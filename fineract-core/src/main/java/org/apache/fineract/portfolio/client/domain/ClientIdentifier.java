@@ -35,7 +35,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDa
 @Table(name = "m_client_identifier", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "document_type_id", "document_key" }, name = "unique_identifier_key"),
         @UniqueConstraint(columnNames = { "client_id", "document_key", "active" }, name = "unique_active_client_identifier") })
-public class ClientIdentifier extends AbstractAuditableWithUTCDateTimeCustom {
+public class ClientIdentifier extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = false)

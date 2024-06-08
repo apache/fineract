@@ -46,7 +46,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationTransact
         @UniqueConstraint(columnNames = { "loan_id", "transaction_type" }, name = "uq_m_loan_credit_allocation_rule") })
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class LoanCreditAllocationRule extends AbstractAuditableWithUTCDateTimeCustom {
+public class LoanCreditAllocationRule extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "loan_id", nullable = false)

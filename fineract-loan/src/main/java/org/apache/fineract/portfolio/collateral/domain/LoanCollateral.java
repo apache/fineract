@@ -37,7 +37,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 
 @Entity
 @Table(name = "m_loan_collateral")
-public class LoanCollateral extends AbstractPersistableCustom {
+public class LoanCollateral extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id", nullable = false)

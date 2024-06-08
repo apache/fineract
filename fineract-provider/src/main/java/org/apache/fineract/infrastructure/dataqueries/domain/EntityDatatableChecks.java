@@ -32,7 +32,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Getter
 @Entity
 @Table(name = "m_entity_datatable_check")
-public class EntityDatatableChecks extends AbstractPersistableCustom {
+public class EntityDatatableChecks extends AbstractPersistableCustom<Long> {
 
     @Column(name = "application_table_name", nullable = false)
     private String entity;

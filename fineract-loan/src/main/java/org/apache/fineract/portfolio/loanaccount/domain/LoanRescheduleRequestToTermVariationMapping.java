@@ -28,7 +28,7 @@ import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanResch
 
 @Entity
 @Table(name = "m_loan_reschedule_request_term_variations_mapping")
-public class LoanRescheduleRequestToTermVariationMapping extends AbstractPersistableCustom {
+public class LoanRescheduleRequestToTermVariationMapping extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = false, cascade = CascadeType.ALL)
     @JoinColumn(name = "loan_reschedule_request_id", nullable = false)

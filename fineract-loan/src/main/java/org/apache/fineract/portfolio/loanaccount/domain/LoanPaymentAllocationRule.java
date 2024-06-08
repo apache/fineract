@@ -47,7 +47,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTypeLis
         @UniqueConstraint(columnNames = { "loan_id", "transaction_type" }, name = "uq_m_loan_payment_allocation_rule") })
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class LoanPaymentAllocationRule extends AbstractAuditableWithUTCDateTimeCustom {
+public class LoanPaymentAllocationRule extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "loan_id", nullable = false)

@@ -37,7 +37,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyTy
 
 @Entity
 @Table(name = "m_loan_recalculation_details")
-public class LoanInterestRecalculationDetails extends AbstractPersistableCustom {
+public class LoanInterestRecalculationDetails extends AbstractPersistableCustom<Long> {
 
     @OneToOne
     @JoinColumn(name = "loan_id", nullable = false)

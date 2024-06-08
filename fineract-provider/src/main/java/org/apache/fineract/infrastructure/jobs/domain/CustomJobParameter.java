@@ -31,7 +31,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @NoArgsConstructor
 @Getter
 @Setter
-public class CustomJobParameter extends AbstractPersistableCustom {
+public class CustomJobParameter extends AbstractPersistableCustom<Long> {
 
     @Column(name = "parameter_json", nullable = false, columnDefinition = "json")
     private String parameterJson;

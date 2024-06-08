@@ -34,7 +34,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleIns
 
 @Entity
 @Table(name = "m_repayment_with_post_dated_checks")
-public class PostDatedChecks extends AbstractPersistableCustom {
+public class PostDatedChecks extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id", referencedColumnName = "id", nullable = false)

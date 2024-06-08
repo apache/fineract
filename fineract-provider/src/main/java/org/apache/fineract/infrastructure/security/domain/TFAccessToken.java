@@ -41,7 +41,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class TFAccessToken extends AbstractPersistableCustom {
+public class TFAccessToken extends AbstractPersistableCustom<Long> {
 
     @Column(name = "token", nullable = false, length = 32)
     private String token;

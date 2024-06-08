@@ -60,7 +60,7 @@ import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
  */
 @Entity
 @Table(name = "m_loan_transaction", uniqueConstraints = { @UniqueConstraint(columnNames = { "external_id" }, name = "external_id_UNIQUE") })
-public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
+public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id", nullable = false)

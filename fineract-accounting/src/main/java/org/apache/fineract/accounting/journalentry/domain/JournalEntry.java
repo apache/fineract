@@ -37,7 +37,7 @@ import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 @Entity
 @Getter
 @Table(name = "acc_gl_journal_entry")
-public class JournalEntry extends AbstractAuditableWithUTCDateTimeCustom {
+public class JournalEntry extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "office_id", nullable = false)

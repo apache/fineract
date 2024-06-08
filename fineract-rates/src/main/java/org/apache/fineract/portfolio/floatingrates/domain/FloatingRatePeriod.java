@@ -31,7 +31,7 @@ import org.apache.fineract.portfolio.floatingrates.data.FloatingRatePeriodData;
 
 @Entity
 @Table(name = "m_floating_rates_periods")
-public class FloatingRatePeriod extends AbstractAuditableWithUTCDateTimeCustom {
+public class FloatingRatePeriod extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "floating_rates_id", nullable = false)

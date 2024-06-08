@@ -27,7 +27,7 @@ import org.apache.fineract.infrastructure.documentmanagement.command.DocumentCom
 
 @Entity
 @Table(name = "m_document")
-public class Document extends AbstractPersistableCustom {
+public class Document extends AbstractPersistableCustom<Long> {
 
     @Column(name = "parent_entity_type", length = 50)
     private String parentEntityType;

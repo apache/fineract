@@ -32,7 +32,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "m_import_document")
-public class ImportDocument extends AbstractPersistableCustom {
+public class ImportDocument extends AbstractPersistableCustom<Long> {
 
     @OneToOne
     @JoinColumn(name = "document_id")

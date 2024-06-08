@@ -20,9 +20,9 @@ package org.apache.fineract.cob.service;
 
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
-public interface ReloadService<S extends AbstractPersistableCustom> {
+public interface ReloadService<S extends AbstractPersistableCustom<Long>> {
 
-    <X extends AbstractPersistableCustom> boolean canReload(X input);
+    <X extends AbstractPersistableCustom<Long>> boolean canReload(X input);
 
     S reload(S input);
 }

@@ -27,7 +27,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 
 @Entity
 @Table(name = "m_product_mix")
-public class ProductMix extends AbstractPersistableCustom {
+public class ProductMix extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)

@@ -40,7 +40,7 @@ import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
 @Entity
 @Table(name = "acc_product_mapping", uniqueConstraints = { @UniqueConstraint(columnNames = { "product_id", "product_type",
         "financial_account_type", "payment_type" }, name = "financial_action") })
-public class ProductToGLAccountMapping extends AbstractPersistableCustom {
+public class ProductToGLAccountMapping extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "gl_account_id")
@@ -69,5 +69,4 @@ public class ProductToGLAccountMapping extends AbstractPersistableCustom {
         return new ProductToGLAccountMapping().setGlAccount(glAccount).setProductId(productId).setProductType(productType)
                 .setFinancialAccountType(financialAccountType);
     }
-
 }

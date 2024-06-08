@@ -44,7 +44,7 @@ import org.apache.fineract.portfolio.group.domain.Group;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class EmailMessage extends AbstractPersistableCustom {
+public class EmailMessage extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "group_id", nullable = true)

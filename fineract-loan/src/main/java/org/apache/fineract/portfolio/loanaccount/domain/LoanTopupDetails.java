@@ -28,7 +28,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_loan_topup")
-public class LoanTopupDetails extends AbstractPersistableCustom {
+public class LoanTopupDetails extends AbstractPersistableCustom<Long> {
 
     @OneToOne
     @JoinColumn(name = "loan_id", nullable = false)

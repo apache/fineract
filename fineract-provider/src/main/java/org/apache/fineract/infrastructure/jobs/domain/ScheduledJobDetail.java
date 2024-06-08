@@ -41,7 +41,7 @@ import org.apache.fineract.infrastructure.jobs.api.SchedulerJobApiConstants;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class ScheduledJobDetail extends AbstractPersistableCustom {
+public class ScheduledJobDetail extends AbstractPersistableCustom<Long> {
 
     @Column(name = "name")
     private String jobName;

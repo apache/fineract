@@ -56,7 +56,7 @@ import org.apache.fineract.organisation.staff.domain.Staff;
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)
-public class Cashier extends AbstractPersistableCustom {
+public class Cashier extends AbstractPersistableCustom<Long> {
 
     // ManyToOne(fetch = FetchType.LAZY)
     // JoinColumn(name = "office_id", nullable = false)

@@ -32,7 +32,7 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanInstallmentChargeData;
 
 @Entity
 @Table(name = "m_loan_installment_charge")
-public class LoanInstallmentCharge extends AbstractPersistableCustom implements Comparable<LoanInstallmentCharge> {
+public class LoanInstallmentCharge extends AbstractPersistableCustom<Long> implements Comparable<LoanInstallmentCharge> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_charge_id", referencedColumnName = "id", nullable = false)

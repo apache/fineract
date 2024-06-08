@@ -31,7 +31,7 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 
 @Entity
 @Table(name = "m_loan_transaction_repayment_schedule_mapping")
-public class LoanTransactionToRepaymentScheduleMapping extends AbstractPersistableCustom {
+public class LoanTransactionToRepaymentScheduleMapping extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = false, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "loan_transaction_id", nullable = false)

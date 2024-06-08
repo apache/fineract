@@ -38,7 +38,7 @@ import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
 
 @Entity
 @Table(name = "m_note")
-public class Note extends AbstractAuditableWithUTCDateTimeCustom {
+public class Note extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = true)

@@ -33,7 +33,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "m_portfolio_command_source")
-public class CommandSource extends AbstractPersistableCustom {
+public class CommandSource extends AbstractPersistableCustom<Long> {
 
     @Column(name = "action_name", nullable = true, length = 100)
     private String actionName;

@@ -154,7 +154,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
         @UniqueConstraint(columnNames = { "external_id" }, name = "loan_externalid_UNIQUE") })
 @Setter
 @Getter
-public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
+public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     public static final String RECALCULATE_LOAN_SCHEDULE = "recalculateLoanSchedule";
     public static final String EXTERNAL_ID = "externalId";

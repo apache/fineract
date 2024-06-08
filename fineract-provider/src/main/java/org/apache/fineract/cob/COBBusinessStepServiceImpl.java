@@ -56,7 +56,7 @@ public class COBBusinessStepServiceImpl implements COBBusinessStepService {
 
     @SuppressWarnings({ "unchecked" })
     @Override
-    public <T extends COBBusinessStep<S>, S extends AbstractPersistableCustom> S run(TreeMap<Long, String> executionMap, S item) {
+    public <T extends COBBusinessStep<S>, S extends AbstractPersistableCustom<Long>> S run(TreeMap<Long, String> executionMap, S item) {
         if (executionMap == null || executionMap.isEmpty()) {
             throw new BusinessStepException("Execution map is empty! COB Business step execution skipped!");
         }
@@ -94,7 +94,7 @@ public class COBBusinessStepServiceImpl implements COBBusinessStepService {
 
     @NotNull
     @Override
-    public <T extends COBBusinessStep<S>, S extends AbstractPersistableCustom> Set<BusinessStepNameAndOrder> getCOBBusinessSteps(
+    public <T extends COBBusinessStep<S>, S extends AbstractPersistableCustom<Long>> Set<BusinessStepNameAndOrder> getCOBBusinessSteps(
             Class<T> businessStepClass, String cobJobName) {
         List<BatchBusinessStep> cobStepConfigs = batchBusinessStepRepository.findAllByJobName(cobJobName);
         List<String> businessSteps = Arrays.stream(beanFactory.getBeanNamesForType(businessStepClass)).toList();

@@ -40,7 +40,7 @@ import org.apache.fineract.infrastructure.security.exception.ForcePasswordResetE
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class GlobalConfigurationProperty extends AbstractPersistableCustom {
+public class GlobalConfigurationProperty extends AbstractPersistableCustom<Long> {
 
     @Column(name = "name", nullable = false)
     private String name;

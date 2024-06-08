@@ -465,6 +465,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         Money money = Money.of(MONETARY_CURRENCY, BigDecimal.valueOf(transactionAmount));
         lenient().when(chargeback.getAmount(MONETARY_CURRENCY)).thenReturn(money);
         lenient().when(chargeback.getTransactionDate()).thenReturn(LocalDate.of(2023, 1, 1));
+        lenient().when(chargeback.getId()).thenReturn(1L);
         return chargeback;
     }
 

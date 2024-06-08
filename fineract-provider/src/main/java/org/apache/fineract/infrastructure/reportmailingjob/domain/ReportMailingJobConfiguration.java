@@ -35,7 +35,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class ReportMailingJobConfiguration extends AbstractPersistableCustom {
+public class ReportMailingJobConfiguration extends AbstractPersistableCustom<Long> {
 
     private static final long serialVersionUID = 3099279770861263184L;
 

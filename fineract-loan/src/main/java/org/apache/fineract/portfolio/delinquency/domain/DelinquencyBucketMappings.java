@@ -35,7 +35,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDa
 @Entity
 @Table(name = "m_delinquency_bucket_mappings", uniqueConstraints = {
         @UniqueConstraint(name = "uq_delinquency_bucket_mapping", columnNames = { "delinquencyBucket", "delinquencyRange" }) })
-public class DelinquencyBucketMappings extends AbstractAuditableWithUTCDateTimeCustom {
+public class DelinquencyBucketMappings extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "delinquency_bucket_id", nullable = false)

@@ -572,6 +572,7 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
                 .forClass(LoanDelinquencyRangeChangeBusinessEvent.class);
         // given
         Loan loanForProcessing = Mockito.mock(Loan.class);
+        when(loanForProcessing.getId()).thenReturn(1L);
         DelinquencyRange range1 = DelinquencyRange.instance("Range1", 1, 2);
         range1.setId(1L);
         DelinquencyRange range2 = DelinquencyRange.instance("Range30", 3, 30);
@@ -603,7 +604,7 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
                 .forClass(LoanAccountDelinquencyPauseChangedBusinessEvent.class);
         // given
         Loan loanForProcessing = Mockito.mock(Loan.class);
-        loanForProcessing.setId(1L);
+        when(loanForProcessing.getId()).thenReturn(1L);
 
         JsonCommand command = Mockito.mock(JsonCommand.class);
 
@@ -654,7 +655,7 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
                 .forClass(LoanDelinquencyRangeChangeBusinessEvent.class);
         // given
         Loan loanForProcessing = Mockito.mock(Loan.class);
-        loanForProcessing.setId(1L);
+        when(loanForProcessing.getId()).thenReturn(1L);
 
         JsonCommand command = Mockito.mock(JsonCommand.class);
 

@@ -35,7 +35,7 @@ import org.apache.fineract.organisation.staff.domain.Staff;
 
 @Entity
 @Table(name = "m_savings_officer_assignment_history")
-public class SavingsOfficerAssignmentHistory extends AbstractAuditableWithUTCDateTimeCustom {
+public class SavingsOfficerAssignmentHistory extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "account_id", nullable = false)

@@ -37,7 +37,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 @NoArgsConstructor
 @Entity
 @Table(name = "m_loan_delinquency_action")
-public class LoanDelinquencyAction extends AbstractAuditableWithUTCDateTimeCustom {
+public class LoanDelinquencyAction extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "loan_id", nullable = false)

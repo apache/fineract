@@ -35,7 +35,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDa
 @Table(name = "m_external_asset_owner_transfer_details")
 @NoArgsConstructor
 @Entity
-public class ExternalAssetOwnerTransferDetails extends AbstractAuditableWithUTCDateTimeCustom {
+public class ExternalAssetOwnerTransferDetails extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "asset_owner_transfer_id", referencedColumnName = "id")

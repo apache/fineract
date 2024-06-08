@@ -40,7 +40,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "m_loan_reschedule_request")
-public class LoanRescheduleRequest extends AbstractPersistableCustom {
+public class LoanRescheduleRequest extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "loan_id", nullable = false)

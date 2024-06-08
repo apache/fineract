@@ -37,7 +37,7 @@ import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanResch
 
 @Entity
 @Table(name = "m_loan_repayment_schedule_history")
-public class LoanRepaymentScheduleHistory extends AbstractPersistableCustom {
+public class LoanRepaymentScheduleHistory extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id")
