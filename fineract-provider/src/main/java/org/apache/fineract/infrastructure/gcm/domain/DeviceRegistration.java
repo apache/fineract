@@ -38,7 +38,7 @@ import org.apache.fineract.portfolio.client.domain.Client;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class DeviceRegistration extends AbstractPersistableCustom {
+public class DeviceRegistration extends AbstractPersistableCustom<Long> {
 
     @OneToOne
     @JoinColumn(name = "client_id", nullable = false, unique = true)

@@ -42,7 +42,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public final class HookTemplate extends AbstractPersistableCustom {
+public final class HookTemplate extends AbstractPersistableCustom<Long> {
 
     @Column(name = "name", nullable = false, length = 100)
     private String name;

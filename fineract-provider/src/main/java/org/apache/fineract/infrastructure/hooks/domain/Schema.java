@@ -35,7 +35,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class Schema extends AbstractPersistableCustom {
+public class Schema extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "hook_template_id", referencedColumnName = "id", nullable = false)

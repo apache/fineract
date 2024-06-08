@@ -58,7 +58,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "m_group")
-public final class Group extends AbstractPersistableCustom {
+public final class Group extends AbstractPersistableCustom<Long> {
 
     @Column(name = "external_id", length = 100, unique = true)
     private String externalId;

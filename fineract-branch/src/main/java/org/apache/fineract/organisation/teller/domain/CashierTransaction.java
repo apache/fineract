@@ -47,7 +47,7 @@ import org.apache.fineract.organisation.office.domain.Office;
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)
-public class CashierTransaction extends AbstractPersistableCustom {
+public class CashierTransaction extends AbstractPersistableCustom<Long> {
 
     @Transient
     private Office office;

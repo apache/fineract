@@ -41,7 +41,7 @@ import org.apache.fineract.portfolio.client.domain.Client;
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)
-public class TellerTransaction extends AbstractPersistableCustom {
+public class TellerTransaction extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "office_id", nullable = false)

@@ -37,7 +37,7 @@ import org.apache.fineract.portfolio.client.domain.ClientAddress;
 
 @Entity
 @Table(name = "m_address")
-public class Address extends AbstractPersistableCustom {
+public class Address extends AbstractPersistableCustom<Long> {
 
     /*
      * @OneToMany(mappedBy = "address", cascade = CascadeType.ALL) private List<ClientAddress> clientaddress = new

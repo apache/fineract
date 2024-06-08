@@ -84,7 +84,7 @@ import org.apache.fineract.portfolio.rate.domain.Rate;
 @Table(name = "m_product_loan", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "unq_name"),
         @UniqueConstraint(columnNames = { "external_id" }, name = "external_id_UNIQUE"),
         @UniqueConstraint(columnNames = { "short_name" }, name = "unq_short_name") })
-public class LoanProduct extends AbstractPersistableCustom {
+public class LoanProduct extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "fund_id")

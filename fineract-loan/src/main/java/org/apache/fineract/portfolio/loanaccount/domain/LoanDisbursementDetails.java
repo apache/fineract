@@ -32,7 +32,7 @@ import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 
 @Entity
 @Table(name = "m_loan_disbursement_detail")
-public class LoanDisbursementDetails extends AbstractPersistableCustom {
+public class LoanDisbursementDetails extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "loan_id", nullable = false)

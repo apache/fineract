@@ -31,7 +31,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Entity
 @Table(name = "m_fund", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "fund_name_org"),
         @UniqueConstraint(columnNames = { "external_id" }, name = "fund_externalid_org") })
-public class Fund extends AbstractPersistableCustom {
+public class Fund extends AbstractPersistableCustom<Long> {
 
     @Column(name = "name")
     private String name;

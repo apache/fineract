@@ -33,7 +33,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class SchedulerDetail extends AbstractPersistableCustom {
+public class SchedulerDetail extends AbstractPersistableCustom<Long> {
 
     @Column(name = "execute_misfired_jobs")
     private boolean executeInstructionForMisfiredJobs;

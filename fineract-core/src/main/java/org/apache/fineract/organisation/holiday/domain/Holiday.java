@@ -62,7 +62,7 @@ import org.apache.fineract.organisation.office.domain.Office;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class Holiday extends AbstractPersistableCustom {
+public class Holiday extends AbstractPersistableCustom<Long> {
 
     @Column(name = "name", unique = true, nullable = false, length = 100)
     private String name;

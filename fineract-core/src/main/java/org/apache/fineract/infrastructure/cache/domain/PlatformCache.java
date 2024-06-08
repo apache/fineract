@@ -33,7 +33,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class PlatformCache extends AbstractPersistableCustom {
+public class PlatformCache extends AbstractPersistableCustom<Long> {
 
     @Column(name = "cache_type_enum")
     private Integer cacheType;

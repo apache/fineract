@@ -46,7 +46,7 @@ import org.apache.fineract.portfolio.floatingrates.data.FloatingRatePeriodData;
 
 @Entity
 @Table(name = "m_floating_rates", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "unq_name") })
-public class FloatingRate extends AbstractAuditableWithUTCDateTimeCustom {
+public class FloatingRate extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @Column(name = "name", length = 200, unique = true, nullable = false)
     private String name;

@@ -43,7 +43,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class CodeValue extends AbstractPersistableCustom {
+public class CodeValue extends AbstractPersistableCustom<Long> {
 
     @Column(name = "code_value", length = 100)
     private String label;

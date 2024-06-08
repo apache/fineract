@@ -50,7 +50,7 @@ import org.apache.fineract.portfolio.common.domain.NthDayType;
 
 @Entity
 @Table(name = "m_calendar")
-public class Calendar extends AbstractAuditableWithUTCDateTimeCustom {
+public class Calendar extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @Column(name = "title", length = 50, nullable = false)
     private String title;

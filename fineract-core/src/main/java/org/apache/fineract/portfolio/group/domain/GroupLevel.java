@@ -25,7 +25,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_group_level")
-public class GroupLevel extends AbstractPersistableCustom {
+public class GroupLevel extends AbstractPersistableCustom<Long> {
 
     @Column(name = "parent_id")
     private Long parentId;

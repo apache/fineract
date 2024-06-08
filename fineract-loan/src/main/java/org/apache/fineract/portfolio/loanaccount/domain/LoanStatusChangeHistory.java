@@ -38,7 +38,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDa
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class LoanStatusChangeHistory extends AbstractAuditableWithUTCDateTimeCustom {
+public class LoanStatusChangeHistory extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "loan_id", nullable = false)

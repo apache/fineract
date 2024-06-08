@@ -28,7 +28,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
  */
 @Entity
 @Table(name = "m_organisation_currency")
-public class OrganisationCurrency extends AbstractPersistableCustom {
+public class OrganisationCurrency extends AbstractPersistableCustom<Long> {
 
     @Column(name = "code", nullable = false, length = 3)
     private String code;

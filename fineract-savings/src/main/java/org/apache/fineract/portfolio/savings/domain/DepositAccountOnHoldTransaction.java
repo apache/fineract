@@ -37,7 +37,7 @@ import org.apache.fineract.portfolio.savings.DepositAccountOnHoldTransactionType
 
 @Entity
 @Table(name = "m_deposit_account_on_hold_transaction")
-public class DepositAccountOnHoldTransaction extends AbstractAuditableWithUTCDateTimeCustom {
+public class DepositAccountOnHoldTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "savings_account_id", nullable = true)

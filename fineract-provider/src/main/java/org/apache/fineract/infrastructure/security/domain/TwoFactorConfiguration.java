@@ -37,7 +37,7 @@ import org.apache.fineract.infrastructure.security.constants.TwoFactorConfigurat
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class TwoFactorConfiguration extends AbstractPersistableCustom {
+public class TwoFactorConfiguration extends AbstractPersistableCustom<Long> {
 
     @Column(name = "name", nullable = false, length = 32)
     private String name;

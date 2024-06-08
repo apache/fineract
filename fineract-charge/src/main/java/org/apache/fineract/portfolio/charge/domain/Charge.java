@@ -57,7 +57,7 @@ import org.apache.fineract.portfolio.tax.domain.TaxGroup;
 
 @Entity
 @Table(name = "m_charge", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "name") })
-public class Charge extends AbstractPersistableCustom {
+public class Charge extends AbstractPersistableCustom<Long> {
 
     @Column(name = "name", length = 100)
     private String name;

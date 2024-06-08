@@ -142,6 +142,7 @@ public class SynchronousCommandProcessingServiceTest {
         NewCommandSourceHandler commandHandler = Mockito.mock(NewCommandSourceHandler.class);
         CommandProcessingResult commandProcessingResult = Mockito.mock(CommandProcessingResult.class);
         CommandSource commandSource = Mockito.mock(CommandSource.class);
+        when(commandSource.getId()).thenReturn(1L);
         when(commandProcessingResult.isRollbackTransaction()).thenReturn(false);
         RuntimeException runtimeException = new RuntimeException("foo");
         when(commandHandler.processCommand(jsonCommand)).thenThrow(runtimeException);
@@ -154,6 +155,7 @@ public class SynchronousCommandProcessingServiceTest {
         when(commandSourceService.getCommandSource(commandId)).thenReturn(commandSource);
 
         AppUser appUser = Mockito.mock(AppUser.class);
+        when(appUser.getId()).thenReturn(1L);
         when(context.authenticatedUser(Mockito.any(CommandWrapper.class))).thenReturn(appUser);
         when(commandSourceService.saveInitialNewTransaction(commandWrapper, jsonCommand, appUser, idk)).thenReturn(commandSource);
 

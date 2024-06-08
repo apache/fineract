@@ -47,7 +47,7 @@ import org.apache.fineract.organisation.office.domain.Office;
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)
-public class Teller extends AbstractPersistableCustom {
+public class Teller extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "office_id", nullable = false)

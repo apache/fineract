@@ -30,7 +30,7 @@ public class ReloaderService {
 
     private final List<ReloadService> reloadServices;
 
-    public <S extends AbstractPersistableCustom> S reload(S input) {
+    public <S extends AbstractPersistableCustom<Long>> S reload(S input) {
         for (ReloadService reloadService : reloadServices) {
             if (reloadService.canReload(input)) {
                 return (S) reloadService.reload(input);

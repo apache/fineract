@@ -34,7 +34,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class CreditBureau extends AbstractPersistableCustom {
+public class CreditBureau extends AbstractPersistableCustom<Long> {
 
     private String name;
 

@@ -34,7 +34,7 @@ import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 
 @Entity
 @Table(name = "m_loan_term_variations")
-public class LoanTermVariations extends AbstractPersistableCustom {
+public class LoanTermVariations extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id", nullable = false)

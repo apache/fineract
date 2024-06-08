@@ -37,7 +37,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 @Table(name = "m_loan_reage_parameter")
 @AllArgsConstructor
 @Getter
-public class LoanReAgeParameter extends AbstractAuditableWithUTCDateTimeCustom {
+public class LoanReAgeParameter extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @OneToOne
     @JoinColumn(name = "loan_transaction_id", nullable = false)

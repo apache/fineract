@@ -60,7 +60,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 @Setter
 @Table(name = "m_client", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "account_no_UNIQUE"), //
         @UniqueConstraint(columnNames = { "mobile_no" }, name = "mobile_no_UNIQUE") })
-public class Client extends AbstractAuditableWithUTCDateTimeCustom {
+public class Client extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @Column(name = "account_no", length = 20, unique = true, nullable = false)
     private String accountNumber;
@@ -180,16 +180,6 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
 
     @Column(name = "submittedon_date")
     private LocalDate submittedOnDate;
-
-    /*
-     * Deprecated since common Auditable fields were introduced. Columns and data left untouched to help migration.
-     *
-     * @Column(name = "updated_on") private LocalDate updatedOnDate;
-     *
-     * @ManyToOne(optional = true, fetch = FetchType.LAZY)
-     *
-     * @JoinColumn(name = "updated_by") private AppUser updatedBy;
-     */
 
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "activatedon_userid")
@@ -751,5 +741,4 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
             setDisplayName(null);
         }
     }
-
 }

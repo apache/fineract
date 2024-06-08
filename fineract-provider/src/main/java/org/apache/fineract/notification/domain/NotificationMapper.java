@@ -37,7 +37,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class NotificationMapper extends AbstractPersistableCustom {
+public class NotificationMapper extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "notification_id")

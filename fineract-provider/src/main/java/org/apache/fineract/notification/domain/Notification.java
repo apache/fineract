@@ -34,7 +34,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class Notification extends AbstractPersistableCustom {
+public class Notification extends AbstractPersistableCustom<Long> {
 
     @Column(name = "object_type")
     private String objectType;

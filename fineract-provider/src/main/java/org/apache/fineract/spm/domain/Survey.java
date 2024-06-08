@@ -32,7 +32,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_surveys")
-public class Survey extends AbstractPersistableCustom {
+public class Survey extends AbstractPersistableCustom<Long> {
 
     @OneToMany(mappedBy = "survey", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sequenceNo")

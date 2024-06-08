@@ -27,7 +27,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "m_pocket_accounts_mapping")
-public class PocketAccountMapping extends AbstractPersistableCustom {
+public class PocketAccountMapping extends AbstractPersistableCustom<Long> {
 
     @Column(name = "pocket_id", length = 20, nullable = false)
     private Long pocketId;
