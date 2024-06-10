@@ -140,103 +140,39 @@ public class LoanSummary {
         this.totalFeeChargesDueAtDisbursement = totalFeeChargesDueAtDisbursement;
     }
 
-    public void updateTotalFeeChargesDueAtDisbursement(final BigDecimal totalFeeChargesDueAtDisbursement) {
-        this.totalFeeChargesDueAtDisbursement = totalFeeChargesDueAtDisbursement;
-    }
-
-    public Money getTotalFeeChargesDueAtDisbursement(final MonetaryCurrency currency) {
-        return Money.of(currency, this.totalFeeChargesDueAtDisbursement);
-    }
-
-    public Money getTotalOutstanding(final MonetaryCurrency currency) {
-        return Money.of(currency, this.totalOutstanding);
-    }
-
-    public void updateFeeChargeOutstanding(final BigDecimal totalFeeChargesOutstanding) {
-        this.totalFeeChargesOutstanding = totalFeeChargesOutstanding;
-    }
-
-    public void updatePenaltyChargeOutstanding(final BigDecimal totalPenaltyChargesOutstanding) {
-        this.totalPenaltyChargesOutstanding = totalPenaltyChargesOutstanding;
-    }
-
-    public void updateFeeChargesWaived(final BigDecimal totalFeeChargesWaived) {
-        this.totalFeeChargesWaived = totalFeeChargesWaived;
-    }
-
-    public void updatePenaltyChargesWaived(final BigDecimal totalPenaltyChargesWaived) {
-        this.totalPenaltyChargesWaived = totalPenaltyChargesWaived;
-    }
-
-    public boolean isRepaidInFull(final MonetaryCurrency currency) {
-        return getTotalOutstanding(currency).isZero();
-    }
-
-    public BigDecimal getTotalInterestCharged() {
-        return this.totalInterestCharged;
-    }
-
-    public BigDecimal getTotalPrincipalOutstanding() {
-        return this.totalPrincipalOutstanding;
-    }
-
-    public BigDecimal getTotalInterestOutstanding() {
-        return this.totalInterestOutstanding;
-    }
-
-    public BigDecimal getTotalFeeChargesOutstanding() {
-        return this.totalFeeChargesOutstanding;
-    }
-
-    public BigDecimal getTotalPenaltyChargesOutstanding() {
-        return this.totalPenaltyChargesOutstanding;
-    }
-
-    public BigDecimal getTotalOutstanding() {
-        return this.totalOutstanding;
-    }
-
-    public void updateTotalOutstanding(final BigDecimal newTotalOutstanding) {
-        this.totalOutstanding = newTotalOutstanding;
-    }
-
-    public void updateTotalWaived(final BigDecimal totalWaived) {
-        this.totalWaived = totalWaived;
-    }
-
     /**
      * All fields but <code>totalFeeChargesDueAtDisbursement</code> should be reset.
      */
     public void zeroFields() {
-        this.totalPrincipalDisbursed = BigDecimal.ZERO;
-        this.totalPrincipalAdjustments = BigDecimal.ZERO;
+        this.totalCostOfLoan = BigDecimal.ZERO;
+        this.totalExpectedCostOfLoan = BigDecimal.ZERO;
+        this.totalExpectedRepayment = BigDecimal.ZERO;
         this.totalFeeAdjustments = BigDecimal.ZERO;
-        this.totalPenaltyAdjustments = BigDecimal.ZERO;
-        this.totalPrincipalRepaid = BigDecimal.ZERO;
-        this.totalPrincipalWrittenOff = BigDecimal.ZERO;
-        this.totalPrincipalOutstanding = BigDecimal.ZERO;
-        this.totalInterestCharged = BigDecimal.ZERO;
-        this.totalInterestRepaid = BigDecimal.ZERO;
-        this.totalInterestWaived = BigDecimal.ZERO;
-        this.totalInterestWrittenOff = BigDecimal.ZERO;
-        this.totalInterestOutstanding = BigDecimal.ZERO;
         this.totalFeeChargesCharged = BigDecimal.ZERO;
+        this.totalFeeChargesOutstanding = BigDecimal.ZERO;
         this.totalFeeChargesRepaid = BigDecimal.ZERO;
         this.totalFeeChargesWaived = BigDecimal.ZERO;
         this.totalFeeChargesWrittenOff = BigDecimal.ZERO;
-        this.totalFeeChargesOutstanding = BigDecimal.ZERO;
+        this.totalInterestCharged = BigDecimal.ZERO;
+        this.totalInterestOutstanding = BigDecimal.ZERO;
+        this.totalInterestRepaid = BigDecimal.ZERO;
+        this.totalInterestWaived = BigDecimal.ZERO;
+        this.totalInterestWrittenOff = BigDecimal.ZERO;
+        this.totalOutstanding = BigDecimal.ZERO;
+        this.totalPenaltyAdjustments = BigDecimal.ZERO;
         this.totalPenaltyChargesCharged = BigDecimal.ZERO;
+        this.totalPenaltyChargesOutstanding = BigDecimal.ZERO;
         this.totalPenaltyChargesRepaid = BigDecimal.ZERO;
         this.totalPenaltyChargesWaived = BigDecimal.ZERO;
         this.totalPenaltyChargesWrittenOff = BigDecimal.ZERO;
-        this.totalPenaltyChargesOutstanding = BigDecimal.ZERO;
-        this.totalExpectedRepayment = BigDecimal.ZERO;
+        this.totalPrincipalAdjustments = BigDecimal.ZERO;
+        this.totalPrincipalDisbursed = BigDecimal.ZERO;
+        this.totalPrincipalOutstanding = BigDecimal.ZERO;
+        this.totalPrincipalRepaid = BigDecimal.ZERO;
+        this.totalPrincipalWrittenOff = BigDecimal.ZERO;
         this.totalRepayment = BigDecimal.ZERO;
-        this.totalExpectedCostOfLoan = BigDecimal.ZERO;
-        this.totalCostOfLoan = BigDecimal.ZERO;
         this.totalWaived = BigDecimal.ZERO;
         this.totalWrittenOff = BigDecimal.ZERO;
-        this.totalOutstanding = BigDecimal.ZERO;
     }
 
     public void updateSummary(final MonetaryCurrency currency, final Money principal,
@@ -327,58 +263,43 @@ public class LoanSummary {
         this.totalOutstanding = totalOutstanding.getAmount();
     }
 
-    public BigDecimal getTotalPrincipalDisbursed() {
-        return this.totalPrincipalDisbursed;
+    public void updateTotalFeeChargesDueAtDisbursement(final BigDecimal totalFeeChargesDueAtDisbursement) {
+        this.totalFeeChargesDueAtDisbursement = totalFeeChargesDueAtDisbursement;
     }
 
-    public BigDecimal getTotalPrincipalRepaid() {
-        return this.totalPrincipalRepaid;
+    public Money getTotalFeeChargesDueAtDisbursement(final MonetaryCurrency currency) {
+        return Money.of(currency, this.totalFeeChargesDueAtDisbursement);
     }
 
-    public BigDecimal getTotalWrittenOff() {
-        return this.totalWrittenOff;
+    public Money getTotalOutstanding(final MonetaryCurrency currency) {
+        return Money.of(currency, this.totalOutstanding);
     }
 
-    /**
-     * @return total interest repaid
-     **/
-    public BigDecimal getTotalInterestRepaid() {
-        return this.totalInterestRepaid;
+    public void updateFeeChargeOutstanding(final BigDecimal totalFeeChargesOutstanding) {
+        this.totalFeeChargesOutstanding = totalFeeChargesOutstanding;
     }
 
-    public BigDecimal getTotalFeeChargesCharged() {
-        return this.totalFeeChargesCharged;
+    public void updatePenaltyChargeOutstanding(final BigDecimal totalPenaltyChargesOutstanding) {
+        this.totalPenaltyChargesOutstanding = totalPenaltyChargesOutstanding;
     }
 
-    public BigDecimal getTotalPenaltyChargesCharged() {
-        return this.totalPenaltyChargesCharged;
+    public void updateFeeChargesWaived(final BigDecimal totalFeeChargesWaived) {
+        this.totalFeeChargesWaived = totalFeeChargesWaived;
     }
 
-    public BigDecimal getTotalPrincipalWrittenOff() {
-        return this.totalPrincipalWrittenOff;
+    public void updatePenaltyChargesWaived(final BigDecimal totalPenaltyChargesWaived) {
+        this.totalPenaltyChargesWaived = totalPenaltyChargesWaived;
     }
 
-    public BigDecimal getTotalInterestWaived() {
-        return this.totalInterestWaived;
+    public boolean isRepaidInFull(final MonetaryCurrency currency) {
+        return getTotalOutstanding(currency).isZero();
     }
 
-    public BigDecimal getTotalFeeChargesRepaid() {
-        return this.totalFeeChargesRepaid;
+    public void updateTotalOutstanding(final BigDecimal newTotalOutstanding) {
+        this.totalOutstanding = newTotalOutstanding;
     }
 
-    public BigDecimal getTotalFeeChargesWaived() {
-        return this.totalFeeChargesWaived;
-    }
-
-    public BigDecimal getTotalPenaltyChargesRepaid() {
-        return this.totalPenaltyChargesRepaid;
-    }
-
-    public BigDecimal getTotalPenaltyChargesWaived() {
-        return this.totalPenaltyChargesWaived;
-    }
-
-    public BigDecimal getTotalExpectedRepayment() {
-        return this.totalExpectedRepayment;
+    public void updateTotalWaived(final BigDecimal totalWaived) {
+        this.totalWaived = totalWaived;
     }
 }

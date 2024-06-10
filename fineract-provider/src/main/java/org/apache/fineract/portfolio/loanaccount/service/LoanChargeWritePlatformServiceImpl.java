@@ -971,11 +971,15 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
             final String defaultUserMessage = "Installment charge cannot be added to the loan.";
             throw new LoanChargeCannotBeAddedException("loanCharge", "overdue.charge", defaultUserMessage, null,
                     chargeDefinition.getName());
-        } else if (loanCharge.getDueLocalDate() != null
-                && DateUtils.isBefore(loanCharge.getDueLocalDate(), loan.getLastUserTransactionForChargeCalc())) {
-            final String defaultUserMessage = "charge with date before last transaction date can not be added to loan.";
-            throw new LoanChargeCannotBeAddedException("loanCharge", "date.is.before.last.transaction.date", defaultUserMessage, null,
-                    chargeDefinition.getName());
+        } else if (loanCharge.getDueLocalDate() != null) {
+            // TODO: Review, error message seems not valid if interest recalculation is not enabled.
+            LocalDate validationDate = loan.repaymentScheduleDetail().isInterestRecalculationEnabled() ? loan.getLastUserTransactionDate()
+                    : loan.getDisbursementDate();
+            if (DateUtils.isBefore(loanCharge.getDueLocalDate(), validationDate)) {
+                final String defaultUserMessage = "charge with date before last transaction date can not be added to loan.";
+                throw new LoanChargeCannotBeAddedException("loanCharge", "date.is.before.last.transaction.date", defaultUserMessage, null,
+                        chargeDefinition.getName());
+            }
         } else if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
             if (loanCharge.isInstalmentFee() && loan.getStatus().isActive()) {
                 final String defaultUserMessage = "installment charge addition not allowed after disbursement";
