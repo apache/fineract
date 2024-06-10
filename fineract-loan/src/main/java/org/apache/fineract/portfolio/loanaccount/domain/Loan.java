@@ -60,6 +60,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -4329,16 +4330,37 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         LoanTransaction chargeOffTransaction = this.loanTransactions.stream().filter(LoanTransaction::isChargeOff)
                 .filter(LoanTransaction::isNotReversed).findFirst().get();
 
+        LoanTransaction originalChargeOffTransaction = getOriginalTransactionIfReverseReplayed(chargeOffTransaction);
+
         this.loanTransactions.stream().filter(chargeOffDateCriteria).forEach(transaction -> {
             boolean isExistingTransaction = existingTransactionIds.contains(transaction.getId());
             boolean isExistingReversedTransaction = existingReversedTransactionIds.contains(transaction.getId());
-            List<Map<String, Object>> targetList = (transaction.getId().compareTo(chargeOffTransaction.getId()) < 0)
-                    ? newLoanTransactionsBeforeChargeOff
-                    : newLoanTransactionsAfterChargeOff;
-            if ((transaction.isReversed() && isExistingTransaction && !isExistingReversedTransaction) || !isExistingTransaction) {
+            List<Map<String, Object>> targetList = null;
+            if ((transaction.isReversed() && isExistingTransaction && !isExistingReversedTransaction)) {
+                // reversed transactions
+                LoanTransaction originalTransaction = getOriginalTransactionIfReverseReplayed(transaction);
+                targetList = originalTransaction.happenedBefore(originalChargeOffTransaction) ? newLoanTransactionsBeforeChargeOff
+                        : newLoanTransactionsAfterChargeOff;
+
+            } else if (!isExistingTransaction) {
+                // new and replayed transactions
+                targetList = transaction.happenedBefore(chargeOffTransaction) ? newLoanTransactionsBeforeChargeOff
+                        : newLoanTransactionsAfterChargeOff;
+            }
+            if (targetList != null) {
                 targetList.add(transaction.toMapData(currencyCode));
             }
         });
+    }
+
+    private LoanTransaction getOriginalTransactionIfReverseReplayed(LoanTransaction loanTransaction) {
+        if (!loanTransaction.getLoanTransactionRelations().isEmpty()) {
+            return loanTransaction.getLoanTransactionRelations().stream()
+                    .filter(tr -> LoanTransactionRelationTypeEnum.REPLAYED.equals(tr.getRelationType())).map(tr -> tr.getToTransaction())
+                    .collect(Collectors.toList()).stream().sorted(Comparator.comparingLong(LoanTransaction::getId)).findFirst()
+                    .orElse(loanTransaction);
+        }
+        return loanTransaction;
     }
 
     public Map<String, Object> deriveAccountingBridgeData(final String currencyCode, final List<Long> existingTransactionIds,

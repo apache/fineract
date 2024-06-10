@@ -1016,6 +1016,25 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         this.loanReAgeParameter = loanReAgeParameter;
     }
 
+    public boolean happenedBefore(LoanTransaction loanTransaction) {
+        // compare transaction date, creation date and then transaction id
+        if (DateUtils.isBefore(getTransactionDate(), loanTransaction.getTransactionDate())) {
+            return true;
+        }
+        if (DateUtils.isEqual(getTransactionDate(), loanTransaction.getTransactionDate())) {
+            if (DateUtils.isBefore(getCreatedDateTime(), loanTransaction.getCreatedDateTime())) {
+                return true;
+            }
+            if (DateUtils.isEqual(getCreatedDateTime(), loanTransaction.getCreatedDateTime())) {
+                if (getId().compareTo(loanTransaction.getId()) < 0) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     // TODO missing hashCode(), equals(Object obj), but probably OK as long as
     // this is never stored in a Collection.
 }
