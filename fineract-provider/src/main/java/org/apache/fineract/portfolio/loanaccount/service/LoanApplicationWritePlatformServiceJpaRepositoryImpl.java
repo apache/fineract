@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import static org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType.SAME_AS_REPAYMENT_PERIOD;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -236,28 +238,21 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private void createCalendar(final Loan loan, LocalDate calendarStartDate, Integer recalculationFrequencyNthDay,
             final Integer repeatsOnDay, final RecalculationFrequencyType recalculationFrequencyType, Integer frequency,
             CalendarEntityType calendarEntityType, final String title) {
-        CalendarFrequencyType calendarFrequencyType = CalendarFrequencyType.INVALID;
         Integer updatedRepeatsOnDay = repeatsOnDay;
-        switch (recalculationFrequencyType) {
-            case DAILY:
-                calendarFrequencyType = CalendarFrequencyType.DAILY;
-            break;
-            case MONTHLY:
-                calendarFrequencyType = CalendarFrequencyType.MONTHLY;
-            break;
-            case SAME_AS_REPAYMENT_PERIOD:
-                frequency = loan.repaymentScheduleDetail().getRepayEvery();
-                calendarFrequencyType = CalendarFrequencyType.from(loan.repaymentScheduleDetail().getRepaymentPeriodFrequencyType());
-                calendarStartDate = loan.getExpectedDisbursedOnLocalDate();
-                if (updatedRepeatsOnDay == null) {
-                    updatedRepeatsOnDay = calendarStartDate.get(ChronoField.DAY_OF_WEEK);
-                }
-            break;
-            case WEEKLY:
-                calendarFrequencyType = CalendarFrequencyType.WEEKLY;
-            break;
-            default:
-            break;
+        final CalendarFrequencyType calendarFrequencyType = switch (recalculationFrequencyType) {
+            case DAILY -> CalendarFrequencyType.DAILY;
+            case WEEKLY -> CalendarFrequencyType.WEEKLY;
+            case MONTHLY -> CalendarFrequencyType.MONTHLY;
+            case SAME_AS_REPAYMENT_PERIOD -> CalendarFrequencyType.from(loan.repaymentScheduleDetail().getRepaymentPeriodFrequencyType());
+            case INVALID -> CalendarFrequencyType.INVALID;
+        };
+
+        if (recalculationFrequencyType == SAME_AS_REPAYMENT_PERIOD) {
+            frequency = loan.repaymentScheduleDetail().getRepayEvery();
+            calendarStartDate = loan.getExpectedDisbursedOnLocalDate();
+            if (updatedRepeatsOnDay == null) {
+                updatedRepeatsOnDay = calendarStartDate.get(ChronoField.DAY_OF_WEEK);
+            }
         }
 
         final Calendar calendar = Calendar.createRepeatingCalendar(title, calendarStartDate, CalendarType.COLLECTION.getValue(),
