@@ -1525,13 +1525,10 @@ public final class LoanApplicationValidator {
     }
 
     public void validateLinkedSavingsAccount(final JsonElement element, DataValidatorBuilder baseDataValidator) {
-        final boolean linkedAccountIdWasProvided = this.fromApiJsonHelper.parameterExists(LoanApiConstants.linkAccountIdParameterName,
-                element);
         final Long linkedAccountId = this.fromApiJsonHelper.extractLongNamed(LoanApiConstants.linkAccountIdParameterName, element);
-        if (linkedAccountIdWasProvided && linkedAccountId != null) {
+        if (linkedAccountId != null) {
             baseDataValidator.reset().parameter(LoanApiConstants.linkAccountIdParameterName).value(linkedAccountId).ignoreIfNull()
                     .longGreaterThanZero();
-
             final SavingsAccount savingsAccount = savingsAccountRepository.findOneWithNotFoundDetection(linkedAccountId);
             final Long clientId = this.fromApiJsonHelper.extractLongNamed(LoanApiConstants.clientIdParameterName, element);
             if (savingsAccount.isNotActive()) {
