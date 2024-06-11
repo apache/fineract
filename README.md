@@ -477,7 +477,8 @@ documents the process through which you can become a committer in this project.
 Pull Requests
 -------------
 
-We request that your commit message include a FINERACT JIRA issue, recommended to be put in parentheses at the end of the first line.  Start with an upper case imperative verb (not past form), and a short but concise clear description. (E.g. _Add enforced HideUtilityClassConstructor checkstyle (FINERACT-821)_ or _Fix inability to reschedule when interest accrued larger than EMI (FINERACT-1109)_ etc.).
+We request that your commit message include a FINERACT JIRA issue, and a one-liner that describe the changes.
+Start with an upper case imperative verb (not past form), and a short but concise clear description. (E.g. "FINERACT-821: Add enforced HideUtilityClassConstructor checkstyle").
 
 If your PR is failing to pass our CI build due to a test failure, then:
 
