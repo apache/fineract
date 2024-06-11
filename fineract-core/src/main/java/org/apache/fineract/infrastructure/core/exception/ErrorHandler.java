@@ -51,6 +51,7 @@ import org.springframework.core.NestedRuntimeException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.lang.Nullable;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Component;
 
 /**
@@ -171,6 +172,14 @@ public final class ErrorHandler {
         Throwable cause;
         if ((cause = PessimisticLockingFailureCode.match(t)) != null) {
             return new PessimisticLockingFailureException(msg, cause); // deadlock
+        }
+        if (t instanceof JpaSystemException) {
+            msgCode = msgCode == null ? codePfx + ".database.error" : msgCode;
+            msg = t.getMessage();
+            if (t instanceof NestedRuntimeException nre) {
+                msg = nre.getMostSpecificCause().getMessage();
+            }
+            return new GeneralPlatformDomainRuleException(msgCode, msg, param, args);
         }
         if (t instanceof NestedRuntimeException nre) {
             cause = nre.getMostSpecificCause();
