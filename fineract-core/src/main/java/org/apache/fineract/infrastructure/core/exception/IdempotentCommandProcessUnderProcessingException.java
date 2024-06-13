@@ -28,4 +28,9 @@ public class IdempotentCommandProcessUnderProcessingException extends AbstractId
     public IdempotentCommandProcessUnderProcessingException(CommandWrapper wrapper, String idempotencyKey) {
         super(wrapper.actionName(), wrapper.entityName(), idempotencyKey, wrapper.getJson());
     }
+
+    public IdempotentCommandProcessUnderProcessingException(CommandWrapper wrapper, String idempotencyKey, Exception e) {
+        super(wrapper.actionName(), wrapper.entityName(), idempotencyKey, wrapper.getJson());
+    }
+
 }
