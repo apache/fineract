@@ -55,6 +55,10 @@
         <class>org.apache.fineract.portfolio.delinquency.domain.DelinquencyRange</class>
         <class>org.apache.fineract.portfolio.paymenttype.domain.PaymentType</class>
         <class>org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail</class>
+        <class>org.apache.fineract.portfolio.tax.domain.TaxGroup</class>
+        <class>org.apache.fineract.portfolio.tax.domain.TaxGroupMappings</class>
+        <class>org.apache.fineract.portfolio.tax.domain.TaxComponent</class>
+        <class>org.apache.fineract.portfolio.tax.domain.TaxComponentHistory</class>
         <class>org.apache.fineract.portfolio.floatingrates.domain.FloatingRate</class>
         <class>org.apache.fineract.portfolio.floatingrates.domain.FloatingRatePeriod</class>
         <class>org.apache.fineract.portfolio.calendar.domain.Calendar</class>
@@ -64,11 +68,6 @@
         <class>org.apache.fineract.useradministration.domain.Role</class>
         <class>org.apache.fineract.useradministration.domain.Permission</class>
         <class>org.apache.fineract.useradministration.domain.AppUserClientMapping</class>
-        <!-- Fineract Tax module -->
-        <class>org.apache.fineract.portfolio.tax.domain.TaxGroup</class>
-        <class>org.apache.fineract.portfolio.tax.domain.TaxGroupMappings</class>
-        <class>org.apache.fineract.portfolio.tax.domain.TaxComponent</class>
-        <class>org.apache.fineract.portfolio.tax.domain.TaxComponentHistory</class>
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <properties>
             <property name="eclipselink.weaving" value="static" />

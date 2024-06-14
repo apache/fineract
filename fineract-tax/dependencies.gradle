@@ -25,7 +25,6 @@ dependencies {
     // implementation dependencies are directly used (compiled against) in src/main (and src/test)
     //
     implementation(project(path: ':fineract-core'))
-    implementation(project(path: ':fineract-tax'))
 
     implementation(
             'org.springframework.boot:spring-boot-starter-web',
