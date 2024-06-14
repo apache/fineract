@@ -26,10 +26,13 @@ import com.google.gson.JsonObject;
 import jakarta.persistence.PersistenceException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -69,19 +72,16 @@ import org.apache.fineract.portfolio.calendar.domain.CalendarRepository;
 import org.apache.fineract.portfolio.calendar.domain.CalendarType;
 import org.apache.fineract.portfolio.calendar.exception.CalendarNotFoundException;
 import org.apache.fineract.portfolio.calendar.service.CalendarReadPlatformService;
-import org.apache.fineract.portfolio.client.domain.Client;
-import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
 import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagement;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
-import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.exception.GroupMemberNotFoundInGSIMException;
-import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoringAccount;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
@@ -92,10 +92,11 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeDeleted;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleAssembler;
-import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationTransitionApiJsonValidator;
+import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationTransitionValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationValidator;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
+import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.savings.data.GroupSavingsIndividualMonitoringAccountData;
@@ -113,7 +114,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
     private final PlatformSecurityContext context;
     private final FromJsonHelper fromJsonHelper;
-    private final LoanApplicationTransitionApiJsonValidator loanApplicationTransitionApiJsonValidator;
+    private final LoanApplicationTransitionValidator loanApplicationTransitionValidator;
     private final LoanApplicationValidator loanApplicationValidator;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final NoteRepository noteRepository;
@@ -476,7 +477,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     public CommandProcessingResult deleteApplication(final Long loanId) {
 
         final Loan loan = retrieveLoanBy(loanId);
-        checkClientOrGroupActive(loan);
+        loanApplicationTransitionValidator.checkClientOrGroupActive(loan);
 
         if (loan.isNotSubmittedAndPendingApproval()) {
             throw new LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeDeleted(loanId);
@@ -578,7 +579,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         final AppUser currentUser = getAppUserIfPresent();
         LocalDate expectedDisbursementDate = null;
 
-        this.loanApplicationTransitionApiJsonValidator.validateApproval(command.json());
+        this.loanApplicationTransitionValidator.validateApproval(command.json());
 
         Loan loan = retrieveLoanBy(loanId);
 
@@ -592,7 +593,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             this.validateMultiDisbursementData(command, expectedDisbursementDate);
         }
 
-        checkClientOrGroupActive(loan);
+        loanApplicationTransitionValidator.checkClientOrGroupActive(loan);
         Boolean isSkipRepaymentOnFirstMonth = false;
         Integer numberOfDays = 0;
         // validate expected disbursement date against meeting date
@@ -721,7 +722,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.loanApplicationValidator.validateForUndo(command.json());
 
         Loan loan = retrieveLoanBy(loanId);
-        checkClientOrGroupActive(loan);
+        loanApplicationTransitionValidator.checkClientOrGroupActive(loan);
 
         final Map<String, Object> changes = loan.undoApproval(defaultLoanLifecycleStateMachine);
         if (!changes.isEmpty()) {
@@ -792,21 +793,21 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     @Override
     public CommandProcessingResult rejectApplication(final Long loanId, final JsonCommand command) {
 
-        final AppUser currentUser = getAppUserIfPresent();
+        // retrieve loan
+        Loan loan = retrieveLoanBy(loanId);
 
-        this.loanApplicationTransitionApiJsonValidator.validateRejection(command.json());
+        // validate loan rejection
+        loanApplicationTransitionValidator.validateRejection(command, loan, defaultLoanLifecycleStateMachine);
 
-        final Loan loan = retrieveLoanBy(loanId);
-
-        checkClientOrGroupActive(loan);
-
+        // check for mandatory entities
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(loanId, EntityTables.LOAN.getName(),
                 StatusEnum.REJECTED.getCode().longValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
 
-        final Map<String, Object> changes = loan.loanApplicationRejection(currentUser, command, defaultLoanLifecycleStateMachine);
-        if (!changes.isEmpty()) {
-            this.loanRepositoryWrapper.saveAndFlush(loan);
+        // loan application rejection
+        final Map<String, Object> changes = loanApplicationRejection(loan, command);
 
+        if (!changes.isEmpty()) {
+            loanRepositoryWrapper.saveAndFlush(loan);
             final String noteText = command.stringValueOfParameterNamed("note");
             createNote(noteText, loan);
         }
@@ -823,16 +824,41 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 .build();
     }
 
+    private Map<String, Object> loanApplicationRejection(Loan loan, final JsonCommand command) {
+
+        final AppUser currentUser = getAppUserIfPresent();
+        final LocalDate rejectedOn = command.localDateValueOfParameterNamed(Loan.REJECTED_ON_DATE);
+
+        loan.setRejectedOnDate(rejectedOn);
+        loan.setRejectedBy(currentUser);
+        loan.setClosedOnDate(rejectedOn);
+        loan.setClosedBy(currentUser);
+
+        defaultLoanLifecycleStateMachine.transition(LoanEvent.LOAN_REJECTED, loan);
+
+        final Map<String, Object> actualChanges = new LinkedHashMap<>();
+        final Locale locale = new Locale(command.locale());
+        final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
+
+        actualChanges.put(Loan.PARAM_STATUS, LoanEnumerations.status(loan.getStatus()));
+        actualChanges.put(Loan.LOCALE, command.locale());
+        actualChanges.put(Loan.DATE_FORMAT, command.dateFormat());
+        actualChanges.put(Loan.REJECTED_ON_DATE, rejectedOn.format(fmt));
+        actualChanges.put(Loan.CLOSED_ON_DATE, rejectedOn.format(fmt));
+
+        return actualChanges;
+    }
+
     @Transactional
     @Override
     public CommandProcessingResult applicantWithdrawsFromApplication(final Long loanId, final JsonCommand command) {
 
         final AppUser currentUser = getAppUserIfPresent();
 
-        this.loanApplicationTransitionApiJsonValidator.validateApplicantWithdrawal(command.json());
+        this.loanApplicationTransitionValidator.validateApplicantWithdrawal(command.json());
 
         final Loan loan = retrieveLoanBy(loanId);
-        checkClientOrGroupActive(loan);
+        loanApplicationTransitionValidator.checkClientOrGroupActive(loan);
 
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(loanId, EntityTables.LOAN.getName(),
                 StatusEnum.WITHDRAWN.getCode().longValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
@@ -876,21 +902,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
         loan.setHelpers(defaultLoanLifecycleStateMachine, this.loanSummaryWrapper, this.loanRepaymentScheduleTransactionProcessorFactory);
         return loan;
-    }
-
-    private void checkClientOrGroupActive(final Loan loan) {
-        final Client client = loan.client();
-        if (client != null) {
-            if (client.isNotActive()) {
-                throw new ClientNotActiveException(client.getId());
-            }
-        }
-        final Group group = loan.group();
-        if (group != null) {
-            if (group.isNotActive()) {
-                throw new GroupNotActiveException(group.getId());
-            }
-        }
     }
 
     private AppUser getAppUserIfPresent() {
