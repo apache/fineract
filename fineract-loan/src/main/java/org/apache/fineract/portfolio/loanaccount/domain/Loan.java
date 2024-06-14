@@ -1741,53 +1741,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return maturityDate;
     }
 
-    public Map<String, Object> loanApplicationRejection(final AppUser currentUser, final JsonCommand command,
-            final LoanLifecycleStateMachine loanLifecycleStateMachine) {
-        validateAccountStatus(LoanEvent.LOAN_REJECTED);
-
-        final Map<String, Object> actualChanges = new LinkedHashMap<>();
-
-        final LoanStatus statusEnum = loanLifecycleStateMachine.dryTransition(LoanEvent.LOAN_REJECTED, this);
-        if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
-            final LocalDate rejectedOn = command.localDateValueOfParameterNamed(REJECTED_ON_DATE);
-
-            final Locale locale = new Locale(command.locale());
-            final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
-
-            this.rejectedOnDate = rejectedOn;
-            this.rejectedBy = currentUser;
-            this.closedOnDate = rejectedOn;
-            this.closedBy = currentUser;
-
-            loanLifecycleStateMachine.transition(LoanEvent.LOAN_REJECTED, this);
-            actualChanges.put(PARAM_STATUS, LoanEnumerations.status(this.loanStatus));
-
-            actualChanges.put(LOCALE, command.locale());
-            actualChanges.put(DATE_FORMAT, command.dateFormat());
-            actualChanges.put(REJECTED_ON_DATE, rejectedOn.format(fmt));
-            actualChanges.put(CLOSED_ON_DATE, rejectedOn.format(fmt));
-
-            if (DateUtils.isBefore(rejectedOn, getSubmittedOnDate())) {
-                final String errorMessage = "The date on which a loan is rejected cannot be before its submittal date: "
-                        + getSubmittedOnDate().toString();
-                throw new InvalidLoanStateTransitionException("reject", "cannot.be.before.submittal.date", errorMessage, rejectedOn,
-                        getSubmittedOnDate());
-            }
-
-            validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_REJECTED, rejectedOn);
-
-            if (DateUtils.isDateInTheFuture(rejectedOn)) {
-                final String errorMessage = "The date on which a loan is rejected cannot be in the future.";
-                throw new InvalidLoanStateTransitionException("reject", "cannot.be.a.future.date", errorMessage, rejectedOn);
-            }
-        } else {
-            final String errorMessage = "Only the loan applications with status 'Submitted and pending approval' are allowed to be rejected.";
-            throw new InvalidLoanStateTransitionException("reject", "cannot.reject", errorMessage);
-        }
-
-        return actualChanges;
-    }
-
     public Map<String, Object> loanApplicationWithdrawnByApplicant(final AppUser currentUser, final JsonCommand command,
             final LoanLifecycleStateMachine loanLifecycleStateMachine) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
@@ -3559,7 +3512,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return getStatus().isApproved();
     }
 
-    private boolean isNotDisbursed() {
+    public boolean isNotDisbursed() {
         return !isDisbursed();
     }
 
@@ -3603,7 +3556,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return getStatus().isActive();
     }
 
-    private boolean isAllTranchesNotDisbursed() {
+    public boolean isAllTranchesNotDisbursed() {
         LoanStatus actualLoanStatus = LoanStatus.fromInt(this.loanStatus);
         return this.loanProduct.isMultiDisburseLoan() && (actualLoanStatus.isActive() || actualLoanStatus.isApproved()
                 || actualLoanStatus.isClosedObligationsMet() || actualLoanStatus.isOverpaid()) && isDisbursementAllowed();
@@ -4325,11 +4278,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
                         action = "repayment.or.waiver";
                         postfix = "cannot.be.made.before.client.transfer.date";
                     }
-                    case LOAN_REJECTED -> {
-                        errorMessage = "The date on which a loan is rejected cannot be earlier than client's transfer date to this office";
-                        action = "reject";
-                        postfix = "cannot.be.before.client.transfer.date";
-                    }
                     case LOAN_WITHDRAWN -> {
                         errorMessage = "The date on which a loan is withdrawn cannot be earlier than client's transfer date to this office";
                         action = "withdraw";
@@ -4527,14 +4475,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
                     final String defaultUserMessage = "Loan Repayment (or its types) or Waiver is not allowed. Loan Account is not active.";
                     final ApiParameterError error = ApiParameterError
                             .generalError("error.msg.loan.repayment.or.waiver.account.is.not.active", defaultUserMessage);
-                    dataValidationErrors.add(error);
-                }
-            }
-            case LOAN_REJECTED -> {
-                if (!isSubmittedAndPendingApproval()) {
-                    final String defaultUserMessage = "Loan application cannot be rejected. Loan Account is not in Submitted and Pending approval state.";
-                    final ApiParameterError error = ApiParameterError
-                            .generalError("error.msg.loan.reject.account.is.not.submitted.pending.approval.state", defaultUserMessage);
                     dataValidationErrors.add(error);
                 }
             }

@@ -30,22 +30,33 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.portfolio.client.domain.Client;
+import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
+import org.apache.fineract.portfolio.group.domain.Group;
+import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanStateTransitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public final class LoanApplicationTransitionApiJsonValidator {
+public final class LoanApplicationTransitionValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
-    public LoanApplicationTransitionApiJsonValidator(final FromJsonHelper fromApiJsonHelper) {
+    public LoanApplicationTransitionValidator(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
@@ -101,8 +112,16 @@ public final class LoanApplicationTransitionApiJsonValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    public void validateRejection(final String json) {
+    public void validateRejection(final JsonCommand command, final Loan loan, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+        // validate request body
+        final String json = command.json();
+        validateLoanRejectionRequestBody(json);
 
+        // validate loan rejection
+        validateLoanRejection(command, loan, loanLifecycleStateMachine);
+    }
+
+    private void validateLoanRejectionRequestBody(String json) {
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
         }
@@ -125,6 +144,38 @@ public final class LoanApplicationTransitionApiJsonValidator {
         baseDataValidator.reset().parameter(LoanApiConstants.noteParameterName).value(note).notExceedingLengthOf(1000);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    private void validateLoanRejection(final JsonCommand command, final Loan loan,
+            final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+        // validate client or group is active
+        checkClientOrGroupActive(loan);
+
+        // validate Account Status
+        validateAccountStatus(loan, LoanEvent.LOAN_REJECTED);
+
+        // validate loan state transition
+
+        final LoanStatus statusEnum = loanLifecycleStateMachine.dryTransition(LoanEvent.LOAN_REJECTED, loan);
+        if (!statusEnum.hasStateOf(LoanStatus.fromInt(loan.getLoanStatus()))) {
+            final LocalDate rejectedOn = command.localDateValueOfParameterNamed(Loan.REJECTED_ON_DATE);
+            if (DateUtils.isBefore(rejectedOn, loan.getSubmittedOnDate())) {
+                final String errorMessage = "The date on which a loan is rejected cannot be before its submittal date: "
+                        + loan.getSubmittedOnDate().toString();
+                throw new InvalidLoanStateTransitionException("reject", "cannot.be.before.submittal.date", errorMessage, rejectedOn,
+                        loan.getSubmittedOnDate());
+            }
+
+            validateActivityNotBeforeClientOrGroupTransferDate(loan, LoanEvent.LOAN_REJECTED, rejectedOn);
+
+            if (DateUtils.isDateInTheFuture(rejectedOn)) {
+                final String errorMessage = "The date on which a loan is rejected cannot be in the future.";
+                throw new InvalidLoanStateTransitionException("reject", "cannot.be.a.future.date", errorMessage, rejectedOn);
+            }
+        } else {
+            final String errorMessage = "Only the loan applications with status 'Submitted and pending approval' are allowed to be rejected.";
+            throw new InvalidLoanStateTransitionException("reject", "cannot.reject", errorMessage);
+        }
     }
 
     public void validateApplicantWithdrawal(final String json) {
@@ -151,5 +202,59 @@ public final class LoanApplicationTransitionApiJsonValidator {
         baseDataValidator.reset().parameter(LoanApiConstants.noteParameterName).value(note).notExceedingLengthOf(1000);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    private void validateActivityNotBeforeClientOrGroupTransferDate(final Loan loan, final LoanEvent event, final LocalDate activityDate) {
+        if (loan.getClient() != null && loan.getClient().getOfficeJoiningDate() != null) {
+            final LocalDate clientOfficeJoiningDate = loan.getClient().getOfficeJoiningDate();
+            if (DateUtils.isBefore(activityDate, clientOfficeJoiningDate)) {
+                String errorMessage = null;
+                String action = null;
+                String postfix = null;
+                switch (event) {
+                    case LOAN_REJECTED -> {
+                        errorMessage = "The date on which a loan is rejected cannot be earlier than client's transfer date to this office";
+                        action = "reject";
+                        postfix = "cannot.be.before.client.transfer.date";
+                    }
+                    default -> {
+                    }
+                }
+                throw new InvalidLoanStateTransitionException(action, postfix, errorMessage, clientOfficeJoiningDate);
+            }
+        }
+    }
+
+    public void validateAccountStatus(final Loan loan, final LoanEvent event) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+
+        switch (event) {
+            case LOAN_REJECTED -> {
+                if (!loan.isSubmittedAndPendingApproval()) {
+                    final String defaultUserMessage = "Loan application cannot be rejected. Loan Account is not in Submitted and Pending approval state.";
+                    final ApiParameterError error = ApiParameterError
+                            .generalError("error.msg.loan.reject.account.is.not.submitted.pending.approval.state", defaultUserMessage);
+                    dataValidationErrors.add(error);
+                }
+            }
+            default -> {
+            }
+        }
+
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+
+    }
+
+    public void checkClientOrGroupActive(final Loan loan) {
+        final Client client = loan.client();
+        if (client != null && client.isNotActive()) {
+            throw new ClientNotActiveException(client.getId());
+        }
+        final Group group = loan.group();
+        if (group != null && group.isNotActive()) {
+            throw new GroupNotActiveException(group.getId());
+        }
     }
 }
