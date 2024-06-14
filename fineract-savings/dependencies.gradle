@@ -28,6 +28,7 @@ dependencies {
     implementation(project(path: ':fineract-accounting'))
     implementation(project(path: ':fineract-charge'))
     implementation(project(path: ':fineract-rates'))
+    implementation(project(path: ':fineract-tax'))
 
     implementation(
             'org.springframework.boot:spring-boot-starter-web',
