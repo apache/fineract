@@ -76,6 +76,29 @@ final class LoanTransactionsApiResourceSwagger {
         @Schema(example = "[2009, 8, 1]")
         public LocalDate date;
         public GetLoansTotal total;
+
+        @Schema(example = "200.000000")
+        public Double amount;
+
+        public GetLoanCurrency currency;
+    }
+
+    public static final class GetLoanCurrency {
+
+        private GetLoanCurrency() {}
+
+        @Schema(example = "UGX")
+        public String code;
+        @Schema(example = "Uganda Shilling")
+        public String name;
+        @Schema(example = "2")
+        public Integer decimalPlaces;
+        @Schema(example = "USh")
+        public String displaySymbol;
+        @Schema(example = "currency.UGX")
+        public String nameCode;
+        @Schema(example = "Uganda Shilling (USh)")
+        public String displayLabel;
     }
 
     @Schema(description = "GetLoansLoanIdTransactionsTransactionIdResponse")

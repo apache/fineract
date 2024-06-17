@@ -45,6 +45,7 @@ import org.apache.fineract.client.models.GetLoansApprovalTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostDelinquencyBucketResponse;
@@ -900,12 +901,23 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
             assertEquals(actualDate, loanApprovalResult.getApprovalDate());
             assertEquals(1000.0, loanApprovalResult.getApprovalAmount());
             assertEquals(1000.0, loanApprovalResult.getNetDisbursalAmount());
+            assertNotNull(loanApprovalResult.getCurrency());
+            assertNotNull(loanApprovalResult.getCurrency().getCode());
+            assertEquals("USD", loanApprovalResult.getCurrency().getCode());
 
             GetLoansLoanIdResponse loanDetailsResult = this.loanTransactionHelper.getLoanDetails(loanExternalIdStr);
             assertEquals(loanExternalIdStr, loanDetailsResult.getExternalId());
 
             this.loanTransactionHelper.approveLoan("02 September 2022", loanId);
             String txnExternalIdStr = UUID.randomUUID().toString();
+
+            GetLoansLoanIdTransactionsTemplateResponse disburseTemplate = this.loanTransactionHelper
+                    .retrieveTransactionTemplate(loanExternalIdStr, "disburse", null, null, null);
+            assertEquals(1000.0, disburseTemplate.getAmount());
+            assertNotNull(disburseTemplate.getCurrency());
+            assertNotNull(disburseTemplate.getCurrency().getCode());
+            assertEquals("USD", disburseTemplate.getCurrency().getCode());
+
             final HashMap disbursedLoanResult = this.loanTransactionHelper.disburseLoan("03 September 2022", loanId, "1000",
                     txnExternalIdStr);
 
