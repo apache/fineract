@@ -30,6 +30,7 @@ dependencies {
             project(path: ':fineract-tax', configuration: 'runtimeElements'),
             project(path: ':fineract-loan', configuration: 'runtimeElements'),
             project(path: ':fineract-savings', configuration: 'runtimeElements'),
+            project(path: ':fineract-job', configuration: 'runtimeElements'),
             project(path: ':fineract-provider', configuration: 'runtimeElements'),
             project(path: ':fineract-avro-schemas', configuration: 'runtimeElements'),
             project(path: ':fineract-client', configuration: 'runtimeElements'),

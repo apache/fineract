@@ -39,6 +39,7 @@ buildscript {
                 'fineract-loan',
                 'fineract-savings',
                 'fineract-report',
+                'fineract-job',
                 'integration-tests',
                 'twofactor-tests',
                 'oauth2-tests',
@@ -64,6 +65,7 @@ buildscript {
                 'fineract-loan',
                 'fineract-savings',
                 'fineract-report',
+                'fineract-job',
                 'fineract-branch',
                 'fineract-document',
                 'fineract-progressive-loan'

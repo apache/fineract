@@ -20,10 +20,13 @@ package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.Getter;
+import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 /**
  * Immutable data object representing a loan transaction.
  */
+@Getter
 public class LoanApprovalData {
 
     private final LocalDate approvalDate;
@@ -36,6 +39,7 @@ public class LoanApprovalData {
     private String dateFormat;
     private String locale;
     private transient Integer rowIndex;
+    private CurrencyData currency;
 
     public static LoanApprovalData importInstance(LocalDate approvedOnDate, Integer rowIndex, String locale, String dateFormat) {
         return new LoanApprovalData(approvedOnDate, rowIndex, locale, dateFormat);
@@ -52,22 +56,12 @@ public class LoanApprovalData {
         this.netDisbursalAmount = null;
     }
 
-    public LoanApprovalData(final BigDecimal approvalAmount, final LocalDate approvalDate, final BigDecimal netDisbursalAmount) {
+    public LoanApprovalData(final BigDecimal approvalAmount, final LocalDate approvalDate, final BigDecimal netDisbursalAmount,
+            final CurrencyData currency) {
         this.approvalDate = approvalDate;
         this.approvalAmount = approvalAmount;
         this.netDisbursalAmount = netDisbursalAmount;
-    }
-
-    public LocalDate getApprovalDate() {
-        return this.approvalDate;
-    }
-
-    public BigDecimal getApprovalAmount() {
-        return this.approvalAmount;
-    }
-
-    public BigDecimal getNetDisbursalAmount() {
-        return this.netDisbursalAmount;
+        this.currency = currency;
     }
 
 }
