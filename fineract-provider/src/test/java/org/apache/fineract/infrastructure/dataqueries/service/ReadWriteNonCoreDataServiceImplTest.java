@@ -39,6 +39,7 @@ import org.apache.fineract.infrastructure.core.service.database.DatabaseType;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableNotFoundException;
+import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -71,6 +72,9 @@ public class ReadWriteNonCoreDataServiceImplTest {
     @Autowired
     private ReadWriteNonCoreDataService underTest;
 
+    @Autowired
+    private SqlValidator sqlValidator;
+
     @Test
     public void testSqlInjectionCaughtQueryDataTable() {
         when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), anyString())).thenReturn(1);
@@ -87,6 +91,22 @@ public class ReadWriteNonCoreDataServiceImplTest {
         assertThrows(PlatformApiDataValidationException.class, () -> {
             underTest.queryDataTable("table", "cf1", "vf1", "1; DROP TABLE m_loan; SELECT");
         });
+    }
+
+    @Test
+    public void testSqlInjectionUnResolved() {
+        // Sql injection with new line
+        sqlValidator.validate("-- (SMPOL) \n DROP sampletable;--");
+        sqlValidator.validate("# (M) \nDROP sampletable;#");
+        // Sql injection with comment
+        sqlValidator.validate(" DROP/*comment*/sampletable");
+        sqlValidator.validate(" SELECT/*avoid-spaces*/password/**/FROM/**/Members");
+        sqlValidator.validate(" DR/**/OP/*bypass blacklisting*/sampletable");
+        sqlValidator.validate(" SELECT/*avoid-spaces*/password/**/FROM/**/Members");
+        // Sql injection with if statements
+        sqlValidator.validate(" IF(1=1,'true','false')");
+        // Sql injection with string concatenation
+        sqlValidator.validate(" CONCAT(login, password) FROM members");
     }
 
     @Test
