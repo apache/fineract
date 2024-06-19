@@ -175,6 +175,17 @@ public class LoanUtilService {
         return holidayDetailDTO;
     }
 
+    public HolidayDetailDTO constructHolidayDTO(final Long officeId, LocalDate localDate) {
+        final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
+        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(officeId, localDate,
+                HolidayStatusType.ACTIVE.getValue());
+        final WorkingDays workingDays = this.workingDaysRepository.findOne();
+        final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
+        final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
+
+        return new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays, allowTransactionsOnHoliday, allowTransactionsOnNonWorkingDay);
+    }
+
     private FloatingRateDTO constructFloatingRateDTO(final Loan loan) {
         FloatingRateDTO floatingRateDTO = null;
         if (loan.loanProduct().isLinkedToFloatingInterestRate()) {

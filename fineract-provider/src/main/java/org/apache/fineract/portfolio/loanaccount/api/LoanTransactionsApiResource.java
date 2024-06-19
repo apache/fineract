@@ -111,9 +111,9 @@ public class LoanTransactionsApiResource {
             + "loans/1/transactions/template?command=disburse" + "\n" + "loans/1/transactions/template?command=disburseToSavings" + "\n"
             + "loans/1/transactions/template?command=recoverypayment" + "\n" + "loans/1/transactions/template?command=prepayLoan" + "\n"
             + "loans/1/transactions/template?command=refundbycash" + "\n" + "loans/1/transactions/template?command=refundbytransfer" + "\n"
-            + "loans/1/transactions/template?command=foreclosure" + "\n"
-            + "loans/1/transactions/template?command=creditBalanceRefund (returned 'amount' field will have the overpaid value)" + "\n"
-            + "loans/1/transactions/template?command=charge-off" + "\n" + "loans/1/transactions/template?command=downPayment" + "\n")
+            + "loans/1/transactions/template?command=foreclosure" + "\n" + "loans/1/transactions/template?command=interestPaymentWaiver"
+            + "\n" + "loans/1/transactions/template?command=creditBalanceRefund (returned 'amount' field will have the overpaid value)"
+            + "\n" + "loans/1/transactions/template?command=charge-off" + "\n" + "loans/1/transactions/template?command=downPayment" + "\n")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.GetLoansLoanIdTransactionsTemplateResponse.class))) })
     public String retrieveTransactionTemplate(@PathParam("loanId") @Parameter(description = "loanId", required = true) final Long loanId,
@@ -140,9 +140,9 @@ public class LoanTransactionsApiResource {
             + "loans/1/transactions/template?command=disburse" + "\n" + "loans/1/transactions/template?command=disburseToSavings" + "\n"
             + "loans/1/transactions/template?command=recoverypayment" + "\n" + "loans/1/transactions/template?command=prepayLoan" + "\n"
             + "loans/1/transactions/template?command=refundbycash" + "\n" + "loans/1/transactions/template?command=refundbytransfer" + "\n"
-            + "loans/1/transactions/template?command=foreclosure" + "\n"
-            + "loans/1/transactions/template?command=creditBalanceRefund (returned 'amount' field will have the overpaid value)" + "\n"
-            + "loans/1/transactions/template?command=charge-off" + "\n" + "loans/1/transactions/template?command=downPayment" + "\n")
+            + "loans/1/transactions/template?command=foreclosure" + "\n" + "loans/1/transactions/template?command=interestPaymentWaiver"
+            + "\n" + "loans/1/transactions/template?command=creditBalanceRefund (returned 'amount' field will have the overpaid value)"
+            + "\n" + "loans/1/transactions/template?command=charge-off" + "\n" + "loans/1/transactions/template?command=downPayment" + "\n")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.GetLoansLoanIdTransactionsTemplateResponse.class))) })
     public String retrieveTransactionTemplate(
@@ -455,6 +455,8 @@ public class LoanTransactionsApiResource {
             commandRequest = builder.loanPayoutRefundTransaction(resolvedLoanId).build();
         } else if (CommandParameterUtil.is(commandParam, "goodwillCredit")) {
             commandRequest = builder.loanGoodwillCreditTransaction(resolvedLoanId).build();
+        } else if (CommandParameterUtil.is(commandParam, "interestPaymentWaiver")) {
+            commandRequest = builder.loanInterestPaymentWaiverTransaction(resolvedLoanId).build();
         } else if (CommandParameterUtil.is(commandParam, "chargeRefund")) {
             commandRequest = builder.refundLoanCharge(resolvedLoanId).build();
         } else if (CommandParameterUtil.is(commandParam, "waiveinterest")) {
@@ -520,6 +522,10 @@ public class LoanTransactionsApiResource {
         } else if (CommandParameterUtil.is(commandParam, "goodwillCredit")) {
             LocalDate transactionDate = DateUtils.getBusinessLocalDate();
             transactionData = this.loanReadPlatformService.retrieveLoanPrePaymentTemplate(LoanTransactionType.GOODWILL_CREDIT,
+                    resolvedLoanId, transactionDate);
+        } else if (CommandParameterUtil.is(commandParam, "interestPaymentWaiver")) {
+            LocalDate transactionDate = DateUtils.getBusinessLocalDate();
+            transactionData = this.loanReadPlatformService.retrieveLoanPrePaymentTemplate(LoanTransactionType.INTEREST_PAYMENT_WAIVER,
                     resolvedLoanId, transactionDate);
         } else if (CommandParameterUtil.is(commandParam, "waiveinterest")) {
             transactionData = this.loanReadPlatformService.retrieveWaiveInterestDetails(resolvedLoanId);

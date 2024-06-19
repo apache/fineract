@@ -580,11 +580,12 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
 
     public boolean isRepaymentLikeType() {
         return isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit() || isChargeRefund()
-                || isChargeAdjustment() || isDownPayment();
+                || isChargeAdjustment() || isDownPayment() || isInterestPaymentWaiver();
     }
 
     public boolean isTypeAllowedForChargeback() {
-        return isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit() || isDownPayment();
+        return isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit() || isDownPayment()
+                || isInterestPaymentWaiver();
     }
 
     public boolean isRepayment() {
@@ -605,6 +606,10 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
 
     public boolean isGoodwillCredit() {
         return LoanTransactionType.GOODWILL_CREDIT.equals(getTypeOf()) && isNotReversed();
+    }
+
+    public boolean isInterestPaymentWaiver() {
+        return LoanTransactionType.INTEREST_PAYMENT_WAIVER.equals(getTypeOf()) && isNotReversed();
     }
 
     public boolean isChargeRefund() {

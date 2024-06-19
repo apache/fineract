@@ -601,6 +601,16 @@ public class LoanTransactionHelper extends IntegrationTest {
         return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "repayment"));
     }
 
+    public PostLoansLoanIdTransactionsResponse makeInterestPaymentWaiver(final Long loanId,
+            final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "interestPaymentWaiver"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeInterestPaymentWaiver(final String loanExternalId,
+            final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction1(loanExternalId, request, "interestPaymentWaiver"));
+    }
+
     public PostLoansLoanIdTransactionsResponse reAge(final Long loanId, final PostLoansLoanIdTransactionsRequest request) {
         return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "reAge"));
     }

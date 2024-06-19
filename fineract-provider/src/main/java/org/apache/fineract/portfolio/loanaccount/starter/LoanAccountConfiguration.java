@@ -43,6 +43,7 @@ import org.apache.fineract.organisation.teller.data.CashierTransactionDataValida
 import org.apache.fineract.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationsRepository;
 import org.apache.fineract.portfolio.account.domain.AccountTransferDetailRepository;
+import org.apache.fineract.portfolio.account.domain.AccountTransferRepository;
 import org.apache.fineract.portfolio.account.service.AccountAssociationsReadPlatformService;
 import org.apache.fineract.portfolio.account.service.AccountNumberGenerator;
 import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
@@ -87,7 +88,7 @@ import org.apache.fineract.portfolio.loanaccount.mapper.LoanTransactionRelationM
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationTransitionValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeApiJsonValidator;
-import org.apache.fineract.portfolio.loanaccount.serialization.LoanEventApiJsonValidator;
+import org.apache.fineract.portfolio.loanaccount.serialization.LoanTransactionValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanUpdateCommandFromApiJsonDeserializer;
 import org.apache.fineract.portfolio.loanaccount.service.BulkLoansReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.BulkLoansReadPlatformServiceImpl;
@@ -121,6 +122,7 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.service.LoanStatusChangePlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanStatusChangePlatformServiceImpl;
+import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformServiceJpaRepositoryImpl;
@@ -254,6 +256,14 @@ public class LoanAccountConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(LoanTransactionAssembler.class)
+    public LoanTransactionAssembler loanTransactionAssembler(ExternalIdFactory externalIdFactory,
+            PaymentDetailWritePlatformService paymentDetailWritePlatformService) {
+
+        return new LoanTransactionAssembler(externalIdFactory, paymentDetailWritePlatformService);
+    }
+
+    @Bean
     @ConditionalOnMissingBean(LoanCalculateRepaymentPastDueService.class)
     public LoanCalculateRepaymentPastDueService loanCalculateRepaymentPastDueService() {
         return new LoanCalculateRepaymentPastDueService();
@@ -362,7 +372,7 @@ public class LoanAccountConfiguration {
     @Bean
     @ConditionalOnMissingBean(LoanWritePlatformService.class)
     public LoanWritePlatformService loanWritePlatformService(PlatformSecurityContext context,
-            LoanEventApiJsonValidator loanEventApiJsonValidator,
+            LoanTransactionValidator loanTransactionValidator,
             LoanUpdateCommandFromApiJsonDeserializer loanUpdateCommandFromApiJsonDeserializer, LoanRepositoryWrapper loanRepositoryWrapper,
             LoanAccountDomainService loanAccountDomainService, NoteRepository noteRepository,
             LoanTransactionRepository loanTransactionRepository, LoanTransactionRelationRepository loanTransactionRelationRepository,
@@ -386,8 +396,9 @@ public class LoanAccountConfiguration {
             LoanLifecycleStateMachine defaultLoanLifecycleStateMachine, LoanAccountLockService loanAccountLockService,
             ExternalIdFactory externalIdFactory, ReplayedTransactionBusinessEventService replayedTransactionBusinessEventService,
             LoanAccrualTransactionBusinessEventService loanAccrualTransactionBusinessEventService, ErrorHandler errorHandler,
-            LoanDownPaymentHandlerService loanDownPaymentHandlerService) {
-        return new LoanWritePlatformServiceJpaRepositoryImpl(context, loanEventApiJsonValidator, loanUpdateCommandFromApiJsonDeserializer,
+            LoanDownPaymentHandlerService loanDownPaymentHandlerService, AccountTransferRepository accountTransferRepository,
+            LoanTransactionAssembler loanTransactionAssembler) {
+        return new LoanWritePlatformServiceJpaRepositoryImpl(context, loanTransactionValidator, loanUpdateCommandFromApiJsonDeserializer,
                 loanRepositoryWrapper, loanAccountDomainService, noteRepository, loanTransactionRepository,
                 loanTransactionRelationRepository, loanAssembler, journalEntryWritePlatformService, calendarInstanceRepository,
                 paymentDetailWritePlatformService, holidayRepository, configurationDomainService, workingDaysRepository,
@@ -398,7 +409,8 @@ public class LoanAccountConfiguration {
                 transactionProcessingStrategy, codeValueRepository, cashierTransactionDataValidator, glimRepository, loanRepository,
                 repaymentWithPostDatedChecksAssembler, postDatedChecksRepository, loanRepaymentScheduleInstallmentRepository,
                 defaultLoanLifecycleStateMachine, loanAccountLockService, externalIdFactory, replayedTransactionBusinessEventService,
-                loanAccrualTransactionBusinessEventService, errorHandler, loanDownPaymentHandlerService);
+                loanAccrualTransactionBusinessEventService, errorHandler, loanDownPaymentHandlerService, accountTransferRepository,
+                loanTransactionAssembler);
     }
 
     @Bean
