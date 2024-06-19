@@ -35,32 +35,54 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.organisation.holiday.domain.Holiday;
+import org.apache.fineract.organisation.holiday.service.HolidayUtil;
+import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
+import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepository;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.organisation.monetary.exception.CurrencyNotFoundException;
+import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
+import org.apache.fineract.organisation.workingdays.service.WorkingDaysUtil;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
 import org.apache.fineract.portfolio.calendar.exception.NotValidRecurringDateException;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
+import org.apache.fineract.portfolio.client.domain.Client;
+import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
+import org.apache.fineract.portfolio.group.domain.Group;
+import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
+import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanStateTransitionException;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationDateException;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanChargeRefundException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanRepaymentScheduleNotFoundException;
+import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.springframework.stereotype.Component;
 
 @Component
 @AllArgsConstructor
-public final class LoanEventApiJsonValidator {
+public final class LoanTransactionValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
     private final LoanApplicationValidator fromApiJsonDeserializer;
     private final LoanRepository loanRepository;
+    private final ApplicationCurrencyRepository applicationCurrencyRepository;
+    private final LoanUtilService loanUtilService;
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) {
@@ -561,5 +583,155 @@ public final class LoanEventApiJsonValidator {
 
         validatePaymentDetails(baseDataValidator, element);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    public void validateLoanClientIsActive(final Loan loan) {
+        final Client client = loan.client();
+        if (client != null && client.isNotActive()) {
+            throw new ClientNotActiveException(client.getId());
+        }
+    }
+
+    public void validateLoanGroupIsActive(final Loan loan) {
+        final Group group = loan.group();
+        if (group != null && group.isNotActive()) {
+            throw new GroupNotActiveException(group.getId());
+        }
+    }
+
+    public void validateLoanStatusIsActiveOrFullyPaidOrOverpaid(final Loan loan) {
+        if (!(loan.isOpen() || loan.isClosedObligationsMet() || loan.isOverPaid())) {
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+            final String defaultUserMessage = "Loan must be Active, Fully Paid or Overpaid";
+            final ApiParameterError error = ApiParameterError.generalError("error.msg.loan.must.be.active.fully.paid.or.overpaid",
+                    defaultUserMessage);
+            dataValidationErrors.add(error);
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+    }
+
+    public void validateLoanHasNoLaterChargeRefundTransactionToReverseOrCreateATransaction(Loan loan, LocalDate transactionDate,
+            String reversedOrCreated) {
+        for (LoanTransaction txn : loan.getLoanTransactions()) {
+            if (txn.isChargeRefund() && DateUtils.isBefore(transactionDate, txn.getTransactionDate())) {
+                final String errorMessage = "loan.transaction.cant.be." + reversedOrCreated + ".because.later.charge.refund.exists";
+                final String details = "Loan Transaction: " + loan.getId() + " Can't be " + reversedOrCreated
+                        + " because a Later Charge Refund Exists.";
+                throw new LoanChargeRefundException(errorMessage, details);
+            }
+        }
+    }
+
+    public void validateLoanDisbursementIsBeforeTransactionDate(final Loan loan, final LocalDate transactionDate) {
+        if (DateUtils.isBefore(transactionDate, loan.getDisbursementDate())) {
+            final String errorMessage = "The transaction date cannot be before the loan disbursement date: "
+                    + loan.getDisbursementDate().toString();
+            throw new InvalidLoanStateTransitionException("transaction", "cannot.be.before.disbursement.date", errorMessage,
+                    transactionDate, loan.getDisbursementDate());
+        }
+    }
+
+    public void validateTransactionShouldNotBeInTheFuture(final LocalDate transactionDate) {
+        if (DateUtils.isDateInTheFuture(transactionDate)) {
+            final String errorMessage = "The transaction date cannot be in the future.";
+            throw new InvalidLoanStateTransitionException("transaction", "cannot.be.a.future.date", errorMessage, transactionDate);
+        }
+    }
+
+    public void validateLoanHasCurrency(final Loan loan) {
+        MonetaryCurrency currency = loan.getCurrency();
+        final ApplicationCurrency defaultApplicationCurrency = this.applicationCurrencyRepository.findOneByCode(currency.getCode());
+        if (defaultApplicationCurrency == null) {
+            throw new CurrencyNotFoundException(currency.getCode());
+        }
+    }
+
+    public void validateClientOfficeJoiningDateIsBeforeTransactionDate(Loan loan, LocalDate transactionDate) {
+        if (loan.getClient() != null && loan.getClient().getOfficeJoiningDate() != null) {
+            final LocalDate clientOfficeJoiningDate = loan.getClient().getOfficeJoiningDate();
+            if (DateUtils.isBefore(transactionDate, clientOfficeJoiningDate)) {
+                String errorMessage = "The date on which a repayment or waiver is made cannot be earlier than client's transfer date to this office";
+                String action = "repayment.or.waiver";
+                String postfix = "cannot.be.made.before.client.transfer.date";
+                throw new InvalidLoanStateTransitionException(action, postfix, errorMessage, clientOfficeJoiningDate);
+            }
+        }
+    }
+
+    public void validateActivityNotBeforeLastTransactionDate(final Loan loan, final LocalDate activityDate) {
+        if (!(loan.repaymentScheduleDetail().isInterestRecalculationEnabled() || loan.loanProduct().isHoldGuaranteeFunds())) {
+            return;
+        }
+        LocalDate lastTransactionDate = loan.getLastUserTransactionDate();
+        if (DateUtils.isAfter(lastTransactionDate, activityDate)) {
+            String errorMessage = "The date on which a repayment or waiver is made cannot be earlier than last transaction date";
+            String action = "repayment.or.waiver";
+            String postfix = "cannot.be.made.before.last.transaction.date";
+            throw new InvalidLoanStateTransitionException(action, postfix, errorMessage, lastTransactionDate);
+        }
+    }
+
+    public void validateRepaymentDateIsOnNonWorkingDay(final LocalDate repaymentDate, final WorkingDays workingDays,
+            final boolean allowTransactionsOnNonWorkingDay) {
+        if (!allowTransactionsOnNonWorkingDay && !WorkingDaysUtil.isWorkingDay(workingDays, repaymentDate)) {
+            final String errorMessage = "Repayment date cannot be on a non working day";
+            throw new LoanApplicationDateException("repayment.date.on.non.working.day", errorMessage, repaymentDate);
+        }
+    }
+
+    public void validateRepaymentDateIsOnHoliday(final LocalDate repaymentDate, final boolean allowTransactionsOnHoliday,
+            final List<Holiday> holidays) {
+        if (!allowTransactionsOnHoliday && HolidayUtil.isHoliday(repaymentDate, holidays)) {
+            final String errorMessage = "Repayment date cannot be on a holiday";
+            throw new LoanApplicationDateException("repayment.date.on.holiday", errorMessage, repaymentDate);
+        }
+    }
+
+    public void validateTransactionAmountNotExceedThresholdForMultiDisburseLoan(Loan loan) {
+        if (loan.getLoanProduct().isMultiDisburseLoan()) {
+            BigDecimal totalDisbursed = loan.getDisbursedAmount();
+            BigDecimal totalPrincipalAdjusted = loan.getSummary().getTotalPrincipalAdjustments();
+            BigDecimal totalPrincipalCredited = totalDisbursed.add(totalPrincipalAdjusted);
+            if (totalPrincipalCredited.compareTo(loan.getSummary().getTotalPrincipalRepaid()) < 0) {
+                final String errorMessage = "The transaction amount cannot exceed threshold.";
+                throw new InvalidLoanStateTransitionException("transaction", "amount.exceeds.threshold", errorMessage);
+            }
+        }
+    }
+
+    public void validateLoanTransactionInterestPaymentWaiver(JsonCommand command) {
+        final Long loanId = command.getLoanId();
+        Loan loan = this.loanRepository.findById(loanId).orElseThrow(() -> new LoanNotFoundException(loanId));
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
+        validateNewRepaymentTransaction(command.json());
+        validateTransactionShouldNotBeInTheFuture(transactionDate);
+        validateLoanClientIsActive(loan);
+        validateLoanHasCurrency(loan);
+        validateLoanGroupIsActive(loan);
+        validateLoanStatusIsActiveOrFullyPaidOrOverpaid(loan);
+        validateLoanDisbursementIsBeforeTransactionDate(loan, transactionDate);
+        validateLoanHasNoLaterChargeRefundTransactionToReverseOrCreateATransaction(loan, transactionDate, "created");
+
+        validateClientOfficeJoiningDateIsBeforeTransactionDate(loan, transactionDate);
+        validateActivityNotBeforeLastTransactionDate(loan, transactionDate);
+        HolidayDetailDTO holidayDetailDTO = loanUtilService.constructHolidayDTO(loan.getOfficeId(), loan.getDisbursementDate());
+        validateRepaymentDateIsOnHoliday(transactionDate, holidayDetailDTO.isAllowTransactionsOnHoliday(), holidayDetailDTO.getHolidays());
+        validateRepaymentDateIsOnNonWorkingDay(transactionDate, holidayDetailDTO.getWorkingDays(),
+                holidayDetailDTO.isAllowTransactionsOnNonWorkingDay());
+        validateTransactionAmountNotExceedThresholdForMultiDisburseLoan(loan);
+    }
+
+    public void validateLoanTransactionInterestPaymentWaiverAfterRecalculation(Loan loan) {
+        // Payment allocation calculates the new total principal repaid, and it should be validated after recalculation
+        if (loan.getLoanProduct().isMultiDisburseLoan()) {
+            BigDecimal totalDisbursed = loan.getDisbursedAmount();
+            BigDecimal totalPrincipalAdjusted = loan.getSummary().getTotalPrincipalAdjustments();
+            BigDecimal totalPrincipalCredited = totalDisbursed.add(totalPrincipalAdjusted);
+            if (totalPrincipalCredited.compareTo(loan.getSummary().getTotalPrincipalRepaid()) < 0
+                    && loan.getLoanRepaymentScheduleDetail().getPrincipal().minus(totalDisbursed).isGreaterThanZero()) {
+                final String errorMessage = "The transaction amount cannot exceed threshold.";
+                throw new InvalidLoanStateTransitionException("transaction", "amount.exceeds.threshold", errorMessage);
+            }
+        }
     }
 }

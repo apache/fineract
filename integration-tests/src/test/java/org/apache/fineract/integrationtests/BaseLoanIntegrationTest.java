@@ -138,6 +138,7 @@ public abstract class BaseLoanIntegrationTest {
     protected final Account chargeOffFraudExpenseAccount = accountHelper.createExpenseAccount("chargeOffFraud");
     protected final Account writtenOffAccount = accountHelper.createExpenseAccount();
     protected final Account goodwillExpenseAccount = accountHelper.createExpenseAccount();
+    protected final Account goodwillIncomeAccount = accountHelper.createIncomeAccount();
     protected final LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
     protected JournalEntryHelper journalEntryHelper = new JournalEntryHelper(requestSpec, responseSpec);
     protected ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
@@ -705,6 +706,14 @@ public abstract class BaseLoanIntegrationTest {
     protected Long addRepaymentForLoan(Long loanId, Double amount, String date) {
         String firstRepaymentUUID = UUID.randomUUID().toString();
         PostLoansLoanIdTransactionsResponse response = loanTransactionHelper.makeLoanRepayment(loanId,
+                new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate(date).locale("en")
+                        .transactionAmount(amount).externalId(firstRepaymentUUID));
+        return response.getResourceId();
+    }
+
+    protected Long addInterestPaymentWaiverForLoan(Long loanId, Double amount, String date) {
+        String firstRepaymentUUID = UUID.randomUUID().toString();
+        PostLoansLoanIdTransactionsResponse response = loanTransactionHelper.makeInterestPaymentWaiver(loanId,
                 new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate(date).locale("en")
                         .transactionAmount(amount).externalId(firstRepaymentUUID));
         return response.getResourceId();

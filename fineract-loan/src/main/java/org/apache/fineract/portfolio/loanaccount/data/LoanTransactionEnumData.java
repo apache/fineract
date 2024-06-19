@@ -37,6 +37,7 @@ public class LoanTransactionEnumData {
     private final boolean merchantIssuedRefund;
     private final boolean payoutRefund;
     private final boolean goodwillCredit;
+    private final boolean interestPaymentWaiver;
     private final boolean chargeRefund;
     private final boolean contra;
     private final boolean waiveInterest;
@@ -88,6 +89,7 @@ public class LoanTransactionEnumData {
         this.chargeAdjustment = Long.valueOf(26).equals(this.id);
         this.chargeoff = Long.valueOf(27).equals(this.id);
         this.downPayment = Long.valueOf(28).equals(this.id);
+        this.interestPaymentWaiver = Long.valueOf(31).equals(this.id);
         this.reAge = Long.valueOf(LoanTransactionType.REAGE.getValue()).equals(this.id);
         this.reAmortize = Long.valueOf(LoanTransactionType.REAMORTIZE.getValue()).equals(this.id);
     }

@@ -52,6 +52,9 @@ public interface LoanWritePlatformService {
     CommandProcessingResult makeLoanRepaymentWithChargeRefundChargeType(LoanTransactionType repaymentTransactionType, Long loanId,
             JsonCommand command, boolean isRecoveryRepayment, String chargeRefundChargeType);
 
+    @Transactional
+    CommandProcessingResult makeInterestPaymentWaiver(JsonCommand command);
+
     Map<String, Object> makeLoanBulkRepayment(CollectionSheetBulkRepaymentCommand bulkRepaymentCommand);
 
     CommandProcessingResult adjustLoanTransaction(Long loanId, Long transactionId, JsonCommand command);

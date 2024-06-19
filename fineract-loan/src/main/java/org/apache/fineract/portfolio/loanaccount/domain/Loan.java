@@ -1387,7 +1387,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         }
     }
 
-    private void updateLoanSummaryDerivedFields() {
+    public void updateLoanSummaryDerivedFields() {
         if (isNotDisbursed()) {
             this.summary.zeroFields();
             this.totalOverpaid = null;
@@ -2586,9 +2586,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     }
 
     private void validateRepaymentTypeAccountStatus(LoanTransaction repaymentTransaction, LoanEvent event) {
-        if (repaymentTransaction.isGoodwillCredit() || repaymentTransaction.isMerchantIssuedRefund()
-                || repaymentTransaction.isPayoutRefund() || repaymentTransaction.isChargeRefund() || repaymentTransaction.isRepayment()
-                || repaymentTransaction.isDownPayment()) {
+        if (repaymentTransaction.isGoodwillCredit() || repaymentTransaction.isInterestPaymentWaiver()
+                || repaymentTransaction.isMerchantIssuedRefund() || repaymentTransaction.isPayoutRefund()
+                || repaymentTransaction.isChargeRefund() || repaymentTransaction.isRepayment() || repaymentTransaction.isDownPayment()) {
+
             if (!(isOpen() || isClosedObligationsMet() || isOverPaid())) {
                 final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
                 final String defaultUserMessage = "Loan must be Active, Fully Paid or Overpaid";
@@ -2799,7 +2800,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return loanTransactionDate;
     }
 
-    private LoanRepaymentScheduleInstallment fetchLoanRepaymentScheduleInstallment(LocalDate dueDate) {
+    public LoanRepaymentScheduleInstallment fetchLoanRepaymentScheduleInstallment(LocalDate dueDate) {
         return getRepaymentScheduleInstallments().stream() //
                 .filter(installment -> dueDate.equals(installment.getDueDate())).findFirst() //
                 .orElse(null);
@@ -2887,7 +2888,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         processIncomeAccrualTransactionOnLoanClosure();
     }
 
-    private void processIncomeAccrualTransactionOnLoanClosure() {
+    public void processIncomeAccrualTransactionOnLoanClosure() {
         if (this.loanInterestRecalculationDetails != null && this.loanInterestRecalculationDetails.isCompoundingToBePostedAsTransaction()
                 && this.getStatus().isClosedObligationsMet() && !isNpa() && !isChargedOff()) {
 
@@ -3161,7 +3162,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
                 .orElse(null);
     }
 
-    private boolean isOverPaid() {
+    public boolean isOverPaid() {
         return calculateTotalOverpayment().isGreaterThanZero();
     }
 
@@ -3209,7 +3210,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return getTotalRecoveredPayments();
     }
 
-    private MonetaryCurrency loanCurrency() {
+    public MonetaryCurrency loanCurrency() {
         return this.loanRepaymentScheduleDetail.getCurrency();
     }
 
@@ -3479,7 +3480,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return getStatus().isClosed() || isCancelled();
     }
 
-    private boolean isClosedObligationsMet() {
+    public boolean isClosedObligationsMet() {
         return getStatus().isClosedObligationsMet();
     }
 
@@ -6024,7 +6025,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         }
     }
 
-    private boolean isForeclosure() {
+    public boolean isForeclosure() {
         boolean isForeClosure = false;
         if (this.loanSubStatus != null) {
             isForeClosure = LoanSubStatus.fromInt(loanSubStatus).isForeclosed();
