@@ -128,26 +128,35 @@ public class CobPartitioningTest {
             // Let's create 1, 2, ..., N-1, N loans
             final CountDownLatch createLatch = new CountDownLatch(N);
             Integer loanProductID = createLoanProduct();
+            List<Future<?>> futures = new ArrayList<>();
             for (int i = 0; i < N; i++) {
-                Future<?> unused = executorService.submit(() -> {
+                futures.add(executorService.submit(() -> {
                     Integer clientID = createClient();
                     Integer loanID = createLoanForClient(clientID, loanProductID);
                     loanIds.add(loanID);
                     createLatch.countDown();
-                });
+                }));
             }
-            createLatch.await();
+            waitForFutures(futures, createLatch);
+            futures.clear();
 
             // Force close loans 3, 4, ... , N-3, N-2
             Collections.sort(loanIds);
             final CountDownLatch closeLatch = new CountDownLatch(N - 4);
             for (int i = 2; i < N - 2; i++) {
                 final int idx = i;
-                Future<?> unused = executorService.submit(() -> {
+                futures.add(executorService.submit(() -> {
                     LOAN_TRANSACTION_HELPER.forecloseLoan("02 March 2020", loanIds.get(idx));
                     closeLatch.countDown();
-                });
+                }));
             }
+            futures.forEach(future -> {
+                try {
+                    future.get(); // turn any possible async failures into errors
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
             closeLatch.await();
 
             // Let's retrieve the partitions
@@ -169,6 +178,17 @@ public class CobPartitioningTest {
         } finally {
             cleanUpAndRestoreBusinessDate();
         }
+    }
+
+    private static void waitForFutures(List<Future<?>> futures, CountDownLatch createLatch) throws InterruptedException {
+        futures.forEach(future -> {
+            try {
+                future.get(); // turn any possible async failures into errors
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        createLatch.await();
     }
 
     private void setInitialBusinessDate(String date) {
@@ -210,7 +230,7 @@ public class CobPartitioningTest {
 
         HashMap loanStatusHashMap;
 
-        Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), "10 January 2020");
+        Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), "1 March 2020");
 
         Assertions.assertNotNull(loanID);
 

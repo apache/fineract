@@ -76,9 +76,9 @@ public class AccountTransferTest {
     public static final String TO_LOAN_ACCOUNT_TYPE = "1";
     public static final String TO_SAVINGS_ACCOUNT_TYPE = "2";
 
-    public static final String LOAN_APPROVAL_DATE = "01 March 2013";
-    public static final String LOAN_APPROVAL_DATE_PLUS_ONE = "02 March 2013";
-    public static final String LOAN_DISBURSAL_DATE = "01 March 2013";
+    public static final String LOAN_APPROVAL_DATE = "10 January 2013";
+    public static final String LOAN_APPROVAL_DATE_PLUS_ONE = "11 January 2013";
+    public static final String LOAN_DISBURSAL_DATE = "10 January 2013";
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -107,12 +107,12 @@ public class AccountTransferTest {
 
         List<HashMap> financialActivities = this.financialActivityAccountHelper.getAllFinancialActivityAccounts(this.responseSpec);
         if (financialActivities.isEmpty()) {
-            /** Setup liability transfer account **/
-            /** Create a Liability and an Asset Transfer Account **/
+            /* Setup liability transfer account **/
+            /* Create a Liability and an Asset Transfer Account **/
             liabilityTransferAccount = accountHelper.createLiabilityAccount();
             Assertions.assertNotNull(liabilityTransferAccount);
 
-            /*** Create A Financial Activity to Account Mapping **/
+            /* Create A Financial Activity to Account Mapping **/
             financialActivityAccountId = (Integer) financialActivityAccountHelper.createFinancialActivityAccount(
                     FinancialActivityAccountsTest.LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID, liabilityTransferAccount.getAccountID(),
                     responseSpec, CommonConstants.RESPONSE_RESOURCE_ID);

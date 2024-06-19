@@ -119,7 +119,7 @@ public class LoanDueCalculationTest extends BaseLoanIntegrationTest {
                     installment(250.0, false, "30 May 2024")) //
             ;
 
-            loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(), approveLoanRequest(1000.0, "31 January 2024"));
+            loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(), approveLoanRequest(1000.0, "30 January 2024"));
 
             verifyRepaymentSchedule(postLoansResponse.getLoanId(), installment(1000.0, null, "30 January 2024"), //
                     installment(250.0, false, "29 February 2024"), //

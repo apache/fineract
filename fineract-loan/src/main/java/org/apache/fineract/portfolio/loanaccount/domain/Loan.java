@@ -113,7 +113,6 @@ import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor.TransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
-import org.apache.fineract.portfolio.loanaccount.exception.ExceedingTrancheCountException;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanStateTransitionException;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanTransactionTypeException;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidRefundDateException;
@@ -1740,114 +1739,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return maturityDate;
     }
 
-    public Map<String, Object> loanApplicationApproval(final AppUser currentUser, final JsonCommand command,
-            final JsonArray disbursementDataArray, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
-        validateAccountStatus(LoanEvent.LOAN_APPROVED);
-
-        final Map<String, Object> actualChanges = new LinkedHashMap<>();
-
-        /*
-         * statusEnum is holding the possible new status derived from loanLifecycleStateMachine.transition.
-         */
-
-        final LoanStatus newStatusEnum = loanLifecycleStateMachine.dryTransition(LoanEvent.LOAN_APPROVED, this);
-
-        /*
-         * FIXME: There is no need to check below condition, if loanLifecycleStateMachine.transition is doing it's
-         * responsibility properly. Better implementation approach is, if code passes invalid combination of states
-         * (fromState and toState), state machine should return invalidate state and below if condition should check for
-         * not equal to invalidateState, instead of check new value is same as present value.
-         */
-
-        if (!newStatusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
-            loanLifecycleStateMachine.transition(LoanEvent.LOAN_APPROVED, this);
-            actualChanges.put(PARAM_STATUS, LoanEnumerations.status(this.loanStatus));
-
-            // only do below if status has changed in the 'approval' case
-            LocalDate approvedOn = command.localDateValueOfParameterNamed(APPROVED_ON_DATE);
-            String approvedOnDateChange = command.stringValueOfParameterNamed(APPROVED_ON_DATE);
-            if (approvedOn == null) {
-                approvedOn = command.localDateValueOfParameterNamed(EVENT_DATE);
-                approvedOnDateChange = command.stringValueOfParameterNamed(EVENT_DATE);
-            }
-
-            LocalDate expectedDisbursementDate = command.localDateValueOfParameterNamed(EXPECTED_DISBURSEMENT_DATE);
-
-            BigDecimal approvedLoanAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.approvedLoanAmountParameterName);
-            if (approvedLoanAmount != null) {
-                compareApprovedToProposedPrincipal(approvedLoanAmount);
-
-                /*
-                 * All the calculations are done based on the principal amount, so it is necessary to set principal
-                 * amount to approved amount
-                 */
-                this.approvedPrincipal = approvedLoanAmount;
-
-                this.loanRepaymentScheduleDetail.setPrincipal(approvedLoanAmount);
-                actualChanges.put(LoanApiConstants.approvedLoanAmountParameterName, approvedLoanAmount);
-                actualChanges.put(LoanApiConstants.disbursementPrincipalParameterName, approvedLoanAmount);
-                actualChanges.put(LoanApiConstants.disbursementNetDisbursalAmountParameterName, netDisbursalAmount);
-
-                if (disbursementDataArray != null) {
-                    updateDisbursementDetails(command, actualChanges);
-                }
-            }
-
-            recalculateAllCharges();
-
-            if (loanProduct.isMultiDisburseLoan()) {
-                List<LoanDisbursementDetails> currentDisbursementDetails = getLoanDisbursementDetails();
-
-                if (currentDisbursementDetails.size() > loanProduct.maxTrancheCount()) {
-                    final String errorMessage = "Number of tranche shouldn't be greater than " + loanProduct.maxTrancheCount();
-                    throw new ExceedingTrancheCountException(LoanApiConstants.disbursementDataParameterName, errorMessage,
-                            loanProduct.maxTrancheCount(), currentDisbursementDetails.size());
-                }
-            }
-            this.approvedOnDate = approvedOn;
-            this.approvedBy = currentUser;
-            actualChanges.put(LOCALE, command.locale());
-            actualChanges.put(DATE_FORMAT, command.dateFormat());
-            actualChanges.put(APPROVED_ON_DATE, approvedOnDateChange);
-
-            final LocalDate submittalDate = this.submittedOnDate;
-            if (DateUtils.isBefore(approvedOn, submittalDate)) {
-                final String errorMessage = "The date on which a loan is approved cannot be before its submittal date: " + submittalDate;
-                throw new InvalidLoanStateTransitionException("approval", "cannot.be.before.submittal.date", errorMessage,
-                        getApprovedOnDate(), submittalDate);
-            }
-
-            if (expectedDisbursementDate != null) {
-                this.expectedDisbursementDate = expectedDisbursementDate;
-                actualChanges.put(EXPECTED_DISBURSEMENT_DATE, this.expectedDisbursementDate);
-
-                if (DateUtils.isBefore(expectedDisbursementDate, approvedOn)) {
-                    final String errorMessage = "The expected disbursement date should be either on or after the approval date: "
-                            + approvedOn;
-                    throw new InvalidLoanStateTransitionException("expecteddisbursal", "should.be.on.or.after.approval.date", errorMessage,
-                            getApprovedOnDate(), expectedDisbursementDate);
-                }
-            }
-
-            validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_APPROVED, approvedOn);
-
-            if (DateUtils.isDateInTheFuture(approvedOn)) {
-                final String errorMessage = "The date on which a loan is approved cannot be in the future.";
-                throw new InvalidLoanStateTransitionException("approval", "cannot.be.a.future.date", errorMessage, getApprovedOnDate());
-            }
-
-            if (this.loanOfficer != null) {
-                final LoanOfficerAssignmentHistory loanOfficerAssignmentHistory = LoanOfficerAssignmentHistory.createNew(this,
-                        this.loanOfficer, approvedOn);
-                this.loanOfficerHistory.add(loanOfficerAssignmentHistory);
-            }
-            this.adjustNetDisbursalAmount(this.approvedPrincipal);
-        }
-
-        return actualChanges;
-    }
-
-    private List<LoanDisbursementDetails> getLoanDisbursementDetails() {
+    public List<LoanDisbursementDetails> getLoanDisbursementDetails() {
         List<LoanDisbursementDetails> currentDisbursementDetails = getDisbursementDetails();
         if (loanProduct.isDisallowExpectedDisbursements()) {
             if (!currentDisbursementDetails.isEmpty()) {
@@ -1863,24 +1755,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return currentDisbursementDetails;
     }
 
-    private void compareApprovedToProposedPrincipal(BigDecimal approvedLoanAmount) {
-        if (this.loanProduct().isDisallowExpectedDisbursements() && this.loanProduct().isAllowApprovedDisbursedAmountsOverApplied()) {
-            BigDecimal maxApprovedLoanAmount = getOverAppliedMax();
-            if (approvedLoanAmount.compareTo(maxApprovedLoanAmount) > 0) {
-                final String errorMessage = "Loan approved amount can't be greater than maximum applied loan amount calculation.";
-                throw new InvalidLoanStateTransitionException("approval",
-                        "amount.can't.be.greater.than.maximum.applied.loan.amount.calculation", errorMessage, approvedLoanAmount,
-                        maxApprovedLoanAmount);
-            }
-        } else {
-            if (approvedLoanAmount.compareTo(this.proposedPrincipal) > 0) {
-                final String errorMessage = "Loan approved amount can't be greater than loan amount demanded.";
-                throw new InvalidLoanStateTransitionException("approval", "amount.can't.be.greater.than.loan.amount.demanded", errorMessage,
-                        this.proposedPrincipal, approvedLoanAmount);
-            }
-        }
-    }
-
+    @Deprecated // moved to LoanApplicationValidator
     private BigDecimal getOverAppliedMax() {
         if ("percentage".equals(getLoanProduct().getOverAppliedCalculationType())) {
             BigDecimal overAppliedNumber = BigDecimal.valueOf(getLoanProduct().getOverAppliedNumber());
