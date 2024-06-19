@@ -42,7 +42,6 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1739,54 +1738,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
             }
         }
         return maturityDate;
-    }
-
-    public Map<String, Object> loanApplicationWithdrawnByApplicant(final AppUser currentUser, final JsonCommand command,
-            final LoanLifecycleStateMachine loanLifecycleStateMachine) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<>();
-
-        final LoanStatus statusEnum = loanLifecycleStateMachine.dryTransition(LoanEvent.LOAN_WITHDRAWN, this);
-        if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
-            loanLifecycleStateMachine.transition(LoanEvent.LOAN_WITHDRAWN, this);
-            actualChanges.put(PARAM_STATUS, LoanEnumerations.status(this.loanStatus));
-
-            LocalDate withdrawnOn = command.localDateValueOfParameterNamed(WITHDRAWN_ON_DATE);
-            if (withdrawnOn == null) {
-                withdrawnOn = command.localDateValueOfParameterNamed(EVENT_DATE);
-            }
-
-            final Locale locale = new Locale(command.locale());
-            final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
-
-            this.withdrawnOnDate = withdrawnOn;
-            this.withdrawnBy = currentUser;
-            this.closedOnDate = withdrawnOn;
-            this.closedBy = currentUser;
-
-            actualChanges.put(LOCALE, command.locale());
-            actualChanges.put(DATE_FORMAT, command.dateFormat());
-            actualChanges.put(WITHDRAWN_ON_DATE, withdrawnOn.format(fmt));
-            actualChanges.put(CLOSED_ON_DATE, withdrawnOn.format(fmt));
-
-            if (DateUtils.isBefore(withdrawnOn, getSubmittedOnDate())) {
-                final String errorMessage = "The date on which a loan is withdrawn cannot be before its submittal date: "
-                        + getSubmittedOnDate().toString();
-                throw new InvalidLoanStateTransitionException("withdraw", "cannot.be.before.submittal.date", errorMessage, command,
-                        getSubmittedOnDate());
-            }
-
-            validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_WITHDRAWN, withdrawnOn);
-
-            if (DateUtils.isDateInTheFuture(withdrawnOn)) {
-                final String errorMessage = "The date on which a loan is withdrawn cannot be in the future.";
-                throw new InvalidLoanStateTransitionException("withdraw", "cannot.be.a.future.date", errorMessage, command);
-            }
-        } else {
-            final String errorMessage = "Only the loan applications with status 'Submitted and pending approval' are allowed to be withdrawn by applicant.";
-            throw new InvalidLoanStateTransitionException("withdraw", "cannot.withdraw", errorMessage);
-        }
-
-        return actualChanges;
     }
 
     public Map<String, Object> loanApplicationApproval(final AppUser currentUser, final JsonCommand command,
@@ -4278,11 +4229,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
                         action = "repayment.or.waiver";
                         postfix = "cannot.be.made.before.client.transfer.date";
                     }
-                    case LOAN_WITHDRAWN -> {
-                        errorMessage = "The date on which a loan is withdrawn cannot be earlier than client's transfer date to this office";
-                        action = "withdraw";
-                        postfix = "cannot.be.before.client.transfer.date";
-                    }
                     case WRITE_OFF_OUTSTANDING -> {
                         errorMessage = "The date on which a write off is made cannot be earlier than client's transfer date to this office";
                         action = "writeoff";
@@ -4475,14 +4421,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
                     final String defaultUserMessage = "Loan Repayment (or its types) or Waiver is not allowed. Loan Account is not active.";
                     final ApiParameterError error = ApiParameterError
                             .generalError("error.msg.loan.repayment.or.waiver.account.is.not.active", defaultUserMessage);
-                    dataValidationErrors.add(error);
-                }
-            }
-            case LOAN_WITHDRAWN -> {
-                if (!isSubmittedAndPendingApproval()) {
-                    final String defaultUserMessage = "Loan application cannot be withdrawn. Loan Account is not in Submitted and Pending approval state.";
-                    final ApiParameterError error = ApiParameterError
-                            .generalError("error.msg.loan.withdrawn.account.is.not.submitted.pending.approval.state", defaultUserMessage);
                     dataValidationErrors.add(error);
                 }
             }

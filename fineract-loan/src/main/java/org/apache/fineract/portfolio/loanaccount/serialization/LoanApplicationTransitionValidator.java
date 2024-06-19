@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -47,18 +48,14 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanStateTransitionException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public final class LoanApplicationTransitionValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
-
-    @Autowired
-    public LoanApplicationTransitionValidator(final FromJsonHelper fromApiJsonHelper) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
-    }
+    private final LoanLifecycleStateMachine defaultLoanLifecycleStateMachine;
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) {
@@ -112,13 +109,13 @@ public final class LoanApplicationTransitionValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    public void validateRejection(final JsonCommand command, final Loan loan, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+    public void validateRejection(final JsonCommand command, final Loan loan) {
         // validate request body
         final String json = command.json();
         validateLoanRejectionRequestBody(json);
 
         // validate loan rejection
-        validateLoanRejection(command, loan, loanLifecycleStateMachine);
+        validateLoanRejection(command, loan);
     }
 
     private void validateLoanRejectionRequestBody(String json) {
@@ -146,8 +143,7 @@ public final class LoanApplicationTransitionValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    private void validateLoanRejection(final JsonCommand command, final Loan loan,
-            final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+    private void validateLoanRejection(final JsonCommand command, final Loan loan) {
         // validate client or group is active
         checkClientOrGroupActive(loan);
 
@@ -156,7 +152,7 @@ public final class LoanApplicationTransitionValidator {
 
         // validate loan state transition
 
-        final LoanStatus statusEnum = loanLifecycleStateMachine.dryTransition(LoanEvent.LOAN_REJECTED, loan);
+        final LoanStatus statusEnum = defaultLoanLifecycleStateMachine.dryTransition(LoanEvent.LOAN_REJECTED, loan);
         if (!statusEnum.hasStateOf(LoanStatus.fromInt(loan.getLoanStatus()))) {
             final LocalDate rejectedOn = command.localDateValueOfParameterNamed(Loan.REJECTED_ON_DATE);
             if (DateUtils.isBefore(rejectedOn, loan.getSubmittedOnDate())) {
@@ -178,8 +174,16 @@ public final class LoanApplicationTransitionValidator {
         }
     }
 
-    public void validateApplicantWithdrawal(final String json) {
+    public void validateApplicantWithdrawal(final JsonCommand command, final Loan loan) {
+        // validate request body
+        final String json = command.json();
+        validateApplicantWithdrawalRequestBody(json);
 
+        // validate Loan application withdrawal by applicant
+        validateLoanApplicantWithdrawal(command, loan);
+    }
+
+    private void validateApplicantWithdrawalRequestBody(String json) {
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
         }
@@ -204,6 +208,37 @@ public final class LoanApplicationTransitionValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
+    private void validateLoanApplicantWithdrawal(final JsonCommand command, final Loan loan) {
+        // validate client or group is active
+        checkClientOrGroupActive(loan);
+
+        // validate loan state transition
+        final LoanStatus statusEnum = defaultLoanLifecycleStateMachine.dryTransition(LoanEvent.LOAN_WITHDRAWN, loan);
+        if (!statusEnum.hasStateOf(LoanStatus.fromInt(loan.getLoanStatus()))) {
+            LocalDate withdrawnOn = command.localDateValueOfParameterNamed(Loan.WITHDRAWN_ON_DATE);
+            if (withdrawnOn == null) {
+                withdrawnOn = command.localDateValueOfParameterNamed(Loan.EVENT_DATE);
+            }
+            if (DateUtils.isBefore(withdrawnOn, loan.getSubmittedOnDate())) {
+                final String errorMessage = "The date on which a loan is withdrawn cannot be before its submittal date: "
+                        + loan.getSubmittedOnDate().toString();
+                throw new InvalidLoanStateTransitionException("withdraw", "cannot.be.before.submittal.date", errorMessage, command,
+                        loan.getSubmittedOnDate());
+            }
+
+            validateActivityNotBeforeClientOrGroupTransferDate(loan, LoanEvent.LOAN_WITHDRAWN, withdrawnOn);
+
+            if (DateUtils.isDateInTheFuture(withdrawnOn)) {
+                final String errorMessage = "The date on which a loan is withdrawn cannot be in the future.";
+                throw new InvalidLoanStateTransitionException("withdraw", "cannot.be.a.future.date", errorMessage, command);
+            }
+        } else {
+            final String errorMessage = "Only the loan applications with status 'Submitted and pending approval' are allowed to be withdrawn by applicant.";
+            throw new InvalidLoanStateTransitionException("withdraw", "cannot.withdraw", errorMessage);
+        }
+
+    }
+
     private void validateActivityNotBeforeClientOrGroupTransferDate(final Loan loan, final LoanEvent event, final LocalDate activityDate) {
         if (loan.getClient() != null && loan.getClient().getOfficeJoiningDate() != null) {
             final LocalDate clientOfficeJoiningDate = loan.getClient().getOfficeJoiningDate();
@@ -215,6 +250,11 @@ public final class LoanApplicationTransitionValidator {
                     case LOAN_REJECTED -> {
                         errorMessage = "The date on which a loan is rejected cannot be earlier than client's transfer date to this office";
                         action = "reject";
+                        postfix = "cannot.be.before.client.transfer.date";
+                    }
+                    case LOAN_WITHDRAWN -> {
+                        errorMessage = "The date on which a loan is withdrawn cannot be earlier than client's transfer date to this office";
+                        action = "withdraw";
                         postfix = "cannot.be.before.client.transfer.date";
                     }
                     default -> {
