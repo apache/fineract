@@ -26,13 +26,10 @@ import com.google.gson.JsonObject;
 import jakarta.persistence.PersistenceException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -96,7 +93,6 @@ import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationTr
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationValidator;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
-import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.savings.data.GroupSavingsIndividualMonitoringAccountData;
@@ -492,6 +488,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             this.accountAssociationsRepository.delete(accountAssociations);
         }
 
+        // Note: check if releaseAttachedCollaterals method can be used here
         Set<LoanCollateralManagement> loanCollateralManagements = loan.getLoanCollateralManagements();
         for (LoanCollateralManagement loanCollateralManagement : loanCollateralManagements) {
             BigDecimal quantity = loanCollateralManagement.getQuantity();
@@ -797,20 +794,23 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         Loan loan = retrieveLoanBy(loanId);
 
         // validate loan rejection
-        loanApplicationTransitionValidator.validateRejection(command, loan, defaultLoanLifecycleStateMachine);
+        loanApplicationTransitionValidator.validateRejection(command, loan);
 
         // check for mandatory entities
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(loanId, EntityTables.LOAN.getName(),
                 StatusEnum.REJECTED.getCode().longValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
 
         // loan application rejection
-        final Map<String, Object> changes = loanApplicationRejection(loan, command);
+        final AppUser currentUser = getAppUserIfPresent();
+        defaultLoanLifecycleStateMachine.transition(LoanEvent.LOAN_REJECTED, loan);
+        final Map<String, Object> changes = loanAssembler.updateLoanApplicationAttributesForRejection(loan, command, currentUser);
 
         if (!changes.isEmpty()) {
             loanRepositoryWrapper.saveAndFlush(loan);
             final String noteText = command.stringValueOfParameterNamed("note");
             createNote(noteText, loan);
         }
+
         businessEventNotifierService.notifyPostBusinessEvent(new LoanRejectedBusinessEvent(loan));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -824,63 +824,31 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 .build();
     }
 
-    private Map<String, Object> loanApplicationRejection(Loan loan, final JsonCommand command) {
-
-        final AppUser currentUser = getAppUserIfPresent();
-        final LocalDate rejectedOn = command.localDateValueOfParameterNamed(Loan.REJECTED_ON_DATE);
-
-        loan.setRejectedOnDate(rejectedOn);
-        loan.setRejectedBy(currentUser);
-        loan.setClosedOnDate(rejectedOn);
-        loan.setClosedBy(currentUser);
-
-        defaultLoanLifecycleStateMachine.transition(LoanEvent.LOAN_REJECTED, loan);
-
-        final Map<String, Object> actualChanges = new LinkedHashMap<>();
-        final Locale locale = new Locale(command.locale());
-        final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
-
-        actualChanges.put(Loan.PARAM_STATUS, LoanEnumerations.status(loan.getStatus()));
-        actualChanges.put(Loan.LOCALE, command.locale());
-        actualChanges.put(Loan.DATE_FORMAT, command.dateFormat());
-        actualChanges.put(Loan.REJECTED_ON_DATE, rejectedOn.format(fmt));
-        actualChanges.put(Loan.CLOSED_ON_DATE, rejectedOn.format(fmt));
-
-        return actualChanges;
-    }
-
     @Transactional
     @Override
     public CommandProcessingResult applicantWithdrawsFromApplication(final Long loanId, final JsonCommand command) {
 
-        final AppUser currentUser = getAppUserIfPresent();
-
-        this.loanApplicationTransitionValidator.validateApplicantWithdrawal(command.json());
-
+        // retrieve loan
         final Loan loan = retrieveLoanBy(loanId);
-        loanApplicationTransitionValidator.checkClientOrGroupActive(loan);
 
+        // validate withdrawal
+        loanApplicationTransitionValidator.validateApplicantWithdrawal(command, loan);
+
+        // check for mandatory entities
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(loanId, EntityTables.LOAN.getName(),
                 StatusEnum.WITHDRAWN.getCode().longValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
 
-        final Map<String, Object> changes = loan.loanApplicationWithdrawnByApplicant(currentUser, command,
-                defaultLoanLifecycleStateMachine);
-
+        // loan application withdrawal
+        final AppUser currentUser = getAppUserIfPresent();
+        defaultLoanLifecycleStateMachine.transition(LoanEvent.LOAN_WITHDRAWN, loan);
+        final Map<String, Object> changes = loanAssembler.updateLoanApplicationAttributesForWithdrawal(loan, command, currentUser);
         // Release attached collaterals
         if (loan.getLoanType().isIndividualAccount()) {
-            Set<LoanCollateralManagement> loanCollateralManagements = loan.getLoanCollateralManagements();
-            for (LoanCollateralManagement loanCollateralManagement : loanCollateralManagements) {
-                ClientCollateralManagement clientCollateralManagement = loanCollateralManagement.getClientCollateralManagement();
-                clientCollateralManagement
-                        .updateQuantity(clientCollateralManagement.getQuantity().add(loanCollateralManagement.getQuantity()));
-                loanCollateralManagement.setClientCollateralManagement(clientCollateralManagement);
-                loanCollateralManagement.setIsReleased(true);
-            }
-            loan.updateLoanCollateral(loanCollateralManagements);
+            releaseAttachedCollaterals(loan);
         }
 
         if (!changes.isEmpty()) {
-            this.loanRepositoryWrapper.saveAndFlush(loan);
+            loanRepositoryWrapper.saveAndFlush(loan);
 
             final String noteText = command.stringValueOfParameterNamed("note");
             createNote(noteText, loan);
@@ -981,6 +949,17 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final Note note = Note.loanNote(newLoanApplication, submittedOnNote);
             this.noteRepository.save(note);
         }
+    }
+
+    private void releaseAttachedCollaterals(Loan loan) {
+        Set<LoanCollateralManagement> loanCollateralManagements = loan.getLoanCollateralManagements();
+        for (LoanCollateralManagement loanCollateralManagement : loanCollateralManagements) {
+            ClientCollateralManagement clientCollateralManagement = loanCollateralManagement.getClientCollateralManagement();
+            clientCollateralManagement.updateQuantity(clientCollateralManagement.getQuantity().add(loanCollateralManagement.getQuantity()));
+            loanCollateralManagement.setClientCollateralManagement(clientCollateralManagement);
+            loanCollateralManagement.setIsReleased(true);
+        }
+        loan.updateLoanCollateral(loanCollateralManagements);
     }
 
 }

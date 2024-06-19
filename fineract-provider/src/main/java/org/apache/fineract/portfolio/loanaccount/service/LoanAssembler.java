@@ -22,9 +22,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -96,8 +98,10 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundException;
+import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.portfolio.rate.domain.Rate;
 import org.apache.fineract.portfolio.rate.service.RateAssembler;
+import org.apache.fineract.useradministration.domain.AppUser;
 
 @RequiredArgsConstructor
 public class LoanAssembler {
@@ -832,5 +836,50 @@ public class LoanAssembler {
         }
 
         return changes;
+    }
+
+    public Map<String, Object> updateLoanApplicationAttributesForWithdrawal(Loan loan, JsonCommand command, AppUser currentUser) {
+        final Map<String, Object> actualChanges = new LinkedHashMap<>();
+
+        LocalDate withdrawnOn = command.localDateValueOfParameterNamed(Loan.WITHDRAWN_ON_DATE);
+        if (withdrawnOn == null) {
+            withdrawnOn = command.localDateValueOfParameterNamed(Loan.EVENT_DATE);
+        }
+
+        loan.setWithdrawnOnDate(withdrawnOn);
+        loan.setWithdrawnBy(currentUser);
+        loan.setClosedOnDate(withdrawnOn);
+        loan.setClosedBy(currentUser);
+
+        final Locale locale = new Locale(command.locale());
+        final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
+
+        actualChanges.put(Loan.PARAM_STATUS, LoanEnumerations.status(loan.getStatus()));
+        actualChanges.put(Loan.LOCALE, command.locale());
+        actualChanges.put(Loan.DATE_FORMAT, command.dateFormat());
+        actualChanges.put(Loan.WITHDRAWN_ON_DATE, withdrawnOn.format(fmt));
+        actualChanges.put(Loan.CLOSED_ON_DATE, withdrawnOn.format(fmt));
+        return actualChanges;
+    }
+
+    public Map<String, Object> updateLoanApplicationAttributesForRejection(Loan loan, JsonCommand command, AppUser currentUser) {
+        final Map<String, Object> actualChanges = new LinkedHashMap<>();
+
+        final LocalDate rejectedOn = command.localDateValueOfParameterNamed(Loan.REJECTED_ON_DATE);
+
+        loan.setRejectedOnDate(rejectedOn);
+        loan.setRejectedBy(currentUser);
+        loan.setClosedOnDate(rejectedOn);
+        loan.setClosedBy(currentUser);
+
+        final Locale locale = new Locale(command.locale());
+        final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
+
+        actualChanges.put(Loan.PARAM_STATUS, LoanEnumerations.status(loan.getStatus()));
+        actualChanges.put(Loan.LOCALE, command.locale());
+        actualChanges.put(Loan.DATE_FORMAT, command.dateFormat());
+        actualChanges.put(Loan.REJECTED_ON_DATE, rejectedOn.format(fmt));
+        actualChanges.put(Loan.CLOSED_ON_DATE, rejectedOn.format(fmt));
+        return actualChanges;
     }
 }
