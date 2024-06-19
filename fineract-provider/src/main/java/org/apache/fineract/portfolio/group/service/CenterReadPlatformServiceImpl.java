@@ -510,7 +510,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         Integer numberOfDays = 0;
         boolean isSkipRepaymentOnFirstMonthEnabled = this.configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
         if (isSkipRepaymentOnFirstMonthEnabled) {
-            numberOfDays = this.configurationDomainService.retreivePeroidInNumberOfDaysForSkipMeetingDate().intValue();
+            numberOfDays = this.configurationDomainService.retreivePeriodInNumberOfDaysForSkipMeetingDate().intValue();
         }
         for (CenterData centerData : centerDataArray) {
             if (centerData.getCollectionMeetingCalendar().isValidRecurringDate(meetingDate, isSkipRepaymentOnFirstMonthEnabled,

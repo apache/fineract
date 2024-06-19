@@ -97,7 +97,7 @@ public class LoanCatchUpIntegrationTest {
             final Integer loanProductID = createLoanProduct(overdueFeeChargeId.toString());
             Assertions.assertNotNull(loanProductID);
             HashMap loanStatusHashMap;
-            final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null, "10 January 2020");
+            final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null, "1 March 2020");
 
             Assertions.assertNotNull(loanID);
 

@@ -216,12 +216,12 @@ public class LoanAccountConfiguration {
             EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService, GLIMAccountInfoRepository glimRepository,
             LoanRepository loanRepository, GSIMReadPlatformService gsimReadPlatformService,
             LoanLifecycleStateMachine defaultLoanLifecycleStateMachine) {
-        return new LoanApplicationWritePlatformServiceJpaRepositoryImpl(context, fromJsonHelper, loanApplicationTransitionValidator,
+        return new LoanApplicationWritePlatformServiceJpaRepositoryImpl(context, loanApplicationTransitionValidator,
                 loanApplicationValidator, loanRepositoryWrapper, noteRepository, loanAssembler, loanSummaryWrapper,
                 loanRepaymentScheduleTransactionProcessorFactory, calendarRepository, calendarInstanceRepository, savingsAccountRepository,
-                accountAssociationsRepository, loanReadPlatformService, businessEventNotifierService, configurationDomainService,
-                loanScheduleAssembler, loanUtilService, calendarReadPlatformService, entityDatatableChecksWritePlatformService,
-                glimRepository, loanRepository, gsimReadPlatformService, defaultLoanLifecycleStateMachine);
+                accountAssociationsRepository, businessEventNotifierService, loanScheduleAssembler, loanUtilService,
+                calendarReadPlatformService, entityDatatableChecksWritePlatformService, glimRepository, loanRepository,
+                gsimReadPlatformService, defaultLoanLifecycleStateMachine);
     }
 
     @Bean

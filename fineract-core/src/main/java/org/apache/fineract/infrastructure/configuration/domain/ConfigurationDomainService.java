@@ -81,7 +81,7 @@ public interface ConfigurationDomainService {
 
     boolean isPrincipalCompoundingDisabledForOverdueLoans();
 
-    Long retreivePeroidInNumberOfDaysForSkipMeetingDate();
+    Long retreivePeriodInNumberOfDaysForSkipMeetingDate();
 
     boolean isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled();
 

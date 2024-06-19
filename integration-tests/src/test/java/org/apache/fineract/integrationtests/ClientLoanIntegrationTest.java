@@ -445,7 +445,7 @@ public class ClientLoanIntegrationTest {
 
         DateFormat dateFormat = new SimpleDateFormat(DATETIME_PATTERN, Locale.US);
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
-        final String LOAN_DISBURSEMENT_DATE = dateFormat.format(todaysDate.getTime());
+        final String LOAN_DISBURSEMENT_DATE = "2 June 2014";
 
         LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
         loanStatusHashMap = LOAN_TRANSACTION_HELPER.approveLoan(LOAN_DISBURSEMENT_DATE, loanID);
@@ -1545,7 +1545,7 @@ public class ClientLoanIntegrationTest {
      * amount plus interest
      */
     @Test
-    public void loanWithCahargesOfTypeAmountPlusInterestPercentageAndCashBasedAccountingEnabled() {
+    public void loanWithChargesOfTypeAmountPlusInterestPercentageAndCashBasedAccountingEnabled() {
 
         final Integer clientID = ClientHelper.createClient(REQUEST_SPEC, RESPONSE_SPEC);
         ClientHelper.verifyClientCreatedOnServer(REQUEST_SPEC, RESPONSE_SPEC, clientID);

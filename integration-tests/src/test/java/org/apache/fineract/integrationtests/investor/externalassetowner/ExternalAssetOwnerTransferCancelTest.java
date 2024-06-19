@@ -307,7 +307,7 @@ public class ExternalAssetOwnerTransferCancelTest {
         Assertions.assertNotNull(loanProductID);
         HashMap loanStatusHashMap;
 
-        Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), "10 January 2020");
+        Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), "1 March 2020");
 
         Assertions.assertNotNull(loanID);
 

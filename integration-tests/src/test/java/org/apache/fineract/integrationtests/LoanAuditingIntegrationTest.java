@@ -98,7 +98,7 @@ public class LoanAuditingIntegrationTest {
         OffsetDateTime now = Utils.getAuditDateTimeToCompare();
 
         final Integer loanID = applyForLoanApplicationWithPaymentStrategyAndPastMonth(clientID, loanProductID, Collections.emptyList(),
-                null, "10000", LoanApplicationTestBuilder.DEFAULT_STRATEGY, "10 July 2022");
+                null, "10000", LoanApplicationTestBuilder.DEFAULT_STRATEGY, "10 July 2022", "11 July 2022");
         Assertions.assertNotNull(loanID);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
@@ -143,7 +143,8 @@ public class LoanAuditingIntegrationTest {
     }
 
     private Integer applyForLoanApplicationWithPaymentStrategyAndPastMonth(final Integer clientID, final Integer loanProductID,
-            List<HashMap> charges, final String savingsId, String principal, final String repaymentStrategy, final String submittedOnDate) {
+            List<HashMap> charges, final String savingsId, String principal, final String repaymentStrategy, final String submittedOnDate,
+            final String disbursementDate) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
 
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
@@ -157,7 +158,7 @@ public class LoanAuditingIntegrationTest {
                 .withAmortizationTypeAsEqualInstallments() //
                 .withInterestTypeAsFlatBalance() //
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
-                .withExpectedDisbursementDate(submittedOnDate) //
+                .withExpectedDisbursementDate(disbursementDate) //
                 .withSubmittedOnDate(submittedOnDate) //
                 .withRepaymentStrategy(repaymentStrategy) //
                 .withCharges(charges).build(clientID.toString(), loanProductID.toString(), savingsId);

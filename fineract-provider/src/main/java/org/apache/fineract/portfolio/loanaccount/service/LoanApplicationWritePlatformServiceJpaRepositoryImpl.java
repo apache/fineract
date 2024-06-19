@@ -31,23 +31,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
-import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
-import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
@@ -85,7 +80,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummaryWrapper;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeDeleted;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleAssembler;
@@ -109,7 +103,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements LoanApplicationWritePlatformService {
 
     private final PlatformSecurityContext context;
-    private final FromJsonHelper fromJsonHelper;
     private final LoanApplicationTransitionValidator loanApplicationTransitionValidator;
     private final LoanApplicationValidator loanApplicationValidator;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
@@ -121,9 +114,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final SavingsAccountRepositoryWrapper savingsAccountRepository;
     private final AccountAssociationsRepository accountAssociationsRepository;
-    private final LoanReadPlatformService loanReadPlatformService;
     private final BusinessEventNotifierService businessEventNotifierService;
-    private final ConfigurationDomainService configurationDomainService;
     private final LoanScheduleAssembler loanScheduleAssembler;
     private final LoanUtilService loanUtilService;
     private final CalendarReadPlatformService calendarReadPlatformService;
@@ -510,19 +501,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 .build();
     }
 
-    public void validateMultiDisbursementData(final JsonCommand command, LocalDate expectedDisbursementDate) {
-        final String json = command.json();
-        final JsonElement element = this.fromJsonHelper.parse(json);
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
-        final BigDecimal principal = this.fromJsonHelper.extractBigDecimalWithLocaleNamed("approvedLoanAmount", element);
-        loanApplicationValidator.validateLoanMultiDisbursementDate(element, baseDataValidator, expectedDisbursementDate, principal);
-        if (!dataValidationErrors.isEmpty()) {
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-    }
-
     @Transactional
     @Override
     public CommandProcessingResult approveGLIMLoanAppication(final Long loanId, final JsonCommand command) {
@@ -572,100 +550,16 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     @Transactional
     @Override
     public CommandProcessingResult approveApplication(final Long loanId, final JsonCommand command) {
-
         final AppUser currentUser = getAppUserIfPresent();
-        LocalDate expectedDisbursementDate = null;
+        loanApplicationValidator.validateApproval(command, loanId);
 
-        this.loanApplicationTransitionValidator.validateApproval(command.json());
-
-        Loan loan = retrieveLoanBy(loanId);
-
-        final JsonArray disbursementDataArray = command.arrayOfParameterNamed(LoanApiConstants.disbursementDataParameterName);
-
-        expectedDisbursementDate = command.localDateValueOfParameterNamed(LoanApiConstants.expectedDisbursementDateParameterName);
-        if (expectedDisbursementDate == null) {
-            expectedDisbursementDate = loan.getExpectedDisbursedOnLocalDate();
-        }
-        if (loan.loanProduct().isMultiDisburseLoan()) {
-            this.validateMultiDisbursementData(command, expectedDisbursementDate);
-        }
-
-        loanApplicationTransitionValidator.checkClientOrGroupActive(loan);
-        Boolean isSkipRepaymentOnFirstMonth = false;
-        Integer numberOfDays = 0;
-        // validate expected disbursement date against meeting date
-        if (loan.isSyncDisbursementWithMeeting() && (loan.isGroupLoan() || loan.isJLGLoan())) {
-            final CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstaneByEntityId(loan.getId(),
-                    CalendarEntityType.LOANS.getValue());
-            Calendar calendar = null;
-            if (calendarInstance != null) {
-                calendar = calendarInstance.getCalendar();
-            }
-            // final Calendar calendar = calendarInstance.getCalendar();
-            boolean isSkipRepaymentOnFirstMonthEnabled = this.configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
-            if (isSkipRepaymentOnFirstMonthEnabled) {
-                isSkipRepaymentOnFirstMonth = this.loanUtilService.isLoanRepaymentsSyncWithMeeting(loan.group(), calendar);
-                if (isSkipRepaymentOnFirstMonth) {
-                    numberOfDays = configurationDomainService.retreivePeroidInNumberOfDaysForSkipMeetingDate().intValue();
-                }
-            }
-            this.loanScheduleAssembler.validateDisbursementDateWithMeetingDates(expectedDisbursementDate, calendar,
-                    isSkipRepaymentOnFirstMonth, numberOfDays);
-
-        }
-
-        final Map<String, Object> changes = loan.loanApplicationApproval(currentUser, command, disbursementDataArray,
-                defaultLoanLifecycleStateMachine);
-
-        entityDatatableChecksWritePlatformService.runTheCheckForProduct(loanId, EntityTables.LOAN.getName(),
-                StatusEnum.APPROVE.getCode().longValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
+        Pair<Loan, Map<String, Object>> loanAndChanges = loanScheduleAssembler.assembleLoanApproval(currentUser, command, loanId);
+        final Loan loan = loanAndChanges.getLeft();
+        final Map<String, Object> changes = loanAndChanges.getRight();
 
         if (!changes.isEmpty()) {
-
-            // If loan approved amount less than loan demanded amount, then need
-            // to recompute the schedule
-            if (changes.containsKey(LoanApiConstants.approvedLoanAmountParameterName) || changes.containsKey("recalculateLoanSchedule")
-                    || changes.containsKey("expectedDisbursementDate")) {
-                LocalDate recalculateFrom = null;
-                ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
-                loan.regenerateRepaymentSchedule(scheduleGeneratorDTO);
-            }
-
-            if (loan.isTopup() && loan.getClientId() != null) {
-                final Long loanIdToClose = loan.getTopupLoanDetails().getLoanIdToClose();
-                final Loan loanToClose = this.loanRepositoryWrapper.findNonClosedLoanThatBelongsToClient(loanIdToClose, loan.getClientId());
-                if (loanToClose == null) {
-                    throw new GeneralPlatformDomainRuleException("error.msg.loan.to.be.closed.with.topup.is.not.active",
-                            "Loan to be closed with this topup is not active.");
-                }
-
-                final LocalDate lastUserTransactionOnLoanToClose = loanToClose.getLastUserTransactionDate();
-                if (DateUtils.isBefore(loan.getDisbursementDate(), lastUserTransactionOnLoanToClose)) {
-                    throw new GeneralPlatformDomainRuleException(
-                            "error.msg.loan.disbursal.date.should.be.after.last.transaction.date.of.loan.to.be.closed",
-                            "Disbursal date of this loan application " + loan.getDisbursementDate()
-                                    + " should be after last transaction date of loan to be closed " + lastUserTransactionOnLoanToClose);
-                }
-                BigDecimal loanOutstanding = this.loanReadPlatformService
-                        .retrieveLoanPrePaymentTemplate(LoanTransactionType.REPAYMENT, loanIdToClose, expectedDisbursementDate).getAmount();
-                final BigDecimal firstDisbursalAmount = loan.getFirstDisbursalAmount();
-                if (loanOutstanding.compareTo(firstDisbursalAmount) > 0) {
-                    throw new GeneralPlatformDomainRuleException("error.msg.loan.amount.less.than.outstanding.of.loan.to.be.closed",
-                            "Topup loan amount should be greater than outstanding amount of loan to be closed.");
-                }
-                BigDecimal netDisbursalAmount = loan.getApprovedPrincipal().subtract(loanOutstanding);
-                loan.adjustNetDisbursalAmount(netDisbursalAmount);
-            }
-
-            loan = loanRepository.saveAndFlush(loan);
-
             final String noteText = command.stringValueOfParameterNamed("note");
-            if (StringUtils.isNotBlank(noteText)) {
-                final Note note = Note.loanNote(loan, noteText);
-                changes.put("note", noteText);
-                this.noteRepository.save(note);
-            }
-
+            createNote(noteText, loan).ifPresent(note -> changes.put("note", noteText));
             businessEventNotifierService.notifyPostBusinessEvent(new LoanApprovedBusinessEvent(loan));
         }
 
@@ -944,10 +838,13 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         }
     }
 
-    private void createNote(String submittedOnNote, Loan newLoanApplication) {
+    private Optional<Note> createNote(String submittedOnNote, Loan newLoanApplication) {
         if (StringUtils.isNotBlank(submittedOnNote)) {
             final Note note = Note.loanNote(newLoanApplication, submittedOnNote);
             this.noteRepository.save(note);
+            return Optional.of(note);
+        } else {
+            return Optional.empty();
         }
     }
 
