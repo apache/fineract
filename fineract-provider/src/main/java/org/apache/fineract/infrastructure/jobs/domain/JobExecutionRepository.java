@@ -121,7 +121,7 @@ public class JobExecutionRepository {
                 List.of(COMPLETED.name(), FAILED.name(), UNKNOWN.name()), "threshold", threshold), Long.class);
     }
 
-    public Long getNotCompletedPartitionsCount(Long jobExecutionId, String partitionerStepName) {
+    public Long getNotCompletedPartitionsCount(Long jobExecutionId, String partitionerStepName, String exitCode) {
         return namedParameterJdbcTemplate.queryForObject("""
                     SELECT COUNT(bse.STEP_EXECUTION_ID)
                     FROM BATCH_STEP_EXECUTION BSE
@@ -131,7 +131,11 @@ public class JobExecutionRepository {
                         BSE.STEP_NAME <> :stepName
                         AND
                         BSE.status <> :status
-                """, Map.of("jobExecutionId", jobExecutionId, "stepName", partitionerStepName, "status", COMPLETED.name()), Long.class);
+                        AND
+                        BSE.exit_code <> :exitCode
+                """,
+                Map.of("jobExecutionId", jobExecutionId, "stepName", partitionerStepName, "status", COMPLETED.name(), "exitCode", exitCode),
+                Long.class);
     }
 
     public void updateJobStatusToFailed(Long stuckJobId, String partitionerStepName) {
