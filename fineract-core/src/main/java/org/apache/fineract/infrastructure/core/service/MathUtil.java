@@ -467,4 +467,14 @@ public final class MathUtil {
         }
         return percentageOf;
     }
+
+    /**
+     * Remove unused zeros from end of BigDecimal fraction and keep the format "0.0"
+     *
+     * @param value
+     * @return
+     */
+    public static BigDecimal stripTrailingZeros(final BigDecimal value) {
+        return value == null ? null : new BigDecimal(value.stripTrailingZeros().toPlainString());
+    }
 }

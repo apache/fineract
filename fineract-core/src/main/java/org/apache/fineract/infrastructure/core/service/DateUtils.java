@@ -24,7 +24,6 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.Year;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -35,7 +34,6 @@ import java.util.Locale;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 
 public final class DateUtils {
 
@@ -394,14 +392,6 @@ public final class DateUtils {
             formatter = locale == null ? DateTimeFormatter.ofPattern(format) : DateTimeFormatter.ofPattern(format, locale);
         }
         return formatter;
-    }
-
-    public static Integer daysInYear(final DaysInYearType daysInYear, final LocalDate referenceDate) {
-        return daysInYear.isActual() ? DateUtils.getDaysInYear(referenceDate.getYear()) : daysInYear.getValue();
-    }
-
-    public static Integer getDaysInYear(final Integer year) {
-        return Year.isLeap(year) ? 366 : 365;
     }
 
 }

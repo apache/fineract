@@ -48,6 +48,8 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleD
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleModelDownPaymentPeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleParams;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.exception.MultiDisbursementOutstandingAmoutException;
+import org.apache.fineract.portfolio.loanproduct.calc.EMICalculationResult;
+import org.apache.fineract.portfolio.loanproduct.calc.EMICalculator;
 import org.apache.fineract.portfolio.loanproduct.domain.RepaymentStartDateType;
 
 public abstract class AbstractProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
@@ -83,6 +85,11 @@ public abstract class AbstractProgressiveLoanScheduleGenerator implements LoanSc
         List<LoanScheduleModelPeriod> periods = createNewLoanScheduleListWithDisbursementDetails(loanApplicationTerms, scheduleParams,
                 chargesDueAtTimeOfDisbursement);
 
+        List<PreGeneratedLoanSchedulePeriod> expectedRepaymentPeriods = getScheduledDateGenerator()
+                .generateRepaymentPeriods(loanApplicationTerms, holidayDetailDTO);
+        EMICalculationResult emiCalculationResult = getEMICalculator().calculateEMIValueAndRateFactors(scheduleParams,
+                loanApplicationTerms.toLoanProductRelatedDetail(), expectedRepaymentPeriods, mc);
+
         boolean isFirstRepayment = true;
 
         // charges which depends on total loan interest will be added to this
@@ -115,10 +122,11 @@ public abstract class AbstractProgressiveLoanScheduleGenerator implements LoanSc
 
             // 5 determine principal,interest of repayment period
             PrincipalInterest principalInterestForThisPeriod = calculatePrincipalInterestComponentsForPeriod(loanApplicationTerms,
-                    scheduleParams, mc);
+                    scheduleParams, emiCalculationResult, mc);
 
             // update cumulative fields for principal
             currentPeriodParams.setPrincipalForThisPeriod(principalInterestForThisPeriod.principal());
+            currentPeriodParams.setInterestForThisPeriod(principalInterestForThisPeriod.interest());
             updateOutstandingBalance(scheduleParams, currentPeriodParams);
 
             if (scheduleParams.getOutstandingBalance().isLessThanZero() || !isNextRepaymentAvailable) {
@@ -226,7 +234,9 @@ public abstract class AbstractProgressiveLoanScheduleGenerator implements LoanSc
     public abstract PaymentPeriodsInOneYearCalculator getPaymentPeriodsInOneYearCalculator();
 
     public abstract PrincipalInterest calculatePrincipalInterestComponentsForPeriod(LoanApplicationTerms loanApplicationTerms,
-            LoanScheduleParams loanScheduleParams, MathContext mc);
+            LoanScheduleParams loanScheduleParams, EMICalculationResult emiCalculationResult, MathContext mc);
+
+    protected abstract EMICalculator getEMICalculator();
 
     // Private, internal methods
     private BigDecimal deriveTotalChargesDueAtTimeOfDisbursement(final Set<LoanCharge> loanCharges) {
@@ -260,7 +270,6 @@ public abstract class AbstractProgressiveLoanScheduleGenerator implements LoanSc
                 loanScheduleParams.addOutstandingBalance(principalMoney);
                 loanScheduleParams.addOutstandingBalanceAsPerRest(principalMoney);
                 loanScheduleParams.addPrincipalToBeScheduled(principalMoney);
-                loanApplicationTerms.setPrincipal(loanApplicationTerms.getPrincipal().plus(principalMoney));
                 loanApplicationTerms.resetFixedEmiAmount();
                 if (loanApplicationTerms.isDownPaymentEnabled()) {
                     final LoanScheduleModelDownPaymentPeriod downPaymentPeriod = createDownPaymentPeriod(loanApplicationTerms,

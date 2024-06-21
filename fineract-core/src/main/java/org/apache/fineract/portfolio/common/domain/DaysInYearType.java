@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.common.domain;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 
 /**
@@ -82,5 +83,12 @@ public enum DaysInYearType {
 
     public boolean isActual() {
         return DaysInYearType.ACTUAL.getValue().equals(this.value);
+    }
+
+    public Integer getNumberOfDays(final LocalDate referenceDate) {
+        if (referenceDate == null) {
+            return null;
+        }
+        return this == ACTUAL ? referenceDate.lengthOfYear() : this.getValue();
     }
 }
