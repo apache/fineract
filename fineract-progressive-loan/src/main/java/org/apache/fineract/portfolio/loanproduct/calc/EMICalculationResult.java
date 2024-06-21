@@ -21,20 +21,23 @@ package org.apache.fineract.portfolio.loanproduct.calc;
 import java.math.BigDecimal;
 import java.util.List;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-@AllArgsConstructor(access = AccessLevel.PACKAGE)
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class EMICalculationResult {
 
     @Getter
     private final BigDecimal equalMonthlyInstallmentValue;
     private final List<BigDecimal> repaymentPeriodRateFactorMinus1List;
 
-    public BigDecimal getRateFactorMinus1ForRepaymentPeriod(Integer repaymentPeriodNumber) {
-        return repaymentPeriodNumber != null && repaymentPeriodNumber > 0
-                && repaymentPeriodNumber <= repaymentPeriodRateFactorMinus1List.size()
-                        ? repaymentPeriodRateFactorMinus1List.get(repaymentPeriodNumber - 1)
-                        : BigDecimal.ZERO;
+    private int counter = 0;
+
+    public BigDecimal getNextRepaymentPeriodRateFactorMinus1() {
+        return counter < repaymentPeriodRateFactorMinus1List.size() ? repaymentPeriodRateFactorMinus1List.get(counter++) : BigDecimal.ZERO;
+    }
+
+    public void reset() {
+        counter = 0;
     }
 }

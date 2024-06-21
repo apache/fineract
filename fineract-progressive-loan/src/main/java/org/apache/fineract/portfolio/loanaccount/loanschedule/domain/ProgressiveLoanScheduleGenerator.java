@@ -23,6 +23,8 @@ import java.math.MathContext;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleParams;
+import org.apache.fineract.portfolio.loanproduct.calc.EMICalculationResult;
+import org.apache.fineract.portfolio.loanproduct.calc.EMICalculator;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -31,6 +33,7 @@ public class ProgressiveLoanScheduleGenerator extends AbstractProgressiveLoanSch
 
     private final ScheduledDateGenerator scheduledDateGenerator;
     private final PaymentPeriodsInOneYearCalculator paymentPeriodsInOneYearCalculator;
+    private final EMICalculator emiCalculator;
 
     @Override
     public ScheduledDateGenerator getScheduledDateGenerator() {
@@ -43,30 +46,32 @@ public class ProgressiveLoanScheduleGenerator extends AbstractProgressiveLoanSch
     }
 
     @Override
-    public PrincipalInterest calculatePrincipalInterestComponentsForPeriod(LoanApplicationTerms loanApplicationTerms,
-            LoanScheduleParams loanScheduleParams, MathContext mc) {
-        // TODO: handle interest calculation
-        int periodNumber = loanScheduleParams.getPeriodNumber();
-        BigDecimal fixedEMIAmount = loanApplicationTerms.getFixedEmiAmount();
-        Money calculatedPrincipal;
-        if (fixedEMIAmount == null) {
-            int noRemainingPeriod = loanApplicationTerms.getActualNoOfRepaymnets() - periodNumber + 1;
-            calculatedPrincipal = loanScheduleParams.getOutstandingBalance().dividedBy(noRemainingPeriod, mc.getRoundingMode());
-            if (loanApplicationTerms.getInstallmentAmountInMultiplesOf() != null) {
-                calculatedPrincipal = Money.roundToMultiplesOf(calculatedPrincipal,
-                        loanApplicationTerms.getInstallmentAmountInMultiplesOf());
-            }
-            loanApplicationTerms.setFixedEmiAmount(calculatedPrincipal.getAmount());
-        } else {
-            calculatedPrincipal = Money.of(loanApplicationTerms.getCurrency(), fixedEMIAmount);
-        }
-        // adjust if needed
-        if (periodNumber == loanApplicationTerms.getActualNoOfRepaymnets()) {
-            Money remainingAmount = loanScheduleParams.getOutstandingBalance().minus(calculatedPrincipal);
-            calculatedPrincipal = calculatedPrincipal.plus(remainingAmount);
-        }
+    protected EMICalculator getEMICalculator() {
+        return emiCalculator;
+    }
 
-        return new PrincipalInterest(calculatedPrincipal, Money.zero(loanApplicationTerms.getCurrency()),
-                Money.zero(loanApplicationTerms.getCurrency()));
+    @Override
+    public PrincipalInterest calculatePrincipalInterestComponentsForPeriod(final LoanApplicationTerms loanApplicationTerms,
+            final LoanScheduleParams loanScheduleParams, final EMICalculationResult emiCalculationResult, final MathContext mc) {
+
+        final Money equalMonthlyInstallmentValue = Money.of(loanApplicationTerms.getCurrency(),
+                emiCalculationResult.getEqualMonthlyInstallmentValue());
+        final BigDecimal rateFactorMinus1 = emiCalculationResult.getNextRepaymentPeriodRateFactorMinus1();
+        final Money calculatedInterest = loanScheduleParams.getOutstandingBalance().multipliedBy(rateFactorMinus1);
+        final Money calculatedPrincipal = equalMonthlyInstallmentValue.minus(calculatedInterest);
+
+        return new PrincipalInterest(
+                adjustCalculatedPrincipalWithRemainingBalanceInLastPeriod(calculatedPrincipal, loanApplicationTerms, loanScheduleParams),
+                calculatedInterest, Money.zero(loanApplicationTerms.getCurrency()));
+    }
+
+    private Money adjustCalculatedPrincipalWithRemainingBalanceInLastPeriod(final Money calculatedPrincipal,
+            final LoanApplicationTerms loanApplicationTerms, final LoanScheduleParams loanScheduleParams) {
+        final boolean isLastRepaymentPeriod = loanScheduleParams.getPeriodNumber() == loanApplicationTerms.getActualNoOfRepaymnets();
+        if (isLastRepaymentPeriod) {
+            final Money remainingAmount = loanScheduleParams.getOutstandingBalance().minus(calculatedPrincipal);
+            return calculatedPrincipal.plus(remainingAmount);
+        }
+        return calculatedPrincipal;
     }
 }

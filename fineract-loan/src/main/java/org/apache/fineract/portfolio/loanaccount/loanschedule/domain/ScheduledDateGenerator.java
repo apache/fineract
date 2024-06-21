@@ -19,12 +19,16 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
 import java.time.LocalDate;
+import java.util.List;
 import org.apache.fineract.organisation.workingdays.data.AdjustedDateDetailsDTO;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 
 public interface ScheduledDateGenerator {
+
+    List<PreGeneratedLoanSchedulePeriod> generateRepaymentPeriods(LoanApplicationTerms loanApplicationTerms,
+            HolidayDetailDTO holidayDetailDTO);
 
     LocalDate getLastRepaymentDate(LoanApplicationTerms loanApplicationTerms, HolidayDetailDTO holidayDetailDTO);
 

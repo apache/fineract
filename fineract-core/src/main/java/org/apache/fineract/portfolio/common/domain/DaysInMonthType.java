@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.common.domain;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 
 /**
@@ -73,5 +74,12 @@ public enum DaysInMonthType {
 
     public boolean isDaysInMonth_30() {
         return DaysInMonthType.DAYS_30.getValue().equals(this.value);
+    }
+
+    public Integer getNumberOfDays(final LocalDate referenceDate) {
+        if (referenceDate == null) {
+            return null;
+        }
+        return this == ACTUAL ? referenceDate.lengthOfMonth() : this.getValue();
     }
 }
