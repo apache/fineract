@@ -1579,6 +1579,51 @@ public class LoanTransactionInterestPaymentWaiverTest extends BaseLoanIntegratio
         });
     }
 
+    @Test
+    public void testInterestPaymentWaiverAdjustTransaction() {
+        runAt("15 January 2023", () -> {
+            Integer numberOfRepayments = 4;
+            double amount = 1000.0;
+            String loanDisbursementDate = "1 January 2023";
+
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
+            PostLoanProductsResponse loanProductResponse = loanProductHelper
+                    .createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                            .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString()));
+
+            Long loanId = applyAndApproveLoanProgressiveAdvancedPaymentAllocationStrategyMonthlyRepayments(clientId,
+                    loanProductResponse.getResourceId(), numberOfRepayments, loanDisbursementDate, amount, null);
+
+            verifyRepaymentSchedule(loanId, //
+                    installment(1000.0, null, "01 January 2023"), //
+                    installment(250.0, false, "01 February 2023"), //
+                    installment(250.0, false, "01 March 2023"), //
+                    installment(250.0, false, "01 April 2023"), //
+                    installment(250.0, false, "01 May 2023") //
+            );
+
+            loanTransactionHelper.disburseLoan(loanId, new PostLoansLoanIdRequest().actualDisbursementDate("1 January 2023")
+                    .dateFormat(DATETIME_PATTERN).transactionAmount(BigDecimal.valueOf(1000.0)).locale("en"));
+
+            // loan should be active
+            Long transactionId = addInterestPaymentWaiverForLoan(loanId, 250.0, "2 January 2023");
+
+            verifyTransactions(loanId, //
+                    transaction(1000.0, "Disbursement", "01 January 2023", 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+                    transaction(250.0, "Interest Payment Waiver", "02 January 2023", 750.0, 250.0, 0.0, 0.0, 0, 0.0, 0.0));
+
+            loanTransactionHelper.adjustLoanTransaction(loanId, transactionId, new PostLoansLoanIdTransactionsTransactionIdRequest()
+                    .transactionAmount(200.0).dateFormat(DATETIME_PATTERN).transactionDate("3 January 2023").locale("en"));
+
+            verifyTransactions(loanId, //
+                    transaction(1000.0, "Disbursement", "01 January 2023", 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+                    transaction(250.0, "Interest Payment Waiver", "02 January 2023", 750.0, 250.0, 0.0, 0.0, 0, 0.0, 0.0, true),
+                    transaction(200.0, "Interest Payment Waiver", "03 January 2023", 800.0, 200.0, 0.0, 0.0, 0, 0.0, 0.0));
+        });
+    }
+
     private void chargeFee(Long loanId, Double amount, String dueDate) {
         PostChargesResponse feeCharge = chargesHelper.createCharges(new PostChargesRequest().penalty(false).amount(9.0)
                 .chargeCalculationType(ChargeCalculationType.FLAT.getValue()).chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE.getValue())
