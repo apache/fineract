@@ -1444,8 +1444,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final Money transactionAmountAsMoney = Money.of(loan.getCurrency(), transactionAmount);
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createPaymentDetail(command, changes);
-        LoanTransaction newTransactionDetail = LoanTransaction.repayment(loan.getOffice(), transactionAmountAsMoney, paymentDetail,
-                transactionDate, txnExternalId);
+        LoanTransaction newTransactionDetail = LoanTransaction.repaymentType(transactionToAdjust.getTypeOf(), loan.getOffice(),
+                transactionAmountAsMoney, paymentDetail, transactionDate, txnExternalId, transactionToAdjust.getChargeRefundChargeType());
         if (transactionToAdjust.isInterestWaiver()) {
             Money unrecognizedIncome = transactionAmountAsMoney.zero();
             Money interestComponent = transactionAmountAsMoney;

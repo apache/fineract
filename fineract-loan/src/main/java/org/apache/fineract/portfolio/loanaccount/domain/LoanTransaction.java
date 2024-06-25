@@ -1040,6 +1040,10 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
         return false;
     }
 
+    public String getChargeRefundChargeType() {
+        return chargeRefundChargeType;
+    }
+
     // TODO missing hashCode(), equals(Object obj), but probably OK as long as
     // this is never stored in a Collection.
 }
