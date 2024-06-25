@@ -1091,7 +1091,7 @@ final class LoansApiResourceSwagger {
         public BigDecimal interestRatePerPeriod;
         public GetLoansLoanIdInterestRateFrequencyType interestRateFrequencyType;
         @Schema(example = "24")
-        public Integer annualInterestRate;
+        public BigDecimal annualInterestRate;
         @Schema(example = "false")
         public Boolean isFloatingInterestRate;
         public GetLoansLoanIdAmortizationType amortizationType;
