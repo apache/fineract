@@ -2004,7 +2004,7 @@ public final class LoanApplicationValidator {
             }
 
             entityDatatableChecksWritePlatformService.runTheCheckForProduct(loanId, EntityTables.LOAN.getName(),
-                    StatusEnum.APPROVE.getCode().longValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
+                    StatusEnum.APPROVE.getValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
 
             if (loan.isTopup() && loan.getClientId() != null) {
                 validateTopupLoan(loan, expectedDisbursementDate);

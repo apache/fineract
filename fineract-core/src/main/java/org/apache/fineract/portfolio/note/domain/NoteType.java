@@ -75,6 +75,14 @@ public enum NoteType {
         return BY_API.get(url);
     }
 
+    public static EnumOptionData toEnumOptionData(final Integer id) {
+        return toEnumOptionData(NoteType.fromInt(id));
+    }
+
+    public static EnumOptionData toEnumOptionData(final NoteType noteType) {
+        return noteType == null ? null : noteType.toEnumOptionData();
+    }
+
     public EnumOptionData toEnumOptionData() {
         return new EnumOptionData(getValue().longValue(), getCode(), getDescription());
     }

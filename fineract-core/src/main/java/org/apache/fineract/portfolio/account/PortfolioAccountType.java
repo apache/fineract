@@ -22,7 +22,8 @@ public enum PortfolioAccountType {
 
     INVALID(0, "accountType.invalid"), //
     LOAN(1, "accountType.loan"), //
-    SAVINGS(2, "accountType.savings");
+    SAVINGS(2, "accountType.savings"), //
+    ;
 
     private final Integer value;
     private final String code;

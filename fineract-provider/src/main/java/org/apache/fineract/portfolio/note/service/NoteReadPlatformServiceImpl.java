@@ -61,12 +61,8 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
             final Long groupId = JdbcSupport.getLong(rs, "groupId");
             final Long loanId = JdbcSupport.getLong(rs, "loanId");
             final Long transactionId = JdbcSupport.getLong(rs, "transactionId");
-            // final Long depositAccountId = JdbcSupport.getLong(rs,
-            // "depositAccountId");
-            // final Long savingAccountId = JdbcSupport.getLong(rs,
-            // "savingAccountId");
             final Integer noteTypeId = JdbcSupport.getInteger(rs, "noteTypeEnum");
-            final EnumOptionData noteType = NoteEnumerations.noteType(noteTypeId);
+            final EnumOptionData noteType = NoteType.toEnumOptionData(noteTypeId);
             final String note = rs.getString("note");
             final OffsetDateTime createdDateLocal = JdbcSupport.getOffsetDateTime(rs, "createdDate");
             final OffsetDateTime createdDateUtc = JdbcSupport.getOffsetDateTime(rs, "createdDateUtc");
