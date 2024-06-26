@@ -203,7 +203,7 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         final Loan loanForProcessing = Mockito.mock(Loan.class);
         when(loanForProcessing.getId()).thenReturn(1L);
         LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
-        when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
+        when(loanForProcessing.getSummary()).thenReturn(loanSummary);
         ExternalAssetOwnerTransfer firstResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
         ExternalAssetOwnerTransfer secondResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);
         when(firstResponseItem.getStatus()).thenReturn(ExternalTransferStatus.BUYBACK);
@@ -248,7 +248,7 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         ExternalAssetOwnerTransfer newTransfer = Mockito.mock(ExternalAssetOwnerTransfer.class);
         when(externalAssetOwnerTransferRepository.save(any())).thenReturn(firstResponseItem).thenReturn(newTransfer);
         LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
-        when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
+        when(loanForProcessing.getSummary()).thenReturn(loanSummary);
         when(loanSummary.getTotalOutstanding()).thenReturn(BigDecimal.ONE);
         when(newTransfer.getStatus()).thenReturn(ExternalTransferStatus.ACTIVE);
         // when
@@ -296,7 +296,7 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         ExternalAssetOwnerTransfer newTransfer = Mockito.mock(ExternalAssetOwnerTransfer.class);
         when(externalAssetOwnerTransferRepository.save(any())).thenReturn(firstResponseItem).thenReturn(newTransfer);
         LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
-        when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
+        when(loanForProcessing.getSummary()).thenReturn(loanSummary);
         when(loanSummary.getTotalOutstanding()).thenReturn(BigDecimal.ZERO);
         when(loanForProcessing.getTotalOverpaid()).thenReturn(BigDecimal.ZERO);
         when(newTransfer.getStatus()).thenReturn(ExternalTransferStatus.DECLINED);
@@ -340,7 +340,7 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         ExternalAssetOwnerTransfer newTransfer = Mockito.mock(ExternalAssetOwnerTransfer.class);
         when(externalAssetOwnerTransferRepository.save(any())).thenReturn(firstResponseItem).thenReturn(newTransfer);
         LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
-        when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
+        when(loanForProcessing.getSummary()).thenReturn(loanSummary);
         when(loanSummary.getTotalOutstanding()).thenReturn(BigDecimal.ONE.negate());
         when(loanForProcessing.getTotalOverpaid()).thenReturn(BigDecimal.ONE.negate());
         when(newTransfer.getStatus()).thenReturn(ExternalTransferStatus.DECLINED);
@@ -389,7 +389,7 @@ public class LoanAccountOwnerTransferBusinessStepTest {
         final Loan loanForProcessing = Mockito.mock(Loan.class);
         when(loanForProcessing.getId()).thenReturn(1L);
         LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
-        when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
+        when(loanForProcessing.getSummary()).thenReturn(loanSummary);
         when(loanSummary.getTotalOutstanding()).thenReturn(BigDecimal.ZERO);
         when(loanForProcessing.getTotalOverpaid()).thenReturn(BigDecimal.ONE);
         ExternalAssetOwnerTransfer firstResponseItem = Mockito.mock(ExternalAssetOwnerTransfer.class);

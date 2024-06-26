@@ -85,7 +85,7 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
                 if (anyOfAllowedWhenComingFrom(from, LoanStatus.APPROVED, LoanStatus.CLOSED_OBLIGATIONS_MET)) {
                     newState = activeTransition();
                 } else if (from.isOverpaid() && loan.getTotalOverpaidAsMoney().isZero()) {
-                    if (loan.getLoanSummary().getTotalOutstanding(loan.getCurrency()).isZero()) {
+                    if (loan.getSummary().getTotalOutstanding(loan.getCurrency()).isZero()) {
                         newState = closeObligationsMetTransition();
                     } else {
                         newState = activeTransition();

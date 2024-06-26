@@ -38,11 +38,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
+import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
+import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.service.HolidayUtil;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
@@ -52,26 +56,35 @@ import org.apache.fineract.organisation.monetary.exception.CurrencyNotFoundExcep
 import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
 import org.apache.fineract.organisation.workingdays.service.WorkingDaysUtil;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
+import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
+import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.apache.fineract.portfolio.calendar.exception.NotValidRecurringDateException;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
+import org.apache.fineract.portfolio.collateralmanagement.exception.LoanCollateralAmountNotSufficientException;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
+import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.exception.DateMismatchException;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanStateTransitionException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationDateException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanChargeRefundException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanRepaymentScheduleNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -81,8 +94,11 @@ public final class LoanTransactionValidator {
     private final FromJsonHelper fromApiJsonHelper;
     private final LoanApplicationValidator fromApiJsonDeserializer;
     private final LoanRepository loanRepository;
+    private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final ApplicationCurrencyRepository applicationCurrencyRepository;
     private final LoanUtilService loanUtilService;
+    private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
+    private final CalendarInstanceRepository calendarInstanceRepository;
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) {
@@ -91,13 +107,129 @@ public final class LoanTransactionValidator {
         }
     }
 
-    public void validateDisbursement(final String json, boolean isAccountTransfer) {
-
+    public void validateDisbursement(JsonCommand command, boolean isAccountTransfer, Long loanId) {
+        String json = command.json();
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
         }
 
-        Set<String> disbursementParameters = null;
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, getDisbursementParameters(isAccountTransfer));
+
+        LoanApplicationValidator.validateOrThrow("loan.disbursement", baseDataValidator -> {
+            final JsonElement element = this.fromApiJsonHelper.parse(json);
+            final LocalDate actualDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed("actualDisbursementDate", element);
+            baseDataValidator.reset().parameter("actualDisbursementDate").value(actualDisbursementDate).notNull();
+
+            final String note = this.fromApiJsonHelper.extractStringNamed("note", element);
+            baseDataValidator.reset().parameter("note").value(note).notExceedingLengthOf(1000);
+
+            final BigDecimal principal = this.fromApiJsonHelper
+                    .extractBigDecimalWithLocaleNamed(LoanApiConstants.principalDisbursedParameterName, element);
+            baseDataValidator.reset().parameter(LoanApiConstants.principalDisbursedParameterName).value(principal).ignoreIfNull()
+                    .positiveAmount();
+
+            final BigDecimal netDisbursalAmount = this.fromApiJsonHelper
+                    .extractBigDecimalWithLocaleNamed(LoanApiConstants.disbursementNetDisbursalAmountParameterName, element);
+            baseDataValidator.reset().parameter(LoanApiConstants.disbursementNetDisbursalAmountParameterName).value(netDisbursalAmount)
+                    .ignoreIfNull().positiveAmount();
+
+            final BigDecimal emiAmount = this.fromApiJsonHelper
+                    .extractBigDecimalWithLocaleNamed(LoanApiConstants.fixedEmiAmountParameterName, element);
+            baseDataValidator.reset().parameter(LoanApiConstants.fixedEmiAmountParameterName).value(emiAmount).ignoreIfNull()
+                    .positiveAmount().notGreaterThanMax(principal);
+
+            validatePaymentDetails(baseDataValidator, element);
+
+            if (command.parameterExists("postDatedChecks")) {
+                this.validateDisbursementWithPostDatedChecks(command.json(), loanId);
+            }
+
+            final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
+            validateLoanClientIsActive(loan);
+            validateLoanGroupIsActive(loan);
+
+            if (loan.isChargedOff() && DateUtils.isBefore(actualDisbursementDate, loan.getChargedOffOnDate())) {
+                throw new GeneralPlatformDomainRuleException("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date", "Loan: "
+                        + loan.getId()
+                        + " backdated transaction is not allowed. Transaction date cannot be earlier than the charge-off date of the loan",
+                        loan.getId());
+            }
+
+            boolean isSingleDisburseLoan = !loan.getLoanProduct().isMultiDisburseLoan();
+            boolean isSingleDisburseNotApprovedOrDisbursedAlready = isSingleDisburseLoan && !(loan.isApproved() && loan.isNotDisbursed());
+            boolean isMultiDisburseLoanAndAllTranchesDisbursed = loan.getLoanProduct().isMultiDisburseLoan()
+                    && !loan.isAllTranchesNotDisbursed();
+            if (isSingleDisburseNotApprovedOrDisbursedAlready || isMultiDisburseLoanAndAllTranchesDisbursed) {
+                final String defaultUserMessage = "Loan Disbursal is not allowed. Loan Account is not in approved and not disbursed state.";
+                final ApiParameterError error = ApiParameterError
+                        .generalError("error.msg.loan.disbursal.account.is.not.approve.not.disbursed.state", defaultUserMessage);
+                baseDataValidator.getDataValidationErrors().add(error);
+            }
+
+            final BigDecimal disbursedAmount = loan.getDisbursedAmount();
+            final Set<LoanCollateralManagement> loanCollateralManagements = loan.getLoanCollateralManagements();
+
+            if ((loanCollateralManagements != null && !loanCollateralManagements.isEmpty()) && loan.getLoanType().isIndividualAccount()) {
+                BigDecimal totalCollateral = collectTotalCollateral(loanCollateralManagements);
+
+                // Validate the loan collateral value against the disbursedAmount
+                if (disbursedAmount.compareTo(totalCollateral) > 0) {
+                    throw new LoanCollateralAmountNotSufficientException(disbursedAmount);
+                }
+            }
+
+            // validate ActualDisbursement Date Against Expected Disbursement Date
+            LoanProduct loanProduct = loan.loanProduct();
+            if (loanProduct.isSyncExpectedWithDisbursementDate()) {
+                if (!loan.getExpectedDisbursedOnLocalDate().equals(actualDisbursementDate)) {
+                    throw new DateMismatchException(actualDisbursementDate, loan.getExpectedDisbursedOnLocalDate());
+                }
+            }
+
+            entityDatatableChecksWritePlatformService.runTheCheckForProduct(loan.getId(), EntityTables.LOAN.getName(),
+                    StatusEnum.DISBURSE.getValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
+
+            ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, null);
+            final CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstaneByEntityId(loan.getId(),
+                    CalendarEntityType.LOANS.getValue());
+            if (loan.isSyncDisbursementWithMeeting()) {
+                validateDisbursementDateWithMeetingDate(actualDisbursementDate, calendarInstance,
+                        scheduleGeneratorDTO.isSkipRepaymentOnFirstDayofMonth(), scheduleGeneratorDTO.getNumberOfdays());
+            }
+
+            // validate if disbursement date is a holiday or a non-working day
+            HolidayDetailDTO holidayDetailDTO = scheduleGeneratorDTO.getHolidayDetailDTO();
+            if (!holidayDetailDTO.isAllowTransactionsOnNonWorkingDay()
+                    && !WorkingDaysUtil.isWorkingDay(holidayDetailDTO.getWorkingDays(), loan.getDisbursementDate())) {
+                final String errorMessage = "Expected disbursement date cannot be on a non working day";
+                throw new LoanApplicationDateException("disbursement.date.on.non.working.day", errorMessage,
+                        loan.getExpectedDisbursedOnLocalDate());
+            }
+            if (!holidayDetailDTO.isAllowTransactionsOnHoliday()
+                    && HolidayUtil.isHoliday(loan.getDisbursementDate(), holidayDetailDTO.getHolidays())) {
+                final String errorMessage = "Expected disbursement date cannot be on a holiday";
+                throw new LoanApplicationDateException("disbursement.date.on.holiday", errorMessage,
+                        loan.getExpectedDisbursedOnLocalDate());
+            }
+
+        });
+    }
+
+    private static @NotNull BigDecimal collectTotalCollateral(Set<LoanCollateralManagement> loanCollateralManagements) {
+        BigDecimal totalCollateral = BigDecimal.ZERO;
+
+        for (LoanCollateralManagement loanCollateralManagement : loanCollateralManagements) {
+            BigDecimal quantity = loanCollateralManagement.getQuantity();
+            BigDecimal pctToBase = loanCollateralManagement.getClientCollateralManagement().getCollaterals().getPctToBase();
+            BigDecimal basePrice = loanCollateralManagement.getClientCollateralManagement().getCollaterals().getBasePrice();
+            totalCollateral = totalCollateral.add(quantity.multiply(basePrice).multiply(pctToBase).divide(BigDecimal.valueOf(100)));
+        }
+        return totalCollateral;
+    }
+
+    private static @NotNull Set<String> getDisbursementParameters(boolean isAccountTransfer) {
+        Set<String> disbursementParameters;
 
         if (isAccountTransfer) {
             disbursementParameters = new HashSet<>(Arrays.asList("actualDisbursementDate", "externalId", "note", "locale", "dateFormat",
@@ -109,38 +241,7 @@ public final class LoanTransactionValidator {
                     LoanApiConstants.principalDisbursedParameterName, LoanApiConstants.fixedEmiAmountParameterName,
                     LoanApiConstants.postDatedChecks, LoanApiConstants.disbursementNetDisbursalAmountParameterName));
         }
-
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.disbursement");
-
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
-        final LocalDate actualDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed("actualDisbursementDate", element);
-        baseDataValidator.reset().parameter("actualDisbursementDate").value(actualDisbursementDate).notNull();
-
-        final String note = this.fromApiJsonHelper.extractStringNamed("note", element);
-        baseDataValidator.reset().parameter("note").value(note).notExceedingLengthOf(1000);
-
-        final BigDecimal principal = this.fromApiJsonHelper
-                .extractBigDecimalWithLocaleNamed(LoanApiConstants.principalDisbursedParameterName, element);
-        baseDataValidator.reset().parameter(LoanApiConstants.principalDisbursedParameterName).value(principal).ignoreIfNull()
-                .positiveAmount();
-
-        final BigDecimal netDisbursalAmount = this.fromApiJsonHelper
-                .extractBigDecimalWithLocaleNamed(LoanApiConstants.disbursementNetDisbursalAmountParameterName, element);
-        baseDataValidator.reset().parameter(LoanApiConstants.disbursementNetDisbursalAmountParameterName).value(netDisbursalAmount)
-                .ignoreIfNull().positiveAmount();
-
-        final BigDecimal emiAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.fixedEmiAmountParameterName,
-                element);
-        baseDataValidator.reset().parameter(LoanApiConstants.fixedEmiAmountParameterName).value(emiAmount).ignoreIfNull().positiveAmount()
-                .notGreaterThanMax(principal);
-
-        validatePaymentDetails(baseDataValidator, element);
-
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+        return disbursementParameters;
     }
 
     public void validateDisbursementWithPostDatedChecks(final String json, final Long loanId) {

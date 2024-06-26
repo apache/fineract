@@ -262,25 +262,25 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
     public static LoanTransaction initiateTransfer(final Office office, final Loan loan, final LocalDate transferDate,
             final ExternalId externalId) {
         return new LoanTransaction(loan, office, LoanTransactionType.INITIATE_TRANSFER.getValue(), transferDate,
-                loan.getLoanSummary().getTotalOutstanding(), loan.getLoanSummary().getTotalPrincipalOutstanding(),
-                loan.getLoanSummary().getTotalInterestOutstanding(), loan.getLoanSummary().getTotalFeeChargesOutstanding(),
-                loan.getLoanSummary().getTotalPenaltyChargesOutstanding(), null, false, null, externalId);
+                loan.getSummary().getTotalOutstanding(), loan.getSummary().getTotalPrincipalOutstanding(),
+                loan.getSummary().getTotalInterestOutstanding(), loan.getSummary().getTotalFeeChargesOutstanding(),
+                loan.getSummary().getTotalPenaltyChargesOutstanding(), null, false, null, externalId);
     }
 
     public static LoanTransaction approveTransfer(final Office office, final Loan loan, final LocalDate transferDate,
             final ExternalId externalId) {
         return new LoanTransaction(loan, office, LoanTransactionType.APPROVE_TRANSFER.getValue(), transferDate,
-                loan.getLoanSummary().getTotalOutstanding(), loan.getLoanSummary().getTotalPrincipalOutstanding(),
-                loan.getLoanSummary().getTotalInterestOutstanding(), loan.getLoanSummary().getTotalFeeChargesOutstanding(),
-                loan.getLoanSummary().getTotalPenaltyChargesOutstanding(), null, false, null, externalId);
+                loan.getSummary().getTotalOutstanding(), loan.getSummary().getTotalPrincipalOutstanding(),
+                loan.getSummary().getTotalInterestOutstanding(), loan.getSummary().getTotalFeeChargesOutstanding(),
+                loan.getSummary().getTotalPenaltyChargesOutstanding(), null, false, null, externalId);
     }
 
     public static LoanTransaction withdrawTransfer(final Office office, final Loan loan, final LocalDate transferDate,
             final ExternalId externalId) {
         return new LoanTransaction(loan, office, LoanTransactionType.WITHDRAW_TRANSFER.getValue(), transferDate,
-                loan.getLoanSummary().getTotalOutstanding(), loan.getLoanSummary().getTotalPrincipalOutstanding(),
-                loan.getLoanSummary().getTotalInterestOutstanding(), loan.getLoanSummary().getTotalFeeChargesOutstanding(),
-                loan.getLoanSummary().getTotalPenaltyChargesOutstanding(), null, false, null, externalId);
+                loan.getSummary().getTotalOutstanding(), loan.getSummary().getTotalPrincipalOutstanding(),
+                loan.getSummary().getTotalInterestOutstanding(), loan.getSummary().getTotalFeeChargesOutstanding(),
+                loan.getSummary().getTotalPenaltyChargesOutstanding(), null, false, null, externalId);
     }
 
     public static LoanTransaction refund(final Office office, final Money amount, final PaymentDetail paymentDetail,
@@ -369,19 +369,19 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
     }
 
     public static LoanTransaction chargeOff(final Loan loan, final LocalDate chargeOffDate, final ExternalId externalId) {
-        BigDecimal principalPortion = loan.getLoanSummary().getTotalPrincipalOutstanding().compareTo(BigDecimal.ZERO) != 0
-                ? loan.getLoanSummary().getTotalPrincipalOutstanding()
+        BigDecimal principalPortion = loan.getSummary().getTotalPrincipalOutstanding().compareTo(BigDecimal.ZERO) != 0
+                ? loan.getSummary().getTotalPrincipalOutstanding()
                 : null;
-        BigDecimal interestPortion = loan.getLoanSummary().getTotalInterestOutstanding().compareTo(BigDecimal.ZERO) != 0
-                ? loan.getLoanSummary().getTotalInterestOutstanding()
+        BigDecimal interestPortion = loan.getSummary().getTotalInterestOutstanding().compareTo(BigDecimal.ZERO) != 0
+                ? loan.getSummary().getTotalInterestOutstanding()
                 : null;
-        BigDecimal feePortion = loan.getLoanSummary().getTotalFeeChargesOutstanding().compareTo(BigDecimal.ZERO) != 0
-                ? loan.getLoanSummary().getTotalFeeChargesOutstanding()
+        BigDecimal feePortion = loan.getSummary().getTotalFeeChargesOutstanding().compareTo(BigDecimal.ZERO) != 0
+                ? loan.getSummary().getTotalFeeChargesOutstanding()
                 : null;
-        BigDecimal penaltyPortion = loan.getLoanSummary().getTotalPenaltyChargesOutstanding().compareTo(BigDecimal.ZERO) != 0
-                ? loan.getLoanSummary().getTotalPenaltyChargesOutstanding()
+        BigDecimal penaltyPortion = loan.getSummary().getTotalPenaltyChargesOutstanding().compareTo(BigDecimal.ZERO) != 0
+                ? loan.getSummary().getTotalPenaltyChargesOutstanding()
                 : null;
-        BigDecimal totalOutstanding = loan.getLoanSummary().getTotalOutstanding();
+        BigDecimal totalOutstanding = loan.getSummary().getTotalOutstanding();
 
         return new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.CHARGE_OFF.getValue(), chargeOffDate, totalOutstanding,
                 principalPortion, interestPortion, feePortion, penaltyPortion, null, false, null, externalId);

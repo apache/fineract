@@ -346,8 +346,8 @@ public class LoanAccountConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(LoanWritePlatformService.class)
-    public LoanWritePlatformService loanWritePlatformService(PlatformSecurityContext context,
-            LoanTransactionValidator loanTransactionValidator,
+    public LoanWritePlatformService loanWritePlatformService(LoanRepaymentScheduleTransactionProcessorFactory transactionProcessorFactory,
+            PlatformSecurityContext context, LoanTransactionValidator loanTransactionValidator,
             LoanUpdateCommandFromApiJsonDeserializer loanUpdateCommandFromApiJsonDeserializer, LoanRepositoryWrapper loanRepositoryWrapper,
             LoanAccountDomainService loanAccountDomainService, NoteRepository noteRepository,
             LoanTransactionRepository loanTransactionRepository, LoanTransactionRelationRepository loanTransactionRelationRepository,
@@ -373,17 +373,18 @@ public class LoanAccountConfiguration {
             LoanAccrualTransactionBusinessEventService loanAccrualTransactionBusinessEventService, ErrorHandler errorHandler,
             LoanDownPaymentHandlerService loanDownPaymentHandlerService, AccountTransferRepository accountTransferRepository,
             LoanTransactionAssembler loanTransactionAssembler, LoanAccrualsProcessingService loanAccrualsProcessingService) {
-        return new LoanWritePlatformServiceJpaRepositoryImpl(context, loanTransactionValidator, loanUpdateCommandFromApiJsonDeserializer,
-                loanRepositoryWrapper, loanAccountDomainService, noteRepository, loanTransactionRepository,
-                loanTransactionRelationRepository, loanAssembler, journalEntryWritePlatformService, calendarInstanceRepository,
-                paymentDetailWritePlatformService, holidayRepository, configurationDomainService, workingDaysRepository,
-                accountTransfersWritePlatformService, accountTransfersReadPlatformService, accountAssociationsReadPlatformService,
-                loanReadPlatformService, fromApiJsonHelper, calendarRepository, loanScheduleHistoryWritePlatformService,
-                loanApplicationValidator, accountAssociationRepository, accountTransferDetailRepository, businessEventNotifierService,
-                guarantorDomainService, loanUtilService, loanSummaryWrapper, entityDatatableChecksWritePlatformService,
-                transactionProcessingStrategy, codeValueRepository, cashierTransactionDataValidator, glimRepository, loanRepository,
-                repaymentWithPostDatedChecksAssembler, postDatedChecksRepository, loanRepaymentScheduleInstallmentRepository,
-                defaultLoanLifecycleStateMachine, loanAccountLockService, externalIdFactory, replayedTransactionBusinessEventService,
+        return new LoanWritePlatformServiceJpaRepositoryImpl(transactionProcessorFactory, context, loanTransactionValidator,
+                loanUpdateCommandFromApiJsonDeserializer, loanRepositoryWrapper, loanAccountDomainService, noteRepository,
+                loanTransactionRepository, loanTransactionRelationRepository, loanAssembler, journalEntryWritePlatformService,
+                calendarInstanceRepository, paymentDetailWritePlatformService, holidayRepository, configurationDomainService,
+                workingDaysRepository, accountTransfersWritePlatformService, accountTransfersReadPlatformService,
+                accountAssociationsReadPlatformService, loanReadPlatformService, fromApiJsonHelper, calendarRepository,
+                loanScheduleHistoryWritePlatformService, loanApplicationValidator, accountAssociationRepository,
+                accountTransferDetailRepository, businessEventNotifierService, guarantorDomainService, loanUtilService, loanSummaryWrapper,
+                entityDatatableChecksWritePlatformService, transactionProcessingStrategy, codeValueRepository,
+                cashierTransactionDataValidator, glimRepository, loanRepository, repaymentWithPostDatedChecksAssembler,
+                postDatedChecksRepository, loanRepaymentScheduleInstallmentRepository, defaultLoanLifecycleStateMachine,
+                loanAccountLockService, externalIdFactory, replayedTransactionBusinessEventService,
                 loanAccrualTransactionBusinessEventService, errorHandler, loanDownPaymentHandlerService, accountTransferRepository,
                 loanTransactionAssembler, loanAccrualsProcessingService);
     }

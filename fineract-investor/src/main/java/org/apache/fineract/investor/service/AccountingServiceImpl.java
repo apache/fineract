@@ -80,10 +80,10 @@ public class AccountingServiceImpl implements AccountingService {
         // transaction properties
         final Long transactionId = transfer.getId();
         final LocalDate transactionDate = transfer.getSettlementDate();
-        final BigDecimal principalAmount = loan.getLoanSummary().getTotalPrincipalOutstanding();
-        final BigDecimal interestAmount = loan.getLoanSummary().getTotalInterestOutstanding();
-        final BigDecimal feesAmount = loan.getLoanSummary().getTotalFeeChargesOutstanding();
-        final BigDecimal penaltiesAmount = loan.getLoanSummary().getTotalPenaltyChargesOutstanding();
+        final BigDecimal principalAmount = loan.getSummary().getTotalPrincipalOutstanding();
+        final BigDecimal interestAmount = loan.getSummary().getTotalInterestOutstanding();
+        final BigDecimal feesAmount = loan.getSummary().getTotalFeeChargesOutstanding();
+        final BigDecimal penaltiesAmount = loan.getSummary().getTotalPenaltyChargesOutstanding();
         final BigDecimal overPaymentAmount = loan.getTotalOverpaid();
 
         // Moving money to asset transfer account
