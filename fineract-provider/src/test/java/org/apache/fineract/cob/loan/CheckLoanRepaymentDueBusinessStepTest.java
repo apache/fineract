@@ -95,8 +95,8 @@ public class CheckLoanRepaymentDueBusinessStepTest {
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
         when(loanProduct.getDueDaysForRepaymentEvent()).thenReturn(null);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(loanRepaymentScheduleInstallments);
-        when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
-        when(loanForProcessing.getLoanSummary().getTotalOutstanding()).thenReturn(BigDecimal.ONE);
+        when(loanForProcessing.getSummary()).thenReturn(loanSummary);
+        when(loanForProcessing.getSummary().getTotalOutstanding()).thenReturn(BigDecimal.ONE);
         when(loanForProcessing.getCurrency()).thenReturn(currency);
         when(repaymentInstallment.getTotalOutstanding(currency)).thenReturn(money);
         when(money.isGreaterThanZero()).thenReturn(true);
@@ -153,8 +153,8 @@ public class CheckLoanRepaymentDueBusinessStepTest {
         // Loan Product setting overrides global settings
         when(loanProduct.getDueDaysForRepaymentEvent()).thenReturn(1);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(loanRepaymentScheduleInstallments);
-        when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
-        when(loanForProcessing.getLoanSummary().getTotalOutstanding()).thenReturn(BigDecimal.ONE);
+        when(loanForProcessing.getSummary()).thenReturn(loanSummary);
+        when(loanForProcessing.getSummary().getTotalOutstanding()).thenReturn(BigDecimal.ONE);
         when(loanForProcessing.getCurrency()).thenReturn(currency);
         when(repaymentInstallment.getTotalOutstanding(currency)).thenReturn(money);
         when(money.isGreaterThanZero()).thenReturn(true);

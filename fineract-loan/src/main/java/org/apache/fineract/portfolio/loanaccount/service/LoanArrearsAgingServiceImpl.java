@@ -105,7 +105,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
         Map<Long, List<LoanSchedulePeriodData>> scheduleDate = this.jdbcTemplate.query(originalScheduleExtractor.schema,
                 originalScheduleExtractor);
         if (scheduleDate.size() > 0) {
-            List<Map<String, Object>> transactions = getLoanSummary(loan.getId(), loan.getLoanSummary());
+            List<Map<String, Object>> transactions = getLoanSummary(loan.getId(), loan.getSummary());
             updateScheduleWithPaidDetail(scheduleDate, transactions);
             createInsertStatements(updateStatement, scheduleDate, count == 0);
             if (updateStatement.size() == 1) {

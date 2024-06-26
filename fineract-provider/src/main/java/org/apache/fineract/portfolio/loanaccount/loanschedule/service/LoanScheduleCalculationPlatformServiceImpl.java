@@ -97,8 +97,8 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
 
         if (loan.loanProduct().isMultiDisburseLoan()) {
             BigDecimal disbursedAmount = loan.getDisbursedAmount();
-            BigDecimal principalRepaid = loan.getLoanSummary().getTotalPrincipalRepaid();
-            BigDecimal principalWrittenOff = loan.getLoanSummary().getTotalPrincipalWrittenOff();
+            BigDecimal principalRepaid = loan.getSummary().getTotalPrincipalRepaid();
+            BigDecimal principalWrittenOff = loan.getSummary().getTotalPrincipalWrittenOff();
             if (disbursedAmount.subtract(principalWrittenOff).subtract(principalRepaid).compareTo(BigDecimal.ZERO) <= 0) {
                 return;
             }
