@@ -27,9 +27,9 @@ import lombok.Getter;
  * </p>
  */
 @Getter
-public class EnumOptionData extends BaseEnumOptionData<Long> implements Serializable {
+public class StringEnumOptionData extends BaseEnumOptionData<String> implements Serializable {
 
-    public EnumOptionData(Long id, String code, String description) {
+    public StringEnumOptionData(String id, String code, String description) {
         super(id, code, description);
     }
 }
