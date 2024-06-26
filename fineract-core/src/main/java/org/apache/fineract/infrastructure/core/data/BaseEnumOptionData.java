@@ -19,6 +19,8 @@
 package org.apache.fineract.infrastructure.core.data;
 
 import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 /**
@@ -27,9 +29,11 @@ import lombok.Getter;
  * </p>
  */
 @Getter
-public class EnumOptionData extends BaseEnumOptionData<Long> implements Serializable {
+@EqualsAndHashCode
+@AllArgsConstructor
+public abstract class BaseEnumOptionData<T> implements Serializable {
 
-    public EnumOptionData(Long id, String code, String description) {
-        super(id, code, description);
-    }
+    protected T id;
+    protected final String code;
+    protected final String value;
 }

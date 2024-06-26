@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.Getter;
+import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 
 @Getter
 public enum InteropIdentifierType {
@@ -64,5 +65,9 @@ public enum InteropIdentifierType {
         }
         InteropIdentifierType idType = BY_ALIAS.get(name);
         return idType == null ? BY_NAME.get(name) : idType;
+    }
+
+    public StringEnumOptionData toStringEnumOptionData() {
+        return new StringEnumOptionData(name(), getCode(), getDescription());
     }
 }
