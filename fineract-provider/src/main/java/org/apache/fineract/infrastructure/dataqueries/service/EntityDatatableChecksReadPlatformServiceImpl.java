@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
+import jakarta.validation.constraints.NotNull;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -84,11 +85,10 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
     }
 
     @Override
-    public Page<EntityDataTableChecksData> retrieveAll(SearchParameters searchParameters, final Long status, final String entity,
-            final Long productId) {
+    public Page<EntityDataTableChecksData> retrieveAll(@NotNull SearchParameters searchParameters, final Integer status,
+            final String entity, final Long productId) {
         final StringBuilder sqlBuilder = new StringBuilder(200);
-        sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
-        sqlBuilder.append(this.entityDataTableChecksMapper.schema());
+        sqlBuilder.append("select ").append(sqlGenerator.calcFoundRows()).append(" ").append(this.entityDataTableChecksMapper.schema());
 
         if (status != null || entity != null || productId != null) {
             sqlBuilder.append(" where ");
@@ -122,8 +122,7 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
     }
 
     @Override
-    public List<DatatableData> retrieveTemplates(final Long status, final String entity, final Long productId) {
-
+    public List<DatatableData> retrieveTemplates(final Integer status, final String entity, final Long productId) {
         List<EntityDatatableChecks> tableRequiredBeforeAction = null;
         if (productId != null) {
             tableRequiredBeforeAction = this.entityDatatableChecksRepository.findByEntityStatusAndProduct(entity, status, productId);
@@ -162,7 +161,7 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
         List<DatatableCheckStatusData> ret = new ArrayList<>();
         if (statuses != null) {
             for (StatusEnum status : statuses) {
-                ret.add(new DatatableCheckStatusData(status.name(), status.getCode()));
+                ret.add(new DatatableCheckStatusData(status.name(), status.getValue()));
             }
         }
         return ret;
@@ -196,14 +195,10 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
 
         @Override
         public EntityDataTableChecksData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
             final Long id = JdbcSupport.getLong(rs, "id");
             final String entity = rs.getString("entity");
-            final Long status = rs.getLong("status");
-            EnumOptionData statusEnum = null;
-            if (status != null) {
-                statusEnum = StatusEnum.statusTypeEnum(status.intValue());
-            }
+            final int status = rs.getInt("status");
+            EnumOptionData statusEnum = StatusEnum.toEnumOptionData(status);
             final String datatableName = rs.getString("datatableName");
             final boolean systemDefined = rs.getBoolean("systemDefined");
             final Long productId = JdbcSupport.getLong(rs, "productId");
@@ -222,5 +217,4 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
                     + "left join m_savings_product sp on sp.id = t.product_id and t.application_table_name = 'm_savings_account' ";
         }
     }
-
 }

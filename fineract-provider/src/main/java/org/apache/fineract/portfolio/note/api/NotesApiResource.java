@@ -247,8 +247,6 @@ public class NotesApiResource {
             }
             default -> resourceNameForPermissions = INVALIDNOTE;
         }
-
         return resourceDetails.withEntityName(resourceNameForPermissions).build();
     }
-
 }

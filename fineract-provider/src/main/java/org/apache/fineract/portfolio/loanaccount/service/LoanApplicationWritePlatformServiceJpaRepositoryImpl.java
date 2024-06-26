@@ -153,15 +153,14 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             createSavingsAccountAssociation(savingsAccountId, loan);
             // Save related datatable entries
             if (command.parameterExists(LoanApiConstants.datatables)) {
-                this.entityDatatableChecksWritePlatformService.saveDatatables(StatusEnum.CREATE.getCode().longValue(),
-                        EntityTables.LOAN.getName(), loan.getId(), loan.productId(),
-                        command.arrayOfParameterNamed(LoanApiConstants.datatables));
+                this.entityDatatableChecksWritePlatformService.saveDatatables(StatusEnum.CREATE.getValue(), EntityTables.LOAN.getName(),
+                        loan.getId(), loan.productId(), command.arrayOfParameterNamed(LoanApiConstants.datatables));
             }
             // TODO: review whether we really need this
             loanRepositoryWrapper.flush();
             // Check mandatory datatable entries were created
             this.entityDatatableChecksWritePlatformService.runTheCheckForProduct(loan.getId(), EntityTables.LOAN.getName(),
-                    StatusEnum.CREATE.getCode().longValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
+                    StatusEnum.CREATE.getValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
             // Trigger business event
             businessEventNotifierService.notifyPostBusinessEvent(new LoanCreatedBusinessEvent(loan));
             // Building response
@@ -691,8 +690,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         loanApplicationTransitionValidator.validateRejection(command, loan);
 
         // check for mandatory entities
-        entityDatatableChecksWritePlatformService.runTheCheckForProduct(loanId, EntityTables.LOAN.getName(),
-                StatusEnum.REJECTED.getCode().longValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
+        entityDatatableChecksWritePlatformService.runTheCheckForProduct(loanId, EntityTables.LOAN.getName(), StatusEnum.REJECTED.getValue(),
+                EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
 
         // loan application rejection
         final AppUser currentUser = getAppUserIfPresent();
@@ -730,7 +729,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         // check for mandatory entities
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(loanId, EntityTables.LOAN.getName(),
-                StatusEnum.WITHDRAWN.getCode().longValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
+                StatusEnum.WITHDRAWN.getValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
 
         // loan application withdrawal
         final AppUser currentUser = getAppUserIfPresent();

@@ -16,22 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.dataqueries.service;
+package org.apache.fineract.infrastructure.core.data;
 
-import com.google.gson.JsonArray;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
-public interface EntityDatatableChecksWritePlatformService {
+/**
+ * <p>
+ * Immutable data object representing generic enumeration value.
+ * </p>
+ */
+@Getter
+@EqualsAndHashCode
+@AllArgsConstructor
+public abstract class BaseEnumOptionData<T> implements Serializable {
 
-    CommandProcessingResult createCheck(JsonCommand command);
-
-    CommandProcessingResult deleteCheck(Long entityDatatableCheckId);
-
-    void runTheCheck(Long entityId, String entityName, Integer status, String foreignKeyColumn, String entitySubtype);
-
-    void runTheCheckForProduct(Long entityId, String entityName, Integer status, String foreignKeyColumn, long productLoanId);
-
-    boolean saveDatatables(Integer status, String entity, Long entityId, Long productId, JsonArray data);
-
+    protected T id;
+    protected final String code;
+    protected final String value;
 }
