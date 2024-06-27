@@ -172,7 +172,8 @@ public final class LoanProductDataValidator {
             LoanProductConstants.ENABLE_DOWN_PAYMENT, LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT,
             LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT, LoanProductConstants.REPAYMENT_START_DATE_TYPE,
             LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY, LoanProductConstants.LOAN_SCHEDULE_TYPE,
-            LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE, LoanProductConstants.FIXED_LENGTH));
+            LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE, LoanProductConstants.FIXED_LENGTH,
+            LoanProductConstants.USE_DUE_REPAYMENT_GLOBAL_CONFIGS));
 
     private static final String[] SUPPORTED_LOAN_CONFIGURABLE_ATTRIBUTES = { LoanProductConstants.amortizationTypeParamName,
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyCodeParamName,
@@ -568,7 +569,6 @@ public final class LoanProductDataValidator {
         }
 
         // Fixed Length validation
-
         fixedLengthValidations(transactionProcessingStrategyCode, isInterestBearing, numberOfRepayments, repaymentEvery, element,
                 baseDataValidator);
 
@@ -755,6 +755,13 @@ public final class LoanProductDataValidator {
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.CAN_USE_FOR_TOPUP, element)) {
             final Boolean canUseForTopup = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.CAN_USE_FOR_TOPUP, element);
             baseDataValidator.reset().parameter(LoanProductConstants.CAN_USE_FOR_TOPUP).value(canUseForTopup).validateForBooleanValue();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.USE_DUE_REPAYMENT_GLOBAL_CONFIGS, element)) {
+            final Boolean useDueRepaymentGlobalConfig = this.fromApiJsonHelper
+                    .extractBooleanNamed(LoanProductConstants.USE_DUE_REPAYMENT_GLOBAL_CONFIGS, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.USE_DUE_REPAYMENT_GLOBAL_CONFIGS).value(useDueRepaymentGlobalConfig)
+                    .validateForBooleanValue();
         }
 
         final Integer dueDaysForRepaymentEvent = this.fromApiJsonHelper

@@ -212,6 +212,7 @@ public class LoanProductData implements Serializable {
     private final Collection<DelinquencyBucketData> delinquencyBucketOptions;
     private final DelinquencyBucketData delinquencyBucket;
 
+    private final boolean useDueRepaymentGlobalConfigs;
     private final Integer dueDaysForRepaymentEvent;
     private final Integer overDueDaysForRepaymentEvent;
 
@@ -310,6 +311,7 @@ public class LoanProductData implements Serializable {
         final boolean isRatesEnabled = false;
         final Collection<DelinquencyBucketData> delinquencyBucketOptions = null;
         final DelinquencyBucketData delinquencyBucket = null;
+        final boolean useDueRepaymentGlobalConfigs = false;
         final Integer dueDaysForRepaymentEvent = null;
         final Integer overDueDaysForRepaymentEvent = null;
         final boolean enableDownPayment = false;
@@ -343,7 +345,7 @@ public class LoanProductData implements Serializable {
                 fixedPrincipalPercentagePerInstallment, delinquencyBucketOptions, delinquencyBucket, dueDaysForRepaymentEvent,
                 overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageDownPayment, enableAutoRepaymentForDownPayment,
                 paymentAllocation, creditAllocation, repaymentStartDateType, enableInstallmentLevelDelinquency, loanScheduleType,
-                loanScheduleProcessingType, fixedLength);
+                loanScheduleProcessingType, fixedLength, useDueRepaymentGlobalConfigs);
 
     }
 
@@ -432,6 +434,7 @@ public class LoanProductData implements Serializable {
         final boolean isRatesEnabled = false;
         final Collection<DelinquencyBucketData> delinquencyBucketOptions = null;
         final DelinquencyBucketData delinquencyBucket = null;
+        final boolean useDueRepaymentGlobalConfigs = false;
         final Integer dueDaysForRepaymentEvent = null;
         final Integer overDueDaysForRepaymentEvent = null;
         final boolean enableDownPayment = false;
@@ -463,7 +466,7 @@ public class LoanProductData implements Serializable {
                 fixedPrincipalPercentagePerInstallment, delinquencyBucketOptions, delinquencyBucket, dueDaysForRepaymentEvent,
                 overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageDownPayment, enableAutoRepaymentForDownPayment,
                 paymentAllocation, creditAllocation, repaymentStartDateType, enableInstallmentLevelDelinquency, loanScheduleType,
-                loanScheduleProcessingType, fixedLength);
+                loanScheduleProcessingType, fixedLength, useDueRepaymentGlobalConfigs);
 
     }
 
@@ -559,6 +562,7 @@ public class LoanProductData implements Serializable {
         final boolean isRatesEnabled = false;
         final Collection<DelinquencyBucketData> delinquencyBucketOptions = null;
         final DelinquencyBucketData delinquencyBucket = null;
+        final boolean useDueRepaymentGlobalConfigs = false;
         final Integer dueDaysForRepaymentEvent = null;
         final Integer overDueDaysForRepaymentEvent = null;
         final boolean enableDownPayment = false;
@@ -590,7 +594,7 @@ public class LoanProductData implements Serializable {
                 fixedPrincipalPercentagePerInstallment, delinquencyBucketOptions, delinquencyBucket, dueDaysForRepaymentEvent,
                 overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageDownPayment, enableAutoRepaymentForDownPayment,
                 paymentAllocation, creditAllocation, repaymentStartDateType, enableInstallmentLevelDelinquency, loanScheduleType,
-                loanScheduleProcessingType, fixedLength);
+                loanScheduleProcessingType, fixedLength, useDueRepaymentGlobalConfigs);
 
     }
 
@@ -680,6 +684,7 @@ public class LoanProductData implements Serializable {
         final boolean isRatesEnabled = false;
         final Collection<DelinquencyBucketData> delinquencyBucketOptions = null;
         final DelinquencyBucketData delinquencyBucket = null;
+        final boolean useDueRepaymentGlobalConfigs = false;
         final Integer dueDaysForRepaymentEvent = null;
         final Integer overDueDaysForRepaymentEvent = null;
         final boolean enableDownPayment = false;
@@ -711,7 +716,7 @@ public class LoanProductData implements Serializable {
                 fixedPrincipalPercentagePerInstallment, delinquencyBucketOptions, delinquencyBucket, dueDaysForRepaymentEvent,
                 overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageDownPayment, enableAutoRepaymentForDownPayment,
                 paymentAllocation, creditAllocationData, repaymentStartDateType, enableInstallmentLevelDelinquency, loanScheduleType,
-                loanScheduleProcessingType, fixedLength);
+                loanScheduleProcessingType, fixedLength, useDueRepaymentGlobalConfigs);
     }
 
     public static LoanProductData withAccountingDetails(final LoanProductData productData, final Map<String, Object> accountingMappings,
@@ -761,7 +766,8 @@ public class LoanProductData implements Serializable {
             final BigDecimal disbursedAmountPercentageForDownPayment, final boolean enableAutoRepaymentForDownPayment,
             final Collection<AdvancedPaymentData> paymentAllocation, final Collection<CreditAllocationData> creditAllocation,
             final EnumOptionData repaymentStartDateType, final boolean enableInstallmentLevelDelinquency,
-            final EnumOptionData loanScheduleType, final EnumOptionData loanScheduleProcessingType, final Integer fixedLength) {
+            final EnumOptionData loanScheduleType, final EnumOptionData loanScheduleProcessingType, final Integer fixedLength,
+            final boolean useDueRepaymentGlobalConfigs) {
         this.id = id;
         this.name = name;
         this.shortName = shortName;
@@ -878,6 +884,7 @@ public class LoanProductData implements Serializable {
         this.isEqualAmortization = isEqualAmortization;
         this.delinquencyBucketOptions = delinquencyBucketOptions;
         this.delinquencyBucket = delinquencyBucket;
+        this.useDueRepaymentGlobalConfigs = useDueRepaymentGlobalConfigs;
         this.dueDaysForRepaymentEvent = dueDaysForRepaymentEvent;
         this.overDueDaysForRepaymentEvent = overDueDaysForRepaymentEvent;
         this.enableDownPayment = enableDownPayment;
@@ -1053,6 +1060,7 @@ public class LoanProductData implements Serializable {
         this.isRatesEnabled = isRatesEnabled;
         this.delinquencyBucketOptions = delinquencyBucketOptions;
         this.delinquencyBucket = productData.delinquencyBucket;
+        this.useDueRepaymentGlobalConfigs = productData.useDueRepaymentGlobalConfigs;
         this.dueDaysForRepaymentEvent = productData.dueDaysForRepaymentEvent;
         this.overDueDaysForRepaymentEvent = productData.overDueDaysForRepaymentEvent;
         this.enableDownPayment = productData.enableDownPayment;

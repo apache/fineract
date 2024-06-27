@@ -151,6 +151,7 @@ public class LoanProductTestBuilder {
     private String installmentAmountInMultiplesOf;
     private boolean canDefineInstallmentAmount;
     private Integer delinquencyBucketId;
+    private boolean useDueRepaymentGlobalConfigs = false;
     private Integer dueDaysForRepaymentEvent = null;
     private Integer overDueDaysForRepaymentEvent = null;
     private boolean enableDownPayment = false;
@@ -302,6 +303,7 @@ public class LoanProductTestBuilder {
             map.put("penaltyToIncomeAccountMappings", this.penaltyToIncomeAccountMappings);
         }
 
+        map.put("useDueRepaymentGlobalConfigs", this.useDueRepaymentGlobalConfigs);
         if (this.dueDaysForRepaymentEvent != null) {
             map.put("dueDaysForRepaymentEvent", this.dueDaysForRepaymentEvent);
         }
@@ -724,6 +726,11 @@ public class LoanProductTestBuilder {
 
     public LoanProductTestBuilder withFeeAndPenaltyAssetAccount(final Account account) {
         this.feeAndPenaltyAssetAccount = account;
+        return this;
+    }
+
+    public LoanProductTestBuilder withUseDueRepaymentGlobalConfigs(final boolean useGlobalConfigs) {
+        this.useDueRepaymentGlobalConfigs = useGlobalConfigs;
         return this;
     }
 

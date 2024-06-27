@@ -68,6 +68,7 @@ public class LoanProductWithRepaymentDueEventConfigurationTest {
                 delinquencyBucketId);
 
         // event days configuration
+        boolean useDueRepaymentGlobalConfigs = true;
         Integer dueDaysForRepaymentEvent = 1;
         Integer overDueDaysForRepaymentEvent = 2;
 
@@ -75,13 +76,15 @@ public class LoanProductWithRepaymentDueEventConfigurationTest {
 
         final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
         Integer loanProductId = createLoanProductWithDueDaysForRepaymentEvent(loanTransactionHelper, delinquencyBucketId,
-                dueDaysForRepaymentEvent, overDueDaysForRepaymentEvent);
+                dueDaysForRepaymentEvent, overDueDaysForRepaymentEvent, useDueRepaymentGlobalConfigs);
         final GetLoanProductsProductIdResponse getLoanProductsProductResponse = loanTransactionHelper.getLoanProduct(loanProductId);
         assertNotNull(getLoanProductsProductResponse);
         assertNotNull(getLoanProductsProductResponse.getDueDaysForRepaymentEvent());
         assertNotNull(getLoanProductsProductResponse.getOverDueDaysForRepaymentEvent());
         assertEquals(getLoanProductsProductResponse.getDueDaysForRepaymentEvent(), dueDaysForRepaymentEvent);
         assertEquals(getLoanProductsProductResponse.getOverDueDaysForRepaymentEvent(), overDueDaysForRepaymentEvent);
+        assertNotNull(getLoanProductsProductResponse.getUseDueRepaymentGlobalConfigs());
+        assertEquals(useDueRepaymentGlobalConfigs, getLoanProductsProductResponse.getUseDueRepaymentGlobalConfigs());
     }
 
     @Test
@@ -99,21 +102,25 @@ public class LoanProductWithRepaymentDueEventConfigurationTest {
         final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
         final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
                 delinquencyBucketId);
+        final Long loanProductId = getLoanProductsProductResponse.getId();
         assertNotNull(getLoanProductsProductResponse);
 
         // Modify Loan Product
-        PutLoanProductsProductIdResponse loanProductModifyResponse = updateLoanProduct(loanTransactionHelper,
-                getLoanProductsProductResponse.getId());
+        PutLoanProductsProductIdResponse loanProductModifyResponse = updateLoanProduct(loanTransactionHelper, loanProductId);
         assertNotNull(loanProductModifyResponse);
 
+        final GetLoanProductsProductIdResponse getloanProductsResponse = loanTransactionHelper.getLoanProduct(loanProductId.intValue());
+        assertEquals(true, getloanProductsResponse.getUseDueRepaymentGlobalConfigs());
     }
 
     private PutLoanProductsProductIdResponse updateLoanProduct(LoanTransactionHelper loanTransactionHelper, Long id) {
         // event days configuration
+        boolean useGlobalConfigs = true;
         Integer dueDaysForRepaymentEvent = 1;
         Integer overDueDaysForRepaymentEvent = 2;
         final PutLoanProductsProductIdRequest requestModifyLoan = new PutLoanProductsProductIdRequest()
-                .dueDaysForRepaymentEvent(dueDaysForRepaymentEvent).overDueDaysForRepaymentEvent(overDueDaysForRepaymentEvent).locale("en");
+                .dueDaysForRepaymentEvent(dueDaysForRepaymentEvent).overDueDaysForRepaymentEvent(overDueDaysForRepaymentEvent)
+                .useDueRepaymentGlobalConfigs(useGlobalConfigs).locale("en");
         return loanTransactionHelper.updateLoanProduct(id, requestModifyLoan);
     }
 
@@ -125,9 +132,11 @@ public class LoanProductWithRepaymentDueEventConfigurationTest {
     }
 
     private Integer createLoanProductWithDueDaysForRepaymentEvent(final LoanTransactionHelper loanTransactionHelper,
-            final Integer delinquencyBucketId, Integer dueDaysForRepaymentEvent, Integer overDueDaysForRepaymentEvent) {
-        final HashMap<String, Object> loanProductMap = new LoanProductTestBuilder().withDueDaysForRepaymentEvent(dueDaysForRepaymentEvent)
-                .withOverDueDaysForRepaymentEvent(overDueDaysForRepaymentEvent).build(null, delinquencyBucketId);
+            final Integer delinquencyBucketId, Integer dueDaysForRepaymentEvent, Integer overDueDaysForRepaymentEvent,
+            boolean useGlobalConfigs) {
+        final HashMap<String, Object> loanProductMap = new LoanProductTestBuilder().withUseDueRepaymentGlobalConfigs(useGlobalConfigs)
+                .withDueDaysForRepaymentEvent(dueDaysForRepaymentEvent).withOverDueDaysForRepaymentEvent(overDueDaysForRepaymentEvent)
+                .build(null, delinquencyBucketId);
         final Integer loanProductId = loanTransactionHelper.getLoanProductId(Utils.convertToJson(loanProductMap));
         return loanProductId;
     }

@@ -163,4 +163,6 @@ public interface LoanProductConstants {
     String ADVANCED_PAYMENT_ALLOCATION_STRATEGY = "advanced-payment-allocation-strategy";
 
     String FIXED_LENGTH = "fixedLength";
+
+    String USE_DUE_REPAYMENT_GLOBAL_CONFIGS = "useDueRepaymentGlobalConfigs";
 }

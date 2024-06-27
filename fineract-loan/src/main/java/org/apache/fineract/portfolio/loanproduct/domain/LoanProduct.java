@@ -232,6 +232,9 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
     @Column(name = "repayment_start_date_type_enum", nullable = false)
     private RepaymentStartDateType repaymentStartDateType;
 
+    @Column(name = "use_due_repayment_global_configs", nullable = false)
+    private boolean useDueRepaymentGlobalConfigs = false;
+
     public static LoanProduct assembleFromJson(final Fund fund, final String loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate,
             final List<Rate> productRates, List<LoanProductPaymentAllocationRule> loanProductPaymentAllocationRules,
@@ -439,6 +442,9 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
 
         final Integer fixedLength = command.integerValueOfParameterNamed(LoanProductConstants.FIXED_LENGTH);
 
+        final boolean useDueRepaymentGlobalConfigs = command
+                .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.USE_DUE_REPAYMENT_GLOBAL_CONFIGS);
+
         return new LoanProduct(fund, loanTransactionProcessingStrategy, loanProductPaymentAllocationRules, loanProductCreditAllocationRules,
                 name, shortName, description, currency, principal, minPrincipal, maxPrincipal, interestRatePerPeriod,
                 minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType, annualInterestRate, interestMethod,
@@ -457,7 +463,8 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
                 isEqualAmortization, productRates, fixedPrincipalPercentagePerInstallment, disallowExpectedDisbursements,
                 allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber, dueDaysForRepaymentEvent,
                 overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageDownPayment, enableAutoRepaymentForDownPayment,
-                repaymentStartDateType, enableInstallmentLevelDelinquency, loanScheduleType, loanScheduleProcessingType, fixedLength);
+                repaymentStartDateType, enableInstallmentLevelDelinquency, loanScheduleType, loanScheduleProcessingType, fixedLength,
+                useDueRepaymentGlobalConfigs);
 
     }
 
@@ -674,7 +681,8 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
             final boolean enableDownPayment, final BigDecimal disbursedAmountPercentageForDownPayment,
             final boolean enableAutoRepaymentForDownPayment, final RepaymentStartDateType repaymentStartDateType,
             final boolean enableInstallmentLevelDelinquency, final LoanScheduleType loanScheduleType,
-            final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength) {
+            final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength,
+            final boolean useDueRepaymentGlobalConfigs) {
         this.fund = fund;
         this.transactionProcessingStrategyCode = transactionProcessingStrategyCode;
 
@@ -771,6 +779,7 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
             this.rates = rates;
         }
 
+        this.useDueRepaymentGlobalConfigs = useDueRepaymentGlobalConfigs;
         this.dueDaysForRepaymentEvent = dueDaysForRepaymentEvent;
         this.overDueDaysForRepaymentEvent = overDueDaysForRepaymentEvent;
         this.repaymentStartDateType = repaymentStartDateType;
@@ -1275,6 +1284,13 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
             actualChanges.put(LoanProductConstants.OVER_APPLIED_NUMBER, newValue);
             actualChanges.put("locale", localeAsInput);
             this.overAppliedNumber = newValue;
+        }
+
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.USE_DUE_REPAYMENT_GLOBAL_CONFIGS,
+                this.useDueRepaymentGlobalConfigs)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.USE_DUE_REPAYMENT_GLOBAL_CONFIGS);
+            actualChanges.put(LoanProductConstants.USE_DUE_REPAYMENT_GLOBAL_CONFIGS, newValue);
+            this.useDueRepaymentGlobalConfigs = newValue;
         }
 
         if (command.isChangeInIntegerParameterNamed(LoanProductConstants.DUE_DAYS_FOR_REPAYMENT_EVENT, this.dueDaysForRepaymentEvent)) {
