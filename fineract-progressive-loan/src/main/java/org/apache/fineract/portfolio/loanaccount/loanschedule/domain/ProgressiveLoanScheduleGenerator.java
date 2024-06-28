@@ -54,8 +54,11 @@ public class ProgressiveLoanScheduleGenerator extends AbstractProgressiveLoanSch
     public PrincipalInterest calculatePrincipalInterestComponentsForPeriod(final LoanApplicationTerms loanApplicationTerms,
             final LoanScheduleParams loanScheduleParams, final EMICalculationResult emiCalculationResult, final MathContext mc) {
 
-        final Money equalMonthlyInstallmentValue = Money.of(loanApplicationTerms.getCurrency(),
-                emiCalculationResult.getEqualMonthlyInstallmentValue());
+        final Money equalMonthlyInstallmentValue = loanApplicationTerms.getInstallmentAmountInMultiplesOf() != null
+                ? Money.of(loanApplicationTerms.getCurrency(),
+                        Money.roundToMultiplesOf(emiCalculationResult.getEqualMonthlyInstallmentValue(),
+                                loanApplicationTerms.getInstallmentAmountInMultiplesOf()))
+                : Money.of(loanApplicationTerms.getCurrency(), emiCalculationResult.getEqualMonthlyInstallmentValue());
         final BigDecimal rateFactorMinus1 = emiCalculationResult.getNextRepaymentPeriodRateFactorMinus1();
         final Money calculatedInterest = loanScheduleParams.getOutstandingBalance().multipliedBy(rateFactorMinus1);
         final Money calculatedPrincipal = equalMonthlyInstallmentValue.minus(calculatedInterest);

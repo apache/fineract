@@ -27,7 +27,7 @@ import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 
 public interface ScheduledDateGenerator {
 
-    List<PreGeneratedLoanSchedulePeriod> generateRepaymentPeriods(LoanApplicationTerms loanApplicationTerms,
+    List<PreGeneratedLoanSchedulePeriod> generateRepaymentPeriods(LocalDate scheduledDueDate, LoanApplicationTerms loanApplicationTerms,
             HolidayDetailDTO holidayDetailDTO);
 
     LocalDate getLastRepaymentDate(LoanApplicationTerms loanApplicationTerms, HolidayDetailDTO holidayDetailDTO);

@@ -98,7 +98,8 @@ public class DefaultScheduledDateGeneratorTest {
                 submittedOnDate, CUMULATIVE, LoanScheduleProcessingType.HORIZONTAL, null);
 
         // when
-        List<PreGeneratedLoanSchedulePeriod> result = underTest.generateRepaymentPeriods(loanApplicationTerms, holidayDetailDTO);
+        List<PreGeneratedLoanSchedulePeriod> result = underTest.generateRepaymentPeriods(expectedDisbursementDate, loanApplicationTerms,
+                holidayDetailDTO);
 
         // then
         assertThat(result.size()).isEqualTo(4);

@@ -275,7 +275,7 @@ public final class LoanSchedulePeriodData {
         this.dueDate = dueDate;
         this.obligationsMetOnDate = null;
         this.complete = null;
-        this.daysInPeriod = 1;
+        this.daysInPeriod = 1; // TODO: check this may should be 0 or somewhere else should be 1?
         this.principalDisbursed = null;
         this.principalOriginalDue = principalDue;
         this.principalDue = principalOriginalDue;
