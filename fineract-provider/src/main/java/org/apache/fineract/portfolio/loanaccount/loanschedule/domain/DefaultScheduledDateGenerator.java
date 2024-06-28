@@ -43,12 +43,11 @@ import org.springframework.stereotype.Component;
 public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
 
     @Override
-    public List<PreGeneratedLoanSchedulePeriod> generateRepaymentPeriods(final LoanApplicationTerms loanApplicationTerms,
-            final HolidayDetailDTO holidayDetailDTO) {
+    public List<PreGeneratedLoanSchedulePeriod> generateRepaymentPeriods(final LocalDate scheduledDueDate,
+            final LoanApplicationTerms loanApplicationTerms, final HolidayDetailDTO holidayDetailDTO) {
         final int numberOfRepayments = loanApplicationTerms.getNumberOfRepayments();
         final ArrayList<PreGeneratedLoanSchedulePeriod> repaymentPeriods = new ArrayList<>(numberOfRepayments);
-        // TODO: check periodStartDate
-        LocalDate lastRepaymentDate = loanApplicationTerms.getRepaymentStartDate();
+        LocalDate lastRepaymentDate = scheduledDueDate;
         LocalDate nextRepaymentDate;
         boolean isFirstRepayment = true;
         for (int repaymentPeriod = 1; repaymentPeriod <= numberOfRepayments; repaymentPeriod++) {

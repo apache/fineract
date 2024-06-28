@@ -58,12 +58,9 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     public EMICalculationResult calculateEMIValueAndRateFactors(final LoanScheduleParams scheduleParams,
             final LoanProductRelatedDetail loanProductRelatedDetail, final List<? extends LoanScheduleModelPeriod> expectedRepaymentPeriods,
             final MathContext mc) {
-        // TODO: decide which outstanding balance method needed in the future
         final BigDecimal nominalInterestRatePerPeriod = calcNominalInterestRatePerPeriod(
                 loanProductRelatedDetail.getNominalInterestRatePerPeriod(), mc);
-        final BigDecimal outstandingBalance = scheduleParams.getOutstandingBalanceAsPerRest().getAmount().compareTo(BigDecimal.ZERO) > 0
-                ? scheduleParams.getOutstandingBalanceAsPerRest().getAmount()
-                : loanProductRelatedDetail.getPrincipal().getAmount();
+        final BigDecimal outstandingBalance = scheduleParams.getOutstandingBalanceAsPerRest().getAmount();
         final DaysInYearType daysInYearType = DaysInYearType.fromInt(loanProductRelatedDetail.getDaysInYearType());
         final DaysInMonthType daysInMonthType = DaysInMonthType.fromInt(loanProductRelatedDetail.getDaysInMonthType());
         final PeriodFrequencyType repaymentFrequency = loanProductRelatedDetail.getRepaymentPeriodFrequencyType();

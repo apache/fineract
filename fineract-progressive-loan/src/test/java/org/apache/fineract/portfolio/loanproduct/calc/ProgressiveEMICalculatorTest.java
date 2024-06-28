@@ -66,7 +66,7 @@ class ProgressiveEMICalculatorTest {
     @BeforeAll
     public static void init() {
         periods = new ArrayList<>();
-        LocalDate startDate = LocalDate.of(2024, 01, 1);
+        LocalDate startDate = LocalDate.of(2024, 1, 1);
         periods.add(createPeriod(1, startDate, startDate.plusMonths(1)));
         periods.add(createPeriod(2, startDate.plusMonths(1), startDate.plusMonths(2)));
         periods.add(createPeriod(3, startDate.plusMonths(2), startDate.plusMonths(3)));
@@ -495,11 +495,9 @@ class ProgressiveEMICalculatorTest {
         final MathContext mc = MoneyHelper.getMathContext();
 
         final BigDecimal interestRate = BigDecimal.valueOf(0);
-        final Money principal = Money.of(monetaryCurrency, BigDecimal.valueOf(1000));
-        final Money outstandingBalance = Money.of(monetaryCurrency, BigDecimal.ZERO);
+        final Money outstandingBalance = Money.of(monetaryCurrency, BigDecimal.valueOf(1000));
 
         Mockito.when(scheduleParams.getOutstandingBalanceAsPerRest()).thenReturn(outstandingBalance);
-        Mockito.when(loanProductRelatedDetail.getPrincipal()).thenReturn(principal);
         Mockito.when(loanProductRelatedDetail.getNominalInterestRatePerPeriod()).thenReturn(interestRate);
         Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
         Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.DAYS_30.getValue());
