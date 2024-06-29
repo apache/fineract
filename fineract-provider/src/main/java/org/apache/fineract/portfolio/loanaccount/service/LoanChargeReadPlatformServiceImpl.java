@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -47,7 +46,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
-import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -149,25 +147,15 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
                 .retrieveSavingsCalculationTypes();
         final List<EnumOptionData> savingsChargeTimeTypeOptions = this.chargeDropdownReadPlatformService
                 .retrieveSavingsCollectionTimeTypes();
-        final List<EnumOptionData> clientChargeCalculationTypeOptions = null;
-        final List<EnumOptionData> clientChargeTimeTypeOptions = null;
 
         final List<EnumOptionData> feeFrequencyOptions = this.dropdownReadPlatformService.retrievePeriodFrequencyTypeOptions();
-        // this field is applicable only for client charges
-        final Map<String, List<GLAccountData>> incomeOrLiabilityAccountOptions = null;
-        final List<EnumOptionData> shareChargeCalculationTypeOptions = null;
-        final List<EnumOptionData> shareChargeTimeTypeOptions = null;
-        final Collection<TaxGroupData> taxGroupOptions = null;
+        // other fields is applicable only for client charges
 
-        final String accountMappingForChargeConfig = null;
-        final List<GLAccountData> expenseAccountOptions = null;
-        final List<GLAccountData> assetAccountOptions = null;
-
-        return ChargeData.template(null, allowedChargeCalculationTypeOptions, null, allowedChargeTimeOptions, null,
-                loansChargeCalculationTypeOptions, loansChargeTimeTypeOptions, savingsChargeCalculationTypeOptions,
-                savingsChargeTimeTypeOptions, clientChargeCalculationTypeOptions, clientChargeTimeTypeOptions, feeFrequencyOptions,
-                incomeOrLiabilityAccountOptions, taxGroupOptions, shareChargeCalculationTypeOptions, shareChargeTimeTypeOptions,
-                accountMappingForChargeConfig, expenseAccountOptions, assetAccountOptions);
+        return ChargeData.builder().chargeCalculationTypeOptions(allowedChargeCalculationTypeOptions)
+                .chargeTimeTypeOptions(allowedChargeTimeOptions).loanChargeCalculationTypeOptions(loansChargeCalculationTypeOptions)
+                .loanChargeTimeTypeOptions(loansChargeTimeTypeOptions)
+                .savingsChargeCalculationTypeOptions(savingsChargeCalculationTypeOptions)
+                .savingsChargeTimeTypeOptions(savingsChargeTimeTypeOptions).feeFrequencyOptions(feeFrequencyOptions).build();
     }
 
     @Override
