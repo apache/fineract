@@ -140,12 +140,18 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         final List<GLAccountData> expenseAccountOptions = this.accountingDropdownReadPlatformService.retrieveExpenseAccountOptions();
         final List<GLAccountData> assetAccountOptions = this.accountingDropdownReadPlatformService.retrieveAssetAccountOptions();
 
-        return ChargeData.template(currencyOptions, allowedChargeCalculationTypeOptions, allowedChargeAppliesToOptions,
-                allowedChargeTimeOptions, chargePaymentOptions, loansChargeCalculationTypeOptions, loansChargeTimeTypeOptions,
-                savingsChargeCalculationTypeOptions, savingsChargeTimeTypeOptions, clientChargeCalculationTypeOptions,
-                clientChargeTimeTypeOptions, feeFrequencyOptions, incomeOrLiabilityAccountOptions, taxGroupOptions,
-                shareChargeCalculationTypeOptions, shareChargeTimeTypeOptions, accountMappingForChargeConfig, expenseAccountOptions,
-                assetAccountOptions);
+        return ChargeData.builder().currencyOptions(currencyOptions).chargeCalculationTypeOptions(allowedChargeCalculationTypeOptions)
+                .chargeAppliesToOptions(allowedChargeAppliesToOptions).chargeTimeTypeOptions(allowedChargeTimeOptions)
+                .chargePaymetModeOptions(chargePaymentOptions).loanChargeCalculationTypeOptions(loansChargeCalculationTypeOptions)
+                .loanChargeTimeTypeOptions(loansChargeTimeTypeOptions)
+                .savingsChargeCalculationTypeOptions(savingsChargeCalculationTypeOptions)
+                .savingsChargeTimeTypeOptions(savingsChargeTimeTypeOptions)
+                .clientChargeCalculationTypeOptions(clientChargeCalculationTypeOptions)
+                .clientChargeTimeTypeOptions(clientChargeTimeTypeOptions).feeFrequencyOptions(feeFrequencyOptions)
+                .incomeOrLiabilityAccountOptions(incomeOrLiabilityAccountOptions).taxGroupOptions(taxGroupOptions)
+                .shareChargeCalculationTypeOptions(shareChargeCalculationTypeOptions).shareChargeTimeTypeOptions(shareChargeTimeTypeOptions)
+                .accountMappingForChargeConfig(accountMappingForChargeConfig).expenseAccountOptions(expenseAccountOptions)
+                .assetAccountOptions(assetAccountOptions).build();
     }
 
     @Override
@@ -368,10 +374,14 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                 paymentTypeData = PaymentTypeData.instance(paymentTypeId, paymentTypeName);
             }
 
-            return ChargeData.instance(id, name, amount, currency, chargeTimeType, chargeAppliesToType, chargeCalculationType,
-                    chargePaymentMode, feeOnMonthDay, feeInterval, penalty, active, isFreeWithdrawal, freeWithdrawalChargeFrequency,
-                    restartFrequency, restartFrequencyEnum, isPaymentType, paymentTypeData, minCap, maxCap, feeFrequencyType, glAccountData,
-                    taxGroupData);
+            return ChargeData.builder().id(id).name(name).amount(amount).currency(currency).chargeTimeType(chargeTimeType)
+                    .chargeAppliesTo(chargeAppliesToType).chargeCalculationType(chargeCalculationType).chargePaymentMode(chargePaymentMode)
+                    .feeOnMonthDay(feeOnMonthDay).feeInterval(feeInterval).penalty(penalty).active(active).freeWithdrawal(isFreeWithdrawal)
+                    .freeWithdrawalChargeFrequency(freeWithdrawalChargeFrequency).restartFrequency(restartFrequency)
+                    .restartFrequencyEnum(restartFrequencyEnum).isPaymentType(isPaymentType).paymentTypeOptions(paymentTypeData)
+                    .minCap(minCap).maxCap(maxCap).feeFrequency(feeFrequencyType).incomeOrLiabilityAccount(glAccountData)
+                    .taxGroup(taxGroupData).build();
+
         }
     }
 
