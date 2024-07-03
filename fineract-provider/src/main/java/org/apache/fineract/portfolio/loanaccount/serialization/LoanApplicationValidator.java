@@ -169,7 +169,7 @@ public final class LoanApplicationValidator {
             LoanApiConstants.daysInYearTypeParameterName, LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName,
             LoanApiConstants.DISALLOW_EXPECTED_DISBURSEMENTS, LoanApiConstants.FRAUD_ATTRIBUTE_NAME,
             LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE, LoanProductConstants.FIXED_LENGTH,
-            LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY));
+            LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY, LoanProductConstants.ENABLE_DOWN_PAYMENT));
     public static final String LOANAPPLICATION_UNDO = "loanapplication.undo";
 
     private final FromJsonHelper fromApiJsonHelper;
@@ -740,6 +740,8 @@ public final class LoanApplicationValidator {
                             "Loan with externalId is already registered.");
                 }
             }
+
+            loanScheduleValidator.validateDownPaymentAttribute(loanProduct.getLoanProductRelatedDetail().isEnableDownPayment(), element);
 
             checkForProductMixRestrictions(element);
             validateSubmittedOnDate(element, submittedOnDate, loanProduct);
@@ -1395,6 +1397,8 @@ public final class LoanApplicationValidator {
                     }
                 }
             }
+
+            loanScheduleValidator.validateDownPaymentAttribute(loanProduct.getLoanProductRelatedDetail().isEnableDownPayment(), element);
 
             validateDisbursementDetails(loanProduct, element);
             validateSubmittedOnDate(element, loan.getSubmittedOnDate(), loanProduct);

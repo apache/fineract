@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -71,7 +72,8 @@ public final class LoanScheduleValidator {
             LoanApiConstants.repaymentFrequencyDayOfWeekTypeParameterName, LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose,
             LoanApiConstants.datatables, LoanApiConstants.isEqualAmortizationParam, LoanProductConstants.RATES_PARAM_NAME,
             LoanApiConstants.daysInYearTypeParameterName, LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName,
-            LoanProductConstants.FIXED_LENGTH, LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY));
+            LoanProductConstants.FIXED_LENGTH, LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY,
+            LoanProductConstants.ENABLE_DOWN_PAYMENT));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -176,4 +178,15 @@ public final class LoanScheduleValidator {
             dataValidationErrors.add(error);
         }
     }
+
+    public void validateDownPaymentAttribute(final boolean isDownPaymentEnabledInLoanProduct, final JsonElement element) {
+        final Boolean inputIsDownPaymentEnabled = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.ENABLE_DOWN_PAYMENT,
+                element);
+        if (!isDownPaymentEnabledInLoanProduct && Boolean.TRUE.equals(inputIsDownPaymentEnabled)) {
+            throw new GeneralPlatformDomainRuleException("error.msg.downpayment.is.not.enabled.in.loan.product",
+                    "The Loan can not override the downpayment flag because in the Loan Product the downpayment is disabled",
+                    inputIsDownPaymentEnabled);
+        }
+    }
+
 }
