@@ -466,7 +466,11 @@ public class LoanScheduleAssembler {
         final boolean isPrincipalCompoundingDisabledForOverdueLoans = this.configurationDomainService
                 .isPrincipalCompoundingDisabledForOverdueLoans();
 
-        final boolean isDownPaymentEnabled = loanProduct.getLoanProductRelatedDetail().isEnableDownPayment();
+        boolean isDownPaymentEnabled = loanProduct.getLoanProductRelatedDetail().isEnableDownPayment();
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.ENABLE_DOWN_PAYMENT, element)) {
+            isDownPaymentEnabled = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.ENABLE_DOWN_PAYMENT, element);
+        }
+
         BigDecimal disbursedAmountPercentageForDownPayment = null;
         boolean isAutoRepaymentForDownPaymentEnabled = false;
         if (isDownPaymentEnabled) {
@@ -1379,6 +1383,22 @@ public class LoanScheduleAssembler {
             changes.put(LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM, newValue);
             loanProductRelatedDetail.setEqualAmortization(newValue);
         }
+
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.ENABLE_DOWN_PAYMENT,
+                loanProductRelatedDetail.isEnableDownPayment())) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ENABLE_DOWN_PAYMENT);
+            changes.put(LoanProductConstants.ENABLE_DOWN_PAYMENT, newValue);
+            loanProductRelatedDetail.setEnableDownPayment(newValue);
+            if (!newValue) {
+                loanProductRelatedDetail.setEnableAutoRepaymentForDownPayment(false);
+                loanProductRelatedDetail.setDisbursedAmountPercentageForDownPayment(null);
+            } else {
+                loanProductRelatedDetail.setEnableAutoRepaymentForDownPayment(
+                        loan.loanProduct().getLoanProductRelatedDetail().isEnableAutoRepaymentForDownPayment());
+                loanProductRelatedDetail.setDisbursedAmountPercentageForDownPayment(
+                        loan.loanProduct().getLoanProductRelatedDetail().getDisbursedAmountPercentageForDownPayment());
+            }
+        }
     }
 
     public Pair<Loan, Map<String, Object>> assembleLoanApproval(AppUser currentUser, JsonCommand command, Long loanId) {
@@ -1446,4 +1466,5 @@ public class LoanScheduleAssembler {
 
         return Pair.of(loan, actualChanges);
     }
+
 }

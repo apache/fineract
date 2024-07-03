@@ -1245,6 +1245,8 @@ final class LoansApiResourceSwagger {
         public String loanScheduleProcessingType;
         @Schema(example = "false")
         public Boolean enableInstallmentLevelDelinquency;
+        @Schema(example = "false")
+        public Boolean enableDownPayment;
     }
 
     @Schema(description = "PostLoansResponse")
@@ -1394,6 +1396,8 @@ final class LoansApiResourceSwagger {
         public String loanScheduleProcessingType;
         @Schema(example = "false")
         public Boolean enableInstallmentLevelDelinquency;
+        @Schema(example = "false")
+        public Boolean enableDownPayment;
 
         static final class PutLoansLoanIdChanges {
 
