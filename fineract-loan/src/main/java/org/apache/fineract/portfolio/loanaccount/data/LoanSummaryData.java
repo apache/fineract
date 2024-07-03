@@ -24,8 +24,12 @@ import java.util.Collection;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -91,11 +95,15 @@ public class LoanSummaryData {
     private BigDecimal totalCreditBalanceRefundReversed;
     private BigDecimal totalRepaymentTransaction;
     private BigDecimal totalRepaymentTransactionReversed;
+    private BigDecimal totalInterestPaymentWaiver;
     private final Long chargeOffReasonId;
     private final String chargeOffReason;
 
+    private BigDecimal totalUnpaidAccruedDueInterest;
+    private BigDecimal totalUnpaidAccruedNotDueInterest;
+
     public static LoanSummaryData withTransactionAmountsSummary(final LoanSummaryData defaultSummaryData,
-            final Collection<LoanTransactionData> loanTransactions) {
+            final Collection<LoanTransactionData> loanTransactions, final LoanScheduleData repaymentSchedule) {
 
         BigDecimal totalMerchantRefund = BigDecimal.ZERO;
         BigDecimal totalMerchantRefundReversed = BigDecimal.ZERO;
@@ -110,6 +118,9 @@ public class LoanSummaryData {
         BigDecimal totalCreditBalanceRefundReversed = BigDecimal.ZERO;
         BigDecimal totalRepaymentTransaction = BigDecimal.ZERO;
         BigDecimal totalRepaymentTransactionReversed = BigDecimal.ZERO;
+        BigDecimal totalInterestPaymentWaiver = BigDecimal.ZERO;
+        BigDecimal totalUnpaidAccruedDueInterest = BigDecimal.ZERO;
+        BigDecimal totalUnpaidAccruedNotDueInterest = BigDecimal.ZERO;
 
         if (!CollectionUtils.isEmpty(loanTransactions)) {
 
@@ -131,6 +142,24 @@ public class LoanSummaryData {
                     loanTransactions);
             totalRepaymentTransaction = computeTotalRepaymentTransactionAmount(loanTransactions);
             totalRepaymentTransactionReversed = computeTotalAmountForReversedTransactions(LoanTransactionType.REPAYMENT, loanTransactions);
+            totalInterestPaymentWaiver = computeTotalAmountForNonReversedTransactions(LoanTransactionType.INTEREST_PAYMENT_WAIVER,
+                    loanTransactions);
+        }
+
+        if (repaymentSchedule != null) {
+            // Accrued Due Interest on Past due installments
+            totalUnpaidAccruedDueInterest = computeTotalAccruedDueInterestAmount(repaymentSchedule.getPeriods());
+            if (MathUtil.isGreaterThanZero(totalUnpaidAccruedDueInterest)) {
+                totalUnpaidAccruedDueInterest = totalUnpaidAccruedDueInterest
+                        .subtract(computeTotalInterestPaidDueAmount(repaymentSchedule.getPeriods()));
+            }
+
+            // Accrued Due Interest on Actual Installment
+            totalUnpaidAccruedNotDueInterest = computeTotalAccruedNotDueInterestAmountOnActualPeriod(repaymentSchedule.getPeriods());
+            if (MathUtil.isGreaterThanZero(totalUnpaidAccruedNotDueInterest)) {
+                totalUnpaidAccruedNotDueInterest = totalUnpaidAccruedNotDueInterest
+                        .subtract(computeTotalInterestPaidNotDueAmountOnActualPeriod(repaymentSchedule.getPeriods()));
+            }
         }
 
         return LoanSummaryData.builder().currency(defaultSummaryData.currency).principalDisbursed(defaultSummaryData.principalDisbursed)
@@ -163,7 +192,9 @@ public class LoanSummaryData {
                 .totalChargeAdjustment(totalChargeAdjustment).totalChargeAdjustmentReversed(totalChargeAdjustmentReversed)
                 .totalChargeback(totalChargeback).totalCreditBalanceRefund(totalCreditBalanceRefund)
                 .totalCreditBalanceRefundReversed(totalCreditBalanceRefundReversed).totalRepaymentTransaction(totalRepaymentTransaction)
-                .totalRepaymentTransactionReversed(totalRepaymentTransactionReversed).build();
+                .totalRepaymentTransactionReversed(totalRepaymentTransactionReversed).totalInterestPaymentWaiver(totalInterestPaymentWaiver)
+                .totalUnpaidAccruedDueInterest(totalUnpaidAccruedDueInterest)
+                .totalUnpaidAccruedNotDueInterest(totalUnpaidAccruedNotDueInterest).build();
     }
 
     public static LoanSummaryData withOnlyCurrencyData(CurrencyData currencyData) {
@@ -190,5 +221,46 @@ public class LoanSummaryData {
         BigDecimal totalDownPaymentTransaction = computeTotalAmountForNonReversedTransactions(LoanTransactionType.DOWN_PAYMENT,
                 loanTransactions);
         return totalRepaymentTransaction.add(totalDownPaymentTransaction);
+    }
+
+    private static BigDecimal computeTotalAccruedDueInterestAmount(Collection<LoanSchedulePeriodData> periods) {
+        final LocalDate businessDate = DateUtils.getBusinessLocalDate();
+        return periods.stream().filter(period -> !period.getDownPaymentPeriod() && businessDate.isAfter(period.getDueDate()))
+                .map(period -> period.getTotalAccruedInterest()).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private static BigDecimal computeTotalInterestPaidDueAmount(Collection<LoanSchedulePeriodData> periods) {
+        final LocalDate businessDate = DateUtils.getBusinessLocalDate();
+        return periods.stream().filter(period -> !period.getDownPaymentPeriod() && businessDate.isAfter(period.getDueDate()))
+                .map(period -> period.getInterestPaid()).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private static BigDecimal computeTotalAccruedNotDueInterestAmountOnActualPeriod(Collection<LoanSchedulePeriodData> periods) {
+        final LocalDate businessDate = DateUtils.getBusinessLocalDate();
+        return periods.stream()
+                .filter(period -> !period.getDownPaymentPeriod() && isActualPeriod(period) && businessDate.isBefore(period.getDueDate()))
+                .map(period -> period.getTotalAccruedInterest()).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private static BigDecimal computeTotalInterestPaidNotDueAmountOnActualPeriod(Collection<LoanSchedulePeriodData> periods) {
+        final LocalDate businessDate = DateUtils.getBusinessLocalDate();
+        return periods.stream()
+                .filter(period -> !period.getDownPaymentPeriod() && isActualPeriod(period) && businessDate.isBefore(period.getDueDate()))
+                .map(period -> period.getInterestPaid()).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private static boolean isActualPeriod(LoanSchedulePeriodData period) {
+        final LocalDate businessDate = DateUtils.getBusinessLocalDate();
+        boolean actualPeriod = false;
+        if (period.getPeriod() != null) {
+            if (period.getPeriod() == 1) {
+                actualPeriod = ((businessDate.isEqual(period.getFromDate()) || businessDate.isAfter(period.getFromDate()))
+                        && businessDate.isBefore(period.getDueDate()));
+            } else {
+                actualPeriod = (businessDate.isAfter(period.getFromDate()) && businessDate.isBefore(period.getDueDate()));
+            }
+        }
+
+        return actualPeriod;
     }
 }
