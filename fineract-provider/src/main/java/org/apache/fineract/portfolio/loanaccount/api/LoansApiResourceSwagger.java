@@ -636,7 +636,13 @@ final class LoansApiResourceSwagger {
             @Schema(example = "0.000000")
             public Double totalRepaymentTransaction;
             @Schema(example = "0.000000")
+            public Double totalInterestPaymentWaiver;
+            @Schema(example = "0.000000")
             public Double totalRepaymentTransactionReversed;
+            @Schema(example = "0.000000")
+            public Double totalUnpaidAccruedDueInterest;
+            @Schema(example = "0.000000")
+            public Double totalUnpaidAccruedNotDueInterest;
             public Set<GetLoansLoanIdOverdueCharges> overdueCharges;
             @Schema(example = "1")
             public Long chargeOffReasonId;
@@ -1004,6 +1010,14 @@ final class LoansApiResourceSwagger {
             public LocalDate delinquentDate;
             @Schema(example = "100.000000")
             public Double delinquentAmount;
+            @Schema(example = "80.000000")
+            public Double delinquentPrincipal;
+            @Schema(example = "10.000000")
+            public Double delinquentInterest;
+            @Schema(example = "6.000000")
+            public Double delinquentFee;
+            @Schema(example = "4.000000")
+            public Double delinquentPenalty;
             @Schema(example = "[2022, 07, 01]")
             public LocalDate lastPaymentDate;
             @Schema(example = "100.000000")

@@ -64,6 +64,11 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
             return CollectionData.template();
         }
 
+        BigDecimal delinquentPrincipal = BigDecimal.ZERO;
+        BigDecimal delinquentInterest = BigDecimal.ZERO;
+        BigDecimal delinquentFee = BigDecimal.ZERO;
+        BigDecimal delinquentPenalty = BigDecimal.ZERO;
+
         // Get the oldest overdue installment if exists one
         for (LoanRepaymentScheduleInstallment installment : loan.getRepaymentScheduleInstallments()) {
             if (!installment.isObligationsMet()) {
@@ -71,6 +76,10 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
                     log.debug("Loan Id: {} with installment {} due date {}", loan.getId(), installment.getInstallmentNumber(),
                             installment.getDueDate());
                     outstandingAmount = outstandingAmount.add(installment.getTotalOutstanding(loanCurrency).getAmount());
+                    delinquentPrincipal = delinquentPrincipal.add(installment.getPrincipalOutstanding(loanCurrency).getAmount());
+                    delinquentInterest = delinquentInterest.add(installment.getInterestOutstanding(loanCurrency).getAmount());
+                    delinquentFee = delinquentFee.add(installment.getFeeChargesOutstanding(loanCurrency).getAmount());
+                    delinquentPenalty = delinquentPenalty.add(installment.getPenaltyChargesOutstanding(loanCurrency).getAmount());
                     if (!oldestOverdueInstallment) {
                         log.debug("Oldest installment {} {}", installment.getInstallmentNumber(), installment.getDueDate());
                         CollectionData overDueInstallmentDelinquentData = calculateDelinquencyDataForOverdueInstallment(loan, installment);
@@ -85,6 +94,10 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
                     CollectionData nonOverDueInstallmentDelinquentData = calculateDelinquencyDataForNonOverdueInstallment(loan,
                             installment);
                     outstandingAmount = outstandingAmount.add(nonOverDueInstallmentDelinquentData.getDelinquentAmount());
+                    delinquentPrincipal = delinquentPrincipal.add(nonOverDueInstallmentDelinquentData.getDelinquentPrincipal());
+                    delinquentInterest = delinquentInterest.add(nonOverDueInstallmentDelinquentData.getDelinquentInterest());
+                    delinquentFee = delinquentFee.add(nonOverDueInstallmentDelinquentData.getDelinquentFee());
+                    delinquentPenalty = delinquentPenalty.add(nonOverDueInstallmentDelinquentData.getDelinquentPenalty());
                     if (!overdueSinceDateWasSet) {
                         overdueSinceDate = nonOverDueInstallmentDelinquentData.getDelinquentDate();
                         overdueSinceDateWasSet = true;
@@ -110,6 +123,11 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
             collectionData.setDelinquentDate(overdueSinceDate);
         }
         collectionData.setDelinquentAmount(outstandingAmount);
+        collectionData.setDelinquentPrincipal(delinquentPrincipal);
+        collectionData.setDelinquentInterest(delinquentInterest);
+        collectionData.setDelinquentFee(delinquentFee);
+        collectionData.setDelinquentPenalty(delinquentPenalty);
+
         collectionData.setDelinquentDays(0L);
         Long delinquentDays = overdueDays - graceDays;
         if (delinquentDays > 0) {
@@ -248,8 +266,17 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
         LocalDate overdueSinceDate = null;
         CollectionData collectionData = CollectionData.template();
         BigDecimal outstandingAmount = BigDecimal.ZERO;
+        BigDecimal delinquentPrincipal = BigDecimal.ZERO;
+        BigDecimal delinquentInterest = BigDecimal.ZERO;
+        BigDecimal delinquentFee = BigDecimal.ZERO;
+        BigDecimal delinquentPenalty = BigDecimal.ZERO;
 
         outstandingAmount = outstandingAmount.add(installment.getTotalOutstanding(loanCurrency).getAmount());
+        delinquentPrincipal = delinquentPrincipal.add(installment.getPrincipalOutstanding(loanCurrency).getAmount());
+        delinquentInterest = delinquentInterest.add(installment.getInterestOutstanding(loanCurrency).getAmount());
+        delinquentFee = delinquentFee.add(installment.getFeeChargesOutstanding(loanCurrency).getAmount());
+        delinquentPenalty = delinquentPenalty.add(installment.getPenaltyChargesOutstanding(loanCurrency).getAmount());
+
         overdueSinceDate = installment.getDueDate();
         BigDecimal amountAvailable = installment.getTotalPaid(loanCurrency).getAmount();
         boolean isLatestInstallment = Objects.equals(installment.getId(), latestInstallment.getId());
@@ -272,6 +299,10 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
         }
         collectionData.setDelinquentDate(overdueSinceDate);
         collectionData.setDelinquentAmount(outstandingAmount);
+        collectionData.setDelinquentPrincipal(delinquentPrincipal);
+        collectionData.setDelinquentInterest(delinquentInterest);
+        collectionData.setDelinquentFee(delinquentFee);
+        collectionData.setDelinquentPenalty(delinquentPenalty);
         return collectionData;
     }
 
@@ -283,6 +314,10 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
         LocalDate overdueSinceDate = null;
         CollectionData collectionData = CollectionData.template();
         BigDecimal outstandingAmount = BigDecimal.ZERO;
+        BigDecimal delinquentPrincipal = BigDecimal.ZERO;
+        BigDecimal delinquentInterest = BigDecimal.ZERO;
+        BigDecimal delinquentFee = BigDecimal.ZERO;
+        BigDecimal delinquentPenalty = BigDecimal.ZERO;
 
         List<LoanTransaction> chargebackTransactions = loan.getLoanTransactions(LoanTransaction::isChargeback);
         BigDecimal amountAvailable = installment.getTotalPaid(loanCurrency).getAmount();
@@ -306,6 +341,10 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
         }
         collectionData.setDelinquentDate(overdueSinceDate);
         collectionData.setDelinquentAmount(outstandingAmount);
+        collectionData.setDelinquentPrincipal(delinquentPrincipal);
+        collectionData.setDelinquentInterest(delinquentInterest);
+        collectionData.setDelinquentFee(delinquentFee);
+        collectionData.setDelinquentPenalty(delinquentPenalty);
         return collectionData;
     }
 
