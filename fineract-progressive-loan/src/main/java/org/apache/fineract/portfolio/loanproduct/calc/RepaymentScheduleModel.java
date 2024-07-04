@@ -18,27 +18,16 @@
  */
 package org.apache.fineract.portfolio.loanproduct.calc;
 
-import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
-import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.apache.fineract.organisation.monetary.domain.Money;
 
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-public class EMICalculationResult {
+@Getter
+public class RepaymentScheduleModel {
 
-    @Getter
-    private final Money equalMonthlyInstallmentValue;
-    private final List<BigDecimal> repaymentPeriodRateFactorMinus1List;
+    List<RepaymentPeriodModel> scheduleList = new ArrayList<>();
 
-    private int counter = 0;
-
-    public BigDecimal getNextRepaymentPeriodRateFactorMinus1() {
-        return counter < repaymentPeriodRateFactorMinus1List.size() ? repaymentPeriodRateFactorMinus1List.get(counter++) : BigDecimal.ZERO;
-    }
-
-    public void reset() {
-        counter = 0;
+    public void addRepaymentPeriodModel(final RepaymentPeriodModel repaymentPeriodModel) {
+        scheduleList.add(repaymentPeriodModel);
     }
 }

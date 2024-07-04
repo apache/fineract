@@ -55,12 +55,11 @@ public class ProgressiveLoanScheduleGenerator extends AbstractProgressiveLoanSch
             final LoanScheduleParams loanScheduleParams, final EMICalculationResult emiCalculationResult, final MathContext mc) {
 
         final Money equalMonthlyInstallmentValue = loanApplicationTerms.getInstallmentAmountInMultiplesOf() != null
-                ? Money.of(loanApplicationTerms.getCurrency(),
-                        Money.roundToMultiplesOf(emiCalculationResult.getEqualMonthlyInstallmentValue(),
-                                loanApplicationTerms.getInstallmentAmountInMultiplesOf()))
-                : Money.of(loanApplicationTerms.getCurrency(), emiCalculationResult.getEqualMonthlyInstallmentValue());
+                ? Money.roundToMultiplesOf(emiCalculationResult.getEqualMonthlyInstallmentValue(),
+                        loanApplicationTerms.getInstallmentAmountInMultiplesOf())
+                : emiCalculationResult.getEqualMonthlyInstallmentValue();
         final BigDecimal rateFactorMinus1 = emiCalculationResult.getNextRepaymentPeriodRateFactorMinus1();
-        final Money calculatedInterest = loanScheduleParams.getOutstandingBalance().multipliedBy(rateFactorMinus1);
+        final Money calculatedInterest = loanScheduleParams.getOutstandingBalanceAsPerRest().multipliedBy(rateFactorMinus1);
         final Money calculatedPrincipal = equalMonthlyInstallmentValue.minus(calculatedInterest);
 
         return new PrincipalInterest(
@@ -72,7 +71,7 @@ public class ProgressiveLoanScheduleGenerator extends AbstractProgressiveLoanSch
             final LoanApplicationTerms loanApplicationTerms, final LoanScheduleParams loanScheduleParams) {
         final boolean isLastRepaymentPeriod = loanScheduleParams.getPeriodNumber() == loanApplicationTerms.getActualNoOfRepaymnets();
         if (isLastRepaymentPeriod) {
-            final Money remainingAmount = loanScheduleParams.getOutstandingBalance().minus(calculatedPrincipal);
+            final Money remainingAmount = loanScheduleParams.getOutstandingBalanceAsPerRest().minus(calculatedPrincipal);
             return calculatedPrincipal.plus(remainingAmount);
         }
         return calculatedPrincipal;

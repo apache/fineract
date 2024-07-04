@@ -119,8 +119,8 @@ public abstract class AbstractProgressiveLoanScheduleGenerator implements LoanSc
                         : scheduleParams.getPeriodStartDate();
                 List<PreGeneratedLoanSchedulePeriod> expectedRepaymentPeriods = getScheduledDateGenerator()
                         .generateRepaymentPeriods(startDate, loanApplicationTerms, holidayDetailDTO);
-                emiCalculationResult = getEMICalculator().calculateEMIValueAndRateFactors(scheduleParams,
-                        loanApplicationTerms.toLoanProductRelatedDetail(), expectedRepaymentPeriods, mc);
+                emiCalculationResult = getEMICalculator().calculateEMIValueAndRateFactors(loanApplicationTerms, scheduleParams,
+                        expectedRepaymentPeriods, mc);
             }
 
             // 5 determine principal,interest of repayment period
