@@ -21,12 +21,11 @@ package org.apache.fineract.portfolio.loanproduct.calc;
 import java.math.MathContext;
 import java.util.List;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleParams;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelPeriod;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 
 public interface EMICalculator {
 
-    EMICalculationResult calculateEMIValueAndRateFactors(LoanScheduleParams scheduleParams,
-            LoanProductRelatedDetail loanProductRelatedDetail, List<? extends LoanScheduleModelPeriod> expectedRepaymentPeriods,
-            MathContext mc);
+    EMICalculationResult calculateEMIValueAndRateFactors(LoanApplicationTerms loanApplicationTerms, LoanScheduleParams scheduleParams,
+            List<? extends LoanScheduleModelPeriod> expectedRepaymentPeriods, MathContext mc);
 }
