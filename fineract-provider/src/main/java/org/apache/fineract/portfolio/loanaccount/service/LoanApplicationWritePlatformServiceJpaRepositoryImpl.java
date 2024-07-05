@@ -123,6 +123,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final LoanRepository loanRepository;
     private final GSIMReadPlatformService gsimReadPlatformService;
     private final LoanLifecycleStateMachine defaultLoanLifecycleStateMachine;
+    private final LoanAccrualsProcessingService loanAccrualsProcessingService;
 
     @Transactional
     @Override
@@ -625,6 +626,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 LocalDate recalculateFrom = null;
                 ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
                 loan.regenerateRepaymentSchedule(scheduleGeneratorDTO);
+                loanAccrualsProcessingService.reprocessExistingAccruals(loan);
             }
 
             loan.adjustNetDisbursalAmount(loan.getProposedPrincipal());

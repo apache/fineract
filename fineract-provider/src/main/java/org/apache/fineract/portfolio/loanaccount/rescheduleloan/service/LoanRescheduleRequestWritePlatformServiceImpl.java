@@ -80,6 +80,7 @@ import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanResch
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequestRepository;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.exception.LoanRescheduleRequestNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualTransactionBusinessEventService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualsProcessingService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.portfolio.loanaccount.service.ReplayedTransactionBusinessEventService;
@@ -119,6 +120,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
     private final ReplayedTransactionBusinessEventService replayedTransactionBusinessEventService;
     private final LoanAccrualTransactionBusinessEventService loanAccrualTransactionBusinessEventService;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final LoanAccrualsProcessingService loanAccrualsProcessingService;
 
     /**
      * create a new instance of the LoanRescheduleRequest object from the JsonCommand object and persist
@@ -447,6 +449,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             } else {
                 loan.updateLoanSchedule(loanSchedule.getLoanScheduleModel());
             }
+            loanAccrualsProcessingService.reprocessExistingAccruals(loan);
             loan.recalculateAllCharges();
             ChangedTransactionDetail changedTransactionDetail = loan.processTransactions();
 
@@ -476,7 +479,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
             loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
 
-            this.loanAccountDomainService.recalculateAccruals(loan, true);
+            loanAccrualsProcessingService.processAccrualsForInterestRecalculation(loan, true);
             businessEventNotifierService.notifyPostBusinessEvent(new LoanRescheduledDueAdjustScheduleBusinessEvent(loan));
 
             return new CommandProcessingResultBuilder().withCommandId(jsonCommand.commandId()).withEntityId(loanRescheduleRequestId)

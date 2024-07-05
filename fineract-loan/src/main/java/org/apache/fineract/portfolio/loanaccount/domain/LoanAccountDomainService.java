@@ -58,14 +58,6 @@ public interface LoanAccountDomainService {
     void updateLoanCollateralStatus(Set<LoanCollateralManagement> loanCollateralManagementSet, boolean isReleased);
 
     /**
-     * This method is to recalculate and accrue the income till the last accrued date. this method is used when the
-     * schedule changes due to interest recalculation
-     *
-     * @param loan
-     */
-    void recalculateAccruals(Loan loan);
-
-    /**
      * This method is to set a Delinquency Tag If the loan is overdue, If the loan after the repayment transaction is
      * not overdue and It has a Delinquency Tag, It is removed
      *
@@ -98,10 +90,7 @@ public interface LoanAccountDomainService {
      */
     void disableStandingInstructionsLinkedToClosedLoan(Loan loan);
 
-    void recalculateAccruals(Loan loan, boolean isInterestCalcualtionHappened);
-
     LoanTransaction creditBalanceRefund(Loan loan, LocalDate transactionDate, BigDecimal transactionAmount, String noteText,
             ExternalId externalId, PaymentDetail paymentDetail);
 
-    void applyFinalIncomeAccrualTransaction(Loan loan);
 }

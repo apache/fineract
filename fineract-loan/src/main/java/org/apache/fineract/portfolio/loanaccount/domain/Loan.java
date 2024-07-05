@@ -1260,7 +1260,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
         updateLoanScheduleDependentDerivedFields();
         updateLoanSummaryDerivedFields();
-        applyAccruals();
     }
 
     public void updateLoanSchedule(final Collection<LoanRepaymentScheduleInstallment> installments) {
@@ -1279,7 +1278,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         }
         updateLoanScheduleDependentDerivedFields();
         updateLoanSummaryDerivedFields();
-        applyAccruals();
 
     }
 
@@ -1291,94 +1289,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
             }
         }
         return null;
-    }
-
-    /**
-     * method updates accrual derived fields on installments and reverse the unprocessed transactions
-     */
-    private void applyAccruals() {
-        Collection<LoanTransaction> accruals = retrieveListOfAccrualTransactions();
-        if (!accruals.isEmpty()) {
-            if (isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
-                applyPeriodicAccruals(accruals);
-            } else if (isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct()) {
-                updateAccrualsForNonPeriodicAccruals(accruals);
-            }
-        }
-    }
-
-    private void applyPeriodicAccruals(final Collection<LoanTransaction> accruals) {
-        List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
-        boolean isBasedOnSubmittedOnDate = TemporaryConfigurationServiceContainer.getAccrualDateConfigForCharge()
-                .equalsIgnoreCase("submitted-date");
-        for (LoanRepaymentScheduleInstallment installment : installments) {
-            Money interest = Money.zero(getCurrency());
-            Money fee = Money.zero(getCurrency());
-            Money penalty = Money.zero(getCurrency());
-            for (LoanTransaction loanTransaction : accruals) {
-                LocalDate transactionDateForRange = getDateForRangeCalculation(loanTransaction, isBasedOnSubmittedOnDate);
-                boolean isInPeriod = LoanRepaymentScheduleProcessingWrapper.isInPeriod(transactionDateForRange, installment, installments);
-                if (isInPeriod) {
-                    interest = interest.plus(loanTransaction.getInterestPortion(getCurrency()));
-                    fee = fee.plus(loanTransaction.getFeeChargesPortion(getCurrency()));
-                    penalty = penalty.plus(loanTransaction.getPenaltyChargesPortion(getCurrency()));
-                    if (installment.getFeeChargesCharged(getCurrency()).isLessThan(fee)
-                            || installment.getInterestCharged(getCurrency()).isLessThan(interest)
-                            || installment.getPenaltyChargesCharged(getCurrency()).isLessThan(penalty)
-                            || (isInterestBearing() && DateUtils.isEqual(getAccruedTill(), loanTransaction.getTransactionDate())
-                                    && !DateUtils.isEqual(getAccruedTill(), installment.getDueDate()))) {
-                        interest = interest.minus(loanTransaction.getInterestPortion(getCurrency()));
-                        fee = fee.minus(loanTransaction.getFeeChargesPortion(getCurrency()));
-                        penalty = penalty.minus(loanTransaction.getPenaltyChargesPortion(getCurrency()));
-                        loanTransaction.reverse();
-                    }
-
-                }
-            }
-            installment.updateAccrualPortion(interest, fee, penalty);
-        }
-        LoanRepaymentScheduleInstallment lastInstallment = getLastLoanRepaymentScheduleInstallment();
-        for (LoanTransaction loanTransaction : accruals) {
-            if (!loanTransaction.isReversed() && DateUtils.isAfter(loanTransaction.getTransactionDate(), lastInstallment.getDueDate())) {
-                loanTransaction.reverse();
-            }
-        }
-    }
-
-    private LocalDate getDateForRangeCalculation(LoanTransaction loanTransaction, boolean isChargeAccrualBasedOnSubmittedOnDate) {
-        return isChargeAccrualBasedOnSubmittedOnDate && !loanTransaction.getLoanChargesPaid().isEmpty()
-                ? loanTransaction.getLoanChargesPaid().stream().findFirst().get().getLoanCharge().getEffectiveDueDate()
-                : loanTransaction.getTransactionDate();
-    }
-
-    private void updateAccrualsForNonPeriodicAccruals(final Collection<LoanTransaction> accruals) {
-        final Money interestApplied = Money.of(getCurrency(), this.summary.getTotalInterestCharged());
-        ExternalId externalId = ExternalId.empty();
-        boolean isExternalIdAutoGenerationEnabled = TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled();
-
-        for (LoanTransaction loanTransaction : accruals) {
-            if (loanTransaction.getInterestPortion(getCurrency()).isGreaterThanZero()) {
-                if (loanTransaction.getInterestPortion(getCurrency()).isNotEqualTo(interestApplied)) {
-                    loanTransaction.reverse();
-                    if (isExternalIdAutoGenerationEnabled) {
-                        externalId = ExternalId.generate();
-                    }
-                    final LoanTransaction interestAppliedTransaction = LoanTransaction.accrueInterest(getOffice(), this, interestApplied,
-                            getDisbursementDate(), externalId);
-                    addLoanTransaction(interestAppliedTransaction);
-                }
-            } else {
-                Set<LoanChargePaidBy> chargePaidBies = loanTransaction.getLoanChargesPaid();
-                for (final LoanChargePaidBy chargePaidBy : chargePaidBies) {
-                    LoanCharge loanCharge = chargePaidBy.getLoanCharge();
-                    Money chargeAmount = loanCharge.getAmount(getCurrency());
-                    if (chargeAmount.isNotEqualTo(loanTransaction.getAmount(getCurrency()))) {
-                        loanTransaction.reverse();
-                        handleChargeAppliedTransaction(loanCharge, loanTransaction.getTransactionDate());
-                    }
-                }
-            }
-        }
     }
 
     public void updateLoanScheduleDependentDerivedFields() {
@@ -2061,7 +1971,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return details;
     }
 
-    private boolean isDisbursementMissed() {
+    public boolean isDisbursementMissed() {
         return getDisbursementDetails().stream() //
                 .anyMatch(disbursementDetail -> disbursementDetail.actualDisbursementDate() == null
                         && DateUtils.isBeforeBusinessDate(disbursementDetail.expectedDisbursementDateAsLocalDate()));
@@ -2683,12 +2593,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
                 .orElse(null);
     }
 
-    private List<LoanTransaction> retrieveListOfIncomePostingTransactions() {
-        return getLoanTransactions().stream() //
-                .filter(transaction -> transaction.isNotReversed() && transaction.isIncomePosting()) //
-                .sorted(LoanTransactionComparator.INSTANCE).collect(Collectors.toList());
-    }
-
     public List<LoanTransaction> retrieveListOfTransactionsForReprocessing() {
         return getLoanTransactions().stream()
                 .filter(transaction -> transaction.isNotReversed() && !transaction.isAccrual()
@@ -2713,11 +2617,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         }
         repaymentsOrWaivers.sort(LoanTransactionComparator.INSTANCE);
         return repaymentsOrWaivers;
-    }
-
-    private List<LoanTransaction> retrieveListOfAccrualTransactions() {
-        return this.loanTransactions.stream().filter(transaction -> transaction.isNotReversed() && transaction.isAccrual())
-                .sorted(LoanTransactionComparator.INSTANCE).collect(Collectors.toList());
     }
 
     public List<LoanTransaction> retrieveListOfTransactionsByType(final LoanTransactionType transactionType) {
@@ -2762,82 +2661,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
             }
             loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT_OR_WAIVER, this);
         }
-        processIncomeAccrualTransactionOnLoanClosure();
-    }
-
-    public void processIncomeAccrualTransactionOnLoanClosure() {
-        if (this.loanInterestRecalculationDetails != null && this.loanInterestRecalculationDetails.isCompoundingToBePostedAsTransaction()
-                && this.getStatus().isClosedObligationsMet() && !isNpa() && !isChargedOff()) {
-
-            ExternalId externalId = ExternalId.empty();
-            boolean isExternalIdAutoGenerationEnabled = TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled();
-
-            LocalDate closedDate = this.getClosedOnDate();
-            reverseTransactionsOnOrAfter(retrieveListOfIncomePostingTransactions(), closedDate);
-            reverseTransactionsOnOrAfter(retrieveListOfAccrualTransactions(), closedDate);
-            HashMap<String, BigDecimal> cumulativeIncomeFromInstallments = new HashMap<>();
-            determineCumulativeIncomeFromInstallments(cumulativeIncomeFromInstallments);
-            HashMap<String, BigDecimal> cumulativeIncomeFromIncomePosting = new HashMap<>();
-            determineCumulativeIncomeDetails(retrieveListOfIncomePostingTransactions(), cumulativeIncomeFromIncomePosting);
-            BigDecimal interestToPost = cumulativeIncomeFromInstallments.get(INTEREST)
-                    .subtract(cumulativeIncomeFromIncomePosting.get(INTEREST));
-            BigDecimal feeToPost = cumulativeIncomeFromInstallments.get(FEE).subtract(cumulativeIncomeFromIncomePosting.get(FEE));
-            BigDecimal penaltyToPost = cumulativeIncomeFromInstallments.get(PENALTY)
-                    .subtract(cumulativeIncomeFromIncomePosting.get(PENALTY));
-            BigDecimal amountToPost = interestToPost.add(feeToPost).add(penaltyToPost);
-            if (isExternalIdAutoGenerationEnabled) {
-                externalId = ExternalId.generate();
-            }
-            LoanTransaction finalIncomeTransaction = LoanTransaction.incomePosting(this, this.getOffice(), closedDate, amountToPost,
-                    interestToPost, feeToPost, penaltyToPost, externalId);
-            addLoanTransaction(finalIncomeTransaction);
-            if (isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
-                List<LoanTransaction> updatedAccrualTransactions = retrieveListOfAccrualTransactions();
-                LocalDate lastAccruedDate = this.getDisbursementDate();
-                if (!updatedAccrualTransactions.isEmpty()) {
-                    lastAccruedDate = updatedAccrualTransactions.get(updatedAccrualTransactions.size() - 1).getTransactionDate();
-                }
-                HashMap<String, Object> feeDetails = new HashMap<>();
-                determineFeeDetails(lastAccruedDate, closedDate, feeDetails);
-                if (isExternalIdAutoGenerationEnabled) {
-                    externalId = ExternalId.generate();
-                }
-                LoanTransaction finalAccrual = LoanTransaction.accrueTransaction(this, this.getOffice(), closedDate, amountToPost,
-                        interestToPost, feeToPost, penaltyToPost, externalId);
-                updateLoanChargesPaidBy(finalAccrual, feeDetails, null);
-                addLoanTransaction(finalAccrual);
-            }
-        }
-        updateLoanOutstandingBalances();
-    }
-
-    private void determineCumulativeIncomeFromInstallments(HashMap<String, BigDecimal> cumulativeIncomeFromInstallments) {
-        BigDecimal interest = BigDecimal.ZERO;
-        BigDecimal fee = BigDecimal.ZERO;
-        BigDecimal penalty = BigDecimal.ZERO;
-        List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
-        for (LoanRepaymentScheduleInstallment installment : installments) {
-            interest = interest.add(installment.getInterestCharged(getCurrency()).getAmount());
-            fee = fee.add(installment.getFeeChargesCharged(getCurrency()).getAmount());
-            penalty = penalty.add(installment.getPenaltyChargesCharged(getCurrency()).getAmount());
-        }
-        cumulativeIncomeFromInstallments.put(INTEREST, interest);
-        cumulativeIncomeFromInstallments.put(FEE, fee);
-        cumulativeIncomeFromInstallments.put(PENALTY, penalty);
-    }
-
-    private void determineCumulativeIncomeDetails(Collection<LoanTransaction> transactions, HashMap<String, BigDecimal> incomeDetailsMap) {
-        BigDecimal interest = BigDecimal.ZERO;
-        BigDecimal fee = BigDecimal.ZERO;
-        BigDecimal penalty = BigDecimal.ZERO;
-        for (LoanTransaction transaction : transactions) {
-            interest = interest.add(transaction.getInterestPortion(getCurrency()).getAmount());
-            fee = fee.add(transaction.getFeeChargesPortion(getCurrency()).getAmount());
-            penalty = penalty.add(transaction.getPenaltyChargesPortion(getCurrency()).getAmount());
-        }
-        incomeDetailsMap.put(INTEREST, interest);
-        incomeDetailsMap.put(FEE, fee);
-        incomeDetailsMap.put(PENALTY, penalty);
     }
 
     private void handleLoanOverpayment(LocalDate transactionDate, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
@@ -4646,197 +4469,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         }
 
         processPostDisbursementTransactions();
-        processIncomeTransactions();
-    }
-
-    private void updateLoanChargesPaidBy(LoanTransaction accrual, Map<String, Object> feeDetails,
-            LoanRepaymentScheduleInstallment installment) {
-        @SuppressWarnings("unchecked")
-        List<LoanCharge> loanCharges = (List<LoanCharge>) feeDetails.get("loanCharges");
-        @SuppressWarnings("unchecked")
-        List<LoanInstallmentCharge> loanInstallmentCharges = (List<LoanInstallmentCharge>) feeDetails.get("loanInstallmentCharges");
-        if (loanCharges != null) {
-            for (LoanCharge loanCharge : loanCharges) {
-                Integer installmentNumber = null == installment ? null : installment.getInstallmentNumber();
-                final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(accrual, loanCharge,
-                        loanCharge.getAmount(getCurrency()).getAmount(), installmentNumber);
-                accrual.getLoanChargesPaid().add(loanChargePaidBy);
-            }
-        }
-        if (loanInstallmentCharges != null) {
-            for (LoanInstallmentCharge loanInstallmentCharge : loanInstallmentCharges) {
-                Integer installmentNumber = null == loanInstallmentCharge.getInstallment() ? null
-                        : loanInstallmentCharge.getInstallment().getInstallmentNumber();
-                final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(accrual, loanInstallmentCharge.getLoanCharge(),
-                        loanInstallmentCharge.getAmount(getCurrency()).getAmount(), installmentNumber);
-                accrual.getLoanChargesPaid().add(loanChargePaidBy);
-            }
-        }
-    }
-
-    public void processIncomeTransactions() {
-        if (this.loanInterestRecalculationDetails != null && this.loanInterestRecalculationDetails.isCompoundingToBePostedAsTransaction()) {
-            LocalDate lastCompoundingDate = this.getDisbursementDate();
-            List<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails = extractInterestRecalculationAdditionalDetails();
-            List<LoanTransaction> incomeTransactions = retrieveListOfIncomePostingTransactions();
-            List<LoanTransaction> accrualTransactions = retrieveListOfAccrualTransactions();
-            for (LoanInterestRecalcualtionAdditionalDetails compoundingDetail : compoundingDetails) {
-                if (!DateUtils.isBeforeBusinessDate(compoundingDetail.getEffectiveDate())) {
-                    break;
-                }
-                LoanTransaction incomeTransaction = getTransactionForDate(incomeTransactions, compoundingDetail.getEffectiveDate());
-                LoanTransaction accrualTransaction = getTransactionForDate(accrualTransactions, compoundingDetail.getEffectiveDate());
-                addUpdateIncomeAndAccrualTransaction(compoundingDetail, lastCompoundingDate, incomeTransaction, accrualTransaction);
-                lastCompoundingDate = compoundingDetail.getEffectiveDate();
-            }
-            List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
-            LoanRepaymentScheduleInstallment lastInstallment = LoanRepaymentScheduleInstallment
-                    .getLastNonDownPaymentInstallment(installments);
-            reverseTransactionsPostEffectiveDate(incomeTransactions, lastInstallment.getDueDate());
-            reverseTransactionsPostEffectiveDate(accrualTransactions, lastInstallment.getDueDate());
-        }
-    }
-
-    private void reverseTransactionsOnOrAfter(List<LoanTransaction> transactions, LocalDate date) {
-        for (LoanTransaction loanTransaction : transactions) {
-            if (!DateUtils.isBefore(loanTransaction.getTransactionDate(), date)) {
-                loanTransaction.reverse();
-            }
-        }
-    }
-
-    private void addUpdateIncomeAndAccrualTransaction(LoanInterestRecalcualtionAdditionalDetails compoundingDetail,
-            LocalDate lastCompoundingDate, LoanTransaction existingIncomeTransaction, LoanTransaction existingAccrualTransaction) {
-        BigDecimal interest = BigDecimal.ZERO;
-        BigDecimal fee = BigDecimal.ZERO;
-        BigDecimal penalties = BigDecimal.ZERO;
-        HashMap<String, Object> feeDetails = new HashMap<>();
-
-        if (this.loanInterestRecalculationDetails.getInterestRecalculationCompoundingMethod()
-                .equals(InterestRecalculationCompoundingMethod.INTEREST)) {
-            interest = compoundingDetail.getAmount();
-        } else if (this.loanInterestRecalculationDetails.getInterestRecalculationCompoundingMethod()
-                .equals(InterestRecalculationCompoundingMethod.FEE)) {
-            determineFeeDetails(lastCompoundingDate, compoundingDetail.getEffectiveDate(), feeDetails);
-            fee = (BigDecimal) feeDetails.get(FEE);
-            penalties = (BigDecimal) feeDetails.get(PENALTIES);
-        } else if (this.loanInterestRecalculationDetails.getInterestRecalculationCompoundingMethod()
-                .equals(InterestRecalculationCompoundingMethod.INTEREST_AND_FEE)) {
-            determineFeeDetails(lastCompoundingDate, compoundingDetail.getEffectiveDate(), feeDetails);
-            fee = (BigDecimal) feeDetails.get(FEE);
-            penalties = (BigDecimal) feeDetails.get(PENALTIES);
-            interest = compoundingDetail.getAmount().subtract(fee).subtract(penalties);
-        }
-
-        ExternalId externalId = ExternalId.empty();
-        if (TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled()) {
-            externalId = ExternalId.generate();
-        }
-
-        if (existingIncomeTransaction == null) {
-            LoanTransaction transaction = LoanTransaction.incomePosting(this, this.getOffice(), compoundingDetail.getEffectiveDate(),
-                    compoundingDetail.getAmount(), interest, fee, penalties, externalId);
-            addLoanTransaction(transaction);
-        } else if (existingIncomeTransaction.getAmount(getCurrency()).getAmount().compareTo(compoundingDetail.getAmount()) != 0) {
-            existingIncomeTransaction.reverse();
-            LoanTransaction transaction = LoanTransaction.incomePosting(this, this.getOffice(), compoundingDetail.getEffectiveDate(),
-                    compoundingDetail.getAmount(), interest, fee, penalties, externalId);
-            addLoanTransaction(transaction);
-        }
-
-        if (TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled()) {
-            externalId = ExternalId.generate();
-        }
-
-        if (isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
-            if (existingAccrualTransaction == null) {
-                LoanTransaction accrual = LoanTransaction.accrueTransaction(this, this.getOffice(), compoundingDetail.getEffectiveDate(),
-                        compoundingDetail.getAmount(), interest, fee, penalties, externalId);
-                updateLoanChargesPaidBy(accrual, feeDetails, null);
-                addLoanTransaction(accrual);
-            } else if (existingAccrualTransaction.getAmount(getCurrency()).getAmount().compareTo(compoundingDetail.getAmount()) != 0) {
-                existingAccrualTransaction.reverse();
-                LoanTransaction accrual = LoanTransaction.accrueTransaction(this, this.getOffice(), compoundingDetail.getEffectiveDate(),
-                        compoundingDetail.getAmount(), interest, fee, penalties, externalId);
-                updateLoanChargesPaidBy(accrual, feeDetails, null);
-                addLoanTransaction(accrual);
-            }
-        }
-        updateLoanOutstandingBalances();
-    }
-
-    private void determineFeeDetails(LocalDate fromDate, LocalDate toDate, Map<String, Object> feeDetails) {
-        BigDecimal fee = BigDecimal.ZERO;
-        BigDecimal penalties = BigDecimal.ZERO;
-
-        List<Integer> installments = new ArrayList<>();
-        List<LoanRepaymentScheduleInstallment> repaymentSchedule = getRepaymentScheduleInstallments();
-        for (LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : repaymentSchedule) {
-            if (DateUtils.isAfter(loanRepaymentScheduleInstallment.getDueDate(), fromDate)
-                    && !DateUtils.isAfter(loanRepaymentScheduleInstallment.getDueDate(), toDate)) {
-                installments.add(loanRepaymentScheduleInstallment.getInstallmentNumber());
-            }
-        }
-
-        List<LoanCharge> loanCharges = new ArrayList<>();
-        List<LoanInstallmentCharge> loanInstallmentCharges = new ArrayList<>();
-        for (LoanCharge loanCharge : this.getActiveCharges()) {
-            boolean isDue = DateUtils.isEqual(fromDate, this.getDisbursementDate())
-                    ? loanCharge.isDueForCollectionFromIncludingAndUpToAndIncluding(fromDate, toDate)
-                    : loanCharge.isDueForCollectionFromAndUpToAndIncluding(fromDate, toDate);
-            if (isDue) {
-                if (loanCharge.isPenaltyCharge() && !loanCharge.isInstalmentFee()) {
-                    penalties = penalties.add(loanCharge.amount());
-                    loanCharges.add(loanCharge);
-                } else if (!loanCharge.isInstalmentFee()) {
-                    fee = fee.add(loanCharge.amount());
-                    loanCharges.add(loanCharge);
-                }
-            } else if (loanCharge.isInstalmentFee()) {
-                for (LoanInstallmentCharge installmentCharge : loanCharge.installmentCharges()) {
-                    if (installments.contains(installmentCharge.getRepaymentInstallment().getInstallmentNumber())) {
-                        fee = fee.add(installmentCharge.getAmount());
-                        loanInstallmentCharges.add(installmentCharge);
-                    }
-                }
-            }
-        }
-
-        feeDetails.put(FEE, fee);
-        feeDetails.put(PENALTIES, penalties);
-        feeDetails.put("loanCharges", loanCharges);
-        feeDetails.put("loanInstallmentCharges", loanInstallmentCharges);
-    }
-
-    private LoanTransaction getTransactionForDate(List<LoanTransaction> transactions, LocalDate effectiveDate) {
-        for (LoanTransaction loanTransaction : transactions) {
-            if (DateUtils.isEqual(effectiveDate, loanTransaction.getTransactionDate())) {
-                return loanTransaction;
-            }
-        }
-        return null;
-    }
-
-    private void reverseTransactionsPostEffectiveDate(List<LoanTransaction> transactions, LocalDate effectiveDate) {
-        for (LoanTransaction loanTransaction : transactions) {
-            if (DateUtils.isAfter(loanTransaction.getTransactionDate(), effectiveDate)) {
-                loanTransaction.reverse();
-            }
-        }
-    }
-
-    private List<LoanInterestRecalcualtionAdditionalDetails> extractInterestRecalculationAdditionalDetails() {
-        List<LoanInterestRecalcualtionAdditionalDetails> retDetails = new ArrayList<>();
-        List<LoanRepaymentScheduleInstallment> repaymentSchedule = getRepaymentScheduleInstallments();
-        if (null != repaymentSchedule) {
-            for (LoanRepaymentScheduleInstallment installment : repaymentSchedule) {
-                if (null != installment.getLoanCompoundingDetails()) {
-                    retDetails.addAll(installment.getLoanCompoundingDetails());
-                }
-            }
-        }
-        retDetails.sort(Comparator.comparing(LoanInterestRecalcualtionAdditionalDetails::getEffectiveDate));
-        return retDetails;
     }
 
     public void processPostDisbursementTransactions() {
@@ -4996,7 +4628,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return recalculatedOn;
     }
 
-    private void updateLoanOutstandingBalances() {
+    public void updateLoanOutstandingBalances() {
         Money outstanding = Money.zero(getCurrency());
         List<LoanTransaction> loanTransactions = retrieveListOfTransactionsExcludeAccruals();
         for (LoanTransaction loanTransaction : loanTransactions) {
@@ -5755,56 +5387,12 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return interest.doubleValue() / daysInPeriod * days;
     }
 
-    public Money[] getReceivableIncome(final LocalDate tillDate) {
-        MonetaryCurrency currency = getCurrency();
-        Money receivableInterest = Money.zero(currency);
-        Money receivableFee = Money.zero(currency);
-        Money receivablePenalty = Money.zero(currency);
-        Money[] receivables = new Money[3];
-        for (final LoanTransaction transaction : this.loanTransactions) {
-            if (transaction.isNotReversed() && !transaction.isRepaymentAtDisbursement() && !transaction.isDisbursement()
-                    && !DateUtils.isAfter(transaction.getTransactionDate(), tillDate)) {
-                if (transaction.isAccrual()) {
-                    receivableInterest = receivableInterest.plus(transaction.getInterestPortion(currency));
-                    receivableFee = receivableFee.plus(transaction.getFeeChargesPortion(currency));
-                    receivablePenalty = receivablePenalty.plus(transaction.getPenaltyChargesPortion(currency));
-                } else if (transaction.isRepaymentLikeType() || transaction.isChargePayment()) {
-                    receivableInterest = receivableInterest.minus(transaction.getInterestPortion(currency));
-                    receivableFee = receivableFee.minus(transaction.getFeeChargesPortion(currency));
-                    receivablePenalty = receivablePenalty.minus(transaction.getPenaltyChargesPortion(currency));
-                }
-            }
-            if (receivableInterest.isLessThanZero()) {
-                receivableInterest = receivableInterest.zero();
-            }
-            if (receivableFee.isLessThanZero()) {
-                receivableFee = receivableFee.zero();
-            }
-            if (receivablePenalty.isLessThanZero()) {
-                receivablePenalty = receivablePenalty.zero();
-            }
-        }
-        receivables[0] = receivableInterest;
-        receivables[1] = receivableFee;
-        receivables[2] = receivablePenalty;
-        return receivables;
-    }
-
-    public void reverseAccrualsAfter(final LocalDate tillDate) {
-        for (final LoanTransaction transaction : this.loanTransactions) {
-            if (transaction.isAccrual() && DateUtils.isAfter(transaction.getTransactionDate(), tillDate)) {
-                transaction.reverse();
-            }
-        }
-    }
-
     public ChangedTransactionDetail handleForeClosureTransactions(final LoanTransaction repaymentTransaction,
             final LoanLifecycleStateMachine loanLifecycleStateMachine, final ScheduleGeneratorDTO scheduleGeneratorDTO) {
         LoanEvent event = LoanEvent.LOAN_FORECLOSURE;
         validateAccountStatus(event);
         validateForForeclosure(repaymentTransaction.getTransactionDate());
         this.loanSubStatus = LoanSubStatus.FORECLOSED.getValue();
-        applyAccruals();
         return handleRepaymentOrRecoveryOrWaiverTransaction(repaymentTransaction, loanLifecycleStateMachine, null, scheduleGeneratorDTO);
     }
 

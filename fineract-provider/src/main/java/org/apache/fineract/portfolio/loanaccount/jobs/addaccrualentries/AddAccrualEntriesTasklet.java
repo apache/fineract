@@ -27,7 +27,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleAccrualData;
-import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualWritePlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualsProcessingService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -41,7 +41,7 @@ import org.springframework.stereotype.Component;
 public class AddAccrualEntriesTasklet implements Tasklet {
 
     private final LoanReadPlatformService loanReadPlatformService;
-    private final LoanAccrualWritePlatformService loanAccrualWritePlatformService;
+    private final LoanAccrualsProcessingService loanAccrualsProcessingService;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
@@ -60,7 +60,7 @@ public class AddAccrualEntriesTasklet implements Tasklet {
         List<Throwable> errors = new ArrayList<>();
         for (Map.Entry<Long, Collection<LoanScheduleAccrualData>> mapEntry : loanDataMap.entrySet()) {
             try {
-                loanAccrualWritePlatformService.addAccrualAccounting(mapEntry.getKey(), mapEntry.getValue());
+                loanAccrualsProcessingService.addAccrualAccounting(mapEntry.getKey(), mapEntry.getValue());
             } catch (Exception e) {
                 log.error("Failed to add accrual transaction for loan {}", mapEntry.getKey(), e);
                 errors.add(e);
