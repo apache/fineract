@@ -23,13 +23,25 @@ import java.util.Collection;
 import org.apache.fineract.infrastructure.core.exception.MultiException;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleAccrualData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 
-public interface LoanAccrualPlatformService {
+public interface LoanAccrualsProcessingService {
 
     void addPeriodicAccruals(LocalDate tilldate) throws MultiException;
 
     void addPeriodicAccruals(LocalDate tilldate, Loan loan) throws MultiException;
 
-    void addPeriodicAccruals(LocalDate tilldate, Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas) throws MultiException;
+    void addAccrualAccounting(Long loanId, Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas) throws Exception;
 
+    void addIncomeAndAccrualTransactions(Long loanId) throws Exception;
+
+    void reprocessExistingAccruals(Loan loan);
+
+    void processAccrualsForInterestRecalculation(Loan loan, boolean isInterestRecalculationEnabled);
+
+    void processIncomePostingAndAccruals(Loan loan);
+
+    void processAccrualsForLoanClosure(Loan loan);
+
+    void processAccrualsForLoanForeClosure(Loan loan, LocalDate foreClosureDate, Collection<LoanTransaction> newAccrualTransactions);
 }

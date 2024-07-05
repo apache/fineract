@@ -25,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
-import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualWritePlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualsProcessingService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -37,7 +37,7 @@ import org.springframework.batch.repeat.RepeatStatus;
 public class AddPeriodicAccrualEntriesForLoansTasklet implements Tasklet {
 
     private final LoanReadPlatformService loanReadPlatformService;
-    private final LoanAccrualWritePlatformService loanAccrualWritePlatformService;
+    private final LoanAccrualsProcessingService loanAccrualsProcessingService;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
@@ -46,7 +46,7 @@ public class AddPeriodicAccrualEntriesForLoansTasklet implements Tasklet {
             List<Throwable> errors = new ArrayList<>();
             for (Long loanId : loanIds) {
                 try {
-                    loanAccrualWritePlatformService.addIncomeAndAccrualTransactions(loanId);
+                    loanAccrualsProcessingService.addIncomeAndAccrualTransactions(loanId);
                 } catch (Exception e) {
                     log.error("Failed to add income and accrual transaction for loan {}", loanId, e);
                     errors.add(e);

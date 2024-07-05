@@ -134,6 +134,7 @@ public class LoanAssembler {
     private final LoanDisbursementDetailsAssembler loanDisbursementDetailsAssembler;
     private final LoanChargeMapper loanChargeMapper;
     private final LoanCollateralManagementMapper loanCollateralManagementMapper;
+    private final LoanAccrualsProcessingService loanAccrualsProcessingService;
 
     public Loan assembleFrom(final Long accountId) {
         final Loan loanAccount = this.loanRepository.findOneWithNotFoundDetection(accountId, true);
@@ -274,7 +275,7 @@ public class LoanAssembler {
         // TODO: review
         loanApplication.recalculateAllCharges();
         topUpLoanConfiguration(element, loanApplication);
-
+        loanAccrualsProcessingService.reprocessExistingAccruals(loanApplication);
         return loanApplication;
     }
 
@@ -827,6 +828,7 @@ public class LoanAssembler {
 
             final LoanScheduleModel loanSchedule = this.calculationPlatformService.calculateLoanSchedule(query, false);
             loan.updateLoanSchedule(loanSchedule);
+            loanAccrualsProcessingService.reprocessExistingAccruals(loan);
             loan.recalculateAllCharges();
         }
 
