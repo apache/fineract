@@ -136,9 +136,9 @@ public abstract class BaseLoanIntegrationTest {
     // expense
     protected final Account chargeOffExpenseAccount = accountHelper.createExpenseAccount("chargeOff");
     protected final Account chargeOffFraudExpenseAccount = accountHelper.createExpenseAccount("chargeOffFraud");
-    protected final Account writtenOffAccount = accountHelper.createExpenseAccount();
-    protected final Account goodwillExpenseAccount = accountHelper.createExpenseAccount();
-    protected final Account goodwillIncomeAccount = accountHelper.createIncomeAccount();
+    protected final Account writtenOffAccount = accountHelper.createExpenseAccount("writtenOffAccount");
+    protected final Account goodwillExpenseAccount = accountHelper.createExpenseAccount("goodwillExpenseAccount");
+    protected final Account goodwillIncomeAccount = accountHelper.createIncomeAccount("goodwillIncomeAccount");
     protected final LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
     protected JournalEntryHelper journalEntryHelper = new JournalEntryHelper(requestSpec, responseSpec);
     protected ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
