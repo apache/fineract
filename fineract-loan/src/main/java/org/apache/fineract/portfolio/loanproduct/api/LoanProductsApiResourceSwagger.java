@@ -169,6 +169,8 @@ final class LoanProductsApiResourceSwagger {
         public Boolean enableAutoRepaymentForDownPayment;
         @Schema(example = "1")
         public Integer repaymentStartDateType;
+        @Schema(example = "false")
+        public Boolean enableAccrualActivityPosting;
 
         // Interest Recalculation
         @Schema(example = "false")
@@ -1277,6 +1279,8 @@ final class LoanProductsApiResourceSwagger {
         public EnumOptionData loanScheduleType;
         @Schema(example = "HORIZONTAL")
         public EnumOptionData loanScheduleProcessingType;
+        @Schema(example = "false")
+        public Boolean enableAccrualActivityPosting;
     }
 
     @Schema(description = "PutLoanProductsProductIdRequest")
@@ -1487,6 +1491,8 @@ final class LoanProductsApiResourceSwagger {
         public List<GetLoanProductsProductIdResponse.GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings;
         public List<GetLoanProductsProductIdResponse.GetLoanFeeToIncomeAccountMappings> feeToIncomeAccountMappings;
         public List<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings;
+        @Schema(example = "false")
+        public Boolean enableAccrualActivityPosting;
 
         // Multi Disburse
         @Schema(example = "true")

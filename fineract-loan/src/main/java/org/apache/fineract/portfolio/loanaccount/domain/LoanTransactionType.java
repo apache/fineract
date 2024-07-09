@@ -64,6 +64,7 @@ public enum LoanTransactionType {
     REAGE(29, "loanTransactionType.reAge"), //
     REAMORTIZE(30, "loanTransactionType.reAmortize"), //
     INTEREST_PAYMENT_WAIVER(31, "loanTransactionType.interestPaymentWaiver"), //
+    ACCRUAL_ACTIVITY(32, "loanTransactionType.accrualActivity"), //
     ;
 
     private final Integer value;
@@ -111,6 +112,7 @@ public enum LoanTransactionType {
             case 29 -> LoanTransactionType.REAGE;
             case 30 -> LoanTransactionType.REAMORTIZE;
             case 31 -> LoanTransactionType.INTEREST_PAYMENT_WAIVER;
+            case 32 -> LoanTransactionType.ACCRUAL_ACTIVITY;
             default -> LoanTransactionType.INVALID;
         };
     }
@@ -214,5 +216,9 @@ public enum LoanTransactionType {
 
     public boolean isDownPayment() {
         return this.equals(LoanTransactionType.DOWN_PAYMENT);
+    }
+
+    public boolean isAccrualActivity() {
+        return this.equals(LoanTransactionType.ACCRUAL_ACTIVITY);
     }
 }

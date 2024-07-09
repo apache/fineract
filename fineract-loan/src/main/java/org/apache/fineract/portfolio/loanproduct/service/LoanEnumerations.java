@@ -319,6 +319,8 @@ public final class LoanEnumerations {
                     "Re-age");
             case REAMORTIZE -> new LoanTransactionEnumData(LoanTransactionType.REAMORTIZE.getValue().longValue(),
                     LoanTransactionType.REAMORTIZE.getCode(), "Re-amortize");
+            case ACCRUAL_ACTIVITY -> new LoanTransactionEnumData(LoanTransactionType.ACCRUAL_ACTIVITY.getValue().longValue(),
+                    LoanTransactionType.ACCRUAL_ACTIVITY.getCode(), "Accrual Activity");
         };
     }
 

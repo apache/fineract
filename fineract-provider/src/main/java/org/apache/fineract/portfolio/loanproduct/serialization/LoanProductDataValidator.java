@@ -106,6 +106,8 @@ public final class LoanProductDataValidator {
     public static final String MAX_DIFFERENTIAL_LENDING_RATE = "maxDifferentialLendingRate";
     public static final String IS_FLOATING_INTEREST_RATE_CALCULATION_ALLOWED = "isFloatingInterestRateCalculationAllowed";
     public static final String ACCOUNTING_RULE = "accountingRule";
+    public static final String ENABLE_ACCRUAL_ACTIVITY_POSTING = "enableAccrualActivityPosting";
+
     /**
      * The parameters supported for this command.
      */
@@ -172,7 +174,8 @@ public final class LoanProductDataValidator {
             LoanProductConstants.ENABLE_DOWN_PAYMENT, LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT,
             LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT, LoanProductConstants.REPAYMENT_START_DATE_TYPE,
             LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY, LoanProductConstants.LOAN_SCHEDULE_TYPE,
-            LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE, LoanProductConstants.FIXED_LENGTH));
+            LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE, LoanProductConstants.FIXED_LENGTH,
+            LoanProductConstants.ENABLE_ACCRUAL_ACTIVITY_POSTING));
 
     private static final String[] SUPPORTED_LOAN_CONFIGURABLE_ATTRIBUTES = { LoanProductConstants.amortizationTypeParamName,
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyCodeParamName,
@@ -732,6 +735,18 @@ public final class LoanProductDataValidator {
                     .extractLongNamed(LoanProductAccountingParams.PENALTIES_RECEIVABLE.getValue(), element);
             baseDataValidator.reset().parameter(LoanProductAccountingParams.PENALTIES_RECEIVABLE.getValue())
                     .value(receivablePenaltyAccountId).notNull().integerGreaterThanZero();
+        }
+
+        if (!AccountingValidations.isAccrualBasedAccounting(accountingRuleType)
+                && this.fromApiJsonHelper.parameterExists(LoanProductConstants.ENABLE_ACCRUAL_ACTIVITY_POSTING, element)) {
+            final Boolean enableAccrualActivityPosting = this.fromApiJsonHelper
+                    .extractBooleanNamed(LoanProductConstants.ENABLE_ACCRUAL_ACTIVITY_POSTING, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_ACCRUAL_ACTIVITY_POSTING).value(enableAccrualActivityPosting)
+                    .ignoreIfNull().validateForBooleanValue();
+            if (!AccountingValidations.isAccrualBasedAccounting(accountingRuleType)) {
+                baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_ACCRUAL_ACTIVITY_POSTING).isOneOfTheseValues(Boolean.TRUE)
+                        .failWithCode("should be false for non accrual accounting");
+            }
         }
 
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.USE_BORROWER_CYCLE_PARAMETER_NAME, element)) {
@@ -1612,6 +1627,25 @@ public final class LoanProductDataValidator {
 
         final Integer accountingRuleType = this.fromApiJsonHelper.extractIntegerNamed(ACCOUNTING_RULE, element, Locale.getDefault());
         baseDataValidator.reset().parameter(ACCOUNTING_RULE).value(accountingRuleType).ignoreIfNull().inMinMaxRange(1, 4);
+
+        boolean actualValue = loanProduct.getLoanProductRelatedDetail().isEnableAccrualActivityPosting();
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.ENABLE_ACCRUAL_ACTIVITY_POSTING, element)) {
+            final Boolean enableAccrualActivityPosting = this.fromApiJsonHelper
+                    .extractBooleanNamed(LoanProductConstants.ENABLE_ACCRUAL_ACTIVITY_POSTING, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_ACCRUAL_ACTIVITY_POSTING).value(enableAccrualActivityPosting)
+                    .ignoreIfNull().validateForBooleanValue();
+            actualValue = enableAccrualActivityPosting;
+        }
+        if (actualValue) {
+            Integer ruleType = accountingRuleType;
+            if (ruleType == null) {
+                ruleType = loanProduct.getAccountingRule();
+            }
+            if (!AccountingValidations.isAccrualBasedAccounting(ruleType)) {
+                baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_ACCRUAL_ACTIVITY_POSTING)
+                        .failWithCode("should be false for non accrual accounting");
+            }
+        }
 
         final Long fundAccountId = this.fromApiJsonHelper.extractLongNamed(LoanProductAccountingParams.FUND_SOURCE.getValue(), element);
         baseDataValidator.reset().parameter(LoanProductAccountingParams.FUND_SOURCE.getValue()).value(fundAccountId).ignoreIfNull()
