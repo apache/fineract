@@ -2785,7 +2785,7 @@ public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanSch
 
         LoanScheduleDTO loanScheduleDTO = rescheduleNextInstallments(mc, loanApplicationTerms, loan, holidayDetailDTO,
                 loanRepaymentScheduleTransactionProcessor, onDate, calculateTill);
-        List<LoanTransaction> loanTransactions = loan.retrieveListOfTransactionsPostDisbursementExcludeAccruals();
+        List<LoanTransaction> loanTransactions = loan.retrieveListOfTransactionsForReprocessing();
 
         loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(loanApplicationTerms.getExpectedDisbursementDate(),
                 loanTransactions, currency, loanScheduleDTO.getInstallments(), loan.getActiveCharges());

@@ -197,6 +197,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             case WAIVE_CHARGES -> log.debug("WAIVE_CHARGES transaction will not be processed.");
             case REAMORTIZE -> handleReAmortization(loanTransaction, ctx.getCurrency(), ctx.getInstallments());
             case REAGE -> handleReAge(loanTransaction, ctx);
+            case ACCRUAL_ACTIVITY -> calculateAccrualActivity(loanTransaction, ctx.getCurrency(), ctx.getInstallments());
             // TODO: Cover rest of the transaction types
             default -> {
                 log.warn("Unhandled transaction processing for transaction type: {}", loanTransaction.getTypeOf());

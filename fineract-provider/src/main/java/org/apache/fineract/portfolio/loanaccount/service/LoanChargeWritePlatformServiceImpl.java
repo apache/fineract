@@ -264,7 +264,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         // [For Adv payment allocation strategy] check if charge due date is earlier than last transaction
         // date, if yes trigger reprocess else no reprocessing
         if (AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY.equals(loan.transactionProcessingStrategy())) {
-            LoanTransaction lastPaymentTransaction = loan.getLastPaymentTransaction();
+            LoanTransaction lastPaymentTransaction = loan.getLastTransactionForReprocessing();
             if (lastPaymentTransaction != null) {
                 if (loanCharge.getEffectiveDueDate() != null
                         && DateUtils.isAfter(loanCharge.getEffectiveDueDate(), lastPaymentTransaction.getTransactionDate())) {

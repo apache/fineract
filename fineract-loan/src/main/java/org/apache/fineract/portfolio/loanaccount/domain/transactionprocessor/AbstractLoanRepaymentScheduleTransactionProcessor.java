@@ -204,10 +204,41 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 reprocessChargebackTransactionRelation(changedTransactionDetail, transactionsToBeProcessed);
             } else if (loanTransaction.isChargeOff()) {
                 recalculateChargeOffTransaction(changedTransactionDetail, loanTransaction, currency, installments);
+            } else if (loanTransaction.isAccrualActivity()) {
+                recalculateAccrualActivityTransaction(changedTransactionDetail, loanTransaction, currency, installments);
             }
         }
         reprocessInstallments(disbursementDate, transactionsToBeProcessed, installments, currency);
         return changedTransactionDetail;
+    }
+
+    protected void calculateAccrualActivity(LoanTransaction loanTransaction, MonetaryCurrency currency,
+            List<LoanRepaymentScheduleInstallment> installments) {
+        loanTransaction.resetDerivedComponents();
+        // determine how much is outstanding total and breakdown for principal, interest and charges
+        final Money principalPortion = Money.zero(currency);
+        Money interestPortion = Money.zero(currency);
+        Money feeChargesPortion = Money.zero(currency);
+        Money penaltychargesPortion = Money.zero(currency);
+        for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
+            if (loanTransaction.getDateOf().isEqual(currentInstallment.getDueDate())) {
+                interestPortion = interestPortion.plus(currentInstallment.getInterestCharged(currency));
+                feeChargesPortion = feeChargesPortion.plus(currentInstallment.getFeeChargesCharged(currency));
+                penaltychargesPortion = penaltychargesPortion.plus(currentInstallment.getPenaltyChargesCharged(currency));
+            }
+        }
+        loanTransaction.updateComponentsAndTotal(principalPortion, interestPortion, feeChargesPortion, penaltychargesPortion);
+    }
+
+    private void recalculateAccrualActivityTransaction(ChangedTransactionDetail changedTransactionDetail, LoanTransaction loanTransaction,
+            MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments) {
+        final LoanTransaction newLoanTransaction = LoanTransaction.copyTransactionProperties(loanTransaction);
+
+        calculateAccrualActivity(newLoanTransaction, currency, installments);
+
+        if (!LoanTransaction.transactionAmountsMatch(currency, loanTransaction, newLoanTransaction)) {
+            createNewTransaction(loanTransaction, newLoanTransaction, changedTransactionDetail);
+        }
     }
 
     @Override

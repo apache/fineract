@@ -879,11 +879,11 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
 
     public boolean isNonMonetaryTransaction() {
         return isNotReversed() && (LoanTransactionType.CONTRA.equals(getTypeOf())
-                || LoanTransactionType.MARKED_FOR_RESCHEDULING.equals(getTypeOf())
-                || LoanTransactionType.APPROVE_TRANSFER.equals(getTypeOf()) || LoanTransactionType.INITIATE_TRANSFER.equals(getTypeOf())
-                || LoanTransactionType.REJECT_TRANSFER.equals(getTypeOf()) || LoanTransactionType.WITHDRAW_TRANSFER.equals(getTypeOf())
-                || LoanTransactionType.CHARGE_OFF.equals(getTypeOf()) || LoanTransactionType.REAMORTIZE.equals(getTypeOf())
-                || LoanTransactionType.REAGE.equals(getTypeOf()));
+                || LoanTransactionType.MARKED_FOR_RESCHEDULING.equals(getTypeOf()) || LoanTransactionType.ACCRUAL.equals(getTypeOf())
+                || LoanTransactionType.ACCRUAL_ACTIVITY.equals(getTypeOf()) || LoanTransactionType.APPROVE_TRANSFER.equals(getTypeOf())
+                || LoanTransactionType.INITIATE_TRANSFER.equals(getTypeOf()) || LoanTransactionType.REJECT_TRANSFER.equals(getTypeOf())
+                || LoanTransactionType.WITHDRAW_TRANSFER.equals(getTypeOf()) || LoanTransactionType.CHARGE_OFF.equals(getTypeOf())
+                || LoanTransactionType.REAMORTIZE.equals(getTypeOf()) || LoanTransactionType.REAGE.equals(getTypeOf()));
     }
 
     public void updateOutstandingLoanBalance(BigDecimal outstandingLoanBalance) {
@@ -949,7 +949,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
     }
 
     public Boolean isAllowTypeTransactionAtTheTimeOfLastUndo() {
-        return isDisbursement() || isAccrual() || isRepaymentAtDisbursement() || isRepayment();
+        return isDisbursement() || isAccrual() || isRepaymentAtDisbursement() || isRepayment() || isAccrualActivity();
     }
 
     public boolean isAccrualTransaction() {
@@ -969,8 +969,8 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
     }
 
     public boolean isPaymentTransaction() {
-        return this.isNotReversed() && !(this.isDisbursement() || this.isAccrual() || this.isRepaymentAtDisbursement()
-                || this.isNonMonetaryTransaction() || this.isIncomePosting());
+        return this.isNotReversed() && !(this.isDisbursement() || this.isRepaymentAtDisbursement() || this.isNonMonetaryTransaction()
+                || this.isIncomePosting());
     }
 
     public Set<LoanCollateralManagement> getLoanCollateralManagementSet() {
