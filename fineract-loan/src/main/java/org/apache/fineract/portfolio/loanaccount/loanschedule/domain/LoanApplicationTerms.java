@@ -224,6 +224,7 @@ public final class LoanApplicationTerms {
     private Money disbursedPrincipal;
     private final LoanScheduleType loanScheduleType;
     private final LoanScheduleProcessingType loanScheduleProcessingType;
+    private final boolean enableAccrualActivityPosting;
 
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency currency, final Integer loanTermFrequency,
             final PeriodFrequencyType loanTermPeriodFrequencyType, final Integer numberOfRepayments, final Integer repaymentEvery,
@@ -251,7 +252,8 @@ public final class LoanApplicationTerms {
             final Boolean enableDownPayment, final BigDecimal disbursedAmountPercentageForDownPayment,
             final Boolean isAutoRepaymentForDownPaymentEnabled, final RepaymentStartDateType repaymentStartDateType,
             final LocalDate submittedOnDate, final LoanScheduleType loanScheduleType,
-            final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength) {
+            final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength,
+            final boolean enableAccrualActivityPosting) {
 
         final LoanRescheduleStrategyMethod rescheduleStrategyMethod = null;
         final CalendarHistoryDataWrapper calendarHistoryDataWrapper = null;
@@ -270,7 +272,7 @@ public final class LoanApplicationTerms {
                 isInterestToBeRecoveredFirstWhenGreaterThanEMI, fixedPrincipalPercentagePerInstallment,
                 isPrincipalCompoundingDisabledForOverdueLoans, enableDownPayment, disbursedAmountPercentageForDownPayment,
                 isAutoRepaymentForDownPaymentEnabled, repaymentStartDateType, submittedOnDate, loanScheduleType, loanScheduleProcessingType,
-                fixedLength);
+                fixedLength, enableAccrualActivityPosting);
 
     }
 
@@ -291,7 +293,8 @@ public final class LoanApplicationTerms {
             final boolean isSkipRepaymentOnFirstDayOfMonth, final HolidayDetailDTO holidayDetailDTO, final boolean allowCompoundingOnEod,
             final boolean isFirstRepaymentDateAllowedOnHoliday, final boolean isInterestToBeRecoveredFirstWhenGreaterThanEMI,
             final BigDecimal fixedPrincipalPercentagePerInstallment, final boolean isPrincipalCompoundingDisabledForOverdueLoans,
-            final RepaymentStartDateType repaymentStartDateType, final LocalDate submittedOnDate) {
+            final RepaymentStartDateType repaymentStartDateType, final LocalDate submittedOnDate,
+            final boolean enableAccrualActivityPosting) {
 
         final Integer numberOfRepayments = loanProductRelatedDetail.getNumberOfRepayments();
         final Integer repaymentEvery = loanProductRelatedDetail.getRepayEvery();
@@ -343,7 +346,7 @@ public final class LoanApplicationTerms {
                 isInterestToBeRecoveredFirstWhenGreaterThanEMI, fixedPrincipalPercentagePerInstallment,
                 isPrincipalCompoundingDisabledForOverdueLoans, isDownPaymentEnabled, disbursedAmountPercentageForDownPayment,
                 isAutoRepaymentForDownPaymentEnabled, repaymentStartDateType, submittedOnDate, loanScheduleType, loanScheduleProcessingType,
-                fixedLength);
+                fixedLength, enableAccrualActivityPosting);
     }
 
     private LoanApplicationTerms(final ApplicationCurrency currency, final Integer loanTermFrequency,
@@ -372,7 +375,7 @@ public final class LoanApplicationTerms {
             final boolean isPrincipalCompoundingDisabledForOverdueLoans, final boolean isDownPaymentEnabled,
             final BigDecimal disbursedAmountPercentageForDownPayment, final boolean isAutoRepaymentForDownPaymentEnabled,
             final RepaymentStartDateType repaymentStartDateType, final LocalDate submittedOnDate, final LoanScheduleType loanScheduleType,
-            final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength) {
+            final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength, boolean enableAccrualActivityPosting) {
 
         this.currency = currency;
         this.loanTermFrequency = loanTermFrequency;
@@ -426,6 +429,7 @@ public final class LoanApplicationTerms {
         this.numberOfDays = numberOfDays;
 
         this.loanCalendar = loanCalendar;
+        this.enableAccrualActivityPosting = enableAccrualActivityPosting;
         this.approvedPrincipal = Money.of(principal.getCurrency(), approvedAmount);
         this.variationsDataWrapper = new LoanTermVariationsDataWrapper(loanTermVariations);
         this.actualNumberOfRepayments = numberOfRepayments + getLoanTermVariations().adjustNumberOfRepayments();
@@ -1333,7 +1337,7 @@ public final class LoanApplicationTerms {
                 this.graceOnArrearsAgeing, this.daysInMonthType.getValue(), this.daysInYearType.getValue(),
                 this.interestRecalculationEnabled, this.isEqualAmortization, this.isDownPaymentEnabled,
                 this.disbursedAmountPercentageForDownPayment, this.isAutoRepaymentForDownPaymentEnabled, this.loanScheduleType,
-                this.loanScheduleProcessingType, this.fixedLength);
+                this.loanScheduleProcessingType, this.fixedLength, this.enableAccrualActivityPosting);
     }
 
     public Integer getLoanTermFrequency() {

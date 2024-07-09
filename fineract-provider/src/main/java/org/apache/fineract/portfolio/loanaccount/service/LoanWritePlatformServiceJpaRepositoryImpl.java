@@ -84,6 +84,8 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.transaction
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanChargeOffPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanChargeOffPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanDisbursalTransactionBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionAccrualActivityPostBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionAccrualActivityPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionInterestPaymentWaiverPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionInterestPaymentWaiverPreBusinessEvent;
@@ -1129,6 +1131,25 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
          */
         loan.getLoanTransactions().addAll(changedTransactionDetail.getNewTransactionMappings().values());
         return changedTransactionDetail;
+    }
+
+    @Transactional
+    @Override
+    public Loan makeAccrualActivityTransaction(Loan loan, final LoanRepaymentScheduleInstallment installment,
+            final LocalDate transactionDate) {
+        businessEventNotifierService.notifyPreBusinessEvent(new LoanTransactionAccrualActivityPreBusinessEvent(loan));
+
+        LoanTransaction newAccrualActivityTransaction = loanTransactionAssembler.assembleAccrualActivityTransaction(loan, installment,
+                transactionDate);
+
+        loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(newAccrualActivityTransaction);
+
+        loan.addLoanTransaction(newAccrualActivityTransaction);
+
+        businessEventNotifierService
+                .notifyPostBusinessEvent(new LoanTransactionAccrualActivityPostBusinessEvent(newAccrualActivityTransaction));
+
+        return loan;
     }
 
     @Transactional

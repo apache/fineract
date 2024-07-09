@@ -439,6 +439,9 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
 
         final Integer fixedLength = command.integerValueOfParameterNamed(LoanProductConstants.FIXED_LENGTH);
 
+        final boolean enableAccrualActivityPosting = command
+                .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ENABLE_ACCRUAL_ACTIVITY_POSTING);
+
         return new LoanProduct(fund, loanTransactionProcessingStrategy, loanProductPaymentAllocationRules, loanProductCreditAllocationRules,
                 name, shortName, description, currency, principal, minPrincipal, maxPrincipal, interestRatePerPeriod,
                 minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType, annualInterestRate, interestMethod,
@@ -457,7 +460,8 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
                 isEqualAmortization, productRates, fixedPrincipalPercentagePerInstallment, disallowExpectedDisbursements,
                 allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber, dueDaysForRepaymentEvent,
                 overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageDownPayment, enableAutoRepaymentForDownPayment,
-                repaymentStartDateType, enableInstallmentLevelDelinquency, loanScheduleType, loanScheduleProcessingType, fixedLength);
+                repaymentStartDateType, enableInstallmentLevelDelinquency, loanScheduleType, loanScheduleProcessingType, fixedLength,
+                enableAccrualActivityPosting);
 
     }
 
@@ -674,7 +678,8 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
             final boolean enableDownPayment, final BigDecimal disbursedAmountPercentageForDownPayment,
             final boolean enableAutoRepaymentForDownPayment, final RepaymentStartDateType repaymentStartDateType,
             final boolean enableInstallmentLevelDelinquency, final LoanScheduleType loanScheduleType,
-            final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength) {
+            final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength,
+            final boolean enableAccrualActivityPosting) {
         this.fund = fund;
         this.transactionProcessingStrategyCode = transactionProcessingStrategyCode;
 
@@ -723,7 +728,7 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
                 recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, amortizationMethod,
                 inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType.getValue(), daysInYearType.getValue(),
                 isInterestRecalculationEnabled, isEqualAmortization, enableDownPayment, disbursedAmountPercentageForDownPayment,
-                enableAutoRepaymentForDownPayment, loanScheduleType, loanScheduleProcessingType, fixedLength);
+                enableAutoRepaymentForDownPayment, loanScheduleType, loanScheduleProcessingType, fixedLength, enableAccrualActivityPosting);
 
         this.loanProductMinMaxConstraints = new LoanProductMinMaxConstraints(defaultMinPrincipal, defaultMaxPrincipal,
                 defaultMinNominalInterestRatePerPeriod, defaultMaxNominalInterestRatePerPeriod, defaultMinNumberOfInstallments,
@@ -906,6 +911,13 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
             final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(isLinkedToFloatingInterestRates);
             actualChanges.put(isLinkedToFloatingInterestRates, newValue);
             this.isLinkedToFloatingInterestRate = newValue;
+        }
+
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.ENABLE_ACCRUAL_ACTIVITY_POSTING,
+                this.getLoanProductRelatedDetail().isEnableAccrualActivityPosting())) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ENABLE_ACCRUAL_ACTIVITY_POSTING);
+            actualChanges.put(LoanProductConstants.ENABLE_ACCRUAL_ACTIVITY_POSTING, newValue);
+            this.getLoanProductRelatedDetail().setEnableAccrualActivityPosting(newValue);
         }
 
         if (this.isLinkedToFloatingInterestRate) {
