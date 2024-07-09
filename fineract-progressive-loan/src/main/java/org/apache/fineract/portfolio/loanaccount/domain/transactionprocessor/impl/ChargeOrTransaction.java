@@ -57,6 +57,10 @@ public class ChargeOrTransaction implements Comparable<ChargeOrTransaction> {
         }
     }
 
+    private boolean isAccrualActivity() {
+        return loanTransaction.isPresent() && loanTransaction.get().isAccrualActivity();
+    }
+
     private boolean isBackdatedCharge() {
         return loanCharge.get().getDueDate().isBefore(loanCharge.get().getSubmittedOnDate());
     }
@@ -86,6 +90,12 @@ public class ChargeOrTransaction implements Comparable<ChargeOrTransaction> {
     public int compareTo(@NotNull ChargeOrTransaction o) {
         int datePortion = this.getEffectiveDate().compareTo(o.getEffectiveDate());
         if (datePortion == 0) {
+            if (this.isAccrualActivity() && !o.isAccrualActivity()) {
+                return 1;
+            }
+            if (!this.isAccrualActivity() && o.isAccrualActivity()) {
+                return -1;
+            }
             int submittedDate = this.getSubmittedOnDate().compareTo(o.getSubmittedOnDate());
             if (submittedDate == 0) {
                 return this.getCreatedDateTime().compareTo(o.getCreatedDateTime());

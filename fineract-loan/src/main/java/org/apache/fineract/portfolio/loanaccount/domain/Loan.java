@@ -2481,24 +2481,19 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     }
 
     public List<LoanTransaction> retrieveListOfTransactionsForReprocessing() {
-        return getLoanTransactions().stream()
-                .filter(transaction -> transaction.isNotReversed() && !transaction.isAccrual()
-                        && (transaction.isChargeOff() || transaction.isReAge() || transaction.isReAmortize()
-                                || !transaction.isNonMonetaryTransaction()))
-                .sorted(LoanTransactionComparator.INSTANCE).collect(Collectors.toList());
+        return getLoanTransactions().stream().filter(loanTransactionForReprocessingPredicate()).sorted(LoanTransactionComparator.INSTANCE)
+                .collect(Collectors.toList());
     }
 
-    public List<LoanTransaction> retrieveListOfTransactionsPostDisbursementExcludeAccruals() {
-        return this.loanTransactions.stream()
-                .filter(transaction -> transaction.isNotReversed() && !(transaction.isAccrual() || transaction.isRepaymentAtDisbursement()
-                        || transaction.isNonMonetaryTransaction() || transaction.isIncomePosting()))
-                .sorted(LoanTransactionComparator.INSTANCE).collect(Collectors.toList());
+    private static Predicate<LoanTransaction> loanTransactionForReprocessingPredicate() {
+        return transaction -> transaction.isNotReversed() && (transaction.isChargeOff() || transaction.isReAge()
+                || transaction.isAccrualActivity() || transaction.isReAmortize() || !transaction.isNonMonetaryTransaction());
     }
 
     private List<LoanTransaction> retrieveListOfTransactionsExcludeAccruals() {
         final List<LoanTransaction> repaymentsOrWaivers = new ArrayList<>();
         for (final LoanTransaction transaction : this.loanTransactions) {
-            if (transaction.isNotReversed() && !(transaction.isAccrual() || transaction.isNonMonetaryTransaction())) {
+            if (transaction.isNotReversed() && !transaction.isNonMonetaryTransaction()) {
                 repaymentsOrWaivers.add(transaction);
             }
         }
@@ -3901,6 +3896,13 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return currentTransactionDate;
     }
 
+    public LoanTransaction getLastTransactionForReprocessing() {
+        return loanTransactions.stream() //
+                .filter(Loan.loanTransactionForReprocessingPredicate()) //
+                .reduce((first, second) -> second) //
+                .orElse(null);
+    }
+
     public LoanTransaction getLastPaymentTransaction() {
         return loanTransactions.stream() //
                 .filter(loanTransaction -> !loanTransaction.isReversed()) //
@@ -4526,7 +4528,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
                 }
                 outstanding = outstanding.plus(transactionOutstanding);
                 loanTransaction.updateOutstandingLoanBalance(MathUtil.negativeToZero(outstanding.getAmount()));
-            } else {
+            } else if (!loanTransaction.isAccrualActivity()) {
                 if (this.loanInterestRecalculationDetails != null
                         && this.loanInterestRecalculationDetails.isCompoundingToBePostedAsTransaction()
                         && !loanTransaction.isRepaymentAtDisbursement()) {
