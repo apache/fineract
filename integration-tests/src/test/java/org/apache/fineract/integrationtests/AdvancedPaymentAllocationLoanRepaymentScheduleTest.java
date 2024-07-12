@@ -4257,6 +4257,79 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
         });
     }
 
+    // UC139c: Advanced payment allocation, with DownPayment enabled in Loan Product and change the auto downpayment and
+    // percentage amount
+    // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+    // 1. Create a Loan product with Adv. Pment. Alloc. and DownPayment
+    // 2. Submit Loan with DownPayment and approve
+    // 3. Modify Loan Application change the auto downpayment and percentage amount
+    // 4. Disburse only 10
+    // 5. Check the repayment schedule is correct, without DownPayment installment
+    @Test
+    public void uc139c() {
+        final String processDate = "23 March 2024";
+        final Double amount = 1000.0;
+        runAt(processDate, () -> {
+            BigDecimal percentageAmount = BigDecimal.valueOf(25);
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                    .installmentAmountInMultiplesOf(null).numberOfRepayments(3).repaymentEvery(15).enableDownPayment(true)
+                    .enableAutoRepaymentForDownPayment(true).disbursedAmountPercentageForDownPayment(percentageAmount);
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            PostLoansRequest applicationRequest = applyLoanRequest(client.getClientId(), loanProductResponse.getResourceId(), processDate,
+                    amount, 4);
+
+            applicationRequest = applicationRequest.numberOfRepayments(3).loanTermFrequency(45)
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY).repaymentEvery(15)
+                    .enableDownPayment(true);
+
+            PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            assertNotNull(loanDetails);
+            assertEquals(true, loanDetails.getEnableDownPayment());
+            assertEquals(true, loanDetails.getEnableAutoRepaymentForDownPayment());
+
+            // verify schedule (with DownPayment and AutoDownPayment to 25%)
+            verifyRepaymentSchedule(loanResponse.getLoanId(), //
+                    installment(1000, null, "23 March 2024"), //
+                    installment(250.0, 0, 0, 0, 250.0, false, "23 March 2024", 750.0), //
+                    installment(250.0, 0, 0, 0, 250.0, false, "07 April 2024", 500.0), //
+                    installment(250.0, 0, 0, 0, 250.0, false, "22 April 2024", 250.0), //
+                    installment(250.0, 0, 0, 0, 250.0, false, "07 May 2024", 0.0) //
+            );
+
+            percentageAmount = BigDecimal.valueOf(15);
+            loanTransactionHelper.modifyApplicationForLoan(loanResponse.getLoanId(), "modify",
+                    new PutLoansLoanIdRequest().clientId(client.getClientId()).productId(loanProductResponse.getResourceId())
+                            .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                            .repaymentEvery(15).interestCalculationPeriodType(1).interestType(0).expectedDisbursementDate(processDate)
+                            .principal(amount.longValue()).repaymentFrequencyType(0).numberOfRepayments(3).loanTermFrequency(45)
+                            .loanTermFrequencyType(0).enableDownPayment(true).loanType("individual").dateFormat(DATETIME_PATTERN)
+                            .locale("en").enableAutoRepaymentForDownPayment(true)
+                            .disbursedAmountPercentageForDownPayment(percentageAmount));
+
+            loanTransactionHelper.approveLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest()
+                    .approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATETIME_PATTERN).approvedOnDate(processDate).locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest().actualDisbursementDate(processDate)
+                    .dateFormat(DATETIME_PATTERN).transactionAmount(BigDecimal.valueOf(1000.0)).locale("en"));
+
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            assertNotNull(loanDetails);
+            assertEquals(true, loanDetails.getEnableDownPayment());
+            assertEquals(true, loanDetails.getEnableAutoRepaymentForDownPayment());
+
+            // verify schedule (with DownPayment and AutoDownPayment to 15%)
+            verifyRepaymentSchedule(loanResponse.getLoanId(), //
+                    installment(1000, null, "23 March 2024"), //
+                    installment(150, 0, 0, 0, 0.0, true, "23 March 2024", 850), //
+                    installment(283.33, 0, 0, 0, 283.33, false, "07 April 2024", 566.67), //
+                    installment(283.33, 0, 0, 0, 283.33, false, "22 April 2024", 283.34), //
+                    installment(283.34, 0, 0, 0, 283.34, false, "07 May 2024", 0.0) //
+            );
+        });
+    }
+
     // uc140: Negative Test: Advanced payment allocation, with DownPayment disabled in Loan Product but try to enable in
     // Loan application
     // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
@@ -4280,8 +4353,8 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                                     .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
                                     .repaymentEvery(15).enableDownPayment(true)));
 
-            Assertions.assertTrue(callFailedRuntimeException.getMessage()
-                    .contains("The Loan can not override the downpayment flag because in the Loan Product the downpayment is disabled"));
+            Assertions.assertTrue(callFailedRuntimeException.getMessage().contains(
+                    "The Loan can not override the downpayment properties because in the Loan Product the downpayment is disabled"));
         });
     }
 

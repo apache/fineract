@@ -476,10 +476,18 @@ public class LoanScheduleAssembler {
         BigDecimal disbursedAmountPercentageForDownPayment = null;
         boolean isAutoRepaymentForDownPaymentEnabled = false;
         if (isDownPaymentEnabled) {
+            isAutoRepaymentForDownPaymentEnabled = loanProduct.getLoanProductRelatedDetail().isEnableAutoRepaymentForDownPayment();
+            if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT, element)) {
+                isAutoRepaymentForDownPaymentEnabled = this.fromApiJsonHelper
+                        .extractBooleanNamed(LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT, element);
+            }
+
             disbursedAmountPercentageForDownPayment = loanProduct.getLoanProductRelatedDetail()
                     .getDisbursedAmountPercentageForDownPayment();
-            isAutoRepaymentForDownPaymentEnabled = loanProduct.getLoanProductRelatedDetail().isEnableAutoRepaymentForDownPayment();
-
+            if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT, element)) {
+                disbursedAmountPercentageForDownPayment = this.fromApiJsonHelper
+                        .extractBigDecimalWithLocaleNamed(LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT, element);
+            }
         }
 
         LoanScheduleType loanScheduleType = loanProduct.getLoanProductRelatedDetail().getLoanScheduleType();
@@ -1397,12 +1405,34 @@ public class LoanScheduleAssembler {
             if (!newValue) {
                 loanProductRelatedDetail.setEnableAutoRepaymentForDownPayment(false);
                 loanProductRelatedDetail.setDisbursedAmountPercentageForDownPayment(null);
-            } else {
-                loanProductRelatedDetail.setEnableAutoRepaymentForDownPayment(
-                        loan.loanProduct().getLoanProductRelatedDetail().isEnableAutoRepaymentForDownPayment());
-                loanProductRelatedDetail.setDisbursedAmountPercentageForDownPayment(
-                        loan.loanProduct().getLoanProductRelatedDetail().getDisbursedAmountPercentageForDownPayment());
             }
+        }
+
+        if (loanProductRelatedDetail.isEnableDownPayment()) {
+            Boolean enableAutoRepaymentForDownPayment = loan.loanProduct().getLoanProductRelatedDetail()
+                    .isEnableAutoRepaymentForDownPayment();
+            if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT, command.parsedJson())) {
+                if (command.isChangeInBooleanParameterNamed(LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT,
+                        loanProductRelatedDetail.isEnableAutoRepaymentForDownPayment())) {
+                    enableAutoRepaymentForDownPayment = command
+                            .booleanObjectValueOfParameterNamed(LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT);
+                    changes.put(LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT, enableAutoRepaymentForDownPayment);
+                }
+            }
+            loanProductRelatedDetail.setEnableAutoRepaymentForDownPayment(enableAutoRepaymentForDownPayment);
+
+            BigDecimal disbursedAmountPercentageDownPayment = loan.loanProduct().getLoanProductRelatedDetail()
+                    .getDisbursedAmountPercentageForDownPayment();
+            if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT,
+                    command.parsedJson())) {
+                if (command.isChangeInBigDecimalParameterNamed(LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT,
+                        loanProductRelatedDetail.getDisbursedAmountPercentageForDownPayment())) {
+                    disbursedAmountPercentageDownPayment = command
+                            .bigDecimalValueOfParameterNamed(LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT);
+                    changes.put(LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT, disbursedAmountPercentageDownPayment);
+                }
+            }
+            loanProductRelatedDetail.setDisbursedAmountPercentageForDownPayment(disbursedAmountPercentageDownPayment);
         }
     }
 

@@ -1261,6 +1261,10 @@ final class LoansApiResourceSwagger {
         public Boolean enableInstallmentLevelDelinquency;
         @Schema(example = "false")
         public Boolean enableDownPayment;
+        @Schema(example = "0.000000")
+        public BigDecimal disbursedAmountPercentageForDownPayment;
+        @Schema(example = "false")
+        public Boolean enableAutoRepaymentForDownPayment;
     }
 
     @Schema(description = "PostLoansResponse")
@@ -1412,6 +1416,10 @@ final class LoansApiResourceSwagger {
         public Boolean enableInstallmentLevelDelinquency;
         @Schema(example = "false")
         public Boolean enableDownPayment;
+        @Schema(example = "0.000000")
+        public BigDecimal disbursedAmountPercentageForDownPayment;
+        @Schema(example = "false")
+        public Boolean enableAutoRepaymentForDownPayment;
 
         static final class PutLoansLoanIdChanges {
 
