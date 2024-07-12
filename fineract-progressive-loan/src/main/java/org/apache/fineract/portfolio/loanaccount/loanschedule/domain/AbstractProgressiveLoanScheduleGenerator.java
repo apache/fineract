@@ -119,13 +119,16 @@ public abstract class AbstractProgressiveLoanScheduleGenerator implements LoanSc
                         : scheduleParams.getPeriodStartDate();
                 List<PreGeneratedLoanSchedulePeriod> expectedRepaymentPeriods = getScheduledDateGenerator()
                         .generateRepaymentPeriods(startDate, loanApplicationTerms, holidayDetailDTO);
-                emiCalculationResult = getEMICalculator().calculateEMIValueAndRateFactors(loanApplicationTerms, scheduleParams,
-                        expectedRepaymentPeriods, mc);
+                emiCalculationResult = getEMICalculator().calculateEMIValueAndRateFactors(scheduleParams.getOutstandingBalanceAsPerRest(),
+                        loanApplicationTerms.toLoanProductRelatedDetail(), expectedRepaymentPeriods, scheduleParams.getPeriodNumber(),
+                        loanApplicationTerms.getNumberOfRepayments(), mc);
             }
 
             // 5 determine principal,interest of repayment period
-            PrincipalInterest principalInterestForThisPeriod = calculatePrincipalInterestComponentsForPeriod(loanApplicationTerms,
-                    scheduleParams, emiCalculationResult, mc);
+            PrincipalInterest principalInterestForThisPeriod = getEMICalculator().calculatePrincipalInterestComponentsForPeriod(
+                    emiCalculationResult, scheduleParams.getOutstandingBalanceAsPerRest(),
+                    loanApplicationTerms.getInstallmentAmountInMultiplesOf(), scheduleParams.getPeriodNumber(),
+                    loanApplicationTerms.getActualNoOfRepaymnets(), mc);
 
             // update cumulative fields for principal
             currentPeriodParams.setPrincipalForThisPeriod(principalInterestForThisPeriod.principal());
@@ -236,9 +239,6 @@ public abstract class AbstractProgressiveLoanScheduleGenerator implements LoanSc
     public abstract ScheduledDateGenerator getScheduledDateGenerator();
 
     public abstract PaymentPeriodsInOneYearCalculator getPaymentPeriodsInOneYearCalculator();
-
-    public abstract PrincipalInterest calculatePrincipalInterestComponentsForPeriod(LoanApplicationTerms loanApplicationTerms,
-            LoanScheduleParams loanScheduleParams, EMICalculationResult emiCalculationResult, MathContext mc);
 
     protected abstract EMICalculator getEMICalculator();
 

@@ -34,8 +34,6 @@ import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleModelDownPaymentPeriod;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleParams;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelDisbursementPeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelPeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.PreGeneratedLoanSchedulePeriod;
@@ -55,8 +53,6 @@ class ProgressiveEMICalculatorTest {
     private static final ProgressiveEMICalculator emiCalculator = new ProgressiveEMICalculator();
 
     private static MockedStatic<MoneyHelper> moneyHelper = Mockito.mockStatic(MoneyHelper.class);
-    private static LoanScheduleParams scheduleParams = Mockito.mock(LoanScheduleParams.class);
-    private static LoanApplicationTerms loanApplicationTerms = Mockito.mock(LoanApplicationTerms.class);
     private static LoanProductRelatedDetail loanProductRelatedDetail = Mockito.mock(LoanProductRelatedDetail.class);
 
     private static final MonetaryCurrency monetaryCurrency = MonetaryCurrency
@@ -79,8 +75,6 @@ class ProgressiveEMICalculatorTest {
         // When
         moneyHelper.when(MoneyHelper::getRoundingMode).thenReturn(RoundingMode.HALF_EVEN);
         moneyHelper.when(MoneyHelper::getMathContext).thenReturn(new MathContext(12, RoundingMode.HALF_EVEN));
-        Mockito.when(loanApplicationTerms.toLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
-        Mockito.when(loanApplicationTerms.getCurrency()).thenReturn(monetaryCurrency);
     }
 
     private BigDecimal getRateFactorsByMonth(final DaysInYearType daysInYearType, final DaysInMonthType daysInMonthType,
@@ -163,15 +157,14 @@ class ProgressiveEMICalculatorTest {
         final BigDecimal principal = BigDecimal.valueOf(100);
         final Money outstandingBalance = Money.of(monetaryCurrency, principal);
 
-        Mockito.when(scheduleParams.getOutstandingBalanceAsPerRest()).thenReturn(outstandingBalance);
         Mockito.when(loanProductRelatedDetail.getNominalInterestRatePerPeriod()).thenReturn(interestRate);
         Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.ACTUAL.getValue());
         Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.ACTUAL.getValue());
         Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.MONTHS);
         Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
 
-        final EMICalculationResult result = emiCalculator.calculateEMIValueAndRateFactors(loanApplicationTerms, scheduleParams,
-                expectedRepaymentPeriods, mc);
+        final EMICalculationResult result = emiCalculator.calculateEMIValueAndRateFactors(outstandingBalance, loanProductRelatedDetail,
+                expectedRepaymentPeriods, 1, 6, mc);
 
         // 17.13
         Assertions.assertEquals(BigDecimal.valueOf(17.13), result.getEqualMonthlyInstallmentValue().getAmount());
@@ -205,15 +198,14 @@ class ProgressiveEMICalculatorTest {
         final BigDecimal principal = BigDecimal.valueOf(10_000);
         final Money outstandingBalance = Money.of(monetaryCurrency, principal);
 
-        Mockito.when(scheduleParams.getOutstandingBalanceAsPerRest()).thenReturn(outstandingBalance);
         Mockito.when(loanProductRelatedDetail.getNominalInterestRatePerPeriod()).thenReturn(interestRate);
         Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.ACTUAL.getValue());
         Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.ACTUAL.getValue());
         Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.MONTHS);
         Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
 
-        final EMICalculationResult result = emiCalculator.calculateEMIValueAndRateFactors(loanApplicationTerms, scheduleParams,
-                expectedRepaymentPeriods, mc);
+        final EMICalculationResult result = emiCalculator.calculateEMIValueAndRateFactors(outstandingBalance, loanProductRelatedDetail,
+                expectedRepaymentPeriods, 1, 6, mc);
 
         // 1713.12
         Assertions.assertEquals(BigDecimal.valueOf(1713.12), result.getEqualMonthlyInstallmentValue().getAmount());
@@ -244,15 +236,14 @@ class ProgressiveEMICalculatorTest {
         final BigDecimal principal = BigDecimal.valueOf(100);
         final Money outstandingBalance = Money.of(monetaryCurrency, principal);
 
-        Mockito.when(scheduleParams.getOutstandingBalanceAsPerRest()).thenReturn(outstandingBalance);
         Mockito.when(loanProductRelatedDetail.getNominalInterestRatePerPeriod()).thenReturn(interestRate);
         Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_365.getValue());
         Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.ACTUAL.getValue());
         Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.MONTHS);
         Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
 
-        final EMICalculationResult result = emiCalculator.calculateEMIValueAndRateFactors(loanApplicationTerms, scheduleParams,
-                expectedRepaymentPeriods, mc);
+        final EMICalculationResult result = emiCalculator.calculateEMIValueAndRateFactors(outstandingBalance, loanProductRelatedDetail,
+                expectedRepaymentPeriods, 1, 6, mc);
 
         // 17.13
         Assertions.assertEquals(BigDecimal.valueOf(17.13), result.getEqualMonthlyInstallmentValue().getAmount());
@@ -287,15 +278,14 @@ class ProgressiveEMICalculatorTest {
         final BigDecimal principal = BigDecimal.valueOf(100);
         final Money outstandingBalance = Money.of(monetaryCurrency, principal);
 
-        Mockito.when(scheduleParams.getOutstandingBalanceAsPerRest()).thenReturn(outstandingBalance);
         Mockito.when(loanProductRelatedDetail.getNominalInterestRatePerPeriod()).thenReturn(interestRate);
         Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
         Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.DAYS_30.getValue());
         Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.MONTHS);
         Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
 
-        final EMICalculationResult result = emiCalculator.calculateEMIValueAndRateFactors(loanApplicationTerms, scheduleParams,
-                expectedRepaymentPeriods, mc);
+        final EMICalculationResult result = emiCalculator.calculateEMIValueAndRateFactors(outstandingBalance, loanProductRelatedDetail,
+                expectedRepaymentPeriods, 1, 6, mc);
 
         // 17.13
         Assertions.assertEquals(BigDecimal.valueOf(17.13), result.getEqualMonthlyInstallmentValue().getAmount());
@@ -330,15 +320,14 @@ class ProgressiveEMICalculatorTest {
         final BigDecimal principal = BigDecimal.valueOf(100);
         final Money outstandingBalance = Money.of(monetaryCurrency, principal);
 
-        Mockito.when(scheduleParams.getOutstandingBalanceAsPerRest()).thenReturn(outstandingBalance);
         Mockito.when(loanProductRelatedDetail.getNominalInterestRatePerPeriod()).thenReturn(interestRate);
         Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_364.getValue());
         Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.INVALID.getValue());
         Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.WEEKS);
         Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
 
-        final EMICalculationResult result = emiCalculator.calculateEMIValueAndRateFactors(loanApplicationTerms, scheduleParams,
-                expectedRepaymentPeriods, mc);
+        final EMICalculationResult result = emiCalculator.calculateEMIValueAndRateFactors(outstandingBalance, loanProductRelatedDetail,
+                expectedRepaymentPeriods, 1, 6, mc);
 
         // 16.77
         Assertions.assertEquals(BigDecimal.valueOf(16.77), result.getEqualMonthlyInstallmentValue().getAmount());
@@ -374,15 +363,14 @@ class ProgressiveEMICalculatorTest {
         final BigDecimal principal = BigDecimal.valueOf(100);
         final Money outstandingBalance = Money.of(monetaryCurrency, principal);
 
-        Mockito.when(scheduleParams.getOutstandingBalanceAsPerRest()).thenReturn(outstandingBalance);
         Mockito.when(loanProductRelatedDetail.getNominalInterestRatePerPeriod()).thenReturn(interestRate);
         Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
         Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.INVALID.getValue());
         Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.WEEKS);
         Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(2);
 
-        final EMICalculationResult result = emiCalculator.calculateEMIValueAndRateFactors(loanApplicationTerms, scheduleParams,
-                expectedRepaymentPeriods, mc);
+        final EMICalculationResult result = emiCalculator.calculateEMIValueAndRateFactors(outstandingBalance, loanProductRelatedDetail,
+                expectedRepaymentPeriods, 1, 6, mc);
 
         // 16.88
         Assertions.assertEquals(new BigDecimal("16.88"), result.getEqualMonthlyInstallmentValue().getAmount());
@@ -418,15 +406,14 @@ class ProgressiveEMICalculatorTest {
         final BigDecimal principal = BigDecimal.valueOf(100);
         final Money outstandingBalance = Money.of(monetaryCurrency, principal);
 
-        Mockito.when(scheduleParams.getOutstandingBalanceAsPerRest()).thenReturn(outstandingBalance);
         Mockito.when(loanProductRelatedDetail.getNominalInterestRatePerPeriod()).thenReturn(interestRate);
         Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
         Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.INVALID.getValue());
         Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.DAYS);
         Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(15);
 
-        final EMICalculationResult result = emiCalculator.calculateEMIValueAndRateFactors(loanApplicationTerms, scheduleParams,
-                expectedRepaymentPeriods, mc);
+        final EMICalculationResult result = emiCalculator.calculateEMIValueAndRateFactors(outstandingBalance, loanProductRelatedDetail,
+                expectedRepaymentPeriods, 1, 6, mc);
 
         // 16.90
         Assertions.assertEquals(new BigDecimal("16.90"), result.getEqualMonthlyInstallmentValue().getAmount());
@@ -456,7 +443,6 @@ class ProgressiveEMICalculatorTest {
         final Money downPaymentValue = Money.of(monetaryCurrency, BigDecimal.valueOf(25));
         final Money outstandingBalance = principal.minus(downPaymentValue);
 
-        Mockito.when(scheduleParams.getOutstandingBalanceAsPerRest()).thenReturn(outstandingBalance);
         Mockito.when(loanProductRelatedDetail.getNominalInterestRatePerPeriod()).thenReturn(interestRate);
         Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
         Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.DAYS_30.getValue());
@@ -474,8 +460,8 @@ class ProgressiveEMICalculatorTest {
         expectedRepaymentPeriods.add(new PreGeneratedLoanSchedulePeriod(5, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
         expectedRepaymentPeriods.add(new PreGeneratedLoanSchedulePeriod(6, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
 
-        final EMICalculationResult result = emiCalculator.calculateEMIValueAndRateFactors(loanApplicationTerms, scheduleParams,
-                expectedRepaymentPeriods, mc);
+        final EMICalculationResult result = emiCalculator.calculateEMIValueAndRateFactors(outstandingBalance, loanProductRelatedDetail,
+                expectedRepaymentPeriods, 1, 5, mc);
 
         // 15.36
         Assertions.assertEquals(new BigDecimal("15.36"), result.getEqualMonthlyInstallmentValue().getAmount());
@@ -501,7 +487,6 @@ class ProgressiveEMICalculatorTest {
         final BigDecimal interestRate = BigDecimal.valueOf(0);
         final Money outstandingBalance = Money.of(monetaryCurrency, BigDecimal.valueOf(1000));
 
-        Mockito.when(scheduleParams.getOutstandingBalanceAsPerRest()).thenReturn(outstandingBalance);
         Mockito.when(loanProductRelatedDetail.getNominalInterestRatePerPeriod()).thenReturn(interestRate);
         Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
         Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.DAYS_30.getValue());
@@ -514,8 +499,8 @@ class ProgressiveEMICalculatorTest {
         expectedRepaymentPeriods.add(new PreGeneratedLoanSchedulePeriod(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
         expectedRepaymentPeriods.add(new PreGeneratedLoanSchedulePeriod(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
 
-        final EMICalculationResult result = emiCalculator.calculateEMIValueAndRateFactors(loanApplicationTerms, scheduleParams,
-                expectedRepaymentPeriods, mc);
+        final EMICalculationResult result = emiCalculator.calculateEMIValueAndRateFactors(outstandingBalance, loanProductRelatedDetail,
+                expectedRepaymentPeriods, 1, 4, mc);
 
         // 250.00
         Assertions.assertEquals(new BigDecimal("250.00"), result.getEqualMonthlyInstallmentValue().getAmount());
@@ -542,7 +527,6 @@ class ProgressiveEMICalculatorTest {
         final BigDecimal principal = BigDecimal.valueOf(100);
         final Money outstandingBalance = Money.of(monetaryCurrency, principal);
 
-        Mockito.when(scheduleParams.getOutstandingBalanceAsPerRest()).thenReturn(outstandingBalance);
         Mockito.when(loanProductRelatedDetail.getNominalInterestRatePerPeriod()).thenReturn(interestRate);
         Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
         Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.INVALID.getValue());
@@ -552,7 +536,8 @@ class ProgressiveEMICalculatorTest {
         expectedRepaymentPeriods.add(new PreGeneratedLoanSchedulePeriod(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 16)));
 
         try {
-            emiCalculator.calculateEMIValueAndRateFactors(loanApplicationTerms, scheduleParams, expectedRepaymentPeriods, mc);
+            final EMICalculationResult result = emiCalculator.calculateEMIValueAndRateFactors(outstandingBalance, loanProductRelatedDetail,
+                    expectedRepaymentPeriods, 1, 6, mc);
             Assertions.fail();
         } catch (Exception e) {
             Assertions.assertInstanceOf(UnsupportedOperationException.class, e);
@@ -568,7 +553,6 @@ class ProgressiveEMICalculatorTest {
         final BigDecimal principal = BigDecimal.valueOf(100);
         final Money outstandingBalance = Money.of(monetaryCurrency, principal);
 
-        Mockito.when(scheduleParams.getOutstandingBalanceAsPerRest()).thenReturn(outstandingBalance);
         Mockito.when(loanProductRelatedDetail.getNominalInterestRatePerPeriod()).thenReturn(interestRate);
         Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
         Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.INVALID.getValue());
@@ -578,7 +562,8 @@ class ProgressiveEMICalculatorTest {
         expectedRepaymentPeriods.add(new PreGeneratedLoanSchedulePeriod(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 16)));
 
         try {
-            emiCalculator.calculateEMIValueAndRateFactors(loanApplicationTerms, scheduleParams, expectedRepaymentPeriods, mc);
+            final EMICalculationResult result = emiCalculator.calculateEMIValueAndRateFactors(outstandingBalance, loanProductRelatedDetail,
+                    expectedRepaymentPeriods, 1, 6, mc);
             Assertions.fail();
         } catch (Exception e) {
             Assertions.assertInstanceOf(UnsupportedOperationException.class, e);
@@ -594,7 +579,6 @@ class ProgressiveEMICalculatorTest {
         final BigDecimal principal = BigDecimal.valueOf(100);
         final Money outstandingBalance = Money.of(monetaryCurrency, principal);
 
-        Mockito.when(scheduleParams.getOutstandingBalanceAsPerRest()).thenReturn(outstandingBalance);
         Mockito.when(loanProductRelatedDetail.getNominalInterestRatePerPeriod()).thenReturn(interestRate);
         Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
         Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.INVALID.getValue());
@@ -604,7 +588,8 @@ class ProgressiveEMICalculatorTest {
         expectedRepaymentPeriods.add(new PreGeneratedLoanSchedulePeriod(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 16)));
 
         try {
-            emiCalculator.calculateEMIValueAndRateFactors(loanApplicationTerms, scheduleParams, expectedRepaymentPeriods, mc);
+            final EMICalculationResult result = emiCalculator.calculateEMIValueAndRateFactors(outstandingBalance, loanProductRelatedDetail,
+                    expectedRepaymentPeriods, 1, 6, mc);
             Assertions.fail();
         } catch (Exception e) {
             Assertions.assertInstanceOf(UnsupportedOperationException.class, e);
