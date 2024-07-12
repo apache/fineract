@@ -20,12 +20,18 @@ package org.apache.fineract.portfolio.loanproduct.calc;
 
 import java.math.MathContext;
 import java.util.List;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleParams;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
+import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelPeriod;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.PrincipalInterest;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 
 public interface EMICalculator {
 
-    EMICalculationResult calculateEMIValueAndRateFactors(LoanApplicationTerms loanApplicationTerms, LoanScheduleParams scheduleParams,
-            List<? extends LoanScheduleModelPeriod> expectedRepaymentPeriods, MathContext mc);
+    EMICalculationResult calculateEMIValueAndRateFactors(Money outstandingBalanceAsPerRest,
+            LoanProductRelatedDetail loanProductRelatedDetail, List<? extends LoanScheduleModelPeriod> expectedRepaymentPeriods,
+            Integer actualPeriodNumber, Integer numberOfRepayments, MathContext mc);
+
+    PrincipalInterest calculatePrincipalInterestComponentsForPeriod(EMICalculationResult emiCalculationResult,
+            Money outstandingBalanceAsPerRest, Integer installmentAmountInMultiplesOf, Integer actualPeriodNumber,
+            Integer actualNoOfRepayments, MathContext mc);
 }
