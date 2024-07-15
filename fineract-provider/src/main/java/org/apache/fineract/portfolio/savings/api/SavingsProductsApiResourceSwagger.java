@@ -67,11 +67,46 @@ final class SavingsProductsApiResourceSwagger {
         public Integer interestCalculationType;
         @Schema(example = "365")
         public Integer interestCalculationDaysInYearType;
-        @Schema(example = "1")
-        public Integer accountingRule;
-        public Set<PostSavingsCharges> charges;
         @Schema(example = "accountMappingForPayment")
         public String accountMappingForPayment;
+        @Schema(example = "false")
+        public boolean withdrawalFeeForTransfers;
+        @Schema(example = "false")
+        public boolean enforceMinRequiredBalance;
+        @Schema(example = "false")
+        public boolean isDormancyTrackingActive;
+        @Schema(example = "false")
+        public boolean allowOverdraft;
+        @Schema(example = "false")
+        public boolean withHoldTax;
+        @Schema(example = "1")
+        public Integer accountingRule;
+        @Schema(example = "5")
+        public Long savingsReferenceAccountId;
+        @Schema(example = "5")
+        public Long overdraftPortfolioControlId;
+        @Schema(example = "5")
+        public Long feesReceivableAccountId;
+        @Schema(example = "5")
+        public Long penaltiesReceivableAccountId;
+        @Schema(example = "5")
+        public Long savingsControlAccountId;
+        @Schema(example = "5")
+        public Long transfersInSuspenseAccountId;
+        @Schema(example = "5")
+        public Long interestPayableAccountId;
+        @Schema(example = "5")
+        public Long incomeFromFeeAccountId;
+        @Schema(example = "5")
+        public Long incomeFromPenaltyAccountId;
+        @Schema(example = "5")
+        public Long incomeFromInterestId;
+        @Schema(example = "5")
+        public Long interestOnSavingsAccountId;
+        @Schema(example = "5")
+        public Long writeOffAccountId;
+
+        public Set<PostSavingsCharges> charges;
     }
 
     @Schema(description = "PostSavingsProductsResponse")

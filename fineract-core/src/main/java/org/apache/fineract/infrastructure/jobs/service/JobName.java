@@ -57,6 +57,7 @@ public enum JobName {
     SEND_ASYNCHRONOUS_EVENTS("Send Asynchronous Events"), //
     PURGE_EXTERNAL_EVENTS("Purge External Events"), //
     PURGE_PROCESSED_COMMANDS("Purge Processed Commands"), //
+    ADD_PERIODIC_ACCRUAL_ENTRIES_FOR_SAVINGS("Add Periodic Accrual Transactions for Savings"); //
     ;
 
     private final String name;

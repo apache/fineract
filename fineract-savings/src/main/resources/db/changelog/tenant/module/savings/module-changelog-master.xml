@@ -23,4 +23,5 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
   <!-- Sequence is starting from 2000 to make it easier to move existing liquibase changesets here -->
+  <include file="parts/0001_add_accrued_data_to_savings_account.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

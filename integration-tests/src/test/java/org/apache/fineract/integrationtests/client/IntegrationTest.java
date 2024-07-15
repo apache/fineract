@@ -57,6 +57,9 @@ import retrofit2.Response;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public abstract class IntegrationTest {
 
+    protected static final String DATETIME_PATTERN = "dd MMMM yyyy";
+    protected static final String LOCALE = "en_GB";
+
     private static final SecureRandom random = new SecureRandom();
 
     private FineractClient fineract;

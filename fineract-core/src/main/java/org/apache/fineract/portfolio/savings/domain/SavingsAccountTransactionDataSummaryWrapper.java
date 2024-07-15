@@ -142,4 +142,15 @@ public final class SavingsAccountTransactionDataSummaryWrapper {
         }
         return total.getAmountDefaultedToNullIfZero();
     }
+
+    public BigDecimal calculateTotalInterestAccrued(CurrencyData currency, List<SavingsAccountTransactionData> transactions) {
+        Money total = Money.zero(currency);
+        for (final SavingsAccountTransactionData transaction : transactions) {
+            if (transaction.isAccrual() && !transaction.isReversalTransaction()) {
+                total = total.plus(transaction.getAmount());
+            }
+        }
+        return total.getAmountDefaultedToNullIfZero();
+    }
+
 }

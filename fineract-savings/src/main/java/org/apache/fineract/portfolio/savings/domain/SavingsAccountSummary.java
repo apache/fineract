@@ -25,6 +25,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -33,6 +35,8 @@ import org.apache.fineract.portfolio.savings.domain.interest.PostingPeriod;
 /**
  * {@link SavingsAccountSummary} encapsulates all the summary details of a {@link SavingsAccount}.
  */
+@Getter
+@Setter
 @Embeddable
 public final class SavingsAccountSummary {
 
@@ -82,6 +86,12 @@ public final class SavingsAccountSummary {
     // Currently this represents the last interest posting date
     @Column(name = "interest_posted_till_date")
     private LocalDate interestPostedTillDate;
+
+    @Column(name = "accrued_till_date")
+    protected LocalDate accruedTillDate;
+
+    @Column(name = "total_interest_accrued_derived", scale = 6, precision = 19, nullable = true)
+    private BigDecimal totalInterestAccrued;
 
     @Transient
     private BigDecimal runningBalanceOnInterestPostingTillDate = BigDecimal.ZERO;
@@ -271,71 +281,8 @@ public final class SavingsAccountSummary {
         return Money.of(currency, this.accountBalance);
     }
 
-    public BigDecimal getAccountBalance() {
-        return this.accountBalance;
-    }
-
-    public void setAccountBalance(BigDecimal accountBalance) {
-        this.accountBalance = accountBalance;
-    }
-
-    public BigDecimal getTotalInterestPosted() {
-        return this.totalInterestPosted;
-    }
-
-    public LocalDate getLastInterestCalculationDate() {
-        return this.lastInterestCalculationDate;
-    }
-
-    public void setInterestPostedTillDate(final LocalDate date) {
-        this.interestPostedTillDate = date;
-    }
-
-    public LocalDate getInterestPostedTillDate() {
-        return this.interestPostedTillDate;
-    }
-
-    public void setRunningBalanceOnPivotDate(final BigDecimal runningBalanceOnPivotDate) {
-        this.runningBalanceOnInterestPostingTillDate = runningBalanceOnPivotDate;
-    }
-
     public BigDecimal getRunningBalanceOnPivotDate() {
         return this.runningBalanceOnInterestPostingTillDate;
     }
 
-    public BigDecimal getTotalWithdrawals() {
-        return this.totalWithdrawals;
-    }
-
-    public BigDecimal getTotalDeposits() {
-        return this.totalDeposits;
-    }
-
-    public BigDecimal getTotalWithdrawalFees() {
-        return this.totalWithdrawalFees;
-    }
-
-    public BigDecimal getTotalFeeCharge() {
-        return this.totalFeeCharge;
-    }
-
-    public BigDecimal getTotalPenaltyCharge() {
-        return this.totalPenaltyCharge;
-    }
-
-    public BigDecimal getTotalAnnualFees() {
-        return this.totalAnnualFees;
-    }
-
-    public BigDecimal getTotalInterestEarned() {
-        return this.totalInterestEarned;
-    }
-
-    public BigDecimal getTotalOverdraftInterestDerived() {
-        return this.totalOverdraftInterestDerived;
-    }
-
-    public BigDecimal getTotalWithholdTax() {
-        return this.totalWithholdTax;
-    }
 }

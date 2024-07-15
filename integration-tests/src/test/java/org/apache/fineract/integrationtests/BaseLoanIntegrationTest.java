@@ -18,8 +18,6 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
 import static org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType.BUSINESS_DATE;
 import static org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -28,10 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.internal.RequestSpecificationImpl;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
@@ -74,7 +69,6 @@ import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.BatchHelper;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -89,19 +83,17 @@ import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtens
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.apache.fineract.integrationtests.inlinecob.InlineLoanCOBHelper;
-import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
-import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(LoanTestLifecycleExtension.class)
-public abstract class BaseLoanIntegrationTest {
+public abstract class BaseLoanIntegrationTest extends BaseIntegrationTest {
 
     protected static final String DATETIME_PATTERN = "dd MMMM yyyy";
 
@@ -193,16 +185,6 @@ public abstract class BaseLoanIntegrationTest {
         assertEquals(interestOutstanding, period.getInterestOutstanding());
         assertEquals(paidInAdvance, period.getTotalPaidInAdvanceForPeriod());
         assertEquals(paidLate, period.getTotalPaidLateForPeriod());
-    }
-
-    private String getNonByPassUserAuthKey(RequestSpecification requestSpec, ResponseSpecification responseSpec) {
-        // creates the user
-        UserHelper.getSimpleUserWithoutBypassPermission(requestSpec, responseSpec);
-        return Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(UserHelper.SIMPLE_USER_NAME, UserHelper.SIMPLE_USER_PASSWORD);
-    }
-
-    private String getFullAdminAuthKey() {
-        return Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey();
     }
 
     // Loan product with proper accounting setup
@@ -361,17 +343,6 @@ public abstract class BaseLoanIntegrationTest {
                 .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue())//
                 .interestType(interestType)//
                 .amortizationType(amortizationType);
-    }
-
-    private RequestSpecification createRequestSpecification(String authKey) {
-        RequestSpecification requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        requestSpec.header("Authorization", "Basic " + authKey);
-        requestSpec.header("Fineract-Platform-TenantId", "default");
-        return requestSpec;
-    }
-
-    protected ResponseSpecification createResponseSpecification(Matcher<Integer> statusCodeMatcher) {
-        return new ResponseSpecBuilder().expectStatusCode(statusCodeMatcher).build();
     }
 
     protected void verifyUndoLastDisbursalShallFail(Long loanId, String expectedError) {
@@ -626,29 +597,6 @@ public abstract class BaseLoanIntegrationTest {
             }
             Assertions.assertEquals(installments[i].completed, period.getComplete());
             Assertions.assertEquals(LocalDate.parse(installments[i].dueDate, dateTimeFormatter), period.getDueDate());
-        }
-    }
-
-    protected void runAt(String date, Runnable runnable) {
-        try {
-            GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, 42, true);
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, TRUE);
-            businessDateHelper.updateBusinessDate(
-                    new BusinessDateRequest().type(BUSINESS_DATE.getName()).date(date).dateFormat(DATETIME_PATTERN).locale("en"));
-            runnable.run();
-        } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, FALSE);
-            GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, 42, false);
-        }
-    }
-
-    protected void runAsNonByPass(Runnable runnable) {
-        RequestSpecificationImpl requestSpecImpl = (RequestSpecificationImpl) requestSpec;
-        try {
-            requestSpecImpl.replaceHeader("Authorization", "Basic " + nonByPassUserAuthKey);
-            runnable.run();
-        } finally {
-            requestSpecImpl.replaceHeader("Authorization", "Basic " + fullAdminAuthKey);
         }
     }
 
