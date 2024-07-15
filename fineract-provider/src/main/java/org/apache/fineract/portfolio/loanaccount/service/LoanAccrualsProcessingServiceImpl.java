@@ -1017,6 +1017,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
                 final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(accrualTransaction, loanCharge,
                         loanCharge.getAmountOutstanding(currency).getAmount(), null);
                 accrualCharges.add(loanChargePaidBy);
+                loanCharge.getLoanChargePaidBySet().add(loanChargePaidBy);
             }
         }
     }
@@ -1301,6 +1302,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
                 final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(accrualTransaction, loanCharge,
                         amountToBeAccrued.getAmount(), null);
                 accrualCharges.add(loanChargePaidBy);
+                loanCharge.getLoanChargePaidBySet().add(loanChargePaidBy);
             }
         });
 
@@ -1315,6 +1317,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
                                     installmentCharge.getLoanCharge(), amountToBeAccrued.getAmount(),
                                     installmentCharge.getInstallment().getInstallmentNumber());
                             accrualCharges.add(loanChargePaidBy);
+                            installmentCharge.getLoanCharge().getLoanChargePaidBySet().add(loanChargePaidBy);
                             accrualDetails.computeIfPresent(installmentCharge.getLoanCharge().getId(),
                                     (mappedKey, mappedValue) -> mappedValue.add(amountToBeAccrued));
                         }
