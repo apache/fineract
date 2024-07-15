@@ -147,7 +147,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
         commandSource.setResultStatusCode(SC_OK);
         commandSource.updateForAudit(result);
-        commandSource.setResult(toApiJsonSerializer.serializeResult(result));
+        commandSource.setResult(toApiResultJsonSerializer.serializeResult(result));
         commandSource.setStatus(PROCESSED.getValue());
         commandSource = commandSourceService.saveResultSameTransaction(commandSource);
         storeCommandIdInContext(commandSource); // Store command id as a request attribute
@@ -318,7 +318,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
             reqmap.put("timestamp", Instant.now().toString());
 
-            final String serializedResult = toApiResultJsonSerializer.serialize(reqmap);
+            final String serializedResult = toApiJsonSerializer.serialize(reqmap);
 
             final HookEvent applicationEvent = new HookEvent(hookEventSource, serializedResult, appUser,
                     ThreadLocalContextUtil.getContext());
