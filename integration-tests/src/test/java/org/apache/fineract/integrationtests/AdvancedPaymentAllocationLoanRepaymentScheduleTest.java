@@ -4720,8 +4720,8 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
 
             // After Disbursement we are expecting no Accrual transactions
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
-            assertEquals(0.0, loanDetails.getSummary().getTotalUnpaidAccruedDueInterest());
-            assertEquals(0.0, loanDetails.getSummary().getTotalUnpaidAccruedNotDueInterest());
+            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidAccruedDueInterest().stripTrailingZeros());
+            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidAccruedNotDueInterest().stripTrailingZeros());
         });
 
         // Not Due yet
@@ -4732,14 +4732,14 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             periodicAccrualAccountingHelper.runPeriodicAccrualAccounting("30 January 2024");
 
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
-            assertEquals(0.0, loanDetails.getSummary().getTotalUnpaidAccruedDueInterest());
-            assertEquals(0.97, loanDetails.getSummary().getTotalUnpaidAccruedNotDueInterest());
+            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidAccruedDueInterest().stripTrailingZeros());
+            assertEquals(new BigDecimal("0.97"), loanDetails.getSummary().getTotalUnpaidAccruedNotDueInterest().stripTrailingZeros());
 
             // Partial interest repayment
             addRepaymentForLoan(createdLoanId.get(), 20.50, "30 January 2024");
             loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
-            assertEquals(0.0, loanDetails.getSummary().getTotalUnpaidAccruedDueInterest());
-            assertEquals(0.05, loanDetails.getSummary().getTotalUnpaidAccruedNotDueInterest());
+            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidAccruedDueInterest().stripTrailingZeros());
+            assertEquals(new BigDecimal("0.05"), loanDetails.getSummary().getTotalUnpaidAccruedNotDueInterest().stripTrailingZeros());
         });
 
         // Not Due and Due Interest
@@ -4749,8 +4749,8 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             periodicAccrualAccountingHelper.runPeriodicAccrualAccounting("20 February 2024");
 
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
-            assertEquals(0.12, loanDetails.getSummary().getTotalUnpaidAccruedDueInterest());
-            assertEquals(0.52, loanDetails.getSummary().getTotalUnpaidAccruedNotDueInterest());
+            assertEquals(new BigDecimal("0.12"), loanDetails.getSummary().getTotalUnpaidAccruedDueInterest().stripTrailingZeros());
+            assertEquals(new BigDecimal("0.52"), loanDetails.getSummary().getTotalUnpaidAccruedNotDueInterest().stripTrailingZeros());
         });
     }
 

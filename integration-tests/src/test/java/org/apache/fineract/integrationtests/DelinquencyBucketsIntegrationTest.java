@@ -1508,9 +1508,9 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
         log.info("Loan Delinquency Data {} {}", loanDetails.getDelinquent().getDelinquentPrincipal(),
                 loanDetails.getDelinquent().getDelinquentInterest());
         assertNotNull(loanDetails.getDelinquent().getDelinquentPrincipal());
-        assertEquals(305.91, loanDetails.getDelinquent().getDelinquentPrincipal());
+        assertEquals(new BigDecimal("305.91"), loanDetails.getDelinquent().getDelinquentPrincipal().stripTrailingZeros());
         assertNotNull(loanDetails.getDelinquent().getDelinquentInterest());
-        assertEquals(250.72, loanDetails.getDelinquent().getDelinquentInterest());
+        assertEquals(new BigDecimal("250.72"), loanDetails.getDelinquent().getDelinquentInterest().stripTrailingZeros());
 
         // Apply a partial repayment to move only the interest
         PostLoansLoanIdTransactionsResponse loansLoanIdTransactions = loanTransactionHelper.makeLoanRepayment(operationDate, 120f,
@@ -1521,8 +1521,8 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
         loanDetails = loanTransactionHelper.getLoanDetails(loanId);
         assertNotNull(loanDetails.getDelinquent());
         assertNotNull(loanDetails.getDelinquencyRange().getClassification());
-        assertEquals(305.91, loanDetails.getDelinquent().getDelinquentPrincipal());
-        assertEquals(130.72, loanDetails.getDelinquent().getDelinquentInterest());
+        assertEquals(new BigDecimal("305.91"), loanDetails.getDelinquent().getDelinquentPrincipal().stripTrailingZeros());
+        assertEquals(new BigDecimal("130.72"), loanDetails.getDelinquent().getDelinquentInterest().stripTrailingZeros());
 
         // Apply a repayment to cover interest and part of the principal
         loansLoanIdTransactions = loanTransactionHelper.makeLoanRepayment(operationDate, 330.72f, loanId.intValue());
@@ -1532,8 +1532,8 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
         loanDetails = loanTransactionHelper.getLoanDetails(loanId);
         assertNotNull(loanDetails.getDelinquent());
         assertNotNull(loanDetails.getDelinquencyRange().getClassification());
-        assertEquals(105.91, loanDetails.getDelinquent().getDelinquentPrincipal());
-        assertEquals(0.0, loanDetails.getDelinquent().getDelinquentInterest());
+        assertEquals(new BigDecimal("105.91"), loanDetails.getDelinquent().getDelinquentPrincipal().stripTrailingZeros());
+        assertEquals(BigDecimal.ZERO, loanDetails.getDelinquent().getDelinquentInterest().stripTrailingZeros());
 
         // Apply a repayment to cover the remain principal
         loansLoanIdTransactions = loanTransactionHelper.makeLoanRepayment(operationDate, 105.91f, loanId.intValue());
@@ -1543,8 +1543,8 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
         loanDetails = loanTransactionHelper.getLoanDetails(loanId);
         assertNotNull(loanDetails.getDelinquent());
         assertNull(loanDetails.getDelinquencyRange());
-        assertEquals(0.0, loanDetails.getDelinquent().getDelinquentPrincipal());
-        assertEquals(0.0, loanDetails.getDelinquent().getDelinquentInterest());
+        assertEquals(BigDecimal.ZERO, loanDetails.getDelinquent().getDelinquentPrincipal().stripTrailingZeros());
+        assertEquals(BigDecimal.ZERO, loanDetails.getDelinquent().getDelinquentInterest().stripTrailingZeros());
 
         // Undo the last repayment transaction we must to have pending the principal
         PostLoansLoanIdTransactionsResponse reverseRepayment = loanTransactionHelper.reverseLoanTransaction(loanId,
@@ -1554,8 +1554,8 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
         loanDetails = loanTransactionHelper.getLoanDetails(loanId);
         assertNotNull(loanDetails.getDelinquent());
         assertNotNull(loanDetails.getDelinquencyRange().getClassification());
-        assertEquals(105.91, loanDetails.getDelinquent().getDelinquentPrincipal());
-        assertEquals(0.0, loanDetails.getDelinquent().getDelinquentInterest());
+        assertEquals(new BigDecimal("105.91"), loanDetails.getDelinquent().getDelinquentPrincipal().stripTrailingZeros());
+        assertEquals(BigDecimal.ZERO, loanDetails.getDelinquent().getDelinquentInterest().stripTrailingZeros());
     }
 
     private GetLoanProductsProductIdResponse createLoanProduct(final LoanTransactionHelper loanTransactionHelper,
