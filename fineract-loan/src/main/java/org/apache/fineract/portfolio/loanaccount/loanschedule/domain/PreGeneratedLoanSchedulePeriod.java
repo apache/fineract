@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -43,6 +44,7 @@ public class PreGeneratedLoanSchedulePeriod implements LoanScheduleModelPeriod {
     private BigDecimal rescheduleInterestPortion;
     private boolean isRecalculatedInterestComponent;
     private boolean isEMIFixedSpecificToInstallment;
+    private Set<LoanInterestRecalcualtionAdditionalDetails> loanCompoundingDetails;
 
     public PreGeneratedLoanSchedulePeriod(Integer periodNumber, LocalDate periodFromDate, LocalDate periodDueDate) {
         this.periodNumber = periodNumber;
@@ -57,6 +59,7 @@ public class PreGeneratedLoanSchedulePeriod implements LoanScheduleModelPeriod {
         this.rescheduleInterestPortion = BigDecimal.ZERO;
         this.isRecalculatedInterestComponent = false;
         this.isEMIFixedSpecificToInstallment = false;
+        this.loanCompoundingDetails = new HashSet<>();
     }
 
     @Override
@@ -81,7 +84,7 @@ public class PreGeneratedLoanSchedulePeriod implements LoanScheduleModelPeriod {
 
     @Override
     public Set<LoanInterestRecalcualtionAdditionalDetails> getLoanCompoundingDetails() {
-        return Set.of();
+        return this.loanCompoundingDetails;
     }
 
     @Override

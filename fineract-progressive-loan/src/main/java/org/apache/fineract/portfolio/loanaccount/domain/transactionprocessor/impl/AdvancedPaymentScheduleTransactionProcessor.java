@@ -78,6 +78,11 @@ import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgingParam
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.AbstractLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.PreGeneratedLoanSchedulePeriod;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.PrincipalInterest;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanRepaymentSchedulePeriodMapper;
+import org.apache.fineract.portfolio.loanproduct.calc.EMICalculationResult;
+import org.apache.fineract.portfolio.loanproduct.calc.EMICalculator;
 import org.apache.fineract.portfolio.loanproduct.domain.AllocationType;
 import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationTransactionType;
 import org.apache.fineract.portfolio.loanproduct.domain.DueType;
@@ -96,6 +101,10 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     public final SingleLoanChargeRepaymentScheduleProcessingWrapper loanChargeProcessor = new SingleLoanChargeRepaymentScheduleProcessingWrapper();
 
     private final LoanReAgingParameterRepository reAgingParameterRepository;
+
+    private final EMICalculator emiCalculator;
+
+    private final LoanRepaymentSchedulePeriodMapper repaymentSchedulePeriodMapper;
 
     @Override
     public String getCode() {
@@ -644,23 +653,31 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         Money amortizableAmount = disbursementTransaction.getAmount(currency).minus(downPaymentAmount);
 
         if (amortizableAmount.isGreaterThanZero()) {
-            Money increasePrincipalBy = amortizableAmount.dividedBy(noCandidateRepaymentInstallments, mc.getRoundingMode());
-            if (installmentAmountInMultiplesOf != null) {
-                increasePrincipalBy = Money.roundToMultiplesOf(increasePrincipalBy, installmentAmountInMultiplesOf);
-            }
-
-            Money remainingAmount = amortizableAmount
-                    .minus(increasePrincipalBy.multiplyRetainScale(noCandidateRepaymentInstallments, mc.getRoundingMode()));
-
-            Money finalIncreasePrincipalBy = increasePrincipalBy;
-            candidateRepaymentInstallments
-                    .forEach(i -> i.addToPrincipal(disbursementTransaction.getTransactionDate(), finalIncreasePrincipalBy));
-            // Hence the rounding, we might need to amend the last installment amount
-            candidateRepaymentInstallments.get(noCandidateRepaymentInstallments - 1)
-                    .addToPrincipal(disbursementTransaction.getTransactionDate(), remainingAmount);
+            List<PreGeneratedLoanSchedulePeriod> repaymentScheduleFromInstallments = repaymentSchedulePeriodMapper
+                    .map(candidateRepaymentInstallments);
+            EMICalculationResult emiCalculationResult = emiCalculator.calculateEMIValueAndRateFactors(amortizableAmount,
+                    loanProductRelatedDetail, repaymentScheduleFromInstallments, 1, noCandidateRepaymentInstallments, mc);
+            updatePrincipalAndInterestAmountsForInstallments(disbursementTransaction, candidateRepaymentInstallments, emiCalculationResult,
+                    amortizableAmount, installmentAmountInMultiplesOf, mc);
         }
 
         allocateOverpayment(disbursementTransaction, currency, installments, overpaymentHolder);
+    }
+
+    private void updatePrincipalAndInterestAmountsForInstallments(LoanTransaction disbursementTransaction,
+            List<LoanRepaymentScheduleInstallment> candidateRepaymentInstallments, EMICalculationResult emiCalculationResult,
+            Money amortizableAmount, Integer installmentAmountInMultiplesOf, MathContext mc) {
+        Money outstandingAmount = amortizableAmount;
+        int installmentNumber = 1;
+        for (LoanRepaymentScheduleInstallment installment : candidateRepaymentInstallments) {
+            PrincipalInterest principalInterestForThisPeriod = emiCalculator.calculatePrincipalInterestComponentsForPeriod(
+                    emiCalculationResult, outstandingAmount, installmentAmountInMultiplesOf, installmentNumber,
+                    candidateRepaymentInstallments.size(), mc);
+            installment.addToPrincipal(disbursementTransaction.getTransactionDate(), principalInterestForThisPeriod.principal());
+            installment.addToInterestCharged(principalInterestForThisPeriod.interest());
+            outstandingAmount = outstandingAmount.minus(principalInterestForThisPeriod.principal());
+            ++installmentNumber;
+        }
     }
 
     private void allocateOverpayment(LoanTransaction loanTransaction, MonetaryCurrency currency,

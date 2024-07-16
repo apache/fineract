@@ -65,6 +65,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgingParam
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor.TransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanRepaymentSchedulePeriodMapper;
+import org.apache.fineract.portfolio.loanproduct.calc.EMICalculator;
 import org.apache.fineract.portfolio.loanproduct.domain.AllocationType;
 import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationTransactionType;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
@@ -91,6 +93,8 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
     private static final MockedStatic<MoneyHelper> MONEY_HELPER = mockStatic(MoneyHelper.class);
     private AdvancedPaymentScheduleTransactionProcessor underTest;
     private LoanReAgingParameterRepository reAgingParameterRepository = Mockito.mock(LoanReAgingParameterRepository.class);
+    private EMICalculator emiCalculator = Mockito.mock(EMICalculator.class);
+    private LoanRepaymentSchedulePeriodMapper loanRepaymentSchedulePeriodMapper = Mockito.mock(LoanRepaymentSchedulePeriodMapper.class);
 
     @BeforeAll
     public static void init() {
@@ -104,7 +108,8 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
 
     @BeforeEach
     public void setUp() {
-        underTest = new AdvancedPaymentScheduleTransactionProcessor(reAgingParameterRepository);
+        underTest = new AdvancedPaymentScheduleTransactionProcessor(reAgingParameterRepository, emiCalculator,
+                loanRepaymentSchedulePeriodMapper);
 
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);

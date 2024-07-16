@@ -32,6 +32,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.imp
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.RBILoanRepaymentScheduleTransactionProcessor;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanRepaymentSchedulePeriodMapper;
+import org.apache.fineract.portfolio.loanproduct.calc.EMICalculator;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
@@ -105,8 +107,9 @@ public class LoanAccountAutoStarter {
     @Bean
     @Conditional(AdvancedPaymentScheduleTransactionProcessorCondition.class)
     public AdvancedPaymentScheduleTransactionProcessor advancedPaymentScheduleTransactionProcessor(
-            LoanReAgingParameterRepository reAgingParameterRepository) {
-        return new AdvancedPaymentScheduleTransactionProcessor(reAgingParameterRepository);
+            LoanReAgingParameterRepository reAgingParameterRepository, EMICalculator emiCalculator,
+            LoanRepaymentSchedulePeriodMapper repaymentSchedulePeriodMapper) {
+        return new AdvancedPaymentScheduleTransactionProcessor(reAgingParameterRepository, emiCalculator, repaymentSchedulePeriodMapper);
     }
 
 }

@@ -1051,6 +1051,11 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         resetDerivedComponents();
         resetPrincipalDue();
         resetChargesCharged();
+        resetInterestCharged();
+    }
+
+    private void resetInterestCharged() {
+        this.interestCharged = null;
     }
 
     public void resetPrincipalDue() {
@@ -1063,5 +1068,13 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
 
     public boolean isReAged() {
         return isReAged;
+    }
+
+    public void addToInterestCharged(final Money interestAmount) {
+        if (this.interestCharged == null) {
+            this.interestCharged = interestAmount.getAmount();
+        } else {
+            this.interestCharged = this.interestCharged.add(interestAmount.getAmount());
+        }
     }
 }
