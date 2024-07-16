@@ -44,6 +44,6 @@ public class FullFilSurveyCommandHandler implements NewCommandSourceHandler {
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.fullFillSurvey(command.entityName(), command.entityId(), command);
+        return this.writePlatformService.fullFillSurvey(command.getEntityName(), command.entityId(), command);
     }
 }

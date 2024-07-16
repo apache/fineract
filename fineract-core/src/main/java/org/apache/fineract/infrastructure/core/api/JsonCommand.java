@@ -34,6 +34,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import lombok.Getter;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -49,6 +50,8 @@ import org.apache.fineract.infrastructure.security.service.PlatformPasswordEncod
  * Wraps the provided JSON with convenience functions for extracting parameter values and checking for changes against
  * an existing value.
  */
+
+@Getter
 public final class JsonCommand {
 
     private final String jsonCommand;
@@ -189,14 +192,6 @@ public final class JsonCommand {
 
     }
 
-    public Long getOrganisationCreditBureauId() {
-        return this.organisationCreditBureauId;
-    }
-
-    public Long getCreditBureauId() {
-        return this.creditBureauId;
-    }
-
     public String json() {
         return this.jsonCommand;
     }
@@ -225,48 +220,12 @@ public final class JsonCommand {
         return this.commandId;
     }
 
-    public String entityName() {
-        return this.entityName;
-    }
-
     public Long entityId() {
         return this.resourceId;
     }
 
     public Long subentityId() {
         return this.subresourceId;
-    }
-
-    public Long getGroupId() {
-        return this.groupId;
-    }
-
-    public Long getClientId() {
-        return this.clientId;
-    }
-
-    public Long getLoanId() {
-        return this.loanId;
-    }
-
-    public Long getSavingsId() {
-        return this.savingsId;
-    }
-
-    public String getTransactionId() {
-        return this.transactionId;
-    }
-
-    public String getUrl() {
-        return this.url;
-    }
-
-    public Long getProductId() {
-        return this.productId;
-    }
-
-    public String getJobName() {
-        return this.jobName;
     }
 
     private boolean differenceExists(final TemporalAccessor baseValue, final TemporalAccessor workingCopyValue) {
