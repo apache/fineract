@@ -426,6 +426,22 @@
                 "null",
                 "string"
             ]
+        },
+        {
+            "default": null,
+            "name": "totalUnpaidAccruedDueInterest",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "totalUnpaidAccruedNotDueInterest",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
         }
     ]
 }
