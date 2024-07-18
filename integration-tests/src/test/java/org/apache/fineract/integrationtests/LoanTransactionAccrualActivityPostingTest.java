@@ -46,6 +46,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.integrationtests.common.BusinessStepHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
@@ -76,6 +77,7 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
     private static ChargesHelper chargesHelper;
     private static InlineLoanCOBHelper inlineLoanCOBHelper;
     private static BusinessStepHelper businessStepHelper;
+    private static SchedulerJobHelper schedulerJobHelper;
 
     @BeforeAll
     public static void setup() {
@@ -85,6 +87,7 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
         requestSpec.header("Fineract-Platform-TenantId", "default");
         responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        schedulerJobHelper = new SchedulerJobHelper(requestSpec);
         ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
         chargesHelper = new ChargesHelper();
         client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
@@ -164,6 +167,133 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
                     transaction(90.0, "Accrual Activity", "01 February 2023", 0, 0, 20.0, 40.0, 30.0, 0.0, 0.0),
                     transaction(0.71, "Accrual", "02 February 2023", 0, 0, 0.71, 0, 0, 0.0, 0.0));
 
+        });
+    }
+
+    // Create Loan with Interest and enabled Accrual Activity Posting
+    // Approve and disburse loan
+    // charge penalty with due date as 1st installment
+    // charge fee with due date as 1st installment
+    // charge penalty with due date as 3rd installment
+    // charge fee with due date as 2nd installment
+    // set business day to the day before closing day of 1st installment, run "Accrual Activity Posting" Job, verify no
+    // Accrual Activity
+    // posted
+    // set business day to the closing day of 1st installment, run "Accrual Activity Posting" Job, verify Accrual
+    // Activity posted
+    // set business day to the day after closing day of 1st installment, run "Accrual Activity Posting" Job, verify no
+    // Accrual Activity
+    // posted
+    @Test
+    public void testAccrualActivityPostingJob() {
+        final String disbursementDay = "01 January 2023";
+        final String repaymentPeriod1DueDate = "01 February 2023";
+        final String repaymentPeriod1CloseDate = "02 February 2023";
+        final String repaymentPeriod1OneDayBeforeCloseDate = "01 February 2023";
+        final String repaymentPeriod1OneDayAfterCloseDate = "03 February 2023";
+        final String repaymentPeriod2DueDate = "01 March 2023";
+        final String repaymentPeriod3DueDate = "01 April 2023";
+        final String creationBusinessDay = "15 May 2023";
+        AtomicReference<Long> loanId = new AtomicReference<>();
+        runAt(creationBusinessDay, () -> {
+
+            Long localLoanProductId = createLoanProductAccountingAccrualPeriodicWithInterest();
+            loanId.set(applyForLoanApplicationWithInterest(client.getClientId(), localLoanProductId, BigDecimal.valueOf(40000),
+                    disbursementDay));
+
+            LOG.info("Test Loan Product Id {1} http://localhost:4200/#/products/loan-products/{}/general", localLoanProductId);
+            LOG.info("Test Client Id {1} http://localhost:4200/#/clients/{}", client.getClientId());
+            LOG.info("Test Loan Id {2} http://localhost:4200/#/clients/{}/loans-accounts/{}/transactions", client.getClientId(), loanId);
+
+            loanTransactionHelper.approveLoan(loanId.get(), new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000))
+                    .dateFormat(DATETIME_PATTERN).approvedOnDate(disbursementDay).locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanId.get(), new PostLoansLoanIdRequest().actualDisbursementDate(disbursementDay)
+                    .dateFormat(DATETIME_PATTERN).transactionAmount(BigDecimal.valueOf(1000.0)).locale("en"));
+
+            chargePenalty(loanId.get(), 30.0, repaymentPeriod1DueDate);
+            chargePenalty(loanId.get(), 50.0, repaymentPeriod2DueDate);
+            chargeFee(loanId.get(), 40.0, repaymentPeriod1DueDate);
+            chargeFee(loanId.get(), 60.0, repaymentPeriod3DueDate);
+
+        });
+        runAt(repaymentPeriod1OneDayBeforeCloseDate, () -> {
+            schedulerJobHelper.executeAndAwaitJob("Accrual Activity Posting");
+            verifyTransactions(loanId.get(), //
+                    transaction(1000.0, "Disbursement", disbursementDay, 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0));
+        });
+        runAt(repaymentPeriod1CloseDate, () -> {
+            schedulerJobHelper.executeAndAwaitJob("Accrual Activity Posting");
+
+            verifyTransactions(loanId.get(), //
+                    transaction(1000.0, "Disbursement", disbursementDay, 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+                    transaction(90.0, "Accrual Activity", "01 February 2023", 0, 0, 20.0, 40.0, 30.0, 0.0, 0.0));
+        });
+        runAt(repaymentPeriod1OneDayAfterCloseDate, () -> {
+            schedulerJobHelper.executeAndAwaitJob("Accrual Activity Posting");
+            verifyTransactions(loanId.get(), //
+                    transaction(1000.0, "Disbursement", disbursementDay, 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+                    transaction(90.0, "Accrual Activity", "01 February 2023", 0, 0, 20.0, 40.0, 30.0, 0.0, 0.0));
+        });
+    }
+
+    // Create Loan with Interest and enabled Accrual Activity Posting
+    // Approve and disburse loan
+    // charge penalty with due date as 1st installment
+    // charge fee with due date as 1st installment
+    // charge penalty with due date as 3rd installment
+    // charge fee with due date as 2nd installment
+    // set business day to the day before closing day of 1st installment, run "Accrual Activity Posting" Job, verify no
+    // Accrual Activity
+    // posted
+    // set business day to the closing day of 1st installment, run "Accrual Activity Posting" Job, verify Accrual
+    // Activity posted
+    // set business day to the day after closing day of 1st installment, run "Accrual Activity Posting" Job, verify no
+    // Accrual Activity
+    // posted
+    @Test
+    public void testAccrualActivityPostingJobForMultipleLoans() {
+        final String disbursementDay = "01 January 2023";
+        final String repaymentPeriod1DueDate = "01 February 2023";
+        final String repaymentPeriod1CloseDate = "02 February 2023";
+        final String creationBusinessDay = "15 May 2023";
+        AtomicReference<Long> loanId1 = new AtomicReference<>();
+        AtomicReference<Long> loanId2 = new AtomicReference<>();
+        runAt(creationBusinessDay, () -> {
+
+            Long localLoanProductId = createLoanProductAccountingAccrualPeriodicWithInterest();
+
+            loanId1.set(applyForLoanApplicationWithInterest(client.getClientId(), localLoanProductId, BigDecimal.valueOf(40000),
+                    disbursementDay));
+            loanId2.set(applyForLoanApplicationWithInterest(client.getClientId(), localLoanProductId, BigDecimal.valueOf(40000),
+                    disbursementDay));
+
+            loanTransactionHelper.approveLoan(loanId1.get(), new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000))
+                    .dateFormat(DATETIME_PATTERN).approvedOnDate(disbursementDay).locale("en"));
+            loanTransactionHelper.approveLoan(loanId2.get(), new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000))
+                    .dateFormat(DATETIME_PATTERN).approvedOnDate(disbursementDay).locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanId1.get(), new PostLoansLoanIdRequest().actualDisbursementDate(disbursementDay)
+                    .dateFormat(DATETIME_PATTERN).transactionAmount(BigDecimal.valueOf(1000.0)).locale("en"));
+            loanTransactionHelper.disburseLoan(loanId2.get(), new PostLoansLoanIdRequest().actualDisbursementDate(disbursementDay)
+                    .dateFormat(DATETIME_PATTERN).transactionAmount(BigDecimal.valueOf(1000.0)).locale("en"));
+
+            chargePenalty(loanId1.get(), 30.0, repaymentPeriod1DueDate);
+            chargeFee(loanId1.get(), 40.0, repaymentPeriod1DueDate);
+
+            chargePenalty(loanId2.get(), 30.0, repaymentPeriod1DueDate);
+            chargeFee(loanId2.get(), 40.0, repaymentPeriod1DueDate);
+
+        });
+        runAt(repaymentPeriod1CloseDate, () -> {
+            schedulerJobHelper.executeAndAwaitJob("Accrual Activity Posting");
+
+            verifyTransactions(loanId1.get(), //
+                    transaction(1000.0, "Disbursement", disbursementDay, 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+                    transaction(90.0, "Accrual Activity", "01 February 2023", 0, 0, 20.0, 40.0, 30.0, 0.0, 0.0));
+            verifyTransactions(loanId2.get(), //
+                    transaction(1000.0, "Disbursement", disbursementDay, 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+                    transaction(90.0, "Accrual Activity", "01 February 2023", 0, 0, 20.0, 40.0, 30.0, 0.0, 0.0));
         });
     }
 
