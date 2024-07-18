@@ -57,6 +57,7 @@ public enum JobName {
     SEND_ASYNCHRONOUS_EVENTS("Send Asynchronous Events"), //
     PURGE_EXTERNAL_EVENTS("Purge External Events"), //
     PURGE_PROCESSED_COMMANDS("Purge Processed Commands"), //
+    ACCRUAL_ACTIVITY_POSTING("Accrual Activity Posting"), //
     ;
 
     private final String name;
