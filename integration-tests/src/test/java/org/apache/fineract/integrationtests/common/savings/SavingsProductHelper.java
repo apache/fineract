@@ -27,14 +27,17 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.fineract.client.models.GetSavingsProductsProductIdResponse;
+import org.apache.fineract.client.models.PostSavingsProductsRequest;
+import org.apache.fineract.client.models.PostSavingsProductsResponse;
 import org.apache.fineract.client.util.JSON;
+import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("unused")
-public class SavingsProductHelper {
+public class SavingsProductHelper extends IntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsProductHelper.class);
     private static final String SAVINGS_PRODUCT_URL = "/fineract-provider/api/v1/savingsproducts";
@@ -379,6 +382,14 @@ public class SavingsProductHelper {
         final String GET_PRODUCT_BY_ID_URL = SAVINGS_PRODUCT_URL + "/" + productId + "?" + Utils.TENANT_IDENTIFIER;
         final String response = Utils.performServerGet(requestSpec, responseSpec, GET_PRODUCT_BY_ID_URL);
         return GSON.fromJson(response, GetSavingsProductsProductIdResponse.class);
+    }
+
+    public PostSavingsProductsResponse createSavingsProduct(PostSavingsProductsRequest request) {
+        return ok(fineract().savingsProducts.create13(request));
+    }
+
+    public GetSavingsProductsProductIdResponse getSavingsProduct(Long savingsProductId) {
+        return ok(fineract().savingsProducts.retrieveOne27(savingsProductId));
     }
 
 }

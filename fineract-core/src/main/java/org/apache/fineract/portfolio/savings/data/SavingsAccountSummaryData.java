@@ -56,13 +56,15 @@ public class SavingsAccountSummaryData implements Serializable {
     private LocalDate interestPostedTillDate;
     private LocalDate prevInterestPostedTillDate;
     private transient BigDecimal runningBalanceOnInterestPostingTillDate = BigDecimal.ZERO;
+    private LocalDate accruedTillDate;
+    private BigDecimal totalInterestAccrued;
 
     public SavingsAccountSummaryData(final CurrencyData currency, final BigDecimal totalDeposits, final BigDecimal totalWithdrawals,
             final BigDecimal totalWithdrawalFees, final BigDecimal totalAnnualFees, final BigDecimal totalInterestEarned,
             final BigDecimal totalInterestPosted, final BigDecimal accountBalance, final BigDecimal totalFeeCharge,
             final BigDecimal totalPenaltyCharge, final BigDecimal totalOverdraftInterestDerived, final BigDecimal totalWithholdTax,
             final BigDecimal interestNotPosted, final LocalDate lastInterestCalculationDate, final BigDecimal availableBalance,
-            final LocalDate interestPostedTillDate) {
+            final LocalDate interestPostedTillDate, final LocalDate accruedTillDate) {
         this.currency = currency;
         this.totalDeposits = totalDeposits;
         this.totalWithdrawals = totalWithdrawals;
@@ -79,6 +81,7 @@ public class SavingsAccountSummaryData implements Serializable {
         this.lastInterestCalculationDate = lastInterestCalculationDate;
         this.availableBalance = availableBalance;
         this.interestPostedTillDate = interestPostedTillDate;
+        this.accruedTillDate = accruedTillDate;
     }
 
     public void setPrevInterestPostedTillDate(LocalDate interestPostedTillDate) {
@@ -255,6 +258,7 @@ public class SavingsAccountSummaryData implements Serializable {
         this.totalPenaltyCharge = wrapper.calculateTotalPenaltyChargeWaived(currency, transactions);
         this.totalOverdraftInterestDerived = wrapper.calculateTotalOverdraftInterest(currency, transactions);
         this.totalWithholdTax = wrapper.calculateTotalWithholdTaxWithdrawal(currency, transactions);
+        this.totalInterestAccrued = wrapper.calculateTotalInterestAccrued(currency, transactions);
 
         // boolean isUpdated = false;
         updateRunningBalanceAndPivotDate(false, transactions, null, null, null);

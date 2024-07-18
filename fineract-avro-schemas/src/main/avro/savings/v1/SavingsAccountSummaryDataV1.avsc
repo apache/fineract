@@ -138,6 +138,22 @@
                 "null",
                 "string"
             ]
+        },
+        {
+            "default": null,
+            "name": "accruedTillDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "totalInterestAccrued",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
         }
     ]
 }

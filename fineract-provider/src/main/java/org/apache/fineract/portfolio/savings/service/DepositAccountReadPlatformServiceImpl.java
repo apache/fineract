@@ -582,6 +582,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         public static final String INTEREST_POSTING_PERIOD_TYPE = "interestPostingPeriodType";
         public static final String INTEREST_CALCULATION_TYPE = "interestCalculationType";
         public static final String INTEREST_CALCULATION_DAYS_IN_YEAR_TYPE = "interestCalculationDaysInYearType";
+        public static final String ACCRUED_TILL_DATE = "accruedTillDate";
         public static final String MIN_REQUIRED_OPENING_BALANCE = "minRequiredOpeningBalance";
         public static final String LOCKIN_PERIOD_FREQUENCY = "lockinPeriodFrequency";
         public static final String LOCKIN_PERIOD_FREQUENCY_TYPE = "lockinPeriodFrequencyType";
@@ -656,7 +657,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             selectFieldsSqlBuilder.append("sa.total_withhold_tax_derived as totalWithholdTax,");
             selectFieldsSqlBuilder.append("sa.deposit_type_enum as depositTypeId, ");
             selectFieldsSqlBuilder.append("sa.min_balance_for_interest_calculation as minBalanceForInterestCalculation, ");
-            selectFieldsSqlBuilder.append("sa.withhold_tax as withHoldTax,");
+            selectFieldsSqlBuilder.append("sa.withhold_tax as withHoldTax, sa.accrued_till_date as accruedTillDate, ");
             selectFieldsSqlBuilder.append("tg.id as taxGroupId, tg.name as taxGroupName ");
 
             this.selectFieldsSql = selectFieldsSqlBuilder.toString();
@@ -739,6 +740,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final String closedByUsername = rs.getString(CLOSED_BY_USERNAME);
             final String closedByFirstname = rs.getString(CLOSED_BY_FIRSTNAME);
             final String closedByLastname = rs.getString(CLOSED_BY_LASTNAME);
+            final LocalDate accruedTillDate = JdbcSupport.getLocalDate(rs, ACCRUED_TILL_DATE);
 
             final SavingsAccountApplicationTimelineData timeline = new SavingsAccountApplicationTimelineData(submittedOnDate,
                     submittedByUsername, submittedByFirstname, submittedByLastname, rejectedOnDate, rejectedByUsername, rejectedByFirstname,
@@ -812,7 +814,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final SavingsAccountSummaryData summary = new SavingsAccountSummaryData(currency, totalDeposits, totalWithdrawals,
                     totalWithdrawalFees, totalAnnualFees, totalInterestEarned, totalInterestPosted, accountBalance, totalFeeCharge,
                     totalPenaltyCharge, totalOverdraftInterestDerived, totalWithholdTax, null, null, availableBalance,
-                    interestPostedTillDate);
+                    interestPostedTillDate, accruedTillDate);
 
             return DepositAccountData.instance(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
                     fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,

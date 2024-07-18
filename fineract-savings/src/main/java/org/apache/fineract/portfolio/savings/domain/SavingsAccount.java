@@ -926,8 +926,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         return this.nominalAnnualInterestRateOverdraft.divide(BigDecimal.valueOf(100L), mc);
     }
 
-    @SuppressWarnings("unused")
-    protected BigDecimal getEffectiveInterestRateAsFraction(final MathContext mc, final LocalDate upToInterestCalculationDate) {
+    public BigDecimal getEffectiveInterestRateAsFraction(final MathContext mc, final LocalDate upToInterestCalculationDate) {
         return this.nominalAnnualInterestRate.divide(BigDecimal.valueOf(100L), mc);
     }
 
@@ -3740,6 +3739,20 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         return lastransactionDate;
     }
 
+    public List<SavingsAccountTransaction> retreiveOrderedAccrualTransactions() {
+        final List<SavingsAccountTransaction> listOfTransactionsSorted = retrieveListOfTransactions();
+
+        final List<SavingsAccountTransaction> orderedAccrualTransactions = new ArrayList<>();
+
+        for (final SavingsAccountTransaction transaction : listOfTransactionsSorted) {
+            if (transaction.isAccrual()) {
+                orderedAccrualTransactions.add(transaction);
+            }
+        }
+        orderedAccrualTransactions.sort(new SavingsAccountTransactionComparator());
+        return orderedAccrualTransactions;
+    }
+
     public BigDecimal getSavingsHoldAmount() {
         return this.savingsOnHoldAmount == null ? BigDecimal.ZERO : this.savingsOnHoldAmount;
     }
@@ -3842,4 +3855,11 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
                 .map(transaction -> transaction.toSavingsAccountTransactionDetailsForPostingPeriod(this.currency, this.allowOverdraft))
                 .toList();
     }
+
+    public List<SavingsAccountTransactionDetailsForPostingPeriod> toSavingsAccountTransactionDetailsForPostingPeriodList() {
+        return retreiveOrderedNonInterestPostingTransactions().stream()
+                .map(transaction -> transaction.toSavingsAccountTransactionDetailsForPostingPeriod(this.currency, this.allowOverdraft))
+                .toList();
+    }
+
 }

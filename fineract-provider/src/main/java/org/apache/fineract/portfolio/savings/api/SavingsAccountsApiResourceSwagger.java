@@ -21,7 +21,9 @@ package org.apache.fineract.portfolio.savings.api;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
+import org.apache.fineract.portfolio.savings.api.SavingsProductsApiResourceSwagger.PostSavingsProductsRequest.PostSavingsCharges;
 
 /**
  * Created by Chirag Gupta on 12/29/17.
@@ -233,6 +235,33 @@ final class SavingsAccountsApiResourceSwagger {
         public String submittedOnDate;
         @Schema(example = "123")
         public String externalId;
+        @Schema(example = "5.0")
+        public Double nominalAnnualInterestRate;
+        @Schema(example = "1")
+        public Integer interestCompoundingPeriodType;
+        @Schema(example = "4")
+        public Integer interestPostingPeriodType;
+        @Schema(example = "1")
+        public Integer interestCalculationType;
+        @Schema(example = "365")
+        public Integer interestCalculationDaysInYearType;
+        @Schema(example = "accountMappingForPayment")
+        public String accountMappingForPayment;
+        @Schema(example = "false")
+        public boolean withdrawalFeeForTransfers;
+        @Schema(example = "false")
+        public boolean enforceMinRequiredBalance;
+        @Schema(example = "false")
+        public boolean isDormancyTrackingActive;
+        @Schema(example = "false")
+        public boolean allowOverdraft;
+        @Schema(example = "false")
+        public boolean withHoldTax;
+        @Schema(example = "1")
+        public Integer lockinPeriodFrequencyType;
+        @Schema(example = "4")
+        public Integer lockinPeriodFrequency;
+        public Set<PostSavingsCharges> charges;
     }
 
     @Schema(description = "PostSavingsAccountsResponse")
@@ -264,6 +293,218 @@ final class SavingsAccountsApiResourceSwagger {
             public BigDecimal accountBalance;
             @Schema(example = "0")
             public BigDecimal availableBalance;
+            @Schema(example = "0")
+            public BigDecimal interestNotPosted;
+            @Schema(example = "[2013, 11, 1]")
+            public LocalDate lastInterestCalculationDate;
+            @Schema(example = "0")
+            public BigDecimal totalDeposits;
+            @Schema(example = "0")
+            public BigDecimal totalInterestEarned;
+            @Schema(example = "0")
+            public BigDecimal totalInterestPosted;
+            @Schema(example = "0")
+            public BigDecimal totalOverdraftInterestDerived;
+            @Schema(example = "[2013, 11, 1]")
+            public LocalDate accruedTillDate;
+            @Schema(example = "0")
+            public BigDecimal totalInterestAccrued;
+        }
+
+        static final class GetPaymentType {
+
+            private GetPaymentType() {}
+
+            @Schema(example = "11")
+            public Long id;
+            @Schema(example = "Cash")
+            public String name;
+            @Schema(example = "Cash Payment")
+            public String description;
+            @Schema(example = "true")
+            public Boolean isCashPayment;
+            @Schema(example = "0")
+            public Long position;
+        }
+
+        static final class GetSavingsAccountsTransaction {
+
+            private GetSavingsAccountsTransaction() {}
+
+            static final class GetLoansLoanIdLoanTransactionEnumData {
+
+                private GetLoansLoanIdLoanTransactionEnumData() {}
+
+                @Schema(example = "1")
+                public Long id;
+                @Schema(example = "loanTransactionType.repayment")
+                public String code;
+                @Schema(example = "2")
+                public Long accountId;
+                @Schema(example = "000000002")
+                public String accountNo;
+
+                @Schema(example = "false")
+                public boolean disbursement;
+                @Schema(example = "false")
+                public boolean repaymentAtDisbursement;
+                @Schema(example = "true")
+                public boolean repayment;
+                @Schema(example = "false")
+                public boolean merchantIssuedRefund;
+                @Schema(example = "false")
+                public boolean payoutRefund;
+                @Schema(example = "false")
+                public boolean goodwillCredit;
+                @Schema(example = "false")
+                public boolean contra;
+                @Schema(example = "false")
+                public boolean waiveInterest;
+                @Schema(example = "false")
+                public boolean waiveCharges;
+                @Schema(example = "false")
+                public boolean accrual;
+                @Schema(example = "false")
+                public boolean writeOff;
+                @Schema(example = "false")
+                public boolean recoveryRepayment;
+                @Schema(example = "false")
+                public boolean initiateTransfer;
+                @Schema(example = "false")
+                public boolean approveTransfer;
+                @Schema(example = "false")
+                public boolean withdrawTransfer;
+                @Schema(example = "false")
+                public boolean rejectTransfer;
+                @Schema(example = "false")
+                public boolean chargePayment;
+                @Schema(example = "false")
+                public boolean refund;
+                @Schema(example = "false")
+                public boolean refundForActiveLoans;
+                @Schema(example = "false")
+                public boolean creditBalanceRefund;
+                @Schema(example = "false")
+                public boolean chargeAdjustment;
+                @Schema(example = "false")
+                public boolean chargeoff;
+            }
+
+            static final class GetPaymentDetailData {
+
+                private GetPaymentDetailData() {}
+
+                @Schema(example = "62")
+                public Long id;
+                public GetPaymentType paymentType;
+                @Schema(example = "acc123")
+                public String accountNumber;
+                @Schema(example = "che123")
+                public String checkNumber;
+                @Schema(example = "rou123")
+                public String routingCode;
+                @Schema(example = "rec123")
+                public String receiptNumber;
+                @Schema(example = "ban123")
+                public String bankNumber;
+            }
+
+            static final class GetSavingsAccountsTransactionChargePaidByData {
+
+                private GetSavingsAccountsTransactionChargePaidByData() {}
+
+                @Schema(example = "11")
+                public Long id;
+                @Schema(example = "100.000000")
+                public Double amount;
+                @Schema(example = "9679")
+                public Integer installmentNumber;
+                @Schema(example = "1")
+                public Long chargeId;
+                @Schema(example = "636")
+                public Long transactionId;
+                @Schema(example = "name")
+                public String name;
+            }
+
+            static final class GetTranscationTypeEnumData {
+
+                private GetTranscationTypeEnumData() {}
+
+                @Schema(example = "1")
+                public Long id;
+                @Schema(example = "savingsAccountTransactionType.deposit")
+                public String code;
+                @Schema(example = "Deposit")
+                public String value;
+                @Schema(example = "true")
+                public boolean accrual;
+                @Schema(example = "true")
+                public boolean deposit;
+                @Schema(example = "false")
+                public boolean dividendPayout;
+                @Schema(example = "false")
+                public boolean withdrawal;
+                @Schema(example = "false")
+                public boolean interestPosting;
+                @Schema(example = "false")
+                public boolean feeDeduction;
+                @Schema(example = "false")
+                public boolean initiateTransfer;
+                @Schema(example = "false")
+                public boolean approveTransfer;
+                @Schema(example = "false")
+                public boolean withdrawTransfer;
+                @Schema(example = "false")
+                public boolean rejectTransfer;
+                @Schema(example = "false")
+                public boolean overdraftInterest;
+                @Schema(example = "false")
+                public boolean writtenoff;
+                @Schema(example = "true")
+                public boolean overdraftFee;
+                @Schema(example = "false")
+                public boolean withholdTax;
+                @Schema(example = "false")
+                public boolean escheat;
+                @Schema(example = "false")
+                public boolean amountHold;
+                @Schema(example = "false")
+                public boolean amountRelease;
+            }
+
+            @Schema(example = "1")
+            public Long id;
+            @Schema(example = "100.000000")
+            public BigDecimal amount;
+            @Schema(description = "List of SavingsAccountsTransactionChargePaidByData")
+            public List<GetSavingsAccountsTransactionChargePaidByData> chargesPaidByData;
+            @Schema(description = "Currency")
+            public GetSavingsAccountsResponse.GetSavingsPageItems.GetSavingsCurrency currency;
+            @Schema(example = "[2022, 07, 01]")
+            public LocalDate date;
+            @Schema(example = "false")
+            public boolean interestedPostedAsOn;
+            @Schema(example = "false")
+            public boolean isManualTransaction;
+            @Schema(example = "false")
+            public boolean isReversal;
+            @Schema(example = "false")
+            public boolean lienTransaction;
+            @Schema(example = "1")
+            public Long originalTransactionId;
+            @Schema(example = "1")
+            public Long releaseTransactionId;
+            @Schema(example = "false")
+            public boolean reversed;
+            @Schema(example = "100.000000")
+            public BigDecimal runningBalance;
+            @Schema(example = "[2022, 07, 01]")
+            public LocalDate submittedOnDate;
+            @Schema(example = "admin")
+            public String submittedByUsername;
+            @Schema(description = "Transaction type")
+            public GetTranscationTypeEnumData transactionType;
         }
 
         @Schema(example = "1")
@@ -280,6 +521,10 @@ final class SavingsAccountsApiResourceSwagger {
         public String savingsProductName;
         @Schema(example = "0")
         public Integer fieldOfficerId;
+        @Schema(example = "false")
+        public boolean withHoldTax;
+        @Schema(example = "false")
+        public boolean withdrawalFeeForTransfers;
         public GetSavingsAccountsResponse.GetSavingsPageItems.GetSavingsStatus status;
         public GetSavingsAccountsResponse.GetSavingsPageItems.GetSavingsTimeline timeline;
         public GetSavingsAccountsResponse.GetSavingsPageItems.GetSavingsCurrency currency;
@@ -290,6 +535,8 @@ final class SavingsAccountsApiResourceSwagger {
         public GetSavingsAccountsResponse.GetSavingsPageItems.GetSavingsInterestCalculationType interestCalculationType;
         public GetSavingsAccountsResponse.GetSavingsPageItems.GetSavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType;
         public GetSavingsAccountsSummary summary;
+        @Schema(description = "Set of SavingsAccountsTransaction")
+        public List<GetSavingsAccountsTransaction> transactions;
     }
 
     @Schema(description = "PutSavingsAccountsAccountIdRequest")

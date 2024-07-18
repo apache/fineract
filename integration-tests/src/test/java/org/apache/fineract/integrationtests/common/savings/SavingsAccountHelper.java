@@ -41,7 +41,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.apache.fineract.client.models.GetSavingsAccountsAccountIdResponse;
 import org.apache.fineract.client.models.PagedLocalRequestAdvancedQueryRequest;
+import org.apache.fineract.client.models.PostSavingsAccountTransactionsRequest;
+import org.apache.fineract.client.models.PostSavingsAccountTransactionsResponse;
+import org.apache.fineract.client.models.PostSavingsAccountsAccountIdRequest;
+import org.apache.fineract.client.models.PostSavingsAccountsAccountIdResponse;
+import org.apache.fineract.client.models.PostSavingsAccountsRequest;
+import org.apache.fineract.client.models.PostSavingsAccountsResponse;
 import org.apache.fineract.client.models.SavingsAccountTransactionsSearchResponse;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
@@ -987,6 +994,39 @@ public class SavingsAccountHelper extends IntegrationTest {
         final String url = "/fineract-provider/api/v1/savingsaccounts/" + savingsId + "/transactions/" + transactionId + "?"
                 + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, url, "");
+    }
+
+    public PostSavingsAccountsResponse createSavingsAccount(PostSavingsAccountsRequest request) {
+        return ok(fineract().savingsAccounts.submitApplication2(request));
+    }
+
+    public PostSavingsAccountsAccountIdResponse approveSavingsAccount(Long savingsAccountId, String approvedOnDate) {
+        PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest().approvedOnDate(approvedOnDate)
+                .dateFormat(DATETIME_PATTERN).locale(LOCALE);
+        return ok(fineract().savingsAccounts.handleCommands6(savingsAccountId, request, "approve"));
+    }
+
+    public PostSavingsAccountsAccountIdResponse activateSavingsAccount(Long savingsAccountId, String activatedOnDate) {
+        PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest().activatedOnDate(activatedOnDate)
+                .dateFormat(DATETIME_PATTERN).locale(LOCALE);
+        return ok(fineract().savingsAccounts.handleCommands6(savingsAccountId, request, "activate"));
+    }
+
+    public GetSavingsAccountsAccountIdResponse getSavingsAccount(Long savingsAccountId) {
+        return ok(fineract().savingsAccounts.retrieveOne25(savingsAccountId, null, null));
+    }
+
+    public PostSavingsAccountTransactionsResponse applySavingsAccountTransaction(Long savingsAccountId,
+            PostSavingsAccountTransactionsRequest request, String command) {
+        return ok(fineract().savingsTransactions.transaction2(savingsAccountId, request, command));
+    }
+
+    public GetSavingsAccountsAccountIdResponse getSavingsAccount(Long savingsAccountId, Map<String, Object> queryParams) {
+        final String url = SAVINGS_ACCOUNT_URL + "/" + savingsAccountId;
+        queryParams.put(TENANT_PARAM_NAME, DEFAULT_TENANT);
+        requestSpec.queryParams(queryParams);
+        String response = Utils.performServerGet(this.requestSpec, this.responseSpec, url);
+        return GSON.fromJson(response, GetSavingsAccountsAccountIdResponse.class);
     }
 
 }

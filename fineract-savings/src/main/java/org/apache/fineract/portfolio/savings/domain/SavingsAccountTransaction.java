@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -337,6 +338,15 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
                 accountTransaction.refNo);
     }
 
+    public static SavingsAccountTransaction accrual(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
+            final Money amount, final boolean isManualTransaction) {
+        final boolean isReversed = false;
+        final Boolean lienTransaction = false;
+        final String refNo = ExternalId.generate().getValue();
+        return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.ACCRUAL.getValue(), date, amount,
+                isReversed, isManualTransaction, lienTransaction, refNo);
+    }
+
     public static SavingsAccountTransaction reversal(SavingsAccountTransaction accountTransaction) {
         SavingsAccountTransaction sat = copyTransaction(accountTransaction);
         sat.reversed = false;
@@ -557,6 +567,10 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
 
     public boolean isTransferRelatedTransaction() {
         return isTransferInitiation() || isTransferApproval() || isTransferRejection() || isTransferWithdrawal();
+    }
+
+    public boolean isAccrual() {
+        return getTransactionType().isAccrual();
     }
 
     public void zeroBalanceFields() {

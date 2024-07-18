@@ -203,12 +203,13 @@ public class AccountingProcessorHelper {
             if (map.containsKey("savingsChargesPaid")) {
                 @SuppressWarnings("unchecked")
                 final List<Map<String, Object>> savingsChargesPaidData = (List<Map<String, Object>>) map.get("savingsChargesPaid");
-                for (final Map<String, Object> loanChargePaid : savingsChargesPaidData) {
-                    final Long chargeId = (Long) loanChargePaid.get("chargeId");
-                    final Long loanChargeId = (Long) loanChargePaid.get("savingsChargeId");
-                    final boolean isPenalty = (Boolean) loanChargePaid.get("isPenalty");
-                    final BigDecimal chargeAmountPaid = (BigDecimal) loanChargePaid.get("amount");
+                for (final Map<String, Object> savingsChargesPaid : savingsChargesPaidData) {
+                    final Long chargeId = (Long) savingsChargesPaid.get("chargeId");
+                    final Long loanChargeId = (Long) savingsChargesPaid.get("savingsChargeId");
+                    final boolean isPenalty = (Boolean) savingsChargesPaid.get("isPenalty");
+                    final BigDecimal chargeAmountPaid = (BigDecimal) savingsChargesPaid.get("amount");
                     final ChargePaymentDTO chargePaymentDTO = new ChargePaymentDTO(chargeId, chargeAmountPaid, loanChargeId);
+
                     if (isPenalty) {
                         penaltyPayments.add(chargePaymentDTO);
                     } else {
@@ -600,6 +601,21 @@ public class AccountingProcessorHelper {
         }
         createAccrualBasedDebitJournalEntriesAndReversalsForSavings(office, currencyCode, accountTypeToBeDebited.getValue(),
                 savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate, amount, isReversal);
+    }
+
+    public void createAccrualBasedJournalEntriesAndReversalsForSavings(final Office office, final String currencyCode,
+            final Integer accountTypeToBeDebited, final Integer accountTypeToBeCredited, final Long savingsProductId,
+            final Long paymentTypeId, final Long loanId, final String transactionId, final LocalDate transactionDate,
+            final BigDecimal amount, final Boolean isReversal) {
+        int accountTypeToDebitId = accountTypeToBeDebited;
+        int accountTypeToCreditId = accountTypeToBeCredited;
+        // reverse debits and credits for reversals
+        if (isReversal) {
+            accountTypeToDebitId = accountTypeToBeCredited;
+            accountTypeToCreditId = accountTypeToBeDebited;
+        }
+        createJournalEntriesForSavings(office, currencyCode, accountTypeToDebitId, accountTypeToCreditId, savingsProductId, paymentTypeId,
+                loanId, transactionId, transactionDate, amount);
     }
 
     public void createCashBasedDebitJournalEntriesAndReversalsForSavings(final Office office, final String currencyCode,

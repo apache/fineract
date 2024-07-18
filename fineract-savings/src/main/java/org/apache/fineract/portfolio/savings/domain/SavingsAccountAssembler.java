@@ -78,16 +78,12 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class SavingsAccountAssembler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountAssembler.class);
     private final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
     private final SavingsAccountTransactionDataSummaryWrapper savingsAccountTransactionDataSummaryWrapper;
     private final SavingsHelper savingsHelper;
@@ -98,7 +94,6 @@ public class SavingsAccountAssembler {
     private final SavingsAccountRepositoryWrapper savingsAccountRepository;
     private final SavingsAccountChargeAssembler savingsAccountChargeAssembler;
     private final FromJsonHelper fromApiJsonHelper;
-    private final JdbcTemplate jdbcTemplate;
     private final ConfigurationDomainService configurationDomainService;
     private final ExternalIdFactory externalIdFactory;
 
@@ -109,7 +104,7 @@ public class SavingsAccountAssembler {
             final StaffRepositoryWrapper staffRepository, final SavingsProductRepository savingProductRepository,
             final SavingsAccountRepositoryWrapper savingsAccountRepository,
             final SavingsAccountChargeAssembler savingsAccountChargeAssembler, final FromJsonHelper fromApiJsonHelper,
-            final AccountTransfersReadPlatformService accountTransfersReadPlatformService, final JdbcTemplate jdbcTemplate,
+            final AccountTransfersReadPlatformService accountTransfersReadPlatformService,
             final ConfigurationDomainService configurationDomainService, ExternalIdFactory externalIdFactory) {
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.savingsAccountTransactionDataSummaryWrapper = savingsAccountTransactionDataSummaryWrapper;
@@ -121,7 +116,6 @@ public class SavingsAccountAssembler {
         this.savingsAccountChargeAssembler = savingsAccountChargeAssembler;
         this.fromApiJsonHelper = fromApiJsonHelper;
         savingsHelper = new SavingsHelper(accountTransfersReadPlatformService);
-        this.jdbcTemplate = jdbcTemplate;
         this.configurationDomainService = configurationDomainService;
         this.externalIdFactory = externalIdFactory;
     }
@@ -363,8 +357,8 @@ public class SavingsAccountAssembler {
                             .findTransactionRunningBalanceBeforePivotDate(account,
                                     interestPostedTillDate.minusDays(relaxingDaysForPivotDate + 1));
                     if (pivotDateTransaction != null && !pivotDateTransaction.isEmpty()) {
-                        account.getSummary().setRunningBalanceOnPivotDate(pivotDateTransaction.get(pivotDateTransaction.size() - 1)
-                                .getRunningBalance(account.getCurrency()).getAmount());
+                        account.getSummary().setRunningBalanceOnInterestPostingTillDate(pivotDateTransaction
+                                .get(pivotDateTransaction.size() - 1).getRunningBalance(account.getCurrency()).getAmount());
                     }
                 } else {
                     savingsAccountTransactions = this.savingsAccountRepository.findTransactionsAfterPivotDate(account,
