@@ -413,6 +413,14 @@
         },
         {
             "default": null,
+            "name": "totalInterestPaymentWaiver",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
             "name": "chargeOffReasonId",
             "type": [
                 "null",

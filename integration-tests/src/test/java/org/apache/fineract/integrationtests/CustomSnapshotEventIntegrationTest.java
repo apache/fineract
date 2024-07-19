@@ -95,7 +95,7 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
             Assertions.assertEquals(loanId, allExternalEvents.get(0).getAggregateRootId());
 
             // Loan Delinquency data validation
-            final Map<String, Object> payLoad = (Map<String, Object>) allExternalEvents.get(0).getPayLoad().get("delinquent");
+            Map<String, Object> payLoad = (Map<String, Object>) allExternalEvents.get(0).getPayLoad().get("delinquent");
             log.info("Payload: {}", payLoad.toString());
 
             Assertions.assertNotNull(payLoad.get("delinquentPrincipal"));
@@ -106,6 +106,13 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
             Assertions.assertEquals(0.0, payLoad.get("delinquentFee"));
             Assertions.assertNotNull(payLoad.get("delinquentPenalty"));
             Assertions.assertEquals(0.0, payLoad.get("delinquentPenalty"));
+
+            payLoad = (Map<String, Object>) allExternalEvents.get(0).getPayLoad().get("summary");
+            log.info("Payload: {}", payLoad.toString());
+            Assertions.assertNotNull(payLoad.get("totalInterestPaymentWaiver"));
+            Assertions.assertEquals(0.0, payLoad.get("totalInterestPaymentWaiver"));
+            Assertions.assertNotNull(payLoad.get("totalRepaymentTransactionReversed"));
+            Assertions.assertEquals(0.0, payLoad.get("totalRepaymentTransactionReversed"));
         });
     }
 
