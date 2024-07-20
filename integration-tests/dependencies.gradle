@@ -58,5 +58,5 @@ dependencies {
     testImplementation 'org.mapstruct:mapstruct'
     testAnnotationProcessor 'org.mapstruct:mapstruct-processor'
 
-    testImplementation 'com.github.tomakehurst:wiremock-standalone:3.0.1'
+    testImplementation 'com.github.tomakehurst:wiremock-standalone'
 }

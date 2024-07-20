@@ -18,7 +18,7 @@
  */
 apply plugin: 'org.asciidoctor.jvm.convert'
 apply plugin: 'org.asciidoctor.jvm.pdf'
-apply plugin: 'org.asciidoctor.jvm.revealjs'
+// apply plugin: 'org.asciidoctor.jvm.revealjs'
 // apply plugin: 'org.asciidoctor.jvm.epub'
 // apply plugin: 'org.asciidoctor.kindlegen.base'
 
@@ -40,7 +40,7 @@ asciidoctorj {
         pdf.version '1.6.2'
         diagram.version '2.2.1'
         epub.version '1.5.1'
-        revealjs.version '4.1.0'
+        //        revealjs.version '4.1.0'
     }
 
     fatalWarnings ~/include file not found|missing callout|image to embed not found or not readable/

@@ -29,11 +29,11 @@ dependencyManagement {
         mavenBom 'org.springframework.boot:spring-boot-dependencies:3.2.6'
         mavenBom 'io.awspring.cloud:spring-cloud-aws-dependencies:3.1.0'
         mavenBom 'io.opentelemetry:opentelemetry-bom:1.34.1'
-        mavenBom 'org.jetbrains.kotlin:kotlin-bom:1.9.22'
+        mavenBom 'org.jetbrains.kotlin:kotlin-bom:1.9.24'
         mavenBom 'org.junit:junit-bom:5.10.2'
         mavenBom 'com.fasterxml.jackson:jackson-bom:2.16.1'
         mavenBom 'io.cucumber:cucumber-bom:7.15.0'
-        mavenBom 'io.netty:netty-bom:4.1.106.Final'
+        mavenBom 'io.netty:netty-bom:4.1.110.Final'
         mavenBom 'org.mockito:mockito-bom:5.10.0'
         mavenBom 'software.amazon.awssdk:bom:2.23.18'
         mavenBom 'io.github.resilience4j:resilience4j-bom:2.2.0'
@@ -44,8 +44,8 @@ dependencyManagement {
         // We do not use :+ to get the latest available version available on Maven Central, as that could suddenly break things.
         // We use the Renovate Bot to automatically propose Pull Requests (PRs) when upgrades for all of these versions are available.
 
-        dependency 'ch.qos.logback:logback-core:1.4.14'
-        dependency 'ch.qos.logback:logback-classic:1.4.14'
+        dependency 'ch.qos.logback:logback-core:1.5.3'
+        dependency 'ch.qos.logback:logback-classic:1.5.3'
         dependency 'ch.qos.logback.contrib:logback-json-classic:0.1.5'
         dependency 'ch.qos.logback.contrib:logback-jackson:0.1.5'
         dependency 'org.codehaus.janino:janino:3.1.11'
@@ -57,6 +57,10 @@ dependencyManagement {
         dependency 'com.google.truth:truth:1.4.0'
         dependency 'com.google.truth.extensions:truth-java8-extension:1.4.0'
         dependency 'com.google.googlejavaformat:google-java-format:1.19.2'
+        dependency 'org.apache.commons:commons-collections4:4.4'
+        dependency ('software.amazon.msk:aws-msk-iam-auth:2.0.3') {
+            exclude 'commons-logging:commons-logging:'
+        }
         dependency ('org.apache.commons:commons-email:1.6.0') {
             exclude 'com.sun.mail:javax.mail'
             exclude 'javax.activation:activation'
@@ -82,7 +86,6 @@ dependencyManagement {
             exclude 'org.apache.logging.log4j:log4j-api'
             exclude 'org.slf4j:slf4j-api'
             exclude 'commons-io:commons-io'
-            exclude 'commons-logging:commons-logging'
             exclude 'commons-codec:commons-codec'
             exclude 'org.apache.commons:commons-lang3'
             exclude 'org.apache.poi:poi'
@@ -119,8 +122,8 @@ dependencyManagement {
         dependency 'org.apache.bval:org.apache.bval.bundle:3.0.0'
         dependency 'joda-time:joda-time:2.12.7'
 
-        dependency 'io.github.classgraph:classgraph:4.8.165'
-        dependency 'org.awaitility:awaitility:4.2.0'
+        dependency 'io.github.classgraph:classgraph:4.8.168'
+        dependency 'org.awaitility:awaitility:4.2.1'
         // TODO: upgrade to 4.8.3
         dependency 'com.github.spotbugs:spotbugs-annotations:4.8.3'
         dependency 'javax.cache:cache-api:1.1.1'
@@ -151,7 +154,7 @@ dependencyManagement {
         dependency "io.gsonfire:gson-fire:1.9.0"
         dependency "com.google.code.findbugs:jsr305:3.0.2"
         dependency "commons-codec:commons-codec:1.16.0"
-        dependency "org.projectlombok:lombok:1.18.30"
+        dependency "org.projectlombok:lombok:1.18.32"
 
         dependency 'org.bouncycastle:bcpkix-jdk15to18:1.77'
         dependency 'org.bouncycastle:bcprov-jdk15to18:1.77'
@@ -175,11 +178,11 @@ dependencyManagement {
             exclude 'javax.annotation:javax.annotation-api'
         }
 
-        dependency 'io.swagger.core.v3:swagger-annotations-jakarta:2.2.19'
-        dependency ('io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.19') {
+        dependency 'io.swagger.core.v3:swagger-annotations-jakarta:2.2.22'
+        dependency ('io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.22') {
             exclude 'jakarta.activation:jakarta.activation-api'
         }
-        dependency ('io.swagger.core.v3:swagger-core-jakarta:2.2.19') {
+        dependency ('io.swagger.core.v3:swagger-core-jakarta:2.2.22') {
             exclude 'jakarta.activation:jakarta.activation-api'
         }
 
@@ -206,7 +209,7 @@ dependencyManagement {
         }
 
         dependency 'org.owasp.esapi:esapi:2.5.3.1'
-        dependency 'org.awaitility:awaitility:4.2.0'
+        dependency 'org.awaitility:awaitility:4.2.1'
 
         dependencySet(group: 'org.apache.poi', version: '5.2.5') {
             entry 'poi'
@@ -239,5 +242,12 @@ dependencyManagement {
         dependency 'org.apache.commons:commons-math3:3.6.1'
 
         dependency 'org.mockito:mockito-inline:5.2.0'
+
+        dependency 'com.github.tomakehurst:wiremock-standalone:3.0.1'
+
+        dependency 'io.cucumber:cucumber-java:7.16.1'
+        dependency 'io.cucumber:cucumber-java8:7.16.1'
+        dependency 'io.cucumber:cucumber-junit-platform-engine:7.16.1'
+        dependency 'io.cucumber:cucumber-spring:7.16.1'
     }
 }
