@@ -56,7 +56,7 @@ dependencies {
 
             'io.github.resilience4j:resilience4j-spring-boot3',
             'org.apache.httpcomponents:httpcore',
-            'org.apache.commons:commons-collections4:4.4'
+            'org.apache.commons:commons-collections4'
 
             )
     compileOnly 'org.projectlombok:lombok'

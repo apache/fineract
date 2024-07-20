@@ -81,7 +81,7 @@ buildscript {
         classpath 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
         classpath 'com.google.cloud.tools:jib-layer-filter-extension-gradle:0.3.0'
         classpath 'org.apache.commons:commons-lang3:3.14.0'
-        classpath 'io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.19'
+        classpath 'io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.22'
         classpath 'jakarta.servlet:jakarta.servlet-api:6.0.0'
     }
 }
@@ -102,8 +102,8 @@ plugins {
     id 'org.asciidoctor.jvm.convert' version '3.3.2' apply false
     id 'org.asciidoctor.jvm.pdf' version '3.3.2' apply false
     id 'org.asciidoctor.jvm.epub' version '3.3.2' apply false
-    id 'org.asciidoctor.jvm.revealjs' version '3.3.2' apply false
-    id 'org.asciidoctor.jvm.gems' version '3.3.2' apply false
+    //    id 'org.asciidoctor.jvm.revealjs' version '3.3.2' apply false
+    //    id 'org.asciidoctor.jvm.gems' version '3.3.2' apply false
     id 'org.asciidoctor.kindlegen.base' version '3.2.0' apply false
     id 'com.google.cloud.tools.jib' version '3.4.2' apply false
     id 'org.sonarqube' version '4.4.1.3373'
@@ -712,10 +712,10 @@ configure(project.fineractCustomProjects) {
                 'com.google.truth.extensions:truth-java8-extension',
                 'io.github.classgraph:classgraph',
                 'io.cucumber:cucumber-core',
-                'io.cucumber:cucumber-java',
-                'io.cucumber:cucumber-java8',
-                'io.cucumber:cucumber-junit-platform-engine',
-                'io.cucumber:cucumber-spring',
+                'io.cucumber:cucumber-java:7.16.1',
+                'io.cucumber:cucumber-java8:7.16.1',
+                'io.cucumber:cucumber-junit-platform-engine:7.16.1',
+                'io.cucumber:cucumber-spring:7.16.1',
                 )
 
         testCompileOnly('org.projectlombok:lombok')
