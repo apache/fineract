@@ -111,8 +111,8 @@ public class CommandSourceService {
     public CommandSource getInitialCommandSource(CommandWrapper wrapper, JsonCommand jsonCommand, AppUser maker, String idempotencyKey) {
         CommandSource commandSourceResult = CommandSource.fullEntryFrom(wrapper, jsonCommand, maker, idempotencyKey,
                 UNDER_PROCESSING.getValue());
-        if (commandSourceResult.getCommandJson() == null) {
-            commandSourceResult.setCommandJson("{}");
+        if (commandSourceResult.getCommandAsJson() == null) {
+            commandSourceResult.setCommandAsJson("{}");
         }
         return commandSourceResult;
     }
