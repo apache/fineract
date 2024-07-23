@@ -163,4 +163,5 @@
     <include file="parts/0141_add_interest_payment_waiver_transaction_type.xml" relativeToChangelogFile="true" />
     <include file="parts/0142_add_accrual_activity_transaction.xml" relativeToChangelogFile="true" />
     <include file="parts/0143_add_accrual_activity_posting_job.xml" relativeToChangelogFile="true" />
+    <include file="parts/0144_transaction_summary_with_asset_owner_report_unc_allocation_fix.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
