@@ -1508,9 +1508,9 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
         log.info("Loan Delinquency Data {} {}", loanDetails.getDelinquent().getDelinquentPrincipal(),
                 loanDetails.getDelinquent().getDelinquentInterest());
         assertNotNull(loanDetails.getDelinquent().getDelinquentPrincipal());
-        assertEquals(new BigDecimal("305.91"), loanDetails.getDelinquent().getDelinquentPrincipal().stripTrailingZeros());
+        assertEquals(new BigDecimal("312.95"), loanDetails.getDelinquent().getDelinquentPrincipal().stripTrailingZeros());
         assertNotNull(loanDetails.getDelinquent().getDelinquentInterest());
-        assertEquals(new BigDecimal("250.72"), loanDetails.getDelinquent().getDelinquentInterest().stripTrailingZeros());
+        assertEquals(new BigDecimal("246"), loanDetails.getDelinquent().getDelinquentInterest().stripTrailingZeros());
 
         // Apply a partial repayment to move only the interest
         PostLoansLoanIdTransactionsResponse loansLoanIdTransactions = loanTransactionHelper.makeLoanRepayment(operationDate, 120f,
@@ -1521,8 +1521,8 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
         loanDetails = loanTransactionHelper.getLoanDetails(loanId);
         assertNotNull(loanDetails.getDelinquent());
         assertNotNull(loanDetails.getDelinquencyRange().getClassification());
-        assertEquals(new BigDecimal("305.91"), loanDetails.getDelinquent().getDelinquentPrincipal().stripTrailingZeros());
-        assertEquals(new BigDecimal("130.72"), loanDetails.getDelinquent().getDelinquentInterest().stripTrailingZeros());
+        assertEquals(new BigDecimal("312.95"), loanDetails.getDelinquent().getDelinquentPrincipal().stripTrailingZeros());
+        assertEquals(new BigDecimal("126"), loanDetails.getDelinquent().getDelinquentInterest().stripTrailingZeros());
 
         // Apply a repayment to cover interest and part of the principal
         loansLoanIdTransactions = loanTransactionHelper.makeLoanRepayment(operationDate, 330.72f, loanId.intValue());
@@ -1532,11 +1532,11 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
         loanDetails = loanTransactionHelper.getLoanDetails(loanId);
         assertNotNull(loanDetails.getDelinquent());
         assertNotNull(loanDetails.getDelinquencyRange().getClassification());
-        assertEquals(new BigDecimal("105.91"), loanDetails.getDelinquent().getDelinquentPrincipal().stripTrailingZeros());
+        assertEquals(new BigDecimal("108.23"), loanDetails.getDelinquent().getDelinquentPrincipal().stripTrailingZeros());
         assertEquals(BigDecimal.ZERO, loanDetails.getDelinquent().getDelinquentInterest().stripTrailingZeros());
 
         // Apply a repayment to cover the remain principal
-        loansLoanIdTransactions = loanTransactionHelper.makeLoanRepayment(operationDate, 105.91f, loanId.intValue());
+        loansLoanIdTransactions = loanTransactionHelper.makeLoanRepayment(operationDate, 108.23f, loanId.intValue());
         assertNotNull(loansLoanIdTransactions);
         log.info("Loan repayment transaction id {}", loansLoanIdTransactions.getResourceId());
         // Loan without Delinquency Classification
@@ -1554,14 +1554,14 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
         loanDetails = loanTransactionHelper.getLoanDetails(loanId);
         assertNotNull(loanDetails.getDelinquent());
         assertNotNull(loanDetails.getDelinquencyRange().getClassification());
-        assertEquals(new BigDecimal("105.91"), loanDetails.getDelinquent().getDelinquentPrincipal().stripTrailingZeros());
+        assertEquals(new BigDecimal("108.23"), loanDetails.getDelinquent().getDelinquentPrincipal().stripTrailingZeros());
         assertEquals(BigDecimal.ZERO, loanDetails.getDelinquent().getDelinquentInterest().stripTrailingZeros());
     }
 
     private GetLoanProductsProductIdResponse createLoanProduct(final LoanTransactionHelper loanTransactionHelper,
             final Integer delinquencyBucketId, final String inArrearsTolerance) {
-        final HashMap<String, Object> loanProductMap = new LoanProductTestBuilder().withInArrearsTolerance(inArrearsTolerance).build(null,
-                delinquencyBucketId);
+        final HashMap<String, Object> loanProductMap = new LoanProductTestBuilder().withDaysInMonth("30").withDaysInYear("360")
+                .withInArrearsTolerance(inArrearsTolerance).build(null, delinquencyBucketId);
         final Integer loanProductId = loanTransactionHelper.getLoanProductId(Utils.convertToJson(loanProductMap));
         return loanTransactionHelper.getLoanProduct(loanProductId);
     }
