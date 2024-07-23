@@ -114,6 +114,7 @@
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanCreditAllocationRule</class>
         <class>org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationTransactionType</class>
         <class>org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTypeListConverter</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.SupportedInterestRefundTypesListConverter</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParameter</class>
         <class>org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest</class>
         <class>org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks</class>

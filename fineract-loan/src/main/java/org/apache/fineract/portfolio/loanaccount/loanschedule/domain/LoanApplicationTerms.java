@@ -53,6 +53,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.InterestRecalculationCom
 import org.apache.fineract.portfolio.loanproduct.domain.LoanPreClosureInterestCalculationStrategy;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedInterestRefundTypes;
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
 import org.apache.fineract.portfolio.loanproduct.domain.RepaymentStartDateType;
 
@@ -225,6 +226,7 @@ public final class LoanApplicationTerms {
     private final LoanScheduleType loanScheduleType;
     private final LoanScheduleProcessingType loanScheduleProcessingType;
     private final boolean enableAccrualActivityPosting;
+    private final List<LoanSupportedInterestRefundTypes> supportedInterestRefundTypes;
 
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency currency, final Integer loanTermFrequency,
             final PeriodFrequencyType loanTermPeriodFrequencyType, final Integer numberOfRepayments, final Integer repaymentEvery,
@@ -253,7 +255,7 @@ public final class LoanApplicationTerms {
             final Boolean isAutoRepaymentForDownPaymentEnabled, final RepaymentStartDateType repaymentStartDateType,
             final LocalDate submittedOnDate, final LoanScheduleType loanScheduleType,
             final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength,
-            final boolean enableAccrualActivityPosting) {
+            final boolean enableAccrualActivityPosting, final List<LoanSupportedInterestRefundTypes> supportedInterestRefundTypes) {
 
         final LoanRescheduleStrategyMethod rescheduleStrategyMethod = null;
         final CalendarHistoryDataWrapper calendarHistoryDataWrapper = null;
@@ -272,7 +274,7 @@ public final class LoanApplicationTerms {
                 isInterestToBeRecoveredFirstWhenGreaterThanEMI, fixedPrincipalPercentagePerInstallment,
                 isPrincipalCompoundingDisabledForOverdueLoans, enableDownPayment, disbursedAmountPercentageForDownPayment,
                 isAutoRepaymentForDownPaymentEnabled, repaymentStartDateType, submittedOnDate, loanScheduleType, loanScheduleProcessingType,
-                fixedLength, enableAccrualActivityPosting);
+                fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes);
 
     }
 
@@ -293,8 +295,7 @@ public final class LoanApplicationTerms {
             final boolean isSkipRepaymentOnFirstDayOfMonth, final HolidayDetailDTO holidayDetailDTO, final boolean allowCompoundingOnEod,
             final boolean isFirstRepaymentDateAllowedOnHoliday, final boolean isInterestToBeRecoveredFirstWhenGreaterThanEMI,
             final BigDecimal fixedPrincipalPercentagePerInstallment, final boolean isPrincipalCompoundingDisabledForOverdueLoans,
-            final RepaymentStartDateType repaymentStartDateType, final LocalDate submittedOnDate,
-            final boolean enableAccrualActivityPosting) {
+            final RepaymentStartDateType repaymentStartDateType, final LocalDate submittedOnDate) {
 
         final Integer numberOfRepayments = loanProductRelatedDetail.getNumberOfRepayments();
         final Integer repaymentEvery = loanProductRelatedDetail.getRepayEvery();
@@ -346,7 +347,8 @@ public final class LoanApplicationTerms {
                 isInterestToBeRecoveredFirstWhenGreaterThanEMI, fixedPrincipalPercentagePerInstallment,
                 isPrincipalCompoundingDisabledForOverdueLoans, isDownPaymentEnabled, disbursedAmountPercentageForDownPayment,
                 isAutoRepaymentForDownPaymentEnabled, repaymentStartDateType, submittedOnDate, loanScheduleType, loanScheduleProcessingType,
-                fixedLength, enableAccrualActivityPosting);
+                fixedLength, loanProductRelatedDetail.isEnableAccrualActivityPosting(),
+                loanProductRelatedDetail.getSupportedInterestRefundTypes());
     }
 
     private LoanApplicationTerms(final ApplicationCurrency currency, final Integer loanTermFrequency,
@@ -375,7 +377,8 @@ public final class LoanApplicationTerms {
             final boolean isPrincipalCompoundingDisabledForOverdueLoans, final boolean isDownPaymentEnabled,
             final BigDecimal disbursedAmountPercentageForDownPayment, final boolean isAutoRepaymentForDownPaymentEnabled,
             final RepaymentStartDateType repaymentStartDateType, final LocalDate submittedOnDate, final LoanScheduleType loanScheduleType,
-            final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength, boolean enableAccrualActivityPosting) {
+            final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength, boolean enableAccrualActivityPosting,
+            final List<LoanSupportedInterestRefundTypes> supportedInterestRefundTypes) {
 
         this.currency = currency;
         this.loanTermFrequency = loanTermFrequency;
@@ -473,6 +476,7 @@ public final class LoanApplicationTerms {
         this.loanScheduleType = loanScheduleType;
         this.loanScheduleProcessingType = loanScheduleProcessingType;
         this.fixedLength = fixedLength;
+        this.supportedInterestRefundTypes = supportedInterestRefundTypes;
     }
 
     public Money adjustPrincipalIfLastRepaymentPeriod(final Money principalForPeriod, final Money totalCumulativePrincipalToDate,
@@ -1337,7 +1341,7 @@ public final class LoanApplicationTerms {
                 this.graceOnArrearsAgeing, this.daysInMonthType.getValue(), this.daysInYearType.getValue(),
                 this.interestRecalculationEnabled, this.isEqualAmortization, this.isDownPaymentEnabled,
                 this.disbursedAmountPercentageForDownPayment, this.isAutoRepaymentForDownPaymentEnabled, this.loanScheduleType,
-                this.loanScheduleProcessingType, this.fixedLength, this.enableAccrualActivityPosting);
+                this.loanScheduleProcessingType, this.fixedLength, this.enableAccrualActivityPosting, this.supportedInterestRefundTypes);
     }
 
     public Integer getLoanTermFrequency() {

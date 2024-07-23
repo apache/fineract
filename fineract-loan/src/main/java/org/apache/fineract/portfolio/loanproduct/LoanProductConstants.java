@@ -165,5 +165,6 @@ public interface LoanProductConstants {
     String FIXED_LENGTH = "fixedLength";
 
     String ENABLE_ACCRUAL_ACTIVITY_POSTING = "enableAccrualActivityPosting";
+    String SUPPORTED_INTEREST_REFUND_TYPES = "supportedInterestRefundTypes";
 
 }

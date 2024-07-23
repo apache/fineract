@@ -160,6 +160,7 @@ public class LoanProductTestBuilder {
     private String loanScheduleType = LoanScheduleType.CUMULATIVE.name();
     private String loanScheduleProcessingType = LoanScheduleProcessingType.HORIZONTAL.name();
     private FullAccountingConfig fullAccountingConfig;
+    private List<String> supportedInterestRefundTypes = null;
 
     public String build() {
         final HashMap<String, Object> map = build(null, null);
@@ -318,6 +319,10 @@ public class LoanProductTestBuilder {
 
         if (this.repaymentStartDateType != null) {
             map.put("repaymentStartDateType", repaymentStartDateType);
+        }
+
+        if (this.supportedInterestRefundTypes != null) {
+            map.put("supportedInterestRefundTypes", supportedInterestRefundTypes);
         }
 
         return map;
@@ -773,6 +778,11 @@ public class LoanProductTestBuilder {
 
     public LoanProductTestBuilder withLoanScheduleProcessingType(LoanScheduleProcessingType loanScheduleProcessingType) {
         this.loanScheduleProcessingType = loanScheduleProcessingType.name();
+        return this;
+    }
+
+    public LoanProductTestBuilder withSupportedInterestRefundTypes(String... refundTypes) {
+        this.supportedInterestRefundTypes = List.of(refundTypes);
         return this;
     }
 

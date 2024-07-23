@@ -61,6 +61,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanPreClosureInterestCa
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductPaymentAllocationRule;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductValueConditionType;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedInterestRefundTypes;
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
 import org.apache.fineract.portfolio.loanproduct.exception.EqualAmortizationUnsupportedFeatureException;
 import org.springframework.stereotype.Component;
@@ -175,7 +176,7 @@ public final class LoanProductDataValidator {
             LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT, LoanProductConstants.REPAYMENT_START_DATE_TYPE,
             LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY, LoanProductConstants.LOAN_SCHEDULE_TYPE,
             LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE, LoanProductConstants.FIXED_LENGTH,
-            LoanProductConstants.ENABLE_ACCRUAL_ACTIVITY_POSTING));
+            LoanProductConstants.ENABLE_ACCRUAL_ACTIVITY_POSTING, LoanProductConstants.SUPPORTED_INTEREST_REFUND_TYPES));
 
     private static final String[] SUPPORTED_LOAN_CONFIGURABLE_ATTRIBUTES = { LoanProductConstants.amortizationTypeParamName,
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyCodeParamName,
@@ -840,6 +841,19 @@ public final class LoanProductDataValidator {
                 .extractIntegerWithLocaleNamed("recurringMoratoriumOnPrincipalPeriods", element);
         validateRepaymentPeriodWithGraceSettings(numberOfRepayments, graceOnPrincipalPayment, graceOnInterestPayment,
                 graceOnInterestCharged, recurringMoratoriumOnPrincipalPeriods, baseDataValidator);
+
+        if (AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY.equals(transactionProcessingStrategyCode)
+                && this.fromApiJsonHelper.parameterExists(LoanProductConstants.SUPPORTED_INTEREST_REFUND_TYPES, element)) {
+            String[] supportedTransactionsForInterestRefund = this.fromApiJsonHelper
+                    .extractArrayNamed(LoanProductConstants.SUPPORTED_INTEREST_REFUND_TYPES, element);
+            Arrays.stream(supportedTransactionsForInterestRefund)
+                    .forEach(value -> baseDataValidator.reset().parameter(LoanProductConstants.SUPPORTED_INTEREST_REFUND_TYPES).value(value)
+                            .isOneOfEnumValues(LoanSupportedInterestRefundTypes.class));
+        } else if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.SUPPORTED_INTEREST_REFUND_TYPES, element)) {
+            baseDataValidator.reset().parameter(LoanProductConstants.SUPPORTED_INTEREST_REFUND_TYPES).failWithCode(
+                    "supported.only.for.progressive.loan.schedule.handling",
+                    "Automatic interest refund functionality is only supported for Progressive loans");
+        }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }

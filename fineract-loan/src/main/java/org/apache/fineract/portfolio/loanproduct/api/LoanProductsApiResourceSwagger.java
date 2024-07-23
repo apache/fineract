@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Set;
 import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.apache.fineract.portfolio.delinquency.api.DelinquencyApiResourceSwagger.GetDelinquencyBucketsResponse;
 
 /**
@@ -318,6 +319,7 @@ final class LoanProductsApiResourceSwagger {
             public boolean active;
         }
 
+        public List<String> supportedInterestRefundTypes;
     }
 
     @Schema(description = "PostLoanProductsResponse")
@@ -600,6 +602,7 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "0")
         public Integer principalThresholdForLastInstalment;
         public GetLoanProductsResponse.GetLoanProductsRepaymentStartDateType repaymentStartDateType;
+        public List<StringEnumOptionData> supportedInterestRefundTypes;
     }
 
     @Schema(description = "GetLoanProductsTemplateResponse")
@@ -1063,6 +1066,8 @@ final class LoanProductsApiResourceSwagger {
         public List<EnumOptionData> creditAllocationAllocationTypes;
         public List<EnumOptionData> creditAllocationTransactionTypes;
 
+        public List<StringEnumOptionData> supportedInterestRefundTypes;
+        public List<StringEnumOptionData> supportedInterestRefundTypesOptions;
     }
 
     @Schema(description = "GetLoanProductsProductIdResponse")
@@ -1336,6 +1341,7 @@ final class LoanProductsApiResourceSwagger {
         public EnumOptionData loanScheduleProcessingType;
         @Schema(example = "false")
         public Boolean enableAccrualActivityPosting;
+        public List<StringEnumOptionData> supportedInterestRefundTypes;
     }
 
     @Schema(description = "PutLoanProductsProductIdRequest")
@@ -1627,6 +1633,7 @@ final class LoanProductsApiResourceSwagger {
             public boolean active;
         }
 
+        public List<String> supportedInterestRefundTypes;
     }
 
     public static final class AdvancedPaymentData {
