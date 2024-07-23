@@ -1164,12 +1164,47 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     @Transactional
     @Override
+    public Loan reverseReplayAccrualActivityTransaction(Loan loan, final LoanTransaction loanTransaction,
+            final LoanRepaymentScheduleInstallment installment, final LocalDate transactionDate) {
+
+        LoanTransaction newLoanTransaction = loanTransactionAssembler.assembleAccrualActivityTransaction(loan, installment,
+                transactionDate);
+        if (!newLoanTransaction.getDateOf().isEqual(loanTransaction.getDateOf())
+                || !LoanTransaction.transactionAmountsMatch(loan.getCurrency(), loanTransaction, newLoanTransaction)) {
+            loanTransaction.reverse();
+            loanTransaction.updateExternalId(null);
+            newLoanTransaction.copyLoanTransactionRelations(loanTransaction.getLoanTransactionRelations());
+            newLoanTransaction.getLoanTransactionRelations().add(LoanTransactionRelation.linkToTransaction(newLoanTransaction,
+                    loanTransaction, LoanTransactionRelationTypeEnum.REPLAYED));
+            loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(newLoanTransaction);
+            loan.addLoanTransaction(newLoanTransaction);
+
+            LoanAdjustTransactionBusinessEvent.Data data = new LoanAdjustTransactionBusinessEvent.Data(loanTransaction);
+            data.setNewTransactionDetail(newLoanTransaction);
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanAdjustTransactionBusinessEvent(data));
+        }
+        return loan;
+    }
+
+    @Transactional
+    @Override
     public Loan makeAccrualActivityTransaction(Loan loan, final LoanRepaymentScheduleInstallment installment,
             final LocalDate transactionDate) {
-        businessEventNotifierService.notifyPreBusinessEvent(new LoanTransactionAccrualActivityPreBusinessEvent(loan));
 
         LoanTransaction newAccrualActivityTransaction = loanTransactionAssembler.assembleAccrualActivityTransaction(loan, installment,
                 transactionDate);
+
+        if (newAccrualActivityTransaction.getAmount().compareTo(BigDecimal.ZERO) == 0) {
+            return loan;
+        }
+
+        return makeAccrualActivityTransaction(loan, newAccrualActivityTransaction);
+    }
+
+    @Transactional
+    @Override
+    public Loan makeAccrualActivityTransaction(Loan loan, LoanTransaction newAccrualActivityTransaction) {
+        businessEventNotifierService.notifyPreBusinessEvent(new LoanTransactionAccrualActivityPreBusinessEvent(loan));
 
         loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(newAccrualActivityTransaction);
 

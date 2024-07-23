@@ -32,10 +32,13 @@ public class LoanStatusChangePlatformServiceImpl implements LoanStatusChangePlat
 
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanAccrualsProcessingService loanAccrualsProcessingService;
+    private final LoanAccrualActivityProcessingService loanAccrualActivityProcessingService;
 
     @PostConstruct
     public void addListeners() {
         businessEventNotifierService.addPostBusinessEventListener(LoanStatusChangedBusinessEvent.class, new LoanStatusChangedListener());
+        businessEventNotifierService.addPostBusinessEventListener(LoanStatusChangedBusinessEvent.class,
+                new LoanAccrualActivityPostingLoanStatusChangedListener());
     }
 
     private final class LoanStatusChangedListener implements BusinessEventListener<LoanStatusChangedBusinessEvent> {
@@ -50,6 +53,23 @@ public class LoanStatusChangePlatformServiceImpl implements LoanStatusChangePlat
             }
             if (loan.isOpen()) {
                 loan.handleMaturityDateActivate();
+            }
+        }
+    }
+
+    private final class LoanAccrualActivityPostingLoanStatusChangedListener
+            implements BusinessEventListener<LoanStatusChangedBusinessEvent> {
+
+        @Override
+        public void onBusinessEvent(LoanStatusChangedBusinessEvent event) {
+            final Loan loan = event.get();
+            if (loan.getLoanProductRelatedDetail().isEnableAccrualActivityPosting()) {
+                if (loan.getStatus().isClosedObligationsMet() || loan.getStatus().isOverpaid()) {
+                    loanAccrualActivityProcessingService.processAccrualActivityForLoanClosure(loan);
+                }
+                if (loan.isOpen()) {
+                    loanAccrualActivityProcessingService.processAccrualActivityForLoanReopen(loan);
+                }
             }
         }
     }

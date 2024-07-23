@@ -54,7 +54,14 @@ public interface LoanWritePlatformService {
             JsonCommand command, boolean isRecoveryRepayment, String chargeRefundChargeType);
 
     @Transactional
+    Loan reverseReplayAccrualActivityTransaction(Loan loan, LoanTransaction loanTransaction, LoanRepaymentScheduleInstallment installment,
+            LocalDate transactionDate);
+
+    @Transactional
     Loan makeAccrualActivityTransaction(Loan loan, LoanRepaymentScheduleInstallment installment, LocalDate transactionDate);
+
+    @Transactional
+    Loan makeAccrualActivityTransaction(Loan loan, LoanTransaction accrualActivityTransaction);
 
     @Transactional
     CommandProcessingResult makeInterestPaymentWaiver(JsonCommand command);

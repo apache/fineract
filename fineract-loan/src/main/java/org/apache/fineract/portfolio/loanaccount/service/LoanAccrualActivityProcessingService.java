@@ -29,4 +29,9 @@ public interface LoanAccrualActivityProcessingService {
 
     Loan makeAccrualActivityTransaction(Loan loan, LocalDate currentDate);
 
+    @Transactional
+    void processAccrualActivityForLoanClosure(Loan loan);
+
+    @Transactional
+    void processAccrualActivityForLoanReopen(Loan loan);
 }
