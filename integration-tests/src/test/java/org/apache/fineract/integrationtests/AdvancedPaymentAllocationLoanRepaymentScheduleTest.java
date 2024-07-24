@@ -4754,6 +4754,88 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
         });
     }
 
+    // UC145: Validate TotalUnpaidAccruedDueInterest in Zero when Interest paid is higher than Accrued Interest
+    // 1. Create a Loan product with Adv. Pment. Alloc. and with Declining Balance, Accrual accounting and Daily Accrual
+    // Activity
+    // 2. Submit Loan, approve and Disburse
+    // 3. Add a Loan Specific Due date charge
+    // 4. Add a Repayment higher than accrued interest to validate TotalUnpaidAccruedDueInterest equal to Zero
+    @Test
+    public void uc145() {
+        final String operationDate = "1 January 2024";
+        AtomicLong createdLoanId = new AtomicLong();
+        runAt(operationDate, () -> {
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                    .interestRatePerPeriod(12.0).interestCalculationPeriodType(RepaymentFrequencyType.DAYS).interestRateFrequencyType(YEARS)
+                    .daysInMonthType(DaysInMonthType.ACTUAL.getValue()).daysInYearType(DaysInYearType.DAYS_365.getValue())
+                    .numberOfRepayments(4)//
+                    .repaymentEvery(5)//
+                    .repaymentFrequencyType(0L)//
+                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .multiDisburseLoan(false)//
+                    .disallowExpectedDisbursements(null)//
+                    .allowApprovedDisbursedAmountsOverApplied(null)//
+                    .overAppliedCalculationType(null)//
+                    .overAppliedNumber(null)//
+                    .installmentAmountInMultiplesOf(null)//
+            ;//
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), operationDate, 1000.0, 4);
+
+            applicationRequest = applicationRequest.interestCalculationPeriodType(DAYS)
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY);
+
+            PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            createdLoanId.set(loanResponse.getLoanId());
+
+            loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000.0)).dateFormat(DATETIME_PATTERN)
+                            .approvedOnDate(operationDate).locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest().actualDisbursementDate(operationDate)
+                    .dateFormat(DATETIME_PATTERN).transactionAmount(BigDecimal.valueOf(1000.0)).locale("en"));
+
+            // After Disbursement we are expecting no Accrual transactions
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidAccruedDueInterest().stripTrailingZeros());
+            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidAccruedNotDueInterest().stripTrailingZeros());
+        });
+
+        runAt("2 January 2024", () -> {
+            // Generate the Accruals
+            final PeriodicAccrualAccountingHelper periodicAccrualAccountingHelper = new PeriodicAccrualAccountingHelper(requestSpec,
+                    responseSpec);
+            periodicAccrualAccountingHelper.runPeriodicAccrualAccounting("2 January 2024");
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
+            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidAccruedDueInterest().stripTrailingZeros());
+            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidAccruedNotDueInterest().stripTrailingZeros());
+        });
+
+        runAt("3 January 2024", () -> {
+            // Add a Charge
+            addCharge(createdLoanId.get(), false, 10, "6 January 2024");
+
+            final PeriodicAccrualAccountingHelper periodicAccrualAccountingHelper = new PeriodicAccrualAccountingHelper(requestSpec,
+                    responseSpec);
+            periodicAccrualAccountingHelper.runPeriodicAccrualAccounting("2 January 2024");
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
+            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidAccruedDueInterest().stripTrailingZeros());
+            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidAccruedNotDueInterest().stripTrailingZeros());
+        });
+
+        // Add Payment higher than accrued amount
+        runAt("4 January 2024", () -> {
+            addRepaymentForLoan(createdLoanId.get(), 150.0, "4 January 2024");
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
+            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidAccruedDueInterest().stripTrailingZeros());
+            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidAccruedNotDueInterest().stripTrailingZeros());
+        });
+    }
+
     private Long applyAndApproveLoanProgressiveAdvancedPaymentAllocationStrategyMonthlyRepayments(Long clientId, Long loanProductId,
             Integer numberOfRepayments, String loanDisbursementDate, double amount) {
         LOG.info("------------------------------APPLY AND APPROVE LOAN ---------------------------------------");

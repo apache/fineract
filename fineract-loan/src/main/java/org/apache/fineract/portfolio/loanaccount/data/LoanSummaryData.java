@@ -152,6 +152,9 @@ public class LoanSummaryData {
             if (MathUtil.isGreaterThanZero(totalUnpaidAccruedDueInterest)) {
                 totalUnpaidAccruedDueInterest = totalUnpaidAccruedDueInterest
                         .subtract(computeTotalInterestPaidDueAmount(repaymentSchedule.getPeriods()));
+                if (MathUtil.isLessThanZero(totalUnpaidAccruedDueInterest)) {
+                    totalUnpaidAccruedDueInterest = BigDecimal.ZERO;
+                }
             }
 
             // Accrued Due Interest on Actual Installment
@@ -159,6 +162,9 @@ public class LoanSummaryData {
             if (MathUtil.isGreaterThanZero(totalUnpaidAccruedNotDueInterest)) {
                 totalUnpaidAccruedNotDueInterest = totalUnpaidAccruedNotDueInterest
                         .subtract(computeTotalInterestPaidNotDueAmountOnActualPeriod(repaymentSchedule.getPeriods()));
+                if (MathUtil.isLessThanZero(totalUnpaidAccruedNotDueInterest)) {
+                    totalUnpaidAccruedNotDueInterest = BigDecimal.ZERO;
+                }
             }
         }
 
