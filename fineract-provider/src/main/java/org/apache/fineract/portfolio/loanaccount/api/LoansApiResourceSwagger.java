@@ -643,6 +643,8 @@ final class LoansApiResourceSwagger {
             public BigDecimal totalUnpaidAccruedDueInterest;
             @Schema(example = "0.000000")
             public BigDecimal totalUnpaidAccruedNotDueInterest;
+            @Schema(example = "0.000000")
+            public BigDecimal totalInterestRefund;
             public Set<GetLoansLoanIdOverdueCharges> overdueCharges;
             @Schema(example = "1")
             public Long chargeOffReasonId;
