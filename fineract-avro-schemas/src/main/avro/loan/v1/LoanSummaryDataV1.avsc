@@ -450,6 +450,14 @@
                 "null",
                 "bigdecimal"
             ]
+        },
+        {
+            "default": null,
+            "name": "totalInterestRefund",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
         }
     ]
 }

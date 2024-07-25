@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.portfolio.loanaccount.api;
 
+import java.util.List;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+
 public interface LoanApiConstants {
 
     String fixedEmiAmountParameterName = "fixedEmiAmount";
@@ -173,4 +176,18 @@ public interface LoanApiConstants {
 
     // Data Validator names
     String LOAN_FRAUD_DATAVALIDATOR_PREFIX = "loans.fraud";
+
+    // Loan Summary Transaction Types
+    List<Integer> LOAN_SUMMARY_TRANSACTION_TYPES = List.of(LoanTransactionType.CHARGE_ADJUSTMENT.getValue(), //
+            LoanTransactionType.CHARGEBACK.getValue(), //
+            LoanTransactionType.CREDIT_BALANCE_REFUND.getValue(), //
+            LoanTransactionType.DOWN_PAYMENT.getValue(), //
+            LoanTransactionType.GOODWILL_CREDIT.getValue(), //
+            LoanTransactionType.INTEREST_PAYMENT_WAIVER.getValue(), //
+            LoanTransactionType.INTEREST_REFUND.getValue(), //
+            LoanTransactionType.MERCHANT_ISSUED_REFUND.getValue(), //
+            LoanTransactionType.PAYOUT_REFUND.getValue(), //
+            LoanTransactionType.REPAYMENT.getValue() //
+    );
+
 }
