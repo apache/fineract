@@ -104,7 +104,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         }
         exceptionWhenTheRequestAlreadyProcessed(wrapper, idempotencyKey, isRetry);
 
-        AppUser user = context.authenticatedUser(wrapper);
+        AppUser user = context.getAuthenticatedUser(wrapper.getActionName(), wrapper.getEntityName());
         if (commandSource == null) {
             if (isEnclosingTransaction) {
                 commandSource = commandSourceService.getInitialCommandSource(wrapper, command, user, idempotencyKey);
@@ -265,7 +265,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
     protected void publishHookEvent(final String entityName, final String actionName, JsonCommand command, final Object result) {
 
-        final AppUser appUser = context.authenticatedUser(CommandWrapper.wrap(actionName, entityName, null, null));
+        final AppUser appUser = context.getAuthenticatedUser(actionName, entityName);
 
         final HookEventSource hookEventSource = new HookEventSource(entityName, actionName);
 

@@ -107,7 +107,7 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
     }
 
     @Override
-    public AppUser authenticatedUser(CommandWrapper commandWrapper) {
+    public AppUser getAuthenticatedUser(String actionName, String entityName) {
 
         AppUser currentUser = null;
         final SecurityContext context = SecurityContextHolder.getContext();
@@ -122,7 +122,7 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
             throw new UnAuthenticatedUserException();
         }
 
-        if (this.shouldCheckForPasswordForceReset(commandWrapper) && this.doesPasswordHasToBeRenewed(currentUser)) {
+        if (this.shouldCheckForPasswordForceReset(actionName, entityName) && this.doesPasswordHasToBeRenewed(currentUser)) {
             throw new ResetPasswordException(currentUser.getId());
         }
 
@@ -165,14 +165,8 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
 
     }
 
-    private boolean shouldCheckForPasswordForceReset(CommandWrapper commandWrapper) {
-        for (CommandWrapper commandItem : EXEMPT_FROM_PASSWORD_RESET_CHECK) {
-            if (commandItem.actionName().equals(commandWrapper.actionName())
-                    && commandItem.getEntityName().equals(commandWrapper.getEntityName())) {
-                return false;
-            }
-        }
-        return true;
+    private boolean shouldCheckForPasswordForceReset(String actionName, String entityName) {
+        return EXEMPT_FROM_PASSWORD_RESET_CHECK.stream()
+                .noneMatch(commandItem -> commandItem.actionName().equals(actionName) && commandItem.getEntityName().equals(entityName));
     }
-
 }
