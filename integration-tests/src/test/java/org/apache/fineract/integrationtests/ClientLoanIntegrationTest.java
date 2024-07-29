@@ -4084,7 +4084,7 @@ public class ClientLoanIntegrationTest {
         addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
 
         final Integer loanID = applyForLoanApplicationWithPaymentStrategyAndPastMonth(clientID, loanProductID, charges, savingsId,
-                principal, LoanApplicationTestBuilder.DEFAULT_STRATEGY, -4, collaterals);
+                principal, LoanApplicationTestBuilder.DEFAULT_STRATEGY, fourMonthsfromNow, collaterals);
         Assertions.assertNotNull(loanID);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(REQUEST_SPEC, RESPONSE_SPEC, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
@@ -4265,7 +4265,7 @@ public class ClientLoanIntegrationTest {
         addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
 
         final Integer loanID = applyForLoanApplicationWithPaymentStrategyAndPastMonth(clientID, loanProductID, charges, savingsId,
-                principal, LoanApplicationTestBuilder.DEFAULT_STRATEGY, -4, collaterals);
+                principal, LoanApplicationTestBuilder.DEFAULT_STRATEGY, fourMonthsfromNow, collaterals);
         Assertions.assertNotNull(loanID);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(REQUEST_SPEC, RESPONSE_SPEC, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
@@ -4455,7 +4455,7 @@ public class ClientLoanIntegrationTest {
         addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
 
         final Integer loanID = applyForLoanApplicationWithPaymentStrategyAndPastMonth(clientID, loanProductID, charges, null, principal,
-                LoanApplicationTestBuilder.DEFAULT_STRATEGY, -4, collaterals);
+                LoanApplicationTestBuilder.DEFAULT_STRATEGY, fourMonthsfromNow, collaterals);
         Assertions.assertNotNull(loanID);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(REQUEST_SPEC, RESPONSE_SPEC, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
@@ -7265,15 +7265,12 @@ public class ClientLoanIntegrationTest {
     }
 
     private Integer applyForLoanApplicationWithPaymentStrategyAndPastMonth(final Integer clientID, final Integer loanProductID,
-            List<HashMap> charges, final String savingsId, String principal, final String repaymentStrategy, final int month,
+            List<HashMap> charges, final String savingsId, String principal, final String repaymentStrategy, final String fourMonthsfromNow,
             List<HashMap> collaterals) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
 
-        Calendar fourMonthsfromNowCalendar = Calendar.getInstance(Utils.getTimeZoneOfTenant());
-        fourMonthsfromNowCalendar.add(Calendar.MONTH, month);
         DateFormat dateFormat = new SimpleDateFormat(DATETIME_PATTERN);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
-        String fourMonthsfromNow = dateFormat.format(fourMonthsfromNowCalendar.getTime());
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal(principal) //
                 .withLoanTermFrequency("6") //
