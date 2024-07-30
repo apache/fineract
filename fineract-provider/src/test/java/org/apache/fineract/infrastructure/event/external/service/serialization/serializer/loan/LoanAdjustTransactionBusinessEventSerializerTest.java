@@ -44,7 +44,7 @@ import org.apache.fineract.infrastructure.event.external.service.serialization.m
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
-import org.apache.fineract.portfolio.loanaccount.service.LoanChargePaidByReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanChargePaidByReadService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.junit.jupiter.api.AfterEach;
@@ -65,7 +65,7 @@ public class LoanAdjustTransactionBusinessEventSerializerTest {
     @Mock
     private LoanReadPlatformService service;
     @Mock
-    private LoanChargePaidByReadPlatformService loanChargePaidByReadPlatformService;
+    private LoanChargePaidByReadService loanChargePaidByReadService;
     @Mock
     private AvroDateTimeMapper avroDateTimeMapper;
     @Mock
@@ -88,7 +88,7 @@ public class LoanAdjustTransactionBusinessEventSerializerTest {
     void loanTransactionReversedOnDateSerializationTest() {
         Loan loanForProcessing = Mockito.mock(Loan.class);
         LoanAdjustTransactionBusinessEventSerializer serializer = new LoanAdjustTransactionBusinessEventSerializer(service,
-                new LoanTransactionDataMapperImpl(avroDateTimeMapper, externalIdMapper), loanChargePaidByReadPlatformService);
+                new LoanTransactionDataMapperImpl(avroDateTimeMapper, externalIdMapper), loanChargePaidByReadService);
         LoanTransaction transactionToAdjust = Mockito.mock(LoanTransaction.class);
         LoanAdjustTransactionBusinessEvent.Data loanAdjustTransactionBusinessEventData = new LoanAdjustTransactionBusinessEvent.Data(
                 transactionToAdjust);
@@ -103,7 +103,7 @@ public class LoanAdjustTransactionBusinessEventSerializerTest {
                 true, new ExternalId("testReversalExternalId"), reversedOnDate, 1L, new ExternalId("testExternalLoanId"));
 
         when(service.retrieveLoanTransaction(anyLong(), anyLong())).thenReturn(transactionToAdjustData);
-        when(loanChargePaidByReadPlatformService.getLoanChargesPaidByTransactionId(anyLong())).thenReturn(new ArrayList<>());
+        when(loanChargePaidByReadService.fetchLoanChargesPaidByDataTransactionId(anyLong())).thenReturn(new ArrayList<>());
         when(transactionToAdjust.getLoan()).thenReturn(loanForProcessing);
         when(loanForProcessing.getId()).thenReturn(1L);
         when(transactionToAdjust.getId()).thenReturn(1L);

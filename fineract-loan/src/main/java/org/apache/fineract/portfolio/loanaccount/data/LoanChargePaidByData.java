@@ -19,19 +19,30 @@
 package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
+import lombok.Data;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import org.springframework.integration.annotation.Default;
 
+@Data
 @Getter
-@RequiredArgsConstructor
 public class LoanChargePaidByData {
 
-    private final Long id;
-    private final BigDecimal amount;
-    private final Integer installmentNumber;
-    private final Long chargeId;
-    private final Long transactionId;
-    private final String name;
+    private Long id;
+    private BigDecimal amount;
+    private Integer installmentNumber;
+    private Long chargeId;
+    private Long transactionId;
+    private String name;
+
+    @Default
+    public LoanChargePaidByData(Long id, BigDecimal amount, Integer installmentNumber, Long chargeId, Long transactionId, String name) {
+        this.id = id;
+        this.amount = amount;
+        this.installmentNumber = installmentNumber;
+        this.chargeId = chargeId;
+        this.transactionId = transactionId;
+        this.name = name;
+    }
 
     public LoanChargePaidByData(final Long id, final BigDecimal amount, final Integer installmentNumber, final Long chargeId,
             final Long transactionId) {

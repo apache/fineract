@@ -27,7 +27,7 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.transaction
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan.LoanTransactionDataMapper;
 import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
-import org.apache.fineract.portfolio.loanaccount.service.LoanChargePaidByReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanChargePaidByReadService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +37,7 @@ public class LoanTransactionBusinessEventSerializer implements BusinessEventSeri
 
     private final LoanReadPlatformService service;
     private final LoanTransactionDataMapper loanTransactionMapper;
-    private final LoanChargePaidByReadPlatformService loanChargePaidByReadPlatformService;
+    private final LoanChargePaidByReadService loanChargePaidByReadService;
 
     @Override
     public <T> boolean canSerialize(BusinessEvent<T> event) {
@@ -50,7 +50,7 @@ public class LoanTransactionBusinessEventSerializer implements BusinessEventSeri
         Long loanId = event.get().getLoan().getId();
         Long loanTransactionId = event.get().getId();
         LoanTransactionData transactionData = service.retrieveLoanTransaction(loanId, loanTransactionId);
-        transactionData.setLoanChargePaidByList(loanChargePaidByReadPlatformService.getLoanChargesPaidByTransactionId(loanTransactionId));
+        transactionData.setLoanChargePaidByList(loanChargePaidByReadService.fetchLoanChargesPaidByDataTransactionId(loanTransactionId));
         return loanTransactionMapper.map(transactionData);
     }
 

@@ -29,7 +29,7 @@ import org.apache.fineract.infrastructure.event.external.service.serialization.m
 import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
-import org.apache.fineract.portfolio.loanaccount.service.LoanChargePaidByReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanChargePaidByReadService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.springframework.stereotype.Component;
 
@@ -39,7 +39,7 @@ public class LoanAdjustTransactionBusinessEventSerializer implements BusinessEve
 
     private final LoanReadPlatformService service;
     private final LoanTransactionDataMapper mapper;
-    private final LoanChargePaidByReadPlatformService loanChargePaidByReadPlatformService;
+    private final LoanChargePaidByReadService loanChargePaidByReadService;
 
     @Override
     public <T> boolean canSerialize(BusinessEvent<T> event) {
@@ -52,8 +52,8 @@ public class LoanAdjustTransactionBusinessEventSerializer implements BusinessEve
         LoanTransaction transactionToAdjust = event.get().getTransactionToAdjust();
         LoanTransactionData transactionToAdjustData = service.retrieveLoanTransaction(transactionToAdjust.getLoan().getId(),
                 transactionToAdjust.getId());
-        transactionToAdjustData.setLoanChargePaidByList(
-                loanChargePaidByReadPlatformService.getLoanChargesPaidByTransactionId(transactionToAdjust.getId()));
+        transactionToAdjustData
+                .setLoanChargePaidByList(loanChargePaidByReadService.fetchLoanChargesPaidByDataTransactionId(transactionToAdjust.getId()));
         LoanTransactionDataV1 transactionToAdjustAvroDto = mapper.map(transactionToAdjustData);
 
         LoanTransaction newTransactionDetail = event.get().getNewTransactionDetail();
@@ -62,7 +62,7 @@ public class LoanAdjustTransactionBusinessEventSerializer implements BusinessEve
             LoanTransactionData newTransactionDetailData = service.retrieveLoanTransaction(newTransactionDetail.getLoan().getId(),
                     newTransactionDetail.getId());
             newTransactionDetailData.setLoanChargePaidByList(
-                    loanChargePaidByReadPlatformService.getLoanChargesPaidByTransactionId(newTransactionDetail.getId()));
+                    loanChargePaidByReadService.fetchLoanChargesPaidByDataTransactionId(newTransactionDetail.getId()));
             newTransactionDetailAvroDto = mapper.map(newTransactionDetailData);
 
         }

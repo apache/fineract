@@ -35,6 +35,8 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanDelinquencyData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionReadService;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -42,6 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainService {
 
     private final DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper;
+    private final LoanTransactionReadService loanTransactionReadService;
 
     @Override
     @Transactional(readOnly = true)
@@ -262,7 +265,8 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
             final LoanRepaymentScheduleInstallment installment) {
         final MonetaryCurrency loanCurrency = loan.getCurrency();
         LoanRepaymentScheduleInstallment latestInstallment = loan.getLastLoanRepaymentScheduleInstallment();
-        List<LoanTransaction> chargebackTransactions = loan.getLoanTransactions(LoanTransaction::isChargeback);
+        List<LoanTransaction> chargebackTransactions = loanTransactionReadService.fetchLoanTransactionsByType(loan.getId(), null,
+                LoanTransactionType.CHARGEBACK.getValue());
         LocalDate overdueSinceDate = null;
         CollectionData collectionData = CollectionData.template();
         BigDecimal outstandingAmount = BigDecimal.ZERO;
@@ -319,7 +323,8 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
         BigDecimal delinquentFee = BigDecimal.ZERO;
         BigDecimal delinquentPenalty = BigDecimal.ZERO;
 
-        List<LoanTransaction> chargebackTransactions = loan.getLoanTransactions(LoanTransaction::isChargeback);
+        List<LoanTransaction> chargebackTransactions = loanTransactionReadService.fetchLoanTransactionsByType(loan.getId(), null,
+                LoanTransactionType.CHARGEBACK.getValue());
         BigDecimal amountAvailable = installment.getTotalPaid(loanCurrency).getAmount();
         for (LoanTransaction loanTransaction : chargebackTransactions) {
 
