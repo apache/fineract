@@ -29,7 +29,7 @@ import org.apache.fineract.infrastructure.event.external.service.serialization.m
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan.UnpaidChargeDataMapper;
 import org.apache.fineract.portfolio.loanaccount.data.UnpaidChargeData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
-import org.apache.fineract.portfolio.loanaccount.service.LoanChargePaidByReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanChargePaidByReadService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -43,9 +43,9 @@ public class LoanChargeOffBusinessEventSerializer extends LoanTransactionBusines
     private final LoanTransactionRepository loanTransactionRepository;
 
     public LoanChargeOffBusinessEventSerializer(LoanReadPlatformService loanReadPlatformService,
-            LoanTransactionDataMapper loanTransactionMapper, LoanChargePaidByReadPlatformService loanChargePaidByReadPlatformService,
+            LoanTransactionDataMapper loanTransactionMapper, LoanChargePaidByReadService loanChargePaidByReadService,
             UnpaidChargeDataMapper unpaidChargeDataMapper, LoanTransactionRepository loanTransactionRepository) {
-        super(loanReadPlatformService, loanTransactionMapper, loanChargePaidByReadPlatformService);
+        super(loanReadPlatformService, loanTransactionMapper, loanChargePaidByReadService);
         this.unpaidChargeDataMapper = unpaidChargeDataMapper;
         this.loanTransactionRepository = loanTransactionRepository;
     }

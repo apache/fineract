@@ -381,4 +381,8 @@ public class LoanTransactionData {
     public void setLoanTransactionRelations(List<LoanTransactionRelationData> transactionRelations) {
         this.transactionRelations = transactionRelations;
     }
+
+    public boolean supportTransactionRelations() {
+        return !type.isAccrual();
+    }
 }

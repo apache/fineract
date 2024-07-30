@@ -34,7 +34,6 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentScheduleInsta
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleAccrualData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionRelationData;
 import org.apache.fineract.portfolio.loanaccount.data.PaidInAdvanceData;
 import org.apache.fineract.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -159,8 +158,6 @@ public interface LoanReadPlatformService {
     List<LoanAccountData> retrieveGLIMChildLoansByGLIMParentAccount(String parentloanAccountNumber);
 
     List<LoanRepaymentScheduleInstallmentData> getRepaymentDataResponse(Long loanId);
-
-    List<LoanTransactionRelationData> retrieveLoanTransactionRelationsByLoanTransactionId(Long loanTransactionId);
 
     Long retrieveLoanTransactionIdByExternalId(ExternalId externalId);
 

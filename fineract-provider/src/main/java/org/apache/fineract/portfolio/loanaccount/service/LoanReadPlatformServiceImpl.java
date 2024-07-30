@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingRuleType;
@@ -93,6 +94,7 @@ import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApplicationTimelineData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidByData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanInterestRecalculationData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentScheduleInstallmentData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleAccrualData;
@@ -113,8 +115,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSubStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
@@ -124,7 +124,6 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleP
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
-import org.apache.fineract.portfolio.loanaccount.mapper.LoanTransactionRelationMapper;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrategyData;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
@@ -175,9 +174,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final DelinquencyReadPlatformService delinquencyReadPlatformService;
     private final LoanTransactionRepository loanTransactionRepository;
-    private final LoanTransactionRelationRepository loanTransactionRelationRepository;
-    private final LoanTransactionRelationMapper loanTransactionRelationMapper;
-    private final LoanChargePaidByReadPlatformService loanChargePaidByReadPlatformService;
+    private final LoanChargePaidByReadService loanChargePaidByReadService;
+    private final LoanTransactionRelationReadService loanTransactionRelationReadService;
 
     @Override
     public LoanAccountData retrieveOne(final Long loanId) {
@@ -286,11 +284,17 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             Collection<LoanTransactionData> loanTransactionData = this.jdbcTemplate.query(sql, rm, loanId); // NOSONAR
             // TODO: would worth to rework in the future. It is not nice to fetch relations one by one... might worth to
             // give a try to get rid of native queries
+            final List<Long> loanIds = loanTransactionData.stream().map(LoanTransactionData::getId).collect(Collectors.toList());
+            final List<LoanTransactionRelationData> loanTransactionRelationDatas = loanTransactionRelationReadService
+                    .fetchLoanTransactionRelationDataFrom(loanIds);
+            final List<LoanChargePaidByData> loanChargePaidByDatas = loanChargePaidByReadService
+                    .fetchLoanChargesPaidByDataTransactionId(loanIds);
             for (LoanTransactionData loanTransaction : loanTransactionData) {
-                loanTransaction
-                        .setLoanTransactionRelations(this.retrieveLoanTransactionRelationsByLoanTransactionId(loanTransaction.getId()));
-                loanTransaction.setLoanChargePaidByList(
-                        loanChargePaidByReadPlatformService.getLoanChargesPaidByTransactionId(loanTransaction.getId()));
+                loanTransaction.setLoanTransactionRelations(loanTransactionRelationDatas.stream().filter(
+                        loanTransactionRelationData -> loanTransactionRelationData.getFromLoanTransaction().equals(loanTransaction.getId()))
+                        .toList());
+                loanTransaction.setLoanChargePaidByList(loanChargePaidByDatas.stream()
+                        .filter(loanChargePaidByData -> loanChargePaidByData.getTransactionId().equals(loanTransaction.getId())).toList());
             }
             return loanTransactionData;
         } catch (final EmptyResultDataAccessException e) {
@@ -587,7 +591,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             final LoanTransactionsMapper rm = new LoanTransactionsMapper(sqlGenerator);
             final String sql = "select " + rm.loanPaymentsSchema() + " where l.id = ? and tr.id = ? ";
             LoanTransactionData loanTransactionData = this.jdbcTemplate.queryForObject(sql, rm, loanId, transactionId); // NOSONAR
-            loanTransactionData.setLoanTransactionRelations(this.retrieveLoanTransactionRelationsByLoanTransactionId(transactionId));
+            loanTransactionData.setLoanTransactionRelations(
+                    loanTransactionRelationReadService.fetchLoanTransactionRelationDataFrom(loanTransactionData.getId()));
             return loanTransactionData;
         } catch (final EmptyResultDataAccessException e) {
             throw new LoanTransactionNotFoundException(transactionId, e);
@@ -1224,7 +1229,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 final LocalDate dueDate = JdbcSupport.getLocalDate(rs, "dueDate");
                 final LocalDate obligationsMetOnDate = JdbcSupport.getLocalDate(rs, "obligationsMetOnDate");
                 final boolean complete = rs.getBoolean("complete");
-                final boolean isAdditional = rs.getBoolean("isAdditional");
                 BigDecimal disbursedAmount = BigDecimal.ZERO;
 
                 disbursedAmount = processDisbursementData(loanScheduleType, disbursementData, fromDate, dueDate, disbursementPeriodIds,
@@ -2593,14 +2597,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     public Integer retrieveNumberOfActiveLoans() {
         final String sql = "select count(*) from m_loan";
         return this.jdbcTemplate.queryForObject(sql, Integer.class);
-    }
-
-    @Override
-    public List<LoanTransactionRelationData> retrieveLoanTransactionRelationsByLoanTransactionId(Long loanTransactionId) {
-        final LoanTransaction loanTransaction = this.loanTransactionRepository.getReferenceById(loanTransactionId);
-        List<LoanTransactionRelation> loanTransactionRelations = this.loanTransactionRelationRepository
-                .findByFromTransaction(loanTransaction);
-        return loanTransactionRelationMapper.map(loanTransactionRelations);
     }
 
     @Override

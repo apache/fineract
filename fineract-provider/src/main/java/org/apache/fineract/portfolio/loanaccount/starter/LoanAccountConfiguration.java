@@ -82,7 +82,6 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanSchedu
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleHistoryWritePlatformService;
 import org.apache.fineract.portfolio.loanaccount.mapper.LoanChargeMapper;
 import org.apache.fineract.portfolio.loanaccount.mapper.LoanCollateralManagementMapper;
-import org.apache.fineract.portfolio.loanaccount.mapper.LoanTransactionRelationMapper;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationTransitionValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeApiJsonValidator;
@@ -105,8 +104,7 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanArrearsAgingService
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanCalculateRepaymentPastDueService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeAssembler;
-import org.apache.fineract.portfolio.loanaccount.service.LoanChargePaidByReadPlatformService;
-import org.apache.fineract.portfolio.loanaccount.service.LoanChargePaidByReadPlatformServiceImpl;
+import org.apache.fineract.portfolio.loanaccount.service.LoanChargePaidByReadService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeReadPlatformServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeWritePlatformService;
@@ -119,6 +117,7 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService
 import org.apache.fineract.portfolio.loanaccount.service.LoanStatusChangePlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanStatusChangePlatformServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionAssembler;
+import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionRelationReadService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformServiceJpaRepositoryImpl;
@@ -253,13 +252,6 @@ public class LoanAccountConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(LoanChargePaidByReadPlatformService.class)
-    public LoanChargePaidByReadPlatformService loanChargePaidByReadPlatformService(JdbcTemplate jdbcTemplate,
-            PlatformSecurityContext context) {
-        return new LoanChargePaidByReadPlatformServiceImpl(jdbcTemplate, context);
-    }
-
-    @Bean
     @ConditionalOnMissingBean(LoanChargeReadPlatformService.class)
     public LoanChargeReadPlatformService loanChargeReadPlatformService(JdbcTemplate jdbcTemplate,
             ChargeDropdownReadPlatformService chargeDropdownReadPlatformService, DropdownReadPlatformService dropdownReadPlatformService,
@@ -312,19 +304,15 @@ public class LoanAccountConfiguration {
             ConfigurationDomainService configurationDomainService, AccountDetailsReadPlatformService accountDetailsReadPlatformService,
             ColumnValidator columnValidator, DatabaseSpecificSQLGenerator sqlGenerator,
             DelinquencyReadPlatformService delinquencyReadPlatformService, LoanTransactionRepository loanTransactionRepository,
-            LoanTransactionRelationRepository loanTransactionRelationRepository,
-            LoanTransactionRelationMapper loanTransactionRelationMapper,
-            LoanChargePaidByReadPlatformService loanChargePaidByReadPlatformService) {
+            LoanChargePaidByReadService loanChargePaidByReadService,
+            LoanTransactionRelationReadService loanTransactionRelationReadService) {
         return new LoanReadPlatformServiceImpl(jdbcTemplate, context, loanRepositoryWrapper, applicationCurrencyRepository,
                 loanProductReadPlatformService, clientReadPlatformService, groupReadPlatformService, loanDropdownReadPlatformService,
                 fundReadPlatformService, chargeReadPlatformService, codeValueReadPlatformService, calendarReadPlatformService,
                 staffReadPlatformService, paginationHelper, namedParameterJdbcTemplate, paymentTypeReadPlatformService,
                 loanRepaymentScheduleTransactionProcessorFactory, floatingRatesReadPlatformService, loanUtilService,
                 configurationDomainService, accountDetailsReadPlatformService, columnValidator, sqlGenerator,
-                delinquencyReadPlatformService, loanTransactionRepository, loanTransactionRelationRepository, loanTransactionRelationMapper,
-                loanChargePaidByReadPlatformService
-
-        );
+                delinquencyReadPlatformService, loanTransactionRepository, loanChargePaidByReadService, loanTransactionRelationReadService);
     }
 
     @Bean

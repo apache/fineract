@@ -390,7 +390,7 @@ public abstract class BaseLoanIntegrationTest {
     protected void verifyTransactions(Long loanId, Transaction... transactions) {
         GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId.intValue());
         if (transactions == null || transactions.length == 0) {
-            assertNull(loanDetails.getTransactions(), "No transaction is expected");
+            Assertions.assertTrue(loanDetails.getTransactions().isEmpty(), "No transaction is expected");
         } else {
             Assertions.assertEquals(transactions.length, loanDetails.getTransactions().size());
             Arrays.stream(transactions).forEach(tr -> {
