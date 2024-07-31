@@ -26,7 +26,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
@@ -100,11 +99,12 @@ public class LoanSummaryData {
     private final Long chargeOffReasonId;
     private final String chargeOffReason;
 
-    private BigDecimal totalUnpaidAccruedDueInterest;
-    private BigDecimal totalUnpaidAccruedNotDueInterest;
+    private BigDecimal totalUnpaidPayableDueInterest;
+    private BigDecimal totalUnpaidPayableNotDueInterest;
 
     public static LoanSummaryData withTransactionAmountsSummary(final LoanSummaryData defaultSummaryData,
             final LoanScheduleData repaymentSchedule, final Collection<LoanTransactionBalance> loanTransactionBalances) {
+        final LocalDate businessDate = DateUtils.getBusinessLocalDate();
 
         BigDecimal totalMerchantRefund = BigDecimal.ZERO;
         BigDecimal totalMerchantRefundReversed = BigDecimal.ZERO;
@@ -121,8 +121,8 @@ public class LoanSummaryData {
         BigDecimal totalRepaymentTransactionReversed = BigDecimal.ZERO;
         BigDecimal totalInterestPaymentWaiver = BigDecimal.ZERO;
         BigDecimal totalInterestRefund = BigDecimal.ZERO;
-        BigDecimal totalUnpaidAccruedDueInterest = BigDecimal.ZERO;
-        BigDecimal totalUnpaidAccruedNotDueInterest = BigDecimal.ZERO;
+        BigDecimal totalUnpaidPayableDueInterest = BigDecimal.ZERO;
+        BigDecimal totalUnpaidPayableNotDueInterest = BigDecimal.ZERO;
 
         totalChargeAdjustment = fetchLoanTransactionBalanceByType(loanTransactionBalances,
                 LoanTransactionType.CHARGE_ADJUSTMENT.getValue());
@@ -160,25 +160,12 @@ public class LoanSummaryData {
                 LoanTransactionType.REPAYMENT.getValue());
 
         if (repaymentSchedule != null) {
-            // Accrued Due Interest on Past due installments
-            totalUnpaidAccruedDueInterest = computeTotalAccruedDueInterestAmount(repaymentSchedule.getPeriods());
-            if (MathUtil.isGreaterThanZero(totalUnpaidAccruedDueInterest)) {
-                totalUnpaidAccruedDueInterest = totalUnpaidAccruedDueInterest
-                        .subtract(computeTotalInterestPaidDueAmount(repaymentSchedule.getPeriods()));
-                if (MathUtil.isLessThanZero(totalUnpaidAccruedDueInterest)) {
-                    totalUnpaidAccruedDueInterest = BigDecimal.ZERO;
-                }
-            }
+            // Outstanding Interest on Past due installments
+            totalUnpaidPayableDueInterest = computeTotalUnpaidPayableDueInterestAmount(repaymentSchedule.getPeriods(), businessDate);
 
-            // Accrued Due Interest on Actual Installment
-            totalUnpaidAccruedNotDueInterest = computeTotalAccruedNotDueInterestAmountOnActualPeriod(repaymentSchedule.getPeriods());
-            if (MathUtil.isGreaterThanZero(totalUnpaidAccruedNotDueInterest)) {
-                totalUnpaidAccruedNotDueInterest = totalUnpaidAccruedNotDueInterest
-                        .subtract(computeTotalInterestPaidNotDueAmountOnActualPeriod(repaymentSchedule.getPeriods()));
-                if (MathUtil.isLessThanZero(totalUnpaidAccruedNotDueInterest)) {
-                    totalUnpaidAccruedNotDueInterest = BigDecimal.ZERO;
-                }
-            }
+            // Accumulated daily interest of the current Installment period
+            totalUnpaidPayableNotDueInterest = computeTotalUnpaidPayableNotDueInterestAmountOnActualPeriod(repaymentSchedule.getPeriods(),
+                    businessDate);
         }
 
         return LoanSummaryData.builder().currency(defaultSummaryData.currency).principalDisbursed(defaultSummaryData.principalDisbursed)
@@ -212,8 +199,8 @@ public class LoanSummaryData {
                 .totalChargeback(totalChargeback).totalCreditBalanceRefund(totalCreditBalanceRefund)
                 .totalCreditBalanceRefundReversed(totalCreditBalanceRefundReversed).totalRepaymentTransaction(totalRepaymentTransaction)
                 .totalRepaymentTransactionReversed(totalRepaymentTransactionReversed).totalInterestPaymentWaiver(totalInterestPaymentWaiver)
-                .totalUnpaidAccruedDueInterest(totalUnpaidAccruedDueInterest)
-                .totalUnpaidAccruedNotDueInterest(totalUnpaidAccruedNotDueInterest).totalInterestRefund(totalInterestRefund).build();
+                .totalUnpaidPayableDueInterest(totalUnpaidPayableDueInterest)
+                .totalUnpaidPayableNotDueInterest(totalUnpaidPayableNotDueInterest).totalInterestRefund(totalInterestRefund).build();
     }
 
     private static BigDecimal fetchLoanTransactionBalanceByType(final Collection<LoanTransactionBalance> loanTransactionBalances,
@@ -236,44 +223,23 @@ public class LoanSummaryData {
         return LoanSummaryData.builder().currency(currencyData).build();
     }
 
-    private static BigDecimal computeTotalAccruedDueInterestAmount(Collection<LoanSchedulePeriodData> periods) {
-        final LocalDate businessDate = DateUtils.getBusinessLocalDate();
+    private static BigDecimal computeTotalUnpaidPayableDueInterestAmount(Collection<LoanSchedulePeriodData> periods,
+            final LocalDate businessDate) {
         return periods.stream().filter(period -> !period.getDownPaymentPeriod() && businessDate.isAfter(period.getDueDate()))
-                .map(period -> period.getTotalAccruedInterest()).reduce(BigDecimal.ZERO, BigDecimal::add);
+                .map(period -> period.getInterestOutstanding()).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private static BigDecimal computeTotalInterestPaidDueAmount(Collection<LoanSchedulePeriodData> periods) {
-        final LocalDate businessDate = DateUtils.getBusinessLocalDate();
-        return periods.stream().filter(period -> !period.getDownPaymentPeriod() && businessDate.isAfter(period.getDueDate()))
-                .map(period -> period.getInterestPaid()).reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    private static BigDecimal computeTotalAccruedNotDueInterestAmountOnActualPeriod(Collection<LoanSchedulePeriodData> periods) {
-        final LocalDate businessDate = DateUtils.getBusinessLocalDate();
-        return periods.stream()
-                .filter(period -> !period.getDownPaymentPeriod() && isActualPeriod(period) && businessDate.isBefore(period.getDueDate()))
-                .map(period -> period.getTotalAccruedInterest()).reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    private static BigDecimal computeTotalInterestPaidNotDueAmountOnActualPeriod(Collection<LoanSchedulePeriodData> periods) {
-        final LocalDate businessDate = DateUtils.getBusinessLocalDate();
-        return periods.stream()
-                .filter(period -> !period.getDownPaymentPeriod() && isActualPeriod(period) && businessDate.isBefore(period.getDueDate()))
-                .map(period -> period.getInterestPaid()).reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    private static boolean isActualPeriod(LoanSchedulePeriodData period) {
-        final LocalDate businessDate = DateUtils.getBusinessLocalDate();
-        boolean actualPeriod = false;
-        if (period.getPeriod() != null) {
-            if (period.getPeriod() == 1) {
-                actualPeriod = ((businessDate.isEqual(period.getFromDate()) || businessDate.isAfter(period.getFromDate()))
-                        && businessDate.isBefore(period.getDueDate()));
-            } else {
-                actualPeriod = (businessDate.isAfter(period.getFromDate()) && businessDate.isBefore(period.getDueDate()));
-            }
+    private static BigDecimal computeTotalUnpaidPayableNotDueInterestAmountOnActualPeriod(final Collection<LoanSchedulePeriodData> periods,
+            final LocalDate businessDate) {
+        // Default value equal to Zero
+        BigDecimal totalAccruedNotDueInterestAmount = BigDecimal.ZERO;
+        // Find the current Period (If exists one) based in the Business date
+        final Optional<LoanSchedulePeriodData> optCurrentPeriod = periods.stream()
+                .filter(period -> !period.getDownPaymentPeriod() && period.isActualPeriod(businessDate)).findFirst();
+        if (optCurrentPeriod.isPresent()) {
+            totalAccruedNotDueInterestAmount = optCurrentPeriod.get().getInterestDueUntilDate(businessDate);
         }
-
-        return actualPeriod;
+        return totalAccruedNotDueInterestAmount;
     }
+
 }

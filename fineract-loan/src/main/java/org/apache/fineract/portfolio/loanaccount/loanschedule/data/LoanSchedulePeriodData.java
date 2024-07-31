@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 
 /**
  * Immutable data object that represents a period of a loan schedule.
@@ -400,6 +401,49 @@ public final class LoanSchedulePeriodData {
             value = possibleNullValue;
         }
         return value;
+    }
+
+    public BigDecimal getRatePerDay() {
+        return getInterestOriginalDue().divide(BigDecimal.valueOf(getDaysInPeriod()), MoneyHelper.getMathContext());
+    }
+
+    public BigDecimal getInterestDueUntilDate(final LocalDate businessDate) {
+        if (getComplete()) {
+            return BigDecimal.ZERO;
+        } else {
+            if (businessDate.compareTo(getDueDate()) >= 0) { // Period is matured
+                return getInterestOriginalDue();
+            }
+            if (businessDate.compareTo(getFromDate()) >= 0) { // If It is the current period
+                return getRatePerDay().multiply(BigDecimal.valueOf(DateUtils.getDifferenceInDays(getPeriodStartDate(), businessDate)),
+                        MoneyHelper.getMathContext());
+            }
+            return BigDecimal.ZERO;
+        }
+    }
+
+    public boolean isActualPeriod(final LocalDate businessDate) {
+        boolean actualPeriod = false;
+        if (getPeriod() != null) {
+            if (getPeriod() == 1) {
+                actualPeriod = ((businessDate.compareTo(getFromDate()) >= 0) && businessDate.compareTo(getDueDate()) <= 0);
+            } else {
+                actualPeriod = ((businessDate.compareTo(getFromDate()) > 0) && businessDate.compareTo(getDueDate()) <= 0);
+            }
+        }
+
+        return actualPeriod;
+    }
+
+    private LocalDate getPeriodStartDate() {
+        if (getPeriod() != null) {
+            if (getPeriod() == 1) {
+                return getFromDate();
+            } else {
+                return getFromDate().plusDays(1);
+            }
+        }
+        return null;
     }
 
     public BigDecimal getPrincipalDisbursed() {
