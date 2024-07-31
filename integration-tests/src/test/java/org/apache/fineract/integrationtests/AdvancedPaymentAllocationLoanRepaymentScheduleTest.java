@@ -4257,79 +4257,6 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
         });
     }
 
-    // UC139c: Advanced payment allocation, with DownPayment enabled in Loan Product and change the auto downpayment and
-    // percentage amount
-    // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
-    // 1. Create a Loan product with Adv. Pment. Alloc. and DownPayment
-    // 2. Submit Loan with DownPayment and approve
-    // 3. Modify Loan Application change the auto downpayment and percentage amount
-    // 4. Disburse only 10
-    // 5. Check the repayment schedule is correct, without DownPayment installment
-    @Test
-    public void uc139c() {
-        final String processDate = "23 March 2024";
-        final Double amount = 1000.0;
-        runAt(processDate, () -> {
-            BigDecimal percentageAmount = BigDecimal.valueOf(25);
-            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
-                    .installmentAmountInMultiplesOf(null).numberOfRepayments(3).repaymentEvery(15).enableDownPayment(true)
-                    .enableAutoRepaymentForDownPayment(true).disbursedAmountPercentageForDownPayment(percentageAmount);
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-            PostLoansRequest applicationRequest = applyLoanRequest(client.getClientId(), loanProductResponse.getResourceId(), processDate,
-                    amount, 4);
-
-            applicationRequest = applicationRequest.numberOfRepayments(3).loanTermFrequency(45)
-                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY).repaymentEvery(15)
-                    .enableDownPayment(true);
-
-            PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
-
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
-            assertNotNull(loanDetails);
-            assertEquals(true, loanDetails.getEnableDownPayment());
-            assertEquals(true, loanDetails.getEnableAutoRepaymentForDownPayment());
-
-            // verify schedule (with DownPayment and AutoDownPayment to 25%)
-            verifyRepaymentSchedule(loanResponse.getLoanId(), //
-                    installment(1000, null, "23 March 2024"), //
-                    installment(250.0, 0, 0, 0, 250.0, false, "23 March 2024", 750.0), //
-                    installment(250.0, 0, 0, 0, 250.0, false, "07 April 2024", 500.0), //
-                    installment(250.0, 0, 0, 0, 250.0, false, "22 April 2024", 250.0), //
-                    installment(250.0, 0, 0, 0, 250.0, false, "07 May 2024", 0.0) //
-            );
-
-            percentageAmount = BigDecimal.valueOf(15);
-            loanTransactionHelper.modifyApplicationForLoan(loanResponse.getLoanId(), "modify",
-                    new PutLoansLoanIdRequest().clientId(client.getClientId()).productId(loanProductResponse.getResourceId())
-                            .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
-                            .repaymentEvery(15).interestCalculationPeriodType(1).interestType(0).expectedDisbursementDate(processDate)
-                            .principal(amount.longValue()).repaymentFrequencyType(0).numberOfRepayments(3).loanTermFrequency(45)
-                            .loanTermFrequencyType(0).enableDownPayment(true).loanType("individual").dateFormat(DATETIME_PATTERN)
-                            .locale("en").enableAutoRepaymentForDownPayment(true)
-                            .disbursedAmountPercentageForDownPayment(percentageAmount));
-
-            loanTransactionHelper.approveLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest()
-                    .approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATETIME_PATTERN).approvedOnDate(processDate).locale("en"));
-
-            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest().actualDisbursementDate(processDate)
-                    .dateFormat(DATETIME_PATTERN).transactionAmount(BigDecimal.valueOf(1000.0)).locale("en"));
-
-            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
-            assertNotNull(loanDetails);
-            assertEquals(true, loanDetails.getEnableDownPayment());
-            assertEquals(true, loanDetails.getEnableAutoRepaymentForDownPayment());
-
-            // verify schedule (with DownPayment and AutoDownPayment to 15%)
-            verifyRepaymentSchedule(loanResponse.getLoanId(), //
-                    installment(1000, null, "23 March 2024"), //
-                    installment(150, 0, 0, 0, 0.0, true, "23 March 2024", 850), //
-                    installment(283.33, 0, 0, 0, 283.33, false, "07 April 2024", 566.67), //
-                    installment(283.33, 0, 0, 0, 283.33, false, "22 April 2024", 283.34), //
-                    installment(283.34, 0, 0, 0, 283.34, false, "07 May 2024", 0.0) //
-            );
-        });
-    }
-
     // uc140: Negative Test: Advanced payment allocation, with DownPayment disabled in Loan Product but try to enable in
     // Loan application
     // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
@@ -4993,6 +4920,178 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
             LOG.info("value {}", loanDetails.getSummary().getTotalInterestRefund().stripTrailingZeros());
             assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalInterestRefund().stripTrailingZeros());
+        });
+    }
+
+    // UC14-: Advanced payment allocation with Interest, originally calculated EMI, need adjustment, adjusted EMI is not
+    // better than original, use original EMI and apply with multi disbursement
+    // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+    // 1. Create a Loan product with Adv. Payment. Alloc. and with 5% Interest, 360/30, 1 repayment per month
+    // 2. Submit Loan and approve
+    // 3. Disburse
+    // 4. Validate Repayment Schedule
+    @Test
+    public void uc147a() {
+        final String operationDate = "1 January 2024";
+        runAt(operationDate, () -> {
+            BigDecimal interestRatePerPeriod = BigDecimal.valueOf(9.4822);
+
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                    .interestRatePerPeriod(interestRatePerPeriod.doubleValue()).interestCalculationPeriodType(RepaymentFrequencyType.DAYS)
+                    .interestRateFrequencyType(YEARS).daysInMonthType(DaysInMonthType.DAYS_30.getValue())
+                    .daysInYearType(DaysInYearType.DAYS_360.getValue()).numberOfRepayments(6)//
+                    .repaymentEvery(1)//
+                    .repaymentFrequencyType(2L)//
+                    .enableDownPayment(false)//
+                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .enableAutoRepaymentForDownPayment(null)//
+                    .multiDisburseLoan(true)//
+                    .disallowExpectedDisbursements(true)//
+                    .allowApprovedDisbursedAmountsOverApplied(true)//
+                    .overAppliedCalculationType("flat")//
+                    .overAppliedNumber(10000)//
+                    .maxTrancheCount(10)//
+                    .outstandingLoanBalance(10000.0)//
+                    .installmentAmountInMultiplesOf(null)//
+            ;//
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), operationDate, 100.0, 6);
+
+            applicationRequest = applicationRequest.numberOfRepayments(6)//
+                    .loanTermFrequency(6)//
+                    .loanTermFrequencyType(2)//
+                    .interestRatePerPeriod(interestRatePerPeriod).interestCalculationPeriodType(DAYS)//
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
+                    .repaymentEvery(1)//
+                    .repaymentFrequencyType(2)//
+                    .maxOutstandingLoanBalance(BigDecimal.valueOf(10000.0))//
+            ;//
+
+            PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+            loanTransactionHelper.approveLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest()
+                    .approvedLoanAmount(BigDecimal.valueOf(100)).dateFormat(DATETIME_PATTERN).approvedOnDate(operationDate).locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest().actualDisbursementDate(operationDate)
+                    .dateFormat(DATETIME_PATTERN).transactionAmount(BigDecimal.valueOf(100.0)).locale("en"));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 102.78, 0.0, 100.0, 0.0, null);
+
+            String disbursementDate2nd = "8 January 2024";
+            updateBusinessDate(disbursementDate2nd);
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate(disbursementDate2nd).dateFormat(DATETIME_PATTERN)
+                            .transactionAmount(BigDecimal.valueOf(200.0)).locale("en"));
+
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 307.99, 0.0, 300.0, 0.0, null);
+
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 1), 49.31, 0.0, 49.31, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.02, 0.0,
+                    2.02, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2024, 3, 1), 49.35, 0.0, 49.35, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.98, 0.0,
+                    1.98, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2024, 4, 1), 49.74, 0.0, 49.74, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.59, 0.0,
+                    1.59, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2024, 5, 1), 50.13, 0.0, 50.13, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.20, 0.0,
+                    1.20, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 5, LocalDate.of(2024, 6, 1), 50.53, 0.0, 50.53, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.80, 0.0,
+                    0.80, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 6, LocalDate.of(2024, 7, 1), 50.94, 0.0, 50.94, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.40, 0.0,
+                    0.40, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+            assertEquals(loanDetails.getNumberOfRepayments(), 6);
+        });
+    }
+
+    // UC14-: Advanced payment allocation with Interest, originally calculated EMI, need adjustment, adjusted EMI is not
+    // better than original, use original EMI and apply with multi disbursement in two different periods
+    // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+    // 1. Create a Loan product with Adv. Payment. Alloc. and with 5% Interest, 360/30, 1 repayment per month
+    // 2. Submit Loan and approve
+    // 3. Disburse
+    // 4. Validate Repayment Schedule
+    @Test
+    public void uc147b() {
+        final String operationDate = "1 January 2024";
+        runAt(operationDate, () -> {
+            BigDecimal interestRatePerPeriod = BigDecimal.valueOf(9.4822);
+
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                    .interestRatePerPeriod(interestRatePerPeriod.doubleValue()).interestCalculationPeriodType(RepaymentFrequencyType.DAYS)
+                    .interestRateFrequencyType(YEARS).daysInMonthType(DaysInMonthType.DAYS_30.getValue())
+                    .daysInYearType(DaysInYearType.DAYS_360.getValue()).numberOfRepayments(6)//
+                    .repaymentEvery(1)//
+                    .repaymentFrequencyType(2L)//
+                    .enableDownPayment(false)//
+                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .enableAutoRepaymentForDownPayment(null)//
+                    .multiDisburseLoan(true)//
+                    .disallowExpectedDisbursements(true)//
+                    .allowApprovedDisbursedAmountsOverApplied(true)//
+                    .overAppliedCalculationType("flat")//
+                    .overAppliedNumber(10000)//
+                    .maxTrancheCount(10)//
+                    .outstandingLoanBalance(10000.0)//
+                    .installmentAmountInMultiplesOf(null)//
+            ;//
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), operationDate, 100.0, 5);
+
+            applicationRequest = applicationRequest.numberOfRepayments(6)//
+                    .loanTermFrequency(6)//
+                    .loanTermFrequencyType(2)//
+                    .interestRatePerPeriod(interestRatePerPeriod).interestCalculationPeriodType(DAYS)//
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
+                    .repaymentEvery(1)//
+                    .repaymentFrequencyType(2)//
+                    .maxOutstandingLoanBalance(BigDecimal.valueOf(10000.0))//
+            ;//
+
+            PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+            loanTransactionHelper.approveLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest()
+                    .approvedLoanAmount(BigDecimal.valueOf(100)).dateFormat(DATETIME_PATTERN).approvedOnDate(operationDate).locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest().actualDisbursementDate(operationDate)
+                    .dateFormat(DATETIME_PATTERN).transactionAmount(BigDecimal.valueOf(100.0)).locale("en"));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 102.78, 0.0, 100.0, 0.0, null);
+
+            final String repaymentDate = "1 February 2024";
+            updateBusinessDate(repaymentDate);
+            loanTransactionHelper.makeRepayment(repaymentDate, 17.13f, loanResponse.getLoanId().intValue());
+
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+
+            validateLoanSummaryBalances(loanDetails, 85.65, 17.13, 83.66, 16.34, null);
+
+            final String dateOf2ndDisbursement = "15 February 2024";
+            updateBusinessDate(dateOf2ndDisbursement);
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate(dateOf2ndDisbursement).dateFormat(DATETIME_PATTERN)
+                            .transactionAmount(BigDecimal.valueOf(100.0)).locale("en"));
+
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 187.65, 17.13, 183.66, 16.34, null);
+
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 1), 16.34, 16.34, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.79, 0.79,
+                    0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2024, 3, 1), 36.46, 0.0, 36.46, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.07, 0.0,
+                    1.07, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2024, 4, 1), 36.37, 0.0, 36.37, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.16, 0.0,
+                    1.16, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 4, LocalDate.of(2024, 5, 1), 36.65, 0.0, 36.65, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.88, 0.0,
+                    0.88, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 5, LocalDate.of(2024, 6, 1), 36.94, 0.0, 36.94, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.59, 0.0,
+                    0.59, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 6, LocalDate.of(2024, 7, 1), 37.24, 0.0, 37.24, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.29, 0.0,
+                    0.29, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+            assertEquals(loanDetails.getNumberOfRepayments(), 6);
         });
     }
 

@@ -21,8 +21,6 @@ package org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
@@ -31,22 +29,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleIns
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 
 public interface LoanRepaymentScheduleTransactionProcessor {
-
-    @Data
-    @AllArgsConstructor
-    class TransactionCtx {
-
-        private final MonetaryCurrency currency;
-        private final List<LoanRepaymentScheduleInstallment> installments;
-        private final Set<LoanCharge> charges;
-        private final MoneyHolder overpaymentHolder;
-        private final ChangedTransactionDetail changedTransactionDetail;
-
-        public TransactionCtx(MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges,
-                MoneyHolder overpaymentHolder) {
-            this(currency, installments, charges, overpaymentHolder, null);
-        }
-    }
 
     String getCode();
 

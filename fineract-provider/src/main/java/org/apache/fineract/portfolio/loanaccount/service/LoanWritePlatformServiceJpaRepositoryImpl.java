@@ -175,6 +175,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionToRepayme
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.exception.DateMismatchException;
 import org.apache.fineract.portfolio.loanaccount.exception.ExceedingTrancheCountException;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanTransactionTypeException;
@@ -1111,9 +1112,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (isTransactionChronologicallyLatest && (!reprocess || !loan.getLoanRepaymentScheduleDetail().isInterestRecalculationEnabled())
                 && !loan.isForeclosure()) {
             loanRepaymentScheduleTransactionProcessor.processLatestTransaction(newInterestPaymentWaiverTransaction,
-                    new LoanRepaymentScheduleTransactionProcessor.TransactionCtx(loan.getCurrency(),
-                            loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
-                            new MoneyHolder(loan.getTotalOverpaidAsMoney())));
+                    new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
+                            new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
             reprocess = false;
             if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
                 if (currentInstallment == null || currentInstallment.isNotFullyPaidOff()) {

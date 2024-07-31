@@ -50,6 +50,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParamet
 import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgingParameterRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.note.domain.Note;
@@ -87,9 +88,8 @@ public class LoanReAgingServiceImpl {
 
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
                 .determineProcessor(loan.transactionProcessingStrategy());
-        loanRepaymentScheduleTransactionProcessor.processLatestTransaction(reAgeTransaction,
-                new LoanRepaymentScheduleTransactionProcessor.TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
-                        loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney())));
+        loanRepaymentScheduleTransactionProcessor.processLatestTransaction(reAgeTransaction, new TransactionCtx(loan.getCurrency(),
+                loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
 
         loan.updateLoanScheduleDependentDerivedFields();
         persistNote(loan, command, changes);

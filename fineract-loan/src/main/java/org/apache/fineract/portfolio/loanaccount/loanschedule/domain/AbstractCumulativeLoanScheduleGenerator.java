@@ -2001,8 +2001,9 @@ public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanSch
             final LoanScheduleParams loanScheduleParams, final BigDecimal chargesDueAtTimeOfDisbursement) {
         List<LoanScheduleModelPeriod> periods = new ArrayList<>();
         if (!loanApplicationTerms.isMultiDisburseLoan()) {
-            final LoanScheduleModelDisbursementPeriod disbursementPeriod = LoanScheduleModelDisbursementPeriod
-                    .disbursement(loanApplicationTerms, chargesDueAtTimeOfDisbursement);
+            final LoanScheduleModelDisbursementPeriod disbursementPeriod = LoanScheduleModelDisbursementPeriod.disbursement(
+                    loanApplicationTerms.getExpectedDisbursementDate(), loanApplicationTerms.getPrincipal(),
+                    chargesDueAtTimeOfDisbursement);
             periods.add(disbursementPeriod);
             if (loanApplicationTerms.isDownPaymentEnabled()) {
                 final LoanScheduleModelDownPaymentPeriod downPaymentPeriod = createDownPaymentPeriod(loanApplicationTerms,

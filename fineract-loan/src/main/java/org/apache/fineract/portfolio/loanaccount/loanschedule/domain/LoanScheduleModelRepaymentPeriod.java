@@ -33,11 +33,11 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleP
 @Getter
 public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModelPeriod {
 
-    private final int periodNumber;
+    private int periodNumber;
     private final LocalDate fromDate;
     private final LocalDate dueDate;
     private Money principalDue;
-    private final Money outstandingLoanBalance;
+    private Money outstandingLoanBalance;
     private Money interestDue;
     private Money feeChargesDue;
     private Money penaltyChargesDue;
@@ -164,6 +164,14 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
     public void addInterestAmount(Money interestDue) {
         this.interestDue = this.interestDue.plus(interestDue);
         this.totalDue = this.totalDue.plus(interestDue);
+    }
+
+    public void setPeriodNumber(int periodNumber) {
+        this.periodNumber = periodNumber;
+    }
+
+    public void setOutstandingLoanBalance(Money outstandingLoanBalance) {
+        this.outstandingLoanBalance = outstandingLoanBalance;
     }
 
     @Override

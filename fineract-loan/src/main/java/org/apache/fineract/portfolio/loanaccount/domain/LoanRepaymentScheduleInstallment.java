@@ -743,10 +743,13 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         this.penaltyAccrued = defaultToNullIfZero(penalityCharges.getAmount());
     }
 
-    public void updateDerivedFields(final MonetaryCurrency currency, final LocalDate actualDisbursementDate) {
+    public void updateObligationsMet(final MonetaryCurrency currency, final LocalDate transactionDate) {
         if (!this.obligationsMet && getTotalOutstanding(currency).isZero()) {
             this.obligationsMet = true;
-            this.obligationsMetOnDate = actualDisbursementDate;
+            this.obligationsMetOnDate = transactionDate;
+        } else if (this.obligationsMet && !getTotalOutstanding(currency).isZero()) {
+            this.obligationsMet = false;
+            this.obligationsMetOnDate = null;
         }
     }
 
@@ -839,6 +842,15 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
             this.principal = transactionAmount.getAmount();
         } else {
             this.principal = this.principal.add(transactionAmount.getAmount());
+        }
+        checkIfRepaymentPeriodObligationsAreMet(transactionDate, transactionAmount.getCurrency());
+    }
+
+    public void addToInterest(final LocalDate transactionDate, final Money transactionAmount) {
+        if (this.interestCharged == null) {
+            this.interestCharged = transactionAmount.getAmount();
+        } else {
+            this.interestCharged = this.interestCharged.add(transactionAmount.getAmount());
         }
         checkIfRepaymentPeriodObligationsAreMet(transactionDate, transactionAmount.getCurrency());
     }
@@ -1051,6 +1063,11 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         resetDerivedComponents();
         resetPrincipalDue();
         resetChargesCharged();
+        resetInterestDue();
+    }
+
+    public void resetInterestDue() {
+        this.interestCharged = null;
     }
 
     public void resetPrincipalDue() {

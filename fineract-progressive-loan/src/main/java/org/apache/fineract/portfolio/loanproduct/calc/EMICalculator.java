@@ -19,19 +19,31 @@
 package org.apache.fineract.portfolio.loanproduct.calc;
 
 import java.math.MathContext;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.apache.fineract.organisation.monetary.domain.Money;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelPeriod;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.PrincipalInterest;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.ProgressiveLoanInterestRepaymentModel;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.ProgressiveLoanInterestScheduleModel;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelRepaymentPeriod;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 
 public interface EMICalculator {
 
-    EMICalculationResult calculateEMIValueAndRateFactors(Money outstandingBalanceAsPerRest,
-            LoanProductRelatedDetail loanProductRelatedDetail, List<? extends LoanScheduleModelPeriod> expectedRepaymentPeriods,
-            Integer actualPeriodNumber, Integer numberOfRepayments, MathContext mc);
+    ProgressiveLoanInterestScheduleModel generateInterestScheduleModel(List<LoanScheduleModelRepaymentPeriod> periods,
+            LoanProductRelatedDetail loanProductRelatedDetail, Integer installmentAmountInMultiplesOf, MathContext mc);
 
-    PrincipalInterest calculatePrincipalInterestComponentsForPeriod(EMICalculationResult emiCalculationResult,
-            Money outstandingBalanceAsPerRest, Integer installmentAmountInMultiplesOf, Integer actualPeriodNumber,
-            Integer actualNoOfRepayments, MathContext mc);
+    ProgressiveLoanInterestScheduleModel generateModel(LoanProductRelatedDetail loanProductRelatedDetail,
+            Integer installmentAmountInMultiplesOf, List<LoanRepaymentScheduleInstallment> repaymentPeriods, MathContext mc);
+
+    Optional<ProgressiveLoanInterestRepaymentModel> findInterestRepaymentPeriod(ProgressiveLoanInterestScheduleModel scheduleModel,
+            LocalDate dueDate);
+
+    void addDisbursement(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate disbursementDueDate, Money disbursedAmount);
+
+    ProgressiveLoanInterestScheduleModel makeScheduleModelDeepCopy(ProgressiveLoanInterestScheduleModel scheduleModel);
+
+    ProgressiveLoanInterestScheduleModel makeScheduleModelDeepCopy(ProgressiveLoanInterestScheduleModel scheduleModel,
+            LoanProductRelatedDetail loanProductRelatedDetail, Integer installmentAmountInMultiplesOf, MathContext mc);
 }

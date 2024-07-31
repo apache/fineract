@@ -16,18 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanproduct.calc;
+package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 
-import java.util.ArrayList;
+import java.math.MathContext;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
-import lombok.Getter;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 
-@Getter
-public class RepaymentScheduleModel {
+public record ProgressiveLoanInterestScheduleModel(List<ProgressiveLoanInterestRepaymentModel> repayments,
+        LoanProductRelatedDetail loanProductRelatedDetail, Integer installmentAmountInMultiplesOf, MathContext mc) {
 
-    List<RepaymentPeriodModel> scheduleList = new ArrayList<>();
-
-    public void addRepaymentPeriodModel(final RepaymentPeriodModel repaymentPeriodModel) {
-        scheduleList.add(repaymentPeriodModel);
+    public int getLoanTermInDays() {
+        if (repayments.isEmpty()) {
+            return 0;
+        }
+        final var firstPeriod = repayments.get(0);
+        final var lastPeriod = repayments.size() > 1 ? repayments.get(repayments.size() - 1) : firstPeriod;
+        return Math.toIntExact(ChronoUnit.DAYS.between(firstPeriod.getFromDate(), lastPeriod.getDueDate()));
     }
 }
