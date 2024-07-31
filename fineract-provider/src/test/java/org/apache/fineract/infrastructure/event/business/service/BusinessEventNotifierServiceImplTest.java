@@ -27,7 +27,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
+import java.util.HashMap;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.BusinessEventListener;
 import org.apache.fineract.infrastructure.event.business.domain.BulkBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
@@ -43,6 +47,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.transaction.TransactionExecution;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -58,8 +63,139 @@ class BusinessEventNotifierServiceImplTest {
     @Mock
     private FineractProperties fineractProperties;
 
+    @Mock
+    private TransactionHelper transactionHelper;
+
     @InjectMocks
     private BusinessEventNotifierServiceImpl underTest;
+
+    @Test
+    public void testNotifyPostBusinessEventShouldCollectEventsWithinTransaction() {
+        // given
+        setBusinessDate();
+        configureExternalEventsProperties(true);
+        MockBusinessEvent event = new MockBusinessEvent();
+        BusinessEventListener<MockBusinessEvent> postListener = mockListener();
+        underTest.addPostBusinessEventListener(MockBusinessEvent.class, postListener);
+        TransactionExecution mockTransaction = mock(TransactionExecution.class);
+        underTest.afterBegin(mockTransaction, null);
+        // when
+        when(externalEventConfigurationRepository.findExternalEventConfigurationByTypeWithNotFoundDetection(Mockito.any()))
+                .thenReturn(new ExternalEventConfiguration("aType", true));
+        when(transactionHelper.hasTransaction()).thenReturn(true);
+        underTest.notifyPostBusinessEvent(event);
+        // then
+        verify(postListener).onBusinessEvent(event);
+        verifyNoInteractions(externalEventService);
+        // simulate finish transaction
+        underTest.beforeCommit(mockTransaction);
+        verify(externalEventService).postEvent(event);
+        underTest.afterCommit(mockTransaction, null);
+        verifyNoInteractions(mockTransaction);
+    }
+
+    private void setBusinessDate() {
+        HashMap<BusinessDateType, LocalDate> map = new HashMap<>(2);
+        map.put(BusinessDateType.BUSINESS_DATE, LocalDate.of(2023, 2, 1));
+        map.put(BusinessDateType.COB_DATE, LocalDate.of(2023, 1, 31));
+        ThreadLocalContextUtil.setBusinessDates(map);
+    }
+
+    @Test
+    public void testNotifyPostBusinessEventShouldCollectEventsWithinTransactionInNestedTransaction() {
+        // given
+        setBusinessDate();
+        configureExternalEventsProperties(true);
+        MockBusinessEvent event = new MockBusinessEvent();
+        MockBusinessEvent nestedEvent = new MockBusinessEvent();
+        BusinessEventListener<MockBusinessEvent> postListener = mockListener();
+        underTest.addPostBusinessEventListener(MockBusinessEvent.class, postListener);
+        TransactionExecution mockTransaction = mock(TransactionExecution.class);
+        // when
+        when(externalEventConfigurationRepository.findExternalEventConfigurationByTypeWithNotFoundDetection(Mockito.any()))
+                .thenReturn(new ExternalEventConfiguration("aType", true));
+        when(transactionHelper.hasTransaction()).thenReturn(true);
+
+        // simulate outer transaction
+        underTest.afterBegin(mockTransaction, null);
+        underTest.notifyPostBusinessEvent(event);
+        verify(postListener).onBusinessEvent(event);
+        verifyNoInteractions(externalEventService);
+        // simulate nested transaction
+        underTest.afterBegin(mockTransaction, null);
+        underTest.notifyPostBusinessEvent(nestedEvent);
+        verify(postListener).onBusinessEvent(nestedEvent);
+        verifyNoInteractions(externalEventService);
+        // simulate commit nested transaction
+        underTest.beforeCommit(mockTransaction);
+        underTest.afterCommit(mockTransaction, null);
+        verify(externalEventService).postEvent(nestedEvent);
+        // simulate commit outer transaction
+        underTest.beforeCommit(mockTransaction);
+        verify(externalEventService).postEvent(event);
+        underTest.afterCommit(mockTransaction, null);
+        verifyNoInteractions(mockTransaction);
+    }
+
+    @Test
+    public void testNotifyPostBusinessEventShouldCollectEventsWithinTransactionInNestedRollbackTransaction() {
+        // given
+        setBusinessDate();
+        configureExternalEventsProperties(true);
+        MockBusinessEvent event = new MockBusinessEvent();
+        MockBusinessEvent nestedEvent = new MockBusinessEvent();
+        BusinessEventListener<MockBusinessEvent> postListener = mockListener();
+        underTest.addPostBusinessEventListener(MockBusinessEvent.class, postListener);
+        TransactionExecution mockTransaction = mock(TransactionExecution.class);
+        // when
+        when(externalEventConfigurationRepository.findExternalEventConfigurationByTypeWithNotFoundDetection(Mockito.any()))
+                .thenReturn(new ExternalEventConfiguration("aType", true));
+        when(transactionHelper.hasTransaction()).thenReturn(true);
+
+        // simulate outer transaction
+        underTest.afterBegin(mockTransaction, null);
+        underTest.notifyPostBusinessEvent(event);
+        verify(postListener).onBusinessEvent(event);
+        verifyNoInteractions(externalEventService);
+        // simulate nested transaction
+        underTest.afterBegin(mockTransaction, null);
+        underTest.notifyPostBusinessEvent(nestedEvent);
+        verify(postListener).onBusinessEvent(nestedEvent);
+        verifyNoInteractions(externalEventService);
+        // simulate commit nested transaction
+        underTest.afterRollback(mockTransaction, null);
+        verifyNoInteractions(externalEventService);
+        // simulate commit outer transaction
+        underTest.beforeCommit(mockTransaction);
+        verify(externalEventService).postEvent(event);
+        underTest.afterCommit(mockTransaction, null);
+        verifyNoInteractions(mockTransaction);
+    }
+
+    @Test
+    public void testNotifyPostBusinessEventShouldCollectEventsWithinTransactionAndNotSendExternalOnRollback() {
+        // given
+        setBusinessDate();
+        configureExternalEventsProperties(true);
+        MockBusinessEvent event = new MockBusinessEvent();
+        BusinessEventListener<MockBusinessEvent> postListener = mockListener();
+        underTest.addPostBusinessEventListener(MockBusinessEvent.class, postListener);
+        TransactionExecution mockTransaction = mock(TransactionExecution.class);
+        underTest.afterBegin(mockTransaction, null);
+        // when
+        when(externalEventConfigurationRepository.findExternalEventConfigurationByTypeWithNotFoundDetection(Mockito.any()))
+                .thenReturn(new ExternalEventConfiguration("aType", true));
+        when(transactionHelper.hasTransaction()).thenReturn(true);
+        underTest.notifyPostBusinessEvent(event);
+        // then
+        verify(postListener).onBusinessEvent(event);
+        verifyNoInteractions(externalEventService);
+        // simulate rollback transaction
+        verifyNoInteractions(externalEventService);
+        underTest.afterRollback(mockTransaction, null);
+        verifyNoInteractions(externalEventService);
+        verifyNoInteractions(mockTransaction);
+    }
 
     @Test
     public void testNotifyPostBusinessEventShouldNotifyPostListeners() {
@@ -85,6 +221,7 @@ class BusinessEventNotifierServiceImplTest {
         BusinessEventListener<MockBusinessEvent> postListener = mockListener();
         underTest.addPostBusinessEventListener(MockBusinessEvent.class, postListener);
 
+        when(transactionHelper.hasTransaction()).thenReturn(false);
         when(externalEventConfigurationRepository.findExternalEventConfigurationByTypeWithNotFoundDetection(Mockito.any()))
                 .thenReturn(new ExternalEventConfiguration("aType", true));
         // when
