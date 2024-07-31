@@ -46,8 +46,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith({ LoanTestLifecycleExtension.class, ExternalEventsExtension.class })
 public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest {
 
-    private SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(this.requestSpec);
-    private Gson gson = new Gson();
+    private final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(this.requestSpec);
 
     @Test
     public void testSnapshotEventGenerationWhenLoanInstallmentIsNotPayed() {
@@ -221,9 +220,8 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
     public void testNoSnapshotEventGenerationWhenCOBDateIsNotMatchingWithInstallmentDueDate() {
         runAt("30 January 2023", () -> {
             // Enable Business Step
-            enableCOBBusinessStep("APPLY_CHARGE_TO_OVERDUE_LOANS", "LOAN_DELINQUENCY_CLASSIFICATION", "CHECK_LOAN_REPAYMENT_DUE",
-                    "CHECK_LOAN_REPAYMENT_OVERDUE", "UPDATE_LOAN_ARREARS_AGING", "ADD_PERIODIC_ACCRUAL_ENTRIES",
-                    "EXTERNAL_ASSET_OWNER_TRANSFER", "CHECK_DUE_INSTALLMENTS");
+            enableCOBBusinessStep("APPLY_CHARGE_TO_OVERDUE_LOANS", "LOAN_DELINQUENCY_CLASSIFICATION", "CHECK_LOAN_REPAYMENT_OVERDUE",
+                    "UPDATE_LOAN_ARREARS_AGING", "ADD_PERIODIC_ACCRUAL_ENTRIES", "EXTERNAL_ASSET_OWNER_TRANSFER", "CHECK_DUE_INSTALLMENTS");
 
             enableLoanAccountCustomSnapshotBusinessEvent();
 
@@ -265,6 +263,8 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
     @Test
     public void testNoSnapshotEventGenerationWhenCustomSnapshotEventIsDisabled() {
         runAt("31 January 2023", () -> {
+            // disable custom snapshot event
+            disableLoanAccountCustomSnapshotBusinessEvent();
             // Enable Business Step
             enableCOBBusinessStep("APPLY_CHARGE_TO_OVERDUE_LOANS", "LOAN_DELINQUENCY_CLASSIFICATION", "CHECK_LOAN_REPAYMENT_DUE",
                     "CHECK_LOAN_REPAYMENT_OVERDUE", "UPDATE_LOAN_ARREARS_AGING", "ADD_PERIODIC_ACCRUAL_ENTRIES",
@@ -331,6 +331,14 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
         Assertions.assertEquals(updatedConfigurations.size(), 1);
         Assertions.assertTrue(updatedConfigurations.containsKey("LoanAccountCustomSnapshotBusinessEvent"));
         Assertions.assertTrue(updatedConfigurations.get("LoanAccountCustomSnapshotBusinessEvent"));
+    }
+
+    private void disableLoanAccountCustomSnapshotBusinessEvent() {
+        final Map<String, Boolean> updatedConfigurations = ExternalEventConfigurationHelper.updateExternalEventConfigurations(requestSpec,
+                responseSpec, "{\"externalEventConfigurations\":{\"LoanAccountCustomSnapshotBusinessEvent\":false}}\n");
+        Assertions.assertEquals(updatedConfigurations.size(), 1);
+        Assertions.assertTrue(updatedConfigurations.containsKey("LoanAccountCustomSnapshotBusinessEvent"));
+        Assertions.assertFalse(updatedConfigurations.get("LoanAccountCustomSnapshotBusinessEvent"));
     }
 
     private void updateBusinessDateAndExecuteCOBJob(String date) {
