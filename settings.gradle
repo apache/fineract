@@ -25,6 +25,7 @@ plugins {
 def isCI = System.getenv('JENKINS_URL') != null
 
 develocity {
+    projectId = "fineract"
     server = "https://ge.apache.org"
     buildScan {
         uploadInBackground = !isCI
