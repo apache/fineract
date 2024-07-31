@@ -37,13 +37,6 @@ public final class LoanScheduleModelDisbursementPeriod implements LoanScheduleMo
     private final BigDecimal chargesDueAtTimeOfDisbursement;
     private boolean isEMIFixedSpecificToInstallment = false;
 
-    public static LoanScheduleModelDisbursementPeriod disbursement(final LoanApplicationTerms loanApplicationTerms,
-            final BigDecimal chargesDueAtTimeOfDisbursement) {
-
-        return new LoanScheduleModelDisbursementPeriod(null, loanApplicationTerms.getExpectedDisbursementDate(),
-                loanApplicationTerms.getPrincipal(), chargesDueAtTimeOfDisbursement);
-    }
-
     public static LoanScheduleModelDisbursementPeriod disbursement(final LocalDate disbursementDate, final Money principalDisbursed,
             final BigDecimal chargesDueAtTimeOfDisbursement) {
         return new LoanScheduleModelDisbursementPeriod(null, disbursementDate, principalDisbursed, chargesDueAtTimeOfDisbursement);

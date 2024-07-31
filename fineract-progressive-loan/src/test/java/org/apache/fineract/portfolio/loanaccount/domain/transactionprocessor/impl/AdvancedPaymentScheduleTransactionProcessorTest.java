@@ -61,10 +61,10 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
-import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgingParameterRepository;
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor.TransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
+import org.apache.fineract.portfolio.loanproduct.calc.EMICalculator;
 import org.apache.fineract.portfolio.loanproduct.domain.AllocationType;
 import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationTransactionType;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
@@ -90,7 +90,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
     private static final MonetaryCurrency MONETARY_CURRENCY = new MonetaryCurrency("USD", 2, 1);
     private static final MockedStatic<MoneyHelper> MONEY_HELPER = mockStatic(MoneyHelper.class);
     private AdvancedPaymentScheduleTransactionProcessor underTest;
-    private LoanReAgingParameterRepository reAgingParameterRepository = Mockito.mock(LoanReAgingParameterRepository.class);
+    private final EMICalculator emiCalculator = Mockito.mock(EMICalculator.class);
 
     @BeforeAll
     public static void init() {
@@ -104,7 +104,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
 
     @BeforeEach
     public void setUp() {
-        underTest = new AdvancedPaymentScheduleTransactionProcessor(reAgingParameterRepository);
+        underTest = new AdvancedPaymentScheduleTransactionProcessor(emiCalculator);
 
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
@@ -148,7 +148,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(loanTransaction.isPenaltyPayment()).thenReturn(false);
 
         underTest.processLatestTransaction(loanTransaction,
-                new TransactionCtx(currency, List.of(installment), Set.of(charge), new MoneyHolder(overpaidAmount)));
+                new TransactionCtx(currency, List.of(installment), Set.of(charge), new MoneyHolder(overpaidAmount), null));
 
         Mockito.verify(installment, times(1)).payFeeChargesComponent(eq(transactionDate), eq(chargeAmountMoney));
         Mockito.verify(loanTransaction, times(1)).updateComponents(refEq(zero), refEq(zero), refEq(chargeAmountMoney), refEq(zero));
@@ -192,7 +192,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(loanTransaction.isPenaltyPayment()).thenReturn(false);
 
         underTest.processLatestTransaction(loanTransaction,
-                new TransactionCtx(currency, List.of(installment), Set.of(charge), new MoneyHolder(overpaidAmount)));
+                new TransactionCtx(currency, List.of(installment), Set.of(charge), new MoneyHolder(overpaidAmount), null));
 
         Mockito.verify(installment, times(1)).payFeeChargesComponent(eq(transactionDate), eq(transactionAmountMoney));
         Mockito.verify(loanTransaction, times(1)).updateComponents(refEq(zero), refEq(zero), refEq(transactionAmountMoney), refEq(zero));
@@ -243,7 +243,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(loanTransaction.isOn(eq(transactionDate))).thenReturn(true);
 
         underTest.processLatestTransaction(loanTransaction,
-                new TransactionCtx(currency, List.of(installment), Set.of(charge), new MoneyHolder(overpaidAmount)));
+                new TransactionCtx(currency, List.of(installment), Set.of(charge), new MoneyHolder(overpaidAmount), null));
 
         Mockito.verify(installment, times(1)).payFeeChargesComponent(eq(transactionDate), eq(chargeAmountMoney));
         Mockito.verify(loanTransaction, times(1)).updateComponents(refEq(zero), refEq(zero), refEq(chargeAmountMoney), refEq(zero));
@@ -271,7 +271,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         installments.add(installment);
 
         // when
-        TransactionCtx ctx = new TransactionCtx(MONETARY_CURRENCY, installments, null, overpaymentHolder);
+        TransactionCtx ctx = new TransactionCtx(MONETARY_CURRENCY, installments, null, overpaymentHolder, null);
         underTest.processCreditTransaction(chargeBackTransaction, ctx);
 
         // verify principal
@@ -328,7 +328,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         installments.add(installment);
 
         // when
-        TransactionCtx ctx = new TransactionCtx(MONETARY_CURRENCY, installments, null, overpaymentHolder);
+        TransactionCtx ctx = new TransactionCtx(MONETARY_CURRENCY, installments, null, overpaymentHolder, null);
         underTest.processCreditTransaction(chargeBackTransaction, ctx);
 
         // verify charges on installment
@@ -380,7 +380,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         installments.add(installment2);
 
         // when
-        TransactionCtx ctx = new TransactionCtx(MONETARY_CURRENCY, installments, null, overpaymentHolder);
+        TransactionCtx ctx = new TransactionCtx(MONETARY_CURRENCY, installments, null, overpaymentHolder, null);
         underTest.processCreditTransaction(chargeBackTransaction, ctx);
 
         // verify principal

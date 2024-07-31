@@ -83,7 +83,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
         for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
             currentInstallment.resetDerivedComponents();
-            currentInstallment.updateDerivedFields(currency, disbursementDate);
+            currentInstallment.updateObligationsMet(currency, disbursementDate);
         }
 
         // re-process loan charges over repayment periods (picking up on waived
@@ -164,7 +164,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             if (loanTransaction.isRepaymentLikeType() || loanTransaction.isInterestWaiver() || loanTransaction.isRecoveryRepayment()) {
                 // pass through for new transactions
                 if (loanTransaction.getId() == null) {
-                    processLatestTransaction(loanTransaction, new TransactionCtx(currency, installments, charges, overpaymentHolder));
+                    processLatestTransaction(loanTransaction, new TransactionCtx(currency, installments, charges, overpaymentHolder, null));
                     loanTransaction.adjustInterestComponent(currency);
                 } else {
                     /**
@@ -175,7 +175,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
                     // Reset derived component of new loan transaction and
                     // re-process transaction
-                    processLatestTransaction(newLoanTransaction, new TransactionCtx(currency, installments, charges, overpaymentHolder));
+                    processLatestTransaction(newLoanTransaction,
+                            new TransactionCtx(currency, installments, charges, overpaymentHolder, null));
                     newLoanTransaction.adjustInterestComponent(currency);
                     /**
                      * Check if the transaction amounts have changed. If so, reverse the original transaction and update

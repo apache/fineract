@@ -2446,8 +2446,8 @@ Feature: Loan DownPayment
       | 2  | 15   | 16 February 2024 | 16 February 2024 | 250.0           | 125.0         | 0.0      | 0.0  | 0.0       | 125.0 | 125.0 | 0.0        | 0.0  | 0.0         |
       |    |      | 20 February 2024 |                  | 625.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
       | 3  | 0    | 20 February 2024 | 20 February 2024 | 719.0           | 156.0         | 0.0      | 0.0  | 0.0       | 156.0 | 156.0 | 0.0        | 0.0  | 0.0         |
-      | 4  | 15   | 02 March 2024    | 20 February 2024 | 360.0           | 359.0         | 0.0      | 0.0  | 0.0       | 359.0 | 359.0 | 359.0      | 0.0  | 0.0         |
-      | 5  | 15   | 17 March 2024    | 20 February 2024 | 0.0             | 360.0         | 0.0      | 0.0  | 0.0       | 360.0 | 360.0 | 360.0      | 0.0  | 0.0         |
+      | 4  | 15   | 02 March 2024    | 20 February 2024 | 359.0           | 360.0         | 0.0      | 0.0  | 0.0       | 360.0 | 360.0 | 360.0      | 0.0  | 0.0         |
+      | 5  | 15   | 17 March 2024    | 20 February 2024 | 0.0             | 359.0         | 0.0      | 0.0  | 0.0       | 359.0 | 359.0 | 359.0      | 0.0  | 0.0         |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       | 1125.0         | 0.0      | 0.0  | 0.0       | 1125.0 | 1125.0 | 719.0      | 0.0  | 0.0         |
