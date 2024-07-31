@@ -42,7 +42,7 @@ develocity {
 
 buildCache {
     local {
-        enabled = !isCI
+        enabled = true
     }
 }
 
