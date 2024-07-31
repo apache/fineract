@@ -14,7 +14,7 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     env:
-      GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GE_ACCESS_TOKEN }}
+      DEVELOCITY_ACCESS_KEY: ${{ secrets.GE_ACCESS_TOKEN }}
 
     steps:
       - name: Checkout Source Code
