@@ -402,6 +402,19 @@ public final class LoanSchedulePeriodData {
         return value;
     }
 
+    public boolean isActualPeriodForNotDuePayableCalculation(final LocalDate businessDate) {
+        boolean actualPeriod = false;
+        if (getPeriod() != null) {
+            if (getPeriod() == 1) {
+                actualPeriod = ((businessDate.compareTo(getFromDate()) >= 0) && businessDate.compareTo(getDueDate()) < 0);
+            } else {
+                actualPeriod = ((businessDate.compareTo(getFromDate()) >= 0) && businessDate.compareTo(getDueDate()) < 0);
+            }
+        }
+
+        return actualPeriod;
+    }
+
     public BigDecimal getPrincipalDisbursed() {
         return defaultToZeroIfNull(this.principalDisbursed);
     }

@@ -4720,8 +4720,8 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
 
             // After Disbursement we are expecting no Accrual transactions
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
-            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidAccruedDueInterest().stripTrailingZeros());
-            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidAccruedNotDueInterest().stripTrailingZeros());
+            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidPayableDueInterest().stripTrailingZeros());
+            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
         });
 
         // Not Due yet
@@ -4732,14 +4732,14 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             periodicAccrualAccountingHelper.runPeriodicAccrualAccounting("30 January 2024");
 
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
-            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidAccruedDueInterest().stripTrailingZeros());
-            assertEquals(new BigDecimal("0.97"), loanDetails.getSummary().getTotalUnpaidAccruedNotDueInterest().stripTrailingZeros());
+            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidPayableDueInterest().stripTrailingZeros());
+            assertEquals(new BigDecimal("0.97"), loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
 
             // Partial interest repayment
             addRepaymentForLoan(createdLoanId.get(), 20.50, "30 January 2024");
             loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
-            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidAccruedDueInterest().stripTrailingZeros());
-            assertEquals(new BigDecimal("0.05"), loanDetails.getSummary().getTotalUnpaidAccruedNotDueInterest().stripTrailingZeros());
+            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidPayableDueInterest().stripTrailingZeros());
+            assertEquals(new BigDecimal("0.97"), loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
         });
 
         // Not Due and Due Interest
@@ -4749,8 +4749,8 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             periodicAccrualAccountingHelper.runPeriodicAccrualAccounting("20 February 2024");
 
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
-            assertEquals(new BigDecimal("0.12"), loanDetails.getSummary().getTotalUnpaidAccruedDueInterest().stripTrailingZeros());
-            assertEquals(new BigDecimal("0.52"), loanDetails.getSummary().getTotalUnpaidAccruedNotDueInterest().stripTrailingZeros());
+            assertEquals(new BigDecimal("0.12"), loanDetails.getSummary().getTotalUnpaidPayableDueInterest().stripTrailingZeros());
+            assertEquals(new BigDecimal("0.52"), loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
         });
     }
 
@@ -4767,11 +4767,12 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
         runAt(operationDate, () -> {
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
-                    .interestRatePerPeriod(12.0).interestCalculationPeriodType(RepaymentFrequencyType.DAYS).interestRateFrequencyType(YEARS)
-                    .daysInMonthType(DaysInMonthType.ACTUAL.getValue()).daysInYearType(DaysInYearType.DAYS_365.getValue())
-                    .numberOfRepayments(4)//
-                    .repaymentEvery(5)//
-                    .repaymentFrequencyType(0L)//
+                    .interestRatePerPeriod(108.0).interestCalculationPeriodType(RepaymentFrequencyType.DAYS)
+                    .interestRateFrequencyType(YEARS).daysInMonthType(DaysInMonthType.ACTUAL.getValue())
+                    .daysInYearType(DaysInYearType.DAYS_360.getValue()).numberOfRepayments(4)//
+                    .maxInterestRatePerPeriod((double) 110)//
+                    .repaymentEvery(1)//
+                    .repaymentFrequencyType(1L)//
                     .allowPartialPeriodInterestCalcualtion(false)//
                     .multiDisburseLoan(false)//
                     .disallowExpectedDisbursements(null)//
@@ -4781,7 +4782,8 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .installmentAmountInMultiplesOf(null)//
             ;//
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), operationDate, 1000.0, 4);
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), operationDate, 1000.0, 4)
+                    .interestRatePerPeriod(BigDecimal.valueOf(108.0));
 
             applicationRequest = applicationRequest.interestCalculationPeriodType(DAYS)
                     .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY);
@@ -4796,12 +4798,13 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             loanTransactionHelper.disburseLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest().actualDisbursementDate(operationDate)
                     .dateFormat(DATETIME_PATTERN).transactionAmount(BigDecimal.valueOf(1000.0)).locale("en"));
 
-            // After Disbursement we are expecting no Accrual transactions
+            // After Disbursement we are expecting amount in Zero (first day)
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
-            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidAccruedDueInterest().stripTrailingZeros());
-            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidAccruedNotDueInterest().stripTrailingZeros());
+            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidPayableDueInterest().stripTrailingZeros());
+            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
         });
 
+        // First day on First Period, then TotalUnpaidPayableDueInterest = 0 and TotalUnpaidPayableNotDueInterest = 3
         runAt("2 January 2024", () -> {
             // Generate the Accruals
             final PeriodicAccrualAccountingHelper periodicAccrualAccountingHelper = new PeriodicAccrualAccountingHelper(requestSpec,
@@ -4809,30 +4812,126 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             periodicAccrualAccountingHelper.runPeriodicAccrualAccounting("2 January 2024");
 
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
-            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidAccruedDueInterest().stripTrailingZeros());
-            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidAccruedNotDueInterest().stripTrailingZeros());
+            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidPayableDueInterest().stripTrailingZeros());
+            assertEquals(BigDecimal.valueOf(3.0).stripTrailingZeros(),
+                    loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
         });
 
+        // Second day on First Period, then TotalUnpaidPayableDueInterest = 0 and TotalUnpaidPayableNotDueInterest = 6
         runAt("3 January 2024", () -> {
-            // Add a Charge
-            addCharge(createdLoanId.get(), false, 10, "6 January 2024");
-
-            final PeriodicAccrualAccountingHelper periodicAccrualAccountingHelper = new PeriodicAccrualAccountingHelper(requestSpec,
-                    responseSpec);
-            periodicAccrualAccountingHelper.runPeriodicAccrualAccounting("2 January 2024");
-
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
-            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidAccruedDueInterest().stripTrailingZeros());
-            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidAccruedNotDueInterest().stripTrailingZeros());
+            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidPayableDueInterest().stripTrailingZeros());
+            assertEquals(BigDecimal.valueOf(6.0).stripTrailingZeros(),
+                    loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
         });
 
-        // Add Payment higher than accrued amount
+        // Third day on First Period, then TotalUnpaidPayableDueInterest = 0 and TotalUnpaidPayableNotDueInterest = 9
         runAt("4 January 2024", () -> {
-            addRepaymentForLoan(createdLoanId.get(), 150.0, "4 January 2024");
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
+            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidPayableDueInterest().stripTrailingZeros());
+            assertEquals(BigDecimal.valueOf(9.0).stripTrailingZeros(),
+                    loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
+        });
+
+        // Fourth day on First Period, then TotalUnpaidPayableDueInterest = 0 and TotalUnpaidPayableNotDueInterest = 12
+        runAt("5 January 2024", () -> {
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
+            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidPayableDueInterest().stripTrailingZeros());
+            assertEquals(BigDecimal.valueOf(12.0).stripTrailingZeros(),
+                    loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
+        });
+
+        // Last day on First Period, then TotalUnpaidPayableDueInterest = 90 and TotalUnpaidPayableNotDueInterest = 0
+        runAt("31 January 2024", () -> {
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
+            assertEquals(BigDecimal.valueOf(90.0).stripTrailingZeros(),
+                    loanDetails.getSummary().getTotalUnpaidPayableDueInterest().stripTrailingZeros());
+            assertEquals(BigDecimal.ZERO.stripTrailingZeros(),
+                    loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
+        });
+
+        // First day on Second Period, then TotalUnpaidPayableDueInterest = 90 and TotalUnpaidPayableNotDueInterest =
+        // 2.34
+        runAt("1 February 2024", () -> {
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
+            assertEquals(BigDecimal.valueOf(90.0).stripTrailingZeros(),
+                    loanDetails.getSummary().getTotalUnpaidPayableDueInterest().stripTrailingZeros());
+            assertEquals(BigDecimal.valueOf(2.34), loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
+        });
+
+        // Second day on Second Period, then TotalUnpaidPayableDueInterest = 90 and TotalUnpaidPayableNotDueInterest =
+        // 4.69
+        runAt("2 February 2024", () -> {
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
+            assertEquals(BigDecimal.valueOf(90.0).stripTrailingZeros(),
+                    loanDetails.getSummary().getTotalUnpaidPayableDueInterest().stripTrailingZeros());
+            assertEquals(BigDecimal.valueOf(4.69), loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
+        });
+
+        // Third day on Second Period, then TotalUnpaidPayableDueInterest = 90 and TotalUnpaidPayableNotDueInterest =
+        // 7.03
+        runAt("3 February 2024", () -> {
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
+            assertEquals(BigDecimal.valueOf(90.0).stripTrailingZeros(),
+                    loanDetails.getSummary().getTotalUnpaidPayableDueInterest().stripTrailingZeros());
+            assertEquals(BigDecimal.valueOf(7.03), loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
+        });
+
+        // N day on Second Period, then TotalUnpaidPayableDueInterest = 90 and TotalUnpaidPayableNotDueInterest = 21.096
+        runAt("10 February 2024", () -> {
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
+            assertEquals(BigDecimal.valueOf(90.0).stripTrailingZeros(),
+                    loanDetails.getSummary().getTotalUnpaidPayableDueInterest().stripTrailingZeros());
+            assertEquals(BigDecimal.valueOf(23.44).stripTrailingZeros(),
+                    loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
+        });
+
+        // First day on Third Period, then TotalUnpaidPayableDueInterest = 90 + 70.32 and
+        // TotalUnpaidPayableNotDueInterest = 0
+        runAt("1 March 2024", () -> {
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
+            assertEquals(BigDecimal.valueOf(160.32).stripTrailingZeros(),
+                    loanDetails.getSummary().getTotalUnpaidPayableDueInterest().stripTrailingZeros());
+            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
+        });
+
+        // Second day on Third Period, then TotalUnpaidPayableDueInterest = 90 + 70.32 and
+        // TotalUnpaidPayableNotDueInterest = 1.63
+        runAt("2 March 2024", () -> {
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
+            assertEquals(BigDecimal.valueOf(160.32).stripTrailingZeros(),
+                    loanDetails.getSummary().getTotalUnpaidPayableDueInterest().stripTrailingZeros());
+            assertEquals(BigDecimal.valueOf(1.63), loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
+        });
+
+        // Third day on Third Period, then TotalUnpaidPayableDueInterest = 90 + 70.32 and
+        // TotalUnpaidPayableNotDueInterest = 3.26
+        runAt("3 March 2024", () -> {
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
+            assertEquals(BigDecimal.valueOf(160.32).stripTrailingZeros(),
+                    loanDetails.getSummary().getTotalUnpaidPayableDueInterest().stripTrailingZeros());
+            assertEquals(BigDecimal.valueOf(3.26), loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
+        });
+
+        // Last day on Third Period, then TotalUnpaidPayableDueInterest = 90 + 70.32 + 48.87 and
+        // TotalUnpaidPayableNotDueInterest = 0
+        runAt("31 March 2024", () -> {
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
+            assertEquals(BigDecimal.valueOf(209.19).stripTrailingZeros(),
+                    loanDetails.getSummary().getTotalUnpaidPayableDueInterest().stripTrailingZeros());
+            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
+        });
+
+        // Add Payment to pay the First installment, then TotalUnpaidPayableDueInterest = 70.32 and
+        // TotalUnpaidPayableNotDueInterest = 16.29
+        runAt("11 March 2024", () -> {
+            addRepaymentForLoan(createdLoanId.get(), 340.00, "11 March 2024");
 
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
-            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidAccruedDueInterest().stripTrailingZeros());
-            assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidAccruedNotDueInterest().stripTrailingZeros());
+            assertEquals(BigDecimal.valueOf(70.32).stripTrailingZeros(),
+                    loanDetails.getSummary().getTotalUnpaidPayableDueInterest().stripTrailingZeros());
+            assertEquals(BigDecimal.valueOf(16.29).stripTrailingZeros(),
+                    loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
         });
     }
 

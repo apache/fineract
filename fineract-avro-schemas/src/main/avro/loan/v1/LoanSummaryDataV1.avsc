@@ -437,7 +437,7 @@
         },
         {
             "default": null,
-            "name": "totalUnpaidAccruedDueInterest",
+            "name": "totalUnpaidPayableDueInterest",
             "type": [
                 "null",
                 "bigdecimal"
@@ -445,7 +445,7 @@
         },
         {
             "default": null,
-            "name": "totalUnpaidAccruedNotDueInterest",
+            "name": "totalUnpaidPayableNotDueInterest",
             "type": [
                 "null",
                 "bigdecimal"
