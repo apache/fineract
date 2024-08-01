@@ -640,9 +640,9 @@ final class LoansApiResourceSwagger {
             @Schema(example = "0.000000")
             public Double totalRepaymentTransactionReversed;
             @Schema(example = "0.000000")
-            public BigDecimal totalUnpaidAccruedDueInterest;
+            public BigDecimal totalUnpaidPayableDueInterest;
             @Schema(example = "0.000000")
-            public BigDecimal totalUnpaidAccruedNotDueInterest;
+            public BigDecimal totalUnpaidPayableNotDueInterest;
             @Schema(example = "0.000000")
             public BigDecimal totalInterestRefund;
             public Set<GetLoansLoanIdOverdueCharges> overdueCharges;
