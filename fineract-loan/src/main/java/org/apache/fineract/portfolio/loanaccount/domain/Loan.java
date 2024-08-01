@@ -1727,19 +1727,13 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
                 .collect(Collectors.toList());
     }
 
-    public boolean canDisburse(final LocalDate actualDisbursementDate) {
-        LocalDate loanSubmittedOnDate = this.submittedOnDate;
+    public boolean canDisburse() {
         final LoanStatus statusEnum = this.loanLifecycleStateMachine.dryTransition(LoanEvent.LOAN_DISBURSED, this);
 
         boolean isMultiTrancheDisburse = false;
         LoanStatus actualLoanStatus = LoanStatus.fromInt(this.loanStatus);
         if ((actualLoanStatus.isActive() || actualLoanStatus.isClosedObligationsMet() || actualLoanStatus.isOverpaid())
                 && isAllTranchesNotDisbursed()) {
-            if (DateUtils.isBefore(actualDisbursementDate, loanSubmittedOnDate)) {
-                final String errorMsg = "Loan can't be disbursed before " + loanSubmittedOnDate;
-                throw new LoanDisbursalException(errorMsg, "actualdisbursementdate.before.submittedDate", loanSubmittedOnDate,
-                        actualDisbursementDate);
-            }
             isMultiTrancheDisburse = true;
         }
         return !statusEnum.hasStateOf(actualLoanStatus) || isMultiTrancheDisburse;
@@ -2012,18 +2006,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
             updateLoanOutstandingBalances();
         }
 
-        if (getApprovedOnDate() != null && DateUtils.isBefore(disbursedOn, getApprovedOnDate())) {
-            final String errorMessage = "The date on which a loan is disbursed cannot be before its approval date: "
-                    + getApprovedOnDate().toString();
-            throw new InvalidLoanStateTransitionException("disbursal", "cannot.be.before.approval.date", errorMessage, disbursedOn,
-                    getApprovedOnDate());
-        }
-
         LocalDate expectedDate = getExpectedFirstRepaymentOnDate();
         if (expectedDate != null && (DateUtils.isAfter(disbursedOn, this.fetchRepaymentScheduleInstallment(1).getDueDate())
                 || DateUtils.isAfter(disbursedOn, expectedDate)) && DateUtils.isEqual(disbursedOn, this.actualDisbursementDate)) {
-            final String errorMessage = "submittedOnDate cannot be after the loans  expectedFirstRepaymentOnDate: "
-                    + expectedDate.toString();
+            final String errorMessage = "submittedOnDate cannot be after the loans  expectedFirstRepaymentOnDate: " + expectedDate;
             throw new InvalidLoanStateTransitionException("disbursal", "cannot.be.after.expected.first.repayment.date", errorMessage,
                     disbursedOn, expectedDate);
         }

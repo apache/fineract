@@ -1892,6 +1892,23 @@ public class LoanStepDef extends AbstractStepDef {
         assertThat(fixedLengthactual).as(ErrorMessageHelper.wrongfixedLength(fixedLengthactual, fieldValue)).isEqualTo(fieldValue);
     }
 
+    @Then("Admin fails to disburse the loan on {string} with {string} EUR transaction amount because disbursement date is earlier than {string}")
+    public void disburseLoanFailureWithPastDate(String actualDisbursementDate, String transactionAmount, String futureApproveDate)
+            throws IOException {
+        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.body().getLoanId();
+        PostLoansLoanIdRequest disburseRequest = LoanRequestFactory.defaultLoanDisburseRequest()
+                .actualDisbursementDate(actualDisbursementDate).transactionAmount(new BigDecimal(transactionAmount));
+
+        String futureApproveDateISO = FORMATTER_EVENTS.format(FORMATTER.parse(futureApproveDate));
+        Response<PostLoansLoanIdResponse> loanDisburseResponse = loansApi.stateTransitions(loanId, disburseRequest, "disburse").execute();
+        testContext().set(TestContextKey.LOAN_DISBURSE_RESPONSE, loanDisburseResponse);
+        ErrorResponse errorDetails = ErrorResponse.from(loanDisburseResponse);
+        assertThat(errorDetails.getHttpStatusCode()).as(ErrorMessageHelper.dateFailureErrorCodeMsg()).isEqualTo(403);
+        assertThat(errorDetails.getSingleError().getDeveloperMessage())
+                .isEqualTo(ErrorMessageHelper.disbursePastDateFailure((int) loanId, futureApproveDateISO));
+    }
+
     private LoanStatusEnumDataV1 getExpectedStatus(String loanStatus) {
         LoanStatusEnumDataV1 result = new LoanStatusEnumDataV1();
         switch (loanStatus) {
