@@ -66,6 +66,10 @@ public final class ErrorMessageHelper {
         return "Loan disbursal amount can't be greater than maximum applied loan amount calculation. Total disbursed amount: [0-9]*  Maximum disbursal amount: [0-9]*";
     }
 
+    public static String disbursePastDateFailure(Integer loanId, String actualDisbursementDate) {
+        return String.format("The date on which a loan is disbursed cannot be before its approval date: %s", actualDisbursementDate);
+    }
+
     public static String loanSubmitDateInFutureFailureMsg() {
         return "The date on which a loan is submitted cannot be in the future.";
     }
