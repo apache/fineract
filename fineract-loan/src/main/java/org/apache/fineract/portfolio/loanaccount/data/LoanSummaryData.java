@@ -26,6 +26,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
@@ -258,6 +259,12 @@ public class LoanSummaryData {
                     .divide(BigDecimal.valueOf(remainingDays), MoneyHelper.getMathContext());
             totalAccruedInterest = totalAccruedInterest.add(accruedInterest);
             remainingDays--;
+        }
+
+        totalAccruedInterest = totalAccruedInterest.subtract(period.getInterestPaid()).subtract(period.getInterestWaived());
+        if (MathUtil.isLessThanZero(totalAccruedInterest)) {
+            // Set Zero If the Interest Paid + Waived is greather than Interest Accrued
+            totalAccruedInterest = BigDecimal.ZERO;
         }
 
         return Money.of(currency, totalAccruedInterest).getAmount();
