@@ -356,10 +356,6 @@ public final class LoanApplicationValidator {
                         .integerGreaterThanZero();
             }
 
-            final BigDecimal principal = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.principalParamName,
-                    element);
-            baseDataValidator.reset().parameter(LoanApiConstants.principalParamName).value(principal).notNull().positiveAmount();
-
             final Integer loanTermFrequency = this.fromApiJsonHelper
                     .extractIntegerWithLocaleNamed(LoanApiConstants.loanTermFrequencyParameterName, element);
             baseDataValidator.reset().parameter(LoanApiConstants.loanTermFrequencyParameterName).value(loanTermFrequency).notNull()
@@ -422,7 +418,7 @@ public final class LoanApplicationValidator {
                     baseDataValidator.reset().parameter(LoanApiConstants.isFloatingInterestRate).trueOrFalseRequired(false);
                 }
 
-                if (interestType != null && interestType.equals(InterestMethod.FLAT.getValue())) {
+                if (InterestMethod.FLAT.getValue().equals(interestType)) {
                     baseDataValidator.reset().parameter(LoanApiConstants.interestTypeParameterName).failWithCode(
                             "should.be.0.for.selected.loan.product",
                             "interestType should be DECLINING_BALANCE for selected Loan Product as it is linked to floating rates.");
@@ -452,7 +448,7 @@ public final class LoanApplicationValidator {
                         .extractBigDecimalWithLocaleNamed(LoanApiConstants.interestRatePerPeriodParameterName, element);
                 baseDataValidator.reset().parameter(LoanApiConstants.interestRatePerPeriodParameterName).value(interestRatePerPeriod)
                         .notNull().zeroOrPositiveAmount();
-                isInterestBearing = interestRatePerPeriod.compareTo(BigDecimal.ZERO) > 0;
+                isInterestBearing = interestRatePerPeriod != null && interestRatePerPeriod.compareTo(BigDecimal.ZERO) > 0;
             }
 
             final Integer amortizationType = this.fromApiJsonHelper
@@ -622,6 +618,9 @@ public final class LoanApplicationValidator {
                         .ignoreIfNull().positiveAmount();
             }
 
+            final BigDecimal principal = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.principalParamName,
+                    element);
+
             if (loanProduct.isCanUseForTopup() && this.fromApiJsonHelper.parameterExists(LoanApiConstants.isTopup, element)) {
                 final Boolean isTopup = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.isTopup, element);
                 baseDataValidator.reset().parameter(LoanApiConstants.isTopup).value(isTopup).validateForBooleanValue();
@@ -745,7 +744,7 @@ public final class LoanApplicationValidator {
             loanScheduleValidator.validateDownPaymentAttribute(loanProduct.getLoanProductRelatedDetail().isEnableDownPayment(), element);
 
             checkForProductMixRestrictions(element);
-            validateSubmittedOnDate(element, submittedOnDate, loanProduct);
+            validateSubmittedOnDate(element, null, null, loanProduct);
             validateDisbursementDetails(loanProduct, element);
             validateCollateral(element);
             // validate if disbursement date is a holiday or a non-working day
@@ -754,8 +753,11 @@ public final class LoanApplicationValidator {
             validateDisbursementDateIsOnHoliday(expectedDisbursementDate, officeId);
             final Integer recurringMoratoriumOnPrincipalPeriods = this.fromApiJsonHelper
                     .extractIntegerWithLocaleNamed("recurringMoratoriumOnPrincipalPeriods", element);
-            loanProductDataValidator.validateRepaymentPeriodWithGraceSettings(numberOfRepayments, graceOnPrincipalPayment,
-                    graceOnInterestPayment, graceOnInterestCharged, recurringMoratoriumOnPrincipalPeriods, baseDataValidator);
+
+            if (numberOfRepayments != null) {
+                loanProductDataValidator.validateRepaymentPeriodWithGraceSettings(numberOfRepayments, graceOnPrincipalPayment,
+                        graceOnInterestPayment, graceOnInterestCharged, recurringMoratoriumOnPrincipalPeriods, baseDataValidator);
+            }
         });
     }
 
@@ -777,7 +779,8 @@ public final class LoanApplicationValidator {
     private void validateDisbursementDateIsOnNonWorkingDay(final LocalDate expectedDisbursementDate) {
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
-        if (!allowTransactionsOnNonWorkingDay && !WorkingDaysUtil.isWorkingDay(workingDays, expectedDisbursementDate)) {
+        if (expectedDisbursementDate != null && !allowTransactionsOnNonWorkingDay
+                && !WorkingDaysUtil.isWorkingDay(workingDays, expectedDisbursementDate)) {
             final String errorMessage = "Expected disbursement date cannot be on a non working day";
             throw new LoanApplicationDateException("disbursement.date.on.non.working.day", errorMessage, expectedDisbursementDate);
         }
@@ -1032,7 +1035,7 @@ public final class LoanApplicationValidator {
                 if (interestType == null) {
                     interestType = loan.getLoanProductRelatedDetail().getInterestMethod().getValue();
                 }
-                if (interestType != null && interestType.equals(InterestMethod.FLAT.getValue())) {
+                if (InterestMethod.FLAT.getValue().equals(interestType)) {
                     baseDataValidator.reset().parameter(LoanApiConstants.interestTypeParameterName).failWithCode(
                             "should.be.0.for.selected.loan.product",
                             "interestType should be DECLINING_BALANCE for selected Loan Product as it is linked to floating rates.");
@@ -1402,7 +1405,7 @@ public final class LoanApplicationValidator {
             loanScheduleValidator.validateDownPaymentAttribute(loanProduct.getLoanProductRelatedDetail().isEnableDownPayment(), element);
 
             validateDisbursementDetails(loanProduct, element);
-            validateSubmittedOnDate(element, loan.getSubmittedOnDate(), loanProduct);
+            validateSubmittedOnDate(element, loan.getSubmittedOnDate(), loan.getExpectedDisbursementDate(), loanProduct);
             validateClientOrGroup(client, group, productId);
 
             // validate if disbursement date is a holiday or a non-working day
@@ -1759,16 +1762,16 @@ public final class LoanApplicationValidator {
                     "Loan transaction processing strategy cannot be Advanced Payment Allocation Strategy if it's not configured on loan product");
         } else {
             // PROGRESSIVE: Repayment strategy MUST be only "advanced payment allocation"
-            if (loanProduct.getLoanProductRelatedDetail().getLoanScheduleType().equals(LoanScheduleType.PROGRESSIVE)) {
-                if (!transactionProcessingStrategy.equals(LoanProductConstants.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)) {
+            if (LoanScheduleType.PROGRESSIVE.equals(loanProduct.getLoanProductRelatedDetail().getLoanScheduleType())) {
+                if (!LoanProductConstants.ADVANCED_PAYMENT_ALLOCATION_STRATEGY.equals(transactionProcessingStrategy)) {
                     // TODO: GeneralPlatformDomainRuleException vs PlatformApiDataValidationException
                     throw new GeneralPlatformDomainRuleException(
                             "error.msg.loan.repayment.strategy.can.not.be.different.than.advanced.payment.allocation",
                             "Loan repayment strategy can not be different than Advanced Payment Allocation");
                 }
                 // CUMULATIVE: Repayment strategy CANNOT be "advanced payment allocation"
-            } else if (loanProduct.getLoanProductRelatedDetail().getLoanScheduleType().equals(LoanScheduleType.CUMULATIVE)) {
-                if (transactionProcessingStrategy.equals(LoanProductConstants.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)) {
+            } else if (LoanScheduleType.CUMULATIVE.equals(loanProduct.getLoanProductRelatedDetail().getLoanScheduleType())) {
+                if (LoanProductConstants.ADVANCED_PAYMENT_ALLOCATION_STRATEGY.equals(transactionProcessingStrategy)) {
                     // TODO: GeneralPlatformDomainRuleException vs PlatformApiDataValidationException
                     throw new GeneralPlatformDomainRuleException(
                             "error.msg.loan.repayment.strategy.can.not.be.equal.to.advanced.payment.allocation",
@@ -1781,7 +1784,6 @@ public final class LoanApplicationValidator {
     }
 
     public void checkForProductMixRestrictions(final JsonElement element) {
-
         final List<Long> activeLoansLoanProductIds;
         final Long productId = this.fromApiJsonHelper.extractLongNamed(LoanApiConstants.productIdParameterName, element);
         final Long groupId = this.fromApiJsonHelper.extractLongNamed(LoanApiConstants.groupIdParameterName, element);
@@ -1813,7 +1815,8 @@ public final class LoanApplicationValidator {
         }
     }
 
-    private void validateSubmittedOnDate(final JsonElement element, LocalDate originalSubmittedOnDate, LoanProduct loanProduct) {
+    private void validateSubmittedOnDate(final JsonElement element, LocalDate originalSubmittedOnDate,
+            LocalDate originalExpectedDisbursementDate, LoanProduct loanProduct) {
         final LocalDate startDate = loanProduct.getStartDate();
         final LocalDate closeDate = loanProduct.getCloseDate();
         final LocalDate submittedOnDate = this.fromApiJsonHelper.parameterExists(LoanApiConstants.submittedOnDateParameterName, element)
@@ -1822,7 +1825,9 @@ public final class LoanApplicationValidator {
         final Long clientId = this.fromApiJsonHelper.extractLongNamed(LoanApiConstants.clientIdParameterName, element);
         final Long groupId = this.fromApiJsonHelper.extractLongNamed(LoanApiConstants.groupIdParameterName, element);
         final LocalDate expectedDisbursementDate = this.fromApiJsonHelper
-                .extractLocalDateNamed(LoanApiConstants.expectedDisbursementDateParameterName, element);
+                .parameterExists(LoanApiConstants.expectedDisbursementDateParameterName, element)
+                        ? this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.expectedDisbursementDateParameterName, element)
+                        : originalExpectedDisbursementDate;
 
         String defaultUserMessage = "";
         if (DateUtils.isBefore(submittedOnDate, startDate)) {
@@ -1863,17 +1868,17 @@ public final class LoanApplicationValidator {
             Group group = groupRepository.findOneWithNotFoundDetection(groupId);
 
             if (group != null && group.isActivatedAfter(submittedOnDate)) {
-                final String errorMessage = "The date on which a loan is submitted cannot be earlier than groups's activation date.";
+                final String errorMessage = "The date on which a loan is submitted cannot be earlier than group's activation date.";
                 throw new InvalidLoanStateTransitionException("submittal", "cannot.be.before.group.activation.date", errorMessage,
                         submittedOnDate, group.getActivationDate());
             }
+        }
 
-            if (DateUtils.isAfter(submittedOnDate, expectedDisbursementDate)) {
-                final String errorMessage = "The date on which a loan is submitted cannot be after its expected disbursement date: "
-                        + expectedDisbursementDate;
-                throw new InvalidLoanStateTransitionException("submittal", "cannot.be.after.expected.disbursement.date", errorMessage,
-                        submittedOnDate, expectedDisbursementDate);
-            }
+        if (DateUtils.isAfter(submittedOnDate, expectedDisbursementDate)) {
+            final String errorMessage = "The date on which a loan is submitted cannot be after its expected disbursement date: "
+                    + expectedDisbursementDate;
+            throw new InvalidLoanStateTransitionException("submittal", "cannot.be.after.expected.disbursement.date", errorMessage,
+                    submittedOnDate, expectedDisbursementDate);
         }
     }
 
@@ -1975,7 +1980,7 @@ public final class LoanApplicationValidator {
                 expectedDisbursementDate = loan.getExpectedDisbursedOnLocalDate();
             }
 
-            if (DateUtils.isBefore(approvedOnDate, loan.getSubmittedOnDate())) {
+            if (approvedOnDate != null && DateUtils.isBefore(approvedOnDate, loan.getSubmittedOnDate())) {
                 final String errorMessage = "Loan approval date " + approvedOnDate + " can not be before its submittal date: "
                         + loan.getSubmittedOnDate();
                 throw new InvalidLoanStateTransitionException("approval", "cannot.be.before.submittal.date", errorMessage, approvedOnDate,

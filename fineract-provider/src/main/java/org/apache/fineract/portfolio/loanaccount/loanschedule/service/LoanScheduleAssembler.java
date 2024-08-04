@@ -616,7 +616,7 @@ public class LoanScheduleAssembler {
 
     private void validateRepaymentsStartDateWithMeetingDates(final LocalDate repaymentsStartingFromDate, final Calendar calendar,
             boolean isSkipRepaymentOnFirstDayOfMonth, final Integer numberOfDays) {
-        if (repaymentsStartingFromDate != null && !CalendarUtils.isValidRedurringDate(calendar.getRecurrence(),
+        if (repaymentsStartingFromDate != null && !CalendarUtils.isValidRecurringDate(calendar.getRecurrence(),
                 calendar.getStartDateLocalDate(), repaymentsStartingFromDate, isSkipRepaymentOnFirstDayOfMonth, numberOfDays)) {
             final String errorMessage = "First repayment date '" + repaymentsStartingFromDate + "' do not fall on a meeting date";
             throw new LoanApplicationDateException("first.repayment.date.do.not.match.meeting.date", errorMessage,
