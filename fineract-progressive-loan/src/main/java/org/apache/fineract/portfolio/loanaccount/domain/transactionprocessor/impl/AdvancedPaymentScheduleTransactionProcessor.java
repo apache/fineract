@@ -144,6 +144,10 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     @Override
     public ChangedTransactionDetail reprocessLoanTransactions(LocalDate disbursementDate, List<LoanTransaction> loanTransactions,
             MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges) {
+        final ChangedTransactionDetail changedTransactionDetail = new ChangedTransactionDetail();
+        if (loanTransactions.isEmpty()) {
+            return changedTransactionDetail;
+        }
         if (charges != null) {
             for (final LoanCharge loanCharge : charges) {
                 if (!loanCharge.isDueAtDisbursement()) {
@@ -165,7 +169,6 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
         List<ChargeOrTransaction> chargeOrTransactions = createSortedChargesAndTransactionsList(loanTransactions, charges);
 
-        final ChangedTransactionDetail changedTransactionDetail = new ChangedTransactionDetail();
         MoneyHolder overpaymentHolder = new MoneyHolder(Money.zero(currency));
         for (final ChargeOrTransaction chargeOrTransaction : chargeOrTransactions) {
             chargeOrTransaction.getLoanTransaction().ifPresent(loanTransaction -> processSingleTransaction(loanTransaction, currency,
