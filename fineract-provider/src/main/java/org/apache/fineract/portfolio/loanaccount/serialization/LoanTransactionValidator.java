@@ -442,7 +442,7 @@ public final class LoanTransactionValidator {
             final Calendar calendar = calendarInstance.getCalendar();
             if (calendar != null && repaymentDate != null) {
                 // Disbursement date should fall on a meeting date
-                if (!CalendarUtils.isValidRedurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(), repaymentDate)) {
+                if (!CalendarUtils.isValidRecurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(), repaymentDate)) {
                     final String errorMessage = "Transaction date '" + repaymentDate.toString() + "' does not fall on a meeting date.";
                     throw new NotValidRecurringDateException("loan.transaction.date", errorMessage, repaymentDate.toString(),
                             calendar.getTitle());

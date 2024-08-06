@@ -1784,7 +1784,6 @@ public final class LoanApplicationValidator {
     }
 
     public void checkForProductMixRestrictions(final JsonElement element) {
-
         final List<Long> activeLoansLoanProductIds;
         final Long productId = this.fromApiJsonHelper.extractLongNamed(LoanApiConstants.productIdParameterName, element);
         final Long groupId = this.fromApiJsonHelper.extractLongNamed(LoanApiConstants.groupIdParameterName, element);
@@ -1869,17 +1868,17 @@ public final class LoanApplicationValidator {
             Group group = groupRepository.findOneWithNotFoundDetection(groupId);
 
             if (group != null && group.isActivatedAfter(submittedOnDate)) {
-                final String errorMessage = "The date on which a loan is submitted cannot be earlier than groups's activation date.";
+                final String errorMessage = "The date on which a loan is submitted cannot be earlier than group's activation date.";
                 throw new InvalidLoanStateTransitionException("submittal", "cannot.be.before.group.activation.date", errorMessage,
                         submittedOnDate, group.getActivationDate());
             }
+        }
 
-            if (DateUtils.isAfter(submittedOnDate, expectedDisbursementDate)) {
-                final String errorMessage = "The date on which a loan is submitted cannot be after its expected disbursement date: "
-                        + expectedDisbursementDate;
-                throw new InvalidLoanStateTransitionException("submittal", "cannot.be.after.expected.disbursement.date", errorMessage,
-                        submittedOnDate, expectedDisbursementDate);
-            }
+        if (DateUtils.isAfter(submittedOnDate, expectedDisbursementDate)) {
+            final String errorMessage = "The date on which a loan is submitted cannot be after its expected disbursement date: "
+                    + expectedDisbursementDate;
+            throw new InvalidLoanStateTransitionException("submittal", "cannot.be.after.expected.disbursement.date", errorMessage,
+                    submittedOnDate, expectedDisbursementDate);
         }
     }
 
