@@ -1244,6 +1244,20 @@ Feature: Loan
       | actualMaturityDate | expectedMaturityDate |
       | 01 July 2023       | 01 July 2023         |
 
+  Scenario: Verify that closed date is updated on repayment reversal
+    When Admin sets the business date to "01 June 2023"
+    When Admin creates a client with random data
+    When Admin creates a new default Loan with date: "01 June 2023"
+    And Admin successfully approves the loan on "01 June 2023" with "1000" amount and expected disbursement date on "01 June 2023"
+    When Admin successfully disburse the loan on "01 June 2023" with "1000" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    When Admin sets the business date to "20 June 2023"
+    And Customer makes "AUTOPAY" repayment on "20 June 2023" with 1000 EUR transaction amount
+    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+    When Admin sets the business date to "20 June 2023"
+    When Customer undo "1"th "Repayment" transaction made on "20 June 2023"
+    Then Loan status will be "ACTIVE"
+    Then Loan closedon_date is null
 
   Scenario: As an admin I would like to delete a loan using external id
     When Admin sets the business date to the actual date

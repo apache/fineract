@@ -1352,6 +1352,21 @@ public class LoanStepDef extends AbstractStepDef {
                 .isEqualTo(loanStatusExpectedValue);
     }
 
+    @Then("Loan closedon_date is {}")
+    public void loanClosedonDate(String date) throws IOException {
+        Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanCreateResponse.body().getLoanId();
+
+        Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+        testContext().set(TestContextKey.LOAN_RESPONSE, loanDetailsResponse);
+        if (date == null || "null".equals(date)) {
+            assertThat(loanDetailsResponse.body().getTimeline().getClosedOnDate()).isNull();
+        } else {
+            assertThat(loanDetailsResponse.body().getTimeline().getClosedOnDate()).isEqualTo(date);
+        }
+    }
+
     @Then("Admin can successfully set Fraud flag to the loan")
     public void setFraud() throws IOException {
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
