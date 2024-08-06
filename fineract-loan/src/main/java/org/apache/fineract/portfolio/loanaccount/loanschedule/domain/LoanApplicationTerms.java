@@ -797,7 +797,7 @@ public final class LoanApplicationTerms {
                             this.repaymentPeriodFrequencyType);
                 } else {
                     LocalDate expectedStartDate = startDate;
-                    if (!CalendarUtils.isValidRedurringDate(loanCalendar.getRecurrence(),
+                    if (!CalendarUtils.isValidRecurringDate(loanCalendar.getRecurrence(),
                             loanCalendar.getStartDateLocalDate().minusMonths(getRepaymentEvery()), startDate)) {
                         expectedStartDate = CalendarUtils.getNewRepaymentMeetingDate(loanCalendar.getRecurrence(),
                                 startDate.minusMonths(getRepaymentEvery()), startDate.minusMonths(getRepaymentEvery()), getRepaymentEvery(),

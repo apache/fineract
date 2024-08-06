@@ -391,7 +391,7 @@ public final class CalendarData implements Serializable {
 
     public boolean isValidRecurringDate(final LocalDate compareDate, final Boolean isSkipMeetingOnFirstDay, final Integer numberOfDays) {
         if (isBetweenStartAndEndDate(compareDate)) {
-            return CalendarUtils.isValidRedurringDate(this.getRecurrence(), this.getStartDate(), compareDate, isSkipMeetingOnFirstDay,
+            return CalendarUtils.isValidRecurringDate(this.getRecurrence(), this.getStartDate(), compareDate, isSkipMeetingOnFirstDay,
                     numberOfDays);
         }
         return false;

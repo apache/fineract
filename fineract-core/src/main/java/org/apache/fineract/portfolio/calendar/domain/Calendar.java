@@ -558,14 +558,14 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     public boolean isValidRecurringDate(final LocalDate compareDate, Boolean isSkipRepaymentOnFirstMonth, Integer numberOfDays) {
 
         if (isBetweenStartAndEndDate(compareDate)) {
-            return CalendarUtils.isValidRedurringDate(getRecurrence(), getStartDateLocalDate(), compareDate, isSkipRepaymentOnFirstMonth,
+            return CalendarUtils.isValidRecurringDate(getRecurrence(), getStartDateLocalDate(), compareDate, isSkipRepaymentOnFirstMonth,
                     numberOfDays);
         }
 
         // validate with history details.
         for (CalendarHistory history : history()) {
             if (history.isBetweenStartAndEndDate(compareDate)) {
-                return CalendarUtils.isValidRedurringDate(history.getRecurrence(), history.getStartDate(), compareDate,
+                return CalendarUtils.isValidRecurringDate(history.getRecurrence(), history.getStartDate(), compareDate,
                         isSkipRepaymentOnFirstMonth, numberOfDays);
             }
         }

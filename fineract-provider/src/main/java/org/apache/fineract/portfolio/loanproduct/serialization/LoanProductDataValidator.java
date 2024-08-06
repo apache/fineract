@@ -1942,11 +1942,8 @@ public final class LoanProductDataValidator {
 
     public void validateMinMaxConstraints(final JsonElement element, final DataValidatorBuilder baseDataValidator,
             final LoanProduct loanProduct) {
-
         validatePrincipalMinMaxConstraint(element, loanProduct, baseDataValidator);
-
         validateNumberOfRepaymentsMinMaxConstraint(element, loanProduct, baseDataValidator);
-
         validateNominalInterestRatePerPeriodMinMaxConstraint(element, loanProduct, baseDataValidator);
     }
 
@@ -2029,7 +2026,6 @@ public final class LoanProductDataValidator {
 
     private void validatePrincipalMinMaxConstraint(final JsonElement element, final LoanProduct loanProduct,
             final DataValidatorBuilder baseDataValidator) {
-
         boolean principalUpdated = false;
         boolean minPrincipalUpdated = false;
         boolean maxPrincipalUpdated = false;
@@ -2555,11 +2551,7 @@ public final class LoanProductDataValidator {
         }
     }
 
-    private Integer defaultToZeroIfNull(final Integer value) {
-        Integer result = value;
-        if (value == null) {
-            result = 0;
-        }
-        return result;
+    private Integer defaultToZeroIfNull(Integer value) {
+        return value != null ? value : 0;
     }
 }
