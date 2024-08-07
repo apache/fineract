@@ -553,7 +553,6 @@ public class AccountTransferTest {
 
         Object accountTransfer = this.accountTransferHelper.invalidAccountTransfer(fromClientID, fromSavingsID, fromClientID, loanID,
                 FROM_SAVINGS_ACCOUNT_TYPE, TO_LOAN_ACCOUNT_TYPE, ACCOUNT_TRANSFER_NEGATIVE_AMOUNT);
-
     }
 
     @Test
@@ -644,8 +643,8 @@ public class AccountTransferTest {
 
         Float fromSavingsBalance = Float.valueOf(MINIMUM_OPENING_BALANCE);
 
-        Object accountTransfer = this.accountTransferHelper.invalidAccountTransfer(fromClientID, fromSavingsID, fromClientID, loanID,
-                FROM_SAVINGS_ACCOUNT_TYPE, TO_LOAN_ACCOUNT_TYPE, ACCOUNT_TRANSFER_LARGE_AMOUNT);
+        Object accountTransfer = this.accountTransferHelper.insufficientBalanceAccountTransfer(fromClientID, fromSavingsID, fromClientID,
+                loanID, FROM_SAVINGS_ACCOUNT_TYPE, TO_LOAN_ACCOUNT_TYPE, ACCOUNT_TRANSFER_LARGE_AMOUNT);
 
     }
 
@@ -829,8 +828,7 @@ public class AccountTransferTest {
         final HashMap toSavingsSummaryBefore = this.savingsAccountHelper.getSavingsSummary(toSavingsID);
 
         Float fromSavingsBalance = Float.valueOf(MINIMUM_OPENING_BALANCE);
-
-        Object accountTransfer = this.accountTransferHelper.invalidAccountTransfer(fromClientID, fromSavingsID, fromClientID,
+        Object accountTransfer = this.accountTransferHelper.nonExistentAccountTransfer(fromClientID, fromSavingsID, fromClientID,
                 INVALID_LOAN_ID, FROM_SAVINGS_ACCOUNT_TYPE, TO_LOAN_ACCOUNT_TYPE, ACCOUNT_TRANSFER_AMOUNT);
 
     }

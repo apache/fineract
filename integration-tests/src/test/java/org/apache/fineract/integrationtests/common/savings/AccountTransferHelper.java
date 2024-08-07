@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests.common.savings;
 
 import com.google.gson.Gson;
+import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
@@ -87,13 +88,41 @@ public class AccountTransferHelper {
                 accountTransferJSON, "savingsId");
     }
 
-    public Object invalidAccountTransfer(final Integer fromClientId, final Integer fromAccountId, final Integer toClientId,
+    public Object nonExistentAccountTransfer(final Integer fromClientId, final Integer fromAccountId, final Integer toClientId,
             final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
         LOG.info("--------------------------------ACCOUNT TRANSFER--------------------------------");
+        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(404).build();
         final String accountTransferJSON = new AccountTransferHelper(this.requestSpec, this.responseSpec) //
                 .withTransferOnDate(ACCOUNT_TRANSFER_DATE) //
                 .build(fromAccountId.toString(), fromClientId.toString(), toAccountId.toString(), toClientId.toString(), fromAccountType,
                         toAccountType, transferAmount);
+
+        return Utils.performServerPost(this.requestSpec, this.responseSpec, ACCOUNT_TRANSFER_URL + "?" + Utils.TENANT_IDENTIFIER,
+                accountTransferJSON, "savingsId");
+    }
+
+    public Object insufficientBalanceAccountTransfer(final Integer fromClientId, final Integer fromAccountId, final Integer toClientId,
+            final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
+        LOG.info("--------------------------------ACCOUNT TRANSFER--------------------------------");
+        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(403).build();
+        final String accountTransferJSON = new AccountTransferHelper(this.requestSpec, this.responseSpec) //
+                .withTransferOnDate(ACCOUNT_TRANSFER_DATE) //
+                .build(fromAccountId.toString(), fromClientId.toString(), toAccountId.toString(), toClientId.toString(), fromAccountType,
+                        toAccountType, transferAmount);
+
+        return Utils.performServerPost(this.requestSpec, this.responseSpec, ACCOUNT_TRANSFER_URL + "?" + Utils.TENANT_IDENTIFIER,
+                accountTransferJSON, "savingsId");
+    }
+
+    public Object invalidAccountTransfer(final Integer fromClientId, final Integer fromAccountId, final Integer toClientId,
+            final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
+        LOG.info("--------------------------------ACCOUNT TRANSFER--------------------------------");
+        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(400).build();
+        final String accountTransferJSON = new AccountTransferHelper(this.requestSpec, this.responseSpec) //
+                .withTransferOnDate(ACCOUNT_TRANSFER_DATE) //
+                .build(fromAccountId.toString(), fromClientId.toString(), toAccountId.toString(), toClientId.toString(), fromAccountType,
+                        toAccountType, transferAmount);
+
         return Utils.performServerPost(this.requestSpec, this.responseSpec, ACCOUNT_TRANSFER_URL + "?" + Utils.TENANT_IDENTIFIER,
                 accountTransferJSON, "savingsId");
     }
