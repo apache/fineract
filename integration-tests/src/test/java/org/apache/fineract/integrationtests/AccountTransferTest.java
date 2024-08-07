@@ -554,9 +554,6 @@ public class AccountTransferTest {
         Object accountTransfer = this.accountTransferHelper.invalidAccountTransfer(fromClientID, fromSavingsID, fromClientID, loanID,
                 FROM_SAVINGS_ACCOUNT_TYPE, TO_LOAN_ACCOUNT_TYPE, ACCOUNT_TRANSFER_NEGATIVE_AMOUNT);
 
-        fromSavingsBalance -= TRANSFER_AMOUNT;
-
-        HashMap fromSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(fromSavingsID);
     }
 
     @Test
@@ -650,9 +647,6 @@ public class AccountTransferTest {
         Object accountTransfer = this.accountTransferHelper.invalidAccountTransfer(fromClientID, fromSavingsID, fromClientID, loanID,
                 FROM_SAVINGS_ACCOUNT_TYPE, TO_LOAN_ACCOUNT_TYPE, ACCOUNT_TRANSFER_LARGE_AMOUNT);
 
-        fromSavingsBalance -= TRANSFER_AMOUNT;
-
-        HashMap fromSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(fromSavingsID);
     }
 
     @Test
@@ -746,9 +740,6 @@ public class AccountTransferTest {
         Object accountTransfer = this.accountTransferHelper.invalidAccountTransfer(fromClientID, fromSavingsID, fromClientID, loanID,
                 INVALID_SAVINGS_ACCOUNT_TYPE, INVALID_LOAN_ACCOUNT_TYPE, ACCOUNT_TRANSFER_AMOUNT);
 
-        fromSavingsBalance -= TRANSFER_AMOUNT;
-
-        HashMap fromSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(fromSavingsID);
     }
 
     @Test
