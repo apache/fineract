@@ -30,8 +30,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
-
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
@@ -553,8 +551,8 @@ public class AccountTransferTest {
 
         Float fromSavingsBalance = Float.valueOf(MINIMUM_OPENING_BALANCE);
 
-        Object accountTransfer = this.accountTransferHelper.invalidAccountTransfer(fromClientID, fromSavingsID, fromClientID, loanID, FROM_SAVINGS_ACCOUNT_TYPE,
-                TO_LOAN_ACCOUNT_TYPE, ACCOUNT_TRANSFER_NEGATIVE_AMOUNT);
+        Object accountTransfer = this.accountTransferHelper.invalidAccountTransfer(fromClientID, fromSavingsID, fromClientID, loanID,
+                FROM_SAVINGS_ACCOUNT_TYPE, TO_LOAN_ACCOUNT_TYPE, ACCOUNT_TRANSFER_NEGATIVE_AMOUNT);
 
         fromSavingsBalance -= TRANSFER_AMOUNT;
 
@@ -649,8 +647,8 @@ public class AccountTransferTest {
 
         Float fromSavingsBalance = Float.valueOf(MINIMUM_OPENING_BALANCE);
 
-        Object accountTransfer = this.accountTransferHelper.invalidAccountTransfer(fromClientID, fromSavingsID, fromClientID, loanID, FROM_SAVINGS_ACCOUNT_TYPE,
-                TO_LOAN_ACCOUNT_TYPE, ACCOUNT_TRANSFER_LARGE_AMOUNT);
+        Object accountTransfer = this.accountTransferHelper.invalidAccountTransfer(fromClientID, fromSavingsID, fromClientID, loanID,
+                FROM_SAVINGS_ACCOUNT_TYPE, TO_LOAN_ACCOUNT_TYPE, ACCOUNT_TRANSFER_LARGE_AMOUNT);
 
         fromSavingsBalance -= TRANSFER_AMOUNT;
 
@@ -745,8 +743,8 @@ public class AccountTransferTest {
 
         Float fromSavingsBalance = Float.valueOf(MINIMUM_OPENING_BALANCE);
 
-        Object accountTransfer =  this.accountTransferHelper.invalidAccountTransfer(fromClientID, fromSavingsID, fromClientID, loanID, INVALID_SAVINGS_ACCOUNT_TYPE,
-                INVALID_LOAN_ACCOUNT_TYPE, ACCOUNT_TRANSFER_AMOUNT);
+        Object accountTransfer = this.accountTransferHelper.invalidAccountTransfer(fromClientID, fromSavingsID, fromClientID, loanID,
+                INVALID_SAVINGS_ACCOUNT_TYPE, INVALID_LOAN_ACCOUNT_TYPE, ACCOUNT_TRANSFER_AMOUNT);
 
         fromSavingsBalance -= TRANSFER_AMOUNT;
 
@@ -841,14 +839,10 @@ public class AccountTransferTest {
 
         Float fromSavingsBalance = Float.valueOf(MINIMUM_OPENING_BALANCE);
 
-        Object accountTransfer =  this.accountTransferHelper.invalidAccountTransfer(fromClientID, fromSavingsID, fromClientID, INVALID_LOAN_ID, FROM_SAVINGS_ACCOUNT_TYPE,
-                TO_LOAN_ACCOUNT_TYPE, ACCOUNT_TRANSFER_AMOUNT);
+        Object accountTransfer = this.accountTransferHelper.invalidAccountTransfer(fromClientID, fromSavingsID, fromClientID,
+                INVALID_LOAN_ID, FROM_SAVINGS_ACCOUNT_TYPE, TO_LOAN_ACCOUNT_TYPE, ACCOUNT_TRANSFER_AMOUNT);
 
-        fromSavingsBalance -= TRANSFER_AMOUNT;
-
-        HashMap fromSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(fromSavingsID);
     }
-
 
     private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String minOpenningBalance, final Account... accounts) {

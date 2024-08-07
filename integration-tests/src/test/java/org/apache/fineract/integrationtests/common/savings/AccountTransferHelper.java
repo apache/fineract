@@ -22,8 +22,6 @@ import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
-import java.util.Objects;
-
 import org.apache.fineract.integrationtests.common.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,7 +87,7 @@ public class AccountTransferHelper {
     }
 
     public Object invalidAccountTransfer(final Integer fromClientId, final Integer fromAccountId, final Integer toClientId,
-                                                 final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
+            final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
         LOG.info("--------------------------------ACCOUNT TRANSFER--------------------------------");
         final String accountTransferJSON = new AccountTransferHelper(this.requestSpec, this.responseSpec) //
                 .withTransferOnDate(ACCOUNT_TRANSFER_DATE) //
