@@ -2689,7 +2689,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
             writeOffTransaction.reverse();
         }
 
-        if (isClosedObligationsMet() || isClosedWrittenOff() || isClosedWithOutstandingAmountMarkedForReschedule()) {
+        if (newTransactionDetail.isCreditBalanceRefund()) {
+            updateLoanSummaryAndStatus();
+        } else if (isClosedObligationsMet() || isClosedWrittenOff() || isClosedWithOutstandingAmountMarkedForReschedule()) {
             loanLifecycleStateMachine.transition(LoanEvent.LOAN_ADJUST_TRANSACTION, this);
         }
 
