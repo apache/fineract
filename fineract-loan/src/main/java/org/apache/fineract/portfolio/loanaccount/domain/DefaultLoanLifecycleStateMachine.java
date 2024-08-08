@@ -18,16 +18,21 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+import java.math.BigDecimal;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanStatusChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 // TODO: introduce tests for the state machine
 @Component
 @RequiredArgsConstructor
 public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachine {
+
+    private static Logger LOG = LoggerFactory.getLogger(DefaultLoanLifecycleStateMachine.class);
 
     private static final List<LoanStatus> ALLOWED_LOAN_STATUSES = List.of(LoanStatus.values());
     private final BusinessEventNotifierService businessEventNotifierService;
@@ -40,6 +45,9 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
 
     @Override
     public void transition(final LoanEvent loanEvent, final Loan loan) {
+        loan.updateLoanSummaryDerivedFields();
+
+        LoanStatus oldStatus = loan.getStatus();
         LoanStatus newStatus = getNextStatus(loanEvent, loan);
         if (newStatus != null) {
             Integer newPlainStatus = newStatus.getValue();
@@ -51,16 +59,22 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
             }
 
             // set mandatory field states based on new status after the transition
+            LOG.debug("Transitioning loan {} status from {} to {}", loan.getId(), oldStatus, newStatus);
             switch (newStatus) {
-                case ACTIVE -> {
-                    if (loan.getClosedOnDate() != null) {
-                        loan.setClosedOnDate(null);
-                    }
-                    if (loan.getOverpaidOnDate() != null) {
-                        loan.setOverpaidOnDate(null);
-                    }
+                case SUBMITTED_AND_PENDING_APPROVAL -> {
+                    loan.setApprovedOnDate(null);
+                    loan.setApprovedBy(null);
                 }
-                default -> {
+                case APPROVED -> {
+                    loan.setDisbursedBy(null);
+                    loan.setActualDisbursementDate(null);
+                }
+                case ACTIVE -> {
+                    loan.setClosedBy(null);
+                    loan.setClosedOnDate(null);
+                    loan.setOverpaidOnDate(null);
+                }
+                default -> { // no fields need to get cleared
                 }
             }
         }
@@ -145,7 +159,12 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
             case LOAN_ADJUST_TRANSACTION:
                 if (anyOfAllowedWhenComingFrom(from, LoanStatus.CLOSED_OBLIGATIONS_MET, LoanStatus.CLOSED_WRITTEN_OFF,
                         LoanStatus.CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT)) {
-                    newState = activeTransition();
+                    boolean isOverpaid = loan.getTotalOverpaid() != null && loan.getTotalOverpaid().compareTo(BigDecimal.ZERO) > 0;
+                    if (isOverpaid) {
+                        newState = overpaidTransition();
+                    } else {
+                        newState = activeTransition();
+                    }
                 }
             break;
             case LOAN_INITIATE_TRANSFER:

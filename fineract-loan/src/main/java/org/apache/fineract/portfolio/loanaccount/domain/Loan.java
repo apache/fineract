@@ -1300,7 +1300,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     public void updateLoanSummaryDerivedFields() {
         if (isNotDisbursed()) {
-            this.summary.zeroFields();
+            if (this.summary != null) {
+                this.summary.zeroFields();
+            }
             this.totalOverpaid = null;
         } else {
             final Money overpaidBy = calculateTotalOverpayment();
@@ -3017,7 +3019,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     }
 
     public LoanStatus getStatus() {
-        return LoanStatus.fromInt(this.loanStatus);
+        return this.loanStatus == null ? null : LoanStatus.fromInt(this.loanStatus);
     }
 
     public Integer getPlainStatus() {
