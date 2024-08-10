@@ -4567,6 +4567,21 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     }
 
     /**
+     * @param date
+     * @return a schedule installment is related to the provided date
+     **/
+    public LoanRepaymentScheduleInstallment getRelatedRepaymentScheduleInstallment(LocalDate date) {
+        if (date == null) {
+            return null;
+        }
+        return getRepaymentScheduleInstallments()//
+                .stream()//
+                .filter(installment -> date.isAfter(installment.getFromDate()) && !date.isAfter(installment.getDueDate()))//
+                .findAny()//
+                .orElse(null);//
+    }
+
+    /**
      * @return loan disbursement data
      **/
     public List<DisbursementData> getDisbursmentData() {

@@ -262,6 +262,10 @@ public final class JsonCommand {
         return parameterExists(parameterName);
     }
 
+    public boolean hasParameterValue(final String parameterName) {
+        return this.fromApiJsonHelper.parameterHasValue(parameterName, this.parsedCommand);
+    }
+
     public String dateFormat() {
         return stringValueOfParameterNamed("dateFormat");
     }

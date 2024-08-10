@@ -61,6 +61,27 @@ public class JsonParserHelper {
         return element.getAsJsonObject().has(parameterName);
     }
 
+    /**
+     * Check Parameter has a non-blank value
+     */
+    public boolean parameterHasValue(final String parameterName, final JsonElement element) {
+        if (element == null || !element.isJsonObject()) {
+            return false;
+        }
+
+        var valueObject = element.getAsJsonObject().get(parameterName);
+        if (valueObject == null || valueObject.isJsonNull()) {
+            return false;
+        }
+        if (valueObject instanceof JsonArray) {
+            return !valueObject.getAsJsonArray().isEmpty();
+        }
+        if (valueObject instanceof JsonObject) {
+            return !valueObject.getAsJsonObject().isEmpty();
+        }
+        return valueObject.isJsonPrimitive() && !valueObject.getAsJsonPrimitive().getAsString().isBlank();
+    }
+
     public Boolean extractBooleanNamed(final String parameterName, final JsonElement element, final Set<String> requestParamatersDetected) {
         Boolean value = null;
         if (element.isJsonObject()) {

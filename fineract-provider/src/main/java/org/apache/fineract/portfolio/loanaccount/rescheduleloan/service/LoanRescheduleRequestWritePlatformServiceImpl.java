@@ -195,29 +195,18 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 submittedOnDate = jsonCommand.localDateValueOfParameterNamed(RescheduleLoansApiConstants.submittedOnDateParamName);
             }
 
-            // initially set the value to null
-            LocalDate rescheduleFromDate = null;
-
             // start point of the rescheduling exercise
             Integer rescheduleFromInstallment = null;
 
             // initially set the value to null
             LocalDate adjustedDueDate = null;
 
+            LocalDate rescheduleFromDate = jsonCommand
+                    .localDateValueOfParameterNamed(RescheduleLoansApiConstants.rescheduleFromDateParamName);
             // check if the parameter is in the JsonCommand object
-            if (jsonCommand.hasParameter(RescheduleLoansApiConstants.rescheduleFromDateParamName)) {
-                // create a LocalDate object from the "rescheduleFromDate" Date
-                // string
-                LocalDate localDate = jsonCommand.localDateValueOfParameterNamed(RescheduleLoansApiConstants.rescheduleFromDateParamName);
-
-                if (localDate != null) {
-                    // get installment by due date
-                    LoanRepaymentScheduleInstallment installment = loan.getRepaymentScheduleInstallment(localDate);
-                    rescheduleFromInstallment = installment.getInstallmentNumber();
-
-                    // update the value of the "rescheduleFromDate" variable
-                    rescheduleFromDate = localDate;
-                }
+            if (rescheduleFromDate != null) {
+                // get installment by due date
+                rescheduleFromInstallment = loan.getRelatedRepaymentScheduleInstallment(rescheduleFromDate).getInstallmentNumber();
             }
 
             if (jsonCommand.hasParameter(RescheduleLoansApiConstants.adjustedDueDateParamName)) {
