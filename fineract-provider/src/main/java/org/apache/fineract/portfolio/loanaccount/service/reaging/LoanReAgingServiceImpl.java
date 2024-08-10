@@ -54,6 +54,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.Tra
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.note.domain.Note;
+import org.apache.fineract.portfolio.note.domain.NoteFactory;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -191,7 +192,7 @@ public class LoanReAgingServiceImpl {
     private void persistNote(Loan loan, JsonCommand command, Map<String, Object> changes) {
         if (command.hasParameter("note")) {
             final String note = command.stringValueOfParameterNamed("note");
-            final Note newNote = Note.loanNote(loan, note);
+            final Note newNote = NoteFactory.createLoanNote(loan, note);
             changes.put("note", note);
 
             this.noteRepository.saveAndFlush(newNote);

@@ -45,6 +45,7 @@ import org.apache.fineract.infrastructure.event.business.service.BusinessEventNo
 import org.apache.fineract.portfolio.account.service.AccountNumberGenerator;
 import org.apache.fineract.portfolio.accounts.constants.ShareAccountApiConstants;
 import org.apache.fineract.portfolio.note.domain.Note;
+import org.apache.fineract.portfolio.note.domain.NoteFactory;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionEnumData;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
@@ -236,7 +237,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                 this.shareAccountRepository.save(account);
                 final String noteText = jsonCommand.stringValueOfParameterNamed("note");
                 if (StringUtils.isNotBlank(noteText)) {
-                    final Note note = Note.shareNote(account, noteText);
+                    final Note note = NoteFactory.createShareAccountNote(account, noteText);
                     changes.put("note", noteText);
                     this.noteRepository.save(note);
                 }
@@ -279,7 +280,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                 this.shareAccountRepository.save(account);
                 final String noteText = jsonCommand.stringValueOfParameterNamed("note");
                 if (StringUtils.isNotBlank(noteText)) {
-                    final Note note = Note.shareNote(account, noteText);
+                    final Note note = NoteFactory.createShareAccountNote(account, noteText);
                     changes.put("note", noteText);
                     this.noteRepository.save(note);
                 }
@@ -313,7 +314,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                 this.shareAccountRepository.save(account);
                 final String noteText = jsonCommand.stringValueOfParameterNamed("note");
                 if (StringUtils.isNotBlank(noteText)) {
-                    final Note note = Note.shareNote(account, noteText);
+                    final Note note = NoteFactory.createShareAccountNote(account, noteText);
                     changes.put("note", noteText);
                     this.noteRepository.save(note);
                 }
@@ -474,7 +475,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                 this.shareAccountRepository.saveAndFlush(account);
                 final String noteText = jsonCommand.stringValueOfParameterNamed("note");
                 if (StringUtils.isNotBlank(noteText)) {
-                    final Note note = Note.shareNote(account, noteText);
+                    final Note note = NoteFactory.createShareAccountNote(account, noteText);
                     changes.put("note", noteText);
                     this.noteRepository.save(note);
                 }

@@ -92,6 +92,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.note.domain.Note;
+import org.apache.fineract.portfolio.note.domain.NoteFactory;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
@@ -465,7 +466,7 @@ public class InteropServiceImpl implements InteropService {
 
         String note = request.getNote();
         if (!StringUtils.isBlank(note)) {
-            noteRepository.save(Note.savingsTransactionNote(savingsAccount, transaction, note));
+            noteRepository.save(NoteFactory.createSavingsTransactionNote(savingsAccount, transaction, note));
         }
 
         return InteropTransferResponseData.build(command.commandId(), request.getTransactionCode(), InteropActionState.ACCEPTED,

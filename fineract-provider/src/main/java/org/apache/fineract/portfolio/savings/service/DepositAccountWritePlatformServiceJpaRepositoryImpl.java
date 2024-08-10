@@ -81,6 +81,7 @@ import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.note.domain.Note;
+import org.apache.fineract.portfolio.note.domain.NoteFactory;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
@@ -759,7 +760,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.savingNote(account, noteText);
+            final Note note = NoteFactory.createSavingAccountNote(account, noteText);
             changes.put("note", noteText);
             this.noteRepository.save(note);
         }
@@ -792,7 +793,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.savingNote(account, noteText);
+            final Note note = NoteFactory.createSavingAccountNote(account, noteText);
             changes.put("note", noteText);
             this.noteRepository.save(note);
         }
@@ -825,7 +826,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.savingNote(account, noteText);
+            final Note note = NoteFactory.createSavingAccountNote(account, noteText);
             changes.put("note", noteText);
             this.noteRepository.save(note);
         }
@@ -867,7 +868,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.savingNote(account, noteText);
+            final Note note = NoteFactory.createSavingAccountNote(account, noteText);
             changes.put("note", noteText);
             this.noteRepository.save(note);
         }

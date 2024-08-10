@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.note.service;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -36,6 +37,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
 import org.apache.fineract.portfolio.note.domain.Note;
+import org.apache.fineract.portfolio.note.domain.NoteFactory;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.note.domain.NoteType;
 import org.apache.fineract.portfolio.note.exception.NoteNotFoundException;
@@ -77,7 +79,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
         if (client == null) {
             throw new ClientNotFoundException(resourceId);
         }
-        final Note newNote = Note.clientNoteFromJson(client, command);
+        final Note newNote = NoteFactory.createClientNote(client, command.stringValueOfParameterNamed("note"));
 
         this.noteRepository.saveAndFlush(newNote);
 
@@ -94,7 +96,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
     public void createAndPersistClientNote(final Client client, final JsonCommand command) {
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
-            final Note newNote = new Note(client, noteText);
+            final Note newNote = NoteFactory.createClientNote(client, noteText);
             this.noteRepository.save(newNote);
         }
     }
@@ -104,7 +106,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
         final Long resourceId = command.getGroupId();
 
         final Group group = this.groupRepository.findById(resourceId).orElseThrow(() -> new GroupNotFoundException(resourceId));
-        final Note newNote = Note.groupNoteFromJson(group, command);
+        final Note newNote = NoteFactory.createGroupNote(group, command.stringValueOfParameterNamed("note"));
 
         this.noteRepository.saveAndFlush(newNote);
 
@@ -122,7 +124,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
 
         final Loan loan = this.loanRepository.findOneWithNotFoundDetection(resourceId);
         final String note = command.stringValueOfParameterNamed("note");
-        final Note newNote = Note.loanNote(loan, note);
+        final Note newNote = NoteFactory.createLoanNote(loan, note);
 
         this.noteRepository.saveAndFlush(newNote);
 
@@ -144,7 +146,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
         final Loan loan = loanTransaction.getLoan();
 
         final String note = command.stringValueOfParameterNamed("note");
-        final Note newNote = Note.loanTransactionNote(loan, loanTransaction, note);
+        final Note newNote = NoteFactory.createLoanTransactionNote(loan, loanTransaction, note);
 
         this.noteRepository.saveAndFlush(newNote);
 
@@ -162,7 +164,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
                 .orElseThrow(() -> new SavingsAccountNotFoundException(resourceId));
 
         final String note = command.stringValueOfParameterNamed("note");
-        final Note newNote = Note.savingNote(savingAccount, note);
+        final Note newNote = NoteFactory.createSavingAccountNote(savingAccount, note);
 
         this.noteRepository.saveAndFlush(newNote);
 
@@ -241,11 +243,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
             throw new NoteNotFoundException(noteId, resourceId, type.name().toLowerCase());
         }
 
-        final Map<String, Object> changes = noteForUpdate.update(command);
-
-        if (!changes.isEmpty()) {
-            this.noteRepository.saveAndFlush(noteForUpdate);
-        }
+        final Map<String, Object> changes = update(command, noteForUpdate);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -271,11 +269,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
             throw new NoteNotFoundException(noteId, resourceId, type.name().toLowerCase());
         }
 
-        final Map<String, Object> changes = noteForUpdate.update(command);
-
-        if (!changes.isEmpty()) {
-            this.noteRepository.saveAndFlush(noteForUpdate);
-        }
+        final Map<String, Object> changes = update(command, noteForUpdate);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -298,11 +292,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
             throw new NoteNotFoundException(noteId, resourceId, type.name().toLowerCase());
         }
 
-        final Map<String, Object> changes = noteForUpdate.update(command);
-
-        if (!changes.isEmpty()) {
-            this.noteRepository.saveAndFlush(noteForUpdate);
-        }
+        final Map<String, Object> changes = update(command, noteForUpdate);
 
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(noteForUpdate.getId())
                 .withLoanId(loan.getId()).withOfficeId(loan.getOfficeId()).with(changes).build();
@@ -325,11 +315,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
             throw new NoteNotFoundException(noteId, resourceId, type.name().toLowerCase());
         }
 
-        final Map<String, Object> changes = noteForUpdate.update(command);
-
-        if (!changes.isEmpty()) {
-            this.noteRepository.saveAndFlush(noteForUpdate);
-        }
+        final Map<String, Object> changes = update(command, noteForUpdate);
 
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(noteForUpdate.getId())
                 .withLoanId(loan.getId()).withOfficeId(loan.getOfficeId()).with(changes).build();
@@ -346,10 +332,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
         if (noteForUpdate == null) {
             throw new NoteNotFoundException(noteId, resourceId, type.name().toLowerCase());
         }
-        final Map<String, Object> changes = noteForUpdate.update(command);
-        if (!changes.isEmpty()) {
-            this.noteRepository.saveAndFlush(noteForUpdate);
-        }
+        final Map<String, Object> changes = update(command, noteForUpdate);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -456,4 +439,14 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
         return noteForUpdate;
     }
 
+    public Map<String, Object> update(final JsonCommand command, Note noteForUpdate) {
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
+        final String newNote = command.stringValueOfParameterNamed("note");
+        if (!noteForUpdate.getNote().equals(newNote)) {
+            noteForUpdate.setNote(newNote);
+            this.noteRepository.saveAndFlush(noteForUpdate);
+            actualChanges.put("note", newNote);
+        }
+        return actualChanges;
+    }
 }

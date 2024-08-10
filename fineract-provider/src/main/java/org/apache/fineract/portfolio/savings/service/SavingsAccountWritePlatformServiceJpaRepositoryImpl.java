@@ -93,6 +93,7 @@ import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.note.domain.Note;
+import org.apache.fineract.portfolio.note.domain.NoteFactory;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
@@ -324,7 +325,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.savingsTransactionNote(account, deposit, noteText);
+            final Note note = NoteFactory.createSavingsTransactionNote(account, deposit, noteText);
             this.noteRepository.save(note);
         }
 
@@ -391,7 +392,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.savingsTransactionNote(account, withdrawal, noteText);
+            final Note note = NoteFactory.createSavingsTransactionNote(account, withdrawal, noteText);
             this.noteRepository.save(note);
         }
 
@@ -954,7 +955,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             this.savingAccountRepositoryWrapper.save(account);
             final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
-                final Note note = Note.savingNote(account, noteText);
+                final Note note = NoteFactory.createSavingAccountNote(account, noteText);
                 changes.put("note", noteText);
                 this.noteRepository.save(note);
             }
@@ -1340,7 +1341,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.savingsTransactionNote(savingsAccountCharge.savingsAccount(), chargeTransaction, noteText);
+            final Note note = NoteFactory.createSavingsTransactionNote(savingsAccountCharge.savingsAccount(), chargeTransaction, noteText);
             this.noteRepository.save(note);
         }
 

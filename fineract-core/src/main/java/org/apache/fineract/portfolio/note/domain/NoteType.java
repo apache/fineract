@@ -21,8 +21,10 @@ package org.apache.fineract.portfolio.note.domain;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
+@Getter
 public enum NoteType {
 
     CLIENT(100, "noteType.client", "clients", "Client note"), //
@@ -49,22 +51,6 @@ public enum NoteType {
         this.code = code;
         this.apiUrl = apiUrl;
         this.description = description;
-    }
-
-    public Integer getValue() {
-        return this.value;
-    }
-
-    public String getCode() {
-        return this.code;
-    }
-
-    public String getApiUrl() {
-        return this.apiUrl;
-    }
-
-    public String getDescription() {
-        return description;
     }
 
     public static NoteType fromInt(int i) {
