@@ -75,7 +75,6 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
         if (lastDueDateVariation != null) {
             loanEndDate = lastDueDateVariation.getDateValue();
         }
-        loanApplicationTerms.updateLoanEndDate(loanEndDate);
 
         // determine the total charges due at time of disbursement
         final BigDecimal chargesDueAtTimeOfDisbursement = deriveTotalChargesDueAtTimeOfDisbursement(loanCharges);
@@ -110,6 +109,15 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
 
             processDisbursements(loanApplicationTerms, scheduleParams, interestScheduleModel, periods, chargesDueAtTimeOfDisbursement);
             repaymentPeriod.setPeriodNumber(scheduleParams.getInstalmentNumber());
+
+            for (var interestRateChange : loanApplicationTerms.getLoanTermVariations().getInterestRateFromInstallment()) {
+                final LocalDate interestRateChangeEffectiveDate = interestRateChange.getTermVariationApplicableFrom().minusDays(1);
+                final BigDecimal newInterestRate = interestRateChange.getDecimalValue();
+                if (interestRateChangeEffectiveDate.isAfter(repaymentPeriod.getFromDate())
+                        && !interestRateChangeEffectiveDate.isAfter(repaymentPeriod.getDueDate())) {
+                    emiCalculator.changeInterestRate(interestScheduleModel, interestRateChangeEffectiveDate, newInterestRate);
+                }
+            }
 
             emiCalculator.findInterestRepaymentPeriod(interestScheduleModel, repaymentPeriod.getDueDate())
                     .ifPresent(interestRepaymentPeriod -> {

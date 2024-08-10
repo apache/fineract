@@ -1890,8 +1890,4 @@ public final class LoanApplicationTerms {
         this.variationDays += daysToAdd;
     }
 
-    public LocalDate getLoanEndDate() {
-        return loanEndDate;
-    }
-
 }

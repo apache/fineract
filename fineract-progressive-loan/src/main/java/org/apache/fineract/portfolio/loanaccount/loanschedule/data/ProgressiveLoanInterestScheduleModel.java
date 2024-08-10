@@ -18,13 +18,40 @@
  */
 package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 
+import java.math.BigDecimal;
 import java.math.MathContext;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 
-public record ProgressiveLoanInterestScheduleModel(List<ProgressiveLoanInterestRepaymentModel> repayments,
-        LoanProductRelatedDetail loanProductRelatedDetail, Integer installmentAmountInMultiplesOf, MathContext mc) {
+public record ProgressiveLoanInterestScheduleModel(List<ProgressiveLoanInterestRepaymentModel> repayments, //
+        List<ProgressiveLoanInterestRate> interestRates, //
+        LoanProductRelatedDetail loanProductRelatedDetail, //
+        Integer installmentAmountInMultiplesOf, //
+        MathContext mc) {
+
+    public ProgressiveLoanInterestScheduleModel(List<ProgressiveLoanInterestRepaymentModel> repayments,
+            LoanProductRelatedDetail loanProductRelatedDetail, Integer installmentAmountInMultiplesOf, MathContext mc) {
+        this(repayments, new ArrayList<>(1), loanProductRelatedDetail, installmentAmountInMultiplesOf, mc);
+    }
+
+    public void addInterestRate(final LocalDate newInterestDueDate, final BigDecimal newInterestRate) {
+        interestRates.add(new ProgressiveLoanInterestRate(newInterestDueDate, newInterestDueDate.plusDays(1), newInterestRate));
+        interestRates.sort(Collections.reverseOrder());
+    }
+
+    public BigDecimal getInterestRate(final LocalDate effectiveDate) {
+        return interestRates.isEmpty() ? loanProductRelatedDetail.getNominalInterestRatePerPeriod() : findInterestRate(effectiveDate);
+    }
+
+    private BigDecimal findInterestRate(final LocalDate effectiveDate) {
+        return interestRates.stream().filter(ir -> !ir.effectiveFrom().isAfter(effectiveDate))
+                .map(ProgressiveLoanInterestRate::interestRate).findFirst()
+                .orElse(loanProductRelatedDetail.getNominalInterestRatePerPeriod());
+    }
 
     public int getLoanTermInDays() {
         if (repayments.isEmpty()) {

@@ -97,6 +97,27 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 .findFirst();
     }
 
+    Optional<ProgressiveLoanInterestRepaymentInterestPeriod> findInterestPeriodForInterestChange(
+            final ProgressiveLoanInterestRepaymentModel repaymentPeriod, final LocalDate interestRateChangeEffectiveDate) {
+        if (repaymentPeriod == null || interestRateChangeEffectiveDate == null) {
+            return Optional.empty();
+        }
+        return repaymentPeriod.getInterestPeriods().stream()//
+                .filter(interestPeriod -> interestRateChangeEffectiveDate.isEqual(interestPeriod.getFromDate()))//
+                .findFirst();
+    }
+
+    Optional<ProgressiveLoanInterestRepaymentModel> findInterestRepaymentPeriodForInterestChange(
+            final ProgressiveLoanInterestScheduleModel scheduleModel, final LocalDate interestChangeEffectiveDate) {
+        if (scheduleModel == null || interestChangeEffectiveDate == null) {
+            return Optional.empty();
+        }
+        return scheduleModel.repayments().stream()//
+                .filter(repaymentPeriod -> !interestChangeEffectiveDate.isBefore(repaymentPeriod.getFromDate())
+                        && interestChangeEffectiveDate.isBefore(repaymentPeriod.getDueDate()))//
+                .findFirst();
+    }
+
     /**
      * Add disbursement to Interest Period
      */
@@ -152,6 +173,42 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             repayments.add(new ProgressiveLoanInterestRepaymentModel(repaymentModel));
         }
         return new ProgressiveLoanInterestScheduleModel(repayments, loanProductRelatedDetail, installmentAmountInMultiplesOf, mc);
+    }
+
+    @Override
+    public void changeInterestRate(final ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate newInterestEffectiveDate,
+            final BigDecimal newInterestRate) {
+        final ProgressiveLoanInterestRepaymentModel repaymentPeriod = findInterestRepaymentPeriodForInterestChange(scheduleModel,
+                newInterestEffectiveDate).orElse(null);
+        if (repaymentPeriod == null) {
+            return;
+        }
+        scheduleModel.addInterestRate(newInterestEffectiveDate, newInterestRate);
+        var interestPeriodOptional = findInterestPeriodForInterestChange(repaymentPeriod, newInterestEffectiveDate);
+        if (interestPeriodOptional.isEmpty()) {
+            insertInterestPeriod(scheduleModel, repaymentPeriod, newInterestEffectiveDate);
+        }
+
+        calculateEMIValueAndRateFactors(repaymentPeriod.getDueDate(), scheduleModel);
+    }
+
+    void insertInterestPeriod(final ProgressiveLoanInterestScheduleModel scheduleModel,
+            final ProgressiveLoanInterestRepaymentModel repaymentPeriod, final LocalDate interestChangeDueDate) {
+        // period start date
+        final ProgressiveLoanInterestRepaymentInterestPeriod previousInterestPeriod = repaymentPeriod.getInterestPeriods().stream()
+                .filter(interestPeriod -> interestChangeDueDate.isAfter(interestPeriod.getFromDate())
+                        && interestChangeDueDate.isBefore(interestPeriod.getDueDate()))//
+                .findFirst()//
+                .get();//
+
+        final Money zeroAmount = Money.zero(scheduleModel.loanProductRelatedDetail().getCurrency());
+        final var interestPeriod = new ProgressiveLoanInterestRepaymentInterestPeriod(interestChangeDueDate,
+                previousInterestPeriod.getDueDate(), BigDecimal.ZERO, zeroAmount, zeroAmount);
+
+        previousInterestPeriod.setDueDate(interestChangeDueDate);
+
+        repaymentPeriod.getInterestPeriods().add(interestPeriod);
+        Collections.sort(repaymentPeriod.getInterestPeriods());
     }
 
     /**
@@ -259,7 +316,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             final ProgressiveLoanInterestRepaymentInterestPeriod interestPeriod, final ProgressiveLoanInterestScheduleModel scheduleModel) {
         final MathContext mc = scheduleModel.mc();
         final LoanProductRelatedDetail loanProductRelatedDetail = scheduleModel.loanProductRelatedDetail();
-        final BigDecimal interestRate = calcNominalInterestRatePercentage(loanProductRelatedDetail.getNominalInterestRatePerPeriod(), mc);
+        final BigDecimal interestRate = calcNominalInterestRatePercentage(scheduleModel.getInterestRate(interestPeriod.getFromDate()), mc);
         final DaysInYearType daysInYearType = DaysInYearType.fromInt(loanProductRelatedDetail.getDaysInYearType());
         final DaysInMonthType daysInMonthType = DaysInMonthType.fromInt(loanProductRelatedDetail.getDaysInMonthType());
         final PeriodFrequencyType repaymentFrequency = loanProductRelatedDetail.getRepaymentPeriodFrequencyType();
