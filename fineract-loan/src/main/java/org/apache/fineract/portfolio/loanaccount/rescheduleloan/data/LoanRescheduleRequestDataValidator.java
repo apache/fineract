@@ -42,6 +42,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.RescheduleLoansApiConstants;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
 import org.springframework.stereotype.Component;
@@ -140,11 +141,77 @@ public class LoanRescheduleRequestDataValidator {
         dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rescheduleReasonCommentParamName).value(rescheduleReasonComment)
                 .ignoreIfNull().notExceedingLengthOf(500);
 
-        if (this.fromJsonHelper.parameterExists(RescheduleLoansApiConstants.emiParamName, jsonElement)
-                || this.fromJsonHelper.parameterExists(RescheduleLoansApiConstants.endDateParamName, jsonElement)) {
+        final LocalDate adjustedDueDate = this.fromJsonHelper.extractLocalDateNamed(RescheduleLoansApiConstants.adjustedDueDateParamName,
+                jsonElement);
+
+        if (adjustedDueDate != null && DateUtils.isBefore(adjustedDueDate, rescheduleFromDate)) {
+            dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName).failWithCode(
+                    "adjustedDueDate.before.rescheduleFromDate", "Adjusted due date cannot be before the reschedule from date");
+        }
+
+        if (loan.getLoanProduct().getLoanProductRelatedDetail().getLoanScheduleType() == LoanScheduleType.CUMULATIVE) {
             final LocalDate endDate = jsonCommand.localDateValueOfParameterNamed(RescheduleLoansApiConstants.endDateParamName);
             final BigDecimal emi = jsonCommand.bigDecimalValueOfParameterNamed(RescheduleLoansApiConstants.emiParamName);
+            validateForCumulativeLoan(dataValidatorBuilder, loan, jsonElement, rescheduleFromDate, endDate, emi);
+        } else {
+            validateForProgressiveLoan(dataValidatorBuilder, loan, jsonElement, rescheduleFromDate, adjustedDueDate);
+        }
 
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+    }
+
+    private void validateForProgressiveLoan(final DataValidatorBuilder dataValidatorBuilder, final Loan loan, final JsonElement jsonElement,
+            final LocalDate rescheduleFromDate, final LocalDate adjustedDueDate) {
+        final var unsupportedFields = List.of(RescheduleLoansApiConstants.graceOnPrincipalParamName, //
+                RescheduleLoansApiConstants.graceOnInterestParamName, //
+                RescheduleLoansApiConstants.extraTermsParamName, //
+                RescheduleLoansApiConstants.emiParamName//
+        );
+
+        for (var unsupportedField : unsupportedFields) {
+            if (this.fromJsonHelper.parameterHasValue(unsupportedField, jsonElement)) {
+                dataValidatorBuilder.reset().parameter(unsupportedField).failWithCode(
+                        RescheduleLoansApiConstants.rescheduleSelectedOperationNotSupportedErrorCode,
+                        "Selected operation is not supported by Progressive Loan at a time during Loan Rescheduling");
+                return;
+            }
+        }
+
+        final LocalDate businessDate = DateUtils.getBusinessLocalDate();
+        LoanRepaymentScheduleInstallment installment = null;
+        if (rescheduleFromDate != null) {
+            boolean hasInterestRateChange = this.fromJsonHelper.parameterHasValue(RescheduleLoansApiConstants.newInterestRateParamName,
+                    jsonElement);
+            if (hasInterestRateChange && adjustedDueDate != null) {
+                dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.adjustedDueDateParamName).failWithCode(
+                        RescheduleLoansApiConstants.rescheduleMultipleOperationsNotSupportedErrorCode,
+                        "Only one operation is supported at a time during Loan Rescheduling");
+                return;
+            }
+
+            if (hasInterestRateChange && !rescheduleFromDate.isAfter(businessDate)) {
+                dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName).failWithCode(
+                        "loan.reschedule.interestratechange.reschedulefrom.shouldbefuture",
+                        "Loan Reschedule From date should be in the future.");
+            }
+
+            if (adjustedDueDate != null) {
+                installment = loan.getRepaymentScheduleInstallment(rescheduleFromDate);
+            } else if (hasInterestRateChange) {
+                installment = loan.getRelatedRepaymentScheduleInstallment(rescheduleFromDate);
+            }
+
+            validateReschedulingInstallment(dataValidatorBuilder, installment);
+        }
+
+        validateForOverdueCharges(dataValidatorBuilder, loan, installment);
+    }
+
+    private void validateForCumulativeLoan(final DataValidatorBuilder dataValidatorBuilder, final Loan loan, final JsonElement jsonElement,
+            final LocalDate rescheduleFromDate, final LocalDate endDate, final BigDecimal emi) {
+        if (emi != null || endDate != null) {
             dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.endDateParamName).value(endDate).notNull();
             dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.emiParamName).value(emi).notNull().positiveAmount();
 
@@ -156,15 +223,6 @@ public class LoanRescheduleRequestDataValidator {
                             .failWithCode("repayment.schedule.installment.does.not.exist", "Repayment schedule installment does not exist");
                 }
             }
-
-        }
-
-        final LocalDate adjustedDueDate = this.fromJsonHelper.extractLocalDateNamed(RescheduleLoansApiConstants.adjustedDueDateParamName,
-                jsonElement);
-
-        if (adjustedDueDate != null && DateUtils.isBefore(adjustedDueDate, rescheduleFromDate)) {
-            dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName).failWithCode(
-                    "adjustedDueDate.before.rescheduleFromDate", "Adjusted due date cannot be before the reschedule from date");
         }
 
         // at least one of the following must be provided => graceOnPrincipal,
@@ -177,37 +235,38 @@ public class LoanRescheduleRequestDataValidator {
                 && !this.fromJsonHelper.parameterExists(RescheduleLoansApiConstants.emiParamName, jsonElement)) {
             dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.graceOnPrincipalParamName).notNull();
         }
-        LoanRepaymentScheduleInstallment installment = null;
+
+        final LoanRepaymentScheduleInstallment installment = loan.getRepaymentScheduleInstallment(rescheduleFromDate);
+
         if (rescheduleFromDate != null) {
-            installment = loan.getRepaymentScheduleInstallment(rescheduleFromDate);
-
-            if (installment == null) {
-                dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName)
-                        .failWithCode("repayment.schedule.installment.does.not.exist", "Repayment schedule installment does not exist");
-            }
-
-            if (installment != null && installment.isObligationsMet()) {
-                dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName)
-                        .failWithCode("repayment.schedule.installment.obligation.met", "Repayment schedule installment obligation met");
-            }
-
+            validateReschedulingInstallment(dataValidatorBuilder, installment);
         }
 
         if (loan.isMultiDisburmentLoan()) {
             if (!loan.loanProduct().isDisallowExpectedDisbursements()) {
                 dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode(
-                        RescheduleLoansApiConstants.resheduleForMultiDisbursementNotSupportedErrorCode,
+                        RescheduleLoansApiConstants.rescheduleForMultiDisbursementNotSupportedErrorCode,
                         "Loan rescheduling is not supported for multidisbursement tranche loans");
             }
         }
 
         validateForOverdueCharges(dataValidatorBuilder, loan, installment);
-        if (!dataValidationErrors.isEmpty()) {
-            throw new PlatformApiDataValidationException(dataValidationErrors);
+    }
+
+    private static void validateReschedulingInstallment(DataValidatorBuilder dataValidatorBuilder,
+            LoanRepaymentScheduleInstallment installment) {
+        if (installment == null) {
+            dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName)
+                    .failWithCode("repayment.schedule.installment.does.not.exist", "Repayment schedule installment does not exist");
+        }
+
+        if (installment != null && installment.isObligationsMet()) {
+            dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName)
+                    .failWithCode("repayment.schedule.installment.obligation.met", "Repayment schedule installment obligation met");
         }
     }
 
-    private void validateForOverdueCharges(DataValidatorBuilder dataValidatorBuilder, final Loan loan,
+    private void validateForOverdueCharges(final DataValidatorBuilder dataValidatorBuilder, final Loan loan,
             final LoanRepaymentScheduleInstallment installment) {
         if (installment != null) {
             LocalDate rescheduleFromDate = installment.getFromDate();
