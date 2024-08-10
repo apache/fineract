@@ -331,7 +331,10 @@ public class LoanRescheduleRequestDataValidator {
             }
 
             if (rescheduleFromDate != null) {
-                installment = loan.getRepaymentScheduleInstallment(rescheduleFromDate);
+                final boolean isProgressiveLoanSchedule = loan.getLoanProductRelatedDetail()
+                        .getLoanScheduleType() == LoanScheduleType.PROGRESSIVE;
+                installment = isProgressiveLoanSchedule ? loan.getRelatedRepaymentScheduleInstallment(rescheduleFromDate)
+                        : loan.getRepaymentScheduleInstallment(rescheduleFromDate);
 
                 if (installment == null) {
                     dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode(
