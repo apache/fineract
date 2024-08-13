@@ -60,6 +60,7 @@ public class LoanTransactionEnumData {
     private final boolean reAge;
     private final boolean reAmortize;
     private final boolean accrualActivity;
+    private final boolean interestRefund;
 
     public LoanTransactionEnumData(final Long id, final String code, final String value) {
         this.id = id;
@@ -94,6 +95,7 @@ public class LoanTransactionEnumData {
         this.accrualActivity = Long.valueOf(32).equals(this.id);
         this.reAge = Long.valueOf(LoanTransactionType.REAGE.getValue()).equals(this.id);
         this.reAmortize = Long.valueOf(LoanTransactionType.REAMORTIZE.getValue()).equals(this.id);
+        this.interestRefund = Long.valueOf(LoanTransactionType.INTEREST_REFUND.getValue()).equals(this.id);
     }
 
     public boolean isRepaymentType() {

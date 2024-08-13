@@ -23,9 +23,11 @@ import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsCons
 import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.LAST_MODIFIED_BY;
 import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.LAST_MODIFIED_DATE;
 
+import com.google.gson.Gson;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -41,7 +43,9 @@ import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.boot.FineractProfiles;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.apache.fineract.portfolio.loanaccount.data.LoanRefundRequestData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
@@ -64,6 +68,8 @@ public class InternalLoanInformationApiResource implements InitializingBean {
     private final ToApiJsonSerializer<List> toApiJsonSerializerForList;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final AdvancedPaymentDataMapper advancedPaymentDataMapper;
+    private final LoanAccountDomainService loanAccountDomainService;
+    private final Gson gson = new Gson();
 
     @Override
     @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
@@ -152,4 +158,23 @@ public class InternalLoanInformationApiResource implements InitializingBean {
         final Loan loan = loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
         return advancedPaymentDataMapper.mapLoanPaymentAllocationRule(loan.getPaymentAllocationRules());
     }
+
+    @POST
+    @Path("{loanId}/apply-interest-refund")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
+    public Long applyInterestRefundToLoan(@Context final UriInfo uriInfo, @PathParam("loanId") Long loanId,
+            final String apiRequestBodyAsJson) {
+        log.warn("------------------------------------------------------------");
+        log.warn("                                                            ");
+        log.warn("    Apply Loan Transaction to Interest Refund loanId {} ", loanId);
+        log.warn("                                                            ");
+        log.warn("------------------------------------------------------------");
+        LoanRefundRequestData loanRefundRequestData = gson.fromJson(apiRequestBodyAsJson, LoanRefundRequestData.class);
+        final Loan loan = loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
+        final LoanTransaction loanTransaction = loanAccountDomainService.applyInterestRefund(loan, loanRefundRequestData);
+        return loanTransaction.getId();
+    }
+
 }

@@ -323,6 +323,13 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
                 externalId);
     }
 
+    public static LoanTransaction interestRefund(final Loan loan, final Office office, final BigDecimal amount, final BigDecimal principal,
+            final BigDecimal interest, final BigDecimal feeCharges, final BigDecimal penaltyCharges, final PaymentDetail paymentDetail,
+            final LocalDate refundDate, final ExternalId externalId) {
+        return new LoanTransaction(loan, office, LoanTransactionType.INTEREST_REFUND.getValue(), refundDate, amount, principal, interest,
+                feeCharges, penaltyCharges, amount, false, paymentDetail, externalId);
+    }
+
     public static boolean transactionAmountsMatch(final MonetaryCurrency currency, final LoanTransaction loanTransaction,
             final LoanTransaction newLoanTransaction) {
         return loanTransaction.getAmount(currency).isEqualTo(newLoanTransaction.getAmount(currency))

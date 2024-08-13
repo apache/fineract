@@ -67,7 +67,6 @@ import org.apache.fineract.infrastructure.event.business.service.BusinessEventNo
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepository;
 import org.apache.fineract.organisation.holiday.domain.HolidayStatusType;
-import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
@@ -87,6 +86,7 @@ import org.apache.fineract.portfolio.delinquency.validator.LoanDelinquencyAction
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
+import org.apache.fineract.portfolio.loanaccount.data.LoanRefundRequestData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualTransactionBusinessEventService;
@@ -120,7 +120,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final NoteRepository noteRepository;
     private final AccountTransferRepository accountTransferRepository;
-    private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanUtilService loanUtilService;
     private final StandingInstructionRepository standingInstructionRepository;
@@ -799,6 +798,28 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 }
             }
         }
+    }
+
+    @Override
+    public LoanTransaction applyInterestRefund(final Loan loan, final LoanRefundRequestData loanRefundRequest) {
+        final PaymentDetail paymentDetail = null;
+        final LocalDate transactionDate = DateUtils.getBusinessLocalDate();
+        final BigDecimal refundAmount = loanRefundRequest.getTotalAmount();
+
+        final List<Long> existingTransactionIds = new ArrayList<>();
+        final List<Long> existingReversedTransactionIds = new ArrayList<>();
+        existingTransactionIds.addAll(loan.findExistingTransactionIds());
+        existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
+
+        final LoanTransaction interestRefundTransaction = LoanTransaction.interestRefund(loan, loan.getOffice(), refundAmount,
+                loanRefundRequest.getPrincipal(), loanRefundRequest.getInterest(), loanRefundRequest.getFeeCharges(),
+                loanRefundRequest.getPenaltyCharges(), paymentDetail, transactionDate, externalIdFactory.create());
+        interestRefundTransaction.updateLoan(loan);
+        saveLoanTransactionWithDataIntegrityViolationChecks(interestRefundTransaction);
+        loan.addLoanTransaction(interestRefundTransaction);
+        postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds, false);
+
+        return interestRefundTransaction;
     }
 
 }

@@ -27,6 +27,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.delinquency.validator.LoanDelinquencyActionData;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
+import org.apache.fineract.portfolio.loanaccount.data.LoanRefundRequestData;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 
 public interface LoanAccountDomainService {
@@ -92,5 +93,7 @@ public interface LoanAccountDomainService {
 
     LoanTransaction creditBalanceRefund(Loan loan, LocalDate transactionDate, BigDecimal transactionAmount, String noteText,
             ExternalId externalId, PaymentDetail paymentDetail);
+
+    LoanTransaction applyInterestRefund(Loan loan, LoanRefundRequestData loanRefundRequest);
 
 }
