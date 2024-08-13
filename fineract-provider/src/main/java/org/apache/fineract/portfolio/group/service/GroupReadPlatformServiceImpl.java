@@ -43,10 +43,13 @@ import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
+import org.apache.fineract.portfolio.calendar.data.CalendarData;
 import org.apache.fineract.portfolio.client.data.ClientData;
+import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.group.api.GroupingTypesApiConstants;
 import org.apache.fineract.portfolio.group.data.CenterData;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
+import org.apache.fineract.portfolio.group.data.GroupRoleData;
 import org.apache.fineract.portfolio.group.domain.GroupTypes;
 import org.apache.fineract.portfolio.group.exception.GroupNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -74,6 +77,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final PaginationParametersDataValidator paginationParametersDataValidator;
     private final ColumnValidator columnValidator;
+    private final ClientReadPlatformService clientReadPlatformService;
 
     @Override
     public GroupGeneralData retrieveTemplate(final Long officeId, final boolean isCenterGroup, final boolean staffInSelectedOfficeOnly) {
@@ -244,6 +248,23 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         final List<CodeValueData> closureReasons = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(GroupingTypesApiConstants.GROUP_CLOSURE_REASON));
         return GroupGeneralData.withClosureReasons(closureReasons);
+    }
+
+    @Override
+    public GroupGeneralData retrieveGroupAndMembersDetails(Long groupId) {
+        GroupGeneralData groupAccount = retrieveOne(groupId);
+
+        // get group associations
+        final Collection<ClientData> membersOfGroup = clientReadPlatformService.retrieveActiveClientMembersOfGroup(groupId);
+        if (!CollectionUtils.isEmpty(membersOfGroup)) {
+            final Collection<ClientData> activeClientMembers = null;
+            final Collection<CalendarData> calendarsData = null;
+            final CalendarData collectionMeetingCalendar = null;
+            final Collection<GroupRoleData> groupRoles = null;
+            groupAccount = GroupGeneralData.withAssocations(groupAccount, membersOfGroup, activeClientMembers, groupRoles, calendarsData,
+                    collectionMeetingCalendar);
+        }
+        return groupAccount;
     }
 
     private static final class GroupLookupDataMapper implements RowMapper<GroupGeneralData> {

@@ -22,14 +22,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
 
+@Data
 @AllArgsConstructor
-@ToString
-@Getter
-@Setter
 public final class CollectionData {
 
     private BigDecimal availableDisbursementAmount;
