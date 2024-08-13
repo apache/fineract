@@ -1700,6 +1700,14 @@ public class LoanTransactionHelper extends IntegrationTest {
         return Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_TRANSACTION_URL, jsonReturn);
     }
 
+    public Long applyInterestRefundLoanTransaction(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Long loanId, final String jsonBody) {
+        final String POST_LOAN_TRANSACTION_URL = "/fineract-provider/api/v1/internal/loan/" + loanId + "/apply-interest-refund/" + "?"
+                + Utils.TENANT_IDENTIFIER;
+        final String reponse = Utils.performServerPost(requestSpec, responseSpec, POST_LOAN_TRANSACTION_URL, jsonBody);
+        return Long.valueOf(reponse);
+    }
+
     public void printRepaymentSchedule(GetLoansLoanIdResponse getLoansLoanIdResponse) {
         GetLoansLoanIdRepaymentSchedule getLoanRepaymentSchedule = getLoansLoanIdResponse.getRepaymentSchedule();
         if (getLoanRepaymentSchedule != null) {

@@ -111,13 +111,15 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
                 createJournalEntriesForChargeOff(loanDTO, loanTransactionDTO, office);
             }
             // Logic for Interest Payment Waiver
-            else if (loanTransactionDTO.getTransactionType().isInterestPaymentWaiver()) {
-                createJournalEntriesForInterestPaymentWaiver(loanDTO, loanTransactionDTO, office);
+            else if (loanTransactionDTO.getTransactionType().isInterestPaymentWaiver()
+                    || loanTransactionDTO.getTransactionType().isInterestRefund()) {
+                createJournalEntriesForInterestPaymentWaiverOrInterestRefund(loanDTO, loanTransactionDTO, office);
             }
         }
     }
 
-    private void createJournalEntriesForInterestPaymentWaiver(LoanDTO loanDTO, LoanTransactionDTO loanTransactionDTO, Office office) {
+    private void createJournalEntriesForInterestPaymentWaiverOrInterestRefund(LoanDTO loanDTO, LoanTransactionDTO loanTransactionDTO,
+            Office office) {
         final Long loanProductId = loanDTO.getLoanProductId();
         final Long loanId = loanDTO.getLoanId();
         final String currencyCode = loanDTO.getCurrencyCode();
