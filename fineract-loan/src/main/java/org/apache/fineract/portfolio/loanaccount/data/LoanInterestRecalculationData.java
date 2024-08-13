@@ -18,31 +18,35 @@
  */
 package org.apache.fineract.portfolio.loanaccount.data;
 
-import lombok.Getter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
 
-@Getter
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class LoanInterestRecalculationData {
 
-    private final Long id;
-    private final Long loanId;
-    private final EnumOptionData interestRecalculationCompoundingType;
-    private final EnumOptionData rescheduleStrategyType;
-    private final CalendarData calendarData;
-    private final EnumOptionData recalculationRestFrequencyType;
-    private final Integer recalculationRestFrequencyInterval;
-    private final EnumOptionData recalculationRestFrequencyNthDay;
-    private final EnumOptionData recalculationRestFrequencyWeekday;
-    private final Integer recalculationRestFrequencyOnDay;
-    private final EnumOptionData recalculationCompoundingFrequencyType;
-    private final Integer recalculationCompoundingFrequencyInterval;
-    private final EnumOptionData recalculationCompoundingFrequencyNthDay;
-    private final EnumOptionData recalculationCompoundingFrequencyWeekday;
-    private final Integer recalculationCompoundingFrequencyOnDay;
-    private final Boolean isCompoundingToBePostedAsTransaction;
-    private final CalendarData compoundingCalendarData;
-    private final Boolean allowCompoundingOnEod;
+    private Long id;
+    private Long loanId;
+    private EnumOptionData interestRecalculationCompoundingType;
+    private EnumOptionData rescheduleStrategyType;
+    private CalendarData calendarData;
+    private EnumOptionData recalculationRestFrequencyType;
+    private Integer recalculationRestFrequencyInterval;
+    private EnumOptionData recalculationRestFrequencyNthDay;
+    private EnumOptionData recalculationRestFrequencyWeekday;
+    private Integer recalculationRestFrequencyOnDay;
+    private EnumOptionData recalculationCompoundingFrequencyType;
+    private Integer recalculationCompoundingFrequencyInterval;
+    private EnumOptionData recalculationCompoundingFrequencyNthDay;
+    private EnumOptionData recalculationCompoundingFrequencyWeekday;
+    private Integer recalculationCompoundingFrequencyOnDay;
+    private Boolean isCompoundingToBePostedAsTransaction;
+    private CalendarData compoundingCalendarData;
+    private Boolean allowCompoundingOnEod;
 
     public LoanInterestRecalculationData(final Long id, final Long loanId, final EnumOptionData interestRecalculationCompoundingType,
             final EnumOptionData rescheduleStrategyType, final CalendarData calendarData,
@@ -73,17 +77,8 @@ public class LoanInterestRecalculationData {
         this.allowCompoundingOnEod = allowCompoundingOnEod;
     }
 
-    public static LoanInterestRecalculationData withCalendarData(final LoanInterestRecalculationData recalculationData,
-            final CalendarData calendarData, CalendarData compoundingCalendarData) {
-        return new LoanInterestRecalculationData(recalculationData.id, recalculationData.loanId,
-                recalculationData.interestRecalculationCompoundingType, recalculationData.rescheduleStrategyType, calendarData,
-                recalculationData.recalculationRestFrequencyType, recalculationData.recalculationRestFrequencyInterval,
-                recalculationData.recalculationRestFrequencyNthDay, recalculationData.recalculationRestFrequencyWeekday,
-                recalculationData.recalculationRestFrequencyOnDay, compoundingCalendarData,
-                recalculationData.recalculationCompoundingFrequencyType, recalculationData.recalculationCompoundingFrequencyInterval,
-                recalculationData.recalculationCompoundingFrequencyNthDay, recalculationData.recalculationCompoundingFrequencyWeekday,
-                recalculationData.recalculationCompoundingFrequencyOnDay, recalculationData.isCompoundingToBePostedAsTransaction,
-                recalculationData.allowCompoundingOnEod);
+    public LoanInterestRecalculationData withCalendarData(final CalendarData calendarData, CalendarData compoundingCalendarData) {
+        return this.setCalendarData(calendarData).setCompoundingCalendarData(compoundingCalendarData);
     }
 
 }

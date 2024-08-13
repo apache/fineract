@@ -74,12 +74,6 @@ public interface LoanReadPlatformService {
 
     LoanAccountData retrieveLoanProductDetailsTemplate(Long productId, Long clientId, Long groupId);
 
-    LoanAccountData retrieveClientDetailsTemplate(Long clientId);
-
-    LoanAccountData retrieveGroupDetailsTemplate(Long groupId);
-
-    LoanAccountData retrieveGroupAndMembersDetailsTemplate(Long groupId);
-
     Collection<CalendarData> retrieveCalendars(Long groupId);
 
     Page<LoanAccountData> retrieveAll(SearchParameters searchParameters);
