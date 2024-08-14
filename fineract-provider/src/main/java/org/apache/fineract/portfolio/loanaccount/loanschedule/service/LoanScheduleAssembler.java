@@ -91,6 +91,7 @@ import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
+import org.apache.fineract.portfolio.loanaccount.data.OutstandingAmountsDTO;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
@@ -732,7 +733,7 @@ public class LoanScheduleAssembler {
                 loanRepaymentScheduleTransactionProcessor, rescheduleFrom).getLoanScheduleModel();
     }
 
-    public LoanRepaymentScheduleInstallment calculatePrepaymentAmount(MonetaryCurrency currency, LocalDate onDate,
+    public OutstandingAmountsDTO calculatePrepaymentAmount(MonetaryCurrency currency, LocalDate onDate,
             LoanApplicationTerms loanApplicationTerms, Loan loan, final Long officeId,
             final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor) {
         final LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getLoanScheduleType(),
@@ -748,7 +749,6 @@ public class LoanScheduleAssembler {
 
         return loanScheduleGenerator.calculatePrepaymentAmount(currency, onDate, loanApplicationTerms, mc, loan, holidayDetailDTO,
                 loanRepaymentScheduleTransactionProcessor);
-
     }
 
     public void assempleVariableScheduleFrom(final Loan loan, final String json) {
