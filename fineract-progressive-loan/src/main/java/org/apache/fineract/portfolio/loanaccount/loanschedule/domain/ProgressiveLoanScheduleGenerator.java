@@ -264,10 +264,10 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
                 log.debug("calculating prepayment amount till rest frequency date (Strategy B)");
                 OutstandingAmountsDTO outstandingAmounts = new OutstandingAmountsDTO(currency);
                 loan.getRepaymentScheduleInstallments().forEach(installment -> {
-                    boolean isPayoffAfterInstallmentFrom = installment.getFromDate().isAfter(onDate);
+                    boolean isPayoffBeforeInstallment = installment.getFromDate().isBefore(onDate);
 
                     outstandingAmounts.plusPrincipal(installment.getPrincipalOutstanding(currency));
-                    if (!isPayoffAfterInstallmentFrom) {
+                    if (isPayoffBeforeInstallment) {
                         outstandingAmounts.plusInterest(installment.getInterestOutstanding(currency));
                     } else {
                         log.debug("Payoff after installment {}, not counting interest", installment.getDueDate());
