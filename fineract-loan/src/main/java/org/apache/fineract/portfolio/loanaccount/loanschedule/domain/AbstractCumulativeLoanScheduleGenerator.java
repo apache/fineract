@@ -45,6 +45,7 @@ import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
+import org.apache.fineract.portfolio.loanaccount.data.OutstandingAmountsDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanInterestRecalcualtionAdditionalDetails;
@@ -2775,7 +2776,7 @@ public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanSch
      * Method returns the amount payable to close the loan account as of today.
      */
     @Override
-    public LoanRepaymentScheduleInstallment calculatePrepaymentAmount(final MonetaryCurrency currency, final LocalDate onDate,
+    public OutstandingAmountsDTO calculatePrepaymentAmount(final MonetaryCurrency currency, final LocalDate onDate,
             final LoanApplicationTerms loanApplicationTerms, final MathContext mc, Loan loan, final HolidayDetailDTO holidayDetailDTO,
             final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor) {
 
@@ -2790,10 +2791,10 @@ public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanSch
 
         loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(loanApplicationTerms.getExpectedDisbursementDate(),
                 loanTransactions, currency, loanScheduleDTO.getInstallments(), loan.getActiveCharges());
-        Money feeCharges = Money.zero(currency);
-        Money penaltyCharges = Money.zero(currency);
         Money totalPrincipal = Money.zero(currency);
         Money totalInterest = Money.zero(currency);
+        Money feeCharges = Money.zero(currency);
+        Money penaltyCharges = Money.zero(currency);
         for (final LoanRepaymentScheduleInstallment currentInstallment : loanScheduleDTO.getInstallments()) {
             if (currentInstallment.isNotFullyPaidOff()) {
                 totalPrincipal = totalPrincipal.plus(currentInstallment.getPrincipalOutstanding(currency));
@@ -2802,8 +2803,10 @@ public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanSch
                 penaltyCharges = penaltyCharges.plus(currentInstallment.getPenaltyChargesOutstanding(currency));
             }
         }
-        final Set<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails = null;
-        return new LoanRepaymentScheduleInstallment(null, 0, onDate, onDate, totalPrincipal.getAmount(), totalInterest.getAmount(),
-                feeCharges.getAmount(), penaltyCharges.getAmount(), false, compoundingDetails);
+        return new OutstandingAmountsDTO(currency) //
+                .principal(totalPrincipal) //
+                .interest(totalInterest) //
+                .feeCharges(feeCharges) //
+                .penaltyCharges(penaltyCharges);
     }
 }

@@ -583,20 +583,20 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         return interestPortionOfTransaction;
     }
 
-    public Money payPrincipalComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
+    public Money payPrincipalComponent(final LocalDate transactionDate, final Money transactionAmount) {
 
-        final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
+        final MonetaryCurrency currency = transactionAmount.getCurrency();
         Money principalPortionOfTransaction = Money.zero(currency);
-        if (transactionAmountRemaining.isZero()) {
+        if (transactionAmount.isZero()) {
             return principalPortionOfTransaction;
         }
         final Money principalDue = getPrincipalOutstanding(currency);
-        if (transactionAmountRemaining.isGreaterThanOrEqualTo(principalDue)) {
+        if (transactionAmount.isGreaterThanOrEqualTo(principalDue)) {
             this.principalCompleted = getPrincipalCompleted(currency).plus(principalDue).getAmount();
             principalPortionOfTransaction = principalPortionOfTransaction.plus(principalDue);
         } else {
-            this.principalCompleted = getPrincipalCompleted(currency).plus(transactionAmountRemaining).getAmount();
-            principalPortionOfTransaction = principalPortionOfTransaction.plus(transactionAmountRemaining);
+            this.principalCompleted = getPrincipalCompleted(currency).plus(transactionAmount).getAmount();
+            principalPortionOfTransaction = principalPortionOfTransaction.plus(transactionAmount);
         }
 
         this.principalCompleted = defaultToNullIfZero(this.principalCompleted);

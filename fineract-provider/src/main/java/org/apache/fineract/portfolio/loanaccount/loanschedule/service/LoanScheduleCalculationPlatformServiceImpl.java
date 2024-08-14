@@ -31,6 +31,7 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.data.OutstandingAmountsDTO;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
@@ -115,8 +116,12 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
             }
         }
         LoanApplicationTerms loanApplicationTerms = constructLoanApplicationTerms(loan);
-        LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = this.loanScheduleAssembler.calculatePrepaymentAmount(currency,
-                today, loanApplicationTerms, loan, loan.getOfficeId(), loanRepaymentScheduleTransactionProcessor);
+        OutstandingAmountsDTO outstandingAmountsDTO = this.loanScheduleAssembler.calculatePrepaymentAmount(currency, today,
+                loanApplicationTerms, loan, loan.getOfficeId(), loanRepaymentScheduleTransactionProcessor);
+        LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = new LoanRepaymentScheduleInstallment(null, 0, today, today,
+                outstandingAmountsDTO.principal().getAmount(), outstandingAmountsDTO.interest().getAmount(),
+                outstandingAmountsDTO.feeCharges().getAmount(), outstandingAmountsDTO.penaltyCharges().getAmount(), false, null);
+
         Money totalAmount = totalPrincipal.plus(loanRepaymentScheduleInstallment.getFeeChargesOutstanding(currency))
                 .plus(loanRepaymentScheduleInstallment.getPenaltyChargesOutstanding(currency));
         Money interestDue = Money.zero(currency);

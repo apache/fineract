@@ -250,7 +250,7 @@ public class LoanSummaryData {
         return BigDecimal.ZERO;
     }
 
-    private static BigDecimal computeAccruedInterestTillDay(final LoanSchedulePeriodData period, final long untilDay,
+    public static BigDecimal computeAccruedInterestTillDay(final LoanSchedulePeriodData period, final long untilDay,
             final CurrencyData currency) {
         Integer remainingDays = period.getDaysInPeriod();
         BigDecimal totalAccruedInterest = BigDecimal.ZERO;

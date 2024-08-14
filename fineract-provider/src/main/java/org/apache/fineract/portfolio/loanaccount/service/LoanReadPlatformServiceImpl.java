@@ -104,6 +104,7 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionRelationData;
+import org.apache.fineract.portfolio.loanaccount.data.OutstandingAmountsDTO;
 import org.apache.fineract.portfolio.loanaccount.data.PaidInAdvanceData;
 import org.apache.fineract.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
@@ -473,20 +474,20 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         final LocalDate earliestUnpaidInstallmentDate = DateUtils.getBusinessLocalDate();
         final LocalDate recalculateFrom = null;
         final ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
-        final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = loan.fetchPrepaymentDetail(scheduleGeneratorDTO, onDate);
+        final OutstandingAmountsDTO outstandingAmounts = loan.fetchPrepaymentDetail(scheduleGeneratorDTO, onDate);
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(repaymentTransactionType);
         final Collection<PaymentTypeData> paymentOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
-        final BigDecimal outstandingLoanBalance = loanRepaymentScheduleInstallment.getPrincipalOutstanding(currency).getAmount();
+        final BigDecimal outstandingLoanBalance = outstandingAmounts.principal().getAmount();
         final BigDecimal unrecognizedIncomePortion = null;
-        BigDecimal adjustedChargeAmount = adjustPrepayInstallmentCharge(loan, onDate);
 
-        return new LoanTransactionData(null, null, null, transactionType, null, currencyData, earliestUnpaidInstallmentDate,
-                loanRepaymentScheduleInstallment.getTotalOutstanding(currency).getAmount().subtract(adjustedChargeAmount),
-                loan.getNetDisbursalAmount(), loanRepaymentScheduleInstallment.getPrincipalOutstanding(currency).getAmount(),
-                loanRepaymentScheduleInstallment.getInterestOutstanding(currency).getAmount(),
-                loanRepaymentScheduleInstallment.getFeeChargesOutstanding(currency).getAmount().subtract(adjustedChargeAmount),
-                loanRepaymentScheduleInstallment.getPenaltyChargesOutstanding(currency).getAmount(), null, unrecognizedIncomePortion,
-                paymentOptions, ExternalId.empty(), null, null, outstandingLoanBalance, false, loanId, loan.getExternalId());
+        BigDecimal adjustedChargeAmount = adjustPrepayInstallmentCharge(loan, onDate);
+        BigDecimal totalAdjusted = outstandingAmounts.getTotalOutstanding().getAmount().subtract(adjustedChargeAmount);
+
+        return new LoanTransactionData(null, null, null, transactionType, null, currencyData, earliestUnpaidInstallmentDate, totalAdjusted,
+                loan.getNetDisbursalAmount(), outstandingAmounts.principal().getAmount(), outstandingAmounts.interest().getAmount(),
+                outstandingAmounts.feeCharges().getAmount().subtract(adjustedChargeAmount), outstandingAmounts.penaltyCharges().getAmount(),
+                null, unrecognizedIncomePortion, paymentOptions, ExternalId.empty(), null, null, outstandingLoanBalance, false, loanId,
+                loan.getExternalId());
     }
 
     private BigDecimal adjustPrepayInstallmentCharge(Loan loan, final LocalDate onDate) {
