@@ -136,9 +136,25 @@ class ProgressiveLoanScheduleGeneratorTest {
     }
 
     @Test
-    public void calculateSameDayPayoff() {
+    public void calculateSameDayPayoff_TILL_PRE_CLOSURE_DATE() {
         LoanApplicationTerms terms = mock(LoanApplicationTerms.class);
         when(terms.getPreClosureInterestCalculationStrategy()).thenReturn(TILL_PRE_CLOSURE_DATE);
+
+        Loan loan = prepareLoanWithInstallments(List.of(
+                new TestRow(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), BigDecimal.valueOf(102), BigDecimal.valueOf(100),
+                        BigDecimal.valueOf(2), ZERO, ZERO, false),
+                new TestRow(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1), BigDecimal.valueOf(102), BigDecimal.valueOf(100),
+                        BigDecimal.valueOf(2), ZERO, ZERO, false)));
+
+        OutstandingAmountsDTO amounts = generator.calculatePrepaymentAmount(usd, LocalDate.of(2024, 1, 1), terms, MathContext.DECIMAL32,
+                loan, holidays, processor);
+        assertEquals(BigDecimal.valueOf(200.0).longValue(), amounts.getTotalOutstanding().getAmount().longValue());
+    }
+
+    @Test
+    public void calculateSameDayPayoff_TILL_REST_FREQUENCY_DATE() {
+        LoanApplicationTerms terms = mock(LoanApplicationTerms.class);
+        when(terms.getPreClosureInterestCalculationStrategy()).thenReturn(TILL_REST_FREQUENCY_DATE);
 
         Loan loan = prepareLoanWithInstallments(List.of(
                 new TestRow(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1), BigDecimal.valueOf(102), BigDecimal.valueOf(100),
