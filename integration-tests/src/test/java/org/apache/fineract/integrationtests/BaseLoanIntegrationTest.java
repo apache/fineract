@@ -205,8 +205,12 @@ public abstract class BaseLoanIntegrationTest {
         return Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey();
     }
 
-    // Loan product with proper accounting setup
     protected PostLoanProductsRequest createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct() {
+        return createOnePeriod30DaysPeriodicAccrualProduct((double) 0);
+    }
+
+    // Loan product with proper accounting setup
+    protected PostLoanProductsRequest createOnePeriod30DaysPeriodicAccrualProduct(double interestRatePerPeriod) {
         return new PostLoanProductsRequest().name(Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6))//
                 .shortName(Utils.uniqueRandomStringGenerator("", 4))//
                 .description("Loan Product Description")//
@@ -224,7 +228,7 @@ public abstract class BaseLoanIntegrationTest {
                 .maxNumberOfRepayments(30)//
                 .isLinkedToFloatingInterestRates(false)//
                 .minInterestRatePerPeriod((double) 0)//
-                .interestRatePerPeriod((double) 0)//
+                .interestRatePerPeriod(interestRatePerPeriod)//
                 .maxInterestRatePerPeriod((double) 100)//
                 .interestRateFrequencyType(2)//
                 .repaymentEvery(30)//
@@ -300,6 +304,21 @@ public abstract class BaseLoanIntegrationTest {
                 .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString()) //
                 .loanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString()) //
                 .addPaymentAllocationItem(defaultAllocation);
+    }
+
+    protected PostLoanProductsRequest createOnePeriod30DaysPeriodicAccrualProductWithAdvancedPaymentAllocationAndInterestRecalculation(
+            final double interestRatePerPeriod, final Integer rescheduleStrategyMethod) {
+        String futureInstallmentAllocationRule = "NEXT_INSTALLMENT";
+        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation(futureInstallmentAllocationRule);
+
+        return createOnePeriod30DaysPeriodicAccrualProduct(interestRatePerPeriod) //
+                .transactionProcessingStrategyCode("advanced-payment-allocation-strategy")//
+                .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString()) //
+                .loanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString()) //
+                .addPaymentAllocationItem(defaultAllocation).enableDownPayment(false) //
+                .isInterestRecalculationEnabled(true).interestRecalculationCompoundingMethod(0) //
+                .preClosureInterestCalculationStrategy(1).recalculationRestFrequencyType(1).allowPartialPeriodInterestCalcualtion(true) //
+                .rescheduleStrategyMethod(rescheduleStrategyMethod);
     }
 
     private List<PaymentAllocationOrder> getPaymentAllocationOrder(PaymentAllocationType... paymentAllocationTypes) {

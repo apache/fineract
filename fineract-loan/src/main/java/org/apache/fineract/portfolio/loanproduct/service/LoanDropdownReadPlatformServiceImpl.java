@@ -159,7 +159,8 @@ public class LoanDropdownReadPlatformServiceImpl implements LoanDropdownReadPlat
 
         return Arrays.asList(rescheduleStrategyType(LoanRescheduleStrategyMethod.REDUCE_EMI_AMOUNT),
                 rescheduleStrategyType(LoanRescheduleStrategyMethod.REDUCE_NUMBER_OF_INSTALLMENTS),
-                rescheduleStrategyType(LoanRescheduleStrategyMethod.RESCHEDULE_NEXT_REPAYMENTS));
+                rescheduleStrategyType(LoanRescheduleStrategyMethod.RESCHEDULE_NEXT_REPAYMENTS),
+                rescheduleStrategyType(LoanRescheduleStrategyMethod.ADJUST_LAST_UNPAID_PERIOD));
     }
 
     @Override

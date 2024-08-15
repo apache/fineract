@@ -20,7 +20,7 @@ package org.apache.fineract.test.data;
 
 public enum AdvancePaymentsAdjustmentType {
 
-    RESCHEDULE_NEXT_REPAYMENTS(1), REDUCE_NUMBER_OF_INSTALLMENTS(2), REDUCE_EMI_AMOUNT(3);
+    RESCHEDULE_NEXT_REPAYMENTS(1), REDUCE_NUMBER_OF_INSTALLMENTS(2), REDUCE_EMI_AMOUNT(3), ADJUST_LAST_UNPAID_PERIOD(4);
 
     public final Integer value;
 

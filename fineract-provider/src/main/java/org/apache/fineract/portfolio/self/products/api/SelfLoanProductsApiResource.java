@@ -99,7 +99,7 @@ import org.springframework.stereotype.Component;
         + "Specifies which amount portion should be added to principal for interest recalculation. \n"
         + "Example Values:0=NONE(Only on principal), 1=INTEREST(Principal+Interest), 2=FEE(Principal+Fee), 3=FEE And INTEREST (Principal+Fee+Interest)\n"
         + "rescheduleStrategyMethod\n" + "Specifies what action should perform on loan repayment schedule for advance payments. \n"
-        + "Example Values:1=Reschedule next repayments, 2=Reduce number of installments, 3=Reduce EMI amount\n"
+        + "Example Values:1=Reschedule next repayments, 2=Reduce number of installments, 3=Reduce EMI amount, 4=Adjust last, unpaid period\n"
         + "recalculationCompoundingFrequencyType\n"
         + "Specifies effective date from which the compounding of interest or fee amounts will be considered in recalculation on late payment.\n"
         + "Example Values:1=Same as repayment period, 2=Daily, 3=Weekly, 4=Monthly\n" + "recalculationCompoundingFrequencyInterval\n"
