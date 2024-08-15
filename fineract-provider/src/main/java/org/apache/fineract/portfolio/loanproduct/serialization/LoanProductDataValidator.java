@@ -61,6 +61,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanPreClosureInterestCa
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductPaymentAllocationRule;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductValueConditionType;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedInterestRefundTypes;
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
 import org.apache.fineract.portfolio.loanproduct.exception.EqualAmortizationUnsupportedFeatureException;
@@ -1042,7 +1043,27 @@ public final class LoanProductDataValidator {
             final Integer rescheduleStrategyMethod = this.fromApiJsonHelper
                     .extractIntegerNamed(LoanProductConstants.rescheduleStrategyMethodParameterName, element, Locale.getDefault());
             baseDataValidator.reset().parameter(LoanProductConstants.rescheduleStrategyMethodParameterName).value(rescheduleStrategyMethod)
-                    .notNull().inMinMaxRange(1, 3);
+                    .notNull().inMinMaxRange(1, 4);
+            final LoanRescheduleStrategyMethod loanRescheduleStrategyMethod = LoanRescheduleStrategyMethod
+                    .fromInt(rescheduleStrategyMethod);
+
+            String loanScheduleType = LoanScheduleType.CUMULATIVE.toString();
+            if (fromApiJsonHelper.parameterExists(LoanProductConstants.LOAN_SCHEDULE_TYPE, element)) {
+                loanScheduleType = fromApiJsonHelper.extractStringNamed(LoanProductConstants.LOAN_SCHEDULE_TYPE, element);
+            }
+            if (LoanScheduleType.CUMULATIVE.equals(LoanScheduleType.valueOf(loanScheduleType))
+                    && LoanRescheduleStrategyMethod.ADJUST_LAST_UNPAID_PERIOD.equals(loanRescheduleStrategyMethod)) {
+                baseDataValidator.reset().parameter(LoanProductConstants.rescheduleStrategyMethodParameterName).failWithCode(
+                        "reschedule.strategy.method.not.supported.for.loan.schedule.type.cumulative",
+                        "Adjust last, unpaid period is only supported for Progressive loan schedule type");
+            }
+
+            if (LoanScheduleType.PROGRESSIVE.equals(LoanScheduleType.valueOf(loanScheduleType))
+                    && !LoanRescheduleStrategyMethod.ADJUST_LAST_UNPAID_PERIOD.equals(loanRescheduleStrategyMethod)) {
+                baseDataValidator.reset().parameter(LoanProductConstants.rescheduleStrategyMethodParameterName).failWithCode(
+                        "reschedule.strategy.method.not.supported.for.loan.schedule.type.progressive",
+                        loanScheduleType.toString() + " reschedule strategy type is not supported for Progressive loan schedule type");
+            }
         }
 
         RecalculationFrequencyType frequencyType = null;

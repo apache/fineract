@@ -44,6 +44,7 @@ import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.BusinessDateRequest;
 import org.apache.fineract.client.models.CreditAllocationData;
 import org.apache.fineract.client.models.CreditAllocationOrder;
+import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdLoanChargeData;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
@@ -5092,6 +5093,69 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     0.29, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getActive());
             assertEquals(loanDetails.getNumberOfRepayments(), 6);
+        });
+    }
+
+    // uc148a: Advanced payment allocation, with Interest Recalculation in Loan Product and Adjust last, unpaid period
+    // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+    // 1. Create a Loan product with Adv. Pment. Alloc. with Interest Recalculation enabled and Adjust last, unpaid
+    // period
+    @Test
+    public void uc148a() {
+        runAt("23 March 2024", () -> {
+            final Integer rescheduleStrategyMethod = 4; // Adjust last, unpaid period
+            PostLoanProductsRequest loanProduct = createOnePeriod30DaysPeriodicAccrualProductWithAdvancedPaymentAllocationAndInterestRecalculation(
+                    (double) 80.0, rescheduleStrategyMethod);
+
+            final PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProduct);
+            assertNotNull(loanProductResponse);
+
+            final GetLoanProductsProductIdResponse loanProductDetails = loanProductHelper
+                    .retrieveLoanProductById(loanProductResponse.getResourceId());
+            assertNotNull(loanProductDetails);
+            assertTrue(loanProductDetails.getIsInterestRecalculationEnabled());
+            assertEquals(rescheduleStrategyMethod.longValue(),
+                    loanProductDetails.getInterestRecalculationData().getRescheduleStrategyType().getId());
+        });
+    }
+
+    // uc148b: Negative Test: Advanced payment allocation, with Interest Recalculation in Loan Product but try to use
+    // Reduce EMI amount
+    // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
+    // 1. Try to Create a Loan product with Adv. Pment. Alloc. with Interest Recalculation enabled and use Reduce EMI
+    // amount
+    @Test
+    public void uc148b() {
+        runAt("23 March 2024", () -> {
+            final Integer rescheduleStrategyMethod = 3; // Reduce EMI amount
+            PostLoanProductsRequest loanProduct = createOnePeriod30DaysPeriodicAccrualProductWithAdvancedPaymentAllocationAndInterestRecalculation(
+                    (double) 80.0, rescheduleStrategyMethod);
+
+            CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class,
+                    () -> loanProductHelper.createLoanProduct(loanProduct));
+
+            Assertions.assertTrue(callFailedRuntimeException.getMessage().contains("is not supported for Progressive loan schedule type"));
+        });
+    }
+
+    // uc148c: Negative Test: Comulative, with Interest Recalculation in Loan Product but try to use
+    // Adjust last, unpaid period
+    // COMULATIVE
+    // 1. Try to Create a Loan product with Comulative with Interest Recalculation enabled and use Adjust last, unpaid
+    // period
+    @Test
+    public void uc148c() {
+        runAt("23 March 2024", () -> {
+            final Integer rescheduleStrategyMethod = 4; // Adjust last, unpaid period
+            PostLoanProductsRequest loanProduct = createOnePeriod30DaysPeriodicAccrualProductWithAdvancedPaymentAllocationAndInterestRecalculation(
+                    (double) 80.0, rescheduleStrategyMethod).transactionProcessingStrategyCode(LoanProductTestBuilder.DEFAULT_STRATEGY)//
+                    .loanScheduleType(LoanScheduleType.CUMULATIVE.toString());
+
+            CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class,
+                    () -> loanProductHelper.createLoanProduct(loanProduct));
+
+            Assertions.assertTrue(callFailedRuntimeException.getMessage()
+                    .contains("Adjust last, unpaid period is only supported for Progressive loan schedule type"));
         });
     }
 
