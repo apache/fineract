@@ -225,7 +225,7 @@ public final class LoanTransactionValidator {
             }
 
             LocalDate approvedOnDate = loan.getApprovedOnDate();
-            if (DateUtils.isBefore(actualDisbursementDate, approvedOnDate)) {
+            if (actualDisbursementDate != null && DateUtils.isBefore(actualDisbursementDate, approvedOnDate)) {
                 final String errorMessage = "The date on which a loan is disbursed cannot be before its approval date: " + approvedOnDate;
                 throw new InvalidLoanStateTransitionException("disbursal", "cannot.be.before.approval.date", errorMessage,
                         actualDisbursementDate, approvedOnDate);
