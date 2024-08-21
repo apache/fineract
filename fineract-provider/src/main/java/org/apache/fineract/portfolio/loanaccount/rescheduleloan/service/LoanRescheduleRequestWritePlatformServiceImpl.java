@@ -64,7 +64,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanSummaryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.DefaultScheduledDateGenerator;
@@ -87,6 +86,7 @@ import org.apache.fineract.portfolio.loanaccount.service.ReplayedTransactionBusi
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -101,11 +101,11 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
     private final CodeValueRepositoryWrapper codeValueRepositoryWrapper;
     private final PlatformSecurityContext platformSecurityContext;
+    @Qualifier("loanRescheduleRequestDataValidator")
     private final LoanRescheduleRequestDataValidator loanRescheduleRequestDataValidator;
     private final LoanRescheduleRequestRepository loanRescheduleRequestRepository;
     private final LoanRepaymentScheduleHistoryRepository loanRepaymentScheduleHistoryRepository;
     private final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService;
-    private final LoanTransactionRepository loanTransactionRepository;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final LoanAssembler loanAssembler;

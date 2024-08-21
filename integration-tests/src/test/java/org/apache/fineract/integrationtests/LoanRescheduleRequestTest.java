@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.restassured.builder.RequestSpecBuilder;
@@ -31,19 +32,31 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import org.apache.fineract.client.models.AdvancedPaymentData;
+import org.apache.fineract.client.models.PostClientsResponse;
+import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
+import org.apache.fineract.client.models.PostCreateRescheduleLoansResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdRequest;
+import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.client.models.PostLoansResponse;
+import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
+import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.LoanRescheduleRequestHelper;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanRescheduleRequestTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,8 +64,7 @@ import org.slf4j.LoggerFactory;
  * Test the creation, approval and rejection of a loan reschedule request
  **/
 @SuppressWarnings({ "rawtypes" })
-@ExtendWith(LoanTestLifecycleExtension.class)
-public class LoanRescheduleRequestTest {
+public class LoanRescheduleRequestTest extends BaseLoanIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanRescheduleRequestTest.class);
     private ResponseSpecification responseSpec;
@@ -235,6 +247,99 @@ public class LoanRescheduleRequestTest {
         LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
     }
 
+    @Test
+    public void testInterestRateChangeForProgressiveLoan() {
+        PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final Account assetAccount = accountHelper.createAssetAccount();
+        final Account incomeAccount = accountHelper.createIncomeAccount();
+        final Account expenseAccount = accountHelper.createExpenseAccount();
+        final Account overpaymentAccount = accountHelper.createLiabilityAccount();
+
+        Integer commonLoanProductId = createLoanProduct("500", "15", "4", true, "25", true, LoanScheduleType.PROGRESSIVE,
+                LoanScheduleProcessingType.HORIZONTAL, assetAccount, incomeAccount, expenseAccount, overpaymentAccount);
+        AtomicReference<PostCreateRescheduleLoansResponse> rescheduleResponse = new AtomicReference<>();
+        AtomicReference<PostLoansResponse> loanResponse = new AtomicReference<>();
+        // Do not allow interest rate change on not active loan
+        // Do not allow interest rate change twice on the same day
+        runAt("15 February 2023", () -> {
+
+            loanResponse.set(applyForLoanApplication(client.getClientId(), commonLoanProductId, BigDecimal.valueOf(500.0), 45, 15, 3,
+                    BigDecimal.ZERO, "01 January 2023", "01 January 2023"));
+
+            loanTransactionHelper.approveLoan(loanResponse.get().getLoanId(),
+                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(500)).dateFormat(DATETIME_PATTERN)
+                            .approvedOnDate("01 January 2023").locale("en"));
+
+            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                    () -> loanRescheduleRequestHelper
+                            .createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanResponse.get().getLoanId())
+                                    .dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("15 February 2023")
+                                    .newInterestRate(BigDecimal.ONE).rescheduleReasonId(1L).rescheduleFromDate("16 February 2023")));
+            assertEquals(400, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("loan.is.not.active"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.get().getLoanId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("15 February 2023").dateFormat(DATETIME_PATTERN)
+                            .transactionAmount(BigDecimal.valueOf(500.00)).locale("en"));
+
+            rescheduleResponse.set(loanRescheduleRequestHelper.createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest()
+                    .loanId(loanResponse.get().getLoanId()).dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("15 February 2023")
+                    .newInterestRate(BigDecimal.ONE).rescheduleReasonId(1L).rescheduleFromDate("16 February 2023")));
+
+            exception = assertThrows(CallFailedRuntimeException.class,
+                    () -> loanRescheduleRequestHelper
+                            .createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanResponse.get().getLoanId())
+                                    .dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("15 February 2023")
+                                    .newInterestRate(BigDecimal.ONE).rescheduleReasonId(1L).rescheduleFromDate("16 February 2023")));
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("loan.reschedule.interest.rate.change.already.exists"));
+        });
+        // Do not allow approve an interest rate change if the reschedule from date is not in the future
+        // Do not allow create interest rate change if a previous interest rate change got already approved for that
+        // date
+        runAt("16 February 2023", () -> {
+            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                    () -> loanRescheduleRequestHelper.approveLoanRescheduleRequest(rescheduleResponse.get().getResourceId(),
+                            new PostUpdateRescheduleLoansRequest().approvedOnDate("16 February 2024").locale("en")
+                                    .dateFormat(DATETIME_PATTERN)));
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("loan.reschedule.interest.rate.change.reschedule.from.date.should.be.in.future"));
+
+            PostCreateRescheduleLoansResponse rescheduleLoansResponse = loanRescheduleRequestHelper
+                    .createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanResponse.get().getLoanId())
+                            .dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("17 February 2023").newInterestRate(BigDecimal.ONE)
+                            .rescheduleReasonId(1L).rescheduleFromDate("17 February 2023"));
+
+            loanRescheduleRequestHelper.approveLoanRescheduleRequest(rescheduleLoansResponse.getResourceId(),
+                    new PostUpdateRescheduleLoansRequest().approvedOnDate("17 February 2024").locale("en").dateFormat(DATETIME_PATTERN));
+
+            exception = assertThrows(CallFailedRuntimeException.class,
+                    () -> loanRescheduleRequestHelper
+                            .createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(rescheduleLoansResponse.getLoanId())
+                                    .dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("17 February 2023")
+                                    .newInterestRate(BigDecimal.ONE).rescheduleReasonId(1L).rescheduleFromDate("17 February 2023")));
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("loan.reschedule.interest.rate.change.already.exists"));
+
+        });
+
+        // Allow new interest rate change if the previous got rejected
+        runAt("17 February 2023", () -> {
+            PostCreateRescheduleLoansResponse rescheduleLoansResponse = loanRescheduleRequestHelper
+                    .createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanResponse.get().getLoanId())
+                            .dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("18 February 2023").newInterestRate(BigDecimal.ONE)
+                            .rescheduleReasonId(1L).rescheduleFromDate("18 February 2023"));
+
+            loanRescheduleRequestHelper.rejectLoanRescheduleRequest(rescheduleLoansResponse.getResourceId(),
+                    new PostUpdateRescheduleLoansRequest().rejectedOnDate("18 February 2024").locale("en").dateFormat(DATETIME_PATTERN));
+
+            loanRescheduleRequestHelper.createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest()
+                    .loanId(loanResponse.get().getLoanId()).dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("18 February 2023")
+                    .newInterestRate(BigDecimal.ONE).rescheduleReasonId(1L).rescheduleFromDate("18 February 2023"));
+
+        });
+    }
+
     /**
      * create new loan reschedule request
      **/
@@ -254,5 +359,54 @@ public class LoanRescheduleRequestTest {
     @Test
     public void testCreateLoanRescheduleChangeEMIRequest() {
         this.createLoanRescheduleChangeEMIRequest();
+    }
+
+    private PostLoansResponse applyForLoanApplication(final Long clientId, final Integer loanProductId, final BigDecimal principal,
+            final int loanTermFrequency, final int repaymentAfterEvery, final int numberOfRepayments, final BigDecimal interestRate,
+            final String expectedDisbursementDate, final String submittedOnDate, String transactionProcessorCode,
+            String loanScheduleProcessingType) {
+        LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+        return loanTransactionHelper.applyLoan(new PostLoansRequest().clientId(clientId).productId(loanProductId.longValue())
+                .expectedDisbursementDate(expectedDisbursementDate).dateFormat(DATETIME_PATTERN)
+                .transactionProcessingStrategyCode(transactionProcessorCode).locale("en").submittedOnDate(submittedOnDate)
+                .amortizationType(1).interestRatePerPeriod(interestRate).interestCalculationPeriodType(1).interestType(0)
+                .repaymentFrequencyType(0).repaymentEvery(repaymentAfterEvery).repaymentFrequencyType(0)
+                .numberOfRepayments(numberOfRepayments).loanTermFrequency(loanTermFrequency).loanTermFrequencyType(0).principal(principal)
+                .loanType("individual").loanScheduleProcessingType(loanScheduleProcessingType)
+                .maxOutstandingLoanBalance(BigDecimal.valueOf(35000)));
+    }
+
+    private PostLoansResponse applyForLoanApplication(final Long clientId, final Integer loanProductId, final BigDecimal principal,
+            final int loanTermFrequency, final int repaymentAfterEvery, final int numberOfRepayments, final BigDecimal interestRate,
+            final String expectedDisbursementDate, final String submittedOnDate) {
+        return applyForLoanApplication(clientId, loanProductId, principal, loanTermFrequency, repaymentAfterEvery, numberOfRepayments,
+                interestRate, expectedDisbursementDate, submittedOnDate, LoanScheduleProcessingType.HORIZONTAL);
+    }
+
+    private PostLoansResponse applyForLoanApplication(final Long clientId, final Integer loanProductId, final BigDecimal principal,
+            final int loanTermFrequency, final int repaymentAfterEvery, final int numberOfRepayments, final BigDecimal interestRate,
+            final String expectedDisbursementDate, final String submittedOnDate, LoanScheduleProcessingType loanScheduleProcessingType) {
+        LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+        return applyForLoanApplication(clientId, loanProductId, principal, loanTermFrequency, repaymentAfterEvery, numberOfRepayments,
+                interestRate, expectedDisbursementDate, submittedOnDate,
+                AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY, loanScheduleProcessingType.name());
+    }
+
+    private Integer createLoanProduct(final String principal, final String repaymentAfterEvery, final String numberOfRepayments,
+            boolean downPaymentEnabled, String downPaymentPercentage, boolean autoPayForDownPayment, LoanScheduleType loanScheduleType,
+            LoanScheduleProcessingType loanScheduleProcessingType, final Account... accounts) {
+        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation("NEXT_INSTALLMENT");
+        LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
+        final String loanProductJSON = new LoanProductTestBuilder().withMinPrincipal(principal).withPrincipal(principal)
+                .withRepaymentTypeAsDays().withRepaymentAfterEvery(repaymentAfterEvery).withNumberOfRepayments(numberOfRepayments)
+                .withEnableDownPayment(downPaymentEnabled, downPaymentPercentage, autoPayForDownPayment).withinterestRatePerPeriod("0")
+                .withInterestRateFrequencyTypeAsMonths()
+                .withRepaymentStrategy(AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                .withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat().withAccountingRulePeriodicAccrual(accounts)
+                .addAdvancedPaymentAllocation(defaultAllocation).withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+                .withInterestTypeAsDecliningBalance().withMultiDisburse().withDisallowExpectedDisbursements(true)
+                .withLoanScheduleType(loanScheduleType).withLoanScheduleProcessingType(loanScheduleProcessingType).withDaysInMonth("30")
+                .withDaysInYear("365").withMoratorium("0", "0").build(null);
+        return loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 }

@@ -939,7 +939,7 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
         AtomicReference<Long> loanId = new AtomicReference<>();
         runAt(creationBusinessDay, () -> {
             Long localLoanProductId = loanTransactionHelper
-                    .createLoanProduct(loanProductsRequestPin30InterestDecliningBalanceDailyRecalculationCompoundingNoneAccrualActivity())
+                    .createLoanProduct(loanProductsRequestInterestDecliningBalanceDailyRecalculationCompoundingNoneAccrualActivity())
                     .getResourceId();
             loanId.set(applyForLoanApplication(client.getClientId(), localLoanProductId, BigDecimal.valueOf(1000), disbursementDay));
             loanTransactionHelper.approveLoan(loanId.get(), new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000))
@@ -964,7 +964,7 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
         });
     }
 
-    private PostLoanProductsRequest loanProductsRequestPin30InterestDecliningBalanceDailyRecalculationCompoundingNoneAccrualActivity() {
+    private PostLoanProductsRequest loanProductsRequestInterestDecliningBalanceDailyRecalculationCompoundingNoneAccrualActivity() {
         String name = Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6);
         String shortName = Utils.uniqueRandomStringGenerator("", 4);
 

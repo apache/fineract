@@ -114,7 +114,7 @@ Feature: LoanReschedule
     When Admin sets the business date to "05 July 2023"
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
-      | 31 July 2023       | 05 July 2023    | 31 August 2023  | 0                | 0               | 0          | 0               |
+      | 31 July 2023       | 05 July 2023    | 31 August 2023  |                  |                 |            |                 |
     Then Loan Repayment schedule has 1 periods, with the following data for periods:
       | Nr | Days | Date           | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 July 2023   |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
@@ -144,7 +144,7 @@ Feature: LoanReschedule
     When Admin sets the business date to "05 July 2023"
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate   | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
-      | 01 September 2023  | 05 July 2023    | 15 September 2023 | 0                | 0               | 0          | 0               |
+      | 01 September 2023  | 05 July 2023    | 15 September 2023 |                  |                 |            |                 |
     Then Loan Repayment schedule has 3 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 July 2023      |           | 3000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
@@ -176,7 +176,7 @@ Feature: LoanReschedule
     When Admin sets the business date to "05 July 2023"
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
-      | 01 September 2023  | 05 July 2023    |                 | 0                | 0               | 2          | 0               |
+      | 01 September 2023  | 05 July 2023    |                 |                  |                 | 2          |                 |
     Then Loan Repayment schedule has 5 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 July 2023      |           | 3000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
@@ -210,7 +210,7 @@ Feature: LoanReschedule
     When Admin sets the business date to "05 July 2023"
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
-      | 01 September 2023  | 05 July 2023    |                 | 1                | 0               | 0          | 0               |
+      | 01 September 2023  | 05 July 2023    |                 | 1                |                 |            |                 |
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date    | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 July 2023      |              | 3000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
@@ -244,7 +244,7 @@ Feature: LoanReschedule
     When Admin sets the business date to "05 July 2023"
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
-      | 01 September 2023  | 05 July 2023    |                 | 0                | 2               | 0          | 0               |
+      | 01 September 2023  | 05 July 2023    |                 |                  | 2               |            |                 |
 #    Then Loan Repayment schedule has 3 periods, with the following data for periods:
 #      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
 #      |    |      | 01 July 2023      |           | 3000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
@@ -276,7 +276,7 @@ Feature: LoanReschedule
     When Admin sets the business date to "05 July 2023"
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
-      | 01 September 2023  | 05 July 2023    |                 | 0                | 0               | 0          | 6               |
+      | 01 September 2023  | 05 July 2023    |                 |                  |                 |            | 6               |
     Then Loan Repayment schedule has 3 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 July 2023      |           | 3000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
@@ -298,7 +298,7 @@ Feature: LoanReschedule
     When Admin successfully disburse the loan on "01 October 2023" with "1000" EUR transaction amount
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
-      | 16 October 2023    | 01 October 2023 |                 | 0                | 0               | 2          | 0               |
+      | 16 October 2023    | 01 October 2023 |                 |                  |                 | 2          |                 |
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 October 2023  |                 | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -326,7 +326,7 @@ Feature: LoanReschedule
     When Admin sets the business date to "11 October 2023"
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
-      | 16 October 2023    | 01 October 2023 |                 | 0                | 0               | 2          | 0               |
+      | 16 October 2023    | 01 October 2023 |                 |                  |                 | 2          |                 |
     Then Loan Repayment schedule has 7 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 October 2023  |                 | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -356,7 +356,7 @@ Feature: LoanReschedule
     When Admin sets the business date to "11 October 2023"
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
-      | 16 October 2023    | 01 October 2023 |                 | 0                | 0               | 2          | 0               |
+      | 16 October 2023    | 01 October 2023 |                 |                  |                 | 2          |                 |
     When Admin sets the business date to "20 October 2023"
     When Admin successfully disburse the loan on "20 October 2023" with "400" EUR transaction amount
     Then Loan Repayment schedule has 7 periods, with the following data for periods:
@@ -386,7 +386,7 @@ Feature: LoanReschedule
     When Admin sets the business date to "05 October 2023"
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
-      | 16 October 2023    | 05 October 2023 | 31 October 2023 | 0                | 0               | 0          | 0               |
+      | 16 October 2023    | 05 October 2023 | 31 October 2023 |                  |                 |            |                 |
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 October 2023  |                 | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -410,7 +410,7 @@ Feature: LoanReschedule
     When Admin sets the business date to "05 October 2023"
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate  | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
-      | 16 October 2023    | 05 October 2023 | 15 November 2023 | 0                | 0               | 0          | 0               |
+      | 16 October 2023    | 05 October 2023 | 15 November 2023 |                  |                 |            |                 |
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 October 2023  |                 | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -434,7 +434,7 @@ Feature: LoanReschedule
     When Admin sets the business date to "05 October 2023"
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate  | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
-      | 16 October 2023    | 05 October 2023 | 15 November 2023 | 0                | 0               | 0          | 0               |
+      | 16 October 2023    | 05 October 2023 | 15 November 2023 |                  |                 |            |                 |
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 01 October 2023  |           | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
@@ -464,7 +464,7 @@ Feature: LoanReschedule
     When Admin sets the business date to "05 October 2023"
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
-      | 16 October 2023    | 05 October 2023 | 31 October 2023 | 0                | 0               | 0          | 0               |
+      | 16 October 2023    | 05 October 2023 | 31 October 2023 |                  |                 |            |                 |
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late  | Outstanding |
       |    |      | 01 October 2023  |                 | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |       |             |
@@ -492,7 +492,7 @@ Feature: LoanReschedule
     When Admin successfully disburse the loan on "01 October 2023" with "1000" EUR transaction amount
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
-      | 16 October 2023    | 01 October 2023 | 31 October 2023 | 0                | 0               | 0          | 0               |
+      | 16 October 2023    | 01 October 2023 | 31 October 2023 |                  |                 |            |                 |
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 October 2023  |                 | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -518,7 +518,7 @@ Feature: LoanReschedule
     When Admin sets the business date to "11 October 2023"
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
-      | 16 October 2023    | 01 October 2023 | 31 October 2023 | 0                | 0               | 0          | 0               |
+      | 16 October 2023    | 01 October 2023 | 31 October 2023 |                  |                 |            |                 |
     Then Loan Repayment schedule has 5 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 October 2023  |                 | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -544,7 +544,7 @@ Feature: LoanReschedule
     When Admin sets the business date to "05 October 2023"
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
-      | 16 October 2023    | 05 October 2023 | 31 October 2023 | 0                | 0               | 2          | 0               |
+      | 16 October 2023    | 05 October 2023 | 31 October 2023 |                  |                 | 2          |                 |
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 October 2023  |                 | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -570,7 +570,7 @@ Feature: LoanReschedule
     When Admin sets the business date to "05 October 2023"
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
-      | 16 October 2023    | 05 October 2023 | 31 October 2023 | 1                | 0               | 0          | 0               |
+      | 16 October 2023    | 05 October 2023 | 31 October 2023 | 1                |                 |            |                 |
     Then Loan Repayment schedule has 5 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 October 2023  |                 | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -597,7 +597,7 @@ Feature: LoanReschedule
     When Admin sets the business date to "05 October 2023"
     Then Loan reschedule with the following data results a 403 error and "LOAN_CHARGED_OFF" error message
       | rescheduleFromDate | submittedOnDate | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
-      | 16 October 2023    | 05 October 2023 | 31 October 2023 | 0                | 0               | 0          | 0               |
+      | 16 October 2023    | 05 October 2023 | 31 October 2023 |                  |                 |            |                 |
 
 
   Scenario: Verify that reschedule keeps the N+1 installment
@@ -623,7 +623,7 @@ Feature: LoanReschedule
     When Admin sets the business date to "05 October 2023"
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
-      | 16 October 2023    | 05 October 2023 | 31 October 2023 | 0                | 0               | 0          | 0               |
+      | 16 October 2023    | 05 October 2023 | 31 October 2023 |                  |                 |            |                 |
     Then Loan Repayment schedule has 5 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 01 October 2023  |           | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
