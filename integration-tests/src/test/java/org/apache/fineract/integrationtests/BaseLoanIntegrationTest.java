@@ -333,7 +333,7 @@ public abstract class BaseLoanIntegrationTest {
         }).toList();
     }
 
-    private AdvancedPaymentData createDefaultPaymentAllocation(String futureInstallmentAllocationRule) {
+    public AdvancedPaymentData createDefaultPaymentAllocation(String futureInstallmentAllocationRule) {
         AdvancedPaymentData advancedPaymentData = new AdvancedPaymentData();
         advancedPaymentData.setTransactionType("DEFAULT");
         advancedPaymentData.setFutureInstallmentAllocationRule(futureInstallmentAllocationRule);

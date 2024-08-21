@@ -434,7 +434,7 @@ Feature: Loan DownPayment
     When Admin sets the business date to "10 January 2022"
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
-      | 01 February 2022   | 10 January 2022 | 01 April 2022   | 0                | 0               | 0          | 0               |
+      | 01 February 2022   | 10 January 2022 | 01 April 2022   |                  |                 |            |                 |
     When Admin sets the business date to "01 April 2022"
     When Admin successfully disburse the loan on "01 April 2022" with "400" EUR transaction amount
     Then Loan Repayment schedule has 5 periods, with the following data for periods:
@@ -490,7 +490,7 @@ Feature: Loan DownPayment
     When Admin sets the business date to "10 January 2022"
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
-      | 01 February 2022   | 10 January 2022 | 01 April 2022   | 0                | 0               | 0          | 0               |
+      | 01 February 2022   | 10 January 2022 | 01 April 2022   |                  |                 |            |                 |
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date            | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2022 |                 | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -544,7 +544,7 @@ Feature: Loan DownPayment
       | 1000.0        | 0        | 0    | 50        | 1050.0 | 250.0 | 0          | 0    | 800         |
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
-      | 10 February 2022   | 10 January 2022 | 10 April 2022   | 0                | 0               | 0          | 0               |
+      | 10 February 2022   | 10 January 2022 | 10 April 2022   |                  |                 |            |                 |
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date            | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 10 January 2022 |                 | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -610,7 +610,7 @@ Feature: Loan DownPayment
       | 1000.0        | 0        | 0    | 50        | 1050.0 | 250.0 | 0          | 0    | 800         |
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
-      | 10 February 2022   | 10 January 2022 | 10 April 2022   | 0                | 0               | 0          | 0               |
+      | 10 February 2022   | 10 January 2022 | 10 April 2022   |                  |                 |            |                 |
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date            | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 10 January 2022 |                 | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
