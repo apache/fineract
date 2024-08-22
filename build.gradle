@@ -89,12 +89,12 @@ plugins {
     id 'net.ltgt.errorprone' version '3.1.0' apply false
     id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.19' apply false
     id 'com.gorylenko.gradle-git-properties' version '2.4.1' apply false
-    id 'org.asciidoctor.jvm.convert' version '3.3.2' apply false
-    id 'org.asciidoctor.jvm.pdf' version '3.3.2' apply false
-    id 'org.asciidoctor.jvm.epub' version '3.3.2' apply false
-    id 'org.asciidoctor.jvm.revealjs' version '3.3.2' apply false
-    id 'org.asciidoctor.jvm.gems' version '3.3.2' apply false
-    id 'org.asciidoctor.kindlegen.base' version '3.2.0' apply false
+    // id 'org.asciidoctor.jvm.convert' version '3.3.2' apply false
+    // id 'org.asciidoctor.jvm.pdf' version '3.3.2' apply false
+    // id 'org.asciidoctor.jvm.epub' version '3.3.2' apply false
+    // id 'org.asciidoctor.jvm.revealjs' version '3.3.2' apply false
+    // id 'org.asciidoctor.jvm.gems' version '3.3.2' apply false
+    // id 'org.asciidoctor.kindlegen.base' version '3.2.0' apply false
     id 'com.google.cloud.tools.jib' version '3.4.0' apply false
     id 'org.sonarqube' version '4.4.1.3373'
     id 'com.github.andygoossens.modernizer' version '1.9.0' apply false
