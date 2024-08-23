@@ -84,6 +84,17 @@ buildscript {
         classpath 'io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.22'
         classpath 'jakarta.servlet:jakarta.servlet-api:6.0.0'
     }
+
+
+    configurations.classpath {
+        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+            if (details.requested.group == 'com.burgstaller' && details.requested.name == 'okhttp-digest' && details.requested.version == '1.10') {
+                details.useTarget "io.github.rburgst:${details.requested.name}:1.21"
+                    details.because 'Dependency has moved'
+            }
+        }
+    }
+
 }
 
 plugins {
