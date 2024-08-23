@@ -94,9 +94,11 @@ public class ProgressiveLoanRescheduleRequestDataValidator implements LoanResche
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
         if (rescheduleFromDate != null) {
             if (hasInterestRateChange && !rescheduleFromDate.isAfter(businessDate)) {
-                dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName).failWithCode(
+                throw new GeneralPlatformDomainRuleException(
                         "loan.reschedule.interest.rate.change.reschedule.from.date.should.be.in.future",
-                        "Loan Reschedule From date should be in the future.");
+                        String.format("Loan Reschedule From date (%s) for Loan: %s should be in the future.", rescheduleFromDate,
+                                loan.getId()),
+                        loan.getId(), rescheduleFromDate);
             }
             if (hasInterestRateChange) {
                 validateInterestRateChangeRescheduleFromDate(loan, rescheduleFromDate);
@@ -154,7 +156,9 @@ public class ProgressiveLoanRescheduleRequestDataValidator implements LoanResche
             if (!rescheduleFromDate.isAfter(DateUtils.getBusinessLocalDate())) {
                 throw new GeneralPlatformDomainRuleException(
                         "loan.reschedule.interest.rate.change.reschedule.from.date.should.be.in.future",
-                        "Loan Reschedule From date should be in the future.", rescheduleFromDate);
+                        String.format("Loan Reschedule From date (%s) for Loan: %s should be in the future.", rescheduleFromDate,
+                                loan.getId()),
+                        loan.getId(), rescheduleFromDate);
             }
         } else {
             installment = loan.getRepaymentScheduleInstallment(rescheduleFromDate);
