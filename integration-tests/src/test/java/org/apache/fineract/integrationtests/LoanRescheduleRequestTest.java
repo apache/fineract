@@ -282,6 +282,14 @@ public class LoanRescheduleRequestTest extends BaseLoanIntegrationTest {
                     new PostLoansLoanIdRequest().actualDisbursementDate("15 February 2023").dateFormat(DATETIME_PATTERN)
                             .transactionAmount(BigDecimal.valueOf(500.00)).locale("en"));
 
+            exception = assertThrows(CallFailedRuntimeException.class,
+                    () -> loanRescheduleRequestHelper
+                            .createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanResponse.get().getLoanId())
+                                    .dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("15 February 2023")
+                                    .newInterestRate(BigDecimal.ONE).rescheduleReasonId(1L).rescheduleFromDate("15 February 2023")));
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("loan.reschedule.interest.rate.change.reschedule.from.date.should.be.in.future"));
+
             rescheduleResponse.set(loanRescheduleRequestHelper.createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest()
                     .loanId(loanResponse.get().getLoanId()).dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("15 February 2023")
                     .newInterestRate(BigDecimal.ONE).rescheduleReasonId(1L).rescheduleFromDate("16 February 2023")));
