@@ -56,7 +56,9 @@ public enum JobName {
     LOAN_DELINQUENCY_CLASSIFICATION("Loan Delinquency Classification"), //
     SEND_ASYNCHRONOUS_EVENTS("Send Asynchronous Events"), //
     PURGE_EXTERNAL_EVENTS("Purge External Events"), //
-    PURGE_PROCESSED_COMMANDS("Purge Processed Commands");
+    PURGE_PROCESSED_COMMANDS("Purge Processed Commands"), //
+    ACCRUAL_ACTIVITY_POSTING("Accrual Activity Posting"), //
+    ;
 
     private final String name;
 

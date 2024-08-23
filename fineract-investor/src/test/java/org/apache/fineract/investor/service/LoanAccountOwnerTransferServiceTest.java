@@ -133,7 +133,7 @@ public class LoanAccountOwnerTransferServiceTest {
         final Loan loanForProcessing = Mockito.mock(Loan.class);
         when(loanForProcessing.getId()).thenReturn(1L);
         LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
-        when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
+        when(loanForProcessing.getSummary()).thenReturn(loanSummary);
 
         ExternalAssetOwnerTransfer pendingBuybackTransfer = Mockito.mock(ExternalAssetOwnerTransfer.class);
         when(pendingBuybackTransfer.getStatus()).thenReturn(BUYBACK);

@@ -31,7 +31,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @AllArgsConstructor
 @Entity
 @Table(name = "x_registered_table")
-public class RegisteredDatatable extends AbstractPersistableCustom {
+public class RegisteredDatatable extends AbstractPersistableCustom<Long> {
 
     @Column(name = "registered_table_name", nullable = false)
     private String datatableName;
@@ -46,5 +46,4 @@ public class RegisteredDatatable extends AbstractPersistableCustom {
     private int category;
 
     public RegisteredDatatable() {}
-
 }

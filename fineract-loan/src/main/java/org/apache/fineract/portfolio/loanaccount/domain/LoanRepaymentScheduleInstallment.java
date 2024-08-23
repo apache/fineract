@@ -40,7 +40,7 @@ import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDat
 
 @Entity
 @Table(name = "m_loan_repayment_schedule")
-public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDateTimeCustom
+public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDateTimeCustom<Long>
         implements Comparable<LoanRepaymentScheduleInstallment> {
 
     @ManyToOne(optional = false)
@@ -583,20 +583,20 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         return interestPortionOfTransaction;
     }
 
-    public Money payPrincipalComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
+    public Money payPrincipalComponent(final LocalDate transactionDate, final Money transactionAmount) {
 
-        final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
+        final MonetaryCurrency currency = transactionAmount.getCurrency();
         Money principalPortionOfTransaction = Money.zero(currency);
-        if (transactionAmountRemaining.isZero()) {
+        if (transactionAmount.isZero()) {
             return principalPortionOfTransaction;
         }
         final Money principalDue = getPrincipalOutstanding(currency);
-        if (transactionAmountRemaining.isGreaterThanOrEqualTo(principalDue)) {
+        if (transactionAmount.isGreaterThanOrEqualTo(principalDue)) {
             this.principalCompleted = getPrincipalCompleted(currency).plus(principalDue).getAmount();
             principalPortionOfTransaction = principalPortionOfTransaction.plus(principalDue);
         } else {
-            this.principalCompleted = getPrincipalCompleted(currency).plus(transactionAmountRemaining).getAmount();
-            principalPortionOfTransaction = principalPortionOfTransaction.plus(transactionAmountRemaining);
+            this.principalCompleted = getPrincipalCompleted(currency).plus(transactionAmount).getAmount();
+            principalPortionOfTransaction = principalPortionOfTransaction.plus(transactionAmount);
         }
 
         this.principalCompleted = defaultToNullIfZero(this.principalCompleted);
@@ -743,10 +743,13 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         this.penaltyAccrued = defaultToNullIfZero(penalityCharges.getAmount());
     }
 
-    public void updateDerivedFields(final MonetaryCurrency currency, final LocalDate actualDisbursementDate) {
+    public void updateObligationsMet(final MonetaryCurrency currency, final LocalDate transactionDate) {
         if (!this.obligationsMet && getTotalOutstanding(currency).isZero()) {
             this.obligationsMet = true;
-            this.obligationsMetOnDate = actualDisbursementDate;
+            this.obligationsMetOnDate = transactionDate;
+        } else if (this.obligationsMet && !getTotalOutstanding(currency).isZero()) {
+            this.obligationsMet = false;
+            this.obligationsMetOnDate = null;
         }
     }
 
@@ -839,6 +842,15 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
             this.principal = transactionAmount.getAmount();
         } else {
             this.principal = this.principal.add(transactionAmount.getAmount());
+        }
+        checkIfRepaymentPeriodObligationsAreMet(transactionDate, transactionAmount.getCurrency());
+    }
+
+    public void addToInterest(final LocalDate transactionDate, final Money transactionAmount) {
+        if (this.interestCharged == null) {
+            this.interestCharged = transactionAmount.getAmount();
+        } else {
+            this.interestCharged = this.interestCharged.add(transactionAmount.getAmount());
         }
         checkIfRepaymentPeriodObligationsAreMet(transactionDate, transactionAmount.getCurrency());
     }
@@ -1051,6 +1063,11 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         resetDerivedComponents();
         resetPrincipalDue();
         resetChargesCharged();
+        resetInterestDue();
+    }
+
+    public void resetInterestDue() {
+        this.interestCharged = null;
     }
 
     public void resetPrincipalDue() {

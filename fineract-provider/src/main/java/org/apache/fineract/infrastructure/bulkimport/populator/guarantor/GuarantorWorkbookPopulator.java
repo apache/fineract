@@ -147,7 +147,7 @@ public class GuarantorWorkbookPopulator extends AbstractWorkbookPopulator {
         dateCellStyle.setDataFormat(df);
         int rowIndex = 1;
         Row row;
-        Collections.sort(loans, LoanAccountData.ClientNameComparator);
+        loans.sort(LoanAccountData.LOAN_ACCOUNT_DATA_COMPARATOR_BY_CLIENT_NAME);
         for (LoanAccountData loan : loans) {
             if (addGuarantorSheet.getRow(rowIndex) == null) {
                 row = addGuarantorSheet.createRow(rowIndex++);

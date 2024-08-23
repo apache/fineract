@@ -24,7 +24,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_field_configuration")
-public class FieldConfiguration extends AbstractPersistableCustom {
+public class FieldConfiguration extends AbstractPersistableCustom<Long> {
 
     private String entity;
 

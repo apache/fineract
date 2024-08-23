@@ -40,7 +40,7 @@ public class UpdateOneToManyDatatableEntryCommandHandler implements NewCommandSo
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.updateDatatableEntryOneToMany(command.entityName(), command.entityId(), command.subentityId(),
+        return this.writePlatformService.updateDatatableEntryOneToMany(command.getEntityName(), command.entityId(), command.subentityId(),
                 command);
 
     }

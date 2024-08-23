@@ -842,6 +842,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder loanInterestPaymentWaiverTransaction(final Long loanId) {
+        this.actionName = "INTERESTPAYMENTWAIVER";
+        this.entityName = "LOAN";
+        this.entityId = null;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/transactions/template?command=interestpaymentwaiver";
+        return this;
+    }
+
     public CommandWrapperBuilder refundLoanCharge(final Long loanId) {
         this.actionName = "CHARGEREFUND";
         this.entityName = "LOAN";

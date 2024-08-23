@@ -26,6 +26,7 @@ import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsCons
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import lombok.AccessLevel;
@@ -47,8 +48,8 @@ import org.springframework.data.jpa.domain.AbstractAuditable;
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public abstract class AbstractAuditableWithUTCDateTimeCustom extends AbstractPersistableCustom
-        implements Auditable<Long, Long, OffsetDateTime> {
+public abstract class AbstractAuditableWithUTCDateTimeCustom<T extends Serializable> extends AbstractPersistableCustom<T>
+        implements Auditable<Long, T, OffsetDateTime> {
 
     private static final long serialVersionUID = 141481953116476081L;
 

@@ -43,7 +43,7 @@ import org.apache.fineract.infrastructure.entityaccess.exception.FineractEntityT
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class FineractEntityToEntityMapping extends AbstractPersistableCustom {
+public class FineractEntityToEntityMapping extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "rel_id")

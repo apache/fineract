@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
@@ -34,16 +33,22 @@ import org.apache.fineract.infrastructure.dataqueries.data.ReportExportType;
 import org.apache.fineract.infrastructure.dataqueries.service.export.DatatableReportExportService;
 import org.apache.fineract.infrastructure.dataqueries.service.export.ResponseHolder;
 import org.apache.fineract.infrastructure.report.annotation.ReportService;
-import org.apache.fineract.infrastructure.report.service.ReportingProcessService;
+import org.apache.fineract.infrastructure.report.service.AbstractReportingProcessService;
+import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.springframework.stereotype.Service;
 
 @Service
 @ReportService(type = { "Table", "Chart", "SMS" })
-@RequiredArgsConstructor
 @Slf4j
-public class DatatableReportingProcessService implements ReportingProcessService {
+public class DatatableReportingProcessService extends AbstractReportingProcessService {
 
     private final List<DatatableReportExportService> exportServices;
+
+    public DatatableReportingProcessService(List<DatatableReportExportService> exportServices, SqlValidator sqlValidator) {
+        super(sqlValidator);
+
+        this.exportServices = exportServices;
+    }
 
     @Override
     public Response processRequest(String reportName, MultivaluedMap<String, String> queryParams) {

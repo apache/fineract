@@ -165,15 +165,13 @@ public class LoanAccountOwnerTransferServiceImpl implements LoanAccountOwnerTran
             ExternalAssetOwnerTransfer externalAssetOwnerTransfer) {
         ExternalAssetOwnerTransferDetails details = new ExternalAssetOwnerTransferDetails();
         details.setExternalAssetOwnerTransfer(externalAssetOwnerTransfer);
-        details.setTotalOutstanding(Objects.requireNonNullElse(loan.getLoanSummary().getTotalOutstanding(), BigDecimal.ZERO));
-        details.setTotalPrincipalOutstanding(
-                Objects.requireNonNullElse(loan.getLoanSummary().getTotalPrincipalOutstanding(), BigDecimal.ZERO));
-        details.setTotalInterestOutstanding(
-                Objects.requireNonNullElse(loan.getLoanSummary().getTotalInterestOutstanding(), BigDecimal.ZERO));
+        details.setTotalOutstanding(Objects.requireNonNullElse(loan.getSummary().getTotalOutstanding(), BigDecimal.ZERO));
+        details.setTotalPrincipalOutstanding(Objects.requireNonNullElse(loan.getSummary().getTotalPrincipalOutstanding(), BigDecimal.ZERO));
+        details.setTotalInterestOutstanding(Objects.requireNonNullElse(loan.getSummary().getTotalInterestOutstanding(), BigDecimal.ZERO));
         details.setTotalFeeChargesOutstanding(
-                Objects.requireNonNullElse(loan.getLoanSummary().getTotalFeeChargesOutstanding(), BigDecimal.ZERO));
+                Objects.requireNonNullElse(loan.getSummary().getTotalFeeChargesOutstanding(), BigDecimal.ZERO));
         details.setTotalPenaltyChargesOutstanding(
-                Objects.requireNonNullElse(loan.getLoanSummary().getTotalPenaltyChargesOutstanding(), BigDecimal.ZERO));
+                Objects.requireNonNullElse(loan.getSummary().getTotalPenaltyChargesOutstanding(), BigDecimal.ZERO));
         details.setTotalOverpaid(Objects.requireNonNullElse(loan.getTotalOverpaid(), BigDecimal.ZERO));
         return details;
     }

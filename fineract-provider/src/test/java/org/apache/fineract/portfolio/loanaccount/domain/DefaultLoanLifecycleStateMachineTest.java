@@ -143,7 +143,7 @@ class DefaultLoanLifecycleStateMachineTest {
         Mockito.when(loan.getPlainStatus()).thenReturn(LoanStatus.OVERPAID.getValue());
         Mockito.when(loan.getStatus()).thenReturn(LoanStatus.OVERPAID);
         Mockito.when(loan.getTotalOverpaidAsMoney()).thenReturn(zero);
-        Mockito.when(loan.getLoanSummary()).thenReturn(loanSummary);
+        Mockito.when(loan.getSummary()).thenReturn(loanSummary);
         Mockito.when(loanSummary.getTotalOutstanding(eq(currency))).thenReturn(one);
         // when
         underTest.transition(LoanEvent.LOAN_DISBURSED, loan);
@@ -163,7 +163,7 @@ class DefaultLoanLifecycleStateMachineTest {
         Mockito.when(loan.getPlainStatus()).thenReturn(LoanStatus.OVERPAID.getValue());
         Mockito.when(loan.getStatus()).thenReturn(LoanStatus.OVERPAID);
         Mockito.when(loan.getTotalOverpaidAsMoney()).thenReturn(zero);
-        Mockito.when(loan.getLoanSummary()).thenReturn(loanSummary);
+        Mockito.when(loan.getSummary()).thenReturn(loanSummary);
         Mockito.when(loanSummary.getTotalOutstanding(currency)).thenReturn(zero);
         // when
         underTest.transition(LoanEvent.LOAN_DISBURSED, loan);

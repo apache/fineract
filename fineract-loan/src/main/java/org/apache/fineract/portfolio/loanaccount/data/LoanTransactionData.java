@@ -300,14 +300,13 @@ public class LoanTransactionData {
     public static LoanTransactionData loanTransactionDataForDisbursalTemplate(final LoanTransactionEnumData transactionType,
             final LocalDate expectedDisbursedOnLocalDateForTemplate, final BigDecimal disburseAmountForTemplate,
             final BigDecimal netDisbursalAmount, final Collection<PaymentTypeData> paymentOptions, final BigDecimal retriveLastEmiAmount,
-            final LocalDate possibleNextRepaymentDate) {
+            final LocalDate possibleNextRepaymentDate, final CurrencyData currency) {
         final Long id = null;
         final Long loanId = null;
         final ExternalId externalLoanId = ExternalId.empty();
         final Long officeId = null;
         final String officeName = null;
         final PaymentDetailData paymentDetailData = null;
-        final CurrencyData currency = null;
         final BigDecimal unrecognizedIncomePortion = null;
         final BigDecimal principalPortion = null;
         final BigDecimal interestPortion = null;
@@ -381,5 +380,9 @@ public class LoanTransactionData {
 
     public void setLoanTransactionRelations(List<LoanTransactionRelationData> transactionRelations) {
         this.transactionRelations = transactionRelations;
+    }
+
+    public boolean supportTransactionRelations() {
+        return !type.isAccrual();
     }
 }

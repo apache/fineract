@@ -130,7 +130,7 @@ public enum EntityTables {
 
     @NotNull
     public static List<Integer> getCheckStatusCodes(String name) {
-        return getCheckStatuses(name).stream().map(StatusEnum::getCode).toList();
+        return getCheckStatuses(name).stream().map(StatusEnum::getValue).toList();
     }
 
     @NotNull

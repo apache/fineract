@@ -25,18 +25,20 @@ import org.apache.fineract.infrastructure.event.business.BusinessEventListener;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanStatusChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainServiceJpa;
 
 @Slf4j
 @RequiredArgsConstructor
 public class LoanStatusChangePlatformServiceImpl implements LoanStatusChangePlatformService {
 
     private final BusinessEventNotifierService businessEventNotifierService;
-    private final LoanAccountDomainServiceJpa loanAccountDomainService;
+    private final LoanAccrualsProcessingService loanAccrualsProcessingService;
+    private final LoanAccrualActivityProcessingService loanAccrualActivityProcessingService;
 
     @PostConstruct
     public void addListeners() {
         businessEventNotifierService.addPostBusinessEventListener(LoanStatusChangedBusinessEvent.class, new LoanStatusChangedListener());
+        businessEventNotifierService.addPostBusinessEventListener(LoanStatusChangedBusinessEvent.class,
+                new LoanAccrualActivityPostingLoanStatusChangedListener());
     }
 
     private final class LoanStatusChangedListener implements BusinessEventListener<LoanStatusChangedBusinessEvent> {
@@ -47,10 +49,27 @@ public class LoanStatusChangePlatformServiceImpl implements LoanStatusChangePlat
             log.debug("Loan Status change for loan {}", loan.getId());
             if (loan.getStatus().isClosedObligationsMet() || loan.getStatus().isOverpaid()) {
                 log.debug("Loan Status {} for loan {}", loan.getStatus().getCode(), loan.getId());
-                loanAccountDomainService.applyFinalIncomeAccrualTransaction(loan);
+                loanAccrualsProcessingService.processAccrualsForLoanClosure(loan);
             }
             if (loan.isOpen()) {
                 loan.handleMaturityDateActivate();
+            }
+        }
+    }
+
+    private final class LoanAccrualActivityPostingLoanStatusChangedListener
+            implements BusinessEventListener<LoanStatusChangedBusinessEvent> {
+
+        @Override
+        public void onBusinessEvent(LoanStatusChangedBusinessEvent event) {
+            final Loan loan = event.get();
+            if (loan.getLoanProductRelatedDetail().isEnableAccrualActivityPosting()) {
+                if (loan.getStatus().isClosedObligationsMet() || loan.getStatus().isOverpaid()) {
+                    loanAccrualActivityProcessingService.processAccrualActivityForLoanClosure(loan);
+                }
+                if (loan.isOpen()) {
+                    loanAccrualActivityProcessingService.processAccrualActivityForLoanReopen(loan);
+                }
             }
         }
     }

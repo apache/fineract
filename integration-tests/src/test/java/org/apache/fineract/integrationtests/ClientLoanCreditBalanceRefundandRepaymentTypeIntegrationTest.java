@@ -245,7 +245,8 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
 
     @ParameterizedTest
     @MethodSource("loanProductFactory")
-    public void fullRefundChangesStatusToClosedObligationMetTest(LoanProductTestBuilder loanProductTestBuilder) {
+    public void fullRefundChangesStatusToClosedObligationMetAndSetBackToOverpayAfterReverseTest(
+            LoanProductTestBuilder loanProductTestBuilder) {
         disburseLoanOfAccountingRule(ACCRUAL_PERIODIC, loanProductTestBuilder);
         HashMap loanStatusHashMap = makeRepayment("06 January 2022", 20000.00f); // overpayment
         LoanStatusChecker.verifyLoanAccountIsOverPaid(loanStatusHashMap);
@@ -255,7 +256,8 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
 
         final String creditBalanceRefundDate = "09 January 2022";
         final String externalId = null;
-        loanTransactionHelper.creditBalanceRefund(creditBalanceRefundDate, totalOverpaid, externalId, disbursedLoanID, null);
+        Integer resourceId = (Integer) loanTransactionHelper.creditBalanceRefund(creditBalanceRefundDate, totalOverpaid, externalId,
+                disbursedLoanID, "resourceId");
         loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, disbursedLoanID,
                 "status");
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
@@ -267,6 +269,18 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
             totalOverpaidAtEnd = floatZero;
         }
         assertEquals(totalOverpaidAtEnd, floatZero);
+
+        loanTransactionHelper.reverseLoanTransaction(disbursedLoanID, resourceId.longValue(), creditBalanceRefundDate, responseSpec);
+
+        loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, disbursedLoanID,
+                "status");
+
+        LoanStatusChecker.verifyLoanAccountIsOverPaid(loanStatusHashMap);
+
+        Float totalOverpaidAfterReverse = (Float) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec,
+                disbursedLoanID, "totalOverpaid");
+
+        assertEquals(totalOverpaidAfterReverse, totalOverpaid);
     }
 
     @ParameterizedTest

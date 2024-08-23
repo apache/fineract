@@ -41,6 +41,7 @@ import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.apache.fineract.notification.data.NotificationData;
 import org.apache.fineract.notification.service.NotificationReadPlatformService;
 import org.springframework.stereotype.Component;
@@ -55,6 +56,7 @@ public class NotificationApiResource {
     private final NotificationReadPlatformService notificationReadPlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final ToApiJsonSerializer<NotificationData> toApiJsonSerializer;
+    private final SqlValidator sqlValidator;
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -71,7 +73,10 @@ public class NotificationApiResource {
 
         this.context.authenticatedUser();
         final Page<NotificationData> notificationData;
-        final SearchParameters searchParameters = SearchParameters.forPagination(offset, limit, orderBy, sortOrder);
+        sqlValidator.validate(orderBy);
+        sqlValidator.validate(sortOrder);
+        final SearchParameters searchParameters = SearchParameters.builder().limit(limit).offset(offset).orderBy(orderBy)
+                .sortOrder(sortOrder).build();
         if (!isRead) {
             notificationData = this.notificationReadPlatformService.getAllUnreadNotifications(searchParameters);
         } else {

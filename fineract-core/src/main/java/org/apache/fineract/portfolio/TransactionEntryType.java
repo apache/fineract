@@ -18,26 +18,25 @@
  */
 package org.apache.fineract.portfolio;
 
+import lombok.Getter;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
+
+@Getter
 public enum TransactionEntryType {
 
-    CREDIT(1, "transactionEntryType.credit"), //
-    DEBIT(2, "transactionEntryType.debit"), //
+    CREDIT(1, "transactionEntryType.credit", "Credit transaction"), //
+    DEBIT(2, "transactionEntryType.debit", "Debit transaction"), //
     ;
 
     private final Integer value;
     private final String code;
+    private final String description;
 
-    TransactionEntryType(final Integer value, final String code) {
+    TransactionEntryType(final Integer value, final String code, final String description) {
         this.value = value;
         this.code = code;
-    }
-
-    public Integer getValue() {
-        return this.value;
-    }
-
-    public String getCode() {
-        return this.code;
+        this.description = description;
     }
 
     public boolean isCredit() {
@@ -50,5 +49,13 @@ public enum TransactionEntryType {
 
     public TransactionEntryType getReversal() {
         return this == CREDIT ? DEBIT : CREDIT;
+    }
+
+    public EnumOptionData toEnumOptionData() {
+        return new EnumOptionData((long) getValue(), getCode(), getDescription());
+    }
+
+    public StringEnumOptionData toStringEnumOptionData() {
+        return new StringEnumOptionData(name(), getCode(), getDescription());
     }
 }

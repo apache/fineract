@@ -58,7 +58,7 @@ public class CustomAuditingHandlerTest {
     public void markCreated() {
         MappingContext mappingContext = Mockito.mock(MappingContext.class);
         CustomAuditingHandler testInstance = new CustomAuditingHandler(PersistentEntities.of(mappingContext));
-        AbstractAuditableWithUTCDateTimeCustom targetObject = Mockito.spy(AbstractAuditableWithUTCDateTimeCustom.class);
+        AbstractAuditableWithUTCDateTimeCustom<Long> targetObject = Mockito.spy(AbstractAuditableWithUTCDateTimeCustom.class);
         targetObject = testInstance.markCreated(targetObject);
         OffsetDateTime now = DateUtils.getAuditOffsetDateTime();
 
@@ -74,7 +74,7 @@ public class CustomAuditingHandlerTest {
     public void markModified() {
         MappingContext mappingContext = Mockito.mock(MappingContext.class);
         CustomAuditingHandler testInstance = new CustomAuditingHandler(PersistentEntities.of(mappingContext));
-        AbstractAuditableWithUTCDateTimeCustom targetObject = Mockito.spy(AbstractAuditableWithUTCDateTimeCustom.class);
+        AbstractAuditableWithUTCDateTimeCustom<Long> targetObject = Mockito.spy(AbstractAuditableWithUTCDateTimeCustom.class);
         targetObject = testInstance.markModified(targetObject);
         OffsetDateTime now = DateUtils.getAuditOffsetDateTime();
 

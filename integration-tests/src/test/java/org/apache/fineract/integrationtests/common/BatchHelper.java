@@ -680,7 +680,7 @@ public final class BatchHelper {
         br.setMethod("POST");
         String dateString = date.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
         br.setBody("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", \"approvedOnDate\": \"" + dateString + "\","
-                + "\"note\": \"Loan approval note\"}");
+                + "\"note\": \"Loan approval note\", \"expectedDisbursementDate\": \"" + dateString + "\"}");
 
         return br;
     }
@@ -756,7 +756,7 @@ public final class BatchHelper {
      *            the action to transistion
      * @return BatchRequest the batch request
      */
-    public static BatchRequest transistionLoanStateByExternalId(final Long requestId, final Long reference, final LocalDate date,
+    public static BatchRequest transitionLoanStateByExternalId(final Long requestId, final Long reference, final LocalDate date,
             final String command) {
         final BatchRequest br = new BatchRequest();
 
@@ -769,7 +769,7 @@ public final class BatchHelper {
             br.setBody("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", \"actualDisbursementDate\": \"" + dateString + "\"}");
         } else if ("approve".equals(command)) {
             br.setBody("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", \"approvedOnDate\": \"" + dateString + "\","
-                    + "\"note\": \"Loan approval note\"}");
+                    + "\"note\": \"Loan approval note\", \"expectedDisbursementDate\": \"" + dateString + "\"}");
         }
 
         return br;
@@ -915,6 +915,23 @@ public final class BatchHelper {
      */
     public static BatchRequest goodwillCreditRequest(final Long requestId, final Long reference, final String amount) {
         return createTransactionRequest(requestId, reference, "goodwillCredit", amount, LocalDate.now(Utils.getZoneIdOfTenant()));
+    }
+
+    /**
+     * Creates and returns a {@link CreateTransactionLoanCommandStrategy} request with given request ID for payment
+     * waiver transaction.
+     *
+     *
+     * @param requestId
+     *            the request ID
+     * @param reference
+     *            the reference
+     * @param amount
+     *            the amount
+     * @return BatchRequest the created {@link BatchRequest}
+     */
+    public static BatchRequest interestPaymentWaiverRequest(final Long requestId, final Long reference, final String amount) {
+        return createTransactionRequest(requestId, reference, "interestPaymentWaiver", amount, LocalDate.now(Utils.getZoneIdOfTenant()));
     }
 
     /**

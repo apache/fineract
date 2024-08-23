@@ -102,7 +102,7 @@ public class ClientChargesApiResource {
                             ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ACTIVE,
                             ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_INACTIVE });
         }
-        final SearchParameters searchParameters = SearchParameters.forPagination(offset, limit);
+        final SearchParameters searchParameters = SearchParameters.builder().limit(limit).offset(offset).build();
 
         final Page<ClientChargeData> clientCharges = this.clientChargeReadPlatformService.retrieveClientCharges(clientId, chargeStatus,
                 pendingPayment, searchParameters);

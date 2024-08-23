@@ -157,6 +157,13 @@ public class FromJsonHelper {
         return this.helperDelegator.parameterExists(parameterName, element);
     }
 
+    /**
+     * Check Parameter has a non-blank value
+     */
+    public boolean parameterHasValue(final String parameterName, final JsonElement element) {
+        return this.helperDelegator.parameterHasValue(parameterName, element);
+    }
+
     public String extractStringNamed(final String parameterName, final JsonElement element) {
         return this.helperDelegator.extractStringNamed(parameterName, element, new HashSet<String>());
     }

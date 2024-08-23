@@ -765,7 +765,6 @@ public class LoanAccountBackdatedDisbursementTest {
     @Test
     public void loanAccountBackDatedDisbursementWithDisbursementDateBeforeLoanSubmittedOnDateValidationTest() {
         try {
-
             final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
             final LoanTransactionHelper validationErrorHelper = new LoanTransactionHelper(this.requestSpec, errorResponse);
 
@@ -867,7 +866,6 @@ public class LoanAccountBackdatedDisbursementTest {
         } finally {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
         }
-
     }
 
     @Test

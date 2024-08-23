@@ -32,7 +32,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDa
 @Getter
 @Entity
 @Table(name = "m_loan_transaction_relation")
-public class LoanTransactionRelation extends AbstractAuditableWithUTCDateTimeCustom {
+public class LoanTransactionRelation extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "from_loan_transaction_id", nullable = false)

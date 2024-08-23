@@ -18,6 +18,11 @@
  */
 package org.apache.fineract.portfolio.accountdetails.domain;
 
+import java.util.Arrays;
+import java.util.List;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.portfolio.accountdetails.service.AccountEnumerations;
+
 /**
  * Enum representation of account types .
  */
@@ -27,7 +32,8 @@ public enum AccountType {
     INDIVIDUAL(1, "accountType.individual"), //
     GROUP(2, "accountType.group"), //
     JLG(3, "accountType.jlg"), // JLG account given in group context
-    GLIM(4, "accountType.glim"), GSIM(5, "accountType.gsim");
+    GLIM(4, "accountType.glim"), //
+    GSIM(5, "accountType.gsim");
 
     private final Integer value;
     private final String code;
@@ -69,6 +75,10 @@ public enum AccountType {
             }
         }
         return accountType;
+    }
+
+    public static List<EnumOptionData> toEnumOptionData() {
+        return Arrays.stream(values()).sequential().map(AccountEnumerations::loanType).toList();
     }
 
     public Integer getValue() {

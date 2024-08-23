@@ -96,7 +96,7 @@ public class LoanTransactionAuditingIntegrationTest {
                 expenseAccount, overpaymentAccount);
 
         final Integer loanID = applyForLoanApplicationWithPaymentStrategyAndPastMonth(clientID, loanProductID, Collections.emptyList(),
-                null, "10000", LoanApplicationTestBuilder.DEFAULT_STRATEGY, "10 July 2022");
+                null, "10000", LoanApplicationTestBuilder.DEFAULT_STRATEGY, "10 July 2022", "12 July 2022");
         Assertions.assertNotNull(loanID);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
@@ -151,7 +151,8 @@ public class LoanTransactionAuditingIntegrationTest {
     }
 
     private Integer applyForLoanApplicationWithPaymentStrategyAndPastMonth(final Integer clientID, final Integer loanProductID,
-            List<HashMap> charges, final String savingsId, String principal, final String repaymentStrategy, final String submittedOnDate) {
+            List<HashMap> charges, final String savingsId, String principal, final String repaymentStrategy, final String submittedOnDate,
+            final String disbursementDate) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
 
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
@@ -165,7 +166,7 @@ public class LoanTransactionAuditingIntegrationTest {
                 .withAmortizationTypeAsEqualInstallments() //
                 .withInterestTypeAsFlatBalance() //
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
-                .withExpectedDisbursementDate(submittedOnDate) //
+                .withExpectedDisbursementDate(disbursementDate) //
                 .withSubmittedOnDate(submittedOnDate) //
                 .withRepaymentStrategy(repaymentStrategy) //
                 .withCharges(charges).build(clientID.toString(), loanProductID.toString(), savingsId);

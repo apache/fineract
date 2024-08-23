@@ -32,7 +32,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Getter
 @Entity
 @Table(name = "m_entity_datatable_check")
-public class EntityDatatableChecks extends AbstractPersistableCustom {
+public class EntityDatatableChecks extends AbstractPersistableCustom<Long> {
 
     @Column(name = "application_table_name", nullable = false)
     private String entity;
@@ -41,7 +41,7 @@ public class EntityDatatableChecks extends AbstractPersistableCustom {
     private String datatableName;
 
     @Column(name = "status_enum", nullable = false)
-    private Long status;
+    private Integer status;
 
     @Column(name = "system_defined")
     private boolean systemDefined = false;
@@ -50,29 +50,19 @@ public class EntityDatatableChecks extends AbstractPersistableCustom {
     private Long productId;
 
     public static EntityDatatableChecks fromJson(final JsonCommand command) {
-
         final String entity = command.stringValueOfParameterNamed("entity");
-        final Long status = command.longValueOfParameterNamed("status");
+        final Integer status = command.integerValueSansLocaleOfParameterNamed("status");
         final String datatableName = command.stringValueOfParameterNamed("datatableName");
 
-        boolean systemDefined = false;
-        if (command.parameterExists("systemDefined")) {
-            systemDefined = command.booleanObjectValueOfParameterNamed("systemDefined");
-        } else {
-            systemDefined = false;
-        }
-
+        boolean systemDefined = command.booleanPrimitiveValueOfParameterNamed("systemDefined");
         Long productId = null;
         if (command.parameterExists("productId")) {
             productId = command.longValueOfParameterNamed("productId");
         }
-
         return new EntityDatatableChecks(entity, datatableName, status, systemDefined, productId);
-
     }
 
     public boolean isSystemDefined() {
         return this.systemDefined;
     }
-
 }

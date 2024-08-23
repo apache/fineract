@@ -1,0 +1,36 @@
+name: Fineract Publish to DockerHub
+
+on:
+  push:
+    branches:
+      - develop
+    tags:
+      - 1.*
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    env:
+      GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GE_ACCESS_TOKEN }}
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+        with:
+          fetch-depth: 0
+      - name: Set up JDK 17
+        uses: actions/setup-java@99b8673ff64fbf99d8d325f52d9a5bdedb8483e9 # v4
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+          cache: gradle
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+        id: extract_branch
+      - name: Build the Apache Fineract image
+        run:  |
+          ./gradlew --no-daemon --console=plain :fineract-provider:jib -x test -x cucumber -Djib.to.auth.username=${{secrets.DOCKERHUB_USER}} -Djib.to.auth.password=${{secrets.DOCKERHUB_TOKEN}} -Djib.from.platforms=linux/amd64,linux/arm64 -Djib.to.image=apache/fineract -Djib.to.tags=${{ steps.extract_branch.outputs.branch }}

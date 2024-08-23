@@ -540,6 +540,26 @@ public class ExternalEventConfigurationHelper {
         loanUndoReAmortizeBusinessEvent.put("enabled", false);
         defaults.add(loanUndoReAmortizeBusinessEvent);
 
+        Map<String, Object> loanTransactionInterestPaymentWaiverPostBusinessEvent = new HashMap<>();
+        loanTransactionInterestPaymentWaiverPostBusinessEvent.put("type", "LoanTransactionInterestPaymentWaiverPostBusinessEvent");
+        loanTransactionInterestPaymentWaiverPostBusinessEvent.put("enabled", false);
+        defaults.add(loanTransactionInterestPaymentWaiverPostBusinessEvent);
+
+        Map<String, Object> loanTransactionInterestPaymentWaiverPreBusinessEvent = new HashMap<>();
+        loanTransactionInterestPaymentWaiverPreBusinessEvent.put("type", "LoanTransactionInterestPaymentWaiverPreBusinessEvent");
+        loanTransactionInterestPaymentWaiverPreBusinessEvent.put("enabled", false);
+        defaults.add(loanTransactionInterestPaymentWaiverPreBusinessEvent);
+
+        Map<String, Object> loanTransactionAccrualActivityPostBusinessEvent = new HashMap<>();
+        loanTransactionAccrualActivityPostBusinessEvent.put("type", "LoanTransactionAccrualActivityPostBusinessEvent");
+        loanTransactionAccrualActivityPostBusinessEvent.put("enabled", false);
+        defaults.add(loanTransactionAccrualActivityPostBusinessEvent);
+
+        Map<String, Object> loanTransactionAccrualActivityPreBusinessEvent = new HashMap<>();
+        loanTransactionAccrualActivityPreBusinessEvent.put("type", "LoanTransactionAccrualActivityPreBusinessEvent");
+        loanTransactionAccrualActivityPreBusinessEvent.put("enabled", false);
+        defaults.add(loanTransactionAccrualActivityPreBusinessEvent);
+
         return defaults;
 
     }

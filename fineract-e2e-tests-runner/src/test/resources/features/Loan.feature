@@ -1,45 +1,45 @@
 @LoanFeature
 Feature: Loan
 
-  @TestRailId:C16 @Smoke
+   @Smoke
   Scenario: Loan creation functionality in Fineract
     When Admin sets the business date to the actual date
     When Admin creates a client with random data
     When Admin creates a new Loan
 
-  @TestRailId:C17
+
   Scenario: Loan creation functionality in Fineract
     When Admin sets the business date to "1 July 2022"
     When Admin creates a client with random data
     And Admin successfully creates a new customised Loan submitted on date: "1 July 2022", with Principal: "5000", a loanTermFrequency: 24 months, and numberOfRepayments: 24
 
-  @TestRailId:C42
+
   Scenario: As a user I would like to see that the loan is not created if the loan submission date is after the business date
     When Admin sets the business date to "25 June 2022"
     When Admin creates a client with random data
     Then Admin fails to create a new customised Loan submitted on date: "1 July 2022", with Principal: "5000", a loanTermFrequency: 24 months, and numberOfRepayments: 24
 
-  @TestRailId:C43
+
   Scenario: As a user I would like to see that the loan is created if the loan submission date is equal to business date
     When Admin sets the business date to "1 July 2022"
     When Admin creates a client with random data
     And Admin successfully creates a new customised Loan submitted on date: "1 July 2022", with Principal: "5000", a loanTermFrequency: 24 months, and numberOfRepayments: 24
 
-  @TestRailId:C46
+
   Scenario: As a user I would like to see that the loan is approved at the business date
     When Admin sets the business date to "1 July 2022"
     When Admin creates a client with random data
     And Admin successfully creates a new customised Loan submitted on date: "1 July 2022", with Principal: "5000", a loanTermFrequency: 24 months, and numberOfRepayments: 24
     And Admin successfully approves the loan on "1 July 2022" with "5000" amount and expected disbursement date on "2 July 2022"
 
-  @TestRailId:C30 @single
+   @single
   Scenario: As a user I would like to see that the loan is cannot be approved with future approval date
     When Admin sets the business date to "1 July 2022"
     When Admin creates a client with random data
     And Admin successfully creates a new customised Loan submitted on date: "1 July 2022", with Principal: "5000", a loanTermFrequency: 24 months, and numberOfRepayments: 24
     Then Admin fails to approve the loan on "2 July 2022" with "5000" amount and expected disbursement date on "2 July 2022" because of wrong date
 
-  @TestRailId:C47 @multi
+   @multi
   Scenario: As a user I would like to see that the loan can be disbursed at the business date
     When Admin sets the business date to "1 July 2022"
     When Admin creates a client with random data
@@ -47,7 +47,7 @@ Feature: Loan
     And Admin successfully approves the loan on "1 July 2022" with "5000" amount and expected disbursement date on "2 July 2022"
     When Admin successfully disburse the loan on "1 July 2022" with "5000" EUR transaction amount
 
-  @TestRailId:C31
+
   Scenario: As a user I would like to see that the loan is cannot be disbursed with future disburse date
     When Admin sets the business date to "1 July 2022"
     When Admin creates a client with random data
@@ -55,7 +55,7 @@ Feature: Loan
     And Admin successfully approves the loan on "1 July 2022" with "5000" amount and expected disbursement date on "2 July 2022"
     Then Admin fails to disburse the loan on "2 July 2022" with "5000" EUR transaction amount because of wrong date
 
-  @TestRailId:C64
+
   Scenario: As a user I would like to see that 50% over applied amount can be approved and disbursed on loan correctly
     When Admin sets the business date to "1 September 2022"
     When Admin creates a client with random data
@@ -63,7 +63,7 @@ Feature: Loan
     And Admin successfully approves the loan on "1 September 2022" with "1500" amount and expected disbursement date on "1 September 2022"
     When Admin successfully disburse the loan on "1 September 2022" with "1500" EUR transaction amount
 
-  @TestRailId:C65
+
   Scenario: As a user I would like to see that 50% over applied amount can be approved but more than 50% cannot be disbursed on loan
     When Admin sets the business date to "1 September 2022"
     When Admin creates a client with random data
@@ -71,14 +71,14 @@ Feature: Loan
     And Admin successfully approves the loan on "1 September 2022" with "1500" amount and expected disbursement date on "1 September 2022"
     Then Admin fails to disburse the loan on "1 September 2022" with "1501" EUR transaction amount because of wrong amount
 
-  @TestRailId:C66
+
   Scenario: As a user I would like to see that more than 50% over applied amount can not be approved on loan
     When Admin sets the business date to "1 September 2022"
     When Admin creates a client with random data
     When Admin successfully creates a new customised Loan submitted on date: "1 September 2022", with Principal: "1000", a loanTermFrequency: 3 months, and numberOfRepayments: 3
     Then Admin fails to approve the loan on "1 September 2022" with "1501" amount and expected disbursement date on "1 September 2022" because of wrong amount
 
-  @TestRailId:C2769
+
   Scenario: As a user I would like to see that more than 50% over applied amount in total can not be disbursed on loan
     When Admin sets the business date to "1 September 2022"
     When Admin creates a client with random data
@@ -87,7 +87,7 @@ Feature: Loan
     And Admin successfully disburse the loan on "1 September 2022" with "1400" EUR transaction amount
     Then Admin fails to disburse the loan on "1 September 2022" with "101" EUR transaction amount because of wrong amount
 
-  @TestRailId:C67
+
   Scenario: As admin I would like to check that amounts are distributed equally in loan repayment schedule
     When Admin sets the business date to "1 September 2022"
     When Admin creates a client with random data
@@ -97,7 +97,7 @@ Feature: Loan
     When Admin successfully disburse the loan on "1 September 2022" with "900" EUR transaction amount
     Then Amounts are distributed equally in loan repayment schedule in case of total amount 900
 
-  @TestRailId:C68
+
   Scenario: As admin I would like to be sure that approval of on loan can be undone
     When Admin sets the business date to "1 September 2022"
     When Admin creates a client with random data
@@ -105,7 +105,7 @@ Feature: Loan
     And Admin successfully approves the loan on "1 September 2022" with "1000" amount and expected disbursement date on "1 September 2022"
     Then Admin can successfully undone the loan approval
 
-  @TestRailId:C69
+
   Scenario: As admin I would like to be sure that disbursal of on loan can be undone
     When Admin sets the business date to "1 September 2022"
     When Admin creates a client with random data
@@ -116,14 +116,14 @@ Feature: Loan
     Then Admin can successfully undone the loan approval
     And Admin successfully approves the loan on "1 September 2022" with "1000" amount and expected disbursement date on "1 September 2022"
 
-  @TestRailId:C70
+
   Scenario: As admin I would like to be sure that submitted on date can be edited on loan
     When Admin sets the business date to "1 September 2022"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 September 2022"
     Then Admin can successfully modify the loan and changes the submitted on date to "31 August 2022"
 
-  @TestRailId:C2454 @fraud
+   @fraud
   Scenario: As admin I would like to set Fraud flag to a loan
     When Admin sets the business date to "1 September 2022"
     When Admin creates a client with random data
@@ -132,7 +132,7 @@ Feature: Loan
     When Admin successfully disburse the loan on "1 September 2022" with "1000" EUR transaction amount
     Then Admin can successfully set Fraud flag to the loan
 
-  @TestRailId:C2455 @fraud
+   @fraud
   Scenario: As admin I would like to unset Fraud flag to a loan
     When Admin sets the business date to "1 September 2022"
     When Admin creates a client with random data
@@ -143,7 +143,7 @@ Feature: Loan
     Then Admin can successfully unset Fraud flag to the loan
 
 
-  @TestRailId:C2456 @fraud
+   @fraud
   Scenario: As admin I would like to try to add fraud flag on a not active loan
     When Admin sets the business date to "25 October 2022"
     When Admin creates a client with random data
@@ -151,7 +151,7 @@ Feature: Loan
     And Admin successfully approves the loan on "25 October 2022" with "1000" amount and expected disbursement date on "25 October 2022"
     Then Admin can successfully unset Fraud flag to the loan
 
-  @TestRailId:C2473 @idempotency
+   @idempotency
   Scenario: As admin I would like to verify that idempotency APIs can be called with the Idempotency-Key header
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
@@ -163,7 +163,7 @@ Feature: Loan
     Then Loan has 1 "DISBURSEMENT" transactions on Transactions tab
     Then Loan has 1 "REPAYMENT" transactions on Transactions tab
 
-  @TestRailId:C2474 @idempotency
+   @idempotency
   Scenario: As admin I would like to verify that idempotency APIs can be called without the Idempotency-Key header
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
@@ -175,7 +175,7 @@ Feature: Loan
     Then Loan has 1 "DISBURSEMENT" transactions on Transactions tab
     Then Loan has 1 "REPAYMENT" transactions on Transactions tab
 
-  @TestRailId:C2475 @idempotency
+   @idempotency
   Scenario: As admin I would like to verify that idempotency applies correctly in a happy path scenario in case of REPAYMENT transaction
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
@@ -190,7 +190,7 @@ Feature: Loan
     Then Transaction response has the correct clientId and the loanId of the first transaction
     Then Loan has 1 "REPAYMENT" transactions on Transactions tab
 
-  @TestRailId:C2476 @idempotency
+   @idempotency
   Scenario: As admin I would like to verify that idempotency applies correctly in a happy path scenario in case of GOODWILL_CREDIT transaction
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
@@ -206,7 +206,7 @@ Feature: Loan
     Then Transaction response has the correct clientId and the loanId of the first transaction
     Then Loan has 1 "GOODWILL_CREDIT" transactions on Transactions tab
 
-  @TestRailId:C2477 @idempotency
+   @idempotency
   Scenario: As admin I would like to verify that idempotency applies correctly in a happy path scenario in case of PAYOUT_REFUND transaction
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
@@ -221,7 +221,7 @@ Feature: Loan
     Then Transaction response has the correct clientId and the loanId of the first transaction
     Then Loan has 1 "PAYOUT_REFUND" transactions on Transactions tab
 
-  @TestRailId:C2478 @idempotency
+   @idempotency
   Scenario: As admin I would like to verify that idempotency applies correctly in a happy path scenario in case of MERCHANT_ISSUED_REFUND transaction
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
@@ -236,7 +236,7 @@ Feature: Loan
     Then Transaction response has the correct clientId and the loanId of the first transaction
     Then Loan has 1 "MERCHANT_ISSUED_REFUND" transactions on Transactions tab
 
-  @TestRailId:C2482 @idempotency
+   @idempotency
   Scenario: As admin I would like to verify that idempotency applies correctly in case of client calls the same idempotency key on a second loan
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
@@ -256,7 +256,7 @@ Feature: Loan
     Then Second loan has 0 "REPAYMENT" transactions on Transactions tab
 
 #  TODO it will fail until different client can see each other cached response with same idempotent key is fixed
-  @Skip @TestRailId:C2483 @idempotency
+  @Skip  @idempotency
   Scenario: As admin I would like to verify that idempotency applies correctly in case of a second client calls the same idempotency key on a second loan
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
@@ -276,7 +276,7 @@ Feature: Loan
     Then Loan has 1 "REPAYMENT" transactions on Transactions tab
     Then Second loan has 1 "REPAYMENT" transactions on Transactions tab
 
-  @TestRailId:C2479
+
   Scenario: As admin I would like to be sure that goodwill credit transaction is working properly
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
@@ -288,7 +288,7 @@ Feature: Loan
     When Customer makes "GOODWILL_CREDIT" transaction with "AUTOPAY" payment type on "15 November 2022" with 200 EUR transaction amount and self-generated Idempotency key
     Then Loan has 1 "GOODWILL_CREDIT" transactions on Transactions tab
 
-  @TestRailId:C2480
+
   Scenario: As admin I would like to be sure that payout refund transaction is working properly
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
@@ -300,7 +300,7 @@ Feature: Loan
     When Customer makes "PAYOUT_REFUND" transaction with "AUTOPAY" payment type on "15 November 2022" with 200 EUR transaction amount and self-generated Idempotency key
     Then Loan has 1 "PAYOUT_REFUND" transactions on Transactions tab
 
-  @TestRailId:C2481
+
   Scenario: As admin I would like to be sure that  merchant issued refund transaction is working properly
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
@@ -312,7 +312,7 @@ Feature: Loan
     When Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "15 November 2022" with 200 EUR transaction amount and self-generated Idempotency key
     Then Loan has 1 "MERCHANT_ISSUED_REFUND" transactions on Transactions tab
 
-  @TestRailId:C2488
+
   Scenario: As admin I would like to be sure that no multiple status change event got raised during transaction replaying
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
@@ -333,7 +333,7 @@ Feature: Loan
     When Customer undo "1"th repayment on "4 November 2022"
     Then Loan status has changed to "Active"
 
-  @TestRailId:C2489
+
   Scenario: As admin I would like to charge-off a loan and be sure the event was triggered
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
@@ -346,7 +346,7 @@ Feature: Loan
     And Admin does charge-off the loan on "3 November 2022"
     Then Loan marked as charged-off on "03 November 2022"
 
-  @TestRailId:C2491
+
   Scenario: As a user I would like to do multiple repayment, overpay the loan and reverse-replaying transactions and check outstanding balance
     When Admin sets the business date to "01 November 2022"
     When Admin creates a client with random data
@@ -400,7 +400,7 @@ Feature: Loan
     And Customer makes "AUTOPAY" repayment on "02 November 2022" with 500 EUR transaction amount
     Then Loan has 290 overpaid amount
 
-  @TestRailId:C2502
+
   Scenario: Verify that Loan status goes from active to overpaid in case of Goodwill credit transaction when transaction amount is greater than balance
     When Admin sets the business date to "1 January 2023"
     When Admin creates a client with random data
@@ -435,7 +435,7 @@ Feature: Loan
       | LIABILITY | l1           | Overpayment account      |       | 100.0  |
       | EXPENSE   | 744003       | Goodwill Expense Account | 400.0 |        |
 
-  @TestRailId:C2503
+
   Scenario: Verify that Loan status goes from active to overpaid in case of Backdated 3rd repayment when transaction amount is greater than balance
     When Admin sets the business date to "1 January 2023"
     When Admin creates a client with random data
@@ -471,7 +471,7 @@ Feature: Loan
       | LIABILITY | 145023       | Suspense/Clearing account | 250.0 |        |
 
 
-  @TestRailId:C2504
+
   Scenario: Verify that Loan status goes from overpaid to active in case of Chargeback transaction when transaction amount is greater than overpaid amount
     When Admin sets the business date to "1 January 2023"
     When Admin creates a client with random data
@@ -512,7 +512,7 @@ Feature: Loan
       | LIABILITY | 145023       | Suspense/Clearing account |       | 300.0  |
       | LIABILITY | l1           | Overpayment account       | 200.0 |        |
 
-  @TestRailId:C2506
+
   Scenario: Verify that Loan status goes from overpaid to active in case of 1st repayment is undone
     When Admin sets the business date to "1 January 2023"
     When Admin creates a client with random data
@@ -549,7 +549,7 @@ Feature: Loan
       | ASSET     | 112601       | Loans Receivable          |       | 300.0  |
       | LIABILITY | 145023       | Suspense/Clearing account | 300.0 |        |
 
-  @TestRailId:C2507
+
   Scenario: Verify that Loan status goes from active to closed in case of Goodwill credit transaction when transaction amount equals balance
     When Admin sets the business date to "1 January 2023"
     When Admin creates a client with random data
@@ -582,7 +582,7 @@ Feature: Loan
       | ASSET   | 112601       | Loans Receivable         |       | 300.0  |
       | EXPENSE | 744003       | Goodwill Expense Account | 300.0 |        |
 
-  @TestRailId:C2508
+
   Scenario: Verify that Loan status goes from active to closed in case of Backdated 3rd repayment when transaction amount equals balance
     When Admin sets the business date to "1 January 2023"
     When Admin creates a client with random data
@@ -615,7 +615,7 @@ Feature: Loan
       | ASSET     | 112601       | Loans Receivable          |       | 250.0  |
       | LIABILITY | 145023       | Suspense/Clearing account | 250.0 |        |
 
-  @TestRailId:C2509
+
   Scenario: Verify that Loan status goes from closed to overpaid in case of Goodwill credit transaction
     When Admin sets the business date to "1 January 2023"
     When Admin creates a client with random data
@@ -656,7 +656,7 @@ Feature: Loan
       | EXPENSE   | 744003       | Goodwill Expense Account | 100.0 |        |
 
 
-  @TestRailId:C2510
+
   Scenario: Verify that Loan status goes from overpaid to closed in case of Chargeback transaction when transaction amount equals overpaid amount
     When Admin sets the business date to "1 January 2023"
     When Admin creates a client with random data
@@ -697,7 +697,7 @@ Feature: Loan
       | LIABILITY | 145023       | Suspense/Clearing account |       | 200.0  |
 
 
-  @TestRailId:C2512
+
   Scenario: Verify that Loan status goes from overpaid to closed in case of 1st repayment is undone
     When Admin sets the business date to "1 January 2023"
     When Admin creates a client with random data
@@ -734,7 +734,7 @@ Feature: Loan
       | ASSET     | 112601       | Loans Receivable          |       | 300.0  |
       | LIABILITY | 145023       | Suspense/Clearing account | 300.0 |        |
 
-  @TestRailId:C2513
+
   Scenario: Verify that Loan status goes from closed to active in case of Chargeback transaction
     When Admin sets the business date to "1 January 2023"
     When Admin creates a client with random data
@@ -773,7 +773,7 @@ Feature: Loan
       | ASSET     | 112601       | Loans Receivable          | 200.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 200.0  |
 
-  @TestRailId:C2514
+
   Scenario: Verify that Loan status goes from closed to active in case of 1st repayment is undone
     When Admin sets the business date to "1 January 2023"
     When Admin creates a client with random data
@@ -811,7 +811,7 @@ Feature: Loan
       | LIABILITY | 145023       | Suspense/Clearing account | 200.0 |        |
 
 
-  @TestRailId:C2539
+
   Scenario: Verify that loan overdue calculation is updated upon Goodwill credit transaction
     When Admin sets the business date to "1 January 2023"
     When Admin creates a client with random data
@@ -828,7 +828,7 @@ Feature: Loan
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     Then Loan has 0 outstanding amount
 
-  @TestRailId:C2540
+
   Scenario: Verify that loan overdue calculation is updated upon Payout refund transaction
     When Admin sets the business date to "1 January 2023"
     When Admin creates a client with random data
@@ -845,7 +845,7 @@ Feature: Loan
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     Then Loan has 0 outstanding amount
 
-  @TestRailId:C2541
+
   Scenario: Verify that loan overdue calculation is updated upon Merchant issued refund transaction
     When Admin sets the business date to "1 January 2023"
     When Admin creates a client with random data
@@ -862,7 +862,7 @@ Feature: Loan
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     Then Loan has 0 outstanding amount
 
-  @TestRailId:C2552
+
   Scenario: Verify that delinquency event contains the correct delinquentDate in case of one repayment is overdue
     When Admin sets the business date to "1 January 2023"
     When Admin creates a client with random data
@@ -873,20 +873,20 @@ Feature: Loan
     When Admin runs inline COB job for Loan
     Then Admin checks that delinquency range is: "RANGE_3" and has delinquentDate "2023-02-03"
 
-  @TestRailId:C2553
+
   Scenario: Verify that delinquency event contains the correct delinquentDate in case of multiple repayments are overdue
     When Admin sets the business date to "1 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30       | 1 January 2023    | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1       | 1 January 2023    | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "1 January 2023" with "1000" amount and expected disbursement date on "1 January 2023"
     When Admin successfully disburse the loan on "1 January 2023" with "1000" EUR transaction amount
     When Admin sets the business date to "5 April 2023"
     When Admin runs inline COB job for Loan
     Then Admin checks that delinquency range is: "RANGE_30" and has delinquentDate "2023-02-04"
 
-  @TestRailId:C2583
+
   Scenario: Verify last payment related fields when retrieving loan details with 1 repayment
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -899,7 +899,7 @@ Feature: Loan
       | lastPaymentAmount | lastPaymentDate | lastRepaymentAmount | lastRepaymentDate |
       | 200.0             | 03 January 2023 | 200.0               | 03 January 2023   |
 
-  @TestRailId:C2586
+
   Scenario: Verify last payment related fields when retrieving loan details with 2 repayments on different day
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -914,7 +914,7 @@ Feature: Loan
       | lastPaymentAmount | lastPaymentDate | lastRepaymentAmount | lastRepaymentDate |
       | 300.0             | 05 January 2023 | 300.0               | 05 January 2023   |
 
-  @TestRailId:C2587
+
   Scenario: Verify last payment related fields when retrieving loan details with 2 repayments on the same day
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -928,7 +928,7 @@ Feature: Loan
       | lastPaymentAmount | lastPaymentDate | lastRepaymentAmount | lastRepaymentDate |
       | 300.0             | 03 January 2023 | 300.0               | 03 January 2023   |
 
-  @TestRailId:C2588
+
   Scenario: Verify last payment related fields when retrieving loan details with 2 repayments on different day then the second repayment reversed
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -947,7 +947,7 @@ Feature: Loan
       | lastPaymentAmount | lastPaymentDate | lastRepaymentAmount | lastRepaymentDate |
       | 200.0             | 03 January 2023 | 200.0               | 03 January 2023   |
 
-  @TestRailId:C2589
+
   Scenario: Verify last payment related fields when retrieving loan details with 1 repayment and 1 goodwill credit transaction
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -962,7 +962,7 @@ Feature: Loan
       | lastPaymentAmount | lastPaymentDate | lastRepaymentAmount | lastRepaymentDate |
       | 400.0             | 05 January 2023 | 200.0               | 03 January 2023   |
 
-  @TestRailId:C2590
+
   Scenario: Verify last payment related fields when retrieving loan details with 1 repayment, 1 goodwill credit transaction and 1 more repayment then the second repayment reversed
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -983,7 +983,7 @@ Feature: Loan
       | lastPaymentAmount | lastPaymentDate | lastRepaymentAmount | lastRepaymentDate |
       | 400.0             | 05 January 2023 | 200.0               | 03 January 2023   |
 
-  @TestRailId:C2678
+
   Scenario: Verify that after loan is closed loan details and event has last repayment date and amount
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -999,7 +999,7 @@ Feature: Loan
       | lastPaymentAmount | lastPaymentDate | lastRepaymentAmount | lastRepaymentDate |
       | 1000.0            | 02 January 2023 | 1000.0              | 02 January 2023   |
 
-  @TestRailId:C2679
+
   Scenario: Verify that after loan is overpaid loan details and event has last repayment date and amount
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -1015,7 +1015,7 @@ Feature: Loan
       | lastPaymentAmount | lastPaymentDate | lastRepaymentAmount | lastRepaymentDate |
       | 1100.0            | 02 January 2023 | 1100.0              | 02 January 2023   |
 
-  @TestRailId:C2687 @fraud
+   @fraud
   Scenario: Verify that closed loan can be marked as Fraud
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -1027,7 +1027,7 @@ Feature: Loan
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     Then Admin can successfully set Fraud flag to the loan
 
-  @TestRailId:C2688 @fraud
+   @fraud
   Scenario: Verify that overpaid loan can be marked as Fraud
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -1039,7 +1039,7 @@ Feature: Loan
     Then Loan status will be "OVERPAID"
     Then Admin can successfully set Fraud flag to the loan
 
-  @TestRailId:C2690
+
   Scenario: Verify that the repayment schedule is correct when the loan has a fee and multi disbursement happens
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
@@ -1065,13 +1065,13 @@ Feature: Loan
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 1500          | 0        | 8    | 0         | 1508 | 0    | 0          | 0    | 1508        |
 
-  @TestRailId:C2691
+
   Scenario: As an admin I would like to do a chargeback for Goodwill Credit
     When Admin sets the business date to "8 May 2023"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30       | 8 May 2023        | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1       | 8 May 2023        | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "8 May 2023" with "1000" amount and expected disbursement date on "8 May 2023"
     And Admin successfully disburse the loan on "8 May 2023" with "1000" EUR transaction amount
     When Admin sets the business date to "9 May 2023"
@@ -1093,13 +1093,13 @@ Feature: Loan
       | 09 May 2023      | Goodwill Credit  | 300.0  | 300.0     | 0.0      | 0.0  | 0.0       | 700.0        |
       | 10 May 2023      | Chargeback       | 300.0  | 300.0     | 0.0      | 0.0  | 0.0       | 1000.0       |
 
-  @TestRailId:C2692
+
   Scenario: As an admin I would like to do a chargeback for Payout Refund
     When Admin sets the business date to "8 May 2023"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30       | 8 May 2023        | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1       | 8 May 2023        | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "8 May 2023" with "1000" amount and expected disbursement date on "8 May 2023"
     And Admin successfully disburse the loan on "8 May 2023" with "1000" EUR transaction amount
     When Admin sets the business date to "9 May 2023"
@@ -1121,13 +1121,13 @@ Feature: Loan
       | 09 May 2023      | Payout Refund    | 300.0  | 300.0     | 0.0      | 0.0  | 0.0       | 700.0        |
       | 10 May 2023      | Chargeback       | 300.0  | 300.0     | 0.0      | 0.0  | 0.0       | 1000.0       |
 
-  @TestRailId:C2693
+
   Scenario: As an admin I would like to do a chargeback for Merchant Issued Refund
     When Admin sets the business date to "8 May 2023"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30       | 8 May 2023        | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1       | 8 May 2023        | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "8 May 2023" with "1000" amount and expected disbursement date on "8 May 2023"
     And Admin successfully disburse the loan on "8 May 2023" with "1000" EUR transaction amount
     When Admin sets the business date to "9 May 2023"
@@ -1149,14 +1149,14 @@ Feature: Loan
       | 09 May 2023      | Merchant Issued Refund | 300.0  | 300.0     | 0.0      | 0.0  | 0.0       | 700.0        |
       | 10 May 2023      | Chargeback             | 300.0  | 300.0     | 0.0      | 0.0  | 0.0       | 1000.0       |
 
-  @TestRailId:C2770
+
   Scenario: As an admin I would like to do two merchant issued refund and charge adjustment to close the loan
     When Global config "charge-accrual-date" value set to "submitted-date"
     When Admin sets the business date to "14 May 2023"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30       | 14 May 2023       | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 30                | DAYS                  | 30             | DAYS                   | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LP1       | 14 May 2023       | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 30                | DAYS                  | 30             | DAYS                   | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "14 May 2023" with "127.95" amount and expected disbursement date on "14 May 2023"
     And Admin successfully disburse the loan on "14 May 2023" with "127.95" EUR transaction amount
     When Admin sets the business date to "11 June 2023"
@@ -1220,7 +1220,7 @@ Feature: Loan
       | 17 June 2023     | Merchant Issued Refund | 2.95   | 0.0       | 0.0      | 2.95 | 0.0       | 0.0          |
     When Global config "charge-accrual-date" value set to "due-date"
 
-  @TestRailId:C2776
+
   Scenario: Verify that maturity date is updated on repayment reversal
     When Admin sets the business date to "01 June 2023"
     When Admin creates a client with random data
@@ -1244,27 +1244,41 @@ Feature: Loan
       | actualMaturityDate | expectedMaturityDate |
       | 01 July 2023       | 01 July 2023         |
 
-  @TestRailId:C2777
+  Scenario: Verify that closed date is updated on repayment reversal
+    When Admin sets the business date to "01 June 2023"
+    When Admin creates a client with random data
+    When Admin creates a new default Loan with date: "01 June 2023"
+    And Admin successfully approves the loan on "01 June 2023" with "1000" amount and expected disbursement date on "01 June 2023"
+    When Admin successfully disburse the loan on "01 June 2023" with "1000" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    When Admin sets the business date to "20 June 2023"
+    And Customer makes "AUTOPAY" repayment on "20 June 2023" with 1000 EUR transaction amount
+    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+    When Admin sets the business date to "20 June 2023"
+    When Customer undo "1"th "Repayment" transaction made on "20 June 2023"
+    Then Loan status will be "ACTIVE"
+    Then Loan closedon_date is null
+
   Scenario: As an admin I would like to delete a loan using external id
     When Admin sets the business date to the actual date
     And Admin creates a client with random data
     When Admin creates a new Loan
     Then Admin successfully deletes the loan with external id
 
-  @TestRailId:C2778
+
   Scenario: As an admin I would like to verify that deleting loan using incorrect external id gives error
     When Admin sets the business date to the actual date
     And Admin creates a client with random data
     When Admin creates a new Loan
     Then Admin fails to delete the loan with incorrect external id
 
-  @TestRailId:C2784
+
   Scenario: As a user I would like to do multiple repayment after reverse transactions and check the order of transactions
     When Admin sets the business date to "01 November 2022"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30       | 01 November 2022  | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 30                | DAYS                  | 30             | DAYS                   | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LP1       | 01 November 2022  | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 30                | DAYS                  | 30             | DAYS                   | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "01 November 2022" with "1000" amount and expected disbursement date on "01 November 2022"
     When Admin successfully disburse the loan on "01 November 2022" with "1000" EUR transaction amount
     Then Loan has 1000 outstanding amount
@@ -1291,13 +1305,13 @@ Feature: Loan
       | Repayment        | 8.0    | 0.0       | 0.0      | 0.0  | 8.0       | 1000.0       |
       | Repayment        | 7.0    | 0.0       | 0.0      | 0.0  | 7.0       | 1000.0       |
 
-  @TestRailId:C2783
+
   Scenario: As an admin I would like to verify that only one active repayment schedule exits for loan multiple disbursement
     When Admin sets the business date to "07 July 2023"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30       | 07 July 2023      | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 30                | DAYS                  | 30             | DAYS                   | 1                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1       | 07 July 2023      | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 30                | DAYS                  | 30             | DAYS                   | 1                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "07 July 2023" with "1000" amount and expected disbursement date on "07 July 2023"
     And Admin successfully disburse the loan on "07 July 2023" with "370.55" EUR transaction amount
     When Admin sets the business date to "12 July 2023"
@@ -1346,14 +1360,14 @@ Feature: Loan
       | 21 July 2023     | Merchant Issued Refund | 167.4  | 162.25    | 0.0      | 5.15 | 0.0       | 208.3        |
       | 24 July 2023     | Disbursement           | 18.0   | 0.0       | 0.0      | 0.0  | 0.0       | 226.3        |
 
-  @TestRailId:C2842 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: As an admin I would like to verify that simple payments are working with advanced payment allocation (UC1)
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin sets the business date to "01 January 2023"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2023   | 500            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2023   | 500            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2023" with "500" amount and expected disbursement date on "01 January 2023"
     Then Loan status has changed to "Approved"
     And Admin successfully disburse the loan on "01 January 2023" with "500" EUR transaction amount
@@ -1428,14 +1442,14 @@ Feature: Loan
       | 15 February 2023 | Repayment        | 125.0  | 125.0     | 0.0      | 0.0  | 0.0       | 0.0          |
     Then Loan status has changed to "Closed (obligations met)"
 
-  @TestRailId:C2843 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: As an admin I would like to verify that simple payments and overpayment of the installment (goes to next installment) are working with advanced payment allocation (UC2)
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin sets the business date to "01 January 2023"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2023   | 500            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2023   | 500            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2023" with "500" amount and expected disbursement date on "01 January 2023"
     Then Loan status has changed to "Approved"
     And Admin successfully disburse the loan on "01 January 2023" with "500" EUR transaction amount
@@ -1510,14 +1524,14 @@ Feature: Loan
       | 15 February 2023 | Repayment        | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 0.0          |
     Then Loan status has changed to "Closed (obligations met)"
 
-  @TestRailId:C2844 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: As an admin I would like to verify that simple payments and overpayment of the installment (goes to last installment) are working with advanced payment allocation (UC3)
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin sets the business date to "01 January 2023"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2023   | 500            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2023   | 500            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2023" with "500" amount and expected disbursement date on "01 January 2023"
     Then Loan status has changed to "Approved"
     And Admin successfully disburse the loan on "01 January 2023" with "500" EUR transaction amount
@@ -1592,14 +1606,14 @@ Feature: Loan
       | 15 February 2023 | Goodwill Credit  | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 0.0          |
     Then Loan status has changed to "Closed (obligations met)"
 
-  @TestRailId:C2845 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: As an admin I would like to verify that simple payments are working after some of them failed with advanced payment allocation (UC4)
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin sets the business date to "01 January 2023"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2023   | 500            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2023   | 500            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2023" with "500" amount and expected disbursement date on "01 January 2023"
     Then Loan status has changed to "Approved"
     And Admin successfully disburse the loan on "01 January 2023" with "500" EUR transaction amount
@@ -1725,14 +1739,14 @@ Feature: Loan
       | 15 February 2023 | Repayment        | 360.0  | 360.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    |
     Then Loan status has changed to "Closed (obligations met)"
 
-  @TestRailId:C2846 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: As an admin I would like to verify that Merchant issued refund with reamortization works with advanced payment allocation (UC05)
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin sets the business date to "01 January 2023"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2023   | 500            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2023   | 500            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2023" with "500" amount and expected disbursement date on "01 January 2023"
     Then Loan status has changed to "Approved"
     And Admin successfully disburse the loan on "01 January 2023" with "500" EUR transaction amount
@@ -1803,14 +1817,14 @@ Feature: Loan
       | 16 January 2023  | Repayment              | 201.0  | 200.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    | 1.0         |
     Then Loan status has changed to "Overpaid"
 
-  @TestRailId:C2847 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: As an admin I would like to verify that Merchant issued refund with reamortization on due date works with advanced payment allocation (UC07)
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin sets the business date to "01 January 2023"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2023   | 500            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2023   | 500            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2023" with "500" amount and expected disbursement date on "01 January 2023"
     Then Loan status has changed to "Approved"
     And Admin successfully disburse the loan on "01 January 2023" with "500" EUR transaction amount
@@ -1905,14 +1919,14 @@ Feature: Loan
       | 15 February 2023 | Repayment              | 25.0   | 25.0      | 0.0      | 0.0  | 0.0       | 0.0          |
     Then Loan status has changed to "Closed (obligations met)"
 
-  @TestRailId:C2848 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: As an admin I would like to verify that Merchant issued refund with reamortization past due date works with advanced payment allocation (UC08)
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin sets the business date to "01 January 2023"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2023   | 500            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2023   | 500            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2023" with "500" amount and expected disbursement date on "01 January 2023"
     Then Loan status has changed to "Approved"
     And Admin successfully disburse the loan on "01 January 2023" with "500" EUR transaction amount
@@ -2038,14 +2052,14 @@ Feature: Loan
       | 15 February 2023 | Repayment              | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    |
     Then Loan status has changed to "Closed (obligations met)"
 
-  @TestRailId:C2849 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: As an admin I would like to verify that full refund with CBR (UC17)
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin sets the business date to "01 January 2023"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2023   | 500            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2023   | 500            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2023" with "500" amount and expected disbursement date on "01 January 2023"
     Then Loan status has changed to "Approved"
     And Admin successfully disburse the loan on "01 January 2023" with "500" EUR transaction amount
@@ -2102,14 +2116,14 @@ Feature: Loan
       | 09 January 2023  | Credit Balance Refund  | 125.0  | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          |
     Then Loan status has changed to "Closed (obligations met)"
 
-  @TestRailId:C2850 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: As an admin I would like to verify that reverse-replay works with advanced payment allocation(UC24)
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin sets the business date to "01 January 2023"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2023   | 500            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2023   | 500            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2023" with "500" amount and expected disbursement date on "01 January 2023"
     Then Loan status has changed to "Approved"
     And Admin successfully disburse the loan on "01 January 2023" with "500" EUR transaction amount
@@ -2285,14 +2299,14 @@ Feature: Loan
       | 15 February 2023 | Repayment              | 125.0  | 125.0     | 0.0      | 0.0  | 0.0       | 0.0          | 0.0         | false    |
     Then Loan status has changed to "Closed (obligations met)"
 
-  @TestRailId:C2851 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: As an admin I would like to verify that reamortization works with uneven balances with advanced payment allocation(UC25)
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin sets the business date to "01 January 2023"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2023   | 500            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2023   | 500            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2023" with "500" amount and expected disbursement date on "01 January 2023"
     Then Loan status has changed to "Approved"
     And Admin successfully disburse the loan on "01 January 2023" with "500" EUR transaction amount
@@ -2381,14 +2395,14 @@ Feature: Loan
       | 04 January 2023  | Repayment              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 50.0         | false    |
       | 06 January 2023  | Merchant Issued Refund | 40.0   | 40.0      | 0.0      | 0.0  | 0.0       | 10.0         | false    |
 
-  @TestRailId:C2860 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify advanced payment allocation - future installments: NEXT_INSTALLMENT
     When Admin sets the business date to "01 September 2023"
     And Admin creates a client with random data
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 September 2023 | 400            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 September 2023 | 400            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "400" amount and expected disbursement date on "01 September 2023"
     And Admin successfully disburse the loan on "01 September 2023" with "400" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -2422,16 +2436,16 @@ Feature: Loan
       | 01 September 2023 | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 400.0        |
       | 01 September 2023 | Down Payment     | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 300.0        |
       | 16 September 2023 | Repayment        | 150.0  | 150.0     | 0.0      | 0.0  | 0.0       | 150.0        |
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
 
-  @TestRailId:C2861 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify advanced payment allocation - future installments: LAST_INSTALLMENT, payment on due date
     When Admin sets the business date to "01 September 2023"
     And Admin creates a client with random data
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "LAST_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "LAST_INSTALLMENT" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 September 2023 | 400            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 September 2023 | 400            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "400" amount and expected disbursement date on "01 September 2023"
     And Admin successfully disburse the loan on "01 September 2023" with "400" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -2465,16 +2479,16 @@ Feature: Loan
       | 01 September 2023 | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 400.0        |
       | 01 September 2023 | Down Payment     | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 300.0        |
       | 16 September 2023 | Repayment        | 150.0  | 150.0     | 0.0      | 0.0  | 0.0       | 150.0        |
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
 
-  @TestRailId:C2862 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify advanced payment allocation - future installments: LAST_INSTALLMENT, payment before due date
     When Admin sets the business date to "01 September 2023"
     And Admin creates a client with random data
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "LAST_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "LAST_INSTALLMENT" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 September 2023 | 400            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 September 2023 | 400            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "400" amount and expected disbursement date on "01 September 2023"
     And Admin successfully disburse the loan on "01 September 2023" with "400" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -2508,16 +2522,16 @@ Feature: Loan
       | 01 September 2023 | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 400.0        |
       | 01 September 2023 | Down Payment     | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 300.0        |
       | 10 September 2023 | Repayment        | 150.0  | 150.0     | 0.0      | 0.0  | 0.0       | 150.0        |
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
 
-  @TestRailId:C2863 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify advanced payment allocation - future installments: REAMORTIZATION, payment on due date
     When Admin sets the business date to "01 September 2023"
     And Admin creates a client with random data
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "REAMORTIZATION" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "REAMORTIZATION" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 September 2023 | 400            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 September 2023 | 400            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "400" amount and expected disbursement date on "01 September 2023"
     And Admin successfully disburse the loan on "01 September 2023" with "400" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -2551,16 +2565,16 @@ Feature: Loan
       | 01 September 2023 | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 400.0        |
       | 01 September 2023 | Down Payment     | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 300.0        |
       | 16 September 2023 | Repayment        | 150.0  | 150.0     | 0.0      | 0.0  | 0.0       | 150.0        |
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
 
-  @TestRailId:C2864 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify advanced payment allocation - future installments: REAMORTIZATION, payment before due date
     When Admin sets the business date to "01 September 2023"
     And Admin creates a client with random data
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "REAMORTIZATION" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "REAMORTIZATION" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 September 2023 | 400            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 September 2023 | 400            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "400" amount and expected disbursement date on "01 September 2023"
     And Admin successfully disburse the loan on "01 September 2023" with "400" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -2594,16 +2608,16 @@ Feature: Loan
       | 01 September 2023 | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 400.0        |
       | 01 September 2023 | Down Payment     | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 300.0        |
       | 10 September 2023 | Repayment        | 150.0  | 150.0     | 0.0      | 0.0  | 0.0       | 150.0        |
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
 
-  @TestRailId:C2865 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify advanced payment allocation - future installments: REAMORTIZATION, partial payment due date, payment before next due date
     When Admin sets the business date to "01 September 2023"
     And Admin creates a client with random data
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "REAMORTIZATION" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "REAMORTIZATION" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 September 2023 | 400            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 September 2023 | 400            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "400" amount and expected disbursement date on "01 September 2023"
     And Admin successfully disburse the loan on "01 September 2023" with "400" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -2655,16 +2669,16 @@ Feature: Loan
       | 01 September 2023 | Down Payment     | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 300.0        |
       | 16 September 2023 | Repayment        | 80.0   | 80.0      | 0.0      | 0.0  | 0.0       | 220.0        |
       | 20 September 2023 | Repayment        | 180.0  | 180.0     | 0.0      | 0.0  | 0.0       | 40.0         |
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
 
-  @TestRailId:C2897 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify advanced payment allocation - future installments: LAST_INSTALLMENT, payment after due date
     When Admin sets the business date to "01 September 2023"
     And Admin creates a client with random data
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "LAST_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "LAST_INSTALLMENT" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 September 2023 | 400            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 September 2023 | 400            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "400" amount and expected disbursement date on "01 September 2023"
     And Admin successfully disburse the loan on "01 September 2023" with "400" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -2698,18 +2712,18 @@ Feature: Loan
       | 01 September 2023 | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 400.0        |
       | 01 September 2023 | Down Payment     | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 300.0        |
       | 20 September 2023 | Repayment        | 150.0  | 150.0     | 0.0      | 0.0  | 0.0       | 150.0        |
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
 
-  @TestRailId:C2922
+
   @ProgressiveLoanSchedule
   @AdvancedPaymentAllocation
   Scenario: Verify advanced payment allocation with progressive loan schedule with multi disbursement and with overpaid installment
     When Admin sets the business date to "01 May 2023"
     And Admin creates a client with random data
-    When Admin set "PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                         | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 May 2023       | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 60                | DAYS                  | 15             | DAYS                   | 4                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 May 2023       | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 60                | DAYS                  | 15             | DAYS                   | 4                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 May 2023" with "1000" amount and expected disbursement date on "01 May 2023"
     And Admin successfully disburse the loan on "01 May 2023" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 5 periods, with the following data for periods:
@@ -2786,18 +2800,18 @@ Feature: Loan
       | 06 May 2023      | Repayment        | 650.0  | 650.0     | 0.0      | 0.0  | 0.0       | 350.0        |
       | 25 May 2023      | Disbursement     | 250.0  | 0.0       | 0.0      | 0.0  | 0.0       | 600.0        |
       | 12 June 2023     | Disbursement     | 250.0  | 0.0       | 0.0      | 0.0  | 0.0       | 850.0        |
-    When Admin set "PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
 
-  @TestRailId:C2937
+
   @ProgressiveLoanSchedule
   @AdvancedPaymentAllocation
   Scenario: Verify advanced payment allocation with progressive loan schedule with multi disbursement and reschedule
     When Admin sets the business date to "01 May 2023"
     And Admin creates a client with random data
-    When Admin set "PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                         | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 May 2023       | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 60                | DAYS                  | 15             | DAYS                   | 4                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 May 2023       | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 60                | DAYS                  | 15             | DAYS                   | 4                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 May 2023" with "1000" amount and expected disbursement date on "01 May 2023"
     And Admin successfully disburse the loan on "01 May 2023" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 5 periods, with the following data for periods:
@@ -2897,15 +2911,15 @@ Feature: Loan
       | 06 May 2023      | Repayment        | 650.0  | 650.0     | 0.0      | 0.0  | 0.0       | 350.0        |
       | 25 May 2023      | Disbursement     | 250.0  | 0.0       | 0.0      | 0.0  | 0.0       | 600.0        |
       | 15 July 2023     | Disbursement     | 250.0  | 0.0       | 0.0      | 0.0  | 0.0       | 850.0        |
-    When Admin set "PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
 
-  @TestRailId:C2940 @AdvancedPaymentAllocation @ProgressiveLoanSchedule
+   @AdvancedPaymentAllocation @ProgressiveLoanSchedule
   Scenario: Verify AdvancedPaymentAllocation behaviour: loanScheduleProcessingType-horizontal, charge after maturity, loan fully paid in advance
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                         | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -2964,13 +2978,13 @@ Feature: Loan
       | Name    | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
       | NSF fee | true      | Specified due date | 17 October 2023 | Flat             | 20.0 | 20.0 | 0.0    | 0.0         |
 
-  @TestRailId:C2941 @AdvancedPaymentAllocation @ProgressiveLoanSchedule
+   @AdvancedPaymentAllocation @ProgressiveLoanSchedule
   Scenario: Verify AdvancedPaymentAllocation behaviour: loanScheduleProcessingType-vertical, charge after maturity, loan fully paid in advance
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_VERTICAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_VERTICAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -3029,13 +3043,13 @@ Feature: Loan
       | Name    | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
       | NSF fee | true      | Specified due date | 17 October 2023 | Flat             | 20.0 | 20.0 | 0.0    | 0.0         |
 
-  @TestRailId:C2942 @AdvancedPaymentAllocation @ProgressiveLoanSchedule
+   @AdvancedPaymentAllocation @ProgressiveLoanSchedule
   Scenario: Verify AdvancedPaymentAllocation behaviour: loanScheduleProcessingType-horizontal, charge after maturity, loan overpaid in advance
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                         | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -3095,13 +3109,13 @@ Feature: Loan
       | Name    | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
       | NSF fee | true      | Specified due date | 17 October 2023 | Flat             | 20.0 | 20.0 | 0.0    | 0.0         |
 
-  @TestRailId:C2943 @AdvancedPaymentAllocation @ProgressiveLoanSchedule
+   @AdvancedPaymentAllocation @ProgressiveLoanSchedule
   Scenario: Verify AdvancedPaymentAllocation behaviour: loanScheduleProcessingType-vertical, charge after maturity, loan overpaid in advance
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_VERTICAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_VERTICAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -3161,13 +3175,13 @@ Feature: Loan
       | Name    | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
       | NSF fee | true      | Specified due date | 17 October 2023 | Flat             | 20.0 | 20.0 | 0.0    | 0.0         |
 
-  @TestRailId:C2944 @AdvancedPaymentAllocation @ProgressiveLoanSchedule
+   @AdvancedPaymentAllocation @ProgressiveLoanSchedule
   Scenario: Verify AdvancedPaymentAllocation behaviour: loanScheduleProcessingType-horizontal, charge after maturity, in advanced repayment (future installment type: NEXT_INSTALLMENT)
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                         | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -3275,13 +3289,13 @@ Feature: Loan
       | NSF fee | true      | Specified due date | 16 October 2023   | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
       | NSF fee | true      | Specified due date | 17 September 2023 | Flat             | 20.0 | 20.0 | 0.0    | 0.0         |
 
-  @TestRailId:C2945 @AdvancedPaymentAllocation @ProgressiveLoanSchedule
+   @AdvancedPaymentAllocation @ProgressiveLoanSchedule
   Scenario: Verify AdvancedPaymentAllocation behaviour: loanScheduleProcessingType-vertical, charge after maturity, in advanced repayment (future installment type: NEXT_INSTALLMENT)
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_VERTICAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_VERTICAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -3389,13 +3403,13 @@ Feature: Loan
       | NSF fee | true      | Specified due date | 16 October 2023   | Flat             | 20.0 | 20.0 | 0.0    | 0.0         |
       | NSF fee | true      | Specified due date | 17 September 2023 | Flat             | 20.0 | 20.0 | 0.0    | 0.0         |
 
-  @TestRailId:C2946 @AdvancedPaymentAllocation @ProgressiveLoanSchedule
+   @AdvancedPaymentAllocation @ProgressiveLoanSchedule
   Scenario: Verify AdvancedPaymentAllocation behaviour: loanScheduleProcessingType-horizontal, charge after maturity, late Goodwill credit transaction (future installment type: LAST_INSTALLMENT) - amount < past due charge
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                         | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -3503,13 +3517,13 @@ Feature: Loan
       | NSF fee | true      | Specified due date | 16 October 2023   | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
       | NSF fee | true      | Specified due date | 17 September 2023 | Flat             | 20.0 | 15.0 | 0.0    | 5.0         |
 
-  @TestRailId:C2947 @AdvancedPaymentAllocation @ProgressiveLoanSchedule
+   @AdvancedPaymentAllocation @ProgressiveLoanSchedule
   Scenario: Verify AdvancedPaymentAllocation behaviour: loanScheduleProcessingType-vertical, charge after maturity, late Goodwill credit transaction (future installment type: LAST_INSTALLMENT) - amount < past due charge
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_VERTICAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_VERTICAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -3617,13 +3631,13 @@ Feature: Loan
       | NSF fee | true      | Specified due date | 16 October 2023   | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
       | NSF fee | true      | Specified due date | 17 September 2023 | Flat             | 20.0 | 15.0 | 0.0    | 5.0         |
 
-  @TestRailId:C2948 @AdvancedPaymentAllocation @ProgressiveLoanSchedule
+   @AdvancedPaymentAllocation @ProgressiveLoanSchedule
   Scenario: Verify AdvancedPaymentAllocation behaviour: loanScheduleProcessingType-horizontal, charge after maturity, late Goodwill credit transaction (future installment type: LAST_INSTALLMENT) - amount > first past due charge
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                         | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -3731,13 +3745,13 @@ Feature: Loan
       | NSF fee | true      | Specified due date | 16 October 2023   | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
       | NSF fee | true      | Specified due date | 17 September 2023 | Flat             | 20.0 | 20.0 | 0.0    | 0.0         |
 
-  @TestRailId:C2949 @AdvancedPaymentAllocation @ProgressiveLoanSchedule
+   @AdvancedPaymentAllocation @ProgressiveLoanSchedule
   Scenario: Verify AdvancedPaymentAllocation behaviour: loanScheduleProcessingType-vertical, charge after maturity, late Goodwill credit transaction (future installment type: LAST_INSTALLMENT) - amount > first past due charge
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_VERTICAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_VERTICAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -3845,13 +3859,13 @@ Feature: Loan
       | NSF fee | true      | Specified due date | 16 October 2023   | Flat             | 20.0 | 15.0 | 0.0    | 5.0         |
       | NSF fee | true      | Specified due date | 17 September 2023 | Flat             | 20.0 | 20.0 | 0.0    | 0.0         |
 
-  @TestRailId:C2950 @AdvancedPaymentAllocation @ProgressiveLoanSchedule
+   @AdvancedPaymentAllocation @ProgressiveLoanSchedule
   Scenario: Verify AdvancedPaymentAllocation behaviour: loanScheduleProcessingType-horizontal, charge after maturity, late Goodwill credit transaction (future installment type: LAST_INSTALLMENT) - amount > sum past due charges
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                         | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -3959,13 +3973,13 @@ Feature: Loan
       | NSF fee | true      | Specified due date | 16 October 2023   | Flat             | 20.0 | 20.0 | 0.0    | 0.0         |
       | NSF fee | true      | Specified due date | 17 September 2023 | Flat             | 20.0 | 20.0 | 0.0    | 0.0         |
 
-  @TestRailId:C2951 @AdvancedPaymentAllocation @ProgressiveLoanSchedule
+   @AdvancedPaymentAllocation @ProgressiveLoanSchedule
   Scenario: Verify AdvancedPaymentAllocation behaviour: loanScheduleProcessingType-vertical, charge after maturity, late Goodwill credit transaction (future installment type: LAST_INSTALLMENT) - amount > sum past due charges
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_VERTICAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_VERTICAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -4073,13 +4087,13 @@ Feature: Loan
       | NSF fee | true      | Specified due date | 16 October 2023   | Flat             | 20.0 | 20.0 | 0.0    | 0.0         |
       | NSF fee | true      | Specified due date | 17 September 2023 | Flat             | 20.0 | 20.0 | 0.0    | 0.0         |
 
-  @TestRailId:C2952 @AdvancedPaymentAllocation @ProgressiveLoanSchedule
+   @AdvancedPaymentAllocation @ProgressiveLoanSchedule
   Scenario: Verify AdvancedPaymentAllocation behaviour: loanScheduleProcessingType-horizontal, charge after maturity, in advanced Goodwill credit transaction on first charge due date (future installment type: LAST_INSTALLMENT) - amount > due date charge
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                         | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -4187,13 +4201,13 @@ Feature: Loan
       | NSF fee | true      | Specified due date | 16 October 2023   | Flat             | 20.0 | 15.0 | 0.0    | 5.0         |
       | NSF fee | true      | Specified due date | 17 September 2023 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
 
-  @TestRailId:C2953 @AdvancedPaymentAllocation @ProgressiveLoanSchedule
+   @AdvancedPaymentAllocation @ProgressiveLoanSchedule
   Scenario: Verify AdvancedPaymentAllocation behaviour: loanScheduleProcessingType-vertical, charge after maturity, in advanced Goodwill credit transaction on first charge due date (future installment type: LAST_INSTALLMENT) - amount > due date charge
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_VERTICAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_VERTICAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -4301,13 +4315,13 @@ Feature: Loan
       | NSF fee | true      | Specified due date | 16 October 2023   | Flat             | 20.0 | 15.0 | 0.0    | 5.0         |
       | NSF fee | true      | Specified due date | 17 September 2023 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
 
-  @TestRailId:C2954 @AdvancedPaymentAllocation @ProgressiveLoanSchedule
+   @AdvancedPaymentAllocation @ProgressiveLoanSchedule
   Scenario: Verify AdvancedPaymentAllocation behaviour: loanScheduleProcessingType-horizontal, charge after maturity, in advanced Goodwill credit transaction before first charge due date (future installment type: LAST_INSTALLMENT) - amount > first and second charge
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                         | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -4415,13 +4429,13 @@ Feature: Loan
       | NSF fee | true      | Specified due date | 16 October 2023   | Flat             | 20.0 | 15.0 | 0.0    | 5.0         |
       | NSF fee | true      | Specified due date | 17 September 2023 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
 
-  @TestRailId:C2955 @AdvancedPaymentAllocation @ProgressiveLoanSchedule
+   @AdvancedPaymentAllocation @ProgressiveLoanSchedule
   Scenario: Verify AdvancedPaymentAllocation behaviour: loanScheduleProcessingType-vertical, charge after maturity, in advanced Goodwill credit transaction before first charge due date (future installment type: LAST_INSTALLMENT) - amount > first and second charge
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_VERTICAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_VERTICAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -4529,13 +4543,13 @@ Feature: Loan
       | NSF fee | true      | Specified due date | 16 October 2023   | Flat             | 20.0 | 15.0 | 0.0    | 5.0         |
       | NSF fee | true      | Specified due date | 17 September 2023 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
 
-  @TestRailId:C2956 @AdvancedPaymentAllocation @ProgressiveLoanSchedule
+   @AdvancedPaymentAllocation @ProgressiveLoanSchedule
   Scenario: Verify AdvancedPaymentAllocation behaviour: loanScheduleProcessingType-horizontal, charge after maturity, in advanced Merchant issued refund transaction on first charge due date (future installment type: REAMORTIZATION) - amount < sum all charges
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                         | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -4643,13 +4657,13 @@ Feature: Loan
       | NSF fee | true      | Specified due date | 16 October 2023   | Flat             | 20.0 | 10.0 | 0.0    | 10.0        |
       | NSF fee | true      | Specified due date | 17 September 2023 | Flat             | 20.0 | 10.0 | 0.0    | 10.0        |
 
-  @TestRailId:C2957 @AdvancedPaymentAllocation @ProgressiveLoanSchedule
+   @AdvancedPaymentAllocation @ProgressiveLoanSchedule
   Scenario: Verify AdvancedPaymentAllocation behaviour: loanScheduleProcessingType-vertical, charge after maturity, in advanced Merchant issued refund transaction on first charge due date (future installment type: REAMORTIZATION) - amount < sum all charges
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_VERTICAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_VERTICAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -4757,13 +4771,13 @@ Feature: Loan
       | NSF fee | true      | Specified due date | 16 October 2023   | Flat             | 20.0 | 10.0 | 0.0    | 10.0        |
       | NSF fee | true      | Specified due date | 17 September 2023 | Flat             | 20.0 | 10.0 | 0.0    | 10.0        |
 
-  @TestRailId:C2958 @AdvancedPaymentAllocation @ProgressiveLoanSchedule
+   @AdvancedPaymentAllocation @ProgressiveLoanSchedule
   Scenario: Verify AdvancedPaymentAllocation behaviour: loanScheduleProcessingType-horizontal, charge after maturity, in advanced Merchant issued refund transaction before first charge due date (future installment type: REAMORTIZATION) - amount < sum all charges
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                         | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -4871,13 +4885,13 @@ Feature: Loan
       | NSF fee | true      | Specified due date | 16 October 2023   | Flat             | 20.0 | 10.0 | 0.0    | 10.0        |
       | NSF fee | true      | Specified due date | 17 September 2023 | Flat             | 20.0 | 10.0 | 0.0    | 10.0        |
 
-  @TestRailId:C2959 @AdvancedPaymentAllocation @ProgressiveLoanSchedule
+   @AdvancedPaymentAllocation @ProgressiveLoanSchedule
   Scenario: Verify AdvancedPaymentAllocation behaviour: loanScheduleProcessingType-vertical, charge after maturity, in advanced Merchant issued refund transaction before first charge due date (future installment type: REAMORTIZATION) - amount < sum all charges
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_VERTICAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_VERTICAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -4985,13 +4999,13 @@ Feature: Loan
       | NSF fee | true      | Specified due date | 16 October 2023   | Flat             | 20.0 | 10.0 | 0.0    | 10.0        |
       | NSF fee | true      | Specified due date | 17 September 2023 | Flat             | 20.0 | 10.0 | 0.0    | 10.0        |
 
-  @TestRailId:C2960 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify that rounding in case of multiple installments works properly
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30       | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1       | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
@@ -5007,13 +5021,13 @@ Feature: Loan
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 1000.0        | 0.0      | 0.0  | 0.0       | 1000.0 | 0.0  | 0.0        | 0.0  | 1000.0      |
 
-  @TestRailId:C2976 @AdvancedPaymentAllocation @ProgressiveLoanSchedule
+   @AdvancedPaymentAllocation @ProgressiveLoanSchedule
   Scenario: Verify that disbursement amount only distributed only to future installments (2nd and 3rd installments)
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                         | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -5053,13 +5067,13 @@ Feature: Loan
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 1400.0        | 0.0      | 50.0 | 0.0       | 1450.0 | 250.0 | 0.0        | 0.0  | 1200.0      |
 
-  @TestRailId:C2977 @AdvancedPaymentAllocation @ProgressiveLoanSchedule
+   @AdvancedPaymentAllocation @ProgressiveLoanSchedule
   Scenario: Verify that disbursement amount only distributed only to future installments (1st, 2nd and 3rd installments)
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                         | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -5098,13 +5112,13 @@ Feature: Loan
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 1400.0        | 0.0      | 50.0 | 0.0       | 1450.0 | 250.0 | 0.0        | 0.0  | 1200.0      |
 
-  @TestRailId:C2978 @AdvancedPaymentAllocation @ProgressiveLoanSchedule
+   @AdvancedPaymentAllocation @ProgressiveLoanSchedule
   Scenario: Verify that multiple disbursement amount only distributed only to future installments (2nd and 3rd installments)
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                         | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -5147,14 +5161,14 @@ Feature: Loan
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 1480.0        | 0.0      | 50.0 | 0.0       | 1530.0 | 250.0 | 0.0        | 0.0  | 1280.0      |
 
-  @TestRailId:C2986 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: As an admin I would like to verify that refund is working with advanced payment allocation
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin sets the business date to "01 January 2023"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2023   | 500            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2023   | 500            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2023" with "500" amount and expected disbursement date on "01 January 2023"
     Then Loan status has changed to "Approved"
     And Admin successfully disburse the loan on "01 January 2023" with "500" EUR transaction amount
@@ -5213,14 +5227,14 @@ Feature: Loan
       | 16 January 2023  | Repayment        | 315.0  | 255.0     | 0.0      | 60.0 | 0.0       |
       | 17 January 2023  | Refund           | 150.0  | 130.0     | 0.0      | 20.0 | 0.0       |
 
-  @TestRailId:C3042 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify that second disbursement is working on overpaid accounts in case of NEXT_INSTALLMENT future installment allocation rule
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2024   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2024   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2024" with "1000" amount and expected disbursement date on "01 January 2024"
     When Admin successfully disburse the loan on "01 January 2024" with "500" EUR transaction amount
     When Admin sets the business date to "16 January 2024"
@@ -5237,8 +5251,8 @@ Feature: Loan
       | 2  | 15   | 16 January 2024  | 16 January 2024 | 250.0           | 125.0         | 0.0      | 0.0  | 0.0       | 125.0 | 125.0 | 0.0        | 0.0  | 0.0         |
       |    |      | 16 January 2024  |                 | 500.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
       | 3  | 0    | 16 January 2024  | 16 January 2024 | 625.0           | 125.0         | 0.0      | 0.0  | 0.0       | 125.0 | 125.0 | 0.0        | 0.0  | 0.0         |
-      | 4  | 15   | 31 January 2024  |                 | 312.0           | 313.0         | 0.0      | 0.0  | 0.0       | 313.0 | 125.0 | 125.0      | 0.0  | 188.0       |
-      | 5  | 15   | 15 February 2024 |                 | 0.0             | 312.0         | 0.0      | 0.0  | 0.0       | 312.0 | 125.0 | 125.0      | 0.0  | 187.0       |
+      | 4  | 15   | 31 January 2024  |                 | 313.0           | 312.0         | 0.0      | 0.0  | 0.0       | 312.0 | 125.0 | 125.0      | 0.0  | 187.0       |
+      | 5  | 15   | 15 February 2024 |                 | 0.0             | 313.0         | 0.0      | 0.0  | 0.0       | 313.0 | 125.0 | 125.0      | 0.0  | 188.0       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 1000.0        | 0        | 0.0  | 0         | 1000.0 | 625.0 | 250.0      | 0    | 375.0       |
@@ -5248,16 +5262,16 @@ Feature: Loan
       | 01 January 2024  | Down Payment     | 125.0  | 125.0     | 0.0      | 0.0  | 0.0       | 375.0        |
       | 16 January 2024  | Repayment        | 500.0  | 375.0     | 0.0      | 0.0  | 0.0       | 0.0          |
       | 16 January 2024  | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 375.0        |
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
 
-  @TestRailId:C3043 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify that second disbursement is working on overpaid accounts in case of REAMORTIZATION future installment allocation rule
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "REAMORTIZATION" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "REAMORTIZATION" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2024   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2024   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2024" with "1000" amount and expected disbursement date on "01 January 2024"
     When Admin successfully disburse the loan on "01 January 2024" with "500" EUR transaction amount
     When Admin sets the business date to "16 January 2024"
@@ -5274,8 +5288,8 @@ Feature: Loan
       | 2  | 15   | 16 January 2024  | 16 January 2024 | 250.0           | 125.0         | 0.0      | 0.0  | 0.0       | 125.0 | 125.0 | 0.0        | 0.0  | 0.0         |
       |    |      | 16 January 2024  |                 | 500.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
       | 3  | 0    | 16 January 2024  | 16 January 2024 | 625.0           | 125.0         | 0.0      | 0.0  | 0.0       | 125.0 | 125.0 | 0.0        | 0.0  | 0.0         |
-      | 4  | 15   | 31 January 2024  |                 | 312.0           | 313.0         | 0.0      | 0.0  | 0.0       | 313.0 | 125.0 | 125.0      | 0.0  | 188.0       |
-      | 5  | 15   | 15 February 2024 |                 | 0.0             | 312.0         | 0.0      | 0.0  | 0.0       | 312.0 | 125.0 | 125.0      | 0.0  | 187.0       |
+      | 4  | 15   | 31 January 2024  |                 | 313.0           | 312.0         | 0.0      | 0.0  | 0.0       | 312.0 | 125.0 | 125.0      | 0.0  | 187.0       |
+      | 5  | 15   | 15 February 2024 |                 | 0.0             | 313.0         | 0.0      | 0.0  | 0.0       | 313.0 | 125.0 | 125.0      | 0.0  | 188.0       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 1000.0        | 0        | 0.0  | 0         | 1000.0 | 625.0 | 250.0      | 0    | 375.0       |
@@ -5285,16 +5299,16 @@ Feature: Loan
       | 01 January 2024  | Down Payment     | 125.0  | 125.0     | 0.0      | 0.0  | 0.0       | 375.0        |
       | 16 January 2024  | Payout Refund    | 500.0  | 375.0     | 0.0      | 0.0  | 0.0       | 0.0          |
       | 16 January 2024  | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 375.0        |
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
 
-  @TestRailId:C3046 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify that principal due is correct in case of second disbursement on overpaid loan
     When Admin sets the business date to "01 February 2024"
     When Admin creates a client with random data
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "REAMORTIZATION" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "REAMORTIZATION" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 February 2024  | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 February 2024  | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 February 2024" with "1000" amount and expected disbursement date on "01 February 2024"
     When Admin successfully disburse the loan on "01 February 2024" with "200" EUR transaction amount
     When Admin sets the business date to "02 February 2024"
@@ -5320,16 +5334,16 @@ Feature: Loan
       | 01 February 2024 | Down Payment     | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        |
       | 02 February 2024 | Payout Refund    | 200.0  | 150.0     | 0.0      | 0.0  | 0.0       | 0.0          |
       | 02 February 2024 | Disbursement     | 160.0  | 0.0       | 0.0      | 0.0  | 0.0       | 110.0        |
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
 
-  @TestRailId:C3049 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify that second disbursement on overpaid loan is correct when disbursement amount is lower than overpayment amount
     When Admin sets the business date to "01 February 2024"
     When Admin creates a client with random data
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "REAMORTIZATION" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "REAMORTIZATION" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 February 2024  | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 February 2024  | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 February 2024" with "1000" amount and expected disbursement date on "01 February 2024"
     When Admin successfully disburse the loan on "01 February 2024" with "200" EUR transaction amount
     When Admin sets the business date to "02 February 2024"
@@ -5357,16 +5371,16 @@ Feature: Loan
       | 02 February 2024 | Disbursement     | 28.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          |
     Then Loan status will be "OVERPAID"
     Then Loan has 22 overpaid amount
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
 
-  @TestRailId:C3068 @AdvancedPaymentAllocation
+   @AdvancedPaymentAllocation
   Scenario: Verify that Fraud flag can be applied on loan is its every status
     When Admin sets the business date to "01 February 2024"
     When Admin creates a client with random data
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 February 2024  | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 February 2024  | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     Then Loan status will be "SUBMITTED_AND_PENDING_APPROVAL"
     Then Admin can successfully set Fraud flag to the loan
     Then Admin can successfully unset Fraud flag to the loan
@@ -5395,14 +5409,14 @@ Feature: Loan
     Then Admin can successfully set Fraud flag to the loan
     Then Admin can successfully unset Fraud flag to the loan
 
-  @TestRailId:C3090
+
   Scenario: Verify that disbursement can be done on overpaid loan in case of cummulative loan schedule
     When Admin sets the business date to "01 February 2024"
     When Admin creates a client with random data
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
       | LoanProduct           | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN4_DOWNPAYMENT_AUTO | 01 February 2024  | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
+      | LP2_DOWNPAYMENT_AUTO | 01 February 2024  | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
     And Admin successfully approves the loan on "01 February 2024" with "1000" amount and expected disbursement date on "01 February 2024"
     When Admin successfully disburse the loan on "01 February 2024" with "1000" EUR transaction amount
     When Admin sets the business date to "02 February 2024"
@@ -5485,26 +5499,40 @@ Feature: Loan
       | 05 February 2024 | Disbursement     | 40.0   | 0.0       | 0.0      | 0.0  | 0.0       | 40.0         |
       | 05 February 2024 | Down Payment     | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 30.0         |
 
-  @TestRailId:C3103
+
   Scenario: Verify that fixed length in loan product is inherited by loan account
     When Admin sets the business date to "01 February 2024"
     When Admin creates a client with random data
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_FIXED_LENGTH | 01 February 2024  | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_FIXED_LENGTH | 01 February 2024  | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 February 2024" with "1000" amount and expected disbursement date on "01 February 2024"
     When Admin successfully disburse the loan on "01 February 2024" with "1000" EUR transaction amount
     Then LoanDetails has fixedLength field with int value: 90
 
-  @TestRailId:C3104
+
   Scenario: Verify that fixed legnth in loan product can be overwrote upon loan account creation
     When Admin sets the business date to "01 February 2024"
     When Admin creates a client with random data
-    When Admin set "PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin creates a fully customized loan with fixed length 60 and with the following data:
       | LoanProduct                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_ADV_PMT_ALLOC_FIXED_LENGTH | 01 February 2024  | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_FIXED_LENGTH | 01 February 2024  | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 February 2024" with "1000" amount and expected disbursement date on "01 February 2024"
     When Admin successfully disburse the loan on "01 February 2024" with "1000" EUR transaction amount
     Then LoanDetails has fixedLength field with int value: 60
+
+
+  Scenario: Actual disbursement date is in the past with advanced payment allocation product + submitted on date repaymentStartDateType
+    When Admin sets repaymentStartDateType for "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product to "SUBMITTED_ON_DATE"
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin sets the business date to "01 January 2023"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2023   | 500            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2023" with "500" amount and expected disbursement date on "01 January 2023"
+    Then Loan status has changed to "Approved"
+    Then Admin fails to disburse the loan on "31 December 2022" with "500" EUR transaction amount because disbursement date is earlier than "01 January 2023"
+    When Admin sets repaymentStartDateType for "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product to "DISBURSEMENT_DATE"

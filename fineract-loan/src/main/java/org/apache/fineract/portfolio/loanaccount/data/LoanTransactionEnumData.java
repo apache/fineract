@@ -37,6 +37,7 @@ public class LoanTransactionEnumData {
     private final boolean merchantIssuedRefund;
     private final boolean payoutRefund;
     private final boolean goodwillCredit;
+    private final boolean interestPaymentWaiver;
     private final boolean chargeRefund;
     private final boolean contra;
     private final boolean waiveInterest;
@@ -58,6 +59,8 @@ public class LoanTransactionEnumData {
     private final boolean downPayment;
     private final boolean reAge;
     private final boolean reAmortize;
+    private final boolean accrualActivity;
+    private final boolean interestRefund;
 
     public LoanTransactionEnumData(final Long id, final String code, final String value) {
         this.id = id;
@@ -88,8 +91,11 @@ public class LoanTransactionEnumData {
         this.chargeAdjustment = Long.valueOf(26).equals(this.id);
         this.chargeoff = Long.valueOf(27).equals(this.id);
         this.downPayment = Long.valueOf(28).equals(this.id);
+        this.interestPaymentWaiver = Long.valueOf(31).equals(this.id);
+        this.accrualActivity = Long.valueOf(32).equals(this.id);
         this.reAge = Long.valueOf(LoanTransactionType.REAGE.getValue()).equals(this.id);
         this.reAmortize = Long.valueOf(LoanTransactionType.REAMORTIZE.getValue()).equals(this.id);
+        this.interestRefund = Long.valueOf(LoanTransactionType.INTEREST_REFUND.getValue()).equals(this.id);
     }
 
     public boolean isRepaymentType() {

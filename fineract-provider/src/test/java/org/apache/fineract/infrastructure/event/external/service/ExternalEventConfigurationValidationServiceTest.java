@@ -101,7 +101,9 @@ public class ExternalEventConfigurationValidationServiceTest {
                 "LoanAccountDelinquencyPauseChangedBusinessEvent", "LoanAccountCustomSnapshotBusinessEvent",
                 "LoanReAgeTransactionBusinessEvent", "LoanUndoReAgeTransactionBusinessEvent", "LoanReAmortizeTransactionBusinessEvent",
                 "LoanUndoReAmortizeTransactionBusinessEvent", "LoanReAgeBusinessEvent", "LoanUndoReAgeBusinessEvent",
-                "LoanReAmortizeBusinessEvent", "LoanUndoReAmortizeBusinessEvent");
+                "LoanReAmortizeBusinessEvent", "LoanUndoReAmortizeBusinessEvent", "LoanTransactionInterestPaymentWaiverPreBusinessEvent",
+                "LoanTransactionInterestPaymentWaiverPostBusinessEvent", "LoanTransactionAccrualActivityPostBusinessEvent",
+                "LoanTransactionAccrualActivityPreBusinessEvent");
 
         List<FineractPlatformTenant> tenants = Arrays
                 .asList(new FineractPlatformTenant(1L, "default", "Default Tenant", "Europe/Budapest", null));
@@ -184,7 +186,9 @@ public class ExternalEventConfigurationValidationServiceTest {
                 "LoanAccountDelinquencyPauseChangedBusinessEvent", "LoanAccountCustomSnapshotBusinessEvent",
                 "LoanReAgeTransactionBusinessEvent", "LoanUndoReAgeTransactionBusinessEvent", "LoanReAmortizeTransactionBusinessEvent",
                 "LoanUndoReAmortizeTransactionBusinessEvent", "LoanReAgeBusinessEvent", "LoanUndoReAgeBusinessEvent",
-                "LoanReAmortizeBusinessEvent", "LoanUndoReAmortizeBusinessEvent");
+                "LoanReAmortizeBusinessEvent", "LoanUndoReAmortizeBusinessEvent", "LoanTransactionInterestPaymentWaiverPreBusinessEvent",
+                "LoanTransactionInterestPaymentWaiverPostBusinessEvent", "LoanTransactionAccrualActivityPostBusinessEvent",
+                "LoanTransactionAccrualActivityPreBusinessEvent");
 
         List<FineractPlatformTenant> tenants = Arrays
                 .asList(new FineractPlatformTenant(1L, "default", "Default Tenant", "Europe/Budapest", null));

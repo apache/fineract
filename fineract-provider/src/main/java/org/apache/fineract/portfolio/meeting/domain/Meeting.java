@@ -51,7 +51,7 @@ import org.apache.fineract.portfolio.meeting.exception.MeetingDateException;
 @Entity
 @Table(name = "m_meeting", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "calendar_instance_id", "meeting_date" }, name = "unique_calendar_instance_id_meeting_date") })
-public class Meeting extends AbstractPersistableCustom {
+public class Meeting extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "calendar_instance_id", nullable = false)

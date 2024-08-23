@@ -36,7 +36,7 @@ import org.apache.fineract.portfolio.paymenttype.api.PaymentTypeApiResourceConst
 @Entity
 @Table(name = "m_payment_type")
 @AllArgsConstructor
-public class PaymentType extends AbstractPersistableCustom {
+public class PaymentType extends AbstractPersistableCustom<Long> {
 
     @Column(name = "value")
     private String name;

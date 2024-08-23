@@ -31,24 +31,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Component;
 
+@Slf4j
+@RequiredArgsConstructor
 @Component
 public class ColumnValidator {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ColumnValidator.class);
+    private final SqlValidator sqlValidator;
     private final JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    public ColumnValidator(final JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE", justification = "TODO: fix this!")
     private void validateColumn(Map<String, Set<String>> tableColumnMap) {
@@ -87,7 +84,7 @@ public class ColumnValidator {
                 columns.add(rs.getString("column_name"));
             }
         } catch (SQLException e) {
-            LOG.error("Problem occurred in getTableColumns function", e);
+            log.error("Problem occurred in getTableColumns function", e);
         }
         return columns;
     }
@@ -97,7 +94,7 @@ public class ColumnValidator {
             if (StringUtils.isBlank(condition)) {
                 continue;
             }
-            SQLInjectionValidator.validateSQLInput(condition);
+            sqlValidator.validate("column", condition);
             List<String> operator = new ArrayList<>(Arrays.asList("=", ">", "<", "> =", "< =", "! =", "!=", ">=", "<="));
             condition = condition.trim().replace("( ", "(").replace(" )", ")").toLowerCase();
             for (String op : operator) {

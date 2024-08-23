@@ -51,7 +51,7 @@ public class LoanRequestFactory {
 
     public static final String DATE_FORMAT = "dd MMMM yyyy";
     public static final String DEFAULT_LOCALE = "en";
-    public static final DefaultLoanProduct DEFAULT_LOAN_PRODUCT = DefaultLoanProduct.valueOf("PIN30");
+    public static final DefaultLoanProduct DEFAULT_LOAN_PRODUCT = DefaultLoanProduct.valueOf("LP1");
     public static final Double DEFAULT_PAYMENT_TRANSACTION_AMOUNT = 200.00;
     public static final Double DEFAULT_UNDO_TRANSACTION_AMOUNT = 0.0;
     public static final Double DEFAULT_REPAYMENT_TRANSACTION_AMOUNT = 200.00;

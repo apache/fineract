@@ -284,7 +284,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     }
 
     @Override
-    public Long retreivePeroidInNumberOfDaysForSkipMeetingDate() {
+    public Long retreivePeriodInNumberOfDaysForSkipMeetingDate() {
         final String propertyName = "skip-repayment-on-first-day-of-month";
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
         return property.getValue();

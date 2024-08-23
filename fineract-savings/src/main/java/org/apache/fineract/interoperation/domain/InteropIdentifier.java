@@ -43,7 +43,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 @Table(name = "interop_identifier", uniqueConstraints = {
         @UniqueConstraint(name = "uk_hathor_identifier_account", columnNames = { "account_id", "type" }),
         @UniqueConstraint(name = "uk_hathor_identifier_value", columnNames = { "type", "a_value", "sub_value_or_type" }) })
-public class InteropIdentifier extends AbstractPersistableCustom {
+public class InteropIdentifier extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "account_id", nullable = false)

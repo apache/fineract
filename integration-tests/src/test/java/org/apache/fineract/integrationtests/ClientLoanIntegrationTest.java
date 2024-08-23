@@ -445,7 +445,7 @@ public class ClientLoanIntegrationTest {
 
         DateFormat dateFormat = new SimpleDateFormat(DATETIME_PATTERN, Locale.US);
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
-        final String LOAN_DISBURSEMENT_DATE = dateFormat.format(todaysDate.getTime());
+        final String LOAN_DISBURSEMENT_DATE = "2 June 2014";
 
         LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
         loanStatusHashMap = LOAN_TRANSACTION_HELPER.approveLoan(LOAN_DISBURSEMENT_DATE, loanID);
@@ -1545,7 +1545,7 @@ public class ClientLoanIntegrationTest {
      * amount plus interest
      */
     @Test
-    public void loanWithCahargesOfTypeAmountPlusInterestPercentageAndCashBasedAccountingEnabled() {
+    public void loanWithChargesOfTypeAmountPlusInterestPercentageAndCashBasedAccountingEnabled() {
 
         final Integer clientID = ClientHelper.createClient(REQUEST_SPEC, RESPONSE_SPEC);
         ClientHelper.verifyClientCreatedOnServer(REQUEST_SPEC, RESPONSE_SPEC, clientID);
@@ -4084,7 +4084,7 @@ public class ClientLoanIntegrationTest {
         addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
 
         final Integer loanID = applyForLoanApplicationWithPaymentStrategyAndPastMonth(clientID, loanProductID, charges, savingsId,
-                principal, LoanApplicationTestBuilder.DEFAULT_STRATEGY, -4, collaterals);
+                principal, LoanApplicationTestBuilder.DEFAULT_STRATEGY, fourMonthsfromNow, collaterals);
         Assertions.assertNotNull(loanID);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(REQUEST_SPEC, RESPONSE_SPEC, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
@@ -4265,7 +4265,7 @@ public class ClientLoanIntegrationTest {
         addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
 
         final Integer loanID = applyForLoanApplicationWithPaymentStrategyAndPastMonth(clientID, loanProductID, charges, savingsId,
-                principal, LoanApplicationTestBuilder.DEFAULT_STRATEGY, -4, collaterals);
+                principal, LoanApplicationTestBuilder.DEFAULT_STRATEGY, fourMonthsfromNow, collaterals);
         Assertions.assertNotNull(loanID);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(REQUEST_SPEC, RESPONSE_SPEC, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
@@ -4455,7 +4455,7 @@ public class ClientLoanIntegrationTest {
         addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
 
         final Integer loanID = applyForLoanApplicationWithPaymentStrategyAndPastMonth(clientID, loanProductID, charges, null, principal,
-                LoanApplicationTestBuilder.DEFAULT_STRATEGY, -4, collaterals);
+                LoanApplicationTestBuilder.DEFAULT_STRATEGY, fourMonthsfromNow, collaterals);
         Assertions.assertNotNull(loanID);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(REQUEST_SPEC, RESPONSE_SPEC, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
@@ -7265,15 +7265,12 @@ public class ClientLoanIntegrationTest {
     }
 
     private Integer applyForLoanApplicationWithPaymentStrategyAndPastMonth(final Integer clientID, final Integer loanProductID,
-            List<HashMap> charges, final String savingsId, String principal, final String repaymentStrategy, final int month,
+            List<HashMap> charges, final String savingsId, String principal, final String repaymentStrategy, final String fourMonthsfromNow,
             List<HashMap> collaterals) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
 
-        Calendar fourMonthsfromNowCalendar = Calendar.getInstance(Utils.getTimeZoneOfTenant());
-        fourMonthsfromNowCalendar.add(Calendar.MONTH, month);
         DateFormat dateFormat = new SimpleDateFormat(DATETIME_PATTERN);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
-        String fourMonthsfromNow = dateFormat.format(fourMonthsfromNowCalendar.getTime());
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal(principal) //
                 .withLoanTermFrequency("6") //
@@ -7479,10 +7476,14 @@ public class ClientLoanIntegrationTest {
             map.put("amount", amount);
         }
         if (charge.get("dueDate") != null) {
-            map.put("dueDate", charge.get("dueDate"));
+            map.put("dueDate", DATE_TIME_FORMATTER.format(fromArrayToLocalDate((List) charge.get("dueDate"))));
         }
         map.put("chargeId", charge.get("chargeId"));
         return map;
+    }
+
+    private LocalDate fromArrayToLocalDate(List<Integer> dueDate) {
+        return LocalDate.of(dueDate.get(0), dueDate.get(1), dueDate.get(2));
     }
 
     private HashMap createTrancheDetail(final String date, final String amount) {

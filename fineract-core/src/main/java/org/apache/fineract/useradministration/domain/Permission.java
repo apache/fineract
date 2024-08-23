@@ -26,7 +26,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_permission")
-public class Permission extends AbstractPersistableCustom implements Serializable {
+public class Permission extends AbstractPersistableCustom<Long> implements Serializable {
 
     @Column(name = "grouping", nullable = false, length = 45)
     private String grouping;

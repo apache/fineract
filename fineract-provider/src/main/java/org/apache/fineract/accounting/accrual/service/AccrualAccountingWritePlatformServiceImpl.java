@@ -33,12 +33,12 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.MultiException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualPlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualsProcessingService;
 
 @RequiredArgsConstructor
 public class AccrualAccountingWritePlatformServiceImpl implements AccrualAccountingWritePlatformService {
 
-    private final LoanAccrualPlatformService loanAccrualPlatformService;
+    private final LoanAccrualsProcessingService loanAccrualsProcessingService;
     private final AccrualAccountingDataValidator accountingDataValidator;
 
     @Override
@@ -46,7 +46,7 @@ public class AccrualAccountingWritePlatformServiceImpl implements AccrualAccount
         this.accountingDataValidator.validateLoanPeriodicAccrualData(command.json());
         LocalDate tillDate = command.localDateValueOfParameterNamed(accrueTillParamName);
         try {
-            this.loanAccrualPlatformService.addPeriodicAccruals(tillDate);
+            this.loanAccrualsProcessingService.addPeriodicAccruals(tillDate);
         } catch (MultiException e) {
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)

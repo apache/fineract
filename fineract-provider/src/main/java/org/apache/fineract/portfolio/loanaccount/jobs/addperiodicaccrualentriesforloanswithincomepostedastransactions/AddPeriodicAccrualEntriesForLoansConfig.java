@@ -19,7 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.jobs.addperiodicaccrualentriesforloanswithincomepostedastransactions;
 
 import org.apache.fineract.infrastructure.jobs.service.JobName;
-import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualWritePlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualsProcessingService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -42,7 +42,7 @@ public class AddPeriodicAccrualEntriesForLoansConfig {
     @Autowired
     private LoanReadPlatformService loanReadPlatformService;
     @Autowired
-    private LoanAccrualWritePlatformService loanAccrualWritePlatformService;
+    private LoanAccrualsProcessingService loanAccrualsProcessingService;
 
     @Bean
     protected Step addPeriodicAccrualEntriesForLoansWithIncomePostedAsTransactionsStep() {
@@ -58,6 +58,6 @@ public class AddPeriodicAccrualEntriesForLoansConfig {
 
     @Bean
     public AddPeriodicAccrualEntriesForLoansTasklet addPeriodicAccrualEntriesForLoansWithIncomePostedAsTransactionsTasklet() {
-        return new AddPeriodicAccrualEntriesForLoansTasklet(loanReadPlatformService, loanAccrualWritePlatformService);
+        return new AddPeriodicAccrualEntriesForLoansTasklet(loanReadPlatformService, loanAccrualsProcessingService);
     }
 }

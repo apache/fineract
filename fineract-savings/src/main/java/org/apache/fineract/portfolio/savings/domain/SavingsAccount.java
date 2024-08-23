@@ -134,7 +134,7 @@ import org.springframework.util.CollectionUtils;
 @DiscriminatorColumn(name = "deposit_type_enum", discriminatorType = DiscriminatorType.INTEGER)
 @DiscriminatorValue("100")
 @SuppressWarnings({ "MemberName" })
-public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom {
+public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsAccount.class);
 
@@ -1645,13 +1645,11 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom {
             actualChanges.put(SavingsApiConstants.dateFormatParamName, dateFormat);
             this.submittedOnDate = command.localDateValueOfParameterNamed(SavingsApiConstants.submittedOnDateParamName);
         }
-
         if (command.isChangeInStringParameterNamed(SavingsApiConstants.accountNoParamName, this.accountNumber)) {
             final String newValue = command.stringValueOfParameterNamed(SavingsApiConstants.accountNoParamName);
             actualChanges.put(SavingsApiConstants.accountNoParamName, newValue);
             this.accountNumber = StringUtils.defaultIfEmpty(newValue, null);
         }
-
         if (command.isChangeInStringParameterNamed(SavingsApiConstants.externalIdParamName, this.externalId.getValue())) {
             final String newValue = command.stringValueOfParameterNamed(SavingsApiConstants.externalIdParamName);
             actualChanges.put(SavingsApiConstants.externalIdParamName, newValue);
@@ -1660,35 +1658,28 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom {
                 this.externalId = ExternalId.generate();
             }
         }
-
         if (command.isChangeInLongParameterNamed(SavingsApiConstants.clientIdParamName, clientId())) {
             final Long newValue = command.longValueOfParameterNamed(SavingsApiConstants.clientIdParamName);
             actualChanges.put(SavingsApiConstants.clientIdParamName, newValue);
         }
-
         if (command.isChangeInLongParameterNamed(SavingsApiConstants.groupIdParamName, groupId())) {
             final Long newValue = command.longValueOfParameterNamed(SavingsApiConstants.groupIdParamName);
             actualChanges.put(SavingsApiConstants.groupIdParamName, newValue);
         }
-
         if (command.isChangeInLongParameterNamed(SavingsApiConstants.productIdParamName, this.product.getId())) {
             final Long newValue = command.longValueOfParameterNamed(SavingsApiConstants.productIdParamName);
             actualChanges.put(SavingsApiConstants.productIdParamName, newValue);
         }
-
         if (command.isChangeInLongParameterNamed(SavingsApiConstants.fieldOfficerIdParamName, hasSavingsOfficerId())) {
             final Long newValue = command.longValueOfParameterNamed(SavingsApiConstants.fieldOfficerIdParamName);
             actualChanges.put(SavingsApiConstants.fieldOfficerIdParamName, newValue);
         }
-
         if (command.isChangeInBigDecimalParameterNamed(SavingsApiConstants.nominalAnnualInterestRateParamName,
                 this.nominalAnnualInterestRate)) {
             final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(SavingsApiConstants.nominalAnnualInterestRateParamName);
             actualChanges.put(SavingsApiConstants.nominalAnnualInterestRateParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
             this.nominalAnnualInterestRate = newValue;
         }
-
         if (command.isChangeInIntegerParameterNamed(SavingsApiConstants.interestCompoundingPeriodTypeParamName,
                 this.interestCompoundingPeriodType)) {
             final Integer newValue = command.integerValueOfParameterNamed(SavingsApiConstants.interestCompoundingPeriodTypeParamName);
@@ -1696,20 +1687,17 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom {
                     : newValue;
             actualChanges.put(SavingsApiConstants.interestCompoundingPeriodTypeParamName, this.interestCompoundingPeriodType);
         }
-
         if (command.isChangeInIntegerParameterNamed(SavingsApiConstants.interestPostingPeriodTypeParamName,
                 this.interestPostingPeriodType)) {
             final Integer newValue = command.integerValueOfParameterNamed(SavingsApiConstants.interestPostingPeriodTypeParamName);
             this.interestPostingPeriodType = newValue != null ? SavingsPostingInterestPeriodType.fromInt(newValue).getValue() : newValue;
             actualChanges.put(SavingsApiConstants.interestPostingPeriodTypeParamName, this.interestPostingPeriodType);
         }
-
         if (command.isChangeInIntegerParameterNamed(SavingsApiConstants.interestCalculationTypeParamName, this.interestCalculationType)) {
             final Integer newValue = command.integerValueOfParameterNamed(SavingsApiConstants.interestCalculationTypeParamName);
             this.interestCalculationType = newValue != null ? SavingsInterestCalculationType.fromInt(newValue).getValue() : newValue;
             actualChanges.put(SavingsApiConstants.interestCalculationTypeParamName, this.interestCalculationType);
         }
-
         if (command.isChangeInIntegerParameterNamed(SavingsApiConstants.interestCalculationDaysInYearTypeParamName,
                 this.interestCalculationDaysInYearType)) {
             final Integer newValue = command.integerValueOfParameterNamed(SavingsApiConstants.interestCalculationDaysInYearTypeParamName);
@@ -1718,7 +1706,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom {
                     : newValue;
             actualChanges.put(SavingsApiConstants.interestCalculationDaysInYearTypeParamName, this.interestCalculationDaysInYearType);
         }
-
         if (command.isChangeInBigDecimalParameterNamedDefaultingZeroToNull(SavingsApiConstants.minRequiredOpeningBalanceParamName,
                 this.minRequiredOpeningBalance)) {
             final BigDecimal newValue = command
@@ -1727,7 +1714,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom {
             actualChanges.put("locale", localeAsInput);
             this.minRequiredOpeningBalance = Money.of(this.currency, newValue).getAmount();
         }
-
         if (command.isChangeInIntegerParameterNamedDefaultingZeroToNull(SavingsApiConstants.lockinPeriodFrequencyParamName,
                 this.lockinPeriodFrequency)) {
             final Integer newValue = command
@@ -1806,7 +1792,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom {
             actualChanges.put(enforceMinRequiredBalanceParamName, newValue);
             this.enforceMinRequiredBalance = newValue;
         }
-
         if (command.isChangeInBigDecimalParameterNamedDefaultingZeroToNull(minRequiredBalanceParamName, this.minRequiredBalance)) {
             final BigDecimal newValue = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(minRequiredBalanceParamName);
             actualChanges.put(minRequiredBalanceParamName, newValue);
@@ -1818,14 +1803,12 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom {
             actualChanges.put(lienAllowedParamName, newValue);
             this.lienAllowed = newValue;
         }
-
         if (command.isChangeInBigDecimalParameterNamedDefaultingZeroToNull(maxAllowedLienLimitParamName, this.maxAllowedLienLimit)) {
             final BigDecimal newValue = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(maxAllowedLienLimitParamName);
             actualChanges.put(maxAllowedLienLimitParamName, newValue);
             actualChanges.put(localeParamName, localeAsInput);
             this.maxAllowedLienLimit = newValue;
         }
-
         if (command.isChangeInBooleanParameterNamed(withHoldTaxParamName, this.withHoldTax)) {
             final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(withHoldTaxParamName);
             actualChanges.put(withHoldTaxParamName, newValue);
@@ -2260,7 +2243,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.approvalAction);
 
-        final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
+        final SavingsAccountStatusType currentStatus = getStatus();
         if (!SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.hasStateOf(currentStatus)) {
             baseDataValidator.reset().parameter(SavingsApiConstants.approvedOnDateParamName)
                     .failWithCodeNoParameterAddedToErrorCode("not.in.submittedandpendingapproval.state");
@@ -2327,7 +2310,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.undoApprovalAction);
 
-        final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
+        final SavingsAccountStatusType currentStatus = getStatus();
         if (!SavingsAccountStatusType.APPROVED.hasStateOf(currentStatus)) {
 
             baseDataValidator.reset().parameter(SavingsApiConstants.approvedOnDateParamName)
@@ -2490,7 +2473,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.rejectAction);
 
-        final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
+        final SavingsAccountStatusType currentStatus = getStatus();
         if (!SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.hasStateOf(currentStatus)) {
 
             baseDataValidator.reset().parameter(SavingsApiConstants.rejectedOnDateParamName)
@@ -2551,7 +2534,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.withdrawnByApplicantAction);
 
-        final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
+        final SavingsAccountStatusType currentStatus = getStatus();
         if (!SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.hasStateOf(currentStatus)) {
 
             baseDataValidator.reset().parameter(SavingsApiConstants.withdrawnOnDateParamName)
@@ -2612,7 +2595,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(depositAccountType().resourceName() + SavingsApiConstants.activateAction);
 
-        final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
+        final SavingsAccountStatusType currentStatus = getStatus();
         if (!SavingsAccountStatusType.APPROVED.hasStateOf(currentStatus)) {
 
             baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName)
@@ -2759,7 +2742,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.closeAction);
 
-        final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
+        final SavingsAccountStatusType currentStatus = getStatus();
         if (!SavingsAccountStatusType.ACTIVE.hasStateOf(currentStatus)) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("not.in.active.state");
             if (!dataValidationErrors.isEmpty()) {
@@ -2870,7 +2853,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public void activateAccountBasedOnBalance() {
-        if (SavingsAccountStatusType.fromInt(this.status).isClosed() && !this.summary.getAccountBalance(getCurrency()).isZero()) {
+        if (getStatus().isClosed() && !this.summary.getAccountBalance(getCurrency()).isZero()) {
             this.status = SavingsAccountStatusType.ACTIVE.getValue();
         }
     }
@@ -3527,7 +3510,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(depositAccountType().resourceName() + SavingsApiConstants.blockAction);
 
-        final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
+        final SavingsAccountStatusType currentStatus = getStatus();
         if (!SavingsAccountStatusType.ACTIVE.hasStateOf(currentStatus)) {
 
             baseDataValidator.reset().parameter(SavingsApiConstants.statusParamName)
@@ -3552,7 +3535,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(depositAccountType().resourceName() + SavingsApiConstants.unblockAction);
 
-        final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
+        final SavingsAccountStatusType currentStatus = getStatus();
         if (!SavingsAccountStatusType.ACTIVE.hasStateOf(currentStatus)) {
 
             baseDataValidator.reset().parameter(SavingsApiConstants.statusParamName)
@@ -3581,7 +3564,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(depositAccountType().resourceName() + SavingsApiConstants.blockCreditsAction);
 
-        final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
+        final SavingsAccountStatusType currentStatus = getStatus();
         if (!SavingsAccountStatusType.ACTIVE.hasStateOf(currentStatus)) {
 
             baseDataValidator.reset().parameter(SavingsApiConstants.statusParamName)
@@ -3613,7 +3596,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(depositAccountType().resourceName() + SavingsApiConstants.unblockCreditsAction);
 
-        final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
+        final SavingsAccountStatusType currentStatus = getStatus();
         if (!SavingsAccountStatusType.ACTIVE.hasStateOf(currentStatus)) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(SavingsApiConstants.ERROR_MSG_SAVINGS_ACCOUNT_NOT_ACTIVE);
         }
@@ -3644,7 +3627,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(depositAccountType().resourceName() + SavingsApiConstants.blockDebitsAction);
 
-        final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
+        final SavingsAccountStatusType currentStatus = getStatus();
         if (!SavingsAccountStatusType.ACTIVE.hasStateOf(currentStatus)) {
             baseDataValidator.reset().parameter(SavingsApiConstants.statusParamName)
                     .failWithCodeNoParameterAddedToErrorCode(SavingsApiConstants.ERROR_MSG_SAVINGS_ACCOUNT_NOT_ACTIVE);
@@ -3676,7 +3659,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(depositAccountType().resourceName() + SavingsApiConstants.unblockDebitsAction);
 
-        final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
+        final SavingsAccountStatusType currentStatus = getStatus();
         if (!SavingsAccountStatusType.ACTIVE.hasStateOf(currentStatus)) {
 
             baseDataValidator.reset().parameter(SavingsApiConstants.statusParamName)

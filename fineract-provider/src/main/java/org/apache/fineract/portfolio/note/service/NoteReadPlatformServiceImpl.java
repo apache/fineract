@@ -61,12 +61,8 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
             final Long groupId = JdbcSupport.getLong(rs, "groupId");
             final Long loanId = JdbcSupport.getLong(rs, "loanId");
             final Long transactionId = JdbcSupport.getLong(rs, "transactionId");
-            // final Long depositAccountId = JdbcSupport.getLong(rs,
-            // "depositAccountId");
-            // final Long savingAccountId = JdbcSupport.getLong(rs,
-            // "savingAccountId");
             final Integer noteTypeId = JdbcSupport.getInteger(rs, "noteTypeEnum");
-            final EnumOptionData noteType = NoteEnumerations.noteType(noteTypeId);
+            final EnumOptionData noteType = NoteType.toEnumOptionData(noteTypeId);
             final String note = rs.getString("note");
             final OffsetDateTime createdDateLocal = JdbcSupport.getOffsetDateTime(rs, "createdDate");
             final OffsetDateTime createdDateUtc = JdbcSupport.getOffsetDateTime(rs, "createdDateUtc");
@@ -78,8 +74,10 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
             final String updatedByUsername = rs.getString("modifiedBy");
             final OffsetDateTime createdDate = createdDateUtc != null ? createdDateUtc : createdDateLocal;
             final OffsetDateTime lastModifiedDate = lastModifiedDateUtc != null ? lastModifiedDateUtc : lastModifiedDateLocal;
-            return new NoteData(id, clientId, groupId, loanId, transactionId, null, null, noteType, note, createdDate, createdById,
-                    createdByUsername, lastModifiedDate, lastModifiedById, updatedByUsername);
+
+            return NoteData.builder().id(id).clientId(clientId).groupId(groupId).loanId(loanId).loanTransactionId(transactionId)
+                    .noteType(noteType).note(note).createdOn(createdDate).createdById(createdById).createdByUsername(createdByUsername)
+                    .updatedOn(lastModifiedDate).updatedById(lastModifiedById).updatedByUsername(updatedByUsername).build();
         }
     }
 

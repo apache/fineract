@@ -111,8 +111,8 @@ public class CheckLoanRepaymentOverdueBusinessStepTest {
         List<LoanRepaymentScheduleInstallment> loanRepaymentScheduleInstallments = Arrays.asList(repaymentInstallment);
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
         when(loanProduct.getOverDueDaysForRepaymentEvent()).thenReturn(null);
-        when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
-        when(loanForProcessing.getLoanSummary().getTotalOutstanding()).thenReturn(BigDecimal.valueOf(100));
+        when(loanForProcessing.getSummary()).thenReturn(loanSummary);
+        when(loanForProcessing.getSummary().getTotalOutstanding()).thenReturn(BigDecimal.valueOf(100));
         when(loanForProcessing.getCurrency()).thenReturn(currency);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(loanRepaymentScheduleInstallments);
 
@@ -138,8 +138,8 @@ public class CheckLoanRepaymentOverdueBusinessStepTest {
                         loanInstallmentRepaymentDueDateBefore5Days, BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0),
                         BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0), false, new HashSet<>(), BigDecimal.valueOf(0.0)));
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
-        when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
-        when(loanForProcessing.getLoanSummary().getTotalOutstanding()).thenReturn(BigDecimal.valueOf(100));
+        when(loanForProcessing.getSummary()).thenReturn(loanSummary);
+        when(loanForProcessing.getSummary().getTotalOutstanding()).thenReturn(BigDecimal.valueOf(100));
         when(loanProduct.getOverDueDaysForRepaymentEvent()).thenReturn(null);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(loanRepaymentScheduleInstallments);
         // when
@@ -166,8 +166,8 @@ public class CheckLoanRepaymentOverdueBusinessStepTest {
 
         List<LoanRepaymentScheduleInstallment> loanRepaymentScheduleInstallments = Arrays.asList(repaymentInstallmentPaidOff);
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
-        when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
-        when(loanForProcessing.getLoanSummary().getTotalOutstanding()).thenReturn(BigDecimal.valueOf(100));
+        when(loanForProcessing.getSummary()).thenReturn(loanSummary);
+        when(loanForProcessing.getSummary().getTotalOutstanding()).thenReturn(BigDecimal.valueOf(100));
         when(loanProduct.getOverDueDaysForRepaymentEvent()).thenReturn(null);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(loanRepaymentScheduleInstallments);
 
@@ -196,8 +196,8 @@ public class CheckLoanRepaymentOverdueBusinessStepTest {
         when(loanForProcessing.getStatus()).thenReturn(LoanStatus.ACTIVE);
         // product configuration overrides global configuration
         when(loanProduct.getOverDueDaysForRepaymentEvent()).thenReturn(1);
-        when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
-        when(loanForProcessing.getLoanSummary().getTotalOutstanding()).thenReturn(BigDecimal.valueOf(100));
+        when(loanForProcessing.getSummary()).thenReturn(loanSummary);
+        when(loanForProcessing.getSummary().getTotalOutstanding()).thenReturn(BigDecimal.valueOf(100));
         when(loanForProcessing.getCurrency()).thenReturn(currency);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(loanRepaymentScheduleInstallments);
 
@@ -216,8 +216,8 @@ public class CheckLoanRepaymentOverdueBusinessStepTest {
         Loan loanForProcessing = Mockito.mock(Loan.class);
         LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
         when(loanForProcessing.getStatus()).thenReturn(LoanStatus.ACTIVE);
-        when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
-        when(loanForProcessing.getLoanSummary().getTotalOutstanding()).thenReturn(BigDecimal.ZERO);
+        when(loanForProcessing.getSummary()).thenReturn(loanSummary);
+        when(loanForProcessing.getSummary().getTotalOutstanding()).thenReturn(BigDecimal.ZERO);
         // when
         Loan processedLoan = underTest.execute(loanForProcessing);
         // then - No Business Event raised
@@ -240,8 +240,8 @@ public class CheckLoanRepaymentOverdueBusinessStepTest {
                         BigDecimal.valueOf(1.0), BigDecimal.valueOf(0.0), false, new HashSet<>(), BigDecimal.valueOf(0.0)));
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
         when(loanProduct.getOverDueDaysForRepaymentEvent()).thenReturn(1);
-        when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
-        when(loanForProcessing.getLoanSummary().getTotalOutstanding()).thenReturn(BigDecimal.ONE);
+        when(loanForProcessing.getSummary()).thenReturn(loanSummary);
+        when(loanForProcessing.getSummary().getTotalOutstanding()).thenReturn(BigDecimal.ONE);
         when(loanForProcessing.getCurrency()).thenReturn(currency);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(loanRepaymentScheduleInstallments);
         // when

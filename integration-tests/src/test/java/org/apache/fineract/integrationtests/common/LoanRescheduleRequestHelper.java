@@ -83,4 +83,8 @@ public class LoanRescheduleRequestHelper extends IntegrationTest {
     public PostUpdateRescheduleLoansResponse approveLoanRescheduleRequest(Long scheduleId, PostUpdateRescheduleLoansRequest request) {
         return ok(fineract().rescheduleLoans.updateLoanRescheduleRequest(scheduleId, request, "approve"));
     }
+
+    public PostUpdateRescheduleLoansResponse rejectLoanRescheduleRequest(Long scheduleId, PostUpdateRescheduleLoansRequest request) {
+        return ok(fineract().rescheduleLoans.updateLoanRescheduleRequest(scheduleId, request, "reject"));
+    }
 }

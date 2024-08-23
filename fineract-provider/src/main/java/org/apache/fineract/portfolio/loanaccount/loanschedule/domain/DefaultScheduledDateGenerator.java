@@ -20,11 +20,14 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import net.fortuna.ical4j.model.Recur;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.service.HolidayUtil;
+import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.workingdays.data.AdjustedDateDetailsDTO;
 import org.apache.fineract.organisation.workingdays.domain.RepaymentRescheduleType;
 import org.apache.fineract.organisation.workingdays.service.WorkingDaysUtil;
@@ -34,11 +37,53 @@ import org.apache.fineract.portfolio.calendar.domain.CalendarHistory;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
+import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
 public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
+
+    @Override
+    public List<LoanScheduleModelRepaymentPeriod> generateRepaymentPeriods(final LocalDate scheduleStartDate,
+            final LoanApplicationTerms loanApplicationTerms, final HolidayDetailDTO holidayDetailDTO) {
+        final Money zeroAmount = Money.zero(loanApplicationTerms.getCurrency());
+        final int numberOfRepayments = loanApplicationTerms.getNumberOfRepayments();
+        final ArrayList<LoanScheduleModelRepaymentPeriod> repaymentPeriods = new ArrayList<>(numberOfRepayments);
+        LocalDate lastRepaymentDate = scheduleStartDate;
+        LocalDate nextRepaymentDate;
+        boolean isFirstRepayment = true;
+        for (int repaymentPeriodNumber = 1; repaymentPeriodNumber <= numberOfRepayments; repaymentPeriodNumber++) {
+            nextRepaymentDate = generateNextRepaymentDate(lastRepaymentDate, loanApplicationTerms, isFirstRepayment);
+
+            if (repaymentPeriodNumber == numberOfRepayments) { // last period
+                if (loanApplicationTerms.getFixedLength() != null
+                        && loanApplicationTerms.calculateMaxDateForFixedLength().compareTo(nextRepaymentDate) != 0) {
+                    nextRepaymentDate = loanApplicationTerms.calculateMaxDateForFixedLength();
+                }
+                nextRepaymentDate = adjustRepaymentDate(nextRepaymentDate, loanApplicationTerms, holidayDetailDTO).getChangedScheduleDate();
+            }
+            nextRepaymentDate = applyLoanTermVariations(loanApplicationTerms, nextRepaymentDate);
+            repaymentPeriods.add(LoanScheduleModelRepaymentPeriod.repayment(repaymentPeriodNumber, lastRepaymentDate, nextRepaymentDate,
+                    zeroAmount, zeroAmount, zeroAmount, zeroAmount, zeroAmount, zeroAmount, false));
+            lastRepaymentDate = nextRepaymentDate;
+            isFirstRepayment = false;
+        }
+        return repaymentPeriods;
+    }
+
+    private LocalDate applyLoanTermVariations(final LoanApplicationTerms loanApplicationTerms, final LocalDate scheduledDueDate) {
+        LocalDate modifiedScheduledDueDate = scheduledDueDate;
+        // due date changes should be applied only for that dueDate
+        if (loanApplicationTerms.getLoanTermVariations().hasDueDateVariation(scheduledDueDate)) {
+            LoanTermVariationsData loanTermVariationsData = loanApplicationTerms.getLoanTermVariations().nextDueDateVariation();
+            if (DateUtils.isEqual(modifiedScheduledDueDate, loanTermVariationsData.getTermVariationApplicableFrom())) {
+                modifiedScheduledDueDate = loanTermVariationsData.getDateValue();
+                loanApplicationTerms.updateVariationDays(DateUtils.getDifferenceInDays(scheduledDueDate, modifiedScheduledDueDate));
+            }
+        }
+        return modifiedScheduledDueDate;
+    }
 
     @Override
     public LocalDate getLastRepaymentDate(final LoanApplicationTerms loanApplicationTerms, final HolidayDetailDTO holidayDetailDTO) {

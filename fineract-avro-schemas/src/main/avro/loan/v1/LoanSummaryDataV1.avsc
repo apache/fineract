@@ -413,6 +413,14 @@
         },
         {
             "default": null,
+            "name": "totalInterestPaymentWaiver",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
             "name": "chargeOffReasonId",
             "type": [
                 "null",
@@ -425,6 +433,30 @@
             "type": [
                 "null",
                 "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "totalUnpaidPayableDueInterest",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "totalUnpaidPayableNotDueInterest",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "totalInterestRefund",
+            "type": [
+                "null",
+                "bigdecimal"
             ]
         }
     ]

@@ -87,7 +87,7 @@ public class LoanAccountDisbursementToSavingsWithAutoDownPaymentTest extends Bas
 
             // verify repayment schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 March 2023"), //
+                    installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, true, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
                     installment(250.0, false, "31 March 2023"), //

@@ -40,7 +40,7 @@ import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
-import org.apache.fineract.portfolio.charge.exception.LoanChargeCannotBeAddedException;
+import org.apache.fineract.portfolio.charge.exception.LoanChargeNotFoundException;
 import org.apache.fineract.portfolio.charge.exception.LoanChargeWithoutMandatoryFieldException;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -65,13 +65,13 @@ public class LoanChargeAssembler {
         JsonArray jsonDisbursement = this.fromApiJsonHelper.extractJsonArrayNamed("disbursementData", element);
         List<Long> disbursementChargeIds = new ArrayList<>();
 
-        if (jsonDisbursement != null && jsonDisbursement.size() > 0) {
+        if (jsonDisbursement != null && !jsonDisbursement.isEmpty()) {
             for (int i = 0; i < jsonDisbursement.size(); i++) {
                 final JsonObject jsonObject = jsonDisbursement.get(i).getAsJsonObject();
                 if (jsonObject != null && jsonObject.getAsJsonPrimitive(LoanApiConstants.loanChargeIdParameterName) != null) {
                     String chargeIds = jsonObject.getAsJsonPrimitive(LoanApiConstants.loanChargeIdParameterName).getAsString();
                     if (chargeIds != null) {
-                        if (chargeIds.indexOf(",") != -1) {
+                        if (chargeIds.contains(",")) {
                             Iterable<String> chargeId = Splitter.on(',').split(chargeIds);
                             for (String loanChargeId : chargeId) {
                                 disbursementChargeIds.add(Long.parseLong(loanChargeId));
@@ -104,7 +104,7 @@ public class LoanChargeAssembler {
 
                     final JsonObject loanChargeElement = array.get(i).getAsJsonObject();
 
-                    final Long id = this.fromApiJsonHelper.extractLongNamed("id", loanChargeElement);
+                    final Long loanChargeId = this.fromApiJsonHelper.extractLongNamed("id", loanChargeElement);
                     final Long chargeId = this.fromApiJsonHelper.extractLongNamed("chargeId", loanChargeElement);
                     final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed("amount", loanChargeElement, locale);
                     final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerNamed("chargeTimeType", loanChargeElement, locale);
@@ -116,16 +116,8 @@ public class LoanChargeAssembler {
                             locale);
                     final String externalIdStr = this.fromApiJsonHelper.extractStringNamed("externalId", loanChargeElement);
                     final ExternalId externalId = externalIdFactory.create(externalIdStr);
-                    if (id == null) {
+                    if (loanChargeId == null) {
                         final Charge chargeDefinition = this.chargeRepository.findOneWithNotFoundDetection(chargeId);
-
-                        if (chargeDefinition.isOverdueInstallment()) {
-
-                            final String defaultUserMessage = "Installment charge cannot be added to the loan.";
-                            throw new LoanChargeCannotBeAddedException("loanCharge", "overdue.charge", defaultUserMessage, null,
-                                    chargeDefinition.getName());
-                        }
-
                         ChargeTimeType chargeTime = null;
                         if (chargeTimeType != null) {
                             chargeTime = ChargeTimeType.fromInt(chargeTimeType);
@@ -145,7 +137,7 @@ public class LoanChargeAssembler {
                         } else {
                             if (topLevelJsonElement.has("disbursementData") && topLevelJsonElement.get("disbursementData").isJsonArray()) {
                                 final JsonArray disbursementArray = topLevelJsonElement.get("disbursementData").getAsJsonArray();
-                                if (disbursementArray.size() > 0) {
+                                if (!disbursementArray.isEmpty()) {
                                     JsonObject disbursementDataElement = disbursementArray.get(0).getAsJsonObject();
                                     expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed(
                                             LoanApiConstants.expectedDisbursementDateParameterName, disbursementDataElement, dateFormat,
@@ -201,14 +193,14 @@ public class LoanChargeAssembler {
                             }
                         }
                     } else {
-                        final Long loanChargeId = id;
-                        final LoanCharge loanCharge = this.loanChargeRepository.findById(loanChargeId).orElse(null);
-                        if (loanCharge != null) {
-                            if (!loanCharge.isTrancheDisbursementCharge() || disbursementChargeIds.contains(loanChargeId)) {
-                                loanCharge.update(amount, dueDate, numberOfRepayments);
-                                loanCharges.add(loanCharge);
-                            }
+                        final LoanCharge loanCharge = this.loanChargeRepository.findById(loanChargeId)
+                                .orElseThrow(() -> new LoanChargeNotFoundException(loanChargeId));
+
+                        if (!loanCharge.isTrancheDisbursementCharge() || disbursementChargeIds.contains(loanChargeId)) {
+                            loanCharge.update(amount, dueDate, numberOfRepayments);
+                            loanCharges.add(loanCharge);
                         }
+
                     }
                 }
             }

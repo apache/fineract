@@ -28,7 +28,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_calendar_instance")
-public class CalendarInstance extends AbstractPersistableCustom {
+public class CalendarInstance extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "calendar_id", nullable = false)

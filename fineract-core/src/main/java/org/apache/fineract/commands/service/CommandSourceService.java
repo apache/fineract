@@ -31,8 +31,10 @@ import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
+import org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessUnderProcessingException;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -64,8 +66,16 @@ public class CommandSourceService {
 
     @NotNull
     private CommandSource saveInitial(CommandWrapper wrapper, JsonCommand jsonCommand, AppUser maker, String idempotencyKey) {
-        CommandSource initialCommandSource = getInitialCommandSource(wrapper, jsonCommand, maker, idempotencyKey);
-        return commandSourceRepository.saveAndFlush(initialCommandSource);
+        try {
+            CommandSource initialCommandSource = getInitialCommandSource(wrapper, jsonCommand, maker, idempotencyKey);
+            return commandSourceRepository.saveAndFlush(initialCommandSource);
+        } catch (JpaSystemException jse) {
+            final String message = (jse.getRootCause() != null) ? jse.getRootCause().getMessage() : null;
+            if (message != null && message.toUpperCase().contains("UNIQUE_PORTFOLIO_COMMAND_SOURCE")) {
+                throw new IdempotentCommandProcessUnderProcessingException(wrapper, idempotencyKey, jse);
+            }
+            throw jse;
+        }
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.REPEATABLE_READ)
@@ -101,8 +111,8 @@ public class CommandSourceService {
     public CommandSource getInitialCommandSource(CommandWrapper wrapper, JsonCommand jsonCommand, AppUser maker, String idempotencyKey) {
         CommandSource commandSourceResult = CommandSource.fullEntryFrom(wrapper, jsonCommand, maker, idempotencyKey,
                 UNDER_PROCESSING.getValue());
-        if (commandSourceResult.getCommandJson() == null) {
-            commandSourceResult.setCommandJson("{}");
+        if (commandSourceResult.getCommandAsJson() == null) {
+            commandSourceResult.setCommandAsJson("{}");
         }
         return commandSourceResult;
     }

@@ -47,6 +47,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepositor
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,9 +76,8 @@ public class LoanReAmortizationServiceImpl {
 
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
                 .determineProcessor(loan.transactionProcessingStrategy());
-        loanRepaymentScheduleTransactionProcessor.processLatestTransaction(reAmortizeTransaction,
-                new LoanRepaymentScheduleTransactionProcessor.TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
-                        loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney())));
+        loanRepaymentScheduleTransactionProcessor.processLatestTransaction(reAmortizeTransaction, new TransactionCtx(loan.getCurrency(),
+                loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
 
         loanTransactionRepository.saveAndFlush(reAmortizeTransaction);
 

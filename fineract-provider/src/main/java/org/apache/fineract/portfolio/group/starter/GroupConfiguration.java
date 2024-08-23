@@ -35,8 +35,8 @@ import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
+import org.apache.fineract.portfolio.account.service.AccountNumberGenerator;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
-import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.group.domain.GroupLevelRepository;
@@ -114,10 +114,11 @@ public class GroupConfiguration {
             OfficeReadPlatformService officeReadPlatformService, StaffReadPlatformService staffReadPlatformService,
             CenterReadPlatformService centerReadPlatformService, CodeValueReadPlatformService codeValueReadPlatformService,
             PaginationHelper paginationHelper, DatabaseSpecificSQLGenerator sqlGenerator,
-            PaginationParametersDataValidator paginationParametersDataValidator, ColumnValidator columnValidator) {
+            PaginationParametersDataValidator paginationParametersDataValidator, ColumnValidator columnValidator,
+            ClientReadPlatformService clientReadPlatformService) {
         return new GroupReadPlatformServiceImpl(jdbcTemplate, context, officeReadPlatformService, staffReadPlatformService,
                 centerReadPlatformService, codeValueReadPlatformService, paginationHelper, sqlGenerator, paginationParametersDataValidator,
-                columnValidator);
+                columnValidator, clientReadPlatformService);
     }
 
     @Bean

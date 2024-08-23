@@ -39,7 +39,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class CreditBureauLoanProductMapping extends AbstractPersistableCustom {
+public class CreditBureauLoanProductMapping extends AbstractPersistableCustom<Long> {
 
     @Column(name = "is_credit_check_mandatory")
     private boolean creditCheckMandatory;

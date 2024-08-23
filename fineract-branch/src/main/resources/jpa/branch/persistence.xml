@@ -29,7 +29,6 @@
     <!--  You can find the runtime configuration in the JPAConfig class  -->
     <persistence-unit name="jpa-pu" transaction-type="RESOURCE_LOCAL">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-        <!-- Fineract core module -->
         <class>org.apache.fineract.accounting.glaccount.domain.GLAccount</class>
         <class>org.apache.fineract.accounting.journalentry.domain.JournalEntry</class>
         <class>org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom</class>
@@ -48,11 +47,11 @@
         <class>org.apache.fineract.portfolio.group.domain.StaffAssignmentHistory</class>
         <class>org.apache.fineract.portfolio.group.domain.GroupRole</class>
         <class>org.apache.fineract.portfolio.client.domain.Client</class>
+        <class>org.apache.fineract.portfolio.client.domain.ClientIdentifier</class>
         <class>org.apache.fineract.portfolio.rate.domain.Rate</class>
         <class>org.apache.fineract.portfolio.fund.domain.Fund</class>
         <class>org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket</class>
         <class>org.apache.fineract.portfolio.delinquency.domain.DelinquencyRange</class>
-        <class>org.apache.fineract.portfolio.charge.domain.Charge</class>
         <class>org.apache.fineract.portfolio.paymenttype.domain.PaymentType</class>
         <class>org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail</class>
         <class>org.apache.fineract.portfolio.tax.domain.TaxGroup</class>
@@ -68,6 +67,8 @@
         <class>org.apache.fineract.useradministration.domain.Role</class>
         <class>org.apache.fineract.useradministration.domain.Permission</class>
         <class>org.apache.fineract.useradministration.domain.AppUserClientMapping</class>
+        <!-- Fineract core module -->
+        <class>org.apache.fineract.portfolio.charge.domain.Charge</class>
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <properties>
             <property name="eclipselink.weaving" value="static" />

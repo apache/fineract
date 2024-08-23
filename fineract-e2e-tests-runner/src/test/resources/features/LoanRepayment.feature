@@ -1,7 +1,7 @@
 @Repayment
 Feature: LoanRepayment
 
-  @TestRailId:C49
+
   Scenario Outline: Loan repayment functionality with business date setup
     When Admin sets the business date to <businessDate>
     When Admin creates a client with random data
@@ -14,7 +14,7 @@ Feature: LoanRepayment
       | businessDate  | approveDate   | expectedDisbursementDate | disbursementDate | repaymentDate | transactionAmount |
       | "1 July 2022" | "1 July 2022" | "1 July 2022"            | "1 July 2022"    | "1 July 2022" | 200               |
 
-  @TestRailId:C32
+
   Scenario: As a user I would like to check that the repayment transaction is failed when the repayment date is after the business date
     When Admin sets the business date to "1 July 2022"
     When Admin creates a client with random data
@@ -24,7 +24,7 @@ Feature: LoanRepayment
     And Customer makes "AUTOPAY" repayment on "2 July 2022" with 200 EUR transaction amount (and transaction fails because of wrong date)
     Then Repayment failed because the repayment date is after the business date
 
-  @TestRailId:C44
+
   Scenario: As a user I would like to check that the repayment is successful if the repayment date is equal to the business date
     When Admin sets the business date to "1 July 2022"
     When Admin creates a client with random data
@@ -34,7 +34,7 @@ Feature: LoanRepayment
     And Customer makes "AUTOPAY" repayment on "1 July 2022" with 200 EUR transaction amount
     Then Repayment transaction is created with 200 amount and "AUTOPAY" type
 
-  @TestRailId:C45
+
   Scenario: As a user I would like to increase the business day by the scheduled job and want to create a repayment transaction on that day
     When Admin sets the business date to "1 July 2022"
     When Admin creates a client with random data
@@ -45,7 +45,7 @@ Feature: LoanRepayment
     And Customer makes "AUTOPAY" repayment on "2 July 2022" with 200 EUR transaction amount
     Then Repayment transaction is created with 200 amount and "AUTOPAY" type
 
-  @TestRailId:C2430
+
   Scenario: Verify that as a user I am able to make a repayment with AutoPay type
     When Admin sets the business date to "1 July 2022"
     When Admin creates a client with random data
@@ -56,7 +56,7 @@ Feature: LoanRepayment
     And Customer makes "AUTOPAY" repayment on "2 July 2022" with 200 EUR transaction amount
     Then Repayment transaction is created with 200 amount and "AUTOPAY" type
 
-  @TestRailId:C2431
+
   Scenario: Verify that as a user I am able to make a repayment with Down payment type
     When Admin sets the business date to "1 July 2022"
     When Admin creates a client with random data
@@ -67,7 +67,7 @@ Feature: LoanRepayment
     And Customer makes "DOWN_PAYMENT" repayment on "2 July 2022" with 200 EUR transaction amount
     Then Repayment transaction is created with 200 amount and "DOWN_PAYMENT" type
 
-  @TestRailId:C2432
+
   Scenario: Verify that as a user I am able to make a repayment with Real time type
     When Admin sets the business date to "1 July 2022"
     When Admin creates a client with random data
@@ -78,7 +78,7 @@ Feature: LoanRepayment
     And Customer makes "REAL_TIME" repayment on "2 July 2022" with 200 EUR transaction amount
     Then Repayment transaction is created with 200 amount and "REAL_TIME" type
 
-  @TestRailId:C2433
+
   Scenario: Verify that as a user I am able to make a repayment with Scheduled type
     When Admin sets the business date to "1 July 2022"
     When Admin creates a client with random data
@@ -89,7 +89,7 @@ Feature: LoanRepayment
     And Customer makes "SCHEDULED" repayment on "2 July 2022" with 200 EUR transaction amount
     Then Repayment transaction is created with 200 amount and "SCHEDULED" type
 
-  @TestRailId:C2434
+
   Scenario: Verify that as a user I am able to make a repayment with Check payment type
     When Admin sets the business date to "1 July 2022"
     When Admin creates a client with random data
@@ -100,7 +100,7 @@ Feature: LoanRepayment
     And Customer makes "CHECK_PAYMENT" repayment on "2 July 2022" with 200 EUR transaction amount
     Then Repayment transaction is created with 200 amount and "CHECK_PAYMENT" type
 
-  @TestRailId:C2435
+
   Scenario: Verify that as a user I am able to make a repayment with Oca payment type
     When Admin sets the business date to "1 July 2022"
     When Admin creates a client with random data
@@ -111,7 +111,7 @@ Feature: LoanRepayment
     And Customer makes "OCA_PAYMENT" repayment on "2 July 2022" with 200 EUR transaction amount
     Then Repayment transaction is created with 200 amount and "OCA_PAYMENT" type
 
-  @TestRailId:C2436
+
   Scenario: Verify that as a user I am able to make a repayment with Adjustment chargeback payment type
     When Admin sets the business date to "1 July 2022"
     When Admin creates a client with random data
@@ -122,7 +122,7 @@ Feature: LoanRepayment
     And Customer makes "REPAYMENT_ADJUSTMENT_CHARGEBACK" repayment on "2 July 2022" with 200 EUR transaction amount
     Then Repayment transaction is created with 200 amount and "Repayment Adjustment Chargeback" type
 
-  @TestRailId:C2437
+
   Scenario: Verify that as a user I am able to make a repayment with Adjustment refund payment type
     When Admin sets the business date to "1 July 2022"
     When Admin creates a client with random data
@@ -133,7 +133,7 @@ Feature: LoanRepayment
     And Customer makes "REPAYMENT_ADJUSTMENT_REFUND" repayment on "2 July 2022" with 200 EUR transaction amount
     Then Repayment transaction is created with 200 amount and "Repayment Adjustment Refund" type
 
-  @TestRailId:C2464
+
   Scenario: As a user I would like to check the Autopay repayment undo and repayment after loan closed state
     When Admin sets the business date to "1 July 2022"
     When Admin creates a client with random data
@@ -151,7 +151,7 @@ Feature: LoanRepayment
     Then Loan status will be "OVERPAID"
     Then Loan has 100 overpaid amount
 
-  @TestRailId:C2465
+
   Scenario: As a user I would like to check the Down payment repayment undo and repayment after loan closed state
     When Admin sets the business date to "1 July 2022"
     When Admin creates a client with random data
@@ -169,7 +169,7 @@ Feature: LoanRepayment
     Then Loan status will be "OVERPAID"
     Then Loan has 100 overpaid amount
 
-  @TestRailId:C2466
+
   Scenario: As a user I would like to check the real time repayment undo and repayment after loan closed state
     When Admin sets the business date to "1 July 2022"
     When Admin creates a client with random data
@@ -187,7 +187,7 @@ Feature: LoanRepayment
     Then Loan status will be "OVERPAID"
     Then Loan has 100 overpaid amount
 
-  @TestRailId:C2467
+
   Scenario: As a user I would like to check the scheduled repayment undo and repayment after loan closed state
     When Admin sets the business date to "1 July 2022"
     When Admin creates a client with random data
@@ -205,7 +205,7 @@ Feature: LoanRepayment
     Then Loan status will be "OVERPAID"
     Then Loan has 100 overpaid amount
 
-  @TestRailId:C2468
+
   Scenario: As a user I would like to check the check payment repayment undo and repayment after loan closed state
     When Admin sets the business date to "1 July 2022"
     When Admin creates a client with random data
@@ -223,7 +223,7 @@ Feature: LoanRepayment
     Then Loan status will be "OVERPAID"
     Then Loan has 100 overpaid amount
 
-  @TestRailId:C2469
+
   Scenario: As a user I would like to check the oca payment repayment undo and repayment after loan closed state
     When Admin sets the business date to "1 July 2022"
     When Admin creates a client with random data
@@ -241,7 +241,7 @@ Feature: LoanRepayment
     Then Loan status will be "OVERPAID"
     Then Loan has 100 overpaid amount
 
-  @TestRailId:C2470
+
   Scenario: As a user I would like to check the repayment adjustment chargeback repayment undo and repayment after loan closed state
     When Admin sets the business date to "1 July 2022"
     When Admin creates a client with random data
@@ -259,7 +259,7 @@ Feature: LoanRepayment
     Then Loan status will be "OVERPAID"
     Then Loan has 100 overpaid amount
 
-  @TestRailId:C2471
+
   Scenario: As a user I would like to check the repayment adjustment refund repayment undo and repayment after loan closed state
     When Admin sets the business date to "1 July 2022"
     When Admin creates a client with random data
@@ -277,7 +277,7 @@ Feature: LoanRepayment
     Then Loan status will be "OVERPAID"
     Then Loan has 100 overpaid amount
 
-  @TestRailId:C2485
+
   Scenario: Verify that inlineCOB job creates two separate events for LoanRepaymentDueBusinessEvent and LoanRepaymentOverdueBusinessEvent: due and overdue days values from global config
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -291,13 +291,13 @@ Feature: LoanRepayment
     When Admin runs inline COB job for Loan
     Then Loan Repayment Overdue Business Event is created
 
-  @TestRailId:C2689
+
   Scenario: Verify that inlineCOB job creates two separate events for LoanRepaymentDueBusinessEvent and LoanRepaymentOverdueBusinessEvent: due and overdue days values from Loan product
     When Admin sets the business date to "1 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct    | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_DUE_DATE | 01 January 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_DUE_DATE | 01 January 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "01 January 2023" with "1000" amount and expected disbursement date on "01 January 2023"
     And Admin successfully disburse the loan on "01 January 2023" with "1000" EUR transaction amount
     When Admin sets the business date to "30 January 2023"
@@ -307,13 +307,13 @@ Feature: LoanRepayment
     When Admin runs inline COB job for Loan
     Then Loan Repayment Overdue Business Event is created
 
-  @TestRailId:C2490
+
   Scenario: RS01 - Repayment Schedule with interest type: flat, interest period: Same as payment period, amortization type: Equal installments
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct         | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_INTEREST_FLAT | 1 November 2022   | 5000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 18                | MONTHS                | 1              | MONTHS                 | 18                 | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_INTEREST_FLAT | 1 November 2022   | 5000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 18                | MONTHS                | 1              | MONTHS                 | 18                 | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     Then Loan Repayment schedule has 18 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 01 November 2022  |           | 5000.0          |               |          | 0.0  |           | 0.0   |      |            |      | 0.0         |
@@ -339,13 +339,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 5000          | 900      | 0    | 0         | 5900 | 0    | 0          | 0    | 5900        |
 
-  @TestRailId:C2492
+
   Scenario: RS02 - Repayment Schedule with interest type: Declining Balance, interest period: Same as payment period, amortization type: Equal installments
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                             | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_INTEREST_DECLINING_BALANCE_PERIOD_SAME_AS_PAYMENT | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 18                | MONTHS                | 1              | MONTHS                 | 18                 | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_INTEREST_DECLINING_BALANCE_PERIOD_SAME_AS_PAYMENT | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 18                | MONTHS                | 1              | MONTHS                 | 18                 | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     Then Loan Repayment schedule has 18 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 November 2022  |           | 5000.0          |               |          | 0.0  |           | 0.0    |      |            |      | 0.0         |
@@ -371,13 +371,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
       | 5000          | 488.22   | 0    | 0         | 5488.22 | 0    | 0          | 0    | 5488.22     |
 
-  @TestRailId:C2493
+
   Scenario: RS03 - Repayment Schedule with interest type: Declining Balance, interest period: Daily, amortization type: Equal installments
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                   | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_INTEREST_DECLINING_BALANCE_PERIOD_DAILY | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 18                | MONTHS                | 1              | MONTHS                 | 18                 | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_INTEREST_DECLINING_BALANCE_PERIOD_DAILY | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 18                | MONTHS                | 1              | MONTHS                 | 18                 | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     Then Loan Repayment schedule has 18 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 November 2022  |           | 5000.0          |               |          | 0.0  |           | 0.0    |      |            |      | 0.0         |
@@ -403,13 +403,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
       | 5000          | 487.33   | 0    | 0         | 5487.33 | 0    | 0          | 0    | 5487.33     |
 
-  @TestRailId:C2494
+
   Scenario: RS04 - Repayment Schedule with interest type: Declining Balance, interest period: Same as payment period, amortization type: Equal principal payments
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                             | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type        | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_INTEREST_DECLINING_BALANCE_PERIOD_SAME_AS_PAYMENT | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_PRINCIPAL_PAYMENTS | 18                | MONTHS                | 1              | MONTHS                 | 18                 | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_INTEREST_DECLINING_BALANCE_PERIOD_SAME_AS_PAYMENT | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_PRINCIPAL_PAYMENTS | 18                | MONTHS                | 1              | MONTHS                 | 18                 | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     Then Loan Repayment schedule has 18 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 November 2022  |           | 5000.0          |               |          | 0.0  |           | 0.0    |      |            |      | 0.0         |
@@ -435,13 +435,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 5000          | 475.0    | 0    | 0         | 5475.0 | 0    | 0          | 0    | 5475.0      |
 
-  @TestRailId:C2495
+
   Scenario: RS05 - Repayment Schedule with interest type: Declining Balance, interest period: Same as payment period, amortization type: Equal installments, Grace on principal payment
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                             | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_INTEREST_DECLINING_BALANCE_PERIOD_SAME_AS_PAYMENT | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 18                | MONTHS                | 1              | MONTHS                 | 18                 | 3                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_INTEREST_DECLINING_BALANCE_PERIOD_SAME_AS_PAYMENT | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 18                | MONTHS                | 1              | MONTHS                 | 18                 | 3                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     Then Loan Repayment schedule has 18 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 November 2022  |           | 5000.0          |               |          | 0.0  |           | 0.0    |      |            |      | 0.0         |
@@ -467,13 +467,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
       | 5000          | 558.87   | 0    | 0         | 5558.87 | 0    | 0          | 0    | 5558.87     |
 
-  @TestRailId:C2496
+
   Scenario: RS06 - Repayment Schedule with interest type: Declining Balance, interest period: Same as payment period, amortization type: Equal installments, Grace on principal payment and interest payment
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                             | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_INTEREST_DECLINING_BALANCE_PERIOD_SAME_AS_PAYMENT | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 18                | MONTHS                | 1              | MONTHS                 | 18                 | 6                       | 3                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_INTEREST_DECLINING_BALANCE_PERIOD_SAME_AS_PAYMENT | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 18                | MONTHS                | 1              | MONTHS                 | 18                 | 6                       | 3                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     Then Loan Repayment schedule has 18 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 November 2022  |           | 5000.0          |               |          | 0.0  |           | 0.0    |      |            |      | 0.0         |
@@ -499,13 +499,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
       | 5000          | 631.09   | 0    | 0         | 5631.09 | 0    | 0          | 0    | 5631.09     |
 
-  @TestRailId:C2497
+
   Scenario: RS07 - Repayment Schedule with interest type: Declining Balance, interest period: Same as payment period, amortization type: Equal installments, Grace on principal payment and setting up interest free period
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                             | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_INTEREST_DECLINING_BALANCE_PERIOD_SAME_AS_PAYMENT | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 18                | MONTHS                | 1              | MONTHS                 | 18                 | 6                       | 0                      | 3                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_INTEREST_DECLINING_BALANCE_PERIOD_SAME_AS_PAYMENT | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 18                | MONTHS                | 1              | MONTHS                 | 18                 | 6                       | 0                      | 3                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     Then Loan Repayment schedule has 18 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 November 2022  |           | 5000.0          |               |          | 0.0  |           | 0.0    |      |            |      | 0.0         |
@@ -531,7 +531,7 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
       | 5000          | 631.09   | 0    | 0         | 5631.09 | 0    | 0          | 0    | 5631.09     |
 
-  @TestRailId:C2498
+
   Scenario: As admin I would like to be sure that Edit from Goodwill Credit of on loan transaction can not be done
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
@@ -543,7 +543,7 @@ Feature: LoanRepayment
     And Customer makes "GOODWILL_CREDIT" transaction with "AUTOPAY" payment type on "15 November 2022" with 200 EUR transaction amount and self-generated Idempotency key
     Then Loan "loanPaymentTransactionResponse" transaction adjust amount 900 must return 403 code
 
-  @TestRailId:C2499
+
   Scenario: As admin I would like to be sure that Edit from Payout Refund of on loan transaction can not be done
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
@@ -555,7 +555,7 @@ Feature: LoanRepayment
     And Refund happens on "15 November 2022" with 100 EUR transaction amount
     Then Loan "loanRefundResponse" transaction adjust amount 90 must return 403 code
 
-  @TestRailId:C2500
+
   Scenario: As admin I would like to be sure that Edit from Merchant Issued Refund of on loan transaction can not be done
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
@@ -567,7 +567,7 @@ Feature: LoanRepayment
     And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "15 November 2022" with 200 EUR transaction amount and self-generated Idempotency key
     Then Loan "loanPaymentTransactionResponse" transaction adjust amount 190 must return 403 code
 
-  @TestRailId:C2531
+
   Scenario: As admin I would like to check the last payment amount after a merchant issue refund
     When Admin sets the business date to "9 February 2023"
     And Admin creates a client with random data
@@ -578,13 +578,13 @@ Feature: LoanRepayment
     And Customer makes "AUTOPAY" repayment on "9 February 2023" with 200 EUR transaction amount
     Then Loan has 200 last payment amount
 
-  @TestRailId:C2555
+
   Scenario: RP01 - Repayment Schedule with interest type: Declining Balance and Interest Recalculation with Interest compounding
     When Admin sets the business date to "1 September 2022"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                                     | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_1MONTH_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_MONTHLY | 1 September 2022  | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_1MONTH_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_MONTHLY | 1 September 2022  | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "1 September 2022" with "5000" amount and expected disbursement date on "1 September 2022"
     When Admin successfully disburse the loan on "1 September 2022" with "5000" EUR transaction amount
     When Admin sets the business date to "4 December 2022"
@@ -602,13 +602,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due     | Paid  | In advance | Late  | Outstanding |
       | 5000.0        | 178.96   | 0.0  | 0.0       | 5178.96 | 862.0 | 0.0        | 862.0 | 4316.96     |
 
-  @TestRailId:C2556
+
   Scenario: RP02 - Repayment Schedule with interest type: Declining Balance and Interest Recalculation with on time exact payment
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                           | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "1 November 2022" with "5000" amount and expected disbursement date on "1 November 2023"
     When Admin successfully disburse the loan on "1 November 2022" with "5000" EUR transaction amount
     When Admin sets the business date to "1 December 2022"
@@ -626,13 +626,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due     | Paid  | In advance | Late | Outstanding |
       | 5000.0        | 175.46   | 0.0  | 0.0       | 5175.46 | 863.0 | 0.0        | 0.0  | 4312.46     |
 
-  @TestRailId:C2557
+
   Scenario: RP03 - Repayment Schedule with interest type: Declining Balance and Interest Recalculation with early exact payment
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                           | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "1 November 2022" with "5000" amount and expected disbursement date on "1 November 2023"
     When Admin successfully disburse the loan on "1 November 2022" with "5000" EUR transaction amount
     When Admin sets the business date to "27 November 2022"
@@ -650,13 +650,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due     | Paid  | In advance | Late | Outstanding |
       | 5000.0        | 172.81   | 0.0  | 0.0       | 5172.81 | 863.0 | 863.0      | 0.0  | 4309.81     |
 
-  @TestRailId:C2558
+
   Scenario: RP04 - Repayment Schedule with interest type: Declining Balance and Interest Recalculation with late exact payment
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                           | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "1 November 2022" with "5000" amount and expected disbursement date on "1 November 2023"
     When Admin successfully disburse the loan on "1 November 2022" with "5000" EUR transaction amount
     When Admin sets the business date to "5 December 2022"
@@ -674,13 +674,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due     | Paid  | In advance | Late  | Outstanding |
       | 5000.0        | 176.61   | 0.0  | 0.0       | 5176.61 | 862.0 | 0.0        | 862.0 | 4314.61     |
 
-  @TestRailId:C2559
+
   Scenario: RP05 - Repayment Schedule with interest type: Declining Balance and Interest Recalculation with on time partial payment
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                           | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "1 November 2022" with "5000" amount and expected disbursement date on "1 November 2023"
     When Admin successfully disburse the loan on "1 November 2022" with "5000" EUR transaction amount
     When Admin sets the business date to "1 December 2022"
@@ -698,13 +698,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 5000.0        | 175.5    | 0.0  | 0.0       | 5175.5 | 200.0 | 0.0        | 0.0  | 4975.50     |
 
-  @TestRailId:C2560
+
   Scenario: RP06 - Repayment Schedule with interest type: Declining Balance and Interest Recalculation with early partial payment
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                           | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "1 November 2022" with "5000" amount and expected disbursement date on "1 November 2023"
     When Admin successfully disburse the loan on "1 November 2022" with "5000" EUR transaction amount
     When Admin sets the business date to "27 November 2022"
@@ -722,13 +722,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due     | Paid  | In advance | Late | Outstanding |
       | 5000.0        | 175.21   | 0.0  | 0.0       | 5175.21 | 200.0 | 200.0      | 0.0  | 4975.21     |
 
-  @TestRailId:C2561
+
   Scenario: RP07 - Repayment Schedule with interest type: Declining Balance and Interest Recalculation with late partial payment
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                           | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "1 November 2022" with "5000" amount and expected disbursement date on "1 November 2023"
     When Admin successfully disburse the loan on "1 November 2022" with "5000" EUR transaction amount
     When Admin sets the business date to "5 December 2022"
@@ -746,13 +746,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due     | Paid  | In advance | Late  | Outstanding |
       | 5000.0        | 176.61   | 0.0  | 0.0       | 5176.61 | 200.0 | 0.0        | 200.0 | 4976.61     |
 
-  @TestRailId:C2562
+
   Scenario: RP08 - Repayment Schedule with interest type: Declining Balance and Interest Recalculation with on time excess payment
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                           | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "1 November 2022" with "5000" amount and expected disbursement date on "1 November 2023"
     When Admin successfully disburse the loan on "1 November 2022" with "5000" EUR transaction amount
     When Admin sets the business date to "1 December 2022"
@@ -770,13 +770,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
       | 5000.0        | 156.24   | 0.0  | 0.0       | 5156.24 | 1500.0 | 0.0        | 0.0  | 3656.24     |
 
-  @TestRailId:C2563
+
   Scenario: RP09 - Repayment Schedule with interest type: Declining Balance and Interest Recalculation with early excess payment
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                           | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "1 November 2022" with "5000" amount and expected disbursement date on "1 November 2023"
     When Admin successfully disburse the loan on "1 November 2022" with "5000" EUR transaction amount
     When Admin sets the business date to "27 November 2022"
@@ -794,13 +794,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
       | 5000.0        | 152.77   | 0.0  | 0.0       | 5152.77 | 1500.0 | 1500.0     | 0.0  | 3652.77     |
 
-  @TestRailId:C2564
+
   Scenario: RP10 - Repayment Schedule with interest type: Declining Balance and Interest Recalculation with late excess payment
     When Admin sets the business date to "1 November 2022"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                           | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE | 1 November 2022   | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "1 November 2022" with "5000" amount and expected disbursement date on "1 November 2023"
     When Admin successfully disburse the loan on "1 November 2022" with "5000" EUR transaction amount
     When Admin sets the business date to "5 December 2022"
@@ -818,13 +818,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late  | Outstanding |
       | 5000.0        | 170.74   | 0.0  | 0.0       | 5170.74 | 1500.0 | 638.0      | 862.0 | 3670.74     |
 
-  @TestRailId:C2625
+
   Scenario: Verify that the accounting treatment is correct for Goodwill Credit transaction
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct         | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_INTEREST_FLAT | 1 January 2023    | 1000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_INTEREST_FLAT | 1 January 2023    | 1000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "1 January 2023" with "1000" amount and expected disbursement date on "1 January 2023"
     And Admin successfully disburse the loan on "1 January 2023" with "1000" EUR transaction amount
     And Admin adds an NSF fee because of payment bounce with "1 January 2023" transaction date
@@ -857,13 +857,13 @@ Feature: LoanRepayment
       | INCOME  | 404001       | Interest Income Charge Off | 10.0  |        |
       | INCOME  | 404008       | Fee Charge Off             | 13.0  |        |
 
-  @Skip @TestRailId:C2626 @chargeoffOnLoanWithInterest
+  @Skip  @chargeoffOnLoanWithInterest
   Scenario: Verify that the accounting treatment is correct for Goodwill Credit transaction after Charge-off
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct         | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_INTEREST_FLAT | 1 January 2023    | 1000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_INTEREST_FLAT | 1 January 2023    | 1000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "1 January 2023" with "1000" amount and expected disbursement date on "1 January 2023"
     And Admin successfully disburse the loan on "1 January 2023" with "1000" EUR transaction amount
     And Admin adds an NSF fee because of payment bounce with "1 January 2023" transaction date
@@ -903,13 +903,13 @@ Feature: LoanRepayment
       | INCOME  | 404001       | Interest Income Charge Off | 10.0  |        |
       | INCOME  | 404008       | Fee Charge Off             | 13.0  |        |
 
-  @TestRailId:C2627
+
   Scenario: Verify that the accounting treatment is correct for Goodwill Credit transaction when undo happened
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct         | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_INTEREST_FLAT | 1 January 2023    | 1000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_INTEREST_FLAT | 1 January 2023    | 1000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "1 January 2023" with "1000" amount and expected disbursement date on "1 January 2023"
     And Admin successfully disburse the loan on "1 January 2023" with "1000" EUR transaction amount
     And Admin adds an NSF fee because of payment bounce with "1 January 2023" transaction date
@@ -948,13 +948,13 @@ Feature: LoanRepayment
       | INCOME  | 404001       | Interest Income Charge Off |       | 10.0   |
       | INCOME  | 404008       | Fee Charge Off             |       | 13.0   |
 
-  @Skip @TestRailId:C2628 @chargeoffOnLoanWithInterest
+  @Skip  @chargeoffOnLoanWithInterest
   Scenario: Verify that the accounting treatment is correct for Goodwill Credit transaction when the loan was Charged-off and undo happened for Goodwill
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct         | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_INTEREST_FLAT | 1 January 2023    | 1000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_INTEREST_FLAT | 1 January 2023    | 1000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "1 January 2023" with "1000" amount and expected disbursement date on "1 January 2023"
     And Admin successfully disburse the loan on "1 January 2023" with "1000" EUR transaction amount
     And Admin adds an NSF fee because of payment bounce with "1 January 2023" transaction date
@@ -1000,13 +1000,13 @@ Feature: LoanRepayment
       | INCOME  | 404001       | Interest Income Charge Off |       | 10.0   |
       | INCOME  | 404008       | Fee Charge Off             |       | 13.0   |
 
-  @TestRailId:C2629
+
   Scenario: RP11 - Repayment Schedule with interest type: Declining Balance - Prepayment - Reduce number of installments
     When Admin sets the business date to "01 November 2022"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                                                     | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE_RESCHEDULE_REDUCE_NR_INST | 01 November 2022  | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE_RESCHEDULE_REDUCE_NR_INST | 01 November 2022  | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "01 November 2022" with "5000" amount and expected disbursement date on "01 November 2023"
     When Admin successfully disburse the loan on "01 November 2022" with "5000" EUR transaction amount
     When Admin sets the business date to "01 December 2022"
@@ -1025,13 +1025,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
       | 5000.0        | 127.48   | 0.0  | 0.0       | 5127.48 | 3000.0 | 0.0        | 0.0  | 2127.48     |
 
-  @TestRailId:C2630
+
   Scenario: RP12 - Repayment Schedule with interest type: Declining Balance - Prepayment - Reduce Installment amount
     When Admin sets the business date to "01 November 2022"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                           | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE | 01 November 2022  | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE | 01 November 2022  | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "01 November 2022" with "5000" amount and expected disbursement date on "01 November 2023"
     When Admin successfully disburse the loan on "01 November 2022" with "5000" EUR transaction amount
     When Admin sets the business date to "01 December 2022"
@@ -1051,13 +1051,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
       | 5000.0        | 142.38   | 0.0  | 0.0       | 5142.38 | 3000.0 | 0.0        | 0.0  | 2142.38     |
 
-  @TestRailId:C2631
+
   Scenario: RP13 - Repayment Schedule with interest type: Declining Balance - Prepayment - Reschedule next repayments
     When Admin sets the business date to "01 November 2022"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                                                     | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE_RESCHEDULE_RESCH_NEXT_REP | 01 November 2022  | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE_RESCHEDULE_RESCH_NEXT_REP | 01 November 2022  | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "01 November 2022" with "5000" amount and expected disbursement date on "01 November 2023"
     When Admin successfully disburse the loan on "01 November 2022" with "5000" EUR transaction amount
     When Admin sets the business date to "01 December 2022"
@@ -1077,13 +1077,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
       | 5000.0        | 156.56   | 0.0  | 0.0       | 5156.56 | 3000.0 | 0.0        | 0.0  | 2156.56     |
 
-  @TestRailId:C2632
+
   Scenario: RP14 - Repayment Schedule with interest type: Declining Balance - Interest Recalculation Frequency: Same as Repayment Period - Partial payment
     When Admin sets the business date to "01 November 2022"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                                             | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_SAME_AS_REPAYMENT_COMPOUNDING_NONE | 01 November 2022  | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_SAME_AS_REPAYMENT_COMPOUNDING_NONE | 01 November 2022  | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "01 November 2022" with "5000" amount and expected disbursement date on "01 November 2023"
     When Admin successfully disburse the loan on "01 November 2022" with "5000" EUR transaction amount
     When Admin sets the business date to "20 November 2022"
@@ -1103,13 +1103,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due     | Paid  | In advance | Late  | Outstanding |
       | 5000.0        | 191.04   | 0.0  | 0.0       | 5191.04 | 400.0 | 200.0      | 200.0 | 4791.04     |
 
-  @TestRailId:C2633
+
   Scenario: RP15 - Repayment Schedule with interest type: Declining Balance - Interest Recalculation Frequency: Same as Repayment Period - Late payment
     When Admin sets the business date to "01 November 2022"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                                             | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_SAME_AS_REPAYMENT_COMPOUNDING_NONE | 01 November 2022  | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_SAME_AS_REPAYMENT_COMPOUNDING_NONE | 01 November 2022  | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "01 November 2022" with "5000" amount and expected disbursement date on "01 November 2023"
     When Admin successfully disburse the loan on "01 November 2022" with "5000" EUR transaction amount
     When Admin sets the business date to "01 February 2023"
@@ -1127,13 +1127,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due     | Paid  | In advance | Late  | Outstanding |
       | 5000.0        | 192.63   | 0.0  | 0.0       | 5192.63 | 862.0 | 0.0        | 862.0 | 4330.63     |
 
-  @TestRailId:C2634
+
   Scenario: RP16 - Repayment Schedule with interest type: Declining Balance - Interest Recalculation Frequency: Same as Repayment Period - Multi-disbursement
     When Admin sets the business date to "01 November 2022"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                                                     | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_INTEREST_DECLINING_BALANCE_SAR_RECALCULATION_SAME_AS_REPAYMENT_COMPOUNDING_NONE_MULTIDISB | 01 November 2022  | 10000          | 12                     | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_INTEREST_DECLINING_BALANCE_SAR_RECALCULATION_SAME_AS_REPAYMENT_COMPOUNDING_NONE_MULTIDISB | 01 November 2022  | 10000          | 12                     | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "01 November 2022" with "10000" amount and expected disbursement date on "01 November 2023"
     When Admin successfully disburse the loan on "01 November 2022" with "5000" EUR transaction amount
     When Admin sets the business date to "01 December 2022"
@@ -1162,13 +1162,13 @@ Feature: LoanRepayment
       | 10000.0       | 207.39   | 0.0  | 0.0       | 10207.39 | 6900.0 | 0.0        | 0.0  | 3307.39     |
 
 
-  @TestRailId:C2636 @PaymentStrategyDueInAdvance
+   @PaymentStrategyDueInAdvance
   Scenario: Verify the due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy payment strategy - adding charge due in the future
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                           | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 1 January 2023    | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 1 January 2023    | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "01 January 2023" with "1000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "1000" EUR transaction amount
     When Admin sets the business date to "10 January 2023"
@@ -1190,13 +1190,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 1000          | 0        | 0    | 50        | 1050 | 500  | 500        | 0    | 550         |
 
-  @TestRailId:C2637 @PaymentStrategyDueInAdvance
+   @PaymentStrategyDueInAdvance
   Scenario: Verify the due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy payment strategy - adding charge due in the future, then repayments before and after charge due date
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                           | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 1 January 2023    | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 1 January 2023    | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "01 January 2023" with "1000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "1000" EUR transaction amount
     When Admin sets the business date to "10 January 2023"
@@ -1224,13 +1224,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 1000          | 0        | 0    | 50        | 1050 | 1000 | 1000       | 0    | 50          |
 
-  @TestRailId:C2638 @PaymentStrategyDueInAdvance
+   @PaymentStrategyDueInAdvance
   Scenario: Verify the due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy payment strategy - adding charge due in the future, then repayment before due date, new charge with due date in future and repayment on first charge due date
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                           | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 1 January 2023    | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 1 January 2023    | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "01 January 2023" with "1000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "1000" EUR transaction amount
     When Admin sets the business date to "10 January 2023"
@@ -1261,13 +1261,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 1000          | 0        | 0    | 60        | 1060 | 700  | 700        | 0    | 360         |
 
-  @Skip @TestRailId:C2639 @PaymentStrategyDueInAdvance
+  @Skip  @PaymentStrategyDueInAdvance
   Scenario: Verify the due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy payment strategy - adding charge due in the future, then repayment before due date with full amount
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                           | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 1 January 2023    | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 1 January 2023    | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "01 January 2023" with "1000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "1000" EUR transaction amount
     When Admin sets the business date to "10 January 2023"
@@ -1292,13 +1292,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 1000          | 0        | 0    | 50        | 1050 | 1050 | 1000       | 0    | 0           |
 
-  @TestRailId:C2655 @PaymentStrategyDueInAdvance
+   @PaymentStrategyDueInAdvance
   Scenario: Verify the due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy payment strategy - due principal
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                           | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 01 January 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 01 January 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "01 January 2023" with "3000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "3000" EUR transaction amount
     When Admin sets the business date to "01 February 2023"
@@ -1317,13 +1317,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 3000          | 0        | 0    | 0         | 3000 | 1000 | 0          | 0    | 2000        |
 
-  @TestRailId:C2656 @PaymentStrategyDueInAdvance
+   @PaymentStrategyDueInAdvance
   Scenario: Verify the due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy payment strategy - inAdvance principal
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                           | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 01 January 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 01 January 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "01 January 2023" with "3000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "3000" EUR transaction amount
     When Admin sets the business date to "10 January 2023"
@@ -1342,13 +1342,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 3000          | 0        | 0    | 0         | 3000 | 1000 | 1000       | 0    | 2000        |
 
-  @TestRailId:C2657 @PaymentStrategyDueInAdvance
+   @PaymentStrategyDueInAdvance
   Scenario: Verify the due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy payment strategy - due + inAdvance principal
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                           | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 01 January 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 01 January 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "01 January 2023" with "3000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "3000" EUR transaction amount
     When Admin sets the business date to "01 February 2023"
@@ -1367,13 +1367,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 3000          | 0        | 0    | 0         | 3000 | 1500 | 500        | 0    | 1500        |
 
-  @TestRailId:C2658 @PaymentStrategyDueInAdvance
+   @PaymentStrategyDueInAdvance
   Scenario: Verify the due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy payment strategy - due penalty + due principal
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                           | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 01 January 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 01 January 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "01 January 2023" with "3000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "3000" EUR transaction amount
     When Admin sets the business date to "01 February 2023"
@@ -1393,13 +1393,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 3000          | 0        | 0    | 50        | 3050 | 500  | 0          | 0    | 2550        |
 
-  @TestRailId:C2659 @PaymentStrategyDueInAdvance
+   @PaymentStrategyDueInAdvance
   Scenario: Verify the due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy payment strategy - due fee + due principal
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                           | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 01 January 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 01 January 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "01 January 2023" with "3000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "3000" EUR transaction amount
     When Admin sets the business date to "01 February 2023"
@@ -1419,13 +1419,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 3000          | 0        | 50   | 0         | 3050 | 500  | 0          | 0    | 2550        |
 
-  @TestRailId:C2660 @PaymentStrategyDueInAdvance
+   @PaymentStrategyDueInAdvance
   Scenario: Verify the due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy payment strategy - due interest + due principal
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                         | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE_INTEREST_FLAT | 01 January 2023   | 3000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE_INTEREST_FLAT | 01 January 2023   | 3000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "01 January 2023" with "3000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "3000" EUR transaction amount
     When Admin sets the business date to "01 February 2023"
@@ -1444,13 +1444,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 3000          | 90       | 0    | 0         | 3090 | 500  | 0          | 0    | 2590        |
 
-  @TestRailId:C2661 @PaymentStrategyDueInAdvance
+   @PaymentStrategyDueInAdvance
   Scenario: Verify the due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy payment strategy - due penalty + due fee + due principal
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                           | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 01 January 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 01 January 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "01 January 2023" with "3000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "3000" EUR transaction amount
     When Admin sets the business date to "01 February 2023"
@@ -1471,13 +1471,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 3000          | 0        | 50   | 50        | 3100 | 500  | 0          | 0    | 2600        |
 
-  @TestRailId:C2662 @PaymentStrategyDueInAdvance
+   @PaymentStrategyDueInAdvance
   Scenario: Verify the due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy payment strategy - due penalty + inAdvance principal
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                           | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 01 January 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 01 January 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "01 January 2023" with "3000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "3000" EUR transaction amount
     When Admin sets the business date to "15 January 2023"
@@ -1497,13 +1497,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 3000          | 0        | 0    | 50        | 3050 | 500  | 500        | 0    | 2550        |
 
-  @TestRailId:C2663 @PaymentStrategyDueInAdvance
+   @PaymentStrategyDueInAdvance
   Scenario: Verify the due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy payment strategy - due penalty + inAdvance principal + inAdvance penalty not effective because of partial payment
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                           | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 01 January 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 01 January 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "01 January 2023" with "3000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "3000" EUR transaction amount
     When Admin sets the business date to "15 January 2023"
@@ -1524,13 +1524,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 3000          | 0        | 0    | 100       | 3100 | 500  | 500        | 0    | 2600        |
 
-  @TestRailId:C2664 @PaymentStrategyDueInAdvance
+   @PaymentStrategyDueInAdvance
   Scenario: Verify the due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy payment strategy - due penalty + inAdvance principal + inAdvance penalty
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                           | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 01 January 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 01 January 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "01 January 2023" with "3000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "3000" EUR transaction amount
     When Admin sets the business date to "15 January 2023"
@@ -1551,13 +1551,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 3000          | 0        | 0    | 100       | 3100 | 1100 | 1100       | 0    | 2000        |
 
-  @TestRailId:C2665 @PaymentStrategyDueInAdvance
+   @PaymentStrategyDueInAdvance
   Scenario: Verify the due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy payment strategy - due penalty + inAdvance principal + inAdvance penalty + inAdvance fee
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                           | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 01 January 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 01 January 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "01 January 2023" with "3000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "3000" EUR transaction amount
     When Admin sets the business date to "15 January 2023"
@@ -1579,13 +1579,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 3000          | 0        | 50   | 100       | 3150 | 1150 | 1150       | 0    | 2000        |
 
-  @TestRailId:C2666 @PaymentStrategyDueInAdvance
+   @PaymentStrategyDueInAdvance
   Scenario: Verify the due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy payment strategy - due penalty + inAdvance principal + inAdvance penalty + inAdvance fee + inAdvance interest
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                         | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE_INTEREST_FLAT | 01 January 2023   | 3000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE_INTEREST_FLAT | 01 January 2023   | 3000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "01 January 2023" with "3000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "3000" EUR transaction amount
     When Admin sets the business date to "15 January 2023"
@@ -1608,13 +1608,13 @@ Feature: LoanRepayment
       | 3000          | 90       | 50   | 100       | 3240 | 1180 | 1180       | 0    | 2060        |
 
 
-  @TestRailId:C2667 @PaymentStrategyDueInAdvance
+   @PaymentStrategyDueInAdvance
   Scenario: Verify the due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy payment strategy - repayment + reversal
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                         | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE_INTEREST_FLAT | 01 January 2023   | 3000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE_INTEREST_FLAT | 01 January 2023   | 3000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "01 January 2023" with "3000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "3000" EUR transaction amount
     When Admin sets the business date to "15 January 2023"
@@ -1650,13 +1650,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 3000          | 90       | 50   | 100       | 3240 | 0    | 0          | 0    | 3240        |
 
-  @TestRailId:C2668 @PaymentStrategyDueInAdvance
+   @PaymentStrategyDueInAdvance
   Scenario: Verify the due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy payment strategy - merchant issued refund + reversal
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                         | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE_INTEREST_FLAT | 01 January 2023   | 3000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE_INTEREST_FLAT | 01 January 2023   | 3000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "01 January 2023" with "3000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "3000" EUR transaction amount
     When Admin sets the business date to "15 January 2023"
@@ -1692,13 +1692,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 3000          | 90       | 50   | 100       | 3240 | 0    | 0          | 0    | 3240        |
 
-  @TestRailId:C2669 @PaymentStrategyDueInAdvance
+   @PaymentStrategyDueInAdvance
   Scenario: Verify the due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy payment strategy - payout refund + reversal
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                         | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE_INTEREST_FLAT | 01 January 2023   | 3000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE_INTEREST_FLAT | 01 January 2023   | 3000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "01 January 2023" with "3000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "3000" EUR transaction amount
     When Admin sets the business date to "15 January 2023"
@@ -1734,13 +1734,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 3000          | 90       | 50   | 100       | 3240 | 0    | 0          | 0    | 3240        |
 
-  @TestRailId:C2670 @PaymentStrategyDueInAdvance
+   @PaymentStrategyDueInAdvance
   Scenario: Verify the due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy payment strategy - goodwill credit transaction + reversal
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                         | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE_INTEREST_FLAT | 01 January 2023   | 3000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE_INTEREST_FLAT | 01 January 2023   | 3000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "01 January 2023" with "3000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "3000" EUR transaction amount
     When Admin sets the business date to "15 January 2023"
@@ -1776,13 +1776,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 3000          | 90       | 50   | 100       | 3240 | 0    | 0          | 0    | 3240        |
 
-  @TestRailId:C2671 @PaymentStrategyDueInAdvance
+   @PaymentStrategyDueInAdvance
   Scenario: Verify the due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy payment strategy - repayment + charge adjustment + charge adjustment reversal
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                         | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE_INTEREST_FLAT | 01 January 2023   | 3000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE_INTEREST_FLAT | 01 January 2023   | 3000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "01 January 2023" with "3000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "3000" EUR transaction amount
     When Admin sets the business date to "15 January 2023"
@@ -1837,13 +1837,13 @@ Feature: LoanRepayment
       | 3000          | 90       | 50   | 100       | 3240 | 1180 | 1180       | 0    | 2060        |
 
 
-  @TestRailId:C2682 @PaymentStrategyDueInAdvance
+   @PaymentStrategyDueInAdvance
   Scenario: Verify the due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy payment strategy - fee - repayment - nsffee - chargeback - repayment
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                           | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 01 January 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 01 January 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "01 January 2023" with "1000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "1000" EUR transaction amount
     When Admin sets the business date to "10 January 2023"
@@ -1869,13 +1869,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 1500          | 0        | 10   | 25        | 1535 | 1000 | 1000       | 0    | 535         |
 
-  @Skip @TestRailId:C2799 @PaymentStrategyDueInAdvance
+  @Skip  @PaymentStrategyDueInAdvance
   Scenario: Verify the due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy payment strategy: Same day transaction
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                           | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 1 January 2023    | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE | 1 January 2023    | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "01 January 2023" with "1000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "1000" EUR transaction amount
     When Admin sets the business date to "04 January 2023"
@@ -1897,13 +1897,13 @@ Feature: LoanRepayment
       | 12 January 2023  | Accrual          | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
       | 12 January 2023  | Repayment        | 510.0  | 500.0     | 0.0      | 10.0 | 0.0       | 0.0          |
 
-  @TestRailId:C2694 @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
+   @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
   Scenario: Verify the due-penalty-interest-principal-fee-in-advance-penalty-interest-principal-fee-strategy payment strategy: UC1 - no fees or penalties, due payment
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                          | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE | 01 January 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE | 01 January 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
     And Admin successfully approves the loan on "01 January 2023" with "1000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "1000" EUR transaction amount
     When Admin sets the business date to "01 February 2023"
@@ -1920,13 +1920,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 1000          | 0        | 0    | 0         | 1000 | 1000 | 0          | 0    | 0           |
 
-  @TestRailId:C2695 @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
+   @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
   Scenario: Verify the due-penalty-interest-principal-fee-in-advance-penalty-interest-principal-fee-strategy payment strategy: UC2 - due principal, fee
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                          | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE | 01 January 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE | 01 January 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
     And Admin successfully approves the loan on "01 January 2023" with "1000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "1000" EUR transaction amount
     When Admin sets the business date to "25 January 2023"
@@ -1949,13 +1949,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 1000          | 0        | 20   | 0         | 1020 | 1020 | 0          | 0    | 0           |
 
-  @TestRailId:C2696 @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
+   @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
   Scenario: Verify the due-penalty-interest-principal-fee-in-advance-penalty-interest-principal-fee-strategy payment strategy: UC3 - in advance principal, reverted, due penalty, principal
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                          | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE | 01 January 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE | 01 January 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
     And Admin successfully approves the loan on "01 January 2023" with "1000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "1000" EUR transaction amount
 
@@ -2000,13 +2000,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 1000          | 0        | 0    | 20        | 1020 | 1020 | 0          | 0    | 0           |
 
-  @TestRailId:C2697 @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
+   @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
   Scenario: Verify the due-penalty-interest-principal-fee-in-advance-penalty-interest-principal-fee-strategy payment strategy: UC4 - in advance principal, fee, reverted, due penalty, principal, fee
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                          | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE | 01 January 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE | 01 January 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
     And Admin successfully approves the loan on "01 January 2023" with "1000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "1000" EUR transaction amount
 
@@ -2069,13 +2069,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 1000          | 0        | 20   | 20        | 1040 | 1040 | 0          | 0    | 0           |
 
-  @TestRailId:C2698 @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
+   @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
   Scenario: Verify the due-penalty-interest-principal-fee-in-advance-penalty-interest-principal-fee-strategy payment strategy: UC5 - in advance principal, fee, reverted, multiple due penalty, principal
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                          | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE | 01 January 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE | 01 January 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
     And Admin successfully approves the loan on "01 January 2023" with "1000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "1000" EUR transaction amount
 
@@ -2184,13 +2184,13 @@ Feature: LoanRepayment
       | 1000          | 0        | 20   | 40        | 1060 | 1060 | 0          | 1040 | 0           |
 
 
-  @TestRailId:C2699 @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
+   @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
   Scenario: Verify the due-penalty-interest-principal-fee-in-advance-penalty-interest-principal-fee-strategy payment strategy: UC6 - partial payment
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                          | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE | 01 January 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE | 01 January 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
     And Admin successfully approves the loan on "01 January 2023" with "1000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "1000" EUR transaction amount
     When Admin sets the business date to "25 January 2023"
@@ -2210,13 +2210,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 1000          | 0        | 0    | 0         | 1000 | 1000 | 500        | 0    | 0           |
 
-  @TestRailId:C2700 @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
+   @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
   Scenario: Verify the due-penalty-interest-principal-fee-in-advance-penalty-interest-principal-fee-strategy payment strategy: UC7 - partial payment, in advance principal, due principal, fee
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                          | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE | 01 January 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE | 01 January 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
     And Admin successfully approves the loan on "01 January 2023" with "1000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "1000" EUR transaction amount
 
@@ -2253,13 +2253,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 1000          | 0        | 20   | 0         | 1020 | 1020 | 500        | 0    | 0           |
 
-  @TestRailId:C2701 @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
+   @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
   Scenario: Verify the due-penalty-interest-principal-fee-in-advance-penalty-interest-principal-fee-strategy payment strategy: UC8 - partial payment, in advance principal, due penalty, principal
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                          | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE | 01 January 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE | 01 January 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
     And Admin successfully approves the loan on "01 January 2023" with "1000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "1000" EUR transaction amount
 
@@ -2318,13 +2318,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 1000          | 0        | 0    | 20        | 1020 | 1020 | 520        | 0    | 0           |
 
-  @TestRailId:C2702 @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
+   @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
   Scenario: Verify the due-penalty-interest-principal-fee-in-advance-penalty-interest-principal-fee-strategy payment strategy: UC9 - partial payment, in advance principal, fee, due penalty, principal
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                          | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE | 01 January 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE | 01 January 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
     And Admin successfully approves the loan on "01 January 2023" with "1000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "1000" EUR transaction amount
 
@@ -2432,13 +2432,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 1000          | 0        | 20   | 20        | 1040 | 1040 | 520        | 20   | 0           |
 
-  @TestRailId:C2703 @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
+   @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
   Scenario: Verify the due-penalty-interest-principal-fee-in-advance-penalty-interest-principal-fee-strategy payment strategy: UC10 - partial payment, in advance principal, fee, due penalty
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                          | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE | 01 January 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE | 01 January 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
     And Admin successfully approves the loan on "01 January 2023" with "1000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "1000" EUR transaction amount
 
@@ -2523,13 +2523,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 1000          | 0        | 20   | 20        | 1040 | 1040 | 1040       | 0    | 0           |
 
-  @TestRailId:C2704 @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
+   @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
   Scenario: Verify the due-penalty-interest-principal-fee-in-advance-penalty-interest-principal-fee-strategy payment strategy: UC11 - partial payment, in advance principal, fee, due penalty, principal, fee
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                          | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE | 01 January 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE | 01 January 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
     And Admin successfully approves the loan on "01 January 2023" with "1000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "1000" EUR transaction amount
 
@@ -2662,13 +2662,13 @@ Feature: LoanRepayment
       | 1000          | 0        | 20   | 40        | 1060 | 1060 | 0          | 1040 | 0           |
 
 
-  @TestRailId:C2705 @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
+   @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
   Scenario: Verify the due-penalty-interest-principal-fee-in-advance-penalty-interest-principal-fee-strategy payment strategy: UC12 - partial payment, in advance penalty, interest, principal, fee due penalty, interest, principal, fee
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                                        | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_INTEREST_FLAT | 01 January 2023   | 1000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_INTEREST_FLAT | 01 January 2023   | 1000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
     And Admin successfully approves the loan on "01 January 2023" with "1000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "1000" EUR transaction amount
 
@@ -2812,13 +2812,13 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 1000          | 10       | 20   | 20        | 1050 | 1050 | 0          | 0    | 0           |
 
-  @Skip @TestRailId:C2800 @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
+  @Skip  @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
   Scenario: Verify the due-penalty-interest-principal-fee-in-advance-penalty-interest-principal-fee-strategy payment strategy: Same day transaction
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                                        | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_INTEREST_FLAT | 01 January 2023   | 1000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
+      | LP1_PAYMENT_STRATEGY_DUE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_INTEREST_FLAT | 01 January 2023   | 1000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
     And Admin successfully approves the loan on "01 January 2023" with "1000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "1000" EUR transaction amount
     When Admin sets the business date to "04 January 2023"
@@ -2840,13 +2840,13 @@ Feature: LoanRepayment
       | 12 January 2023  | Accrual          | 20.1   | 0.0       | 10.0     | 10.1 | 0.0       | 0.0          |
       | 12 January 2023  | Repayment        | 520.1  | 510.0     | 0.0      | 10.1 | 0.0       | 0.0          |
 
-  @TestRailId:C2810
+
   Scenario: As a user I would like to adjust an existing repayment and validate the event
     When Admin sets the business date to "01 November 2022"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30       | 01 November 2022  | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 30                | DAYS                  | 30             | DAYS                   | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LP1       | 01 November 2022  | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 30                | DAYS                  | 30             | DAYS                   | 1                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "01 November 2022" with "1000" amount and expected disbursement date on "01 November 2022"
     When Admin successfully disburse the loan on "01 November 2022" with "1000" EUR transaction amount
     Then Loan has 1000 outstanding amount
@@ -2861,8 +2861,8 @@ Feature: LoanRepayment
       | Repayment        | 9.0    | 9.0       | 0.0      | 0.0  | 0.0       | 991.0        |
       | Repayment        | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 990.0        |
 
-  @TestRailId:C2898
-  Scenario: Verify that in case of non/disbursed loan LoanRepaymentDueBusinessEvent is not sent - PIN30 product
+
+  Scenario: Verify that in case of non/disbursed loan LoanRepaymentDueBusinessEvent is not sent - LP1 product
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "01 October 2023"
@@ -2878,13 +2878,13 @@ Feature: LoanRepayment
     When Admin runs inline COB job for Loan
     Then No new event with type "LoanRepaymentDueEvent" has been raised for the loan
 
-  @TestRailId:C2899
-  Scenario: Verify that in case of non/disbursed loan LoanRepaymentDueBusinessEvent is not sent - PIN4 auto payment enabled
+
+  Scenario: Verify that in case of non/disbursed loan LoanRepaymentDueBusinessEvent is not sent - LP2 auto payment enabled
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct           | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN4_DOWNPAYMENT_AUTO | 01 October 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
+      | LP2_DOWNPAYMENT_AUTO | 01 October 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
     And Admin successfully approves the loan on "01 October 2023" with "1000" amount and expected disbursement date on "01 October 2023"
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
@@ -2900,13 +2900,13 @@ Feature: LoanRepayment
     When Admin runs inline COB job for Loan
     Then No new event with type "LoanRepaymentDueEvent" has been raised for the loan
 
-  @TestRailId:C2900
-  Scenario: Verify that in case of non/disbursed loan LoanRepaymentDueBusinessEvent is not sent - PIN4 auto payment disabled
+
+  Scenario: Verify that in case of non/disbursed loan LoanRepaymentDueBusinessEvent is not sent - LP2 auto payment disabled
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN4_DOWNPAYMENT | 01 October 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
+      | LP2_DOWNPAYMENT | 01 October 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
     And Admin successfully approves the loan on "01 October 2023" with "1000" amount and expected disbursement date on "01 October 2023"
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
@@ -2922,13 +2922,13 @@ Feature: LoanRepayment
     When Admin runs inline COB job for Loan
     Then No new event with type "LoanRepaymentDueEvent" has been raised for the loan
 
-  @TestRailId:C2901 @AdvancedPaymentAllocation
-  Scenario: Verify that in case of non/disbursed loan LoanRepaymentDueBusinessEvent is not sent - PIN4 advanced payment allocation product
+   @AdvancedPaymentAllocation
+  Scenario: Verify that in case of non/disbursed loan LoanRepaymentDueBusinessEvent is not sent - LP2 advanced payment allocation product
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 October 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 October 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 October 2023" with "1000" amount and expected disbursement date on "01 October 2023"
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
@@ -2944,8 +2944,8 @@ Feature: LoanRepayment
     When Admin runs inline COB job for Loan
     Then No new event with type "LoanRepaymentDueEvent" has been raised for the loan
 
-  @TestRailId:C2902
-  Scenario: Verify that in case of pre-payed installment LoanRepaymentDueBusinessEvent is not sent - PIN30 product
+
+  Scenario: Verify that in case of pre-payed installment LoanRepaymentDueBusinessEvent is not sent - LP1 product
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "01 October 2023"
@@ -2965,13 +2965,13 @@ Feature: LoanRepayment
     When Admin runs inline COB job for Loan
     Then No new event with type "LoanRepaymentDueEvent" has been raised for the loan
 
-  @TestRailId:C2903
-  Scenario: Verify that in case of pre-payed installment LoanRepaymentDueBusinessEvent is not sent - PIN4 auto payment enabled
+
+  Scenario: Verify that in case of pre-payed installment LoanRepaymentDueBusinessEvent is not sent - LP2 auto payment enabled
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct           | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN4_DOWNPAYMENT_AUTO | 01 October 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
+      | LP2_DOWNPAYMENT_AUTO | 01 October 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
     And Admin successfully approves the loan on "01 October 2023" with "1000" amount and expected disbursement date on "01 October 2023"
     When Admin successfully disburse the loan on "01 October 2023" with "1000" EUR transaction amount
     When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 October 2023" with 250 EUR transaction amount and system-generated Idempotency key
@@ -2989,13 +2989,13 @@ Feature: LoanRepayment
     When Admin runs inline COB job for Loan
     Then No new event with type "LoanRepaymentDueEvent" has been raised for the loan
 
-  @TestRailId:C2904
-  Scenario: Verify that in case of pre-payed installment LoanRepaymentDueBusinessEvent is not sent - PIN4 auto payment disabled
+
+  Scenario: Verify that in case of pre-payed installment LoanRepaymentDueBusinessEvent is not sent - LP2 auto payment disabled
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN4_DOWNPAYMENT | 01 October 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
+      | LP2_DOWNPAYMENT | 01 October 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
     And Admin successfully approves the loan on "01 October 2023" with "1000" amount and expected disbursement date on "01 October 2023"
     When Admin successfully disburse the loan on "01 October 2023" with "1000" EUR transaction amount
     When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 October 2023" with 500 EUR transaction amount and system-generated Idempotency key
@@ -3013,13 +3013,13 @@ Feature: LoanRepayment
     When Admin runs inline COB job for Loan
     Then No new event with type "LoanRepaymentDueEvent" has been raised for the loan
 
-  @TestRailId:C2905 @AdvancedPaymentAllocation
-  Scenario: Verify that in case of pre-payed installment LoanRepaymentDueBusinessEvent is not sent - PIN4 advanced payment allocation product
+   @AdvancedPaymentAllocation
+  Scenario: Verify that in case of pre-payed installment LoanRepaymentDueBusinessEvent is not sent - LP2 advanced payment allocation product
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 October 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 October 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 October 2023" with "1000" amount and expected disbursement date on "01 October 2023"
     When Admin successfully disburse the loan on "01 October 2023" with "1000" EUR transaction amount
     When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 October 2023" with 250 EUR transaction amount and system-generated Idempotency key
@@ -3037,13 +3037,13 @@ Feature: LoanRepayment
     When Admin runs inline COB job for Loan
     Then No new event with type "LoanRepaymentDueEvent" has been raised for the loan
 
-  @TestRailId:C2906
-  Scenario: Verify that in case of pre-payed installments for total amount (loan balance is 0) LoanRepaymentDueBusinessEvent is not sent - PIN4 auto payment enabled
+
+  Scenario: Verify that in case of pre-payed installments for total amount (loan balance is 0) LoanRepaymentDueBusinessEvent is not sent - LP2 auto payment enabled
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct           | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN4_DOWNPAYMENT_AUTO | 01 October 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
+      | LP2_DOWNPAYMENT_AUTO | 01 October 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
     And Admin successfully approves the loan on "01 October 2023" with "1000" amount and expected disbursement date on "01 October 2023"
     When Admin successfully disburse the loan on "01 October 2023" with "1000" EUR transaction amount
     When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 October 2023" with 750 EUR transaction amount and system-generated Idempotency key
@@ -3067,13 +3067,13 @@ Feature: LoanRepayment
     When Admin runs inline COB job for Loan
     Then No new event with type "LoanRepaymentDueEvent" has been raised for the loan
 
-  @TestRailId:C2907
-  Scenario: Verify that in case of pre-payed installments for total amount (loan balance is 0) LoanRepaymentDueBusinessEvent is not sent - PIN4 auto payment disabled
+
+  Scenario: Verify that in case of pre-payed installments for total amount (loan balance is 0) LoanRepaymentDueBusinessEvent is not sent - LP2 auto payment disabled
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN4_DOWNPAYMENT | 01 October 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
+      | LP2_DOWNPAYMENT | 01 October 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
     And Admin successfully approves the loan on "01 October 2023" with "1000" amount and expected disbursement date on "01 October 2023"
     When Admin successfully disburse the loan on "01 October 2023" with "1000" EUR transaction amount
     When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 October 2023" with 1000 EUR transaction amount and system-generated Idempotency key
@@ -3097,13 +3097,13 @@ Feature: LoanRepayment
     When Admin runs inline COB job for Loan
     Then No new event with type "LoanRepaymentDueEvent" has been raised for the loan
 
-  @TestRailId:C2908 @AdvancedPaymentAllocation
-  Scenario: Verify that in case of pre-payed installments for total amount (loan balance is 0) LoanRepaymentDueBusinessEvent is not sent - PIN4 advanced payment allocation product
+   @AdvancedPaymentAllocation
+  Scenario: Verify that in case of pre-payed installments for total amount (loan balance is 0) LoanRepaymentDueBusinessEvent is not sent - LP2 advanced payment allocation product
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | PIN4_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 October 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 October 2023   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 October 2023" with "1000" amount and expected disbursement date on "01 October 2023"
     When Admin successfully disburse the loan on "01 October 2023" with "1000" EUR transaction amount
     When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 October 2023" with 750 EUR transaction amount and system-generated Idempotency key
@@ -3127,33 +3127,33 @@ Feature: LoanRepayment
     When Admin runs inline COB job for Loan
     Then No new event with type "LoanRepaymentDueEvent" has been raised for the loan
 
-  @TestRailId:C2961
+
   Scenario: Verify that outstanding amounts are rounded correctly in case of: installmentAmountInMultiplesOf=1, interestType: FLAT, amortizationType: EQUAL_INSTALLMENTS
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct         | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_INTEREST_FLAT | 01 September 2023 | 1250           | 15                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 4                 | MONTHS                | 1              | MONTHS                 | 4                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LP1_INTEREST_FLAT | 01 September 2023 | 1250           | 15                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 4                 | MONTHS                | 1              | MONTHS                 | 4                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "01 September 2023" with "1250" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1250" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 01 September 2023 |           | 1250.0          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
-      | 1  | 30   | 01 October 2023   |           | 936.62          | 313.38        | 15.62    | 0.0  | 0.0       | 329.0 | 0.0  | 0.0        | 0.0  | 329.0       |
-      | 2  | 31   | 01 November 2023  |           | 623.24          | 313.38        | 15.62    | 0.0  | 0.0       | 329.0 | 0.0  | 0.0        | 0.0  | 329.0       |
-      | 3  | 30   | 01 December 2023  |           | 309.86          | 313.38        | 15.62    | 0.0  | 0.0       | 329.0 | 0.0  | 0.0        | 0.0  | 329.0       |
-      | 4  | 31   | 01 January 2024   |           | 0.0             | 309.86        | 15.64    | 0.0  | 0.0       | 325.5 | 0.0  | 0.0        | 0.0  | 325.5       |
+      | 1  | 30   | 01 October 2023   |           | 937.62          | 312.38        | 15.62    | 0.0  | 0.0       | 328.0 | 0.0  | 0.0        | 0.0  | 328.0       |
+      | 2  | 31   | 01 November 2023  |           | 625.24          | 312.38        | 15.62    | 0.0  | 0.0       | 328.0 | 0.0  | 0.0        | 0.0  | 328.0       |
+      | 3  | 30   | 01 December 2023  |           | 312.86          | 312.38        | 15.62    | 0.0  | 0.0       | 328.0 | 0.0  | 0.0        | 0.0  | 328.0       |
+      | 4  | 31   | 01 January 2024   |           | 0.0             | 312.86        | 15.64    | 0.0  | 0.0       | 328.5 | 0.0  | 0.0        | 0.0  | 328.5       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
       | 1250.0        | 62.50    | 0.0  | 0.0       | 1312.50 | 0.0  | 0.0        | 0.0  | 1312.50     |
 
-  @TestRailId:C2962
+
   Scenario: Verify that outstanding amounts are rounded correctly in case of: installmentAmountInMultiplesOf=1, interestType: DECLINING_BALANCE, amortizationType: EQUAL_INSTALLMENTS
     When Admin sets the business date to "01 September 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                             | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | PIN30_INTEREST_DECLINING_BALANCE_PERIOD_SAME_AS_PAYMENT | 01 September 2023 | 1250           | 15                     | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 4                 | MONTHS                | 1              | MONTHS                 | 4                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
+      | LP1_INTEREST_DECLINING_BALANCE_PERIOD_SAME_AS_PAYMENT | 01 September 2023 | 1250           | 15                     | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 4                 | MONTHS                | 1              | MONTHS                 | 4                  | 0                       | 0                      | 0                    | DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST |
     And Admin successfully approves the loan on "01 September 2023" with "1250" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1250" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:

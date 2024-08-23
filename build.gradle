@@ -31,16 +31,22 @@ buildscript {
                 'fineract-accounting',
                 'fineract-provider',
                 'fineract-branch',
+                'fineract-document',
                 'fineract-investor',
+                'fineract-charge',
+                'fineract-rates',
+                'fineract-tax',
                 'fineract-loan',
                 'fineract-savings',
+                'fineract-report',
                 'integration-tests',
                 'twofactor-tests',
                 'oauth2-tests',
                 'fineract-client',
                 'fineract-avro-schemas',
                 'fineract-e2e-tests-core',
-                'fineract-e2e-tests-runner'
+                'fineract-e2e-tests-runner',
+                'fineract-progressive-loan'
             ].contains(it.name)
         }
         fineractPublishProjects = subprojects.findAll{
@@ -52,9 +58,15 @@ buildscript {
                 'fineract-accounting',
                 'fineract-provider',
                 'fineract-investor',
+                'fineract-charge',
+                'fineract-rates',
+                'fineract-tax',
                 'fineract-loan',
                 'fineract-savings',
-                'fineract-branch'
+                'fineract-report',
+                'fineract-branch',
+                'fineract-document',
+                'fineract-progressive-loan'
             ].contains(it.name)
         }
         npmRepository = 'https://npm.pkg.github.com'
@@ -69,7 +81,7 @@ buildscript {
         classpath 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
         classpath 'com.google.cloud.tools:jib-layer-filter-extension-gradle:0.3.0'
         classpath 'org.apache.commons:commons-lang3:3.14.0'
-        classpath 'io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.19'
+        classpath 'io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.22'
         classpath 'jakarta.servlet:jakarta.servlet-api:6.0.0'
     }
 }
@@ -83,17 +95,17 @@ plugins {
     id 'com.github.hierynomus.license' version '0.16.1' apply false
     id 'com.github.jk1.dependency-license-report' version '2.5' apply false
     id 'org.zeroturnaround.gradle.jrebel' version '1.2.0' apply false
-    id 'org.springframework.boot' version '3.2.2' apply false
+    id 'org.springframework.boot' version '3.2.6' apply false
     id 'net.ltgt.errorprone' version '3.1.0' apply false
     id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.19' apply false
     id 'com.gorylenko.gradle-git-properties' version '2.4.1' apply false
     id 'org.asciidoctor.jvm.convert' version '3.3.2' apply false
     id 'org.asciidoctor.jvm.pdf' version '3.3.2' apply false
     id 'org.asciidoctor.jvm.epub' version '3.3.2' apply false
-    id 'org.asciidoctor.jvm.revealjs' version '3.3.2' apply false
-    id 'org.asciidoctor.jvm.gems' version '3.3.2' apply false
+    //    id 'org.asciidoctor.jvm.revealjs' version '3.3.2' apply false
+    //    id 'org.asciidoctor.jvm.gems' version '3.3.2' apply false
     id 'org.asciidoctor.kindlegen.base' version '3.2.0' apply false
-    id 'com.google.cloud.tools.jib' version '3.4.0' apply false
+    id 'com.google.cloud.tools.jib' version '3.4.2' apply false
     id 'org.sonarqube' version '4.4.1.3373'
     id 'com.github.andygoossens.modernizer' version '1.9.0' apply false
     // TODO: upgrade to 6.0.4
@@ -700,10 +712,10 @@ configure(project.fineractCustomProjects) {
                 'com.google.truth.extensions:truth-java8-extension',
                 'io.github.classgraph:classgraph',
                 'io.cucumber:cucumber-core',
-                'io.cucumber:cucumber-java',
-                'io.cucumber:cucumber-java8',
-                'io.cucumber:cucumber-junit-platform-engine',
-                'io.cucumber:cucumber-spring',
+                'io.cucumber:cucumber-java:7.16.1',
+                'io.cucumber:cucumber-java8:7.16.1',
+                'io.cucumber:cucumber-junit-platform-engine:7.16.1',
+                'io.cucumber:cucumber-spring:7.16.1',
                 )
 
         testCompileOnly('org.projectlombok:lombok')

@@ -57,7 +57,7 @@ import org.springframework.security.core.userdetails.User;
 
 @Entity
 @Table(name = "m_appuser", uniqueConstraints = @UniqueConstraint(columnNames = { "username" }, name = "username_org"))
-public class AppUser extends AbstractPersistableCustom implements PlatformUser {
+public class AppUser extends AbstractPersistableCustom<Long> implements PlatformUser {
 
     @Column(name = "email", nullable = false, length = 100)
     private String email;

@@ -485,9 +485,9 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
                 + " and renum.enum_value in ('PAY_CHARGE', 'WAIVE_CHARGE') "
                 + " and (cli_txn.payment_detail_id IS NULL OR payType.is_cash_payment = true) ) " + " order by created_date ";
 
-        if (searchParameters.isLimited()) {
+        if (searchParameters.hasLimit()) {
             sql += " ";
-            if (searchParameters.isOffset()) {
+            if (searchParameters.hasOffset()) {
                 sql += sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset());
             } else {
                 sql += sqlGenerator.limit(searchParameters.getLimit());

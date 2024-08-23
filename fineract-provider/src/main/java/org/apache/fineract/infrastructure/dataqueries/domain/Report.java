@@ -43,7 +43,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 
 @Entity
 @Table(name = "stretchy_report", uniqueConstraints = { @UniqueConstraint(columnNames = { "report_name" }, name = "unq_report_name") })
-public final class Report extends AbstractPersistableCustom {
+public final class Report extends AbstractPersistableCustom<Long> {
 
     @Column(name = "report_name", nullable = false, unique = true)
     private String reportName;

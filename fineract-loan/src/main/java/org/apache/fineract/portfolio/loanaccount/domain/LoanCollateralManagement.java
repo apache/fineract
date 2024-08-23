@@ -30,7 +30,7 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanCollateralManagementDa
 
 @Entity
 @Table(name = "m_loan_collateral_management")
-public class LoanCollateralManagement extends AbstractPersistableCustom {
+public class LoanCollateralManagement extends AbstractPersistableCustom<Long> {
 
     @Column(name = "quantity", nullable = false, scale = 5, precision = 20)
     private BigDecimal quantity;

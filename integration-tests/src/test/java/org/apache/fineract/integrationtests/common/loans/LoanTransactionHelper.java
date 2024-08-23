@@ -601,6 +601,16 @@ public class LoanTransactionHelper extends IntegrationTest {
         return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "repayment"));
     }
 
+    public PostLoansLoanIdTransactionsResponse makeInterestPaymentWaiver(final Long loanId,
+            final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "interestPaymentWaiver"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeInterestPaymentWaiver(final String loanExternalId,
+            final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction1(loanExternalId, request, "interestPaymentWaiver"));
+    }
+
     public PostLoansLoanIdTransactionsResponse reAge(final Long loanId, final PostLoansLoanIdTransactionsRequest request) {
         return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "reAge"));
     }
@@ -1690,6 +1700,14 @@ public class LoanTransactionHelper extends IntegrationTest {
         return Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_TRANSACTION_URL, jsonReturn);
     }
 
+    public Long applyInterestRefundLoanTransaction(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Long loanId, final String jsonBody) {
+        final String POST_LOAN_TRANSACTION_URL = "/fineract-provider/api/v1/internal/loan/" + loanId + "/apply-interest-refund/" + "?"
+                + Utils.TENANT_IDENTIFIER;
+        final String reponse = Utils.performServerPost(requestSpec, responseSpec, POST_LOAN_TRANSACTION_URL, jsonBody);
+        return Long.valueOf(reponse);
+    }
+
     public void printRepaymentSchedule(GetLoansLoanIdResponse getLoansLoanIdResponse) {
         GetLoansLoanIdRepaymentSchedule getLoanRepaymentSchedule = getLoansLoanIdResponse.getRepaymentSchedule();
         if (getLoanRepaymentSchedule != null) {
@@ -2013,6 +2031,18 @@ public class LoanTransactionHelper extends IntegrationTest {
     public Object updateLoanProduct(final Long loanProductId, final String request) {
         final String UPDATE_LOAN_PRODUCT_URL = LOAN_PRODUCTS_URL + "/" + loanProductId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPut(requestSpec, responseSpec, UPDATE_LOAN_PRODUCT_URL, request, null);
+    }
+
+    public PostLoansLoanIdResponse undoApprovalForLoan(Long loanId, PostLoansLoanIdRequest request) {
+        return ok(fineract().loans.stateTransitions(loanId, request, "undoapproval"));
+    }
+
+    public PutLoansLoanIdResponse modifyApplicationForLoan(final Long loanId, final String command, final PutLoansLoanIdRequest request) {
+        return ok(fineract().loans.modifyLoanApplication(loanId, request, command));
+    }
+
+    public PostLoansResponse calculateRepaymentScheduleForApplyLoan(PostLoansRequest request, String command) {
+        return ok(fineract().loans.calculateLoanScheduleOrSubmitLoanApplication(request, command));
     }
 
 }

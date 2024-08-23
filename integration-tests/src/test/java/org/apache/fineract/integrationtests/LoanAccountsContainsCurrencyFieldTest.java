@@ -23,9 +23,6 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetClientsClientIdAccountsResponse;
@@ -65,15 +62,7 @@ public class LoanAccountsContainsCurrencyFieldTest {
 
     @Test
     public void testGetClientLoanAccountsUsingExternalIdContainsCurrency() {
-
-        // Get today's date
-        LocalDate today = LocalDate.now(ZoneId.systemDefault());
-
-        // Define a custom date formatter
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
-
-        // Format today's date using the custom formatter
-        String formattedDate = today.format(formatter);
+        String formattedDate = "01 September 2022";
 
         // given
         GlobalConfigurationHelper.manageConfigurations(requestSpec, responseSpec,

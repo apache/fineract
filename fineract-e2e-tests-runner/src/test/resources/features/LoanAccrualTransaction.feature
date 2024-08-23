@@ -1,7 +1,7 @@
 @LoanAccrualFeature
 Feature: LoanAccrualTransaction
 
-  @TestRailId:C2647
+
   Scenario: Verify that after COB job Accrual event is raised when loan has a fee-charge on disbursal date
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -16,7 +16,7 @@ Feature: LoanAccrualTransaction
       | Accrual          | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
     Then LoanAccrualTransactionCreatedBusinessEvent is raised on "01 January 2023"
 
-  @TestRailId:C2648
+
   Scenario: Verify that after COB job Accrual event is raised when loan has a fee-charge on disbursal date with partial repayment
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -32,7 +32,7 @@ Feature: LoanAccrualTransaction
       | Accrual          | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
     Then LoanAccrualTransactionCreatedBusinessEvent is raised on "01 January 2023"
 
-  @TestRailId:C2649
+
   Scenario: Verify that after COB job Accrual event is raised when loan has a fee-charge on disbursal date with full repayment and loan is closed
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -48,7 +48,7 @@ Feature: LoanAccrualTransaction
       | Accrual          | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
     Then LoanAccrualTransactionCreatedBusinessEvent is raised on "02 January 2023"
 
-  @TestRailId:C2650
+
   Scenario: Verify that after COB job Accrual event is raised when loan has a fee-charge added with chargeback
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -72,7 +72,7 @@ Feature: LoanAccrualTransaction
       | Accrual          | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
     Then LoanAccrualTransactionCreatedBusinessEvent is raised on "05 January 2023"
 
-  @TestRailId:C2651
+
   Scenario: Verify that after periodic accrual transaction job accrual event is raised when loan has a fee-charge added with waive charge and undo waive charge
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -100,7 +100,7 @@ Feature: LoanAccrualTransaction
       | Accrual          | 10.0   | 0.0       | 0.0      | 0.0 | 10.0       | 0.0          |
     Then LoanAccrualTransactionCreatedBusinessEvent is raised on "05 April 2023"
 
-  @TestRailId:C2652
+
   Scenario: Verify that after periodic accrual transaction job accrual event is raised when loan has a fee-charge added when loan is closed
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -117,13 +117,13 @@ Feature: LoanAccrualTransaction
       | Accrual          | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
     Then LoanAccrualTransactionCreatedBusinessEvent is raised on "02 January 2023"
 
-  @TestRailId:C2653
+
   Scenario: Verify that after disbursement and COB job Accrual event is raised when loan has a interest recalculation
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                           | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE | 01 January 2023   | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE | 01 January 2023   | 5000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "01 January 2023" with "5000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "5000" EUR transaction amount
     When Admin sets the business date to "02 January 2023"
@@ -133,13 +133,13 @@ Feature: LoanAccrualTransaction
       | Accrual          | 1.64   | 0.0       | 1.64     | 0.0  | 0.0       | 0.0          |
     Then LoanAccrualTransactionCreatedBusinessEvent is raised on "02 January 2023"
 
-  @TestRailId:C2654
+
   Scenario: Verify that after loan is closed accrual event is raised when loan has a interest recalculation
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                           | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE | 01 January 2023   | 1000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE | 01 January 2023   | 1000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "01 January 2023" with "1000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "1000" EUR transaction amount
     When Admin sets the business date to "02 January 2023"
@@ -150,7 +150,7 @@ Feature: LoanAccrualTransaction
       | Accrual          | 10.19  | 0.0       | 10.19    | 0.0  | 0.0       | 0.0          |
     Then LoanAccrualTransactionCreatedBusinessEvent is raised on "02 January 2023"
 
-  @TestRailId:C2683
+
   Scenario: Verify that the final accrual is created when the loan goes to overpaid state
     When Admin sets the business date to "1 July 2023"
     When Admin creates a client with random data
@@ -174,7 +174,7 @@ Feature: LoanAccrualTransaction
       | 06 July 2023     | Accrual          | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
       | 06 July 2023     | Repayment        | 5011.0 | 5000.0    | 0.0      | 10.0 | 0.0       | 0.0          |
 
-  @TestRailId:C2684
+
   Scenario: Verify that the accrual transaction correctly created in case a CBR is applied on the loan
     When Admin sets the business date to "1 July 2023"
     When Admin creates a client with random data
@@ -213,7 +213,7 @@ Feature: LoanAccrualTransaction
       | 06 July 2023     | Repayment             | 5011.0 | 5000.0    | 0.0      | 10.0 | 0.0       | 0.0          |
       | 06 July 2023     | Credit Balance Refund | 1.0    | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          |
 
-  @TestRailId:C2685
+
   Scenario: Verify that the accrual transaction correctly created (overpay, undo repayment, overpay)
     When Admin sets the business date to "1 July 2023"
     When Admin creates a client with random data
@@ -259,7 +259,7 @@ Feature: LoanAccrualTransaction
       | 06 July 2023     | Accrual          | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
       | 07 July 2023     | Repayment        | 4011.0 | 4010.0    | 0.0      | 0.0  | 0.0       | 0.0          |
 
-  @TestRailId:C2686
+
   Scenario: Verify that the accrual transaction correctly created (overpay, undo repayment, add charge, overpay)
     When Admin sets the business date to "1 July 2023"
     When Admin creates a client with random data
@@ -307,7 +307,7 @@ Feature: LoanAccrualTransaction
       | 07 July 2023     | Repayment        | 4061.0 | 4060.0    | 0.0      | 0.0  | 0.0       | 0.0          |
       | 07 July 2023     | Accrual          | 50.0   | 0.0       | 0.0      | 50.0 | 0.0       | 0.0          |
 
-  @TestRailId:C2707 @Skip
+   @Skip
   Scenario: Verify that the accrual transaction is not reversed when multi disbursement happens
     When Admin sets the business date to "26 April 2023"
     When Admin creates a client with random data
@@ -339,7 +339,7 @@ Feature: LoanAccrualTransaction
       | 27 April 2023    | Accrual          | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
       | 28 April 2023    | Disbursement     | 20.0   | 0.0       | 0.0      | 0.0  | 0.0       | 1050.0       |
 
-  @TestRailId:C2708 @Skip
+   @Skip
   Scenario: Verify that the accrual is correct when it is on the installment start date
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
@@ -366,7 +366,7 @@ Feature: LoanAccrualTransaction
       | 01 May 2023      | Accrual          | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
       | 08 May 2023      | Disbursement     | 20.0   | 0.0       | 0.0      | 0.0  | 0.0       | 1020.0       |
 
-  @TestRailId:C2709
+
   Scenario:Verify that the accrual transaction is created for disbursement fee
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
@@ -380,7 +380,7 @@ Feature: LoanAccrualTransaction
       | 01 May 2023      | Repayment (at time of disbursement) | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 1000.0       |
       | 01 May 2023      | Accrual                             | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
 
-  @TestRailId:C2710 @Specific
+   @Specific
   Scenario: Verify global config charge-accrual-date function: single installment loan, charge-accrual-date = submitted-date, multiple charges with different submitted date
     When Global config "charge-accrual-date" value set to "submitted-date"
     When Admin sets the business date to "01 February 2023"
@@ -409,7 +409,7 @@ Feature: LoanAccrualTransaction
       | 1000          | 0        | 20   | 0         | 1020 | 0    | 0          | 0    | 1020        |
     When Global config "charge-accrual-date" value set to "due-date"
 
-  @TestRailId:C2711
+
   Scenario: Verify global config charge-accrual-date function: single installment loan, charge-accrual-date = due-date, multiple charges with different submitted date
     When Global config "charge-accrual-date" value set to "due-date"
     When Admin sets the business date to "01 February 2023"
@@ -441,14 +441,14 @@ Feature: LoanAccrualTransaction
       | 1000          | 0        | 20   | 0         | 1020 | 0    | 0          | 0    | 1020        |
     When Global config "charge-accrual-date" value set to "due-date"
 
-  @TestRailId:C2712 @Specific
+   @Specific
   Scenario: Verify global config charge-accrual-date function: multiple installment loan, charge-accrual-date = submitted-date, multiple charges with different submitted date, due dates in same repayment period
     When Global config "charge-accrual-date" value set to "submitted-date"
     When Admin sets the business date to "01 February 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30       | 1 February 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1       | 1 February 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "01 February 2023" with "3000" amount and expected disbursement date on "1 February 2023"
     When Admin successfully disburse the loan on "01 February 2023" with "3000" EUR transaction amount
     When Admin adds "LOAN_SNOOZE_FEE" due date charge with "06 February 2023" due date and 10 EUR transaction amount
@@ -474,14 +474,14 @@ Feature: LoanAccrualTransaction
       | 3000          | 0        | 20   | 0         | 3020 | 0    | 0          | 0    | 3020        |
     When Global config "charge-accrual-date" value set to "due-date"
 
-  @TestRailId:C2713
+
   Scenario: Verify global config charge-accrual-date function: multiple installment loan, charge-accrual-date = due-date, multiple charges with different submitted date, due dates in same repayment period
     When Global config "charge-accrual-date" value set to "due-date"
     When Admin sets the business date to "01 February 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30       | 1 February 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1       | 1 February 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "01 February 2023" with "3000" amount and expected disbursement date on "1 February 2023"
     When Admin successfully disburse the loan on "01 February 2023" with "3000" EUR transaction amount
     When Admin adds "LOAN_SNOOZE_FEE" due date charge with "06 February 2023" due date and 10 EUR transaction amount
@@ -510,14 +510,14 @@ Feature: LoanAccrualTransaction
       | 3000          | 0        | 20   | 0         | 3020 | 0    | 0          | 0    | 3020        |
     When Global config "charge-accrual-date" value set to "due-date"
 
-  @TestRailId:C2714 @Specific
+   @Specific
   Scenario: Verify global config charge-accrual-date function: multiple installment loan, charge-accrual-date = submitted-date, multiple charges with different submitted date, due dates in different repayment periods
     When Global config "charge-accrual-date" value set to "submitted-date"
     When Admin sets the business date to "01 February 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30       | 1 February 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1       | 1 February 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "01 February 2023" with "3000" amount and expected disbursement date on "1 February 2023"
     When Admin successfully disburse the loan on "01 February 2023" with "3000" EUR transaction amount
     When Admin adds "LOAN_SNOOZE_FEE" due date charge with "06 February 2023" due date and 10 EUR transaction amount
@@ -544,14 +544,14 @@ Feature: LoanAccrualTransaction
       | 3000          | 0        | 20   | 0         | 3020 | 0    | 0          | 0    | 3020        |
     When Global config "charge-accrual-date" value set to "due-date"
 
-  @TestRailId:C2715
+
   Scenario: Verify global config charge-accrual-date function: multiple installment loan, charge-accrual-date = due-date, multiple charges with different submitted date, due dates in different repayment periods
     When Global config "charge-accrual-date" value set to "due-date"
     When Admin sets the business date to "01 February 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30       | 1 February 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1       | 1 February 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "01 February 2023" with "3000" amount and expected disbursement date on "1 February 2023"
     When Admin successfully disburse the loan on "01 February 2023" with "3000" EUR transaction amount
     When Admin adds "LOAN_SNOOZE_FEE" due date charge with "06 February 2023" due date and 10 EUR transaction amount
@@ -580,7 +580,7 @@ Feature: LoanAccrualTransaction
       | 3000          | 0        | 20   | 0         | 3020 | 0    | 0          | 0    | 3020        |
     When Global config "charge-accrual-date" value set to "due-date"
 
-  @TestRailId:C2716 @Specific
+   @Specific
   Scenario: Verify global config charge-accrual-date function: single installment loan, charge-accrual-date = submitted-date, multi disbursement
     When Global config "charge-accrual-date" value set to "submitted-date"
     When Admin sets the business date to "01 February 2023"
@@ -612,7 +612,7 @@ Feature: LoanAccrualTransaction
       | 1000          | 0        | 10   | 0         | 1010 | 0    | 0          | 0    | 1010        |
     When Global config "charge-accrual-date" value set to "due-date"
 
-  @TestRailId:C2717 @Specific
+   @Specific
   Scenario: Verify global config charge-accrual-date function: single installment loan, charge-accrual-date = submitted-date, repayment reversal
     When Global config "charge-accrual-date" value set to "submitted-date"
     When Admin sets the business date to "01 February 2023"
@@ -649,7 +649,7 @@ Feature: LoanAccrualTransaction
       | 1000          | 0        | 10   | 0         | 1010 | 0    | 0          | 0    | 1010        |
     When Global config "charge-accrual-date" value set to "due-date"
 
-  @TestRailId:C2718 @Specific
+   @Specific
   Scenario: Verify global config charge-accrual-date function: single installment loan, charge-accrual-date = submitted-date, waive charge, undo waive
     When Global config "charge-accrual-date" value set to "submitted-date"
     When Admin sets the business date to "01 February 2023"
@@ -686,14 +686,14 @@ Feature: LoanAccrualTransaction
       | 1000          | 0        | 10   | 0         | 1010 | 0    | 0          | 0    | 1010        |
     When Global config "charge-accrual-date" value set to "due-date"
 
-  @TestRailId:C2719 @Specific
+   @Specific
   Scenario: Verify global config charge-accrual-date function: multiple installment loan, charge-accrual-date = submitted-date, multi disbursement
     When Global config "charge-accrual-date" value set to "submitted-date"
     When Admin sets the business date to "01 February 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30       | 1 February 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1       | 1 February 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "01 February 2023" with "3000" amount and expected disbursement date on "1 February 2023"
     When Admin successfully disburse the loan on "01 February 2023" with "2000" EUR transaction amount
     When Admin adds "LOAN_SNOOZE_FEE" due date charge with "06 March 2023" due date and 10 EUR transaction amount
@@ -722,14 +722,14 @@ Feature: LoanAccrualTransaction
       | 3000          | 0        | 10   | 0         | 3010 | 0    | 0          | 0    | 3010        |
     When Global config "charge-accrual-date" value set to "due-date"
 
-  @TestRailId:C2720 @Specific
+   @Specific
   Scenario: Verify global config charge-accrual-date function: multiple installment loan, charge-accrual-date = submitted-date, repayment reversal
     When Global config "charge-accrual-date" value set to "submitted-date"
     When Admin sets the business date to "01 February 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30       | 1 February 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1       | 1 February 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "01 February 2023" with "3000" amount and expected disbursement date on "1 February 2023"
     When Admin successfully disburse the loan on "01 February 2023" with "3000" EUR transaction amount
     When Admin adds "LOAN_SNOOZE_FEE" due date charge with "06 March 2023" due date and 10 EUR transaction amount
@@ -763,14 +763,14 @@ Feature: LoanAccrualTransaction
       | 3000          | 0        | 10   | 0         | 3010 | 0    | 0          | 0    | 3010        |
     When Global config "charge-accrual-date" value set to "due-date"
 
-  @TestRailId:C2721 @Specific
+   @Specific
   Scenario: Verify global config charge-accrual-date function: multiple installment loan, charge-accrual-date = submitted-date, waive charge, undo waive
     When Global config "charge-accrual-date" value set to "submitted-date"
     When Admin sets the business date to "01 February 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30       | 1 February 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1       | 1 February 2023   | 3000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "01 February 2023" with "3000" amount and expected disbursement date on "1 February 2023"
     When Admin successfully disburse the loan on "01 February 2023" with "3000" EUR transaction amount
     When Admin adds "LOAN_SNOOZE_FEE" due date charge with "06 March 2023" due date and 10 EUR transaction amount
@@ -805,14 +805,14 @@ Feature: LoanAccrualTransaction
     When Global config "charge-accrual-date" value set to "due-date"
 
 
-  @TestRailId:C2789 @Specific
+   @Specific
   Scenario: Verify accrual transaction for new fee for loan with accrued snooze fee and schedule adjustment
     When Global config "charge-accrual-date" value set to "submitted-date"
     When Admin sets the business date to "19 May 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | PIN30       | 19 May 2023       | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 30                | DAYS                  | 30             | DAYS                   | 1                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+      | LP1       | 19 May 2023       | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 30                | DAYS                  | 30             | DAYS                   | 1                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
     And Admin successfully approves the loan on "19 May 2023" with "1000" amount and expected disbursement date on "19 May 2023"
     When Admin successfully disburse the loan on "19 May 2023" with "1000" EUR transaction amount
     When Admin sets the business date to "12 June 2023"

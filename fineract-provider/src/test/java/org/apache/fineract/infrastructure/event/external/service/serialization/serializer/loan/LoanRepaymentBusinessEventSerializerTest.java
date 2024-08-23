@@ -117,7 +117,7 @@ public class LoanRepaymentBusinessEventSerializerTest {
         when(loanForProcessing.getId()).thenReturn(1L);
         when(loanForProcessing.getAccountNumber()).thenReturn("0001");
         when(loanForProcessing.getExternalId()).thenReturn(ExternalIdFactory.produce("externalId"));
-        when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
+        when(loanForProcessing.getSummary()).thenReturn(loanSummary);
         when(loanSummary.getTotalOutstanding()).thenReturn(BigDecimal.valueOf(0.0));
         when(loanForProcessing.getCurrency()).thenReturn(loanCurrency);
         when(loanCurrency.getCode()).thenReturn("CODE");
@@ -168,7 +168,7 @@ public class LoanRepaymentBusinessEventSerializerTest {
         when(loanForProcessing.getId()).thenReturn(null);
         when(loanForProcessing.getAccountNumber()).thenReturn("0001");
         when(loanForProcessing.getExternalId()).thenReturn(ExternalIdFactory.produce("externalId"));
-        when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
+        when(loanForProcessing.getSummary()).thenReturn(loanSummary);
         when(loanSummary.getTotalOutstanding()).thenReturn(BigDecimal.valueOf(0.0));
         when(loanForProcessing.getCurrency()).thenReturn(loanCurrency);
         when(loanCurrency.getCode()).thenReturn("CODE");

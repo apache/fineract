@@ -27,9 +27,16 @@ dependencies {
     implementation(project(path: ':fineract-core'))
     implementation(project(path: ':fineract-accounting'))
     implementation(project(path: ':fineract-investor'))
+    implementation(project(path: ':fineract-rates'))
+    implementation(project(path: ':fineract-charge'))
     implementation(project(path: ':fineract-loan'))
     implementation(project(path: ':fineract-savings'))
     implementation(project(path: ':fineract-branch'))
+    implementation(project(path: ':fineract-document'))
+    implementation(project(path: ':fineract-progressive-loan'))
+    implementation(project(path: ':fineract-report'))
+    implementation(project(path: ':fineract-tax'))
+
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 
     // Never use "compile" scope, but make all dependencies either 'implementation', 'runtimeOnly' or 'testCompile'.
@@ -108,11 +115,9 @@ dependencies {
             'io.github.resilience4j:resilience4j-spring-boot3',
             )
 
-    implementation ('software.amazon.msk:aws-msk-iam-auth:2.0.3') {
-        exclude group: 'commons-logging'
-    }
+    implementation 'software.amazon.msk:aws-msk-iam-auth'
 
-    implementation 'io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.19'
+    implementation 'io.swagger.core.v3:swagger-jaxrs2-jakarta'
 
     implementation ('org.apache.commons:commons-email') {
         exclude group: 'com.sun.mail', module: 'javax.mail'

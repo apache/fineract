@@ -63,6 +63,9 @@ public enum LoanTransactionType {
     DOWN_PAYMENT(28, "loanTransactionType.downPayment"), //
     REAGE(29, "loanTransactionType.reAge"), //
     REAMORTIZE(30, "loanTransactionType.reAmortize"), //
+    INTEREST_PAYMENT_WAIVER(31, "loanTransactionType.interestPaymentWaiver"), //
+    ACCRUAL_ACTIVITY(32, "loanTransactionType.accrualActivity"), //
+    INTEREST_REFUND(33, "loanTransactionType.interestRefund"), //
     ;
 
     private final Integer value;
@@ -109,6 +112,9 @@ public enum LoanTransactionType {
             case 28 -> LoanTransactionType.DOWN_PAYMENT;
             case 29 -> LoanTransactionType.REAGE;
             case 30 -> LoanTransactionType.REAMORTIZE;
+            case 31 -> LoanTransactionType.INTEREST_PAYMENT_WAIVER;
+            case 32 -> LoanTransactionType.ACCRUAL_ACTIVITY;
+            case 33 -> LoanTransactionType.INTEREST_REFUND;
             default -> LoanTransactionType.INVALID;
         };
     }
@@ -133,6 +139,10 @@ public enum LoanTransactionType {
         return this.equals(LoanTransactionType.REPAYMENT);
     }
 
+    public boolean isInterestPaymentWaiver() {
+        return this.equals(LoanTransactionType.INTEREST_PAYMENT_WAIVER);
+    }
+
     public boolean isMerchantIssuedRefund() {
         return this.equals(LoanTransactionType.MERCHANT_ISSUED_REFUND);
     }
@@ -150,7 +160,8 @@ public enum LoanTransactionType {
     }
 
     public boolean isRepaymentType() {
-        return (isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit() || isChargeRefund() || isDownPayment());
+        return (isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit() || isChargeRefund() || isDownPayment()
+                || isInterestPaymentWaiver());
     }
 
     public boolean isRecoveryRepayment() {
@@ -208,4 +219,13 @@ public enum LoanTransactionType {
     public boolean isDownPayment() {
         return this.equals(LoanTransactionType.DOWN_PAYMENT);
     }
+
+    public boolean isAccrualActivity() {
+        return this.equals(LoanTransactionType.ACCRUAL_ACTIVITY);
+    }
+
+    public boolean isInterestRefund() {
+        return this.equals(LoanTransactionType.INTEREST_REFUND);
+    }
+
 }

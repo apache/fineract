@@ -1,7 +1,7 @@
 @InlineCOBFeature
 Feature: InlineCOBFeature
 
-  @TestRailId:C2457
+
   Scenario: As an admin I would like to see that inline COB Happy Path scenario is working properly
     When Admin sets the business date to "1 January 2022"
     When Admin creates a client with random data
@@ -12,7 +12,7 @@ Feature: InlineCOBFeature
     When Admin runs inline COB job for Loan
     Then Admin checks that delinquency range is: "RANGE_3" and has delinquentDate "2022-02-03"
 
-  @TestRailId:C2473
+
   Scenario: As an admin I would like to see that loan was catching up with inline COB
     When Admin sets the business date to "1 January 2022"
     When Admin creates a client with random data
@@ -27,7 +27,7 @@ Feature: InlineCOBFeature
     When Admin runs inline COB job for Loan
     Then Admin checks that last closed business date of loan is "04 January 2022"
 
-  @TestRailId:C2554
+
   Scenario: As an admin I would like to see that loan was catching up with inline COB on a repayment
     When Admin sets the business date to "1 January 2022"
     When Admin creates a client with random data
@@ -44,7 +44,7 @@ Feature: InlineCOBFeature
     And Created user makes "AUTOPAY" repayment on "5 January 2022" with 100 EUR transaction amount
     Then Admin checks that last closed business date of loan is "04 January 2022"
 
-  @TestRailId:C2602
+
   Scenario: Verify that LoanCOBApiFilter works fine in the background and loanId controlled transaction does not trigger inlineCOB if COB had not been applied on loan before
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -67,7 +67,7 @@ Feature: InlineCOBFeature
       | RANGE_1                | 06 January 2023 | 07 January 2023 |
     Then Admin checks that last closed business date of loan is "null"
 
-  @TestRailId:C2603
+
   Scenario: Verify that LoanCOBApiFilter works fine in the background and externalId controlled transaction does not trigger inlineCOB if COB had not been applied on loan before
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -90,7 +90,7 @@ Feature: InlineCOBFeature
       | RANGE_1                | 06 January 2023 | 07 January 2023 |
     Then Admin checks that last closed business date of loan is "null"
 
-  @TestRailId:C2604
+
   Scenario: Verify that LoanCOBApiFilter works fine in the background and loanId controlled transaction triggers inlineCOB if COB had been applied on loan before
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -116,7 +116,7 @@ Feature: InlineCOBFeature
       | RANGE_1                | 06 January 2023 | 07 January 2023 |
     Then Admin checks that last closed business date of loan is "06 January 2023"
 
-  @TestRailId:C2605
+
   Scenario: Verify that LoanCOBApiFilter works fine in the background and externalId controlled transaction triggers inlineCOB if COB had been applied on loan before
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data

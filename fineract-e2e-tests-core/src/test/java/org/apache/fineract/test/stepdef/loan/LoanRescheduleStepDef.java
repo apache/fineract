@@ -62,10 +62,10 @@ public class LoanRescheduleStepDef extends AbstractStepDef {
         String rescheduleFromDate = rescheduleData.get(0);
         String submittedOnDate = rescheduleData.get(1);
         String adjustedDueDate = rescheduleData.get(2);
-        Integer graceOfPrincipal = Integer.parseInt(rescheduleData.get(3)) == 0 ? null : Integer.valueOf(rescheduleData.get(3));
-        Integer graceOnInterest = Integer.parseInt(rescheduleData.get(4)) == 0 ? null : Integer.valueOf(rescheduleData.get(4));
-        Integer extraTerms = Integer.parseInt(rescheduleData.get(5)) == 0 ? null : Integer.valueOf(rescheduleData.get(5));
-        BigDecimal newInterestRate = new BigDecimal(rescheduleData.get(6));
+        Integer graceOfPrincipal = rescheduleData.get(3) != null ? Integer.parseInt(rescheduleData.get(3)) : null;
+        Integer graceOnInterest = rescheduleData.get(4) != null ? Integer.parseInt(rescheduleData.get(4)) : null;
+        Integer extraTerms = rescheduleData.get(5) != null ? Integer.parseInt(rescheduleData.get(5)) : null;
+        BigDecimal newInterestRate = rescheduleData.get(6) != null ? new BigDecimal(rescheduleData.get(6)) : null;
 
         PostCreateRescheduleLoansRequest request = new PostCreateRescheduleLoansRequest()//
                 .loanId(loanId)//
@@ -105,10 +105,10 @@ public class LoanRescheduleStepDef extends AbstractStepDef {
         String rescheduleFromDate = rescheduleData.get(0);
         String submittedOnDate = rescheduleData.get(1);
         String adjustedDueDate = rescheduleData.get(2);
-        Integer graceOfPrincipal = Integer.parseInt(rescheduleData.get(3)) == 0 ? null : Integer.valueOf(rescheduleData.get(3));
-        Integer graceOnInterest = Integer.parseInt(rescheduleData.get(4)) == 0 ? null : Integer.valueOf(rescheduleData.get(4));
-        Integer extraTerms = Integer.parseInt(rescheduleData.get(5)) == 0 ? null : Integer.valueOf(rescheduleData.get(5));
-        BigDecimal newInterestRate = new BigDecimal(rescheduleData.get(6));
+        Integer graceOfPrincipal = rescheduleData.get(3) != null ? Integer.parseInt(rescheduleData.get(3)) : null;
+        Integer graceOnInterest = rescheduleData.get(4) != null ? Integer.parseInt(rescheduleData.get(4)) : null;
+        Integer extraTerms = rescheduleData.get(5) != null ? Integer.parseInt(rescheduleData.get(5)) : null;
+        BigDecimal newInterestRate = rescheduleData.get(6) != null ? new BigDecimal(rescheduleData.get(6)) : null;
 
         PostCreateRescheduleLoansRequest request = new PostCreateRescheduleLoansRequest()//
                 .loanId(loanId)//

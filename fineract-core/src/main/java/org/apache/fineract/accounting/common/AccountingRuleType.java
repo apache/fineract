@@ -20,16 +20,21 @@ package org.apache.fineract.accounting.common;
 
 import java.util.HashMap;
 import java.util.Map;
+import lombok.Getter;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 
+@Getter
 public enum AccountingRuleType {
 
-    NONE(1, "accountingRuleType.none"), //
-    CASH_BASED(2, "accountingRuleType.cash"), //
-    ACCRUAL_PERIODIC(3, "accountingRuleType.accrual.periodic"), //
-    ACCRUAL_UPFRONT(4, "accountingRuleType.accrual.upfront"); //
+    NONE(1, "accountingRuleType.none", "No accounting"), //
+    CASH_BASED(2, "accountingRuleType.cash", "Cash based accounting"), //
+    ACCRUAL_PERIODIC(3, "accountingRuleType.accrual.periodic", "Periodic accrual accounting"), //
+    ACCRUAL_UPFRONT(4, "accountingRuleType.accrual.upfront", "Upfront accrual accounting"); //
 
     private final Integer value;
     private final String code;
+    private final String description;
 
     private static final Map<Integer, AccountingRuleType> intToEnumMap = new HashMap<>();
 
@@ -44,21 +49,22 @@ public enum AccountingRuleType {
         return type;
     }
 
-    AccountingRuleType(final Integer value, final String code) {
+    AccountingRuleType(final Integer value, final String code, final String description) {
         this.value = value;
         this.code = code;
+        this.description = description;
     }
 
     @Override
     public String toString() {
-        return name().toString().replaceAll("_", " ");
+        return name().replaceAll("_", " ");
     }
 
-    public Integer getValue() {
-        return this.value;
+    public EnumOptionData toEnumOptionData() {
+        return new EnumOptionData((long) getValue(), getCode(), getDescription());
     }
 
-    public String getCode() {
-        return this.code;
+    public StringEnumOptionData toStringEnumOptionData() {
+        return new StringEnumOptionData(name(), getCode(), getDescription());
     }
 }

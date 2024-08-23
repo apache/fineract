@@ -22,9 +22,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.domain.FineractContext;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.BusinessEventListener;
 import org.apache.fineract.infrastructure.event.business.domain.BulkBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
@@ -33,12 +38,16 @@ import org.apache.fineract.infrastructure.event.external.repository.ExternalEven
 import org.apache.fineract.infrastructure.event.external.service.ExternalEventService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionExecution;
+import org.springframework.transaction.TransactionExecutionListener;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @SuppressWarnings({ "unchecked", "rawtypes" })
 @RequiredArgsConstructor
 @Slf4j
-public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierService, InitializingBean {
+public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierService, InitializingBean, TransactionExecutionListener {
 
     private final Map<Class, List<BusinessEventListener>> preListeners = new HashMap<>();
     private final Map<Class, List<BusinessEventListener>> postListeners = new HashMap<>();
@@ -49,6 +58,8 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
     private final ExternalEventService externalEventService;
     private final ExternalEventConfigurationRepository eventConfigurationRepository;
     private final FineractProperties fineractProperties;
+    private final ThreadLocal<Stack<List<BusinessEventWithContext>>> transactionBusinessEvents = ThreadLocal.withInitial(Stack::new);
+    private final TransactionHelper transactionHelper;
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -79,6 +90,7 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
     }
 
     @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
     public void notifyPostBusinessEvent(BusinessEvent<?> businessEvent) {
         throwExceptionIfBulkEvent(businessEvent);
         boolean isExternalEvent = !(businessEvent instanceof NoExternalEvent);
@@ -92,7 +104,11 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
                 if (isExternalEventRecordingEnabled()) {
                     recordedEvents.get().add(businessEvent);
                 } else {
-                    externalEventService.postEvent(businessEvent);
+                    if (transactionHelper.hasTransaction()) {
+                        storeTransactionalBusinessEvent(businessEvent);
+                    } else {
+                        externalEventService.postEvent(businessEvent);
+                    }
                 }
             }
         }
@@ -169,5 +185,59 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
     public void resetEventRecording() {
         eventRecordingEnabled.set(false);
         recordedEvents.remove();
+    }
+
+    private void storeTransactionalBusinessEvent(BusinessEvent<?> businessEvent) {
+        List<BusinessEventWithContext> businessEvents = transactionBusinessEvents.get().peek();
+        FineractContext fineractContext = ThreadLocalContextUtil.getContext();
+        businessEvents.add(new BusinessEventWithContext(businessEvent, fineractContext));
+    }
+
+    private void cleanup() {
+        transactionBusinessEvents.get().pop();
+    }
+
+    @Override
+    public void afterBegin(TransactionExecution transaction, Throwable beginFailure) {
+        transactionBusinessEvents.get().push(new ArrayList<>());
+    }
+
+    @Override
+    public void beforeCommit(TransactionExecution transaction) {
+        List<BusinessEventWithContext> businessEventWithContexts = transactionBusinessEvents.get().peek();
+        if (!businessEventWithContexts.isEmpty()) {
+            FineractContext originalContext = ThreadLocalContextUtil.getContext();
+            try {
+                for (BusinessEventWithContext businessEventWithContext : businessEventWithContexts) {
+                    ThreadLocalContextUtil.init(businessEventWithContext.getFineractContext());
+                    externalEventService.postEvent(businessEventWithContext.getEvent());
+                }
+            } finally {
+                ThreadLocalContextUtil.init(originalContext);
+            }
+        }
+    }
+
+    @Override
+    public void afterCommit(TransactionExecution transaction, Throwable commitFailure) {
+        cleanup();
+    }
+
+    @Override
+    public void afterRollback(TransactionExecution transaction, Throwable rollbackFailure) {
+        cleanup();
+    }
+
+    @Getter
+    @Setter
+    private static final class BusinessEventWithContext {
+
+        private BusinessEvent<?> event;
+        private FineractContext fineractContext;
+
+        BusinessEventWithContext(BusinessEvent<?> event, FineractContext fineractContext) {
+            this.event = event;
+            this.fineractContext = fineractContext;
+        }
     }
 }

@@ -24,7 +24,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "stretchy_parameter")
-public class ReportParameter extends AbstractPersistableCustom {
+public class ReportParameter extends AbstractPersistableCustom<Long> {
 
     protected ReportParameter() {
         //

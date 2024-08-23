@@ -28,7 +28,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "m_client_transfer_details")
-public class ClientTransferDetails extends AbstractPersistableCustom {
+public class ClientTransferDetails extends AbstractPersistableCustom<Long> {
 
     @Column(name = "client_id", length = 20, unique = true, nullable = false)
     private Long clientId;

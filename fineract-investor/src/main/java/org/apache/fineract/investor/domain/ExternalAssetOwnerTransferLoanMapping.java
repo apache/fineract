@@ -33,7 +33,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDa
 @Table(name = "m_external_asset_owner_transfer_loan_mapping")
 @NoArgsConstructor
 @Entity
-public class ExternalAssetOwnerTransferLoanMapping extends AbstractAuditableWithUTCDateTimeCustom {
+public class ExternalAssetOwnerTransferLoanMapping extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @Column(name = "loan_id", nullable = false)
     private Long loanId;

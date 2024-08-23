@@ -31,7 +31,7 @@ public class LoanReloadService implements ReloadService<Loan> {
     private final LoanAssembler loanAssembler;
 
     @Override
-    public <S extends AbstractPersistableCustom> boolean canReload(S input) {
+    public <S extends AbstractPersistableCustom<Long>> boolean canReload(S input) {
         return input instanceof Loan;
     }
 

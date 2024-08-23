@@ -25,11 +25,15 @@ dependencies {
             project(path: ':fineract-core', configuration: 'runtimeElements'),
             project(path: ':fineract-accounting', configuration: 'runtimeElements'),
             project(path: ':fineract-investor', configuration: 'runtimeElements'),
+            project(path: ':fineract-charge', configuration: 'runtimeElements'),
+            project(path: ':fineract-rates', configuration: 'runtimeElements'),
+            project(path: ':fineract-tax', configuration: 'runtimeElements'),
             project(path: ':fineract-loan', configuration: 'runtimeElements'),
             project(path: ':fineract-savings', configuration: 'runtimeElements'),
             project(path: ':fineract-provider', configuration: 'runtimeElements'),
             project(path: ':fineract-avro-schemas', configuration: 'runtimeElements'),
             project(path: ':fineract-client', configuration: 'runtimeElements'),
+            project(path: ':fineract-progressive-loan', configuration: 'runtimeElements'),
             'com.intuit.karate:karate-junit5',
             // 'com.google.code.gson:gson',
             )
@@ -54,5 +58,5 @@ dependencies {
     testImplementation 'org.mapstruct:mapstruct'
     testAnnotationProcessor 'org.mapstruct:mapstruct-processor'
 
-    testImplementation 'com.github.tomakehurst:wiremock-standalone:3.0.1'
+    testImplementation 'com.github.tomakehurst:wiremock-standalone'
 }

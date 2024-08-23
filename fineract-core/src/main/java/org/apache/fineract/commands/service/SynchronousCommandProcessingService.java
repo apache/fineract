@@ -134,7 +134,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             commandSource.setResultStatusCode(statusCode);
             commandSource.setResult(errorInfo.getMessage());
             if (statusCode != SC_OK) {
-                commandSource.setStatus(ERROR);
+                commandSource.setStatus(ERROR.getValue());
             }
             if (!isEnclosingTransaction) { // TODO: temporary solution
                 commandSource = commandSourceService.saveResultNewTransaction(commandSource);
@@ -148,7 +148,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         commandSource.setResultStatusCode(SC_OK);
         commandSource.updateForAudit(result);
         commandSource.setResult(toApiJsonSerializer.serializeResult(result));
-        commandSource.setStatus(PROCESSED);
+        commandSource.setStatus(PROCESSED.getValue());
         commandSource = commandSourceService.saveResultSameTransaction(commandSource);
         storeCommandIdInContext(commandSource); // Store command id as a request attribute
 

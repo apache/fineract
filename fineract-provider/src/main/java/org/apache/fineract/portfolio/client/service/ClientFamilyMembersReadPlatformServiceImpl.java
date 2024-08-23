@@ -83,10 +83,10 @@ public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyM
             final String profession = rs.getString("profession");
             final long professionId = rs.getLong("professionId");
 
-            return ClientFamilyMembersData.instance(id, clientId, firstName, middleName, lastName, qualification, mobileNumber, age,
-                    isDependent, relationship, relationshipId, maritalStatus, maritalStatusId, gender, genderId, dateOfBirth, profession,
-                    professionId);
-
+            return ClientFamilyMembersData.builder().id(id).clientId(clientId).firstName(firstName).middleName(middleName)
+                    .lastName(lastName).qualification(qualification).mobileNumber(mobileNumber).age(age).isDependent(isDependent)
+                    .relationship(relationship).relationshipId(relationshipId).maritalStatus(maritalStatus).maritalStatusId(maritalStatusId)
+                    .gender(gender).genderId(genderId).dateOfBirth(dateOfBirth).profession(profession).professionId(professionId).build();
         }
     }
 
@@ -126,7 +126,8 @@ public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyM
         final List<CodeValueData> professionOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode("PROFESSION"));
 
-        return ClientFamilyMembersData.templateInstance(relationshipOptions, genderOptions, maritalStatusOptions, professionOptions);
+        return ClientFamilyMembersData.builder().relationshipIdOptions(relationshipOptions).genderIdOptions(genderOptions)
+                .maritalStatusIdOptions(maritalStatusOptions).professionIdOptions(professionOptions).build();
     }
 
 }

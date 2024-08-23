@@ -24,6 +24,11 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -32,8 +37,13 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "m_portfolio_command_source")
-public class CommandSource extends AbstractPersistableCustom {
+public class CommandSource extends AbstractPersistableCustom<Long> {
 
     @Column(name = "action_name", nullable = true, length = 100)
     private String actionName;
@@ -123,193 +133,34 @@ public class CommandSource extends AbstractPersistableCustom {
     @Column(name = "result_status_code")
     private Integer resultStatusCode;
 
-    private CommandSource(final String actionName, final String entityName, final String href, final Long resourceId,
-            final Long subResourceId, final String commandSerializedAsJson, final AppUser maker, final String idempotencyKey,
-            final Integer status) {
-        this.actionName = actionName;
-        this.entityName = entityName;
-        this.resourceGetUrl = href;
-        this.resourceId = resourceId;
-        this.subResourceId = subResourceId;
-        this.commandAsJson = commandSerializedAsJson;
-        this.maker = maker;
-        this.madeOnDate = DateUtils.getAuditOffsetDateTime();
-        this.status = status;
-        this.idempotencyKey = idempotencyKey;
-    }
-
     public static CommandSource fullEntryFrom(final CommandWrapper wrapper, final JsonCommand command, final AppUser maker,
             String idempotencyKey, Integer status) {
-        CommandSource commandSource = new CommandSource(wrapper.actionName(), wrapper.entityName(), wrapper.getHref(), command.entityId(),
-                command.subentityId(), command.json(), maker, idempotencyKey, status);
-        commandSource.officeId = wrapper.getOfficeId();
-        commandSource.groupId = command.getGroupId();
-        commandSource.clientId = command.getClientId();
-        commandSource.loanId = command.getLoanId();
-        commandSource.savingsId = command.getSavingsId();
-        commandSource.productId = command.getProductId();
-        commandSource.transactionId = command.getTransactionId();
-        commandSource.creditBureauId = command.getCreditBureauId();
-        commandSource.organisationCreditBureauId = command.getOrganisationCreditBureauId();
-        return commandSource;
-    }
 
-    protected CommandSource() {
-        //
-    }
-
-    public Long getCreditBureauId() {
-        return this.creditBureauId;
-    }
-
-    public void setCreditBureauId(Long creditBureauId) {
-        this.creditBureauId = creditBureauId;
-    }
-
-    public Long getOrganisationCreditBureauId() {
-        return this.organisationCreditBureauId;
-    }
-
-    public void setOrganisationCreditBureauId(Long organisationCreditBureauId) {
-        this.organisationCreditBureauId = organisationCreditBureauId;
-    }
-
-    public String getJobName() {
-        return this.jobName;
-    }
-
-    public Long getResourceId() {
-        return this.resourceId;
-    }
-
-    public void setResourceId(final Long resourceId) {
-        this.resourceId = resourceId;
-    }
-
-    public Long getSubResourceId() {
-        return this.subResourceId;
-    }
-
-    public void setSubResourceId(final Long subResourceId) {
-        this.subResourceId = subResourceId;
-    }
-
-    public String getCommandJson() {
-        return this.commandAsJson;
-    }
-
-    public void setCommandJson(final String json) {
-        this.commandAsJson = json;
-    }
-
-    public AppUser getMaker() {
-        return maker;
-    }
-
-    public AppUser getChecker() {
-        return checker;
-    }
-
-    public String getActionName() {
-        return this.actionName;
-    }
-
-    public String getEntityName() {
-        return this.entityName;
+        return CommandSource.builder() //
+                .actionName(wrapper.actionName()) //
+                .entityName(wrapper.entityName()) //
+                .resourceGetUrl(wrapper.getHref()) //
+                .resourceId(command.entityId()) //
+                .subResourceId(command.subentityId()) //
+                .commandAsJson(command.json()) //
+                .maker(maker) //
+                .madeOnDate(DateUtils.getAuditOffsetDateTime()) //
+                .status(status) //
+                .idempotencyKey(idempotencyKey) //
+                .officeId(wrapper.getOfficeId()) //
+                .groupId(command.getGroupId()) //
+                .clientId(command.getClientId()) //
+                .loanId(command.getLoanId()) //
+                .savingsId(command.getSavingsId()) //
+                .productId(command.getProductId()) //
+                .transactionId(command.getTransactionId()) //
+                .creditBureauId(command.getCreditBureauId()) //
+                .organisationCreditBureauId(command.getOrganisationCreditBureauId()) //
+                .build(); //
     }
 
     public String getPermissionCode() {
         return this.actionName + "_" + this.entityName;
-    }
-
-    public String getResourceGetUrl() {
-        return this.resourceGetUrl;
-    }
-
-    public Long getProductId() {
-        return this.productId;
-    }
-
-    /**
-     * @return the clientId
-     */
-    public Long getClientId() {
-        return clientId;
-    }
-
-    /**
-     * @return the groupId
-     */
-    public Long getGroupId() {
-        return groupId;
-    }
-
-    /**
-     * @return the loanId
-     */
-    public Long getLoanId() {
-        return loanId;
-    }
-
-    /**
-     * @return the officeId
-     */
-    public Long getOfficeId() {
-        return officeId;
-    }
-
-    /**
-     * @return the savingsId
-     */
-    public Long getSavingsId() {
-        return savingsId;
-    }
-
-    /**
-     * @return the transactionId
-     */
-    public String getTransactionId() {
-        return this.transactionId;
-    }
-
-    public void setTransactionId(final String transactionId) {
-        this.transactionId = transactionId;
-    }
-
-    public String getIdempotencyKey() {
-        return idempotencyKey;
-    }
-
-    public void setIdempotencyKey(String idempotencyKey) {
-        this.idempotencyKey = idempotencyKey;
-    }
-
-    public String getResult() {
-        return result;
-    }
-
-    public void setResult(String result) {
-        this.result = result;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public void setStatus(CommandProcessingResultType status) {
-        setStatus(status == null ? null : status.getValue());
-    }
-
-    public Integer getResultStatusCode() {
-        return resultStatusCode;
-    }
-
-    public void setResultStatusCode(Integer resultStatusCode) {
-        this.resultStatusCode = resultStatusCode;
     }
 
     public void markAsAwaitingApproval() {

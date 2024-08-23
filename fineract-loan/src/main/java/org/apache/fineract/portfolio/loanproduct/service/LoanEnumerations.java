@@ -303,6 +303,8 @@ public final class LoanEnumerations {
                     LoanTransactionType.PAYOUT_REFUND.getCode(), "Payout Refund");
             case GOODWILL_CREDIT -> new LoanTransactionEnumData(LoanTransactionType.GOODWILL_CREDIT.getValue().longValue(),
                     LoanTransactionType.GOODWILL_CREDIT.getCode(), "Goodwill Credit");
+            case INTEREST_PAYMENT_WAIVER -> new LoanTransactionEnumData(LoanTransactionType.INTEREST_PAYMENT_WAIVER.getValue().longValue(),
+                    LoanTransactionType.INTEREST_PAYMENT_WAIVER.getCode(), "Interest Payment Waiver");
             case CHARGE_REFUND -> new LoanTransactionEnumData(LoanTransactionType.CHARGE_REFUND.getValue().longValue(),
                     LoanTransactionType.CHARGE_REFUND.getCode(), "Charge Refund");
             case CHARGEBACK -> new LoanTransactionEnumData(LoanTransactionType.CHARGEBACK.getValue().longValue(),
@@ -317,6 +319,10 @@ public final class LoanEnumerations {
                     "Re-age");
             case REAMORTIZE -> new LoanTransactionEnumData(LoanTransactionType.REAMORTIZE.getValue().longValue(),
                     LoanTransactionType.REAMORTIZE.getCode(), "Re-amortize");
+            case ACCRUAL_ACTIVITY -> new LoanTransactionEnumData(LoanTransactionType.ACCRUAL_ACTIVITY.getValue().longValue(),
+                    LoanTransactionType.ACCRUAL_ACTIVITY.getCode(), "Accrual Activity");
+            case INTEREST_REFUND -> new LoanTransactionEnumData(LoanTransactionType.INTEREST_REFUND.getValue().longValue(),
+                    LoanTransactionType.INTEREST_REFUND.getCode(), "Interest Refund");
         };
     }
 
@@ -486,6 +492,9 @@ public final class LoanEnumerations {
             case RESCHEDULE_NEXT_REPAYMENTS ->
                 new EnumOptionData(LoanRescheduleStrategyMethod.RESCHEDULE_NEXT_REPAYMENTS.getValue().longValue(),
                         LoanRescheduleStrategyMethod.RESCHEDULE_NEXT_REPAYMENTS.getCode(), "Reschedule next repayments");
+            case ADJUST_LAST_UNPAID_PERIOD ->
+                new EnumOptionData(LoanRescheduleStrategyMethod.ADJUST_LAST_UNPAID_PERIOD.getValue().longValue(),
+                        LoanRescheduleStrategyMethod.ADJUST_LAST_UNPAID_PERIOD.getCode(), "Adjust last, unpaid period");
             default -> new EnumOptionData(LoanRescheduleStrategyMethod.INVALID.getValue().longValue(),
                     LoanRescheduleStrategyMethod.INVALID.getCode(), "Invalid");
         };

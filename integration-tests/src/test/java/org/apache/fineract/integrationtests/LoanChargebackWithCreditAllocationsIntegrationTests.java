@@ -69,25 +69,25 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             Long penaltyId = addCharge(loanId, true, 20, "20 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 50, 20, 383.0, false, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 50, 20, 382.0, false, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             // Update Business Date
             updateBusinessDate("20 January 2023");
 
             // Add Repayment
-            Long repaymentTransaction = addRepaymentForLoan(loanId, 383.0, "20 January 2023");
+            Long repaymentTransaction = addRepaymentForLoan(loanId, 382.0, "20 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 50, 20, 0.0, true, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 50, 20, 0.0, true, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             // Add Chargeback
@@ -96,17 +96,17 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(383.0, "Repayment", "20 January 2023", 937.0, 313.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
-                    transaction(100.0, "Chargeback", "20 January 2023", 967.0, 30.0, 0.0, 50.0, 20.0, 0.0, 0.0) //
+                    transaction(382.0, "Repayment", "20 January 2023", 938.0, 312.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
+                    transaction(100.0, "Chargeback", "20 January 2023", 968.0, 30.0, 0.0, 50.0, 20.0, 0.0, 0.0) //
             );
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(343.0, 0, 100, 40, 100.0, false, "01 February 2023"),
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(342.0, 0, 100, 40, 100.0, false, "01 February 2023"),
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
         });
     }
@@ -132,25 +132,25 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             Long penaltyId = addCharge(loanId, true, 20, "20 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 50, 20, 383.0, false, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 50, 20, 382.0, false, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             // Update Business Date
             updateBusinessDate("20 January 2023");
 
             // Add Repayment
-            Long repaymentTransaction = addRepaymentForLoan(loanId, 383.0, "20 January 2023");
+            Long repaymentTransaction = addRepaymentForLoan(loanId, 382.0, "20 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 50, 20, 0.0, true, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 50, 20, 0.0, true, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             updateBusinessDate("01 February 2023");
@@ -161,17 +161,17 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(383.0, "Repayment", "20 January 2023", 937.0, 313.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
-                    transaction(100.0, "Chargeback", "01 February 2023", 967.0, 30.0, 0.0, 50.0, 20.0, 0.0, 0.0) //
+                    transaction(382.0, "Repayment", "20 January 2023", 938.0, 312.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
+                    transaction(100.0, "Chargeback", "01 February 2023", 968.0, 30.0, 0.0, 50.0, 20.0, 0.0, 0.0) //
             );
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 50, 20, 0, true, "01 February 2023"), //
-                    installment(343.0, 0, 50, 20, 413.0, false, "01 March 2023"),
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 50, 20, 0, true, "01 February 2023"), //
+                    installment(342.0, 0, 50, 20, 412.0, false, "01 March 2023"),
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
         });
     }
@@ -197,25 +197,25 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             Long penaltyId = addCharge(loanId, true, 20, "20 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 50, 20, 383.0, false, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 50, 20, 382.0, false, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             // Update Business Date
             updateBusinessDate("20 January 2023");
 
             // Add Repayment
-            Long repaymentTransaction = addRepaymentForLoan(loanId, 383.0, "20 January 2023");
+            Long repaymentTransaction = addRepaymentForLoan(loanId, 382.0, "20 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 50, 20, 0.0, true, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 50, 20, 0.0, true, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             updateBusinessDate("01 May 2023");
@@ -226,17 +226,17 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(383.0, "Repayment", "20 January 2023", 937.0, 313.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
-                    transaction(100.0, "Chargeback", "01 May 2023", 967.0, 30.0, 0.0, 50.0, 20.0, 0.0, 0.0) //
+                    transaction(382.0, "Repayment", "20 January 2023", 938.0, 312.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
+                    transaction(100.0, "Chargeback", "01 May 2023", 968.0, 30.0, 0.0, 50.0, 20.0, 0.0, 0.0) //
             );
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 50, 20, 0.0, true, "01 February 2023"),
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(341.0, 0, 50, 20, 411.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 50, 20, 0.0, true, "01 February 2023"),
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(344.0, 0, 50, 20, 414.0, false, "01 May 2023") //
             );
         });
     }
@@ -258,37 +258,37 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             disburseLoan(loanId, BigDecimal.valueOf(1250.0), "01 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             // Update Business Date + and make a full repayment for the first installment
             updateBusinessDate("20 January 2023");
-            addRepaymentForLoan(loanId, 313.0, "20 January 2023");
+            addRepaymentForLoan(loanId, 312.0, "20 January 2023");
 
             // Update Business Date + and make a full repayment for the second installment
             updateBusinessDate("20 February 2023");
-            addRepaymentForLoan(loanId, 313.0, "20 February 2023");
+            addRepaymentForLoan(loanId, 312.0, "20 February 2023");
 
             // Update Business Date + and make a full repayment for the third installment
             updateBusinessDate("20 March 2023");
-            addRepaymentForLoan(loanId, 313.0, "20 March 2023");
+            addRepaymentForLoan(loanId, 312.0, "20 March 2023");
 
             // Add some charges Update Business Date + and make a full repayment for the fourth installment
             updateBusinessDate("20 April 2023");
             addCharge(loanId, false, 50, "20 April 2023");
             addCharge(loanId, true, 20, "20 April 2023");
-            Long repaymentTransaction = addRepaymentForLoan(loanId, 381.0, "20 April 2023");
+            Long repaymentTransaction = addRepaymentForLoan(loanId, 384.0, "20 April 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 0, 0, 0.0, true, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 0.0, true, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 0.0, true, "01 April 2023"), //
-                    installment(311.0, 0, 50, 20, 0.0, true, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 0, 0, 0.0, true, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 0.0, true, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 0.0, true, "01 April 2023"), //
+                    installment(314.0, 0, 50, 20, 0.0, true, "01 May 2023") //
             );
 
             // Let's move over the maturity date and chargeback some money
@@ -299,20 +299,20 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(313.0, "Repayment", "20 January 2023", 937.0, 313.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(313.0, "Repayment", "20 February 2023", 624.0, 313.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(313.0, "Repayment", "20 March 2023", 311.0, 313.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(381.0, "Repayment", "20 April 2023", 0.0, 311.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
+                    transaction(312.0, "Repayment", "20 January 2023", 938.0, 312.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
+                    transaction(312.0, "Repayment", "20 February 2023", 626.0, 312.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
+                    transaction(312.0, "Repayment", "20 March 2023", 314.0, 312.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
+                    transaction(384.0, "Repayment", "20 April 2023", 0.0, 314.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
                     transaction(70.0, "Accrual", "20 April 2023", 0.0, 0.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
                     transaction(100.0, "Chargeback", "02 May 2023", 30.0, 30.0, 0.0, 50.0, 20.0, 0.0, 0.0) //
             );
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 0, 0, 0.0, true, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 0.0, true, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 0.0, true, "01 April 2023"), //
-                    installment(311.0, 0, 50, 20, 0.0, true, "01 May 2023"), //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 0, 0, 0.0, true, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 0.0, true, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 0.0, true, "01 April 2023"), //
+                    installment(314.0, 0, 50, 20, 0.0, true, "01 May 2023"), //
                     installment(30.0, 0, 50, 20, 100.0, false, "02 May 2023") //
             );
         });
@@ -339,25 +339,25 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             Long penaltyId = addCharge(loanId, true, 20, "15 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 50, 20, 383.0, false, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 50, 20, 382.0, false, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             // Update Business Date
             updateBusinessDate("20 January 2023");
 
             // Add Repayment
-            Long repaymentTransaction = addRepaymentForLoan(loanId, 383.0, "20 January 2023");
+            Long repaymentTransaction = addRepaymentForLoan(loanId, 382.0, "20 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 50, 20, 0.0, true, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 50, 20, 0.0, true, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             updateBusinessDate("21 January 2023");
@@ -367,17 +367,17 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(383.0, "Repayment", "20 January 2023", 937.0, 313.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
-                    transaction(100.0, "Chargeback", "21 January 2023", 967.0, 30.0, 0.0, 50.0, 20.0, 0.0, 0.0) //
+                    transaction(382.0, "Repayment", "20 January 2023", 938.0, 312.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
+                    transaction(100.0, "Chargeback", "21 January 2023", 968.0, 30.0, 0.0, 50.0, 20.0, 0.0, 0.0) //
             );
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(343.0, 0, 100, 40, 100.0, false, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(342.0, 0, 100, 40, 100.0, false, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             // let's add a backdated repayment on 19th of January to trigger reverse replaying the chargeback, that will
@@ -387,8 +387,8 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(200.0, "Repayment", "19 January 2023", 1120.0, 130.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
-                    transaction(383.0, "Repayment", "20 January 2023", 737.0, 383.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(100.0, "Chargeback", "21 January 2023", 837.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0) //
+                    transaction(382.0, "Repayment", "20 January 2023", 738.0, 382.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
+                    transaction(100.0, "Chargeback", "21 January 2023", 838.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0) //
             );
         });
     }
@@ -414,25 +414,25 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             Long penaltyId = addCharge(loanId, true, 20, "15 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 50, 20, 383.0, false, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 50, 20, 382.0, false, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             // Update Business Date
             updateBusinessDate("20 January 2023");
 
             // Add Repayment
-            Long repaymentTransaction = addRepaymentForLoan(loanId, 383.0, "20 January 2023");
+            Long repaymentTransaction = addRepaymentForLoan(loanId, 382.0, "20 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 50, 20, 0.0, true, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 50, 20, 0.0, true, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             updateBusinessDate("22 January 2023");
@@ -442,17 +442,17 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(383.0, "Repayment", "20 January 2023", 937.0, 313.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
-                    transaction(100.0, "Chargeback", "22 January 2023", 967.0, 30.0, 0.0, 50.0, 20.0, 0.0, 0.0) //
+                    transaction(382.0, "Repayment", "20 January 2023", 938.0, 312.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
+                    transaction(100.0, "Chargeback", "22 January 2023", 968.0, 30.0, 0.0, 50.0, 20.0, 0.0, 0.0) //
             );
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(343.0, 0, 100, 40, 100.0, false, "01 February 2023"),
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(342.0, 0, 100, 40, 100.0, false, "01 February 2023"),
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             // let's add a backdated repayment on 21th of January that will reverse replay the chargeback transaction
@@ -462,12 +462,12 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(383.0, "Repayment", "20 January 2023", 937.0, 313.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
-                    transaction(200.0, "Repayment", "21 January 2023", 737.0, 200.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(100.0, "Chargeback", "22 January 2023", 767.0, 30.0, 0.0, 50.0, 20.0, 0.0, 0.0) //
+                    transaction(382.0, "Repayment", "20 January 2023", 938.0, 312.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
+                    transaction(200.0, "Repayment", "21 January 2023", 738.0, 200.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
+                    transaction(100.0, "Chargeback", "22 January 2023", 768.0, 30.0, 0.0, 50.0, 20.0, 0.0, 0.0) //
             );
 
-            verifyLoanSummaryAmounts(loanId, 30.0, 50.0, 20.0, 837.0);
+            verifyLoanSummaryAmounts(loanId, 30.0, 50.0, 20.0, 838.0);
         });
     }
 
@@ -494,25 +494,25 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             Long penaltyId = addCharge(loanId, true, 20, "20 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 50, 20, 383.0, false, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 50, 20, 382.0, false, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             // Update Business Date
             updateBusinessDate("20 January 2023");
 
             // Add Repayment
-            Long repaymentTransaction = addRepaymentForLoan(loanId, 383.0, "20 January 2023");
+            Long repaymentTransaction = addRepaymentForLoan(loanId, 382.0, "20 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 50, 20, 0.0, true, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 50, 20, 0.0, true, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             // Add Chargeback
@@ -520,20 +520,20 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(383.0, "Repayment", "20 January 2023", 937.0, 313.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
-                    transaction(100.0, "Chargeback", "20 January 2023", 1037.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0) //
+                    transaction(382.0, "Repayment", "20 January 2023", 938.0, 312.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
+                    transaction(100.0, "Chargeback", "20 January 2023", 1038.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0) //
             );
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(413.0, 0, 50, 20, 100.0, false, "01 February 2023"),
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(412.0, 0, 50, 20, 100.0, false, "01 February 2023"),
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
-            verifyLoanSummaryAmounts(loanId, 100.0, 0.0, 0.0, 1037);
+            verifyLoanSummaryAmounts(loanId, 100.0, 0.0, 0.0, 1038);
         });
     }
 
@@ -558,11 +558,11 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             Long penaltyId = addCharge(loanId, true, 20, "20 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 50, 20, 383.0, false, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 50, 20, 382.0, false, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             // Update Business Date
@@ -573,11 +573,11 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
                                                                                                 // overpayment
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 50, 20, 0.0, true, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 0.0, true, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 0.0, true, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 0.0, true, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 50, 20, 0.0, true, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 0.0, true, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 0.0, true, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 0.0, true, "01 May 2023") //
             );
 
             updateBusinessDate("02 May 2023");
@@ -595,11 +595,11 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             // Verify Repayment Schedule
             // DEFAULT payment allocation is ..., DUE_PENALTY, DUE_FEE, DUE_PRINCIPAL, ...
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 50, 20, 0, true, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 0, true, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 0, true, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 0, true, "01 May 2023"), //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 50, 20, 0, true, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 0, true, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 0, true, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 0, true, "01 May 2023"), //
                     installment(100.0, 0, 0, 0, outstanding(50.0, 0d, 0d, 50.0), false, "02 May 2023") //
             );
         });
@@ -626,11 +626,11 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             Long penaltyId = addCharge(loanId, true, 20, "20 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 50, 20, 383.0, false, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 50, 20, 382.0, false, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             // Update Business Date
@@ -641,11 +641,11 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
                                                                                                 // overpayment
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 50, 20, 0.0, true, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 0.0, true, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 0.0, true, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 0.0, true, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 50, 20, 0.0, true, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 0.0, true, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 0.0, true, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 0.0, true, "01 May 2023") //
             );
 
             // Add Chargeback
@@ -661,11 +661,11 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             // Verify Repayment Schedule,
             // DEFAULT payment allocation is ..., DUE_PENALTY, DUE_FEE, DUE_PRINCIPAL, ...
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(343.0, 0, 100, 40, outstanding(30.0, 20.0, 0.0, 50.0), false, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 0.0, true, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 0.0, true, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 0.0, true, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(342.0, 0, 100, 40, outstanding(30.0, 20.0, 0.0, 50.0), false, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 0.0, true, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 0.0, true, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 0.0, true, "01 May 2023") //
             );
 
             verifyLoanSummaryAmounts(loanId, 30.0, 50.0, 20.0, 50.0);
@@ -693,11 +693,11 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             Long penaltyId = addCharge(loanId, true, 20, "20 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 50, 20, 383.0, false, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 50, 20, 382.0, false, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             // Update Business Date
@@ -708,11 +708,11 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             // overpayment
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 50, 20, 0.0, true, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 0.0, true, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 0.0, true, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 0.0, true, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 50, 20, 0.0, true, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 0.0, true, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 0.0, true, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 0.0, true, "01 May 2023") //
             );
 
             // Add Chargeback
@@ -728,11 +728,11 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             // Verify Repayment Schedule,
             // DEFAULT payment allocation is ..., DUE_PRINCIPAL, DUE_FEE, DUE_PENALTY ...
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(343.0, 0, 100, 40, outstanding(0.0, 30.0, 20.0, 50.0), false, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 0.0, true, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 0.0, true, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 0.0, true, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(342.0, 0, 100, 40, outstanding(0.0, 30.0, 20.0, 50.0), false, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 0.0, true, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 0.0, true, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 0.0, true, "01 May 2023") //
             );
 
             verifyLoanSummaryAmounts(loanId, 30.0, 50.0, 20.0, 50.0);
@@ -760,25 +760,25 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             Long penaltyId = addCharge(loanId, true, 20, "20 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 50, 20, 383.0, false, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 50, 20, 382.0, false, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             // Update Business Date
             updateBusinessDate("20 January 2023");
 
             // Add Repayment
-            Long repaymentTransaction = addRepaymentForLoan(loanId, 383.0, "20 January 2023");
+            Long repaymentTransaction = addRepaymentForLoan(loanId, 382.0, "20 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 50, 20, 0.0, true, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 50, 20, 0.0, true, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             // Add Chargeback
@@ -787,17 +787,17 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(383.0, "Repayment", "20 January 2023", 937.0, 313.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
-                    transaction(100.0, "Chargeback", "20 January 2023", 967.0, 30.0, 0.0, 50.0, 20.0, 0.0, 0.0) //
+                    transaction(382.0, "Repayment", "20 January 2023", 938.0, 312.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
+                    transaction(100.0, "Chargeback", "20 January 2023", 968.0, 30.0, 0.0, 50.0, 20.0, 0.0, 0.0) //
             );
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(343.0, 0, 100, 40, 100.0, false, "01 February 2023"),
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(342.0, 0, 100, 40, 100.0, false, "01 February 2023"),
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             updateBusinessDate("21 January 2023");
@@ -806,18 +806,18 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(383.0, "Repayment", "20 January 2023", 937.0, 313.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
-                    transaction(100.0, "Chargeback", "20 January 2023", 967, 30.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
-                    transaction(100.0, "Chargeback", "21 January 2023", 1067.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0) //
+                    transaction(382.0, "Repayment", "20 January 2023", 938.0, 312.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
+                    transaction(100.0, "Chargeback", "20 January 2023", 968.0, 30.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
+                    transaction(100.0, "Chargeback", "21 January 2023", 1068.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0) //
             );
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(443.0, 0, 100, 40, 200.0, false, "01 February 2023"),
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(442.0, 0, 100, 40, 200.0, false, "01 February 2023"),
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
         });
@@ -844,25 +844,25 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             Long penaltyId = addCharge(loanId, true, 20, "20 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 50, 20, 383.0, false, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 50, 20, 382.0, false, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             // Update Business Date
             updateBusinessDate("20 January 2023");
 
             // Add Repayment
-            Long repaymentTransaction = addRepaymentForLoan(loanId, 383.0, "20 January 2023");
+            Long repaymentTransaction = addRepaymentForLoan(loanId, 382.0, "20 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 50, 20, 0.0, true, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 50, 20, 0.0, true, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             // Add Chargeback
@@ -871,17 +871,17 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(383.0, "Repayment", "20 January 2023", 937.0, 313.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
-                    transaction(100.0, "Chargeback", "20 January 2023", 967.0, 30.0, 0.0, 50.0, 20.0, 0.0, 0.0) //
+                    transaction(382.0, "Repayment", "20 January 2023", 938.0, 312.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
+                    transaction(100.0, "Chargeback", "20 January 2023", 968.0, 30.0, 0.0, 50.0, 20.0, 0.0, 0.0) //
             );
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(343.0, 0, 100, 40, 100.0, false, "01 February 2023"),
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(342.0, 0, 100, 40, 100.0, false, "01 February 2023"),
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             updateBusinessDate("21 January 2023");
@@ -890,18 +890,18 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(383.0, "Repayment", "20 January 2023", 937.0, 313.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
-                    transaction(100.0, "Chargeback", "20 January 2023", 967.0, 30.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
-                    transaction(100.0, "Chargeback", "21 January 2023", 1067.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0) //
+                    transaction(382.0, "Repayment", "20 January 2023", 938.0, 312.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
+                    transaction(100.0, "Chargeback", "20 January 2023", 968.0, 30.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
+                    transaction(100.0, "Chargeback", "21 January 2023", 1068.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0) //
             );
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(443.0, 0, 100, 40, 200.0, false, "01 February 2023"),
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(442.0, 0, 100, 40, 200.0, false, "01 February 2023"),
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             // Let's add repayment to trigger reverse replay for both chargebacks
@@ -910,9 +910,9 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(200.0, "Repayment", "19 January 2023", 1120.0, 130.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
-                    transaction(383.0, "Repayment", "20 January 2023", 737.0, 383.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(100.0, "Chargeback", "20 January 2023", 837.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(100.0, "Chargeback", "21 January 2023", 937.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0) //
+                    transaction(382.0, "Repayment", "20 January 2023", 738.0, 382.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
+                    transaction(100.0, "Chargeback", "20 January 2023", 838.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
+                    transaction(100.0, "Chargeback", "21 January 2023", 938.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0) //
             );
         });
     }
@@ -938,25 +938,25 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             Long penaltyId = addCharge(loanId, true, 20, "15 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 50, 20, 383.0, false, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 50, 20, 382.0, false, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             // Update Business Date
             updateBusinessDate("20 January 2023");
 
             // Add Repayment
-            Long repaymentTransaction = addRepaymentForLoan(loanId, 383.0, "20 January 2023");
+            Long repaymentTransaction = addRepaymentForLoan(loanId, 382.0, "20 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(313.0, 0, 50, 20, 0.0, true, "01 February 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(312.0, 0, 50, 20, 0.0, true, "01 February 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             // Add Chargeback
@@ -965,17 +965,17 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(383.0, "Repayment", "20 January 2023", 937.0, 313.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
-                    transaction(100.0, "Chargeback", "20 January 2023", 967.0, 30.0, 0.0, 50.0, 20.0, 0.0, 0.0) //
+                    transaction(382.0, "Repayment", "20 January 2023", 938.0, 312.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
+                    transaction(100.0, "Chargeback", "20 January 2023", 968.0, 30.0, 0.0, 50.0, 20.0, 0.0, 0.0) //
             );
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(343.0, 0, 100, 40, 100.0, false, "01 February 2023"),
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(342.0, 0, 100, 40, 100.0, false, "01 February 2023"),
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             updateBusinessDate("21 January 2023");
@@ -984,18 +984,18 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(383.0, "Repayment", "20 January 2023", 937.0, 313.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
-                    transaction(100.0, "Chargeback", "20 January 2023", 967.0, 30.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
-                    transaction(100.0, "Chargeback", "21 January 2023", 1067.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0) //
+                    transaction(382.0, "Repayment", "20 January 2023", 938.0, 312.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
+                    transaction(100.0, "Chargeback", "20 January 2023", 968.0, 30.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
+                    transaction(100.0, "Chargeback", "21 January 2023", 1068.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0) //
             );
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
-                    installment(443.0, 0, 100, 40, 200.0, false, "01 February 2023"),
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 March 2023"), //
-                    installment(313.0, 0, 0, 0, 313.0, false, "01 April 2023"), //
-                    installment(311.0, 0, 0, 0, 311.0, false, "01 May 2023") //
+                    installment(1250.0, null, "01 January 2023"), //
+                    installment(442.0, 0, 100, 40, 200.0, false, "01 February 2023"),
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 March 2023"), //
+                    installment(312.0, 0, 0, 0, 312.0, false, "01 April 2023"), //
+                    installment(314.0, 0, 0, 0, 314.0, false, "01 May 2023") //
             );
 
             // Let's add repayment to trigger reverse replay for both chargebacks
@@ -1004,9 +1004,9 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(20.0, "Repayment", "19 January 2023", 1250.0, 0.0, 0.0, 0.0, 20.0, 0.0, 0.0), //
-                    transaction(383.0, "Repayment", "20 January 2023", 917.0, 333.0, 0.0, 50.0, 0.0, 0.0, 0.0), //
-                    transaction(100.0, "Chargeback", "20 January 2023", 967.0, 50.0, 0.0, 50.0, 0.0, 0.0, 0.0), //
-                    transaction(100.0, "Chargeback", "21 January 2023", 1067.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0) //
+                    transaction(382.0, "Repayment", "20 January 2023", 918.0, 332.0, 0.0, 50.0, 0.0, 0.0, 0.0), //
+                    transaction(100.0, "Chargeback", "20 January 2023", 968.0, 50.0, 0.0, 50.0, 0.0, 0.0, 0.0), //
+                    transaction(100.0, "Chargeback", "21 January 2023", 1068.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0) //
             );
         });
     }
@@ -1028,7 +1028,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             disburseLoan(loanId, BigDecimal.valueOf(750), "01 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
+                    installment(750.0, null, "01 January 2023"), //
                     installment(250.0, 0, 0, 0, 250.0, false, "01 February 2023"), //
                     installment(250.0, 0, 0, 0, 250.0, false, "01 March 2023"), //
                     installment(250.0, 0, 0, 0, 250.0, false, "01 April 2023") //
@@ -1100,7 +1100,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             Long feeId = addCharge(loanId, false, 30, "15 February 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
+                    installment(750.0, null, "01 January 2023"), //
                     installment(250.0, 0, 0, 0, 250.0, false, "01 February 2023"), //
                     installment(250.0, 0, 30, 0, 280.0, false, "01 March 2023"), //
                     installment(250.0, 0, 0, 0, 250.0, false, "01 April 2023") //
@@ -1178,7 +1178,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             Long feeId = addCharge(loanId, true, 30, "15 February 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
+                    installment(750.0, null, "01 January 2023"), //
                     installment(250.0, 0, 0, 0, 250.0, false, "01 February 2023"), //
                     installment(250.0, 0, 0, 30.0, 280.0, false, "01 March 2023"), //
                     installment(250.0, 0, 0, 0, 250.0, false, "01 April 2023") //
@@ -1254,7 +1254,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             disburseLoan(loanId, BigDecimal.valueOf(750), "01 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
+                    installment(750.0, null, "01 January 2023"), //
                     installment(250.0, 0, 0, 0, 250.0, false, "01 February 2023"), //
                     installment(250.0, 0, 0, 0, 250.0, false, "01 March 2023"), //
                     installment(250.0, 0, 0, 0, 250.0, false, "01 April 2023") //
@@ -1326,7 +1326,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             disburseLoan(loanId, BigDecimal.valueOf(750), "01 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
+                    installment(750.0, null, "01 January 2023"), //
                     installment(250.0, 0, 0, 0, 250.0, false, "01 February 2023"), //
                     installment(250.0, 0, 0, 0, 250.0, false, "01 March 2023"), //
                     installment(250.0, 0, 0, 0, 250.0, false, "01 April 2023") //
@@ -1397,7 +1397,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             disburseLoan(loanId, BigDecimal.valueOf(750), "01 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
+                    installment(750.0, null, "01 January 2023"), //
                     installment(250.0, 0, 0, 0, 250.0, false, "01 February 2023"), //
                     installment(250.0, 0, 0, 0, 250.0, false, "01 March 2023"), //
                     installment(250.0, 0, 0, 0, 250.0, false, "01 April 2023") //
@@ -1477,7 +1477,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             disburseLoan(loanId, BigDecimal.valueOf(750), "01 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
+                    installment(750.0, null, "01 January 2023"), //
                     installment(250.0, 0, 0, 0, 250.0, false, "01 February 2023"), //
                     installment(250.0, 0, 0, 0, 250.0, false, "01 March 2023"), //
                     installment(250.0, 0, 0, 0, 250.0, false, "01 April 2023") //
@@ -1547,7 +1547,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             disburseLoan(loanId, BigDecimal.valueOf(750), "01 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
+                    installment(750.0, null, "01 January 2023"), //
                     installment(250.0, 0, 0, 0, 250.0, false, "01 February 2023"), //
                     installment(250.0, 0, 0, 0, 250.0, false, "01 March 2023"), //
                     installment(250.0, 0, 0, 0, 250.0, false, "01 April 2023") //
@@ -1618,7 +1618,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             disburseLoan(loanId, BigDecimal.valueOf(750), "01 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
+                    installment(750.0, null, "01 January 2023"), //
                     installment(250.0, 0, 0, 0, 250.0, false, "01 February 2023"), //
                     installment(250.0, 0, 0, 0, 250.0, false, "01 March 2023"), //
                     installment(250.0, 0, 0, 0, 250.0, false, "01 April 2023") //
@@ -1705,7 +1705,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             disburseLoan(loanId, BigDecimal.valueOf(750), "01 January 2023");
 
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 January 2023"), //
+                    installment(750.0, null, "01 January 2023"), //
                     installment(250.0, 0, 0, 0, 250.0, false, "01 February 2023"), //
                     installment(250.0, 0, 0, 0, 250.0, false, "01 March 2023"), //
                     installment(250.0, 0, 0, 0, 250.0, false, "01 April 2023") //

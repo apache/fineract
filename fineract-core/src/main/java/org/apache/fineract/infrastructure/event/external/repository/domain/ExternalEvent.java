@@ -37,7 +37,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 @Table(name = "m_external_event")
 @Getter
 @NoArgsConstructor
-public class ExternalEvent extends AbstractPersistableCustom {
+public class ExternalEvent extends AbstractPersistableCustom<Long> {
 
     @Column(name = "type", nullable = false)
     private String type;

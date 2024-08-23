@@ -198,7 +198,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                 final Long noteId = JdbcSupport.getLong(rs, "noteId");
                 if (noteId != null) {
                     final String note = rs.getString("transactionNote");
-                    noteData = new NoteData(noteId, null, null, null, null, null, null, null, note, null, null, null, null, null, null);
+                    noteData = NoteData.builder().id(noteId).note(note).build();
                 }
                 Long transaction = null;
                 if (entityType != null && transactionId != null) {
@@ -264,7 +264,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             whereClose = " and ";
         }
 
-        if (searchParameters.isOfficeIdPassed()) {
+        if (searchParameters.hasOfficeId()) {
             sqlBuilder.append(whereClose).append(" journalEntry.office_id = ?");
             objectArray[arrayPos] = searchParameters.getOfficeId();
             arrayPos = arrayPos + 1;
@@ -272,7 +272,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             whereClose = " and ";
         }
 
-        if (searchParameters.isCurrencyCodePassed()) {
+        if (searchParameters.hasCurrencyCode()) {
             sqlBuilder.append(whereClose).append(" journalEntry.currency_code = ?");
             objectArray[arrayPos] = searchParameters.getCurrencyCode();
             arrayPos = arrayPos + 1;
@@ -339,7 +339,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             }
         }
 
-        if (searchParameters.isLoanIdPassed()) {
+        if (searchParameters.hasLoanId()) {
             sqlBuilder.append(whereClose)
                     .append(" journalEntry.loan_transaction_id  in (select id from m_loan_transaction where loan_id = ?)");
             objectArray[arrayPos] = searchParameters.getLoanId();
@@ -347,18 +347,18 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
             whereClose = " and ";
         }
-        if (searchParameters.isSavingsIdPassed()) {
+        if (searchParameters.hasSavingsId()) {
             sqlBuilder.append(whereClose).append(
                     " journalEntry.savings_transaction_id in (select id from m_savings_account_transaction where savings_account_id = ?)");
             objectArray[arrayPos] = searchParameters.getSavingsId();
             arrayPos = arrayPos + 1;
         }
 
-        if (searchParameters.isOrderByRequested()) {
+        if (searchParameters.hasOrderBy()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
             this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
 
-            if (searchParameters.isSortOrderProvided()) {
+            if (searchParameters.hasSortOrder()) {
                 sqlBuilder.append(' ').append(searchParameters.getSortOrder());
                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
             }
@@ -366,9 +366,9 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             sqlBuilder.append(" order by journalEntry.entry_date, journalEntry.id");
         }
 
-        if (searchParameters.isLimited()) {
+        if (searchParameters.hasLimit()) {
             sqlBuilder.append(" ");
-            if (searchParameters.isOffset()) {
+            if (searchParameters.hasOffset()) {
                 sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
             } else {
                 sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));
@@ -502,10 +502,6 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
     private Page<JournalEntryData> retrieveContraTransactions(final Long officeId, final Long contraId, final String transactionId,
             final String currencyCode) {
-        final Integer offset = 0;
-        final Integer limit = null;
-        final String orderBy = "journalEntry.id";
-        final String sortOrder = "ASC";
         final Integer entityType = null;
         final Boolean onlyManualEntries = null;
         final LocalDate fromDate = null;
@@ -513,11 +509,10 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         final LocalDate submittedOnDateFrom = null;
         final LocalDate submittedOnDateTo = null;
         final JournalEntryAssociationParametersData associationParametersData = null;
-        final Long loanId = null;
-        final Long savingsId = null;
 
-        final SearchParameters searchParameters = SearchParameters.forJournalEntries(officeId, offset, limit, orderBy, sortOrder, loanId,
-                savingsId, currencyCode);
+        final SearchParameters searchParameters = SearchParameters.builder().orphansOnly(false).officeId(officeId).offset(0)
+                .orderBy("journalEntry.id").sortOrder("ASC").currencyCode(currencyCode).build();
+
         return retrieveAll(searchParameters, contraId, onlyManualEntries, fromDate, toDate, submittedOnDateFrom, submittedOnDateTo,
                 transactionId, entityType, associationParametersData);
 

@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class CreditBureauToken extends AbstractPersistableCustom {
+public class CreditBureauToken extends AbstractPersistableCustom<Long> {
 
     private static final Logger LOG = LoggerFactory.getLogger(CreditBureauToken.class);
 

@@ -56,15 +56,9 @@ public class CashierTransactionDataValidator {
     }
 
     public void validateSettleCashAndCashOutTransactions(final Long cashierId, String currencyCode, final BigDecimal transactionAmount) {
-        final Integer offset = null;
-        final Integer limit = null;
-        final String orderBy = null;
-        final String sortOrder = null;
-        final LocalDate fromDate = null;
-        final LocalDate toDate = null;
-        final SearchParameters searchParameters = SearchParameters.forPagination(offset, limit, orderBy, sortOrder);
+        final SearchParameters searchParameters = SearchParameters.builder().build();
         final CashierTransactionsWithSummaryData cashierTxnWithSummary = this.tellerManagementReadPlatformService
-                .retrieveCashierTransactionsWithSummary(cashierId, false, fromDate, toDate, currencyCode, searchParameters);
+                .retrieveCashierTransactionsWithSummary(cashierId, false, null, null, currencyCode, searchParameters);
         if (MathUtil.isGreaterThan(transactionAmount, cashierTxnWithSummary.getNetCash())) {
             throw new CashierInsufficientAmountException();
         }

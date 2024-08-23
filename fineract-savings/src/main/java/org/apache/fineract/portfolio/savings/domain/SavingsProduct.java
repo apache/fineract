@@ -98,7 +98,7 @@ import org.apache.fineract.portfolio.tax.domain.TaxGroup;
 @Inheritance
 @DiscriminatorColumn(name = "deposit_type_enum", discriminatorType = DiscriminatorType.INTEGER)
 @DiscriminatorValue("100")
-public class SavingsProduct extends AbstractPersistableCustom {
+public class SavingsProduct extends AbstractPersistableCustom<Long> {
 
     @Column(name = "name", nullable = false, unique = true)
     protected String name;

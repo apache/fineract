@@ -6,7 +6,13 @@ Apache Fineract (\’fīn-,ә-,rakt\) is open source software for financial serv
 
 Fineract provides a reliable, robust, and affordable solution for entrepreneurs, financial institutions, and service providers to offer financial services to the world’s 2 billion underbanked and unbanked. Fineract is aimed at innovative mobile and cloud-based solutions, and enables digital transaction accounts for all.
 
-Fineract 1.x is a mature platform with open APIs, while Fineract CN is a cloud native, microservice architecture also supporting open banking APIs.
+Fineract 1.x is a mature platform with open APIs. 
+
+```
+image:https://static.scarf.sh/a.png?x-pxid=c8fb6966-9836-4ad6-882f-0461000fcbc7[]
+```
+
+
 
 == About
 

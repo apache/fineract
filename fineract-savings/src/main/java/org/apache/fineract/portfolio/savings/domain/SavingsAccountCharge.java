@@ -60,7 +60,7 @@ import org.slf4j.LoggerFactory;
  */
 @Entity
 @Table(name = "m_savings_account_charge")
-public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom {
+public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountCharge.class);
 

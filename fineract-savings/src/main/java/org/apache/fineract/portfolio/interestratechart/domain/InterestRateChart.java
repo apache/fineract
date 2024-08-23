@@ -58,7 +58,7 @@ import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 
 @Entity
 @Table(name = "m_interest_rate_chart")
-public class InterestRateChart extends AbstractPersistableCustom {
+public class InterestRateChart extends AbstractPersistableCustom<Long> {
 
     @Embedded
     private InterestRateChartFields chartFields;

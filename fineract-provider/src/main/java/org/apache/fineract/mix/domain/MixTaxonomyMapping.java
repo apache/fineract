@@ -35,7 +35,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public final class MixTaxonomyMapping extends AbstractPersistableCustom {
+public final class MixTaxonomyMapping extends AbstractPersistableCustom<Long> {
 
     @Column(name = "identifier")
     private String identifier;

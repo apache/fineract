@@ -51,7 +51,13 @@ dependencies {
     implementation project(':fineract-core')
     implementation project(':fineract-accounting')
     implementation project(':fineract-investor')
+    implementation project(':fineract-branch')
+    implementation project(':fineract-document')
+    implementation project(':fineract-charge')
+    implementation project(':fineract-rates')
     implementation project(':fineract-loan')
+    implementation project(':fineract-progressive-loan')
+    implementation project(':fineract-savings')
     implementation project(':fineract-provider')
 }
 
