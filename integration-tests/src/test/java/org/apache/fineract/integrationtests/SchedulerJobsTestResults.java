@@ -59,6 +59,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PutJobsJobIDRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
+import org.apache.fineract.integrationtests.common.BusinessStepHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
@@ -86,6 +87,7 @@ import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.domain.AccountTransferType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer.MethodName;
 import org.junit.jupiter.api.Order;
@@ -121,6 +123,16 @@ public class SchedulerJobsTestResults {
     private TimeZone systemTimeZone;
     private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
     private BusinessDateHelper businessDateHelper;
+    private static BusinessStepHelper businessStepHelper;
+
+    @BeforeAll
+    public static void beforeAll() {
+        businessStepHelper = new BusinessStepHelper();
+        // setup COB Business Steps to prevent test failing due other integration test configurations
+        businessStepHelper.updateSteps("LOAN_CLOSE_OF_BUSINESS", "APPLY_CHARGE_TO_OVERDUE_LOANS", "LOAN_DELINQUENCY_CLASSIFICATION",
+                "CHECK_LOAN_REPAYMENT_DUE", "CHECK_LOAN_REPAYMENT_OVERDUE", "UPDATE_LOAN_ARREARS_AGING", "ADD_PERIODIC_ACCRUAL_ENTRIES",
+                "EXTERNAL_ASSET_OWNER_TRANSFER", "CHECK_DUE_INSTALLMENTS", "ACCRUAL_ACTIVITY_POSTING", "LOAN_INTEREST_RECALCULATION");
+    }
 
     @BeforeEach
     public void setup() {
@@ -1380,7 +1392,9 @@ public class SchedulerJobsTestResults {
 
             this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
                     .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10", null));
-            this.schedulerJobHelper.updateSchedulerJob(16L, new PutJobsJobIDRequest().cronExpression("0/5 * * * * ?"));
+
+            this.schedulerJobHelper.updateSchedulerStatus(true);
+            this.schedulerJobHelper.updateSchedulerJob(16L, new PutJobsJobIDRequest().active(true).cronExpression("0/5 * * * * ?"));
 
             Thread.sleep(11000);
             GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);

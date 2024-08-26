@@ -175,6 +175,12 @@ public abstract class BaseLoanIntegrationTest {
     }
 
     protected static void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, LocalDate dueDate, double principalDue,
+            double feeDue, double penaltyDue, double interestDue) {
+        validateRepaymentPeriod(loanDetails, index, dueDate, principalDue, 0, principalDue, feeDue, 0, feeDue, penaltyDue, 0, penaltyDue,
+                interestDue, 0, interestDue, 0, 0);
+    }
+
+    protected static void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, LocalDate dueDate, double principalDue,
             double principalPaid, double principalOutstanding, double feeDue, double feePaid, double feeOutstanding, double penaltyDue,
             double penaltyPaid, double penaltyOutstanding, double interestDue, double interestPaid, double interestOutstanding,
             double paidInAdvance, double paidLate) {
