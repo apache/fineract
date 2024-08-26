@@ -2854,6 +2854,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Retry(name = "recalculateInterest", fallbackMethod = "fallbackRecalculateInterest")
     public void recalculateInterest(final long loanId) {
         Loan loan = this.loanAssembler.assembleFrom(loanId);
+        recalculateInterest(loan);
+    }
+
+    @Transactional
+    @Override
+    public Loan recalculateInterest(Loan loan) {
         LocalDate recalculateFrom = loan.fetchInterestRecalculateFromDate();
         businessEventNotifierService.notifyPreBusinessEvent(new LoanInterestRecalculationBusinessEvent(loan));
         final List<Long> existingTransactionIds = new ArrayList<>();
@@ -2883,6 +2889,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         loanAccrualsProcessingService.processAccrualsForInterestRecalculation(loan,
                 loan.repaymentScheduleDetail().isInterestRecalculationEnabled());
         businessEventNotifierService.notifyPostBusinessEvent(new LoanInterestRecalculationBusinessEvent(loan));
+        return loan;
     }
 
     @Override
