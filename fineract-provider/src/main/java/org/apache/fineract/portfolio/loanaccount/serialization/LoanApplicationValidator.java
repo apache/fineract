@@ -2032,7 +2032,7 @@ public final class LoanApplicationValidator {
                 compareApprovedToProposedPrincipal(loan, approvedLoanAmount);
             }
 
-            if (expectedDisbursementDate != null) {
+            if (approvedOnDate != null && expectedDisbursementDate != null) {
                 if (DateUtils.isBefore(expectedDisbursementDate, approvedOnDate)) {
                     final String errorMessage = "The expected disbursement date " + expectedDisbursementDate
                             + " should be either on or after the approval date: " + approvedOnDate;
@@ -2041,7 +2041,7 @@ public final class LoanApplicationValidator {
                 }
             }
 
-            if (client != null && client.getOfficeJoiningDate() != null) {
+            if (client != null && client.getOfficeJoiningDate() != null && approvedOnDate != null) {
                 final LocalDate clientOfficeJoiningDate = client.getOfficeJoiningDate();
                 if (DateUtils.isBefore(approvedOnDate, clientOfficeJoiningDate)) {
                     throw new InvalidLoanStateTransitionException("approval", "cannot.be.before.client.transfer.date",
@@ -2050,7 +2050,7 @@ public final class LoanApplicationValidator {
                 }
             }
 
-            if (DateUtils.isDateInTheFuture(approvedOnDate)) {
+            if (approvedOnDate != null && DateUtils.isDateInTheFuture(approvedOnDate)) {
                 final String errorMessage = "The date on which a loan is approved cannot be in the future.";
                 throw new InvalidLoanStateTransitionException("approval", "cannot.be.a.future.date", errorMessage, approvedOnDate);
             }
