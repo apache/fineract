@@ -53,11 +53,4 @@
             <column name="enum_type" valueBoolean="false"/>
         </insert>
     </changeSet>
-    <changeSet id="4" author="fineract">
-        <insert tableName="m_batch_business_steps">
-            <column name="job_name" value="LOAN_CLOSE_OF_BUSINESS"/>
-            <column name="step_name" value="ACCRUAL_ACTIVITY_POSTING"/>
-            <column name="step_order" value="8"/>
-        </insert>
-    </changeSet>
 </databaseChangeLog>
