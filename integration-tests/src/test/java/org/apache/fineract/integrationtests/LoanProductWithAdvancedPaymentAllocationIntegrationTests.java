@@ -364,6 +364,50 @@ public class LoanProductWithAdvancedPaymentAllocationIntegrationTests {
                 loanProductError.get(0).get("userMessageGlobalisationCode"));
     }
 
+    @Test
+    public void testCreateShouldFailWhenNoNumberOfRepaymentsIsProvided() {
+        // given
+        ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(400).build();
+        LoanTransactionHelper validationErrorHelper = new LoanTransactionHelper(REQUEST_SPEC, errorResponse);
+        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation();
+        AdvancedPaymentData repaymentPaymentAllocation = createRepaymentPaymentAllocation();
+
+        // when
+        String loanProduct = loanProductTestBuilder(customization -> customization
+                .addAdvancedPaymentAllocation(defaultAllocation, repaymentPaymentAllocation).withPrincipal("15,000.00")
+                .withNumberOfRepayments(null).withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
+                .withAccountingRulePeriodicAccrual(new Account[] { ASSET_ACCOUNT, EXPENSE_ACCOUNT, INCOME_ACCOUNT, OVERPAYMENT_ACCOUNT })
+                .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
+                .withFeeAndPenaltyAssetAccount(FEE_PENALTY_ACCOUNT).build());
+
+        // when
+        List<Map<String, String>> loanProductError = validationErrorHelper.getLoanProductError(loanProduct, "errors");
+        Assertions.assertEquals("The parameter  numberOfRepayments  is mandatory.",
+                loanProductError.get(0).get("defaultUserMessage").replace('`', ' '));
+    }
+
+    @Test
+    public void testCreateShouldFailWhenNoInterestRateIsProvided() {
+        // given
+        ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(400).build();
+        LoanTransactionHelper validationErrorHelper = new LoanTransactionHelper(REQUEST_SPEC, errorResponse);
+        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation();
+        AdvancedPaymentData repaymentPaymentAllocation = createRepaymentPaymentAllocation();
+
+        // when
+        String loanProduct = loanProductTestBuilder(customization -> customization
+                .addAdvancedPaymentAllocation(defaultAllocation, repaymentPaymentAllocation).withPrincipal("15,000.00")
+                .withNumberOfRepayments("4").withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod(null)
+                .withAccountingRulePeriodicAccrual(new Account[] { ASSET_ACCOUNT, EXPENSE_ACCOUNT, INCOME_ACCOUNT, OVERPAYMENT_ACCOUNT })
+                .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
+                .withFeeAndPenaltyAssetAccount(FEE_PENALTY_ACCOUNT).build());
+
+        // when
+        List<Map<String, String>> loanProductError = validationErrorHelper.getLoanProductError(loanProduct, "errors");
+        Assertions.assertEquals("The parameter  interestRatePerPeriod  is mandatory.",
+                loanProductError.get(0).get("defaultUserMessage").replace('`', ' '));
+    }
+
     private String loanProductTestBuilder(Consumer<LoanProductTestBuilder> customization) {
         LoanProductTestBuilder builder = new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4")
                 .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
