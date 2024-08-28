@@ -2548,17 +2548,17 @@ public final class LoanProductDataValidator {
         if (numberOfRepayments != null) {
             if (numberOfRepayments <= defaultToZeroIfNull(graceOnPrincipalPayment)) {
                 baseDataValidator.reset().parameter("graceOnPrincipalPayment").value(graceOnPrincipalPayment)
-                        .failWithCode(".mustBeLessThan.numberOfRepayments");
+                        .failWithCode("mustBeLessThan.numberOfRepayments");
             }
 
             if (numberOfRepayments <= defaultToZeroIfNull(graceOnInterestPayment)) {
                 baseDataValidator.reset().parameter("graceOnInterestPayment").value(graceOnInterestPayment)
-                        .failWithCode(".mustBeLessThan.numberOfRepayments");
+                        .failWithCode("mustBeLessThan.numberOfRepayments");
             }
 
             if (numberOfRepayments < defaultToZeroIfNull(graceOnInterestCharged)) {
                 baseDataValidator.reset().parameter("graceOnInterestCharged").value(graceOnInterestCharged)
-                        .failWithCode(".mustBeLessThan.numberOfRepayments");
+                        .failWithCode("mustBeLessThan.numberOfRepayments");
             }
 
             int graceOnPrincipal = 0;
