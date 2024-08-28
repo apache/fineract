@@ -57,8 +57,8 @@ public class InstanceModeIntegrationTest {
         responseSpec405 = new ResponseSpecBuilder().expectStatusCode(405).build();
 
         schedulerJobHelper = new SchedulerJobHelper(requestSpec);
-        String jobName = "Apply Annual Fee For Savings";
-        jobId = schedulerJobHelper.getSchedulerJobIdByName(jobName);
+        // Apply Annual Fee For Savings"
+        jobId = schedulerJobHelper.getSchedulerJobIdByShortName("SA_AANF");
     }
 
     @ConfigureInstanceMode(readEnabled = true, writeEnabled = false, batchWorkerEnabled = false, batchManagerEnabled = false)

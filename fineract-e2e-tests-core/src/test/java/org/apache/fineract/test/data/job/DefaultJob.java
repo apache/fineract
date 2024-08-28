@@ -20,18 +20,28 @@ package org.apache.fineract.test.data.job;
 
 public enum DefaultJob implements Job {
 
-    ADD_ACCRUAL_TRANSACTIONS("Add Accrual Transactions"), ADD_PERIODIC_ACCRUAL_TRANSACTIONS(
-            "Add Periodic Accrual Transactions"), INCREASE_BUSINESS_DAY("Increase Business Date by 1 day"), LOAN_DELINQUENCY_CLASSIFICATION(
-                    "Loan Delinquency Classification"), LOAN_COB("Loan COB");
+    ADD_ACCRUAL_TRANSACTIONS("Add Accrual Transactions", "LA_AATR"), //
+    ADD_PERIODIC_ACCRUAL_TRANSACTIONS("Add Periodic Accrual Transactions", "ACC_APTR"), //
+    INCREASE_BUSINESS_DAY("Increase Business Date by 1 day", "BDT_INC1"), //
+    LOAN_DELINQUENCY_CLASSIFICATION("Loan Delinquency Classification", "LA_DECL"), //
+    LOAN_COB("Loan COB", "LA_ECOB"), //
+    ;
 
     private final String customName;
+    private final String shortName;
 
-    DefaultJob(String customName) {
+    DefaultJob(String customName, String shortName) {
         this.customName = customName;
+        this.shortName = shortName;
     }
 
     @Override
     public String getName() {
         return customName;
+    }
+
+    @Override
+    public String getShortName() {
+        return shortName;
     }
 }

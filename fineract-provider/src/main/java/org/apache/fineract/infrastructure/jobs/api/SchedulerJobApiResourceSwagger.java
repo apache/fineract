@@ -44,6 +44,8 @@ final class SchedulerJobApiResourceSwagger {
         public Long jobId;
         @Schema(example = "Update loan Summary")
         public String displayName;
+        @Schema(example = "LA_USUM")
+        public String shortName;
         @Schema(example = "")
         public Date nextRunTime;
         @Schema(example = "")

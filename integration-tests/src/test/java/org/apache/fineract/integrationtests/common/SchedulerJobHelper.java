@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests.common;
 
 import static java.time.Instant.now;
+import static org.apache.fineract.infrastructure.jobs.api.SchedulerJobApiConstants.SHORT_NAME_PARAM;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -28,6 +29,7 @@ import com.google.gson.Gson;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -37,7 +39,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.apache.fineract.client.models.PutJobsJobIDRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
@@ -89,6 +93,15 @@ public class SchedulerJobHelper extends IntegrationTest {
         return response;
     }
 
+    private Map<String, Object> getSchedulerJobByShortName(String shortName) {
+        final String GET_SCHEDULER_JOB_URL = "/fineract-provider/api/v1/jobs/" + SHORT_NAME_PARAM + "/" + shortName + "?"
+                + Utils.TENANT_IDENTIFIER;
+        LOG.info("------------------------ RETRIEVING SCHEDULER JOB BY SHORT NAME -------------------------");
+        Map<String, Object> response = Utils.performServerGet(requestSpec, response200Spec, GET_SCHEDULER_JOB_URL, "");
+        assertNotNull(response);
+        return response;
+    }
+
     public Boolean getSchedulerStatus() {
         final String GET_SCHEDULER_STATUS_URL = "/fineract-provider/api/v1/scheduler?" + Utils.TENANT_IDENTIFIER;
         LOG.info("------------------------ RETRIEVING SCHEDULER STATUS -------------------------");
@@ -131,6 +144,18 @@ public class SchedulerJobHelper extends IntegrationTest {
         Utils.performServerPost(requestSpec, responseSpec, RUN_SCHEDULER_JOB_URL, runSchedulerJobAsJSON(), null);
     }
 
+    public void runSchedulerJobByShortName(String shortName) {
+        final ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(202).build();
+        runSchedulerJobByShortName(shortName, responseSpec);
+    }
+
+    public void runSchedulerJobByShortName(String shortName, ResponseSpecification responseSpec) {
+        final String RUN_SCHEDULER_JOB_URL = "/fineract-provider/api/v1/jobs/" + SHORT_NAME_PARAM + "/" + shortName + "?command=executeJob&"
+                + Utils.TENANT_IDENTIFIER;
+        LOG.info("------------------------ RUN SCHEDULER JOB -------------------------");
+        Utils.performServerPost(requestSpec, responseSpec, RUN_SCHEDULER_JOB_URL, runSchedulerJobAsJSON(), null);
+    }
+
     private static String runSchedulerJobAsJSON() {
         final Map<String, String> map = new HashMap<>();
         String runSchedulerJob = new Gson().toJson(map);
@@ -149,6 +174,16 @@ public class SchedulerJobHelper extends IntegrationTest {
                 "No such named Job (see org.apache.fineract.infrastructure.jobs.service.JobName enum):" + jobName);
     }
 
+    public int getSchedulerJobIdByShortName(String shortName) {
+        Map<String, Object> jobMap = getSchedulerJobByShortName(shortName);
+        final String GET_SCHEDULER_JOB_URL = "/fineract-provider/api/v1/jobs/" + SHORT_NAME_PARAM + "/" + shortName + "?"
+                + Utils.TENANT_IDENTIFIER;
+        LOG.info("------------------------ RETRIEVING SCHEDULER JOB ID BY SHORT NAME -------------------------");
+        Integer response = (Integer) jobMap.get("jobId");
+        assertNotNull(response);
+        return response;
+    }
+
     /**
      * Launches a Job and awaits its completion.
      *
@@ -158,23 +193,43 @@ public class SchedulerJobHelper extends IntegrationTest {
      * @author Michael Vorburger.ch
      */
     public void executeAndAwaitJob(String jobName) {
-        final Duration timeout = Duration.ofMinutes(4);
-        final Duration pause = Duration.ofSeconds(2);
-        DateTimeFormatter df = DateTimeFormatter.ISO_INSTANT; // FINERACT-926
-        Instant beforeExecuteTime = now().truncatedTo(ChronoUnit.SECONDS);
+        int jobId = getSchedulerJobIdByName(jobName);
+        executeAndAwaitJob(jobId, (a) -> runSchedulerJob(jobId), () -> jobLastRunHistorySupplier(jobId));
+    }
 
+    /**
+     * Launches a Job and awaits its completion.
+     *
+     * @param shortName
+     *            shortName of Scheduler Job
+     *
+     * @author Michael Vorburger.ch
+     */
+    public void executeAndAwaitJobByShortName(String shortName) {
+        executeAndAwaitJob(shortName, (a) -> runSchedulerJobByShortName(shortName), () -> jobLastRunHistoryByShortName(shortName));
+    }
+
+    public <T extends Serializable> void executeAndAwaitJob(T jobParam, Consumer<T> runSchedulerJob,
+            Supplier<Callable<Map<String, String>>> retrievelastRunHistory) {
         // Stop the Scheduler while we manually trigger execution of job, to
         // avoid side effects and simplify debugging when readings logs
         updateSchedulerStatus(false);
 
+        Instant beforeExecuteTime = now().truncatedTo(ChronoUnit.SECONDS);
         // Executing Scheduler Job
-        int jobId = getSchedulerJobIdByName(jobName);
-        runSchedulerJob(jobId);
+        runSchedulerJob.accept(jobParam);
 
+        awaitJob(beforeExecuteTime, retrievelastRunHistory);
+    }
+
+    private void awaitJob(Instant beforeExecuteTime, Supplier<Callable<Map<String, String>>> retrieveLastRunHistory) {
+        final Duration timeout = Duration.ofMinutes(4);
+        final Duration pause = Duration.ofSeconds(2);
+        DateTimeFormatter df = DateTimeFormatter.ISO_INSTANT; // FINERACT-926
         // Await JobDetailData.lastRunHistory [JobDetailHistoryData]
         // jobRunStartTime >= beforeExecuteTime (or timeout)
         // jobRunEndTime to be both set and >= jobRunStartTime (or timeout)
-        Map<String, String> finalLastRunHistory = await().atMost(timeout).pollInterval(pause).until(jobLastRunHistorySupplier(jobId),
+        Map<String, String> finalLastRunHistory = await().atMost(timeout).pollInterval(pause).until(retrieveLastRunHistory.get(),
                 lastRunHistory -> {
                     String jobRunStartText = lastRunHistory.get("jobRunStartTime");
                     if (jobRunStartText == null) {
@@ -217,6 +272,17 @@ public class SchedulerJobHelper extends IntegrationTest {
     private Callable<Map<String, String>> jobLastRunHistorySupplier(int jobId) {
         return () -> {
             Map<String, Object> job = getSchedulerJobById(jobId);
+            if (job == null) {
+                return null;
+            }
+            return (Map<String, String>) job.get("lastRunHistory");
+        };
+    }
+
+    @SuppressWarnings("unchecked")
+    private Callable<Map<String, String>> jobLastRunHistoryByShortName(String shortName) {
+        return () -> {
+            Map<String, Object> job = getSchedulerJobByShortName(shortName);
             if (job == null) {
                 return null;
             }

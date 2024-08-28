@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet author="fineract" id="1">
+        <addColumn tableName="job">
+            <column name="short_name" type="VARCHAR(8)">
+                <constraints unique="true" nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="fineract" id="2">
+        <update tableName="job">
+            <column name="short_name" value="LA_USUM"/>
+            <where>name='Update loan Summary'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="LA_ARAG"/>
+            <where>name='Update Loan Arrears Ageing'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="LA_PIAD"/>
+            <where>name='Update Loan Paid In Advance'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="LA_AHOL"/>
+            <where>name='Apply Holidays To Loans'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="LA_TFFS"/>
+            <where>name='Transfer Fee For Loans From Savings'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="LA_OPEN"/>
+            <where>name='Apply penalty to overdue loans'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="LA_UNPA"/>
+            <where>name='Update Non Performing Assets'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="LA_RINT"/>
+            <where>name='Recalculate Interest For Loans'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="LA_GLPR"/>
+            <where>name='Generate Loan Loss Provisioning'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="LA_AATR"/>
+            <where>name='Add Accrual Transactions For Loans With Income Posted As Transactions'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="LA_ECOB"/>
+            <where>name='Loan COB'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="LA_DECL"/>
+            <where>name='Loan Delinquency Classification'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="SA_AANF"/>
+            <where>name='Apply Annual Fee For Savings'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="SA_PINT"/>
+            <where>name='Post Interest For Savings'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="SA_PDCH"/>
+            <where>name='Pay Due Savings Charges'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="SA_TINT"/>
+            <where>name='Transfer Interest To Savings'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="SA_MATD"/>
+            <where>name='Update Deposit Accounts Maturity details'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="SA_GSCH"/>
+            <where>name='Generate Mandatory Savings Schedule'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="SA_UDOR"/>
+            <where>name='Update Savings Dormant Accounts'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="SH_PDIV"/>
+            <where>name='Post Dividends For Shares'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="ACC_RBAL"/>
+            <where>name='Update Accounting Running Balances'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="ACC_AATR"/>
+            <where>name='Add Accrual Transactions'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="ACC_APTR"/>
+            <where>name='Add Periodic Accrual Transactions'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="STI_EXEC"/>
+            <where>name='Execute Standing Instruction'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="RMJ_EXEC"/>
+            <where>name='Execute Report Mailing Jobs'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="EM_EXEC"/>
+            <where>name='Execute Email'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="EM_UOUT"/>
+            <where>name='Update Email Outbound with campaign message'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="SMS_UOUT"/>
+            <where>name='Update SMS Outbound with Campaign Message'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="SMS_SMSG"/>
+            <where>name='Send Messages to SMS Gateway'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="SMS_DRPT"/>
+            <where>name='Get Delivery Reports from SMS Gateway'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="ADH_GSCH"/>
+            <where>name='Generate AdhocClient Schedule'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="TBL_UDET"/>
+            <where>name='Update Trial Balance Details'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="JOB_EXEC"/>
+            <where>name='Execute All Dirty Jobs'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="BDT_INC1"/>
+            <where>name='Increase Business Date by 1 day'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="BDT_INC1"/>
+            <where>name='Increase Business Date by 1 day'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="BDT_COB1"/>
+            <where>name='Increase COB Date by 1 day'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="ASE_SEND"/>
+            <where>name='Send Asynchronous Events'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="EXE_PURG"/>
+            <where>name='Purge External Events'</where>
+        </update>
+        <update tableName="job">
+            <column name="short_name" value="COM_PURG"/>
+            <where>name='Purge Processed Commands'</where>
+        </update>
+    </changeSet>
+    <changeSet author="fineract" id="3">
+        <update tableName="job">
+            <column name="short_name" value="ACC_ACPO"/>
+            <where>name='Accrual Activity Posting'</where>
+        </update>
+    </changeSet>
+</databaseChangeLog>
