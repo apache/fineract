@@ -56,6 +56,18 @@ public class PlatformApiDataValidationException extends AbstractPlatformExceptio
         this.errors = errors;
     }
 
+    public PlatformApiDataValidationException(String messageCode, String userMessage, String parameterName, Throwable cause,
+            final Object... userMessageArgs) {
+        this("validation.msg.validation.errors.exist", "Validation errors exist.",
+                List.of(ApiParameterError.parameterError(messageCode, userMessage, parameterName, userMessageArgs)), cause);
+    }
+
+    public PlatformApiDataValidationException(String messageCode, String userMessage, String parameterName,
+            final Object... userMessageArgs) {
+        this("validation.msg.validation.errors.exist", "Validation errors exist.",
+                List.of(ApiParameterError.parameterError(messageCode, userMessage, parameterName, userMessageArgs)), null);
+    }
+
     public List<ApiParameterError> getErrors() {
         return this.errors;
     }

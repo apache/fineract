@@ -16,11 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.test.data.job;
+package org.apache.fineract.infrastructure.core.service;
 
-public interface Job {
+public interface DefaultOption {
 
-    String getName();
+    boolean isDefault();
 
-    String getShortName();
+    static <T extends Enum<T> & DefaultOption> T getDefault(Class<T> clazz) {
+        for (T enumConstant : clazz.getEnumConstants()) {
+            if (enumConstant.isDefault()) {
+                return enumConstant;
+            }
+        }
+        return null;
+    }
 }
