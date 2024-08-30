@@ -194,6 +194,9 @@ public class SavingsAccountTransactionsApiResource {
         } else if (is(commandParam, "withdrawal")) {
             final CommandWrapper commandRequest = builder.savingsAccountWithdrawal(savingsId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "withdrawToLinkedAccount")) {
+            final CommandWrapper commandRequest = builder.savingsAccountWithdrawToLinkedAccount(savingsId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "postInterestAsOn")) {
             final CommandWrapper commandRequest = builder.savingsAccountInterestPosting(savingsId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);

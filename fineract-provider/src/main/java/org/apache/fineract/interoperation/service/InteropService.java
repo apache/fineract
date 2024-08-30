@@ -29,7 +29,9 @@ import org.apache.fineract.interoperation.data.InteropQuoteResponseData;
 import org.apache.fineract.interoperation.data.InteropTransactionRequestResponseData;
 import org.apache.fineract.interoperation.data.InteropTransactionsData;
 import org.apache.fineract.interoperation.data.InteropTransferResponseData;
+import org.apache.fineract.interoperation.domain.InteropIdentifier;
 import org.apache.fineract.interoperation.domain.InteropIdentifierType;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 
 public interface InteropService {
 
@@ -46,6 +48,12 @@ public interface InteropService {
     @NotNull
     InteropIdentifierAccountResponseData getAccountByIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue,
             String subIdOrType);
+
+    @NotNull
+    InteropIdentifier getIndentifierByAccount(@NotNull SavingsAccount account);
+
+    @NotNull
+    InteropIdentifier getIdentifierByAccountId(@NotNull Long accountId);
 
     @NotNull
     InteropIdentifierAccountResponseData registerAccountIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue,

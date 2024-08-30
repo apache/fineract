@@ -46,6 +46,7 @@ import org.apache.fineract.cob.service.LoanAccountLockService;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.configuration.exception.GlobalConfigurationNotEnabledException;
 import org.apache.fineract.infrastructure.configuration.service.TemporaryConfigurationServiceContainer;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -97,6 +98,9 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.transaction
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanWrittenOffPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.interoperation.domain.InteropIdentifier;
+import org.apache.fineract.interoperation.domain.InteropIdentifierType;
+import org.apache.fineract.interoperation.service.InteropService;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -209,6 +213,9 @@ import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.service.Repaym
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.transfer.api.TransferApiConstants;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.pheesdk.transfer.Services.TransferService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.transaction.annotation.Transactional;
@@ -266,6 +273,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final AccountTransferRepository accountTransferRepository;
     private final LoanTransactionAssembler loanTransactionAssembler;
     private final LoanAccrualsProcessingService loanAccrualsProcessingService;
+    private final InteropService interopService;
+    private static final Logger logger =  LoggerFactory.getLogger(LoanWritePlatformServiceJpaRepositoryImpl.class);
 
     @Transactional
     @Override
@@ -293,6 +302,142 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Override
     public CommandProcessingResult disburseLoan(Long loanId, JsonCommand command, Boolean isAccountTransfer) {
         return disburseLoan(loanId, command, isAccountTransfer, false);
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult disburseLoanToLinkedAccount(Long loanId, JsonCommand command, Boolean isAccountTransfer) {
+        Boolean isWithoutAutoPayment = false;
+        boolean isPaymentHubEnabled = configurationDomainService.isPaymentHubEnabled();
+        if(!isPaymentHubEnabled){
+            throw new GlobalConfigurationNotEnabledException("use-payment-hub");
+        }
+        loanTransactionValidator.validateDisbursement(command, isAccountTransfer, loanId);
+
+        Loan loan = loanAssembler.assembleFrom(loanId);
+
+        if (loan.loanProduct().isDisallowExpectedDisbursements()) {
+            List<LoanDisbursementDetails> filteredList = loan.getDisbursementDetails().stream()
+                    .filter(disbursementDetails -> disbursementDetails.actualDisbursementDate() == null).toList();
+            // Check whether a new LoanDisbursementDetails is required
+            if (filteredList.isEmpty()) {
+                // create artificial 'tranche/expected disbursal' as current disburse code expects it for
+                // multi-disbursal products
+                final LocalDate artificialExpectedDate = loan.getExpectedDisbursedOnLocalDate();
+                LoanDisbursementDetails disbursementDetail = new LoanDisbursementDetails(artificialExpectedDate, null,
+                        loan.getDisbursedAmount(), null, false);
+                disbursementDetail.updateLoan(loan);
+                loan.getAllDisbursementDetails().add(disbursementDetail);
+            }
+        }
+
+        final LocalDate nextPossibleRepaymentDate = loan.getNextPossibleRepaymentDateForRescheduling();
+        final LocalDate rescheduledRepaymentDate = command.localDateValueOfParameterNamed("adjustRepaymentDate");
+        final LocalDate actualDisbursementDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
+        if (!loan.isMultiDisburmentLoan()) {
+            loan.setActualDisbursementDate(actualDisbursementDate);
+        }
+
+        // validate actual disbursement date against meeting date
+        ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, null);
+
+
+        final AppUser currentUser = getAppUserIfPresent();
+        final Map<String, Object> changes = new LinkedHashMap<>();
+
+        final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
+        if (paymentDetail != null && paymentDetail.getPaymentType() != null && paymentDetail.getPaymentType().getIsCashPayment()) {
+            BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
+            this.cashierTransactionDataValidator.validateOnLoanDisbursal(currentUser, loan.getCurrencyCode(), transactionAmount);
+        }
+        final boolean isPaymentTypeApplicableForDisbursementCharge = configurationDomainService
+                .isPaymentTypeApplicableForDisbursementCharge();
+
+        Money amountBeforeAdjust = loan.getPrincipal();
+        final Locale locale = command.extractLocale();
+        final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
+
+        if (loan.canDisburse()) {
+            // Get netDisbursalAmount from disbursal screen field.
+            final BigDecimal netDisbursalAmount = command
+                    .bigDecimalValueOfParameterNamed(LoanApiConstants.disbursementNetDisbursalAmountParameterName);
+            if (netDisbursalAmount != null) {
+                loan.setNetDisbursalAmount(netDisbursalAmount);
+            }
+            Money disburseAmount = loan.adjustDisburseAmount(command, actualDisbursementDate);
+            boolean recalculateSchedule = amountBeforeAdjust.isNotEqualTo(loan.getPrincipal());
+            final ExternalId txnExternalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
+
+            if (loan.isTopup() && loan.getClientId() != null) {
+                final Long loanIdToClose = loan.getTopupLoanDetails().getLoanIdToClose();
+                final Loan loanToClose = this.loanRepositoryWrapper.findNonClosedLoanThatBelongsToClient(loanIdToClose, loan.getClientId());
+                if (loanToClose == null) {
+                    throw new GeneralPlatformDomainRuleException("error.msg.loan.to.be.closed.with.topup.is.not.active",
+                            "Loan to be closed with this topup is not active.");
+                }
+                final LocalDate lastUserTransactionOnLoanToClose = loanToClose.getLastUserTransactionDate();
+                if (DateUtils.isBefore(loan.getDisbursementDate(), lastUserTransactionOnLoanToClose)) {
+                    throw new GeneralPlatformDomainRuleException(
+                            "error.msg.loan.disbursal.date.should.be.after.last.transaction.date.of.loan.to.be.closed",
+                            "Disbursal date of this loan application " + loan.getDisbursementDate()
+                                    + " should be after last transaction date of loan to be closed " + lastUserTransactionOnLoanToClose);
+                }
+
+                BigDecimal loanOutstanding = this.loanReadPlatformService
+                        .retrieveLoanPrePaymentTemplate(LoanTransactionType.REPAYMENT, loanIdToClose, actualDisbursementDate).getAmount();
+                final BigDecimal firstDisbursalAmount = loan.getFirstDisbursalAmount();
+                if (loanOutstanding.compareTo(firstDisbursalAmount) > 0) {
+                    throw new GeneralPlatformDomainRuleException("error.msg.loan.amount.less.than.outstanding.of.loan.to.be.closed",
+                            "Topup loan amount should be greater than outstanding amount of loan to be closed.");
+                }
+            }
+            if (loan.getRepaymentScheduleInstallments().isEmpty()) {
+                /*
+                 * If no schedule, generate one (applicable to non-tranche multi-disbursal loans)
+                 */
+                recalculateSchedule = true;
+            }
+
+            regenerateScheduleOnDisbursement(command, loan, recalculateSchedule, scheduleGeneratorDTO, nextPossibleRepaymentDate,
+                    rescheduledRepaymentDate);
+            boolean downPaymentEnabled = loan.repaymentScheduleDetail().isEnableDownPayment();
+            if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled() || downPaymentEnabled) {
+                createAndSaveLoanScheduleArchive(loan, scheduleGeneratorDTO);
+            }
+        }
+
+        final PortfolioAccountData portfolioAccountData = this.accountAssociationsReadPlatformService
+                .retriveLoanLinkedAssociation(loan.getId());
+        if (portfolioAccountData == null) {
+            final String errorMessage = "Disburse Loan with id:" + loan.getId() + " requires linked savings account for payment";
+            throw new LinkedAccountRequiredException("loan.disburse.to.savings", errorMessage, loan.getId());
+        }
+
+        InteropIdentifier identifier1 =interopService.getIdentifierByAccountId(portfolioAccountData.getId());
+        String payerIdentifierType = InteropIdentifierType.ACCOUNT_ID.toString();
+        String payerIdentifierValue = loan.getAccountNumber();
+        String payeeIdentifierType =identifier1.getType().toString();
+        String payeeIdentifierValue=identifier1.getValue();
+        String currency = amountBeforeAdjust.getCurrencyCode();
+        String amount = Integer.toString(amountBeforeAdjust.getAmount().intValue());
+        SdkDisbursalService sdkDisbursalService = new SdkDisbursalServiceImpl();
+        try{
+            String id = sdkDisbursalService.processDisbursal(payerIdentifierType,payerIdentifierValue,payeeIdentifierType,payeeIdentifierValue,amount,currency);
+            logger.info("Payment hub transaction started with transaction id: "+id);
+        }catch (Exception e){
+            logger.error(e.getMessage());
+        }
+
+        return new CommandProcessingResultBuilder()
+                .withCommandId(command.commandId()) //
+                .withEntityId(loan.getId()) //
+                .withEntityExternalId(loan.getExternalId())
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId())
+                .withLoanId(loanId) //
+                .with(changes)//
+                .build();
     }
 
     @Transactional
