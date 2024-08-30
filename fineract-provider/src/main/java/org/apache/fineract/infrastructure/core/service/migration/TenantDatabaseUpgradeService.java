@@ -47,10 +47,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class TenantDatabaseUpgradeService implements InitializingBean {
 
-    private static final String TENANT_STORE_DB_CONTEXT = "tenant_store_db";
-    private static final String INITIAL_SWITCH_CONTEXT = "initial_switch";
-    private static final String TENANT_DB_CONTEXT = "tenant_db";
-    private static final String CUSTOM_CHANGELOG_CONTEXT = "custom_changelog";
+    public static final String TENANT_STORE_DB_CONTEXT = "tenant_store_db";
+    public static final String INITIAL_SWITCH_CONTEXT = "initial_switch";
+    public static final String TENANT_DB_CONTEXT = "tenant_db";
+    public static final String CUSTOM_CHANGELOG_CONTEXT = "custom_changelog";
 
     private final TenantDetailsService tenantDetailsService;
     @Qualifier("hikariTenantDataSource")
@@ -144,17 +144,17 @@ public class TenantDatabaseUpgradeService implements InitializingBean {
     private void upgradeIndividualTenant(FineractPlatformTenant tenant) throws LiquibaseException {
         log.info("Upgrade for tenant {} has started", tenant.getTenantIdentifier());
         DataSource tenantDataSource = tenantDataSourceFactory.create(tenant);
+        // 'initial_switch' and 'custom_changelog' contexts should be controlled by the application configuration
+        // settings, and we should not use them to control the script order
         if (databaseStateVerifier.isFirstLiquibaseMigration(tenantDataSource)) {
-            ExtendedSpringLiquibase liquibase = liquibaseFactory.create(tenantDataSource, TENANT_DB_CONTEXT, INITIAL_SWITCH_CONTEXT,
-                    tenant.getTenantIdentifier());
+            ExtendedSpringLiquibase liquibase = liquibaseFactory.create(tenantDataSource, TENANT_DB_CONTEXT, CUSTOM_CHANGELOG_CONTEXT,
+                    INITIAL_SWITCH_CONTEXT, tenant.getTenantIdentifier());
             applyInitialLiquibase(tenantDataSource, liquibase, tenant.getTenantIdentifier(),
                     (ds) -> !databaseStateVerifier.isTenantOnLatestUpgradableVersion(ds));
         }
-        SpringLiquibase tenantLiquibase = liquibaseFactory.create(tenantDataSource, TENANT_DB_CONTEXT, tenant.getTenantIdentifier());
-        tenantLiquibase.afterPropertiesSet();
-        SpringLiquibase customChangelogLiquibase = liquibaseFactory.create(tenantDataSource, TENANT_DB_CONTEXT, CUSTOM_CHANGELOG_CONTEXT,
+        SpringLiquibase tenantLiquibase = liquibaseFactory.create(tenantDataSource, TENANT_DB_CONTEXT, CUSTOM_CHANGELOG_CONTEXT,
                 tenant.getTenantIdentifier());
-        customChangelogLiquibase.afterPropertiesSet();
+        tenantLiquibase.afterPropertiesSet();
         log.info("Upgrade for tenant {} has finished", tenant.getTenantIdentifier());
     }
 
