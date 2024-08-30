@@ -513,8 +513,8 @@ public class LoanStepDef extends AbstractStepDef {
 
     @When("Admin creates a fully customized loan with Advanced payment allocation and with product no Advanced payment allocation set results an error:")
     public void createFullyCustomizedLoanNoAdvancedPaymentError(DataTable table) throws IOException {
-        int errorCodeExpected = 400;
-        String errorMessageExpected = "Failed data validation due to: strategy.cannot.be.advanced.payment.allocation.if.not.configured.";
+        int errorCodeExpected = 403;
+        String errorMessageExpected = "Loan transaction processing strategy cannot be Advanced Payment Allocation Strategy if it's not configured on loan product";
 
         List<List<String>> data = table.asLists();
         List<String> loanData = data.get(1);

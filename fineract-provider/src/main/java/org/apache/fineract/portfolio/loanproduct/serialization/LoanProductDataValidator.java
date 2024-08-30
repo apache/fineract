@@ -574,7 +574,6 @@ public final class LoanProductDataValidator {
         }
 
         // Fixed Length validation
-
         fixedLengthValidations(transactionProcessingStrategyCode, isInterestBearing, numberOfRepayments, repaymentEvery, element,
                 baseDataValidator);
 
