@@ -26,4 +26,6 @@ import org.springframework.stereotype.Repository;
 public interface InteropIdentifierRepository extends JpaRepository<InteropIdentifier, Long>, JpaSpecificationExecutor<InteropIdentifier> {
 
     InteropIdentifier findOneByTypeAndValueAndSubType(InteropIdentifierType idType, String value, String subType);
+
+    InteropIdentifier findOneByAccountId(Long accountId);
 }

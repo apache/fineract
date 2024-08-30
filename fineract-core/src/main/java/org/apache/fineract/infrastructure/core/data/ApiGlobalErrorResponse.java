@@ -157,6 +157,15 @@ public class ApiGlobalErrorResponse {
         return create(SC_NOT_FOUND, "error.msg.resource.not.found", msg, msg, errors);
     }
 
+    public static ApiGlobalErrorResponse notEnabled(final String globalisationMessageCode, final String defaultUserMessage,
+                                                  final Object... defaultUserMessageArgs) {
+        String msg = "The requested resource is not enabled.";
+        final List<ApiParameterError> errors = new ArrayList<>();
+        errors.add(ApiParameterError.resourceIdentifierNotEnabled(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs));
+
+        return create(SC_FORBIDDEN, "error.msg.resource.not.enabled", msg, msg, errors);
+    }
+
     public static ApiGlobalErrorResponse badClientRequest(final String globalisationMessageCode, final String defaultUserMessage,
             final List<ApiParameterError> errors) {
         return create(SC_BAD_REQUEST, globalisationMessageCode,

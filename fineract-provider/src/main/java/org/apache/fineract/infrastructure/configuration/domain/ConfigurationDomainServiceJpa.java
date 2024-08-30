@@ -49,6 +49,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     private static final String ENABLE_ADDRESS = "Enable-Address";
     private static final String ENABLE_COB_BULK_EVENT = "enable-cob-bulk-event";
     private static final String EXTERNAL_EVENT_BATCH_SIZE = "external-event-batch-size";
+    private static final String USE_PAYMENT_HUB = "use-payment-hub";
 
     private static final String REPORT_EXPORT_S3_FOLDER_NAME = "report-export-s3-folder-name";
 
@@ -527,6 +528,12 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
             return defaultValue;
         }
         return value;
+    }
+
+    @Override
+    public boolean isPaymentHubEnabled() {
+        final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(USE_PAYMENT_HUB);
+        return property.isEnabled();
     }
 
 }
