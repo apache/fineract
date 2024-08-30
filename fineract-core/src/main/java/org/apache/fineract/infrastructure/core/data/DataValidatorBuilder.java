@@ -1056,4 +1056,12 @@ public class DataValidatorBuilder {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
     }
+
+    public static ApiParameterError buildValidationParameterApiError(final String resource, final String parameterName,
+            final String errorCode, final String errorMessage, final Object... defaultUserMessageArgs) {
+        final String validationErrorCode = "validation.msg." + resource + "." + parameterName + errorCode;
+        String defaultEnglishMessage = "The parameter `" + parameterName + "` " + errorMessage;
+        return ApiParameterError.parameterError(validationErrorCode, defaultEnglishMessage, parameterName, defaultUserMessageArgs);
+    }
+
 }
