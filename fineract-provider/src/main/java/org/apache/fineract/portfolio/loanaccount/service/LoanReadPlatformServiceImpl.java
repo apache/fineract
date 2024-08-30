@@ -1642,6 +1642,15 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         if (!loan.isOpen()) {
             return list;
         }
+
+        Optional<Charge> optPenaltyCharge = loan.getLoanProduct().getCharges().stream()
+                .filter((e) -> ChargeTimeType.OVERDUE_INSTALLMENT.getValue().equals(e.getChargeTimeType()) && e.isLoanCharge()).findFirst();
+
+        if (optPenaltyCharge.isEmpty()) {
+            return list;
+        }
+        final Charge penaltyCharge = optPenaltyCharge.get();
+
         final Long penaltyWaitPeriod = configurationDomainService.retrievePenaltyWaitPeriod();
         final boolean backdatePenalties = configurationDomainService.isBackdatePenaltiesEnabled();
 
@@ -1657,16 +1666,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 if (!backdatePenalties && !isDueToday) {
                     continue;
                 }
-                Optional<Charge> penaltyCharge = loan.getLoanProduct().getCharges().stream()
-                        .filter((e) -> ChargeTimeType.OVERDUE_INSTALLMENT.getValue().equals(e.getChargeTimeType()) && e.isLoanCharge())
-                        .findFirst();
 
-                if (penaltyCharge.isEmpty()) {
-                    continue;
-                }
-
-                list.add(new OverdueLoanScheduleData(loan.getId(), penaltyCharge.get().getId(),
-                        DateUtils.DEFAULT_DATE_FORMATTER.format(installment.getDueDate()), penaltyCharge.get().getAmount(),
+                list.add(new OverdueLoanScheduleData(loan.getId(), penaltyCharge.getId(),
+                        DateUtils.DEFAULT_DATE_FORMATTER.format(installment.getDueDate()), penaltyCharge.getAmount(),
                         DateUtils.DEFAULT_DATE_FORMAT, Locale.ENGLISH.toLanguageTag(),
                         installment.getPrincipalOutstanding(loan.getCurrency()).getAmount(),
                         installment.getInterestOutstanding(loan.getCurrency()).getAmount(), installment.getInstallmentNumber()));
