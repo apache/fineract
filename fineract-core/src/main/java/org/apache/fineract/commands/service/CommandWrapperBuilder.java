@@ -1148,7 +1148,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder disburseLoanToLinkedAccountApplication(final Long loanId){
+    public CommandWrapperBuilder disburseLoanToLinkedAccountApplication(final Long loanId) {
         this.actionName = "DISBURSETOLINKEDACCOUNT";
         this.entityName = "LOAN";
         this.entityId = loanId;

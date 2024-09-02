@@ -274,7 +274,7 @@ public class InteropServiceImpl implements InteropService {
     @NotNull
     @Transactional
     @Override
-    public InteropIdentifier getIdentifierByAccountId(@NotNull Long accountId){
+    public InteropIdentifier getIdentifierByAccountId(@NotNull Long accountId) {
         return identifierRepository.findOneByAccountId(accountId);
     }
 
@@ -656,7 +656,7 @@ public class InteropServiceImpl implements InteropService {
         return identifierRepository.findOneByTypeAndValueAndSubType(idType, idValue, subIdOrType);
     }
 
-    public InteropIdentifier findIdentifier(@NotNull SavingsAccount account){
+    public InteropIdentifier findIdentifier(@NotNull SavingsAccount account) {
         return identifierRepository.findOneByAccountId(account.getId());
     }
 

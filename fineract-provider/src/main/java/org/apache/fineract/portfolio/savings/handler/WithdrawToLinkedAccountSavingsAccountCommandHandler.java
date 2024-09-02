@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @CommandType(entity = "SAVINGSACCOUNT", action = "WITHDRAWTOLINKEDACCOUNT")
 public class WithdrawToLinkedAccountSavingsAccountCommandHandler implements NewCommandSourceHandler {
+
     private final SavingsAccountWritePlatformService writePlatformService;
 
     @Autowired
