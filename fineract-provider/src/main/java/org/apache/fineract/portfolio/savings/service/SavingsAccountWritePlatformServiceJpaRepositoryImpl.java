@@ -133,13 +133,13 @@ import org.apache.fineract.portfolio.savings.exception.TransactionUpdateNotAllow
 import org.apache.fineract.portfolio.transfer.api.TransferApiConstants;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -173,7 +173,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private final SavingsAccountInterestPostingService savingsAccountInterestPostingService;
     private final ErrorHandler errorHandler;
     private final InteropService interopService;
-    private static final Logger logger =  LoggerFactory.getLogger(SavingsAccountWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(SavingsAccountWritePlatformServiceJpaRepositoryImpl.class);
 
     @Transactional
     @Override
@@ -419,12 +419,11 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     public CommandProcessingResult withdrawToLinkedAccount(final Long savingsId, final JsonCommand command) {
 
         boolean isPaymentHubEnabled = configurationDomainService.isPaymentHubEnabled();
-        if(!isPaymentHubEnabled){
+        if (!isPaymentHubEnabled) {
             throw new GlobalConfigurationNotEnabledException("use-payment-hub");
         }
 
         this.savingsAccountTransactionDataValidator.validate(command);
-
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
@@ -454,8 +453,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.savingsAccountTransactionDataValidator.validateTransactionWithPivotDate(transactionDate, account);
 
         SdkWithdrawalService sdkWithdrawalService = new SdkWithdrawalServiceImpl();
-        String id = sdkWithdrawalService.processWithdrawal(identifierType.toString(),identifierValue,paymentDetail.getRoutingCode(),paymentDetail.getAccountNumber(),transactionAmount.toString(),account.getCurrency().getCode());
-        logger.info("withdrawal transaction started with id: "+ id);
+        String id = sdkWithdrawalService.processWithdrawal(identifierType.toString(), identifierValue, paymentDetail.getRoutingCode(),
+                paymentDetail.getAccountNumber(), transactionAmount.toString(), account.getCurrency().getCode());
+        logger.info("withdrawal transaction started with id: " + id);
 
         return new CommandProcessingResultBuilder() //
                 .withOfficeId(account.officeId()) //

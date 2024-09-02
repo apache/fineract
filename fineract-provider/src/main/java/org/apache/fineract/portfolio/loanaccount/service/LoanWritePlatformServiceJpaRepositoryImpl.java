@@ -213,7 +213,6 @@ import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.service.Repaym
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.transfer.api.TransferApiConstants;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.pheesdk.transfer.Services.TransferService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -274,7 +273,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final LoanTransactionAssembler loanTransactionAssembler;
     private final LoanAccrualsProcessingService loanAccrualsProcessingService;
     private final InteropService interopService;
-    private static final Logger logger =  LoggerFactory.getLogger(LoanWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(LoanWritePlatformServiceJpaRepositoryImpl.class);
 
     @Transactional
     @Override
@@ -309,7 +308,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public CommandProcessingResult disburseLoanToLinkedAccount(Long loanId, JsonCommand command, Boolean isAccountTransfer) {
         Boolean isWithoutAutoPayment = false;
         boolean isPaymentHubEnabled = configurationDomainService.isPaymentHubEnabled();
-        if(!isPaymentHubEnabled){
+        if (!isPaymentHubEnabled) {
             throw new GlobalConfigurationNotEnabledException("use-payment-hub");
         }
         loanTransactionValidator.validateDisbursement(command, isAccountTransfer, loanId);
@@ -340,7 +339,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         // validate actual disbursement date against meeting date
         ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, null);
-
 
         final AppUser currentUser = getAppUserIfPresent();
         final Map<String, Object> changes = new LinkedHashMap<>();
@@ -413,29 +411,27 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             throw new LinkedAccountRequiredException("loan.disburse.to.savings", errorMessage, loan.getId());
         }
 
-        InteropIdentifier identifier1 =interopService.getIdentifierByAccountId(portfolioAccountData.getId());
+        InteropIdentifier identifier1 = interopService.getIdentifierByAccountId(portfolioAccountData.getId());
         String payerIdentifierType = InteropIdentifierType.ACCOUNT_ID.toString();
         String payerIdentifierValue = loan.getAccountNumber();
-        String payeeIdentifierType =identifier1.getType().toString();
-        String payeeIdentifierValue=identifier1.getValue();
+        String payeeIdentifierType = identifier1.getType().toString();
+        String payeeIdentifierValue = identifier1.getValue();
         String currency = amountBeforeAdjust.getCurrencyCode();
         String amount = Integer.toString(amountBeforeAdjust.getAmount().intValue());
         SdkDisbursalService sdkDisbursalService = new SdkDisbursalServiceImpl();
-        try{
-            String id = sdkDisbursalService.processDisbursal(payerIdentifierType,payerIdentifierValue,payeeIdentifierType,payeeIdentifierValue,amount,currency);
-            logger.info("Payment hub transaction started with transaction id: "+id);
-        }catch (Exception e){
+        try {
+            String id = sdkDisbursalService.processDisbursal(payerIdentifierType, payerIdentifierValue, payeeIdentifierType,
+                    payeeIdentifierValue, amount, currency);
+            logger.info("Payment hub transaction started with transaction id: " + id);
+        } catch (Exception e) {
             logger.error(e.getMessage());
         }
 
-        return new CommandProcessingResultBuilder()
-                .withCommandId(command.commandId()) //
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()) //
                 .withEntityId(loan.getId()) //
-                .withEntityExternalId(loan.getExternalId())
-                .withOfficeId(loan.getOfficeId()) //
+                .withEntityExternalId(loan.getExternalId()).withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
-                .withGroupId(loan.getGroupId())
-                .withLoanId(loanId) //
+                .withGroupId(loan.getGroupId()).withLoanId(loanId) //
                 .with(changes)//
                 .build();
     }

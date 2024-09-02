@@ -26,8 +26,8 @@ import org.slf4j.LoggerFactory;
 
 public class SdkWithdrawalServiceImpl implements SdkWithdrawalService {
 
-    private  TransferService transferService;
-    private static final Logger logger =  LoggerFactory.getLogger(SdkWithdrawalServiceImpl.class);
+    private TransferService transferService;
+    private static final Logger logger = LoggerFactory.getLogger(SdkWithdrawalServiceImpl.class);
 
     public SdkWithdrawalServiceImpl() {
         TransferService transferService = new TransferService();
@@ -35,7 +35,8 @@ public class SdkWithdrawalServiceImpl implements SdkWithdrawalService {
     }
 
     @Override
-    public String processWithdrawal(String payerType, String payerId, String payeeType, String payeeId, String amount, String currencyCode) throws SdkValidationException, SdkApiException {
+    public String processWithdrawal(String payerType, String payerId, String payeeType, String payeeId, String amount, String currencyCode)
+            throws SdkValidationException, SdkApiException {
         String id = null;
         transferService.setPlatformTenantId("gorilla");
         transferService.setBaseUrl("http://localhost:1111");

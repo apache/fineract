@@ -201,7 +201,7 @@ public final class LoanApplicationValidator {
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final LoanUtilService loanUtilService;
     private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
-    private static final Logger logger =  LoggerFactory.getLogger(LoanApplicationValidator.class);
+    private static final Logger logger = LoggerFactory.getLogger(LoanApplicationValidator.class);
 
     public void validateForCreate(final Loan loan) {
         final LocalDate expectedFirstRepaymentOnDate = loan.getExpectedFirstRepaymentOnDate();

@@ -33,7 +33,8 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 @Slf4j
-public class ConfigurationNotEnabledExceptionMapper implements ExceptionMapper<ConfigurationNotEnabledException>{
+public class ConfigurationNotEnabledExceptionMapper implements ExceptionMapper<ConfigurationNotEnabledException> {
+
     @Override
     public Response toResponse(final ConfigurationNotEnabledException exception) {
         log.warn("Exception occurred", ErrorHandler.findMostSpecificException(exception));

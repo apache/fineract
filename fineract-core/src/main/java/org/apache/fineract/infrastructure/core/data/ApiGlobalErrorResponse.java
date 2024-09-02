@@ -158,7 +158,7 @@ public class ApiGlobalErrorResponse {
     }
 
     public static ApiGlobalErrorResponse notEnabled(final String globalisationMessageCode, final String defaultUserMessage,
-                                                  final Object... defaultUserMessageArgs) {
+            final Object... defaultUserMessageArgs) {
         String msg = "The requested resource is not enabled.";
         final List<ApiParameterError> errors = new ArrayList<>();
         errors.add(ApiParameterError.resourceIdentifierNotEnabled(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs));

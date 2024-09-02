@@ -1165,7 +1165,7 @@ public class LoansApiResource {
             commandRequest = builder.disburseLoanApplication(resolvedLoanId).build();
         } else if (CommandParameterUtil.is(commandParam, "disburseToSavings")) {
             commandRequest = builder.disburseLoanToSavingsApplication(resolvedLoanId).build();
-        } else if (CommandParameterUtil.is(commandParam,"disburseToLinkedAccount")){
+        } else if (CommandParameterUtil.is(commandParam, "disburseToLinkedAccount")) {
             commandRequest = builder.disburseLoanToLinkedAccountApplication(resolvedLoanId).build();
         } else if (CommandParameterUtil.is(commandParam, "disburseWithoutAutoDownPayment")) {
             commandRequest = builder.disburseWithoutAutoDownPayment(resolvedLoanId).build();

@@ -35,8 +35,6 @@ import org.apache.fineract.infrastructure.event.business.domain.savings.transact
 import org.apache.fineract.infrastructure.event.business.domain.savings.transaction.SavingsWithdrawalBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.interoperation.domain.InteropIdentifier;
-import org.apache.fineract.interoperation.domain.InteropIdentifierType;
 import org.apache.fineract.interoperation.service.InteropService;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -72,7 +70,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
             final JournalEntryWritePlatformService journalEntryWritePlatformService,
             final ConfigurationDomainService configurationDomainService, final PlatformSecurityContext context,
             final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository,
-            final BusinessEventNotifierService businessEventNotifierService,@Lazy final InteropService interopService) {
+            final BusinessEventNotifierService businessEventNotifierService, @Lazy final InteropService interopService) {
         this.savingsAccountRepository = savingsAccountRepository;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
         this.applicationCurrencyRepositoryWrapper = applicationCurrencyRepositoryWrapper;
@@ -81,7 +79,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         this.context = context;
         this.depositAccountOnHoldTransactionRepository = depositAccountOnHoldTransactionRepository;
         this.businessEventNotifierService = businessEventNotifierService;
-        this.interopService=interopService;
+        this.interopService = interopService;
     }
 
     @Transactional
