@@ -33,12 +33,12 @@
   },
   {
     "matchPackageNames": ["org.eclipse.persistence:eclipselink"],
-    "allowedVersions": "<=4.0.0",
+    "allowedVersions": "<=4.0.2",
     "description": "EclipseLink 4.0.1 has a bug which has been fixed but haven't been released. Try 4.0.2. https://github.com/eclipse-ee4j/eclipselink/issues/1832"
   },
   {
     "matchPackageNames": ["org.eclipse.persistence:org.eclipse.persistence.jpa"],
-    "allowedVersions": "<=4.0.0",
+    "allowedVersions": "<=4.0.2",
     "description": "EclipseLink 4.0.1 has a bug which has been fixed but haven't been released. Try 4.0.2. https://github.com/eclipse-ee4j/eclipselink/issues/1832"
   },
   {
