@@ -51,7 +51,7 @@ dependencyManagement {
         dependency 'org.codehaus.janino:janino:3.1.11'
 
 
-        dependency 'org.eclipse.persistence:org.eclipse.persistence.jpa:4.0.0'
+        dependency 'org.eclipse.persistence:org.eclipse.persistence.jpa:4.0.2'
         dependency 'com.google.guava:guava:32.0.0-jre'
         dependency 'com.google.code.gson:gson:2.10.1'
         dependency 'com.google.truth:truth:1.4.0'
