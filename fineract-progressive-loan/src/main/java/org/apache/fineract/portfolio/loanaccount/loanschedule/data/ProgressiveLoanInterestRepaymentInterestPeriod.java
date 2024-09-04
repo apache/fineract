@@ -35,10 +35,11 @@ public class ProgressiveLoanInterestRepaymentInterestPeriod implements Comparabl
     private BigDecimal rateFactorMinus1;
 
     private Money disbursedAmount;
+    private Money correctionAmount;
     private Money interestDue;
 
     public ProgressiveLoanInterestRepaymentInterestPeriod(final ProgressiveLoanInterestRepaymentInterestPeriod period) {
-        this(period.fromDate, period.dueDate, period.rateFactorMinus1, period.disbursedAmount, period.interestDue);
+        this(period.fromDate, period.dueDate, period.rateFactorMinus1, period.disbursedAmount, period.correctionAmount, period.interestDue);
     }
 
     @Override
@@ -47,6 +48,14 @@ public class ProgressiveLoanInterestRepaymentInterestPeriod implements Comparabl
     }
 
     public void addDisbursedAmount(final Money outstandingBalance) {
-        this.disbursedAmount = this.disbursedAmount.add(outstandingBalance);
+        if (outstandingBalance != null && !outstandingBalance.isZero()) {
+            this.disbursedAmount = this.disbursedAmount.add(outstandingBalance);
+        }
+    }
+
+    public void addCorrectionAmount(final Money correctionAmount) {
+        if (correctionAmount != null && !correctionAmount.isZero()) {
+            this.correctionAmount = this.correctionAmount.add(correctionAmount);
+        }
     }
 }
