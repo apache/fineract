@@ -34,6 +34,7 @@ import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.ProgressiveLoanInterestRepaymentModel;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.ProgressiveLoanInterestScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelRepaymentPeriod;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
@@ -330,6 +331,97 @@ class ProgressiveEMICalculatorTest {
         checkPeriod(interestSchedule, 3, 0, 16.90, 0.003333333333, 0.17, 16.73, 33.63);
         checkPeriod(interestSchedule, 4, 0, 16.90, 0.003333333333, 0.11, 16.79, 16.84);
         checkPeriod(interestSchedule, 5, 0, 16.90, 0.003333333333, 0.06, 16.84, 0.0);
+    }
+
+    /**
+     * This test case tests a period early and late repayment with balance correction
+     */
+    @Test
+    public void testEMICalculation_disbursedAmt100_dayInYears360_daysInMonth30_repayEvery1Month_add_balance_on0215() {
+        final MathContext mc = MoneyHelper.getMathContext();
+        final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
+
+        expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+        expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+        expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+        expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+        expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+
+        final BigDecimal interestRate = new BigDecimal("7");
+        final Integer installmentAmountInMultiplesOf = null;
+
+        Mockito.when(loanProductRelatedDetail.getNominalInterestRatePerPeriod()).thenReturn(interestRate);
+        Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
+        Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.DAYS_30.getValue());
+        Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.MONTHS);
+        Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
+        Mockito.when(loanProductRelatedDetail.getCurrency()).thenReturn(monetaryCurrency);
+
+        threadLocalContextUtil.when(ThreadLocalContextUtil::getBusinessDate).thenReturn(LocalDate.of(2024, 2, 15));
+
+        final ProgressiveLoanInterestScheduleModel interestSchedule = emiCalculator.generateInterestScheduleModel(expectedRepaymentPeriods,
+                loanProductRelatedDetail, installmentAmountInMultiplesOf, mc);
+
+        final Money disbursedAmount = Money.of(monetaryCurrency, BigDecimal.valueOf(100));
+        emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
+
+        // partially pay off a period with balance correction
+        final LocalDate op1stCorrectionDate = LocalDate.of(2024, 2, 15);
+        final Money op1stCorrectionAmount = Money.of(monetaryCurrency, BigDecimal.valueOf(-83.57));
+
+        // get remaining balance and dues for a date
+        final ProgressiveLoanInterestRepaymentModel repaymentDetails1st = emiCalculator
+                .getPayableDetails(interestSchedule, op1stCorrectionDate).get();
+        Assertions.assertEquals(83.57, toDouble(repaymentDetails1st.getOutstandingBalance().getAmount()));
+        Assertions.assertEquals(16.77, toDouble(repaymentDetails1st.getPrincipalDue().getAmount()));
+        Assertions.assertEquals(0.24, toDouble(repaymentDetails1st.getInterestDue().getAmount()));
+
+        emiCalculator.addBalanceCorrection(interestSchedule, op1stCorrectionDate, op1stCorrectionAmount);
+
+        checkDisbursementOnPeriod(interestSchedule, 0, disbursedAmount);
+        checkPeriod(interestSchedule, 0, 0, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
+        checkPeriod(interestSchedule, 1, 0, 17.01, 0.002816091954, 0.24, 0.24, 16.77, 66.80);
+        checkPeriod(interestSchedule, 1, 1, 17.01, 0.003017241379, 0.0, 0.24, 16.77, 66.80);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.39, 16.62, 50.18);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 16.72, 33.46);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.20, 16.81, 16.65);
+        checkPeriod(interestSchedule, 5, 0, 16.75, 0.005833333333, 0.10, 16.65, 0.0);
+
+        // totally pay off another period with balance correction
+        final LocalDate op2ndCorrectionDate = LocalDate.of(2024, 3, 1);
+        final Money op2ndCorrectionAmount = Money.of(monetaryCurrency, BigDecimal.valueOf(-66.80));
+
+        // get remaining balance and dues for a date
+        final ProgressiveLoanInterestRepaymentModel repaymentDetails2st = emiCalculator
+                .getPayableDetails(interestSchedule, op2ndCorrectionDate).get();
+        Assertions.assertEquals(66.80, toDouble(repaymentDetails2st.getOutstandingBalance().getAmount()));
+        Assertions.assertEquals(17.01, toDouble(repaymentDetails2st.getPrincipalDue().getAmount()));
+        Assertions.assertEquals(0.0, toDouble(repaymentDetails2st.getInterestDue().getAmount()));
+
+        emiCalculator.addBalanceCorrection(interestSchedule, op2ndCorrectionDate, op2ndCorrectionAmount);
+
+        checkPeriod(interestSchedule, 0, 0, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
+        checkPeriod(interestSchedule, 1, 0, 17.01, 0.002816091954, 0.24, 0.24, 16.77, 66.80);
+        checkPeriod(interestSchedule, 1, 1, 17.01, 0.003017241379, 0.0, 0.24, 16.77, 66.80);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0, 17.01, 49.79);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 16.72, 33.07);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.19, 16.82, 16.25);
+        checkPeriod(interestSchedule, 5, 0, 16.34, 0.005833333333, 0.09, 16.25, 0.0);
+
+        // check numbers on last period due date
+        final ProgressiveLoanInterestRepaymentModel repaymentDetails3rd = emiCalculator
+                .getPayableDetails(interestSchedule, LocalDate.of(2024, 7, 1)).get();
+        Assertions.assertEquals(16.25, toDouble(repaymentDetails3rd.getOutstandingBalance().getAmount()));
+        Assertions.assertEquals(16.25, toDouble(repaymentDetails3rd.getPrincipalDue().getAmount()));
+        Assertions.assertEquals(0.09, toDouble(repaymentDetails3rd.getInterestDue().getAmount()));
+
+        // check numbers after the last period due date
+        final ProgressiveLoanInterestRepaymentModel repaymentDetails4th = emiCalculator
+                .getPayableDetails(interestSchedule, LocalDate.of(2024, 7, 15)).get();
+        Assertions.assertEquals(16.25, toDouble(repaymentDetails4th.getOutstandingBalance().getAmount()));
+        Assertions.assertEquals(16.25, toDouble(repaymentDetails4th.getPrincipalDue().getAmount()));
+        Assertions.assertEquals(0.14, toDouble(repaymentDetails4th.getInterestDue().getAmount()));
     }
 
     // @Test
