@@ -119,8 +119,8 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> expectedGlobalConfigurations = getAllDefaultGlobalConfigurations();
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
-        Assertions.assertEquals(54, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(54, actualGlobalConfigurations.size());
+        Assertions.assertEquals(55, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(55, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
@@ -590,6 +590,15 @@ public class GlobalConfigurationHelper {
         nextPaymentDateConfigForLoan.put("string_value", "earliest-unpaid-date");
         defaults.add(nextPaymentDateConfigForLoan);
 
+        HashMap<String, Object> enablePaymentHubIntegrationConfig = new HashMap<>();
+        enablePaymentHubIntegrationConfig.put("id", 60);
+        enablePaymentHubIntegrationConfig.put("name", "enable-payment-hub-integration");
+        enablePaymentHubIntegrationConfig.put("value", 0);
+        enablePaymentHubIntegrationConfig.put("enabled", false);
+        enablePaymentHubIntegrationConfig.put("trapDoor", false);
+        enablePaymentHubIntegrationConfig.put("string_value", "enable payment hub integration");
+        defaults.add(enablePaymentHubIntegrationConfig);
+
         return defaults;
     }
 
@@ -725,6 +734,19 @@ public class GlobalConfigurationHelper {
     public static Integer updateLoanNextPaymentDateConfiguration(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String stringValue) {
         long configId = 59;
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("stringValue", stringValue);
+        log.info("map :  {}", map);
+        final String configValue = GSON.toJson(map);
+        final String GLOBAL_CONFIG_UPDATE_URL = "/fineract-provider/api/v1/configurations/" + configId + "?" + Utils.TENANT_IDENTIFIER;
+        log.info("---------------------------------UPDATE VALUE FOR GLOBAL CONFIG---------------------------------------------");
+        return Utils.performServerPut(requestSpec, responseSpec, GLOBAL_CONFIG_UPDATE_URL, configValue, "resourceId");
+
+    }
+
+    public static Integer updateEnablePaymentHubIntegrationConfiguration(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String stringValue) {
+        long configId = 60;
         final HashMap<String, String> map = new HashMap<>();
         map.put("stringValue", stringValue);
         log.info("map :  {}", map);
