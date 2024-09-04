@@ -418,9 +418,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     @Override
     public CommandProcessingResult withdrawToLinkedAccount(final Long savingsId, final JsonCommand command) {
 
-        boolean isPaymentHubEnabled = configurationDomainService.isPaymentHubEnabled();
-        if (!isPaymentHubEnabled) {
-            throw new GlobalConfigurationNotEnabledException("use-payment-hub");
+        boolean isPaymentHubIntegrationEnabled = configurationDomainService.isPaymentHubIntegrationEnabled();
+        if (!isPaymentHubIntegrationEnabled) {
+            throw new GlobalConfigurationNotEnabledException("enable-payment-hub-integration");
         }
 
         this.savingsAccountTransactionDataValidator.validate(command);

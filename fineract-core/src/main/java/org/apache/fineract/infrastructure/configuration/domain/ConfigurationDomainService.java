@@ -143,6 +143,6 @@ public interface ConfigurationDomainService {
 
     String getNextPaymentDateConfigForLoan();
 
-    boolean isPaymentHubEnabled();
+    boolean isPaymentHubIntegrationEnabled();
 
 }

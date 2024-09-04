@@ -171,7 +171,7 @@ configurations.driver.each {File file ->
 task createDB {
     description= "Creates the MariaDB Database. Needs database name to be passed (like: -PdbName=someDBname)"
     doLast {
-        def sql = Sql.newInstance( 'jdbc:mariadb://localhost:3306/', mysqlUser, mysqlPassword, 'org.mariadb.jdbc.Driver' )
+        def sql = Sql.newInstance( 'jdbc:mariadb://localhost:3307/', mysqlUser, mysqlPassword, 'org.mariadb.jdbc.Driver' )
         sql.execute( 'CREATE DATABASE '+"`$dbName` CHARACTER SET utf8mb4" )
     }
 }
@@ -179,7 +179,7 @@ task createDB {
 task dropDB {
     description= "Drops the specified MariaDB database. The database name has to be passed (like: -PdbName=someDBname)"
     doLast {
-        def sql = Sql.newInstance( 'jdbc:mariadb://localhost:3306/', mysqlUser, mysqlPassword, 'org.mariadb.jdbc.Driver' )
+        def sql = Sql.newInstance( 'jdbc:mariadb://localhost:3307/', mysqlUser, mysqlPassword, 'org.mariadb.jdbc.Driver' )
         sql.execute( 'DROP DATABASE '+"`$dbName`")
     }
 }

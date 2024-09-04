@@ -307,9 +307,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Override
     public CommandProcessingResult disburseLoanToLinkedAccount(Long loanId, JsonCommand command, Boolean isAccountTransfer) {
         Boolean isWithoutAutoPayment = false;
-        boolean isPaymentHubEnabled = configurationDomainService.isPaymentHubEnabled();
-        if (!isPaymentHubEnabled) {
-            throw new GlobalConfigurationNotEnabledException("use-payment-hub");
+        boolean isPaymentHubIntegrationEnabled = configurationDomainService.isPaymentHubIntegrationEnabled();
+        if (!isPaymentHubIntegrationEnabled) {
+            throw new GlobalConfigurationNotEnabledException("enable-payment-hub-integration");
         }
         loanTransactionValidator.validateDisbursement(command, isAccountTransfer, loanId);
 
