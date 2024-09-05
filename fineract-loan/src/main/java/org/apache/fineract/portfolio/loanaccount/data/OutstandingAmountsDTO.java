@@ -46,20 +46,24 @@ public class OutstandingAmountsDTO {
                 .plus(penaltyCharges());
     }
 
-    public void plusPrincipal(Money principal) {
+    public OutstandingAmountsDTO plusPrincipal(Money principal) {
         this.principal = this.principal.plus(principal);
+        return this;
     }
 
-    public void plusInterest(Money interest) {
+    public OutstandingAmountsDTO plusInterest(Money interest) {
         this.interest = this.interest.plus(interest);
+        return this;
     }
 
-    public void plusFeeCharges(Money feeCharges) {
+    public OutstandingAmountsDTO plusFeeCharges(Money feeCharges) {
         this.feeCharges = this.feeCharges.plus(feeCharges);
+        return this;
     }
 
-    public void plusPenaltyCharges(Money penaltyCharges) {
+    public OutstandingAmountsDTO plusPenaltyCharges(Money penaltyCharges) {
         this.penaltyCharges = this.penaltyCharges.plus(penaltyCharges);
+        return this;
     }
 
 }
