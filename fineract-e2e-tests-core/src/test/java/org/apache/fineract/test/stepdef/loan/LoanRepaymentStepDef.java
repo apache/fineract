@@ -33,12 +33,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.fineract.avro.loan.v1.LoanTransactionAdjustmentDataV1;
 import org.apache.fineract.avro.loan.v1.LoanTransactionDataV1;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.GetUsersUserIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
@@ -66,6 +68,7 @@ import org.apache.fineract.test.support.TestContextKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import retrofit2.Response;
 
+@Slf4j
 public class LoanRepaymentStepDef extends AbstractStepDef {
 
     public static final String DATE_FORMAT = "dd MMMM yyyy";
@@ -560,5 +563,17 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
                     .isEqualTo(externalOwnerId);
         }
 
+    }
+
+    @When("Loan Pay-off is made on {string}")
+    public void makeLoanPayOff(String transactionDate) throws IOException {
+        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId1 = loanResponse.body().getLoanId();
+        Response<GetLoansLoanIdTransactionsTemplateResponse> response = loanTransactionsApi
+                .retrieveTransactionTemplate(loanId1, "prepayLoan", DATE_FORMAT, transactionDate, DEFAULT_LOCALE).execute();
+        Double transactionAmount = response.body().getAmount();
+
+        log.info("--- Loan Pay-off with amount: {} ---", transactionAmount);
+        makeRepayment("AUTOPAY", transactionDate, transactionAmount, null);
     }
 }
