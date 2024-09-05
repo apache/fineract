@@ -675,6 +675,71 @@ class ProgressiveEMICalculatorTest {
     }
 
     @Test
+    public void testEMICalculation_multiDisbursedAmt150InSamePeriod_dayInYears360_daysInMonth30_repayEvery1Month_backdated_disbursement() {
+        final MathContext mc = MoneyHelper.getMathContext();
+        final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
+
+        expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+        expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+        expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+        expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+        expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+
+        final BigDecimal interestRate = new BigDecimal("9.4822");
+        final Integer installmentAmountInMultiplesOf = null;
+
+        Mockito.when(loanProductRelatedDetail.getNominalInterestRatePerPeriod()).thenReturn(interestRate);
+        Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
+        Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.DAYS_30.getValue());
+        Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.MONTHS);
+        Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
+        Mockito.when(loanProductRelatedDetail.getCurrency()).thenReturn(monetaryCurrency);
+
+        final ProgressiveLoanInterestScheduleModel interestSchedule = emiCalculator.generateInterestScheduleModel(expectedRepaymentPeriods,
+                loanProductRelatedDetail, installmentAmountInMultiplesOf, mc);
+
+        Money disbursedAmount = Money.of(monetaryCurrency, BigDecimal.valueOf(100));
+        emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 8), disbursedAmount);
+
+        checkDisbursementOnPeriod(interestSchedule, 0, disbursedAmount);
+        checkPeriod(interestSchedule, 0, 0, 17.10, 0.001784284946, 0.00, 0.61, 16.49, 83.51);
+        checkPeriod(interestSchedule, 0, 1, 17.10, 0.006117548387, 0.61, 0.61, 16.49, 83.51);
+        checkPeriod(interestSchedule, 1, 0, 17.10, 0.007901833333, 0.66, 16.44, 67.07);
+        checkPeriod(interestSchedule, 2, 0, 17.10, 0.007901833333, 0.53, 16.57, 50.50);
+        checkPeriod(interestSchedule, 3, 0, 17.10, 0.007901833333, 0.40, 16.70, 33.80);
+        checkPeriod(interestSchedule, 4, 0, 17.10, 0.007901833333, 0.27, 16.83, 16.97);
+        checkPeriod(interestSchedule, 5, 0, 17.10, 0.007901833333, 0.13, 16.97, 0.0);
+
+        disbursedAmount = Money.of(monetaryCurrency, BigDecimal.valueOf(50));
+        emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 5), disbursedAmount);
+
+        checkDisbursementOnPeriod(interestSchedule, 0, 150);
+        checkPeriod(interestSchedule, 0, 0, 25.66, 0.001019591398, 0.00, 0.96, 24.70, 125.30);
+        checkPeriod(interestSchedule, 0, 1, 25.66, 0.000764693548, 0.04, 0.96, 24.70, 125.30);
+        checkPeriod(interestSchedule, 0, 2, 25.66, 0.006117548387, 0.92, 0.96, 24.70, 125.30);
+        checkPeriod(interestSchedule, 1, 0, 25.66, 0.007901833333, 0.99, 24.67, 100.63);
+        checkPeriod(interestSchedule, 2, 0, 25.66, 0.007901833333, 0.80, 24.86, 75.77);
+        checkPeriod(interestSchedule, 3, 0, 25.66, 0.007901833333, 0.60, 25.06, 50.71);
+        checkPeriod(interestSchedule, 4, 0, 25.66, 0.007901833333, 0.40, 25.26, 25.45);
+        checkPeriod(interestSchedule, 5, 0, 25.65, 0.007901833333, 0.20, 25.45, 0.0);
+
+        // add disbursement on same date
+        disbursedAmount = Money.of(monetaryCurrency, BigDecimal.valueOf(25));
+        emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 8), disbursedAmount);
+
+        checkDisbursementOnPeriod(interestSchedule, 0, 175);
+        checkPeriod(interestSchedule, 0, 0, 29.93, 0.001019591398, 0.00, 1.11, 28.82, 146.18);
+        checkPeriod(interestSchedule, 0, 1, 29.93, 0.000764693548, 0.04, 1.11, 28.82, 146.18);
+        checkPeriod(interestSchedule, 0, 2, 29.93, 0.006117548387, 1.07, 1.11, 28.82, 146.18);
+        checkPeriod(interestSchedule, 1, 0, 29.93, 0.007901833333, 1.16, 28.77, 117.41);
+        checkPeriod(interestSchedule, 2, 0, 29.93, 0.007901833333, 0.93, 29.00, 88.41);
+        checkPeriod(interestSchedule, 3, 0, 29.93, 0.007901833333, 0.70, 29.23, 59.18);
+        checkPeriod(interestSchedule, 4, 0, 29.93, 0.007901833333, 0.47, 29.46, 29.72);
+        checkPeriod(interestSchedule, 5, 0, 29.95, 0.007901833333, 0.23, 29.72, 0.0);
+    }
+
+    @Test
     public void testEMICalculation_disbursedAmt100_dayInYearsActual_daysInMonthActual_repayEvery1Month() {
         final MathContext mc = MoneyHelper.getMathContext();
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(

@@ -26,6 +26,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -103,11 +104,15 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
 
         prepareDisbursementsOnLoanApplicationTerms(loanApplicationTerms);
 
+        final ArrayList<DisbursementData> disbursementDataList = new ArrayList<>(loanApplicationTerms.getDisbursementDatas());
+        disbursementDataList.sort(Comparator.comparing(DisbursementData::disbursementDate));
+
         for (LoanScheduleModelRepaymentPeriod repaymentPeriod : expectedRepaymentPeriods) {
             scheduleParams.setPeriodStartDate(repaymentPeriod.getFromDate());
             scheduleParams.setActualRepaymentDate(repaymentPeriod.getDueDate());
 
-            processDisbursements(loanApplicationTerms, scheduleParams, interestScheduleModel, periods, chargesDueAtTimeOfDisbursement);
+            processDisbursements(loanApplicationTerms, disbursementDataList, scheduleParams, interestScheduleModel, periods,
+                    chargesDueAtTimeOfDisbursement);
             repaymentPeriod.setPeriodNumber(scheduleParams.getInstalmentNumber());
 
             for (var interestRateChange : loanApplicationTerms.getLoanTermVariations().getInterestRateFromInstallment()) {
@@ -142,7 +147,7 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
         }
 
         if (loanApplicationTerms.isMultiDisburseLoan()) {
-            processDisbursements(loanApplicationTerms, scheduleParams, null, periods, chargesDueAtTimeOfDisbursement);
+            processDisbursements(loanApplicationTerms, disbursementDataList, scheduleParams, null, periods, chargesDueAtTimeOfDisbursement);
         }
 
         // determine fees and penalties for charges which depends on total
@@ -169,11 +174,12 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
         }
     }
 
-    private void processDisbursements(final LoanApplicationTerms loanApplicationTerms, final LoanScheduleParams scheduleParams,
+    private void processDisbursements(final LoanApplicationTerms loanApplicationTerms,
+            final ArrayList<DisbursementData> disbursementDataList, final LoanScheduleParams scheduleParams,
             final ProgressiveLoanInterestScheduleModel interestScheduleModel, final List<LoanScheduleModelPeriod> periods,
             final BigDecimal chargesDueAtTimeOfDisbursement) {
 
-        for (DisbursementData disbursementData : loanApplicationTerms.getDisbursementDatas()) {
+        for (DisbursementData disbursementData : disbursementDataList) {
             final LocalDate disbursementDate = disbursementData.disbursementDate();
             final LocalDate periodFromDate = scheduleParams.getPeriodStartDate();
             final LocalDate periodDueDate = scheduleParams.getActualRepaymentDate();
