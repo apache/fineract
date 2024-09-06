@@ -37,7 +37,8 @@ public class ProgressiveLoanInterestRepaymentModel {
     private Money equalMonthlyInstallment;
     private Money principalDue;
     private Money remainingBalance;
-    private Money outstandingBalance;
+
+    private Money initialBalance;
 
     public ProgressiveLoanInterestRepaymentModel(final LocalDate fromDate, final LocalDate dueDate, final Money equalMonthlyInstallment) {
         this.fromDate = fromDate;
@@ -46,7 +47,7 @@ public class ProgressiveLoanInterestRepaymentModel {
         this.isLastPeriod = false;
 
         final Money zeroAmount = Money.zero(equalMonthlyInstallment.getCurrency());
-        this.outstandingBalance = zeroAmount;
+        this.initialBalance = zeroAmount;
         this.remainingBalance = zeroAmount;
         this.principalDue = zeroAmount;
         this.interestPeriods = new LinkedList<>();
@@ -59,7 +60,7 @@ public class ProgressiveLoanInterestRepaymentModel {
         this.dueDate = repaymentModel.dueDate;
         this.isLastPeriod = repaymentModel.isLastPeriod;
         this.equalMonthlyInstallment = repaymentModel.equalMonthlyInstallment;
-        this.outstandingBalance = repaymentModel.outstandingBalance;
+        this.initialBalance = repaymentModel.initialBalance;
         this.remainingBalance = repaymentModel.remainingBalance;
         this.principalDue = repaymentModel.principalDue;
         this.interestPeriods = new LinkedList<>();
@@ -88,7 +89,11 @@ public class ProgressiveLoanInterestRepaymentModel {
                 .reduce(Money.zero(equalMonthlyInstallment.getCurrency()), Money::plus);
     }
 
+    public Money getOutstandingBalance() {
+        return initialBalance.plus(getDisbursedAmountInPeriod());
+    }
+
     public Money getCorrectedOutstandingBalance() {
-        return outstandingBalance.plus(getCorrectionAmount());
+        return getOutstandingBalance().plus(getCorrectionAmount());
     }
 }
