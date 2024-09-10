@@ -1264,6 +1264,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
                 updateLoanChargesAndInstallmentChargesPaidBy(loan, accrualTransaction);
                 // TODO check if this is required
                 // saveLoanTransactionWithDataIntegrityViolationChecks(accrualTransaction);
+                accrualTransaction = loanTransactionRepository.saveAndFlush(accrualTransaction);
                 loan.addLoanTransaction(accrualTransaction);
                 businessEventNotifierService.notifyPostBusinessEvent(new LoanAccrualTransactionCreatedBusinessEvent(accrualTransaction));
 
@@ -1357,11 +1358,17 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
             }
             BigDecimal accruedAmount = BigDecimal.ZERO;
             BigDecimal waivedAmount = BigDecimal.ZERO;
-            for (LoanChargePaidBy loanChargePaidBy : loanCharge.getLoanChargePaidBySet()) {
-                if (loanChargePaidBy.getLoanTransaction().isAccrual()) {
-                    accruedAmount = accruedAmount.add(loanChargePaidBy.getLoanTransaction().getAmount());
-                } else if (loanChargePaidBy.getLoanTransaction().isChargesWaiver()) {
-                    waivedAmount = waivedAmount.add(loanChargePaidBy.getLoanTransaction().getAmount());
+            for (LoanTransaction loanTransaction : loan.getLoanTransactions()) {
+                if (loanTransaction.isAccrual() || loanTransaction.isChargesWaiver()) {
+                    for (LoanChargePaidBy loanChargePaidBy : loanTransaction.getLoanChargesPaid()) {
+                        if (loanChargePaidBy.getLoanCharge().getId().equals(loanCharge.getId())) {
+                            if (loanTransaction.isAccrual()) {
+                                accruedAmount = accruedAmount.add(loanTransaction.getAmount());
+                            } else if (loanTransaction.isChargesWaiver()) {
+                                waivedAmount = waivedAmount.add(loanTransaction.getAmount());
+                            }
+                        }
+                    }
                 }
             }
             Money needToAccrueAmount = MathUtil.negativeToZero(loanCharge.getAmount(currency).minus(accruedAmount).minus(waivedAmount));

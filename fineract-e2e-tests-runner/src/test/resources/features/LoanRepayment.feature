@@ -3350,6 +3350,7 @@ Feature: LoanRepayment
       | 13 August 2024   | Repayment              | 35.44  | 35.44     | 0.0      | 0.0  | 0.0       | 0.0          | true     |
       | 22 August 2024   | Repayment              | 35.44  | 35.44     | 0.0      | 0.0  | 0.0       | 0.0          | true     |
       | 22 August 2024   | Repayment              | 38.24  | 35.44     | 0.0      | 0.0  | 2.8       | 0.0          | false    |
+      | 22 August 2024   | Accrual                | 5.0    | 0.0       | 0.0      | 0.0  | 5.0       | 0.0          | false    |
       | 23 August 2024   | Repayment              | 10.0   | 0.0       | 0.0      | 0.0  | 5.0       | 0.0          | false    |
       | 24 August 2024   | Accrual                | 2.8    | 0.0       | 0.0      | 0.0  | 2.8       | 0.0          | false    |
     Then Loan Repayment schedule has 2 periods, with the following data for periods:
@@ -3369,9 +3370,10 @@ Feature: LoanRepayment
       | 13 August 2024   | Repayment              | 35.44  | 35.44     | 0.0      | 0.0  | 0.0       | 0.0          | true     |
       | 22 August 2024   | Repayment              | 35.44  | 35.44     | 0.0      | 0.0  | 0.0       | 0.0          | true     |
       | 22 August 2024   | Repayment              | 38.24  | 35.44     | 0.0      | 0.0  | 2.8       | 0.0          | false    |
+      | 22 August 2024   | Accrual                | 5.0    | 0.0       | 0.0      | 0.0  | 5.0       | 0.0          | false    |
       | 23 August 2024   | Repayment              | 10.0   | 0.0       | 0.0      | 0.0  | 10.0      | 0.0          | false    |
       | 24 August 2024   | Accrual                | 2.8    | 0.0       | 0.0      | 0.0  | 2.8       | 0.0          | false    |
-      | 25 August 2024   | Accrual                | 10.0   | 0.0       | 0.0      | 0.0  | 10.0      | 0.0          | false    |
+      | 25 August 2024   | Accrual                | 5.0    | 0.0       | 0.0      | 0.0  | 5.0       | 0.0          | false    |
     Then Loan Repayment schedule has 2 periods, with the following data for periods:
       | Nr | Days | Date           | Paid date      | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       |    |      | 23 July 2024   |                | 111.92          |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
