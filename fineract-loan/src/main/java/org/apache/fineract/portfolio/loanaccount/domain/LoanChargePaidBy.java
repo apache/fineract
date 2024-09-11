@@ -60,16 +60,8 @@ public class LoanChargePaidBy extends AbstractPersistableCustom<Long> {
         return this.loanTransaction;
     }
 
-    public void setLoanTransaction(final LoanTransaction loanTransaction) {
-        this.loanTransaction = loanTransaction;
-    }
-
     public LoanCharge getLoanCharge() {
         return this.loanCharge;
-    }
-
-    public void setLoanCharge(final LoanCharge loanCharge) {
-        this.loanCharge = loanCharge;
     }
 
     public BigDecimal getAmount() {
@@ -82,5 +74,9 @@ public class LoanChargePaidBy extends AbstractPersistableCustom<Long> {
 
     public Integer getInstallmentNumber() {
         return this.installmentNumber;
+    }
+
+    public void setInstallmentNumber(Integer installmentNumber) {
+        this.installmentNumber = installmentNumber;
     }
 }

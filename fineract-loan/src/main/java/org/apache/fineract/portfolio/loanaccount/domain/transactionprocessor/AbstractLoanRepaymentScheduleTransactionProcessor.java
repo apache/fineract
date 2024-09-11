@@ -46,6 +46,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionToRepaymentScheduleMapping;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.loanaccount.domain.SingleLoanChargeRepaymentScheduleProcessingWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.CreocoreLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.HeavensFamilyLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor;
@@ -61,6 +62,8 @@ import org.springframework.util.CollectionUtils;
  * @see CreocoreLoanRepaymentScheduleTransactionProcessor
  */
 public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implements LoanRepaymentScheduleTransactionProcessor {
+
+    public final SingleLoanChargeRepaymentScheduleProcessingWrapper loanChargeProcessor = new SingleLoanChargeRepaymentScheduleProcessingWrapper();
 
     @Override
     public boolean accept(String s) {
@@ -510,7 +513,6 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         newLoanTransaction.getLoanTransactionRelations().add(
                 LoanTransactionRelation.linkToTransaction(newLoanTransaction, loanTransaction, LoanTransactionRelationTypeEnum.REPLAYED));
         changedTransactionDetail.getNewTransactionMappings().put(loanTransaction.getId(), newLoanTransaction);
-
     }
 
     protected void processCreditTransaction(LoanTransaction loanTransaction, MoneyHolder overpaymentHolder, MonetaryCurrency currency,
@@ -887,33 +889,17 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
     protected void addChargeOnlyRepaymentInstallmentIfRequired(Set<LoanCharge> charges,
             List<LoanRepaymentScheduleInstallment> installments) {
-        if (!CollectionUtils.isEmpty(charges) && !CollectionUtils.isEmpty(installments)) {
-            LoanRepaymentScheduleInstallment latestRepaymentScheduleInstalment = installments.stream().filter(i -> !i.isDownPayment())
-                    .reduce((first, second) -> second).orElseThrow();
-            LocalDate installmentDueDate = null;
-
-            LoanCharge latestCharge = getLatestLoanChargeWithSpecificDueDate(charges);
-            if (latestCharge != null
-                    && DateUtils.isAfter(latestCharge.getEffectiveDueDate(), latestRepaymentScheduleInstalment.getDueDate())) {
-                installmentDueDate = latestCharge.getEffectiveDueDate();
-            }
-
-            if (installmentDueDate != null) {
-                if (latestRepaymentScheduleInstalment.isAdditional()) {
-                    latestRepaymentScheduleInstalment.updateDueDate(installmentDueDate);
-                } else {
-                    Loan loan = latestCharge.getLoan();
-                    final LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(loan,
-                            (installments.size() + 1), latestRepaymentScheduleInstalment.getDueDate(), installmentDueDate, BigDecimal.ZERO,
-                            BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, false, null);
-                    installment.markAsAdditional();
-                    loan.addLoanRepaymentScheduleInstallment(installment);
-                }
-            }
+        LoanCharge latestCharge = getLatestLoanChargeWithSpecificDueDate(charges);
+        if (latestCharge == null) {
+            return;
         }
+        loanChargeProcessor.addChargeOnlyRepaymentInstallmentIfRequired(latestCharge, installments);
     }
 
-    private LoanCharge getLatestLoanChargeWithSpecificDueDate(Set<LoanCharge> charges) {
+    protected LoanCharge getLatestLoanChargeWithSpecificDueDate(Set<LoanCharge> charges) {
+        if (charges == null) {
+            return null;
+        }
         LoanCharge latestCharge = null;
         List<LoanCharge> chargesWithSpecificDueDate = new ArrayList<>();
         chargesWithSpecificDueDate.addAll(charges.stream().filter(charge -> charge.isSpecifiedDueDate()).toList());

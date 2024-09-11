@@ -132,7 +132,9 @@ public class SingleLoanChargeRepaymentScheduleProcessingWrapperTest {
         when(charge.getName()).thenReturn("charge a");
         when(charge.getCurrencyCode()).thenReturn("UDS");
         when(charge.isPenalty()).thenReturn(penalty);
-        LoanCharge loanCharge = new LoanCharge(null, charge, new BigDecimal(1000), new BigDecimal(10), ChargeTimeType.SPECIFIED_DUE_DATE,
+        Loan loan = mock(Loan.class);
+        when(loan.isInterestBearing()).thenReturn(false);
+        LoanCharge loanCharge = new LoanCharge(loan, charge, new BigDecimal(1000), new BigDecimal(10), ChargeTimeType.SPECIFIED_DUE_DATE,
                 ChargeCalculationType.FLAT, LocalDate.of(2023, 01, 15), ChargePaymentMode.REGULAR, 1, null, null);
         return loanCharge;
     }
@@ -150,5 +152,4 @@ public class SingleLoanChargeRepaymentScheduleProcessingWrapperTest {
         Mockito.when(period.getInterestCharged(eq(currency))).thenReturn(interest);
         return period;
     }
-
 }
