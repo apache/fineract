@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.test.support.loader;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.StringUtils;
 
+@SuppressFBWarnings({ "VA_FORMAT_STRING_USES_NEWLINE" })
 public final class PropertiesResourceLoader {
 
     private PropertiesResourceLoader() {}

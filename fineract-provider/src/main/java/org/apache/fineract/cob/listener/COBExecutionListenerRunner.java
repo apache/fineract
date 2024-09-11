@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.cob.listener;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,6 +31,7 @@ public class COBExecutionListenerRunner implements JobExecutionListener {
     private final List<FineractCOBBeforeJobListener> beforeJobListeners = new ArrayList<>();
     private final List<FineractCOBAfterJobListener> afterJobListeners = new ArrayList<>();
 
+    @SuppressFBWarnings({ "CT_CONSTRUCTOR_THROW" })
     public COBExecutionListenerRunner(ApplicationContext applicationContext, String jobName) {
         addBeforeListeners(applicationContext, jobName);
         addAfterListeners(applicationContext, jobName);
