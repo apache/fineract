@@ -245,10 +245,14 @@ public class LoanRepaymentScheduleProcessingWrapper {
     public static boolean isInPeriod(LocalDate transactionDate, LoanRepaymentScheduleInstallment targetInstallment,
             List<LoanRepaymentScheduleInstallment> installments) {
         int firstPeriod = fetchFirstNormalInstallmentNumber(installments);
-        return (targetInstallment.getInstallmentNumber().equals(firstPeriod)
-                ? !DateUtils.isBefore(transactionDate, targetInstallment.getFromDate())
-                : DateUtils.isAfter(transactionDate, targetInstallment.getFromDate()))
-                && !DateUtils.isAfter(transactionDate, targetInstallment.getDueDate());
+        return isInPeriod(transactionDate, targetInstallment, targetInstallment.getInstallmentNumber().equals(firstPeriod));
     }
 
+    private static boolean isInPeriod(LocalDate transactionDate, LoanRepaymentScheduleInstallment targetInstallment,
+            boolean isFirstPeriod) {
+        LocalDate fromDate = targetInstallment.getFromDate();
+        LocalDate dueDate = targetInstallment.getDueDate();
+        return isFirstPeriod ? DateUtils.occursOnDayFromAndUpToAndIncluding(fromDate, dueDate, transactionDate)
+                : DateUtils.occursOnDayFromExclusiveAndUpToAndIncluding(fromDate, dueDate, transactionDate);
+    }
 }

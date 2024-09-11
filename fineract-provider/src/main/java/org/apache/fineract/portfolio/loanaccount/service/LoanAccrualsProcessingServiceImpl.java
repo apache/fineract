@@ -838,7 +838,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
         if (!loan.isChargedOff()) {
             List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
             boolean isBasedOnSubmittedOnDate = configurationDomainService.getAccrualDateConfigForCharge()
-                    .equalsIgnoreCase("submitted-date");
+                    .equalsIgnoreCase(ACCRUAL_ON_CHARGE_SUBMITTED_ON_DATE);
             for (LoanRepaymentScheduleInstallment installment : installments) {
                 checkAndUpdateAccrualsForInstallment(loan, accruals, installments, isBasedOnSubmittedOnDate, installment);
             }
