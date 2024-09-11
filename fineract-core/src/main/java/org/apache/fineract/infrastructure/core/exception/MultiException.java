@@ -59,6 +59,7 @@ public class MultiException extends Exception {
         this.throwables = new ArrayList<>(problems);
     }
 
+    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     public MultiException(List<Throwable> problems) {
         this("MultiException with " + problems.size() + " contained causes (details available)", problems);
     }
