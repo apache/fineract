@@ -10,7 +10,7 @@ jobs:
 
     services:
         postgresql:
-            image: postgres:16.1
+            image: postgres:16.4
             ports:
                 - 5432:5432
             env:
@@ -19,7 +19,7 @@ jobs:
             options: --health-cmd="pg_isready -q -d postgres -U root" --health-interval=5s --health-timeout=2s --health-retries=3
 
         mock-oauth2-server:
-          image: ghcr.io/navikt/mock-oauth2-server:2.1.1
+          image: ghcr.io/navikt/mock-oauth2-server:2.1.9
           ports:
             - 9000:9000
           env:
