@@ -87,32 +87,32 @@ buildscript {
 }
 
 plugins {
-    id 'me.qoomon.git-versioning' version '6.4.3'
+    id 'me.qoomon.git-versioning' version '6.4.4'
     id "org.barfuin.gradle.taskinfo" version "2.2.0"
     id 'com.adarshr.test-logger' version '4.0.0'
     id 'com.diffplug.spotless' version '6.25.0' apply false
     id 'org.nosphere.apache.rat' version '0.8.1' apply false
     id 'com.github.hierynomus.license' version '0.16.1' apply false
-    id 'com.github.jk1.dependency-license-report' version '2.5' apply false
+    id 'com.github.jk1.dependency-license-report' version '2.9' apply false
     id 'org.zeroturnaround.gradle.jrebel' version '1.2.0' apply false
-    id 'org.springframework.boot' version '3.2.6' apply false
+    id 'org.springframework.boot' version '3.3.3' apply false
     id 'net.ltgt.errorprone' version '3.1.0' apply false
-    id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.19' apply false
-    id 'com.gorylenko.gradle-git-properties' version '2.4.1' apply false
+    id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.23' apply false
+    id 'com.gorylenko.gradle-git-properties' version '2.4.2' apply false
     id 'org.asciidoctor.jvm.convert' version '3.3.2' apply false
     id 'org.asciidoctor.jvm.pdf' version '3.3.2' apply false
     id 'org.asciidoctor.jvm.epub' version '3.3.2' apply false
     //    id 'org.asciidoctor.jvm.revealjs' version '3.3.2' apply false
     //    id 'org.asciidoctor.jvm.gems' version '3.3.2' apply false
     id 'org.asciidoctor.kindlegen.base' version '3.2.0' apply false
-    id 'com.google.cloud.tools.jib' version '3.4.2' apply false
+    id 'com.google.cloud.tools.jib' version '3.4.3' apply false
     id 'org.sonarqube' version '4.4.1.3373'
-    id 'com.github.andygoossens.modernizer' version '1.9.0' apply false
+    id 'com.github.andygoossens.modernizer' version '1.9.3' apply false
     // TODO: upgrade to 6.0.4
     id 'com.github.spotbugs' version '6.0.22' apply false
     id 'se.thinkcode.cucumber-runner' version '0.0.11' apply false
     id "com.github.davidmc24.gradle.plugin.avro-base" version "1.9.1" apply false
-    id 'org.openapi.generator' version '7.2.0' apply false
+    id 'org.openapi.generator' version '7.8.0' apply false
 }
 
 apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.release.gradle"
