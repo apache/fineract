@@ -52,6 +52,7 @@ task buildJavaSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateT
         useRxJava2: 'false',
         library: 'retrofit2',
         hideGenerationTimestamp: 'true',
+        containerDefaultToNull: 'true'
     ]
     generateModelTests = false
     generateApiTests = false
