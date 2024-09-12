@@ -43,6 +43,7 @@ import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRu
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
@@ -569,7 +570,7 @@ public final class LoanProductDataValidator {
                     Locale.getDefault());
             baseDataValidator.reset().parameter(INTEREST_RATE_FREQUENCY_TYPE).value(interestRateFrequencyType).notNull().inMinMaxRange(0,
                     4);
-            isInterestBearing = interestRatePerPeriod.compareTo(BigDecimal.ZERO) > 0;
+            isInterestBearing = MathUtil.isGreaterThanZero(interestRatePerPeriod);
         }
 
         // Fixed Length validation
@@ -1296,10 +1297,13 @@ public final class LoanProductDataValidator {
                     .integerGreaterThanZero();
         }
 
-        Integer numberOfRepayments = loanProduct.getNumberOfRepayments();
+        Integer numberOfRepayments = null;
         if (this.fromApiJsonHelper.parameterExists(NUMBER_OF_REPAYMENTS, element)) {
             numberOfRepayments = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(NUMBER_OF_REPAYMENTS, element);
             baseDataValidator.reset().parameter(NUMBER_OF_REPAYMENTS).value(numberOfRepayments).notNull().integerGreaterThanZero();
+        }
+        if (numberOfRepayments == null) {
+            numberOfRepayments = loanProduct.getNumberOfRepayments();
         }
 
         Integer repaymentEvery = loanProduct.getLoanProductRelatedDetail().getRepayEvery();
@@ -1608,7 +1612,7 @@ public final class LoanProductDataValidator {
             }
             baseDataValidator.reset().parameter(INTEREST_RATE_FREQUENCY_TYPE).value(interestRateFrequencyType).notNull().inMinMaxRange(0,
                     4);
-            isInterestBearing = interestRatePerPeriod.compareTo(BigDecimal.ZERO) > 0;
+            isInterestBearing = MathUtil.isGreaterThanZero(interestRatePerPeriod);
         }
 
         // Fixed Length validation
@@ -2541,34 +2545,36 @@ public final class LoanProductDataValidator {
     public void validateRepaymentPeriodWithGraceSettings(final Integer numberOfRepayments, final Integer graceOnPrincipalPayment,
             final Integer graceOnInterestPayment, final Integer graceOnInterestCharged, final Integer recurringMoratoriumOnPrincipalPeriods,
             DataValidatorBuilder baseDataValidator) {
-        if (numberOfRepayments <= defaultToZeroIfNull(graceOnPrincipalPayment)) {
-            baseDataValidator.reset().parameter("graceOnPrincipalPayment").value(graceOnPrincipalPayment)
-                    .failWithCode(".mustBeLessThan.numberOfRepayments");
-        }
+        if (numberOfRepayments != null) {
+            if (numberOfRepayments <= defaultToZeroIfNull(graceOnPrincipalPayment)) {
+                baseDataValidator.reset().parameter("graceOnPrincipalPayment").value(graceOnPrincipalPayment)
+                        .failWithCode("mustBeLessThan.numberOfRepayments");
+            }
 
-        if (numberOfRepayments <= defaultToZeroIfNull(graceOnInterestPayment)) {
-            baseDataValidator.reset().parameter("graceOnInterestPayment").value(graceOnInterestPayment)
-                    .failWithCode(".mustBeLessThan.numberOfRepayments");
-        }
+            if (numberOfRepayments <= defaultToZeroIfNull(graceOnInterestPayment)) {
+                baseDataValidator.reset().parameter("graceOnInterestPayment").value(graceOnInterestPayment)
+                        .failWithCode("mustBeLessThan.numberOfRepayments");
+            }
 
-        if (numberOfRepayments < defaultToZeroIfNull(graceOnInterestCharged)) {
-            baseDataValidator.reset().parameter("graceOnInterestCharged").value(graceOnInterestCharged)
-                    .failWithCode(".mustBeLessThan.numberOfRepayments");
-        }
+            if (numberOfRepayments < defaultToZeroIfNull(graceOnInterestCharged)) {
+                baseDataValidator.reset().parameter("graceOnInterestCharged").value(graceOnInterestCharged)
+                        .failWithCode("mustBeLessThan.numberOfRepayments");
+            }
 
-        int graceOnPrincipal = 0;
-        if (graceOnPrincipalPayment != null) {
-            graceOnPrincipal = graceOnPrincipalPayment;
-        }
-        int recurMoratoriumOnPrincipal = 0;
-        if (recurringMoratoriumOnPrincipalPeriods != null) {
-            recurMoratoriumOnPrincipal = recurringMoratoriumOnPrincipalPeriods;
-        }
+            int graceOnPrincipal = 0;
+            if (graceOnPrincipalPayment != null) {
+                graceOnPrincipal = graceOnPrincipalPayment;
+            }
+            int recurMoratoriumOnPrincipal = 0;
+            if (recurringMoratoriumOnPrincipalPeriods != null) {
+                recurMoratoriumOnPrincipal = recurringMoratoriumOnPrincipalPeriods;
+            }
 
-        if ((recurMoratoriumOnPrincipal > 0) && ((numberOfRepayments - graceOnPrincipal) % (recurMoratoriumOnPrincipal + 1) != 1)) {
-            baseDataValidator.reset().parameter("graceOnPrincipalPayments.and.recurringMoratoriumOnPrincipalPeriods")
-                    .value(graceOnPrincipal).value(recurMoratoriumOnPrincipal)
-                    .failWithCode("causes.principal.moratorium.for.last.installment");
+            if ((recurMoratoriumOnPrincipal > 0) && ((numberOfRepayments - graceOnPrincipal) % (recurMoratoriumOnPrincipal + 1) != 1)) {
+                baseDataValidator.reset().parameter("graceOnPrincipalPayments.and.recurringMoratoriumOnPrincipalPeriods")
+                        .value(graceOnPrincipal).value(recurMoratoriumOnPrincipal)
+                        .failWithCode("causes.principal.moratorium.for.last.installment");
+            }
         }
     }
 

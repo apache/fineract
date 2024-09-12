@@ -21,6 +21,7 @@ package org.apache.fineract.test.messaging;
 import static java.lang.String.format;
 import static org.awaitility.Awaitility.await;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -38,6 +39,7 @@ import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
 @Component
+@SuppressFBWarnings({ "VA_FORMAT_STRING_USES_NEWLINE" })
 public class EventAssertion {
 
     private final EventStore eventStore;

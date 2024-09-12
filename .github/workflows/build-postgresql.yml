@@ -28,7 +28,7 @@ jobs:
 
     env:
         TZ: Asia/Kolkata
-        GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GE_ACCESS_TOKEN }}
+        DEVELOCITY_ACCESS_KEY: ${{ secrets.GE_ACCESS_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
@@ -39,14 +39,17 @@ jobs:
         with:
           java-version: '17'
           distribution: 'zulu'
-          cache: gradle
       - uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4
         with:
           node-version: 16
       - name: Congfigure vega-cli
         run: npm i -g vega-cli --unsafe
-      - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@f9c9c575b8b21b6485636a91ffecd10e558c62f6
+
+      - name: Setup Gradle and Validate Wrapper
+        uses: gradle/actions/setup-gradle@16bf8bc8fe830fa669c3c9f914d3eb147c629707 # v4.0.1
+        with:
+          validate-wrappers: true
+          
       - name: Verify PostgreSQL connection
         run: |
             while ! pg_isready -d postgres -U root -h 127.0.0.1 -p 5432 ; do

@@ -14,7 +14,7 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     env:
-      GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GE_ACCESS_TOKEN }}
+      DEVELOCITY_ACCESS_KEY: ${{ secrets.GE_ACCESS_TOKEN }}
 
     steps:
       - name: Checkout Source Code
@@ -26,7 +26,8 @@ jobs:
         with:
           java-version: '17'
           distribution: 'zulu'
-          cache: gradle
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@16bf8bc8fe830fa669c3c9f914d3eb147c629707 # v4.0.1
       - name: Extract branch name
         shell: bash
         run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT

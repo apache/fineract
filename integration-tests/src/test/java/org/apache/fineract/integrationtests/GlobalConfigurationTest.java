@@ -112,6 +112,48 @@ public class GlobalConfigurationTest {
     }
 
     @Test
+    public void testGlobalConfigurationsEnableDisable() {
+        this.globalConfigurationHelper = new GlobalConfigurationHelper(this.requestSpec, this.responseSpec);
+
+        // Retrieving All Global Configuration details
+        final ArrayList<HashMap> globalConfig = GlobalConfigurationHelper.getAllGlobalConfigurations(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(globalConfig);
+        String configName = "enable_payment_hub_integration";
+        for (Integer configIndex = 0; configIndex < globalConfig.size() - 1; configIndex++) {
+            if (globalConfig.get(configIndex).get("name").equals(configName)) {
+                Integer configId = (Integer) globalConfig.get(configIndex).get("id");
+                Assertions.assertNotNull(configId);
+
+                HashMap configDataBefore = GlobalConfigurationHelper.getGlobalConfigurationById(this.requestSpec, this.responseSpec,
+                        configId.toString());
+                Assertions.assertNotNull(configDataBefore);
+
+                Integer value = (Integer) configDataBefore.get("value") + 1;
+
+                // Updating Enabled Flag for use-payment-hub Global
+                // Configuration
+                Boolean enabled = (Boolean) globalConfig.get(configIndex).get("enabled");
+
+                if (enabled == true) {
+                    enabled = false;
+                } else {
+                    enabled = true;
+                }
+
+                configId = GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec,
+                        configId.toString(), enabled);
+
+                HashMap configDataAfter = GlobalConfigurationHelper.getGlobalConfigurationById(this.requestSpec, this.responseSpec,
+                        configId.toString());
+
+                // Verifying Enabled Flag for use-payment-hub after Updation
+                Assertions.assertEquals(enabled, configDataAfter.get("enabled"), "Verifying Enabled Flag Global Config after Updation");
+                break;
+            }
+        }
+    }
+
+    @Test
     public void testGlobalConfigurationIsCacheEnabled() {
         this.globalConfigurationHelper = new GlobalConfigurationHelper(this.requestSpec, this.responseSpec);
 

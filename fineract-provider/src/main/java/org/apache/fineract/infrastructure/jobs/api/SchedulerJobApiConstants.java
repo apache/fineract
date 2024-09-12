@@ -54,6 +54,7 @@ public final class SchedulerJobApiConstants {
     public static final String COMMAND_START_SCHEDULER = "start";
     public static final String COMMAND = "command";
     public static final String JOB_ID = "jobId";
+    public static final String SHORT_NAME_PARAM = "short-name";
     public static final String JOB_RUN_HISTORY = "runhistory";
     public static final String SCHEDULER_STATUS_PATH = "scheduler";
 

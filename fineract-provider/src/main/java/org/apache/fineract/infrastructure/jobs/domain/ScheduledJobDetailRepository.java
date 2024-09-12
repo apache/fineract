@@ -20,6 +20,8 @@ package org.apache.fineract.infrastructure.jobs.domain;
 
 import jakarta.persistence.LockModeType;
 import java.util.List;
+import java.util.Optional;
+import org.apache.fineract.infrastructure.jobs.data.JobDetailData;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
@@ -47,4 +49,22 @@ public interface ScheduledJobDetailRepository
 
     ScheduledJobDetail findByJobName(String jobName);
 
+    String GET_DATA = "select new org.apache.fineract.infrastructure.jobs.data.JobDetailData(j.id, j.jobDisplayName, j.shortName, j.nextRunTime, "
+            + "j.errorLog, j.cronExpression, j.activeSchedular, j.currentlyRunning, "
+            + "jh.version, jh.startTime, jh.endTime, jh.status, jh.errorMessage, jh.triggerType, jh.errorLog) "
+            + "from ScheduledJobDetail j left join ScheduledJobRunHistory jh on jh.scheduledJobDetail = j and j.previousRunStartTime = jh.startTime ";
+
+    @Query(GET_DATA + "where j.id = :jobId")
+    JobDetailData getDataById(@Param("jobId") Long jobId);
+
+    @Query(GET_DATA + "where j.shortName = :shortName")
+    JobDetailData getDataByShortName(@Param("shortName") String shortName);
+
+    @Query(GET_DATA + "order by j.id")
+    List<JobDetailData> getAllData();
+
+    boolean existsByShortName(String shortName);
+
+    @Query("select j.id from ScheduledJobDetail j where j.shortName = :shortName")
+    Optional<Long> findIdByShortName(@Param("shortName") String shortName);
 }

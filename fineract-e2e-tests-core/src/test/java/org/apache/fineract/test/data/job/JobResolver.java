@@ -19,7 +19,6 @@
 package org.apache.fineract.test.data.job;
 
 import java.io.IOException;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetJobsResponse;
@@ -35,20 +34,16 @@ public class JobResolver {
 
     private final SchedulerJobApi schedulerJobApi;
 
-    @Cacheable(key = "#job.getName()", value = "jobsByName")
+    @Cacheable(key = "#job.getShortName()", value = "jobsByShortName")
     public long resolve(Job job) {
         try {
-            String jobName = job.getName();
-            log.debug("Resolving job by name [{}]", jobName);
-            Response<List<GetJobsResponse>> response = schedulerJobApi.retrieveAll8().execute();
+            String shortName = job.getShortName();
+            log.debug("Resolving job by short-name [{}]", shortName);
+            Response<GetJobsResponse> response = schedulerJobApi.retrieveByShortName(shortName).execute();
             if (!response.isSuccessful()) {
-                throw new IllegalStateException("Unable to get jobs list. Status code was HTTP " + response.code());
+                throw new IllegalStateException("Unable to get job. Status code was HTTP " + response.code());
             }
-
-            List<GetJobsResponse> jobsResponses = response.body();
-            GetJobsResponse foundJob = jobsResponses.stream().filter(j -> jobName.equals(j.getDisplayName())).findAny()
-                    .orElseThrow(() -> new IllegalArgumentException("Job [%s] not found".formatted(jobName)));
-            return foundJob.getJobId();
+            return response.body().getJobId();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

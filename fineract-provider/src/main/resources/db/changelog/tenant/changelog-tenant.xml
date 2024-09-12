@@ -164,4 +164,6 @@
     <include file="parts/0142_add_accrual_activity_transaction.xml" relativeToChangelogFile="true" />
     <include file="parts/0143_add_accrual_activity_posting_job.xml" relativeToChangelogFile="true" />
     <include file="parts/0144_transaction_summary_with_asset_owner_report_unc_allocation_fix.xml" relativeToChangelogFile="true" />
+    <include file="parts/0145_job_short_name.xml" relativeToChangelogFile="true" />
+    <include file="parts/0147_enable_payment_hub_integration.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

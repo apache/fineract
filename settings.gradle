@@ -18,19 +18,18 @@
  */
 
 plugins {
-    id 'com.gradle.enterprise' version '3.16.2'
-    id 'com.gradle.common-custom-user-data-gradle-plugin' version '1.12.1'
+    id 'com.gradle.develocity' version '3.17.6'
+    id 'com.gradle.common-custom-user-data-gradle-plugin' version '2.0.2'
 }
 
 def isCI = System.getenv('JENKINS_URL') != null
 
-gradleEnterprise {
+develocity {
+    projectId = "fineract"
     server = "https://ge.apache.org"
     buildScan {
-        capture { taskInputFiles = true }
         uploadInBackground = !isCI
-        publishAlways()
-        publishIfAuthenticated()
+        publishing.onlyIf { it.authenticated }
         obfuscation {
             ipAddresses { addresses ->
                 addresses.collect { address ->
@@ -43,7 +42,7 @@ gradleEnterprise {
 
 buildCache {
     local {
-        enabled = !isCI
+        enabled = true
     }
 }
 

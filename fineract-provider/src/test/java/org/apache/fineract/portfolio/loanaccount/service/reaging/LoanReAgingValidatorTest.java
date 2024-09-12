@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -53,6 +54,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+@SuppressFBWarnings({ "VA_FORMAT_STRING_USES_NEWLINE" })
 class LoanReAgingValidatorTest {
 
     public static final String DATE_FORMAT = "dd MMMM yyyy";

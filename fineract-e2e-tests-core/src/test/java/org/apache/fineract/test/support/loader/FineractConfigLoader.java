@@ -20,11 +20,13 @@ package org.apache.fineract.test.support.loader;
 
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+@SuppressFBWarnings({ "VA_FORMAT_STRING_USES_NEWLINE" })
 public final class FineractConfigLoader {
 
     public static final String FINERACT_TEST_CONFIG_LOCATION = "META-INF/fineract-test.config";

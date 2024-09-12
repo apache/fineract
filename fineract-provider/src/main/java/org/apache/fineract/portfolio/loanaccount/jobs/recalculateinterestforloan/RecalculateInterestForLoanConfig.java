@@ -32,8 +32,11 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -52,7 +55,7 @@ public class RecalculateInterestForLoanConfig {
     private LoanWritePlatformService loanWritePlatformService;
 
     @Autowired
-    private RecalculateInterestPoster recalculateInterestPoster;
+    private ApplicationContext applicationContext;
 
     @Autowired
     private OfficeReadPlatformService officeReadPlatformService;
@@ -74,8 +77,15 @@ public class RecalculateInterestForLoanConfig {
     }
 
     @Bean
+    @Scope("prototype")
+    @ConditionalOnMissingBean(RecalculateInterestPoster.class)
+    public RecalculateInterestPoster recalculateInterestPoster() {
+        return new RecalculateInterestPoster(loanWritePlatformService);
+    }
+
+    @Bean
     public RecalculateInterestForLoanTasklet recalculateInterestForLoanTasklet() {
-        return new RecalculateInterestForLoanTasklet(loanReadPlatformService, loanWritePlatformService, recalculateInterestPoster,
+        return new RecalculateInterestForLoanTasklet(loanReadPlatformService, loanWritePlatformService, applicationContext,
                 officeReadPlatformService, taskExecutor);
     }
 }
