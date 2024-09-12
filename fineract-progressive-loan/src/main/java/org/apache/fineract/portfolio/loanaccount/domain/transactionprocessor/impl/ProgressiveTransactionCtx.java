@@ -18,8 +18,11 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
@@ -28,9 +31,12 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.Mon
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.ProgressiveLoanInterestScheduleModel;
 
+@Getter
 public class ProgressiveTransactionCtx extends TransactionCtx {
 
     private final ProgressiveLoanInterestScheduleModel model;
+    @Setter
+    private LocalDate lastOverdueBalanceChange = null;
 
     public ProgressiveTransactionCtx(MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments,
             Set<LoanCharge> charges, MoneyHolder overpaymentHolder, ChangedTransactionDetail changedTransactionDetail,
@@ -39,7 +45,4 @@ public class ProgressiveTransactionCtx extends TransactionCtx {
         this.model = model;
     }
 
-    public ProgressiveLoanInterestScheduleModel getModel() {
-        return model;
-    }
 }
