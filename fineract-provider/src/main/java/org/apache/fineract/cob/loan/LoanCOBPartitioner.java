@@ -58,10 +58,10 @@ public class LoanCOBPartitioner implements Partitioner {
 
     private final Long numberOfDays;
 
-    @Value("#{jobExecutionContext['BusinessDate']}")
+    @Value("#{stepExecutionContext['BusinessDate']}")
     @Setter
     private LocalDate businessDate;
-    @Value("#{jobExecutionContext['IS_CATCH_UP']}")
+    @Value("#{stepExecutionContext['IS_CATCH_UP']}")
     @Setter
     private Boolean isCatchUp;
 
