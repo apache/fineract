@@ -61,6 +61,7 @@ import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
+import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsDataWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
@@ -69,6 +70,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCreditAllocationRule
 import org.apache.fineract.portfolio.loanaccount.domain.LoanPaymentAllocationRule;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
@@ -167,8 +169,6 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             currentInstallment.updateObligationsMet(currency, disbursementDate);
         }
 
-        List<ChargeOrTransaction> chargeOrTransactions = createSortedChargesAndTransactionsList(loanTransactions, charges);
-
         MoneyHolder overpaymentHolder = new MoneyHolder(Money.zero(currency));
         final MathContext mc = MoneyHelper.getMathContext();
         final Loan loan = loanTransactions.get(0).getLoan();
@@ -177,18 +177,39 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         ProgressiveLoanInterestScheduleModel scheduleModel = emiCalculator.generateModel(loanProductRelatedDetail,
                 installmentAmountInMultiplesOf, installments, mc);
 
-        for (final ChargeOrTransaction chargeOrTransaction : chargeOrTransactions) {
-            chargeOrTransaction.getLoanTransaction().ifPresent(loanTransaction -> processSingleTransaction(loanTransaction, currency,
+        final var loanTermVariations = Optional
+                .ofNullable(loan.getActiveLoanTermVariations()).map(loanTermVariationsSet -> loanTermVariationsSet.stream()
+                        .map(LoanTermVariations::toData).collect(Collectors.toCollection(ArrayList::new)))
+                .map(LoanTermVariationsDataWrapper::new).orElse(null);
+        final List<ChangeOperation> changeOperations = createSortedChangesList(loanTermVariations, loanTransactions, charges);
+        for (final ChangeOperation changeOperation : changeOperations) {
+            changeOperation.getInterestRateChange().ifPresent((interestRateChange) -> {
+                final LocalDate interestRateChangeEffectiveDate = interestRateChange.getTermVariationApplicableFrom().minusDays(1);
+                final BigDecimal newInterestRate = interestRateChange.getDecimalValue();
+                emiCalculator.changeInterestRate(scheduleModel, interestRateChangeEffectiveDate, newInterestRate);
+                processInterestRateChangeOnInstallments(installments, scheduleModel);
+            });
+            changeOperation.getLoanTransaction().ifPresent(loanTransaction -> processSingleTransaction(loanTransaction, currency,
                     installments, charges, changedTransactionDetail, overpaymentHolder, scheduleModel));
-            chargeOrTransaction.getLoanCharge()
+            changeOperation.getLoanCharge()
                     .ifPresent(loanCharge -> processSingleCharge(loanCharge, currency, installments, disbursementDate));
         }
-        List<LoanTransaction> txs = chargeOrTransactions.stream() //
-                .map(ChargeOrTransaction::getLoanTransaction) //
+        List<LoanTransaction> txs = changeOperations.stream() //
+                .map(ChangeOperation::getLoanTransaction) //
                 .filter(Optional::isPresent) //
-                .map(Optional::get).toList();
+                .map(Optional::get) //
+                .toList(); //
         reprocessInstallments(disbursementDate, txs, installments, currency);
         return Pair.of(changedTransactionDetail, scheduleModel);
+    }
+
+    private void processInterestRateChangeOnInstallments(final List<LoanRepaymentScheduleInstallment> installments,
+            final ProgressiveLoanInterestScheduleModel scheduleModel) {
+        installments.stream().filter(this::isNotObligationsMet).forEach((installment -> emiCalculator
+                .findInterestRepaymentPeriod(scheduleModel, installment.getDueDate()).ifPresent((interestRepaymentPeriod -> {
+                    installment.updateInterestCharged(interestRepaymentPeriod.getInterestDue().getAmount());
+                    installment.updatePrincipal(interestRepaymentPeriod.getPrincipalDue().getAmount());
+                }))));
     }
 
     @Override
@@ -618,17 +639,20 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     }
 
     @NotNull
-    private List<ChargeOrTransaction> createSortedChargesAndTransactionsList(List<LoanTransaction> loanTransactions,
-            Set<LoanCharge> charges) {
-        List<ChargeOrTransaction> chargeOrTransactions = new ArrayList<>();
+    private List<ChangeOperation> createSortedChangesList(final LoanTermVariationsDataWrapper loanTermVariations,
+            final List<LoanTransaction> loanTransactions, final Set<LoanCharge> charges) {
+        List<ChangeOperation> changeOperations = new ArrayList<>();
+        if (loanTermVariations != null && !loanTermVariations.getInterestRateFromInstallment().isEmpty()) {
+            changeOperations.addAll(loanTermVariations.getInterestRateFromInstallment().stream().map(ChangeOperation::new).toList());
+        }
         if (charges != null) {
-            chargeOrTransactions.addAll(charges.stream().map(ChargeOrTransaction::new).toList());
+            changeOperations.addAll(charges.stream().map(ChangeOperation::new).toList());
         }
         if (loanTransactions != null) {
-            chargeOrTransactions.addAll(loanTransactions.stream().map(ChargeOrTransaction::new).toList());
+            changeOperations.addAll(loanTransactions.stream().map(ChangeOperation::new).toList());
         }
-        Collections.sort(chargeOrTransactions);
-        return chargeOrTransactions;
+        Collections.sort(changeOperations);
+        return changeOperations;
     }
 
     private void handleDisbursementWithEMICalculator(LoanTransaction disbursementTransaction, TransactionCtx transactionCtx) {

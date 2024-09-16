@@ -18,8 +18,6 @@
  */
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
-import static org.apache.fineract.portfolio.loanproduct.domain.LoanPreClosureInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE;
-
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
