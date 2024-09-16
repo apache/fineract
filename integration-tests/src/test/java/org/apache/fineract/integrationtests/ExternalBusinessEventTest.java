@@ -36,13 +36,19 @@ import java.util.concurrent.atomic.AtomicReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.client.models.PostClientsResponse;
+import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
+import org.apache.fineract.client.models.PostCreateRescheduleLoansResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
 import org.apache.fineract.infrastructure.event.external.service.validation.ExternalEventDTO;
 import org.apache.fineract.integrationtests.common.BusinessStepHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.ExternalEventConfigurationHelper;
+import org.apache.fineract.integrationtests.common.LoanRescheduleRequestHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.externalevents.ExternalEventHelper;
 import org.apache.fineract.integrationtests.common.externalevents.ExternalEventsExtension;
@@ -61,6 +67,7 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
     private static final String DATETIME_PATTERN = "dd MMMM yyyy";
     private static PostClientsResponse client;
     private static LoanTransactionHelper loanTransactionHelper;
+    private static LoanRescheduleRequestHelper loanRescheduleRequestHelper;
     private static Long loanProductId;
     private static ResponseSpecification responseSpec;
     private static RequestSpecification requestSpec;
@@ -74,6 +81,7 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
         responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
         loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(requestSpec, responseSpec);
         BusinessStepHelper businessStepHelper = new BusinessStepHelper();
         client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
         loanProductId = createLoanProductPeriodicWithInterest();
@@ -141,12 +149,47 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
         });
     }
 
+    @Test
+    public void testExternalBusinessEventLoanRescheduledDueAdjustScheduleBusinessEventInterestChange() {
+        AtomicReference<Long> loanIdRef = new AtomicReference<>();
+        runAt("01 March 2024", () -> {
+            enableLoanRescheduledDueAdjustScheduleBusinessEvent();
+            Long loanId = applyForLoanApplicationWithInterest(client.getClientId(), loanProductId, BigDecimal.valueOf(4000), "1 March 2023",
+                    "1 March 2024");
+            loanIdRef.set(loanId);
+            loanTransactionHelper.approveLoan("1 March 2024", loanId.intValue());
+
+            loanTransactionHelper.disburseLoan("1 March 2024", loanId.intValue(), "400", null);
+
+            PostCreateRescheduleLoansResponse rescheduleLoansResponse = loanRescheduleRequestHelper
+                    .createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanIdRef.get()).dateFormat(DATETIME_PATTERN)
+                            .locale("en").submittedOnDate("1 March 2024").newInterestRate(BigDecimal.ONE).rescheduleReasonId(1L)
+                            .rescheduleFromDate("1 April 2024"));
+
+            deleteAllExternalEvents();
+
+            loanRescheduleRequestHelper.approveLoanRescheduleRequest(rescheduleLoansResponse.getResourceId(),
+                    new PostUpdateRescheduleLoansRequest().approvedOnDate("1 March 2024").locale("en").dateFormat(DATETIME_PATTERN));
+
+            verifyBusinessEvents(new BusinessEvent("LoanRescheduledDueAdjustScheduleBusinessEvent", "01 March 2024", 300, 400.0, 400.0,
+                    List.of("interestRateForInstallment")));
+        });
+    }
+
     private static void enableLoanBalanceChangedBusinessEvent() {
         final Map<String, Boolean> updatedConfigurations = ExternalEventConfigurationHelper.updateExternalEventConfigurations(requestSpec,
                 responseSpec, "{\"externalEventConfigurations\":{\"LoanBalanceChangedBusinessEvent\":true}}\n");
         Assertions.assertEquals(updatedConfigurations.size(), 1);
         Assertions.assertTrue(updatedConfigurations.containsKey("LoanBalanceChangedBusinessEvent"));
         Assertions.assertTrue(updatedConfigurations.get("LoanBalanceChangedBusinessEvent"));
+    }
+
+    private static void enableLoanRescheduledDueAdjustScheduleBusinessEvent() {
+        final Map<String, Boolean> updatedConfigurations = ExternalEventConfigurationHelper.updateExternalEventConfigurations(requestSpec,
+                responseSpec, "{\"externalEventConfigurations\":{\"LoanRescheduledDueAdjustScheduleBusinessEvent\":true}}\n");
+        Assertions.assertEquals(updatedConfigurations.size(), 1);
+        Assertions.assertTrue(updatedConfigurations.containsKey("LoanRescheduledDueAdjustScheduleBusinessEvent"));
+        Assertions.assertTrue(updatedConfigurations.get("LoanRescheduledDueAdjustScheduleBusinessEvent"));
     }
 
     private static void disableLoanBalanceChangedBusinessEvent() {
@@ -166,14 +209,38 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
     private static Long createLoanProductPeriodicWithInterest() {
         String name = Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6);
         String shortName = Utils.uniqueRandomStringGenerator("", 4);
-        Long resourceId = loanTransactionHelper.createLoanProduct(new PostLoanProductsRequest().name(name).shortName(shortName)
-                .multiDisburseLoan(true).maxTrancheCount(2).interestType(0).interestCalculationPeriodType(0)
-                .disallowExpectedDisbursements(true).description("Test loan description").currencyCode("USD").digitsAfterDecimal(2)
-                .daysInYearType(1).daysInMonthType(1).interestRecalculationCompoundingMethod(0).recalculationRestFrequencyType(1)
-                .rescheduleStrategyMethod(1).recalculationRestFrequencyInterval(0).isInterestRecalculationEnabled(false)
-                .interestRateFrequencyType(2).locale("en_GB").numberOfRepayments(4).repaymentFrequencyType(2L).interestRatePerPeriod(2.0)
-                .repaymentEvery(1).minPrincipal(100.0).principal(1000.0).maxPrincipal(10000000.0).amortizationType(1)
-                .dateFormat(DATETIME_PATTERN).transactionProcessingStrategyCode(DEFAULT_STRATEGY).accountingRule(1)).getResourceId();
+        Long resourceId = loanTransactionHelper.createLoanProduct(new PostLoanProductsRequest() //
+                .name(name) //
+                .shortName(shortName) //
+                .multiDisburseLoan(true) //
+                .maxTrancheCount(2) //
+                .interestType(InterestType.DECLINING_BALANCE) //
+                .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY) //
+                .disallowExpectedDisbursements(true) //
+                .description("Test loan description") //
+                .currencyCode("USD") //
+                .digitsAfterDecimal(2) //
+                .daysInYearType(DaysInYearType.ACTUAL) //
+                .daysInMonthType(DaysInYearType.ACTUAL) //
+                .interestRecalculationCompoundingMethod(0) //
+                .recalculationRestFrequencyType(1) //
+                .rescheduleStrategyMethod(1) //
+                .recalculationRestFrequencyInterval(0) //
+                .isInterestRecalculationEnabled(false) //
+                .interestRateFrequencyType(2) //
+                .locale("en_GB") //
+                .numberOfRepayments(4) //
+                .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue()) //
+                .interestRatePerPeriod(2.0) //
+                .repaymentEvery(1) //
+                .minPrincipal(100.0) //
+                .principal(1000.0) //
+                .maxPrincipal(10000000.0) //
+                .amortizationType(AmortizationType.EQUAL_INSTALLMENTS) //
+                .dateFormat(DATETIME_PATTERN) //
+                .transactionProcessingStrategyCode(DEFAULT_STRATEGY) //
+                .accountingRule(1)) //
+                .getResourceId();
         log.info("Test MultiDisburse Loan Product With Interest. loanProductId: {}", resourceId);
         return resourceId;
     }
@@ -222,20 +289,52 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
                         && Objects.equals(externalEvent.getBusinessDate(), businessDate)
                         && Objects.equals(statusId, businessEvent.getStatusId().doubleValue())
                         && Objects.equals(principalDisbursed, businessEvent.getPrincipalDisbursed())
-                        && Objects.equals(principalOutstanding, businessEvent.getPrincipalOutstanding());
+                        && Objects.equals(principalOutstanding, businessEvent.getPrincipalOutstanding())
+                        && emiAmountVariationsMatch((List<Map<String, Object>>) externalEvent.getPayLoad().get("emiAmountVariations"),
+                                businessEvent.emiAmountVariationType);
             }).count();
             Assertions.assertEquals(1, count, "Expected business event not found " + businessEvent);
         }
+    }
+
+    private boolean emiAmountVariationsMatch(List<Map<String, Object>> emiAmountVariations, List<String> expectedTypes) {
+        if (CollectionUtils.isEmpty(expectedTypes)) {
+            return true;
+        }
+        int numberOfMatches = 0;
+        if (CollectionUtils.isNotEmpty(emiAmountVariations)) {
+            for (String expectedType : expectedTypes) {
+                int i = 0;
+                while (i < emiAmountVariations.size() && !StringUtils
+                        .equals((String) ((Map<String, Object>) emiAmountVariations.get(i).get("termType")).get("value"), expectedType)) {
+                    i++;
+                }
+                if (i < emiAmountVariations.size()) {
+                    numberOfMatches++;
+                }
+            }
+        }
+
+        return numberOfMatches == expectedTypes.size();
     }
 
     @Data
     @AllArgsConstructor
     public static class BusinessEvent {
 
+        public BusinessEvent(String type, String businessDate, Integer statusId, Double principalDisbursed, Double principalOutstanding) {
+            this.type = type;
+            this.businessDate = businessDate;
+            this.statusId = statusId;
+            this.principalDisbursed = principalDisbursed;
+            this.principalOutstanding = principalOutstanding;
+        }
+
         private String type;
         private String businessDate;
         private Integer statusId;
         private Double principalDisbursed;
         private Double principalOutstanding;
+        private List<String> emiAmountVariationType;
     }
 }

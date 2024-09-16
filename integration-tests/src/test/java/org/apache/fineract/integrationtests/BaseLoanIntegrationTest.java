@@ -1046,6 +1046,7 @@ public abstract class BaseLoanIntegrationTest {
 
     public static class InterestCalculationPeriodType {
 
+        public static final Integer DAILY = 0;
         public static final Integer SAME_AS_REPAYMENT_PERIOD = 1;
     }
 
@@ -1055,4 +1056,12 @@ public abstract class BaseLoanIntegrationTest {
         public static final Integer YEARS = 3;
     }
 
+    public static class DaysInYearType {
+
+        public static final Integer INVALID = 0;
+        public static final Integer ACTUAL = 1;
+        public static final Integer DAYS_360 = 360;
+        public static final Integer DAYS_364 = 364;
+        public static final Integer DAYS_365 = 365;
+    }
 }
