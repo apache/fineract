@@ -45,7 +45,6 @@ import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
-import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -91,7 +90,7 @@ public class LoanRefundTransactionTest extends BaseLoanIntegrationTest {
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .interestRatePerPeriod(108.0).interestCalculationPeriodType(RepaymentFrequencyType.DAYS)
                     .interestRateFrequencyType(YEARS).daysInMonthType(DaysInMonthType.ACTUAL.getValue())
-                    .daysInYearType(DaysInYearType.DAYS_360.getValue()).numberOfRepayments(4)//
+                    .daysInYearType(DaysInYearType.DAYS_360).numberOfRepayments(4)//
                     .maxInterestRatePerPeriod((double) 110)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(1L)//
@@ -163,7 +162,7 @@ public class LoanRefundTransactionTest extends BaseLoanIntegrationTest {
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .interestRatePerPeriod(108.0).interestCalculationPeriodType(RepaymentFrequencyType.DAYS)
                     .interestRateFrequencyType(YEARS).daysInMonthType(DaysInMonthType.ACTUAL.getValue())
-                    .daysInYearType(DaysInYearType.DAYS_360.getValue()).numberOfRepayments(4)//
+                    .daysInYearType(DaysInYearType.DAYS_360).numberOfRepayments(4)//
                     .maxInterestRatePerPeriod((double) 110)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(1L)//

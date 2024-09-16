@@ -77,7 +77,6 @@ import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
-import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.EarlyPaymentLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.FineractStyleLoanRepaymentScheduleTransactionProcessor;
@@ -4427,8 +4426,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .interestRatePerPeriod(5.0).interestCalculationPeriodType(DAYS).interestRateFrequencyType(YEARS)
-                    .daysInMonthType(DaysInMonthType.DAYS_30.getValue()).daysInYearType(DaysInYearType.DAYS_360.getValue())
-                    .numberOfRepayments(5)//
+                    .daysInMonthType(DaysInMonthType.DAYS_30.getValue()).daysInYearType(DaysInYearType.DAYS_360).numberOfRepayments(5)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(2L)//
                     .enableDownPayment(true)//
@@ -4490,8 +4488,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .interestRatePerPeriod(12.3).interestCalculationPeriodType(RepaymentFrequencyType.DAYS).interestRateFrequencyType(YEARS)
-                    .daysInMonthType(DaysInMonthType.DAYS_30.getValue()).daysInYearType(DaysInYearType.DAYS_360.getValue())
-                    .numberOfRepayments(5)//
+                    .daysInMonthType(DaysInMonthType.DAYS_30.getValue()).daysInYearType(DaysInYearType.DAYS_360).numberOfRepayments(5)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(2L)//
                     .enableDownPayment(true)//
@@ -4554,8 +4551,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .interestRatePerPeriod(12.3).interestCalculationPeriodType(RepaymentFrequencyType.DAYS).interestRateFrequencyType(YEARS)
-                    .daysInMonthType(DaysInMonthType.DAYS_30.getValue()).daysInYearType(DaysInYearType.DAYS_360.getValue())
-                    .numberOfRepayments(5)//
+                    .daysInMonthType(DaysInMonthType.DAYS_30.getValue()).daysInYearType(DaysInYearType.DAYS_360).numberOfRepayments(5)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(2L)//
                     .enableDownPayment(true)//
@@ -4618,8 +4614,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .interestRatePerPeriod(12.3).interestCalculationPeriodType(RepaymentFrequencyType.DAYS).interestRateFrequencyType(YEARS)
-                    .daysInMonthType(DaysInMonthType.ACTUAL.getValue()).daysInYearType(DaysInYearType.DAYS_365.getValue())
-                    .numberOfRepayments(4)//
+                    .daysInMonthType(DaysInMonthType.ACTUAL.getValue()).daysInYearType(DaysInYearType.DAYS_365).numberOfRepayments(4)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(2L)//
                     .allowPartialPeriodInterestCalcualtion(false)//
@@ -4698,7 +4693,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .interestRatePerPeriod(108.0).interestCalculationPeriodType(RepaymentFrequencyType.DAYS)
                     .interestRateFrequencyType(YEARS).daysInMonthType(DaysInMonthType.ACTUAL.getValue())
-                    .daysInYearType(DaysInYearType.DAYS_360.getValue()).numberOfRepayments(4)//
+                    .daysInYearType(DaysInYearType.DAYS_360).numberOfRepayments(4)//
                     .maxInterestRatePerPeriod((double) 110)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(1L)//
@@ -4878,8 +4873,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             interestRefundTypes.add("MERCHANT_ISSUED_REFUND");
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .interestRatePerPeriod(12.0).interestCalculationPeriodType(RepaymentFrequencyType.DAYS).interestRateFrequencyType(YEARS)
-                    .daysInMonthType(DaysInMonthType.ACTUAL.getValue()).daysInYearType(DaysInYearType.DAYS_365.getValue())
-                    .numberOfRepayments(4)//
+                    .daysInMonthType(DaysInMonthType.ACTUAL.getValue()).daysInYearType(DaysInYearType.DAYS_365).numberOfRepayments(4)//
                     .repaymentEvery(5)//
                     .repaymentFrequencyType(0L)//
                     .allowPartialPeriodInterestCalcualtion(false)//
@@ -4942,7 +4936,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .interestRatePerPeriod(interestRatePerPeriod.doubleValue()).interestCalculationPeriodType(RepaymentFrequencyType.DAYS)
                     .interestRateFrequencyType(YEARS).daysInMonthType(DaysInMonthType.DAYS_30.getValue())
-                    .daysInYearType(DaysInYearType.DAYS_360.getValue()).numberOfRepayments(6)//
+                    .daysInYearType(DaysInYearType.DAYS_360).numberOfRepayments(6)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(2L)//
                     .enableDownPayment(false)//
@@ -5024,7 +5018,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .interestRatePerPeriod(interestRatePerPeriod.doubleValue()).interestCalculationPeriodType(RepaymentFrequencyType.DAYS)
                     .interestRateFrequencyType(YEARS).daysInMonthType(DaysInMonthType.DAYS_30.getValue())
-                    .daysInYearType(DaysInYearType.DAYS_360.getValue()).numberOfRepayments(6)//
+                    .daysInYearType(DaysInYearType.DAYS_360).numberOfRepayments(6)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(2L)//
                     .enableDownPayment(false)//
@@ -5121,7 +5115,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .interestCalculationPeriodType(RepaymentFrequencyType.DAYS)//
                     .interestRateFrequencyType(YEARS)//
                     .daysInMonthType(DaysInMonthType.DAYS_30.getValue())//
-                    .daysInYearType(DaysInYearType.DAYS_360.getValue())//
+                    .daysInYearType(DaysInYearType.DAYS_360)//
                     .numberOfRepayments(6)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue())//

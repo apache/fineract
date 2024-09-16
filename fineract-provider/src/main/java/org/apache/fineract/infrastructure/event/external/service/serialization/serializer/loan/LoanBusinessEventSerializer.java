@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.event.external.service.serialization.
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.generic.GenericContainer;
 import org.apache.commons.collections4.CollectionUtils;
@@ -37,6 +38,7 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanSummaryData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummaryBalancesRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.springframework.stereotype.Component;
@@ -83,6 +85,11 @@ public class LoanBusinessEventSerializer implements BusinessEventSerializer {
 
         List<LoanInstallmentDelinquencyBucketDataV1> installmentsDelinquencyData = installmentLevelDelinquencyEventProducer
                 .calculateInstallmentLevelDelinquencyData(event.get(), data.getCurrency());
+
+        Set<LoanTermVariations> activeLoanTermVariations = event.get().getActiveLoanTermVariations();
+        if (activeLoanTermVariations != null) {
+            data.setEmiAmountVariations(activeLoanTermVariations.stream().map(LoanTermVariations::toData).toList());
+        }
 
         LoanAccountDataV1 result = mapper.map(data);
         result.getDelinquent().setInstallmentDelinquencyBuckets(installmentsDelinquencyData);
