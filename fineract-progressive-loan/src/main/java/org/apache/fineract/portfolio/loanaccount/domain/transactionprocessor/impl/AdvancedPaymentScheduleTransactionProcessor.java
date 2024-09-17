@@ -26,6 +26,8 @@ import static org.apache.fineract.portfolio.loanproduct.domain.AllocationType.FE
 import static org.apache.fineract.portfolio.loanproduct.domain.AllocationType.INTEREST;
 import static org.apache.fineract.portfolio.loanproduct.domain.AllocationType.PENALTY;
 import static org.apache.fineract.portfolio.loanproduct.domain.AllocationType.PRINCIPAL;
+import static org.apache.fineract.portfolio.loanproduct.domain.LoanPreClosureInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE;
+import static org.apache.fineract.portfolio.loanproduct.domain.LoanPreClosureInterestCalculationStrategy.TILL_REST_FREQUENCY_DATE;
 import static org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTransactionType.DEFAULT;
 
 import java.math.BigDecimal;
@@ -85,6 +87,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.AllocationType;
 import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationTransactionType;
 import org.apache.fineract.portfolio.loanproduct.domain.DueType;
 import org.apache.fineract.portfolio.loanproduct.domain.FutureInstallmentAllocationRule;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanPreClosureInterestCalculationStrategy;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.jetbrains.annotations.NotNull;
@@ -1231,10 +1234,21 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                                 if (transactionCtx instanceof ProgressiveTransactionCtx ctx && loan.isInterestBearing()
                                         && loan.getLoanProductRelatedDetail().isInterestRecalculationEnabled()) {
                                     ProgressiveLoanInterestScheduleModel model = ctx.getModel();
-                                    LocalDate transactionDate = loanTransaction.getTransactionDate();
-                                    LocalDate payDate = inAdvanceInstallment.getFromDate().isAfter(transactionDate)
-                                            ? inAdvanceInstallment.getFromDate()
-                                            : transactionDate;
+                                    LoanPreClosureInterestCalculationStrategy strategy = loanTransaction.getLoan().getLoanProduct()
+                                            .preCloseInterestCalculationStrategy();
+
+                                    LocalDate payDate = switch (strategy) {
+                                        case TILL_PRE_CLOSURE_DATE -> {
+                                            LocalDate transactionDate = loanTransaction.getTransactionDate();
+                                            yield inAdvanceInstallment.getFromDate().isAfter(transactionDate)
+                                                    ? inAdvanceInstallment.getFromDate()
+                                                    : transactionDate;
+                                        }
+                                        case TILL_REST_FREQUENCY_DATE -> inAdvanceInstallment.getDueDate();
+                                        case NONE ->
+                                            throw new IllegalStateException("Unexpected PreClosureInterestCalculationStrategy: NONE");
+                                    };
+
                                     ProgressiveLoanInterestRepaymentModel payableDetails = emiCalculator
                                             .getPayableDetails(model, inAdvanceInstallment.getDueDate(), payDate).orElseThrow();
 
@@ -1253,13 +1267,19 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
                                     switch (paymentAllocationType) {
                                         case IN_ADVANCE_PRINCIPAL -> {
-                                            emiCalculator.addBalanceCorrection(model, payDate,
-                                                    payableDetails.getOutstandingBalance().multipliedBy(-1));
+                                            Money balance = switch (strategy) {
+                                                case TILL_PRE_CLOSURE_DATE -> payableDetails.getOutstandingBalance();
+                                                case TILL_REST_FREQUENCY_DATE -> payableDetails.getRemainingBalance();
+                                                default -> throw new IllegalStateException();
+                                            };
+                                            emiCalculator.addBalanceCorrection(model, payDate, balance.multipliedBy(-1));
                                             emiCalculator.addBalanceCorrection(model, payDate,
                                                     payableDetails.getPrincipalDue().minus(paidPortion));
                                         }
-                                        case IN_ADVANCE_INTEREST -> emiCalculator.addBalanceCorrection(model, payDate,
-                                                payableDetails.getInterestDue().minus(paidPortion));
+                                        case IN_ADVANCE_INTEREST -> {
+                                            emiCalculator.addBalanceCorrection(model, payDate,
+                                                    payableDetails.getInterestDue().minus(paidPortion));
+                                        }
                                         default -> {
                                         }
                                     }

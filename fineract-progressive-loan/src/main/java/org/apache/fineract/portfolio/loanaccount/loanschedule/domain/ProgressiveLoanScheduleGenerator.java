@@ -251,7 +251,7 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
             case TILL_PRE_CLOSURE_DATE -> onDate;
             case TILL_REST_FREQUENCY_DATE -> // find due date of current installment
                 installments.stream().filter(it -> it.getFromDate().isBefore(onDate) && it.getDueDate().isAfter(onDate)).findFirst()
-                        .orElseThrow(() -> new IllegalStateException("No installment found for transaction date: " + onDate)).getDueDate();
+                        .orElse(installments.get(0)).getDueDate();
             case NONE -> throw new IllegalStateException("Unexpected PreClosureInterestCalculationStrategy: NONE");
         };
 
