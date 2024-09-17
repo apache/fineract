@@ -35,16 +35,18 @@ import org.apache.commons.io.IOUtils;
 public class BodyCachingHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
     private final byte[] cachedBody;
+    private ByteArrayInputStream inputStream;
 
     @SuppressFBWarnings(value = "CT_CONSTRUCTOR_THROW")
     public BodyCachingHttpServletRequestWrapper(HttpServletRequest request) throws IOException {
         super(request);
         this.cachedBody = IOUtils.toByteArray(request.getInputStream());
+        this.inputStream = new ByteArrayInputStream(cachedBody);
     }
 
     @Override
     public ServletInputStream getInputStream() throws IOException {
-        return new CachedBodyServletInputStream(cachedBody);
+        return new CachedBodyServletInputStream(inputStream);
     }
 
     @Override
@@ -53,12 +55,16 @@ public class BodyCachingHttpServletRequestWrapper extends HttpServletRequestWrap
         return new BufferedReader(new InputStreamReader(byteArrayInputStream, UTF_8));
     }
 
+    public void resetStream() {
+        inputStream = new ByteArrayInputStream(cachedBody);
+    }
+
     public static class CachedBodyServletInputStream extends ServletInputStream {
 
         private final InputStream inputStream;
 
-        public CachedBodyServletInputStream(byte[] cachedBody) {
-            this.inputStream = new ByteArrayInputStream(cachedBody);
+        public CachedBodyServletInputStream(ByteArrayInputStream inputStream) {
+            this.inputStream = inputStream;
         }
 
         @Override

@@ -65,7 +65,7 @@ public class LoanCOBApiFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         request = new BodyCachingHttpServletRequestWrapper(request);
 
-        if (!helper.isOnApiList(request)) {
+        if (!helper.isOnApiList((BodyCachingHttpServletRequestWrapper) request)) {
             proceed(filterChain, request, response);
         } else {
             try {
@@ -74,7 +74,7 @@ public class LoanCOBApiFilter extends OncePerRequestFilter {
                     proceed(filterChain, request, response);
                 } else {
                     try {
-                        List<Long> loanIds = helper.calculateRelevantLoanIds(request);
+                        List<Long> loanIds = helper.calculateRelevantLoanIds((BodyCachingHttpServletRequestWrapper) request);
                         if (!loanIds.isEmpty() && helper.isLoanBehind(loanIds)) {
                             helper.executeInlineCob(loanIds);
                         }

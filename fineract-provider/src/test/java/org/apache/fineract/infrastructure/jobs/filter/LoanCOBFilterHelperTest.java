@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.jobs.filter;
 
-import jakarta.servlet.http.HttpServletRequest;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
@@ -116,10 +116,10 @@ public class LoanCOBFilterHelperTest {
                 ]
                 """;
 
-        HttpServletRequest httpServletRequest = Mockito.mock(HttpServletRequest.class);
+        BodyCachingHttpServletRequestWrapper httpServletRequest = Mockito.mock(BodyCachingHttpServletRequestWrapper.class);
         Mockito.when(httpServletRequest.getPathInfo()).thenReturn("/v1/batches/endpoint");
         BodyCachingHttpServletRequestWrapper.CachedBodyServletInputStream inputStream = new BodyCachingHttpServletRequestWrapper.CachedBodyServletInputStream(
-                json.getBytes(Charset.forName("UTF-8")));
+                new ByteArrayInputStream(json.getBytes(Charset.forName("UTF-8"))));
         Mockito.when(httpServletRequest.getInputStream()).thenReturn(inputStream);
         List<Long> loanIds = helper.calculateRelevantLoanIds(httpServletRequest);
         Assertions.assertEquals(0, loanIds.size());

@@ -26,7 +26,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
-import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -47,6 +46,7 @@ import org.apache.fineract.cob.service.LoanAccountLockService;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.http.BodyCachingHttpServletRequestWrapper;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.exception.LoanIdsHardLockedException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -113,7 +113,7 @@ public class LoanCOBFilterHelper implements InitializingBean {
         return LOAN_PATH_PATTERN.matcher(pathInfo).matches() && pathInfo.contains("/v1/rescheduleloans/");
     }
 
-    public boolean isOnApiList(HttpServletRequest request) throws IOException {
+    public boolean isOnApiList(BodyCachingHttpServletRequestWrapper request) throws IOException {
         String pathInfo = request.getPathInfo();
         String method = request.getMethod();
         if (StringUtils.isBlank(pathInfo)) {
@@ -126,7 +126,7 @@ public class LoanCOBFilterHelper implements InitializingBean {
         }
     }
 
-    private boolean isBatchApiMatching(HttpServletRequest request) throws IOException {
+    private boolean isBatchApiMatching(BodyCachingHttpServletRequestWrapper request) throws IOException {
         for (BatchRequest batchRequest : getBatchRequests(request)) {
             String method = batchRequest.getMethod();
             String pathInfo = batchRequest.getRelativeUrl();
@@ -137,8 +137,10 @@ public class LoanCOBFilterHelper implements InitializingBean {
         return false;
     }
 
-    private List<BatchRequest> getBatchRequests(HttpServletRequest request) throws IOException {
+    private List<BatchRequest> getBatchRequests(BodyCachingHttpServletRequestWrapper request) throws IOException {
         List<BatchRequest> batchRequests = objectMapper.readValue(request.getInputStream(), new TypeReference<>() {});
+        // since we read body, we have to reset so the upcoming readings are successful
+        request.resetStream();
         for (BatchRequest batchRequest : batchRequests) {
             String pathInfo = "/" + batchRequest.getRelativeUrl();
             if (!isRelativeUrlVersioned(batchRequest.getRelativeUrl())) {
@@ -192,7 +194,7 @@ public class LoanCOBFilterHelper implements InitializingBean {
         return CollectionUtils.isNotEmpty(loanIdAndLastClosedBusinessDates);
     }
 
-    public List<Long> calculateRelevantLoanIds(HttpServletRequest request) throws IOException {
+    public List<Long> calculateRelevantLoanIds(BodyCachingHttpServletRequestWrapper request) throws IOException {
         String pathInfo = request.getPathInfo();
         if (isBatchApi(pathInfo)) {
             return getLoanIdsFromBatchApi(request);
@@ -201,7 +203,7 @@ public class LoanCOBFilterHelper implements InitializingBean {
         }
     }
 
-    private List<Long> getLoanIdsFromBatchApi(HttpServletRequest request) throws IOException {
+    private List<Long> getLoanIdsFromBatchApi(BodyCachingHttpServletRequestWrapper request) throws IOException {
         List<Long> loanIds = new ArrayList<>();
         for (BatchRequest batchRequest : getBatchRequests(request)) {
             // check the URL for Loan related ID

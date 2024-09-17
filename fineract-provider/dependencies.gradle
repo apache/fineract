@@ -136,7 +136,7 @@ dependencies {
     implementation ('jakarta.xml.bind:jakarta.xml.bind-api') {
         exclude group: 'jakarta.activation'
     }
-    implementation ('org.apache.activemq:activemq-client-jakarta') {
+    implementation ('org.apache.activemq:activemq-client') {
         exclude group: 'org.apache.geronimo.specs'
         exclude group: 'javax.annotation', module: 'javax.annotation-api'
     }
