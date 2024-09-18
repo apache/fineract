@@ -166,4 +166,5 @@
     <include file="parts/0144_transaction_summary_with_asset_owner_report_unc_allocation_fix.xml" relativeToChangelogFile="true" />
     <include file="parts/0145_job_short_name.xml" relativeToChangelogFile="true" />
     <include file="parts/0147_enable_payment_hub_integration.xml" relativeToChangelogFile="true" />
+    <include file="parts/0148_transaction_summary_with_asset_owner_report_performance_improvement.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
