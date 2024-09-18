@@ -822,6 +822,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 addToTransactionMapping(loanTransactionToRepaymentScheduleMapping, portion, zero, zero, zero);
             }
         }
+
+        currentInstallment.checkIfRepaymentPeriodObligationsAreMet(transactionDate, loanTransaction.getLoan().loanCurrency());
         return portion;
     }
 

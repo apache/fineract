@@ -230,6 +230,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(loanTransaction.getTransactionDate()).thenReturn(transactionDate);
         when(charge.getAmountOutstanding(currency)).thenReturn(chargeAmountMoney);
         when(loanTransaction.getLoan()).thenReturn(loan);
+        when(loan.loanCurrency()).thenReturn(currency);
         when(loanTransaction.getLoan().getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
         when(loanProductRelatedDetail.getLoanScheduleProcessingType()).thenReturn(LoanScheduleProcessingType.HORIZONTAL);
         when(loan.getDisbursementDate()).thenReturn(disbursementDate);

@@ -512,7 +512,6 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         Money penaltyPortionOfTransaction = Money.zero(currency);
 
         if (transactionAmountRemaining.isZero()) {
-            // checkIfRepaymentPeriodObligationsAreMet(transactionDate, currency);
             return penaltyPortionOfTransaction;
         }
 
@@ -539,7 +538,6 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
         Money feePortionOfTransaction = Money.zero(currency);
         if (transactionAmountRemaining.isZero()) {
-            // checkIfRepaymentPeriodObligationsAreMet(transactionDate, currency);
             return feePortionOfTransaction;
         }
         final Money feeChargesDue = getFeeChargesOutstanding(currency);
@@ -565,7 +563,6 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
         Money interestPortionOfTransaction = Money.zero(currency);
         if (transactionAmountRemaining.isZero()) {
-            // checkIfRepaymentPeriodObligationsAreMet(transactionDate, currency);
             return interestPortionOfTransaction;
         }
         final Money interestDue = getInterestOutstanding(currency);
@@ -591,7 +588,6 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         final MonetaryCurrency currency = transactionAmount.getCurrency();
         Money principalPortionOfTransaction = Money.zero(currency);
         if (transactionAmount.isZero()) {
-            checkIfRepaymentPeriodObligationsAreMet(transactionDate, currency);
             return principalPortionOfTransaction;
         }
         final Money principalDue = getPrincipalOutstanding(currency);
@@ -778,7 +774,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         return DateUtils.isAfter(transactionDate, getDueDate());
     }
 
-    private void checkIfRepaymentPeriodObligationsAreMet(final LocalDate transactionDate, final MonetaryCurrency currency) {
+    public void checkIfRepaymentPeriodObligationsAreMet(final LocalDate transactionDate, final MonetaryCurrency currency) {
         this.obligationsMet = getTotalOutstanding(currency).isZero();
         if (this.obligationsMet) {
             this.obligationsMetOnDate = transactionDate;
