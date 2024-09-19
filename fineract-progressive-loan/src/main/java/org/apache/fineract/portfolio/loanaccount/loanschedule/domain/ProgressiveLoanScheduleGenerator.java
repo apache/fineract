@@ -18,8 +18,6 @@
  */
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
-import static org.apache.fineract.portfolio.loanproduct.domain.LoanPreClosureInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE;
-
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
@@ -102,25 +100,17 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
 
         prepareDisbursementsOnLoanApplicationTerms(loanApplicationTerms);
 
-        final ArrayList<DisbursementData> disbursementDataList = new ArrayList<>(loanApplicationTerms.getDisbursementDatas());
+        final List<DisbursementData> disbursementDataList = new ArrayList<>(loanApplicationTerms.getDisbursementDatas());
         disbursementDataList.sort(Comparator.comparing(DisbursementData::disbursementDate));
 
         for (LoanScheduleModelRepaymentPeriod repaymentPeriod : expectedRepaymentPeriods) {
             scheduleParams.setPeriodStartDate(repaymentPeriod.getFromDate());
             scheduleParams.setActualRepaymentDate(repaymentPeriod.getDueDate());
 
+            applyInterestRateChangesOnPeriod(loanApplicationTerms, repaymentPeriod, interestScheduleModel);
             processDisbursements(loanApplicationTerms, disbursementDataList, scheduleParams, interestScheduleModel, periods,
                     chargesDueAtTimeOfDisbursement);
             repaymentPeriod.setPeriodNumber(scheduleParams.getInstalmentNumber());
-
-            for (var interestRateChange : loanApplicationTerms.getLoanTermVariations().getInterestRateFromInstallment()) {
-                final LocalDate interestRateChangeEffectiveDate = interestRateChange.getTermVariationApplicableFrom().minusDays(1);
-                final BigDecimal newInterestRate = interestRateChange.getDecimalValue();
-                if (interestRateChangeEffectiveDate.isAfter(repaymentPeriod.getFromDate())
-                        && !interestRateChangeEffectiveDate.isAfter(repaymentPeriod.getDueDate())) {
-                    emiCalculator.changeInterestRate(interestScheduleModel, interestRateChangeEffectiveDate, newInterestRate);
-                }
-            }
 
             emiCalculator.findInterestRepaymentPeriod(interestScheduleModel, repaymentPeriod.getDueDate())
                     .ifPresent(interestRepaymentPeriod -> {
@@ -163,6 +153,18 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
                 scheduleParams.getTotalRepaymentExpected().getAmount(), totalOutstanding);
     }
 
+    private void applyInterestRateChangesOnPeriod(final LoanApplicationTerms loanApplicationTerms,
+            final LoanScheduleModelRepaymentPeriod repaymentPeriod, final ProgressiveLoanInterestScheduleModel interestScheduleModel) {
+        for (var interestRateChange : loanApplicationTerms.getLoanTermVariations().getInterestRateFromInstallment()) {
+            final LocalDate interestRateSubmittedOnDate = interestRateChange.getTermVariationApplicableFrom();
+            final BigDecimal newInterestRate = interestRateChange.getDecimalValue();
+            if (interestRateSubmittedOnDate.isAfter(repaymentPeriod.getFromDate())
+                    && !interestRateSubmittedOnDate.isAfter(repaymentPeriod.getDueDate())) {
+                emiCalculator.changeInterestRate(interestScheduleModel, interestRateSubmittedOnDate, newInterestRate);
+            }
+        }
+    }
+
     private void prepareDisbursementsOnLoanApplicationTerms(final LoanApplicationTerms loanApplicationTerms) {
         if (loanApplicationTerms.getDisbursementDatas().isEmpty()) {
             loanApplicationTerms.getDisbursementDatas()
@@ -172,10 +174,9 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
         }
     }
 
-    private void processDisbursements(final LoanApplicationTerms loanApplicationTerms,
-            final ArrayList<DisbursementData> disbursementDataList, final LoanScheduleParams scheduleParams,
-            final ProgressiveLoanInterestScheduleModel interestScheduleModel, final List<LoanScheduleModelPeriod> periods,
-            final BigDecimal chargesDueAtTimeOfDisbursement) {
+    private void processDisbursements(final LoanApplicationTerms loanApplicationTerms, final List<DisbursementData> disbursementDataList,
+            final LoanScheduleParams scheduleParams, final ProgressiveLoanInterestScheduleModel interestScheduleModel,
+            final List<LoanScheduleModelPeriod> periods, final BigDecimal chargesDueAtTimeOfDisbursement) {
 
         for (DisbursementData disbursementData : disbursementDataList) {
             final LocalDate disbursementDate = disbursementData.disbursementDate();

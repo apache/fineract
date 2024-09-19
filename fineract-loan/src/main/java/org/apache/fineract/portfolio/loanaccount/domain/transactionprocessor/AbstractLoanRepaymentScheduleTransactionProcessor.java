@@ -478,7 +478,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 && disbursementDate.equals(loanRepaymentScheduleInstallment.getObligationsMetOnDate());
     }
 
-    private boolean isNotObligationsMet(LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment) {
+    protected boolean isNotObligationsMet(LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment) {
         return !loanRepaymentScheduleInstallment.isObligationsMet() && loanRepaymentScheduleInstallment.getObligationsMetOnDate() == null;
     }
 

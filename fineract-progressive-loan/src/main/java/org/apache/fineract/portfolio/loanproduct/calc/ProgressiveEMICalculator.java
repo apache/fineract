@@ -232,8 +232,9 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     }
 
     @Override
-    public void changeInterestRate(final ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate newInterestEffectiveDate,
+    public void changeInterestRate(final ProgressiveLoanInterestScheduleModel scheduleModel, final LocalDate newInterestSubmittedOnDate,
             final BigDecimal newInterestRate) {
+        final LocalDate newInterestEffectiveDate = newInterestSubmittedOnDate.minusDays(1);
         final ProgressiveLoanInterestRepaymentModel repaymentPeriod = findInterestRepaymentPeriodForInterestChange(scheduleModel,
                 newInterestEffectiveDate).orElse(null);
         if (repaymentPeriod == null) {
