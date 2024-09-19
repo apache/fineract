@@ -38,9 +38,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -300,6 +302,13 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
         if (LoanTransactionType.REAGE.equals(loanTransaction.getTypeOf())) {
             newTransaction.setLoanReAgeParameter(loanTransaction.getLoanReAgeParameter().getCopy(newTransaction));
         }
+        return newTransaction;
+    }
+
+    public LoanTransaction copyTransactionPropertiesAndMappings() {
+        LoanTransaction newTransaction = copyTransactionProperties(this);
+        newTransaction.updateLoanTransactionToRepaymentScheduleMappings(loanTransactionToRepaymentScheduleMappings);
+        newTransaction.updateLoanChargePaidMappings(loanChargesPaid);
         return newTransaction;
     }
 
@@ -920,35 +929,82 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
 
     public void updateLoanTransactionToRepaymentScheduleMappings(final Collection<LoanTransactionToRepaymentScheduleMapping> mappings) {
         Collection<LoanTransactionToRepaymentScheduleMapping> retainMappings = new ArrayList<>();
-        for (LoanTransactionToRepaymentScheduleMapping updatedrepaymentScheduleMapping : mappings) {
-            updateMapingDetail(retainMappings, updatedrepaymentScheduleMapping);
+        for (LoanTransactionToRepaymentScheduleMapping updatedMapping : mappings) {
+            updateMappingDetail(retainMappings, updatedMapping, true);
         }
         this.loanTransactionToRepaymentScheduleMappings.retainAll(retainMappings);
     }
 
-    private boolean updateMapingDetail(final Collection<LoanTransactionToRepaymentScheduleMapping> retainMappings,
-            final LoanTransactionToRepaymentScheduleMapping updatedrepaymentScheduleMapping) {
+    public void addLoanTransactionToRepaymentScheduleMappings(final Collection<LoanTransactionToRepaymentScheduleMapping> updatedMappings) {
+        for (LoanTransactionToRepaymentScheduleMapping updatedMapping : updatedMappings) {
+            updateMappingDetail(null, updatedMapping, false);
+        }
+    }
+
+    private boolean updateMappingDetail(final Collection<LoanTransactionToRepaymentScheduleMapping> retainMappings,
+            final LoanTransactionToRepaymentScheduleMapping updatedMapping, boolean overwrite) {
         boolean isMappingUpdated = false;
-        for (LoanTransactionToRepaymentScheduleMapping repaymentScheduleMapping : this.loanTransactionToRepaymentScheduleMappings) {
-            if (updatedrepaymentScheduleMapping.getLoanRepaymentScheduleInstallment().getId() != null
-                    && repaymentScheduleMapping.getLoanRepaymentScheduleInstallment().getDueDate()
-                            .equals(updatedrepaymentScheduleMapping.getLoanRepaymentScheduleInstallment().getDueDate())
-                    && updatedrepaymentScheduleMapping.getLoanRepaymentScheduleInstallment().getId()
-                            .equals(repaymentScheduleMapping.getLoanRepaymentScheduleInstallment().getId())) {
-                repaymentScheduleMapping.setComponents(updatedrepaymentScheduleMapping.getPrincipalPortion(),
-                        updatedrepaymentScheduleMapping.getInterestPortion(), updatedrepaymentScheduleMapping.getFeeChargesPortion(),
-                        updatedrepaymentScheduleMapping.getPenaltyChargesPortion());
+        LoanRepaymentScheduleInstallment updatedInstallment = updatedMapping.getLoanRepaymentScheduleInstallment();
+        for (LoanTransactionToRepaymentScheduleMapping existingMapping : this.loanTransactionToRepaymentScheduleMappings) {
+            LoanRepaymentScheduleInstallment existingInstallment = existingMapping.getLoanRepaymentScheduleInstallment();
+            if (DateUtils.isEqual(existingInstallment.getDueDate(), updatedInstallment.getDueDate()) && updatedInstallment.getId() != null
+                    && updatedInstallment.getId().equals(existingInstallment.getId())) {
+                if (overwrite) {
+                    existingMapping.setComponents(updatedMapping.getPrincipalPortion(), updatedMapping.getInterestPortion(),
+                            updatedMapping.getFeeChargesPortion(), updatedMapping.getPenaltyChargesPortion());
+                } else {
+                    existingMapping.updateComponents(updatedMapping.getPrincipalPortion(), updatedMapping.getInterestPortion(),
+                            updatedMapping.getFeeChargesPortion(), updatedMapping.getPenaltyChargesPortion());
+                }
                 isMappingUpdated = true;
-                retainMappings.add(repaymentScheduleMapping);
+                if (retainMappings != null) {
+                    retainMappings.add(existingMapping);
+                }
                 break;
             }
         }
         if (!isMappingUpdated) {
-            updatedrepaymentScheduleMapping.setLoanTransaction(this);
-            this.loanTransactionToRepaymentScheduleMappings.add(updatedrepaymentScheduleMapping);
-            retainMappings.add(updatedrepaymentScheduleMapping);
+            LoanTransactionToRepaymentScheduleMapping newMapping = LoanTransactionToRepaymentScheduleMapping.createFrom(this,
+                    updatedInstallment, null, null, null, null);
+            newMapping.setComponents(updatedMapping.getPrincipalPortion(), updatedMapping.getInterestPortion(),
+                    updatedMapping.getFeeChargesPortion(), updatedMapping.getPenaltyChargesPortion());
+            this.loanTransactionToRepaymentScheduleMappings.add(newMapping);
+            if (retainMappings != null) {
+                retainMappings.add(newMapping);
+            }
         }
         return isMappingUpdated;
+    }
+
+    public void updateLoanChargePaidMappings(final Collection<LoanChargePaidBy> updatedMappings) {
+        Collection<LoanChargePaidBy> retainMappings = new ArrayList<>();
+        for (LoanChargePaidBy updatedMapping : updatedMappings) {
+            updateLoanChargePaid(retainMappings, updatedMapping);
+        }
+        this.loanChargesPaid.retainAll(retainMappings);
+    }
+
+    private boolean updateLoanChargePaid(final Collection<LoanChargePaidBy> retainMappings, final LoanChargePaidBy updatedMapping) {
+        boolean updated = false;
+        LoanCharge updatedCharge = updatedMapping.getLoanCharge();
+        Integer updatedInstallment = updatedMapping.getInstallmentNumber();
+        for (LoanChargePaidBy existingMapping : loanChargesPaid) {
+            LoanCharge existingCharge = existingMapping.getLoanCharge();
+            Integer existingInstallment = existingMapping.getInstallmentNumber();
+            if (existingCharge.equals(updatedCharge)
+                    && (existingInstallment == null ? updatedInstallment == null : existingInstallment.equals(updatedInstallment))) {
+                existingMapping.setAmount(updatedMapping.getAmount());
+                updated = true;
+                retainMappings.add(existingMapping);
+                break;
+            }
+        }
+        if (!updated) {
+            LoanChargePaidBy newMapping = new LoanChargePaidBy(this, updatedCharge, updatedMapping.getAmount(), updatedInstallment);
+            this.loanChargesPaid.add(newMapping);
+            retainMappings.add(newMapping);
+        }
+        return updated;
     }
 
     public Set<LoanTransactionToRepaymentScheduleMapping> getLoanTransactionToRepaymentScheduleMappings() {
@@ -989,16 +1045,19 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
     }
 
     public boolean hasLoanTransactionRelations() {
-        return (loanTransactionRelations != null && loanTransactionRelations.size() > 0);
-    }
-
-    public boolean hasChargebackLoanTransactionRelations() {
-        return (loanTransactionRelations != null
-                && loanTransactionRelations.stream().anyMatch(e -> LoanTransactionRelationTypeEnum.CHARGEBACK.equals(e.getRelationType())));
+        return !loanTransactionRelations.isEmpty();
     }
 
     public Set<LoanTransactionRelation> getLoanTransactionRelations() {
         return loanTransactionRelations;
+    }
+
+    public List<LoanTransactionRelation> getLoanTransactionRelations(Predicate<LoanTransactionRelation> predicate) {
+        return loanTransactionRelations.stream().filter(predicate).toList();
+    }
+
+    public boolean hasChargebackLoanTransactionRelations() {
+        return !getLoanTransactionRelations(e -> LoanTransactionRelationTypeEnum.CHARGEBACK.equals(e.getRelationType())).isEmpty();
     }
 
     public void copyLoanTransactionRelations(Set<LoanTransactionRelation> sourceLoanTransactionRelations) {
@@ -1053,6 +1112,10 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
 
     public String getChargeRefundChargeType() {
         return chargeRefundChargeType;
+    }
+
+    public boolean isOverPaid() {
+        return MathUtil.isGreaterThanZero(overPaymentPortion);
     }
 
     // TODO missing hashCode(), equals(Object obj), but probably OK as long as

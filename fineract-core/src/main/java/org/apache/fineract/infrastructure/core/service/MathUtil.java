@@ -338,6 +338,10 @@ public final class MathUtil {
 
     // ----------------- Money -----------------
 
+    public static BigDecimal toBigDecimal(Money value) {
+        return value == null ? null : value.getAmount();
+    }
+
     public static Money nullToZero(Money value, @NotNull MonetaryCurrency currency) {
         return nullToDefault(value, Money.zero(currency));
     }
