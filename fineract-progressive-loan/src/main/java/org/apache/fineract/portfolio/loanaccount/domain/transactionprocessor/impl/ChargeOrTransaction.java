@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import lombok.Getter;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.jetbrains.annotations.NotNull;
@@ -43,6 +44,14 @@ public class ChargeOrTransaction implements Comparable<ChargeOrTransaction> {
         this.loanCharge = Optional.empty();
     }
 
+    public boolean isTransaction() {
+        return loanTransaction.isPresent();
+    }
+
+    public boolean isCharge() {
+        return loanCharge.isPresent();
+    }
+
     private LocalDate getEffectiveDate() {
         if (loanCharge.isPresent()) {
             if (isBackdatedCharge()) {
@@ -58,11 +67,11 @@ public class ChargeOrTransaction implements Comparable<ChargeOrTransaction> {
     }
 
     private boolean isAccrualActivity() {
-        return loanTransaction.isPresent() && loanTransaction.get().isAccrualActivity();
+        return isTransaction() && loanTransaction.get().isAccrualActivity();
     }
 
     private boolean isBackdatedCharge() {
-        return loanCharge.get().getDueDate().isBefore(loanCharge.get().getSubmittedOnDate());
+        return isCharge() && DateUtils.isBefore(loanCharge.get().getDueDate(), loanCharge.get().getSubmittedOnDate());
     }
 
     private LocalDate getSubmittedOnDate() {
@@ -88,17 +97,15 @@ public class ChargeOrTransaction implements Comparable<ChargeOrTransaction> {
     @Override
     @SuppressFBWarnings(value = "EQ_COMPARETO_USE_OBJECT_EQUALS", justification = "TODO: fix this! See: https://stackoverflow.com/questions/2609037/findbugs-how-to-solve-eq-compareto-use-object-equals")
     public int compareTo(@NotNull ChargeOrTransaction o) {
-        int datePortion = this.getEffectiveDate().compareTo(o.getEffectiveDate());
+        int datePortion = DateUtils.compare(this.getEffectiveDate(), o.getEffectiveDate());
         if (datePortion == 0) {
-            if (this.isAccrualActivity() && !o.isAccrualActivity()) {
-                return 1;
+            boolean isAccrual = isAccrualActivity();
+            if (isAccrual != o.isAccrualActivity()) {
+                return isAccrual ? 1 : -1;
             }
-            if (!this.isAccrualActivity() && o.isAccrualActivity()) {
-                return -1;
-            }
-            int submittedDate = this.getSubmittedOnDate().compareTo(o.getSubmittedOnDate());
+            int submittedDate = DateUtils.compare(getSubmittedOnDate(), o.getSubmittedOnDate());
             if (submittedDate == 0) {
-                return this.getCreatedDateTime().compareTo(o.getCreatedDateTime());
+                return DateUtils.compare(getCreatedDateTime(), o.getCreatedDateTime());
             }
             return submittedDate;
         }

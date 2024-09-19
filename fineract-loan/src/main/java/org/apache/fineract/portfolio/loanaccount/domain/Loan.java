@@ -704,8 +704,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         this.charges.add(loanCharge);
         this.summary = updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
 
-        // store Id's of existing loan transactions and existing reversed loan
-        // transactions
+        // store Id's of existing loan transactions and existing reversed loan transactions
         final SingleLoanChargeRepaymentScheduleProcessingWrapper wrapper = new SingleLoanChargeRepaymentScheduleProcessingWrapper();
         wrapper.reprocess(getCurrency(), getDisbursementDate(), getRepaymentScheduleInstallments(), loanCharge);
         updateLoanSummaryDerivedFields();
@@ -721,12 +720,17 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(getDisbursementDate(),
                 allNonContraTransactionsPostDisbursement, getCurrency(), getRepaymentScheduleInstallments(), getActiveCharges());
         for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
-
             mapEntry.getValue().updateLoan(this);
         }
         this.loanTransactions.addAll(changedTransactionDetail.getNewTransactionMappings().values());
         updateLoanSummaryDerivedFields();
         return changedTransactionDetail;
+    }
+
+    public ChangedTransactionDetail reprocessTransactionsWithPostTransactionChecks(LocalDate transactionDate) {
+        ChangedTransactionDetail changedDetail = reprocessTransactions();
+        doPostLoanTransactionChecks(transactionDate, loanLifecycleStateMachine);
+        return changedDetail;
     }
 
     /**
@@ -2499,7 +2503,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     private boolean doPostLoanTransactionChecks(final LocalDate transactionDate,
             final LoanLifecycleStateMachine loanLifecycleStateMachine) {
         boolean statusChanged = false;
-        boolean isOverpaid = getTotalOverpaid() != null && getTotalOverpaid().compareTo(BigDecimal.ZERO) > 0;
+        boolean isOverpaid = MathUtil.isGreaterThanZero(totalOverpaid);
         if (isOverpaid) {
             // FIXME - kw - update account balance to negative amount.
             handleLoanOverpayment(transactionDate, loanLifecycleStateMachine);
@@ -2510,7 +2514,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         } else {
             loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT_OR_WAIVER, this);
         }
-        if (this.totalOverpaid == null || BigDecimal.ZERO.compareTo(this.totalOverpaid) == 0) {
+        if (MathUtil.isEmpty(totalOverpaid)) {
             this.overpaidOnDate = null;
         }
         return statusChanged;
@@ -2526,8 +2530,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
             this.actualMaturityDate = transactionDate;
             loanLifecycleStateMachine.transition(LoanEvent.REPAID_IN_FULL, this);
 
-        } else if (LoanStatus.fromInt(this.loanStatus).isOverpaid()) {
-            if (this.totalOverpaid == null || BigDecimal.ZERO.compareTo(this.totalOverpaid) == 0) {
+        } else if (getStatus().isOverpaid()) {
+            if (MathUtil.isEmpty(totalOverpaid)) {
                 this.overpaidOnDate = null;
             }
             loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT_OR_WAIVER, this);
@@ -4498,7 +4502,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
                 loanTransaction.updateOutstandingLoanBalance(MathUtil.negativeToZero(outstanding.getAmount()));
             } else if (loanTransaction.isChargeback() || loanTransaction.isCreditBalanceRefund()) {
                 Money transactionOutstanding = loanTransaction.getPrincipalPortion(getCurrency());
-                if (!loanTransaction.getOverPaymentPortion(getCurrency()).isZero()) {
+                if (loanTransaction.isOverPaid()) {
                     // in case of advanced payment strategy and creditAllocations the full amount is recognized first
                     if (this.getCreditAllocationRules() != null && this.getCreditAllocationRules().size() > 0) {
                         Money payedPrincipal = loanTransaction.getLoanTransactionToRepaymentScheduleMappings().stream() //
@@ -4792,7 +4796,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
         updateLoanSummaryDerivedFields();
 
-        if (this.totalOverpaid == null || BigDecimal.ZERO.compareTo(this.totalOverpaid) == 0) {
+        if (MathUtil.isEmpty(totalOverpaid)) {
             this.overpaidOnDate = null;
             this.closedOnDate = newCreditBalanceRefundTransaction.getTransactionDate();
             defaultLoanLifecycleStateMachine.transition(LoanEvent.LOAN_CREDIT_BALANCE_REFUND, this);
@@ -5497,12 +5501,12 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return getLoanTransactions().stream().filter(predicate).toList();
     }
 
+    public LoanTransaction getLoanTransaction(Predicate<LoanTransaction> predicate) {
+        return getLoanTransactions().stream().filter(predicate).findFirst().orElse(null);
+    }
+
     public LoanTransaction findChargedOffTransaction() {
-        return getLoanTransactions().stream() //
-                .filter(LoanTransaction::isNotReversed) //
-                .filter(LoanTransaction::isChargeOff) //
-                .findFirst() //
-                .orElse(null);
+        return getLoanTransaction(e -> e.isNotReversed() && e.isChargeOff());
     }
 
     public void handleMaturityDateActivate() {

@@ -534,6 +534,23 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_TILL_REST_FREQUENCY,
                 responseLoanProductsRequestLP2AdvancedpaymentInterest36030InterestRecalcTillRestFrequency);
+
+        String name40 = DefaultLoanProduct.LP2_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL.getName();
+        PostLoanProductsRequest loanProductsRequestLP2AdvPmtAllocProgressiveLoanScheduleHorizontal = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2NoDown()//
+                .name(name40)//
+                .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION.getValue())//
+                .loanScheduleType("PROGRESSIVE") //
+                .loanScheduleProcessingType("HORIZONTAL")//
+                .paymentAllocation(List.of(//
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                        createPaymentAllocation("GOODWILL_CREDIT", "NEXT_INSTALLMENT"), //
+                        createPaymentAllocation("MERCHANT_ISSUED_REFUND", "NEXT_INSTALLMENT"), //
+                        createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
+        Response<PostLoanProductsResponse> responseLP2AdvPmtAllocProgressiveLoanScheduleHorizontal = loanProductsApi
+                .createLoanProduct(loanProductsRequestLP2AdvPmtAllocProgressiveLoanScheduleHorizontal).execute();
+        TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL,
+                responseLP2AdvPmtAllocProgressiveLoanScheduleHorizontal);
     }
 
     public static AdvancedPaymentData createPaymentAllocation(String transactionType, String futureInstallmentAllocationRule,

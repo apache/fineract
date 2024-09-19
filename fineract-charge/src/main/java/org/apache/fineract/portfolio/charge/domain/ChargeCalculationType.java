@@ -120,6 +120,10 @@ public enum ChargeCalculationType {
                 || isPercentageOfDisbursementAmount();
     }
 
+    public boolean hasInterest() {
+        return isPercentageOfInterest() || isPercentageOfAmountAndInterest();
+    }
+
     public boolean isPercentageOfDisbursementAmount() {
         return this.value.equals(ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue());
     }
