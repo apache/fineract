@@ -3242,3 +3242,138 @@ Feature: LoanRepayment
     When Admin sets the business date to "04 September 2023"
     #Run COB to check there is no accounting meltdown and accrual is handled properly
     When Admin runs inline COB job for Loan
+
+  @AdvancedPaymentAllocation @ProgressiveLoanSchedule
+  Scenario: Verify that payment allocation is correct in case of fee charged and payment is backdated
+#    --- 7/23 - Loan Created & Approved ---
+    When Admin sets the business date to "23 July 2024"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                             | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL  | 23 July 2024      | 150            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+#   --- 7/23 - Disbursement for 111.92 EUR ---
+    And Admin successfully approves the loan on "23 July 2024" with "111.92" amount and expected disbursement date on "23 July 2024"
+    When Admin successfully disburse the loan on "23 July 2024" with "111.92" EUR transaction amount
+#    --- 8/8 - Partial merchant issued refund - 76.48 Eur ---
+    When Admin sets the business date to "08 August 2024"
+    When Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "08 August 2024" with 76.48 EUR transaction amount and system-generated Idempotency key
+#    --- 8/13 - Manual Repayment - 35.44 Eur (Account closed) ---
+    When Admin sets the business date to "13 August 2024"
+    And Customer makes "MONEY_TRANSFER" repayment on "13 August 2024" with 35.44 EUR transaction amount
+    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+    Then Loan has 0 outstanding amount
+#    --- 8/15 - Repayment reversed (Account reopened) ---
+    When Admin sets the business date to "15 August 2024"
+    When Customer undo "1"th "Repayment" transaction made on "13 August 2024"
+    Then Loan status will be "ACTIVE"
+    Then Loan has 35.44 outstanding amount
+#    --- 8/22 - Autopay posted for 35.44 Eur ---
+    When Admin sets the business date to "22 August 2024"
+    And Customer makes "AUTOPAY" repayment on "22 August 2024" with 35.44 EUR transaction amount
+    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+    Then Loan has 0 outstanding amount
+#    --- 8/24 - Autopay reversed ---
+    When Admin sets the business date to "24 August 2024"
+    When Customer undo "1"th "Repayment" transaction made on "22 August 2024"
+    Then Loan status will be "ACTIVE"
+    Then Loan has 35.44 outstanding amount
+#    --- 8/24 - Loan Charge created for 2.80 Eur ---
+    When Admin adds "LOAN_NSF_FEE" due date charge with "24 August 2024" due date and 2.80 EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    Then Loan has 38.24 outstanding amount
+#    --- 8/24 (after COB) - Accrual created ---
+    When Admin sets the business date to "25 August 2024"
+    When Admin runs inline COB job for Loan
+    Then Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date           | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 23 July 2024   |           | 111.92          |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 31   | 23 August 2024 |           | 0.0             | 111.92        | 0.0      | 0.0  | 0.0       | 111.92 | 76.48 | 76.48      | 0.0  | 35.44       |
+      | 2  | 1    | 24 August 2024 |           | 0.0             | 0.0           | 0.0      | 0.0  | 2.8       | 2.8    | 0.0   | 0.0        | 0.0  | 2.8         |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 111.92        | 0.0      | 0.0  | 2.8       | 114.72 | 76.48 | 76.48      | 0.0  | 38.24       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 23 July 2024     | Disbursement           | 111.92 | 0.0       | 0.0      | 0.0  | 0.0       | 111.92       | false    |
+      | 08 August 2024   | Merchant Issued Refund | 76.48  | 76.48     | 0.0      | 0.0  | 0.0       | 35.44        | false    |
+      | 13 August 2024   | Repayment              | 35.44  | 35.44     | 0.0      | 0.0  | 0.0       | 0.0          | true     |
+      | 22 August 2024   | Repayment              | 35.44  | 35.44     | 0.0      | 0.0  | 0.0       | 0.0          | true     |
+      | 24 August 2024   | Accrual                | 2.8    | 0.0       | 0.0      | 0.0  | 2.8       | 0.0          | false    |
+#    --- 8/28 - Backdated Autopay posted for 38.24 Eur (35.44 principal + 2.80 penalty) with transactionDate 8/22 ---
+    When Admin sets the business date to "28 August 2024"
+    And Customer makes "AUTOPAY" repayment on "22 August 2024" with 38.24 EUR transaction amount
+    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+    Then Loan has 0 outstanding amount
+#    TODO check data
+    Then Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date           | Paid date      | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      |    |      | 23 July 2024   |                | 111.92          |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
+      | 1  | 31   | 23 August 2024 | 22 August 2024 | 0.0             | 111.92        | 0.0      | 0.0  | 0.0       | 111.92 | 111.92 | 111.92     | 0.0  | 0.0         |
+      | 2  | 1    | 24 August 2024 | 22 August 2024 | 0.0             | 0.0           | 0.0      | 0.0  | 2.8       | 2.8    | 2.8    | 2.8        | 0.0  | 0.0         |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      | 111.92        | 0.0      | 0.0  | 2.8       | 114.72 | 114.72 | 114.72     | 0.0  | 0.0         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 23 July 2024     | Disbursement           | 111.92 | 0.0       | 0.0      | 0.0  | 0.0       | 111.92       | false    |
+      | 08 August 2024   | Merchant Issued Refund | 76.48  | 76.48     | 0.0      | 0.0  | 0.0       | 35.44        | false    |
+      | 13 August 2024   | Repayment              | 35.44  | 35.44     | 0.0      | 0.0  | 0.0       | 0.0          | true     |
+      | 22 August 2024   | Repayment              | 35.44  | 35.44     | 0.0      | 0.0  | 0.0       | 0.0          | true     |
+      | 22 August 2024   | Repayment              | 38.24  | 35.44     | 0.0      | 0.0  | 2.8       | 0.0          | false    |
+      | 24 August 2024   | Accrual                | 2.8    | 0.0       | 0.0      | 0.0  | 2.8       | 0.0          | false    |
+    When Customer makes "AUTOPAY" repayment on "23 August 2024" with 10 EUR transaction amount
+    Then Loan status will be "OVERPAID"
+    Then Loan has 0 outstanding amount
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 23 July 2024     | Disbursement           | 111.92 | 0.0       | 0.0      | 0.0  | 0.0       | 111.92       | false    |
+      | 08 August 2024   | Merchant Issued Refund | 76.48  | 76.48     | 0.0      | 0.0  | 0.0       | 35.44        | false    |
+      | 13 August 2024   | Repayment              | 35.44  | 35.44     | 0.0      | 0.0  | 0.0       | 0.0          | true     |
+      | 22 August 2024   | Repayment              | 35.44  | 35.44     | 0.0      | 0.0  | 0.0       | 0.0          | true     |
+      | 22 August 2024   | Repayment              | 38.24  | 35.44     | 0.0      | 0.0  | 2.8       | 0.0          | false    |
+      | 23 August 2024   | Repayment              | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 24 August 2024   | Accrual                | 2.8    | 0.0       | 0.0      | 0.0  | 2.8       | 0.0          | false    |
+    Then Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date           | Paid date      | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      |    |      | 23 July 2024   |                | 111.92          |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
+      | 1  | 31   | 23 August 2024 | 22 August 2024 | 0.0             | 111.92        | 0.0      | 0.0  | 0.0       | 111.92 | 111.92 | 111.92     | 0.0  | 0.0         |
+      | 2  | 1    | 24 August 2024 | 22 August 2024 | 0.0             | 0.0           | 0.0      | 0.0  | 2.8       | 2.8    | 2.8    | 2.8        | 0.0  | 0.0         |
+    When Admin sets the business date to "29 August 2024"
+    When Admin runs inline COB job for Loan
+    When Admin adds "LOAN_NSF_FEE" due date charge with "22 August 2024" due date and 5 EUR transaction amount
+    Then Loan status will be "OVERPAID"
+    Then Loan has 0 outstanding amount
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 23 July 2024     | Disbursement           | 111.92 | 0.0       | 0.0      | 0.0  | 0.0       | 111.92       | false    |
+      | 08 August 2024   | Merchant Issued Refund | 76.48  | 76.48     | 0.0      | 0.0  | 0.0       | 35.44        | false    |
+      | 13 August 2024   | Repayment              | 35.44  | 35.44     | 0.0      | 0.0  | 0.0       | 0.0          | true     |
+      | 22 August 2024   | Repayment              | 35.44  | 35.44     | 0.0      | 0.0  | 0.0       | 0.0          | true     |
+      | 22 August 2024   | Repayment              | 38.24  | 35.44     | 0.0      | 0.0  | 2.8       | 0.0          | false    |
+      | 23 August 2024   | Repayment              | 10.0   | 0.0       | 0.0      | 0.0  | 5.0       | 0.0          | false    |
+      | 24 August 2024   | Accrual                | 2.8    | 0.0       | 0.0      | 0.0  | 2.8       | 0.0          | false    |
+    Then Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date           | Paid date      | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      |    |      | 23 July 2024   |                | 111.92          |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
+      | 1  | 31   | 23 August 2024 | 23 August 2024 | 0.0             | 111.92        | 0.0      | 0.0  | 5.0       | 116.92 | 116.92 | 114.72     | 0.0  | 0.0         |
+      | 2  | 1    | 24 August 2024 | 23 August 2024 | 0.0             | 0.0           | 0.0      | 0.0  | 2.8       | 2.8    | 2.8    | 2.8        | 0.0  | 0.0         |
+    When Admin adds "LOAN_NSF_FEE" due date charge with "25 August 2024" due date and 5 EUR transaction amount
+    When Admin sets the business date to "30 August 2024"
+    When Admin runs inline COB job for Loan
+    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+    Then Loan has 0 outstanding amount
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 23 July 2024     | Disbursement           | 111.92 | 0.0       | 0.0      | 0.0  | 0.0       | 111.92       | false    |
+      | 08 August 2024   | Merchant Issued Refund | 76.48  | 76.48     | 0.0      | 0.0  | 0.0       | 35.44        | false    |
+      | 13 August 2024   | Repayment              | 35.44  | 35.44     | 0.0      | 0.0  | 0.0       | 0.0          | true     |
+      | 22 August 2024   | Repayment              | 35.44  | 35.44     | 0.0      | 0.0  | 0.0       | 0.0          | true     |
+      | 22 August 2024   | Repayment              | 38.24  | 35.44     | 0.0      | 0.0  | 2.8       | 0.0          | false    |
+      | 23 August 2024   | Repayment              | 10.0   | 0.0       | 0.0      | 0.0  | 10.0      | 0.0          | false    |
+      | 24 August 2024   | Accrual                | 2.8    | 0.0       | 0.0      | 0.0  | 2.8       | 0.0          | false    |
+      | 25 August 2024   | Accrual                | 10.0   | 0.0       | 0.0      | 0.0  | 10.0      | 0.0          | false    |
+    Then Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date           | Paid date      | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      |    |      | 23 July 2024   |                | 111.92          |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
+      | 1  | 31   | 23 August 2024 | 23 August 2024 | 0.0             | 111.92        | 0.0      | 0.0  | 5.0       | 116.92 | 116.92 | 114.72     | 0.0  | 0.0         |
+      | 2  | 2    | 25 August 2024 | 23 August 2024 | 0.0             | 0.0           | 0.0      | 0.0  | 7.8       | 7.8    | 7.8    | 7.8        | 0.0  | 0.0         |

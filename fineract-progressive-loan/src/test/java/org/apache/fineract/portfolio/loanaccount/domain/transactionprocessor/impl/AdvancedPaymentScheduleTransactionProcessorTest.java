@@ -252,7 +252,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         assertEquals(0, chargeAmount.compareTo(installment.getFeeChargesCharged(currency).getAmount()));
         assertEquals(0, BigDecimal.ZERO.compareTo(installment.getFeeChargesOutstanding(currency).getAmount()));
         assertEquals(0, BigDecimal.valueOf(80).compareTo(installment.getPrincipalOutstanding(currency).getAmount()));
-        Mockito.verify(loan, times(1)).getPaymentAllocationRules();
+        Mockito.verify(loan, times(2)).getPaymentAllocationRules();
     }
 
     @Test
@@ -531,7 +531,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         TransactionCtx ctx = mock(TransactionCtx.class);
 
         // when
-        LoanTransaction originalTransaction = underTest.findOriginalTransaction(chargebackTransaction, ctx);
+        LoanTransaction originalTransaction = underTest.findChargebackOriginalTransaction(chargebackTransaction, ctx);
 
         // then
         Assertions.assertEquals(originalTransaction, repayment2);
@@ -554,7 +554,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
 
         // when + then
         RuntimeException runtimeException = Assertions.assertThrows(RuntimeException.class,
-                () -> underTest.findOriginalTransaction(chargebackTransaction, ctx));
+                () -> underTest.findChargebackOriginalTransaction(chargebackTransaction, ctx));
         Assertions.assertEquals("Chargeback transaction must have an original transaction", runtimeException.getMessage());
     }
 
@@ -580,7 +580,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(changedTransactionDetail.getNewTransactionMappings()).thenReturn(Map.of(122L, repayment1, 121L, repayment2));
 
         // when
-        LoanTransaction originalTransaction = underTest.findOriginalTransaction(chargebackReplayed, ctx);
+        LoanTransaction originalTransaction = underTest.findChargebackOriginalTransaction(chargebackReplayed, ctx);
 
         // then
         Assertions.assertEquals(originalTransaction, repayment2);
@@ -611,7 +611,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(changedTransactionDetail.getNewTransactionMappings()).thenReturn(Map.of());
 
         // when
-        LoanTransaction originalTransaction = underTest.findOriginalTransaction(chargebackReplayed, ctx);
+        LoanTransaction originalTransaction = underTest.findChargebackOriginalTransaction(chargebackReplayed, ctx);
 
         // then
         Assertions.assertEquals(originalTransaction, repayment2);

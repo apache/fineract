@@ -1355,7 +1355,7 @@ public class ClientLoanIntegrationTest {
      * amount
      */
     @Test
-    public void loanWithCahargesOfTypeAmountPercentageAndCashBasedAccountingEnabled() {
+    public void loanWithChargesOfTypeAmountPercentageAndCashBasedAccountingEnabled() {
 
         final Integer clientID = ClientHelper.createClient(REQUEST_SPEC, RESPONSE_SPEC);
         ClientHelper.verifyClientCreatedOnServer(REQUEST_SPEC, RESPONSE_SPEC, clientID);

@@ -50,4 +50,8 @@ public enum PaymentAllocationTransactionType {
     public static List<EnumOptionData> getValuesAsEnumOptionDataList() {
         return Arrays.stream(values()).map(v -> new EnumOptionData((long) (v.ordinal() + 1), v.name(), v.getHumanReadableName())).toList();
     }
+
+    public boolean isDefault() {
+        return this == DEFAULT;
+    }
 }

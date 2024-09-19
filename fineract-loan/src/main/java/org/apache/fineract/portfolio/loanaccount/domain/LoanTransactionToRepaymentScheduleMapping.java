@@ -24,8 +24,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 
@@ -77,15 +79,11 @@ public class LoanTransactionToRepaymentScheduleMapping extends AbstractPersistab
             final Money feeChargesPortion, final Money penaltyChargesPortion) {
         return new LoanTransactionToRepaymentScheduleMapping(loanTransaction, installment, defaultToNullIfZero(principalPortion),
                 defaultToNullIfZero(interestPortion), defaultToNullIfZero(feeChargesPortion), defaultToNullIfZero(penaltyChargesPortion),
-                defaultToNullIfZero(principalPortion.plus(interestPortion).plus(feeChargesPortion).plus(penaltyChargesPortion)));
+                defaultToNullIfZero(MathUtil.plus(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion)));
     }
 
     private static BigDecimal defaultToNullIfZero(final Money value) {
-        BigDecimal result = value.getAmount();
-        if (value.isZero()) {
-            result = null;
-        }
-        return result;
+        return (value == null || value.isZero()) ? null : value.getAmount();
     }
 
     private BigDecimal defaultToZeroIfNull(final BigDecimal value) {
@@ -100,10 +98,15 @@ public class LoanTransactionToRepaymentScheduleMapping extends AbstractPersistab
         return this.installment;
     }
 
-    public void updateComponents(final Money principal, final Money interest, final Money feeCharges, final Money penaltyCharges) {
-        final MonetaryCurrency currency = principal.getCurrency();
-        this.principalPortion = defaultToNullIfZero(getPrincipalPortion(currency).plus(principal));
-        this.interestPortion = defaultToNullIfZero(getInterestPortion(currency).plus(interest));
+    public void updateComponents(@NotNull Money principal, @NotNull Money interest, @NotNull Money feeCharges,
+            @NotNull Money penaltyCharges) {
+        updateComponents(principal.getAmount(), interest.getAmount(), feeCharges.getAmount(), penaltyCharges.getAmount());
+    }
+
+    void updateComponents(final BigDecimal principal, final BigDecimal interest, final BigDecimal feeCharges,
+            final BigDecimal penaltyCharges) {
+        this.principalPortion = MathUtil.zeroToNull(MathUtil.add(getPrincipalPortion(), principal));
+        this.interestPortion = MathUtil.zeroToNull(MathUtil.add(getInterestPortion(), interest));
         updateChargesComponents(feeCharges, penaltyCharges);
         updateAmount();
     }
@@ -122,10 +125,9 @@ public class LoanTransactionToRepaymentScheduleMapping extends AbstractPersistab
         updateAmount();
     }
 
-    private void updateChargesComponents(final Money feeCharges, final Money penaltyCharges) {
-        final MonetaryCurrency currency = feeCharges.getCurrency();
-        this.feeChargesPortion = defaultToNullIfZero(getFeeChargesPortion(currency).plus(feeCharges));
-        this.penaltyChargesPortion = defaultToNullIfZero(getPenaltyChargesPortion(currency).plus(penaltyCharges));
+    private void updateChargesComponents(final BigDecimal feeCharges, final BigDecimal penaltyCharges) {
+        this.feeChargesPortion = MathUtil.zeroToNull(MathUtil.add(getFeeChargesPortion(), feeCharges));
+        this.penaltyChargesPortion = MathUtil.zeroToNull(MathUtil.add(getPenaltyChargesPortion(), penaltyCharges));
     }
 
     public Money getPrincipalPortion(final MonetaryCurrency currency) {
