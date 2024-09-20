@@ -20,7 +20,8 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Data;
 import org.apache.fineract.organisation.monetary.domain.Money;
 
@@ -30,7 +31,7 @@ public class ProgressiveLoanInterestRepaymentModel {
     private final LocalDate fromDate;
     private final LocalDate dueDate;
 
-    private LinkedList<ProgressiveLoanInterestRepaymentInterestPeriod> interestPeriods;
+    private List<ProgressiveLoanInterestRepaymentInterestPeriod> interestPeriods;
 
     private boolean isLastPeriod;
 
@@ -50,7 +51,7 @@ public class ProgressiveLoanInterestRepaymentModel {
         this.initialBalance = zeroAmount;
         this.remainingBalance = zeroAmount;
         this.principalDue = zeroAmount;
-        this.interestPeriods = new LinkedList<>();
+        this.interestPeriods = new ArrayList<>();
         this.interestPeriods.add(
                 new ProgressiveLoanInterestRepaymentInterestPeriod(fromDate, dueDate, BigDecimal.ZERO, zeroAmount, zeroAmount, zeroAmount));
     }
@@ -63,7 +64,7 @@ public class ProgressiveLoanInterestRepaymentModel {
         this.initialBalance = repaymentModel.initialBalance;
         this.remainingBalance = repaymentModel.remainingBalance;
         this.principalDue = repaymentModel.principalDue;
-        this.interestPeriods = new LinkedList<>();
+        this.interestPeriods = new ArrayList<>();
         for (final ProgressiveLoanInterestRepaymentInterestPeriod interestPeriod : repaymentModel.interestPeriods) {
             this.interestPeriods.add(new ProgressiveLoanInterestRepaymentInterestPeriod(interestPeriod));
         }

@@ -26,9 +26,11 @@ public enum LoanTermVariationType {
     PRINCIPAL_AMOUNT(3, "loanTermType.principalAmount"), //
     DUE_DATE(4, "loanTermType.dueDate"), //
     INSERT_INSTALLMENT(5, "loanTermType.insertInstallment"), //
-    DELETE_INSTALLMENT(6, "loanTermType.deleteInstallment"), GRACE_ON_INTEREST(7, "loanTermType.graceOnInterest"), GRACE_ON_PRINCIPAL(8,
-            "loanTermType.graceOnPrincipal"), EXTEND_REPAYMENT_PERIOD(9,
-                    "loanTermType.extendRepaymentPeriod"), INTEREST_RATE_FROM_INSTALLMENT(10, "loanTermType.interestRateFromInstallment");
+    DELETE_INSTALLMENT(6, "loanTermType.deleteInstallment"), //
+    GRACE_ON_INTEREST(7, "loanTermType.graceOnInterest"), //
+    GRACE_ON_PRINCIPAL(8, "loanTermType.graceOnPrincipal"), //
+    EXTEND_REPAYMENT_PERIOD(9, "loanTermType.extendRepaymentPeriod"), //
+    INTEREST_RATE_FROM_INSTALLMENT(10, "loanTermType.interestRateFromInstallment"); //
 
     private final Integer value;
     private final String code;

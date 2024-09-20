@@ -39,6 +39,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.ProgressiveLo
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelRepaymentPeriod;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -76,6 +77,12 @@ class ProgressiveEMICalculatorTest {
         // When
         moneyHelper.when(MoneyHelper::getRoundingMode).thenReturn(RoundingMode.HALF_EVEN);
         moneyHelper.when(MoneyHelper::getMathContext).thenReturn(new MathContext(12, RoundingMode.HALF_EVEN));
+    }
+
+    @AfterAll
+    public static void tearDown() {
+        threadLocalContextUtil.close();
+        moneyHelper.close();
     }
 
     private BigDecimal getRateFactorsByMonth(final DaysInYearType daysInYearType, final DaysInMonthType daysInMonthType,
@@ -276,8 +283,7 @@ class ProgressiveEMICalculatorTest {
 
         final BigDecimal interestRateNewValue = new BigDecimal("4");
         final LocalDate interestChangeDate = LocalDate.of(2024, 2, 2);
-        final LocalDate interestEffectiveDate = interestChangeDate.minusDays(1);
-        emiCalculator.changeInterestRate(interestSchedule, interestEffectiveDate, interestRateNewValue);
+        emiCalculator.changeInterestRate(interestSchedule, interestChangeDate, interestRateNewValue);
 
         checkDisbursementOnPeriod(interestSchedule, 0, disbursedAmount);
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
@@ -320,8 +326,7 @@ class ProgressiveEMICalculatorTest {
 
         final BigDecimal interestRateNewValue = new BigDecimal("4");
         final LocalDate interestChangeDate = LocalDate.of(2024, 2, 15);
-        final LocalDate interestEffectiveDate = interestChangeDate.minusDays(1);
-        emiCalculator.changeInterestRate(interestSchedule, interestEffectiveDate, interestRateNewValue);
+        emiCalculator.changeInterestRate(interestSchedule, interestChangeDate, interestRateNewValue);
 
         checkDisbursementOnPeriod(interestSchedule, 0, disbursedAmount);
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
@@ -448,10 +453,10 @@ class ProgressiveEMICalculatorTest {
         final var lastRepaymentPeriod = interestSchedule.repayments().get(interestSchedule.repayments().size() - 1);
         Assertions.assertTrue(lastRepaymentPeriod.isLastPeriod());
         Assertions.assertEquals(2, lastRepaymentPeriod.getInterestPeriods().size());
-        Assertions.assertEquals(LocalDate.of(2024, 6, 1), lastRepaymentPeriod.getInterestPeriods().getFirst().getFromDate());
-        Assertions.assertEquals(LocalDate.of(2024, 6, 10), lastRepaymentPeriod.getInterestPeriods().getFirst().getDueDate());
-        Assertions.assertEquals(LocalDate.of(2024, 6, 10), lastRepaymentPeriod.getInterestPeriods().getLast().getFromDate());
-        Assertions.assertEquals(LocalDate.of(2024, 7, 1), lastRepaymentPeriod.getInterestPeriods().getLast().getDueDate());
+        Assertions.assertEquals(LocalDate.of(2024, 6, 1), lastRepaymentPeriod.getInterestPeriods().get(0).getFromDate());
+        Assertions.assertEquals(LocalDate.of(2024, 6, 10), lastRepaymentPeriod.getInterestPeriods().get(0).getDueDate());
+        Assertions.assertEquals(LocalDate.of(2024, 6, 10), lastRepaymentPeriod.getInterestPeriods().get(1).getFromDate());
+        Assertions.assertEquals(LocalDate.of(2024, 7, 1), lastRepaymentPeriod.getInterestPeriods().get(1).getDueDate());
     }
 
     @Test
