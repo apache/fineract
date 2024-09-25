@@ -28,6 +28,8 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
@@ -52,6 +54,7 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
     private RequestSpecification requestSpec;
     private SavingsProductHelper savingsProductHelper;
     private SavingsAccountHelper savingsAccountHelper;
+    private GlobalConfigurationHelper globalConfigurationHelper;
 
     @BeforeEach
     public void setup() {
@@ -61,6 +64,7 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.savingsProductHelper = new SavingsProductHelper();
+        this.globalConfigurationHelper = new GlobalConfigurationHelper();
     }
 
     @Test
@@ -71,7 +75,7 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
         Assertions.assertNotNull(clientID);
 
         // Configuring global config flags
-        configureInterestPosting(true, 4);
+        configureInterestPosting(true, 4L);
 
         final Integer savingsId = createSavingsAccount(clientID, startDate);
 
@@ -108,36 +112,16 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
         return savingsId;
     }
 
-    private void configureInterestPosting(final Boolean periodEndEnable, final Integer financialYearBeginningMonth) {
-        final ArrayList<HashMap> globalConfig = GlobalConfigurationHelper.getAllGlobalConfigurations(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(globalConfig);
-
+    private void configureInterestPosting(final Boolean periodEndEnable, final Long financialYearBeginningMonth) {
         // Updating flag for interest posting at period end
-        Integer periodEndConfigId = (Integer) globalConfig.get(10).get("id");
-        Assertions.assertNotNull(periodEndConfigId);
-
-        HashMap periodEndConfigData = GlobalConfigurationHelper.getGlobalConfigurationById(this.requestSpec, this.responseSpec,
-                periodEndConfigId.toString());
-        Assertions.assertNotNull(periodEndConfigData);
-
-        Boolean enabled = (Boolean) globalConfig.get(10).get("enabled");
-
-        if (!enabled.equals(periodEndEnable)) {
-            periodEndConfigId = GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec,
-                    periodEndConfigId.toString(), periodEndEnable);
-        }
+        String periodEndConfigName = GlobalConfigurationConstants.SAVINGS_INTEREST_POSTING_CURRENT_PERIOD_END;
+        globalConfigurationHelper.updateGlobalConfiguration(periodEndConfigName,
+                new PutGlobalConfigurationsRequest().enabled(periodEndEnable));
 
         // Updating value for financial year beginning month
-        Integer financialYearBeginningConfigId = (Integer) globalConfig.get(11).get("id");
-        Assertions.assertNotNull(financialYearBeginningConfigId);
-
-        HashMap financialYearBeginningConfigData = GlobalConfigurationHelper.getGlobalConfigurationById(this.requestSpec, this.responseSpec,
-                financialYearBeginningConfigId.toString());
-        Assertions.assertNotNull(financialYearBeginningConfigData);
-
-        financialYearBeginningConfigId = GlobalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec, this.responseSpec,
-                financialYearBeginningConfigId.toString(), financialYearBeginningMonth.toString());
-        Assertions.assertNotNull(financialYearBeginningConfigId);
+        String financialYearBeginningConfigName = GlobalConfigurationConstants.FINANCIAL_YEAR_BEGINNING_MONTH;
+        globalConfigurationHelper.updateGlobalConfiguration(financialYearBeginningConfigName,
+                new PutGlobalConfigurationsRequest().value(financialYearBeginningMonth));
     }
 
     private Integer createSavingsProduct() {
@@ -149,8 +133,8 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
     // Reset configuration fields
     @AfterEach
     public void tearDown() {
-        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
-        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
+        globalConfigurationHelper.resetAllDefaultGlobalConfigurations();
+        globalConfigurationHelper.verifyAllDefaultGlobalConfigurations();
     }
 
 }

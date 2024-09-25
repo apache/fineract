@@ -48,10 +48,11 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
@@ -60,7 +61,6 @@ import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
@@ -68,13 +68,11 @@ import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "unchecked" })
-@ExtendWith(LoanTestLifecycleExtension.class)
-public class LoanSpecificDueDateChargeAfterMaturityTest {
+public class LoanSpecificDueDateChargeAfterMaturityTest extends BaseLoanIntegrationTest {
 
     private static final String DATETIME_PATTERN = "dd MMMM yyyy";
     private static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
@@ -436,7 +434,8 @@ public class LoanSpecificDueDateChargeAfterMaturityTest {
     @Test
     public void addChargeAfterLoanMaturity() {
         try {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
             BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
                     .date("01 September 2023").dateFormat(DATETIME_PATTERN).locale("en"));
 
@@ -508,7 +507,8 @@ public class LoanSpecificDueDateChargeAfterMaturityTest {
             validateRepaymentPeriod(loanDetails, 2, 0.0, 0.0, 0.0, 10.0, 0.0, 10.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getActive());
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
         }
     }
 
@@ -589,14 +589,5 @@ public class LoanSpecificDueDateChargeAfterMaturityTest {
         assertEquals(penaltyOutstanding, loanDetails.getRepaymentSchedule().getPeriods().get(index).getPenaltyChargesOutstanding());
         assertEquals(paidInAdvance, loanDetails.getRepaymentSchedule().getPeriods().get(index).getTotalPaidInAdvanceForPeriod());
         assertEquals(paidLate, loanDetails.getRepaymentSchedule().getPeriods().get(index).getTotalPaidLateForPeriod());
-    }
-
-    private static void validateLoanSummaryBalances(GetLoansLoanIdResponse loanDetails, Double totalOutstanding, Double totalRepayment,
-            Double principalOutstanding, Double principalPaid, Double totalOverpaid) {
-        assertEquals(totalOutstanding, loanDetails.getSummary().getTotalOutstanding());
-        assertEquals(totalRepayment, loanDetails.getSummary().getTotalRepayment());
-        assertEquals(principalOutstanding, loanDetails.getSummary().getPrincipalOutstanding());
-        assertEquals(principalPaid, loanDetails.getSummary().getPrincipalPaid());
-        assertEquals(totalOverpaid, loanDetails.getTotalOverpaid());
     }
 }

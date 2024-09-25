@@ -64,10 +64,10 @@ import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdRequest;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.LoanRescheduleRequestHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -4069,15 +4069,15 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
         AtomicLong createdLoanId = new AtomicLong();
         runAt("23 March 2024", () -> {
             // Rounding mode - HALF_DOWN
-            GlobalConfigurationHelper.updateValueForGlobalConfigurationInternal(requestSpec, responseSpec, "23", 5);
+            globalConfigurationHelper.updateGlobalConfigurationInternal(GlobalConfigurationConstants.ROUNDING_MODE, 5L);
             createLoanForRoundingMethodValidation(true);
 
             // Rounding mode - HALF_UP
-            GlobalConfigurationHelper.updateValueForGlobalConfigurationInternal(requestSpec, responseSpec, "23", 4);
+            globalConfigurationHelper.updateGlobalConfigurationInternal(GlobalConfigurationConstants.ROUNDING_MODE, 4L);
             createLoanForRoundingMethodValidation(false);
 
             // Rounding mode - HALF_EVEN - Default
-            GlobalConfigurationHelper.updateValueForGlobalConfigurationInternal(requestSpec, responseSpec, "23", 6);
+            globalConfigurationHelper.updateGlobalConfigurationInternal(GlobalConfigurationConstants.ROUNDING_MODE, 6L);
         });
     }
 

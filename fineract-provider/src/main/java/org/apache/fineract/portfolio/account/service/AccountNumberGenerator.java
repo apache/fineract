@@ -27,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatEnumerations.AccountNumberPrefixType;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -105,7 +106,7 @@ public class AccountNumberGenerator {
 
         // find if the custom length is defined
         final GlobalConfigurationPropertyData customLength = this.configurationReadPlatformService
-                .retrieveGlobalConfiguration("custom-account-number-length");
+                .retrieveGlobalConfiguration(GlobalConfigurationConstants.CUSTOM_ACCOUNT_NUMBER_LENGTH);
 
         if (customLength.isEnabled()) {
             // if it is enabled, and has the value, get it from the repository.
@@ -115,7 +116,7 @@ public class AccountNumberGenerator {
         }
 
         final GlobalConfigurationPropertyData randomAccountNumber = this.configurationReadPlatformService
-                .retrieveGlobalConfiguration("random-account-number");
+                .retrieveGlobalConfiguration(GlobalConfigurationConstants.RANDOM_ACCOUNT_NUMBER);
 
         if (randomAccountNumber.isEnabled()) {
             accountNumber = randomNumberGenerator(accountMaxLength, propertyMap);

@@ -3,11 +3,11 @@ Feature: BusinessDate
 
 
   Scenario: As a user I would like to enable the Business date configuration
-    Given Global configuration "enable_business_date" is enabled
+    Given Global configuration "enable-business-date" is enabled
 
 
   Scenario: As a user I would like to disable the Business date configuration
-    Given Global configuration "enable_business_date" is disabled
+    Given Global configuration "enable-business-date" is disabled
 
 
   Scenario: As a user I would like to set the business date

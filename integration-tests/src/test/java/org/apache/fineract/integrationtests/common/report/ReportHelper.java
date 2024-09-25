@@ -16,32 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.entityaccess;
+package org.apache.fineract.integrationtests.common.report;
 
-public final class FineractEntityAccessConstants {
+import java.io.IOException;
+import java.util.Map;
+import okhttp3.ResponseBody;
+import org.apache.fineract.integrationtests.client.IntegrationTest;
+import retrofit2.Response;
 
-    private FineractEntityAccessConstants() {
+public class ReportHelper extends IntegrationTest {
 
-    }
-
-    public static final String ENTITY_ACCESS_CODENAME = "Entity to Entity Access Types";
-
-    /***
-     * Enum of all parameters passed in while creating/updating an entity access
-     ***/
-    public enum EntityAccessJSONinputParams {
-
-        ENTITY_TYPE("entityType"), ENTITY_ID("entityId"), ENTITY_ACCESS_TYPE_ID("entityAccessTypeId"), SECOND_ENTITY_TYPE(
-                "secondEntityType"), SECOND_ENTITY_ID("secondEntityId");
-
-        private final String value;
-
-        EntityAccessJSONinputParams(final String value) {
-            this.value = value;
-        }
-
-        public String getValue() {
-            return this.value;
-        }
+    public Response<ResponseBody> runReport(String reportName, Map<String, String> reportParameters) throws IOException {
+        return fineract().reportsRun.runReportGetFile("Transaction Summary Report with Asset Owner", reportParameters, false).execute();
     }
 }

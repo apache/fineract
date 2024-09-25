@@ -5659,7 +5659,7 @@ Feature: Loan
     When Admin set "LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_TILL_REST_FREQUENCY" loan product "DEFAULT" transaction type to "LAST_INSTALLMENT" future installment allocation rule
 
   Scenario: Interest recalculation - S1 daily for overdue loan
-    Given Global configuration "enable_business_date" is enabled
+    Given Global configuration "enable-business-date" is enabled
     When Admin sets the business date to "1 January 2024"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -5682,7 +5682,7 @@ Feature: Loan
     When Admin removes "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
 
   Scenario: Interest recalculation - S2 2 overdue
-    Given Global configuration "enable_business_date" is enabled
+    Given Global configuration "enable-business-date" is enabled
     When Admin sets the business date to "1 January 2024"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -5705,7 +5705,7 @@ Feature: Loan
     When Admin removes "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
 
   Scenario: Interest recalculation - S3 1 paid, 1 overdue
-    Given Global configuration "enable_business_date" is enabled
+    Given Global configuration "enable-business-date" is enabled
     When Admin sets the business date to "1 January 2024"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:

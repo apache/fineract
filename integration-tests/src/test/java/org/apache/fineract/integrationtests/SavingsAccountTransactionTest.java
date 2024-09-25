@@ -31,7 +31,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import io.restassured.builder.RequestSpecBuilder;
@@ -56,7 +55,9 @@ import java.util.stream.Collectors;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.batch.domain.Header;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.BatchHelper;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
@@ -91,6 +92,7 @@ public class SavingsAccountTransactionTest {
     private SavingsProductHelper savingsProductHelper;
     private SavingsAccountHelper savingsAccountHelper;
     private DatatableHelper datatableHelper;
+    private GlobalConfigurationHelper globalConfigurationHelper;
 
     @BeforeEach
     public void setup() {
@@ -103,13 +105,15 @@ public class SavingsAccountTransactionTest {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.savingsProductHelper = new SavingsProductHelper();
         this.datatableHelper = new DatatableHelper(this.requestSpec, this.responseSpec);
+        globalConfigurationHelper = new GlobalConfigurationHelper();
     }
 
     @Test
-    public void verifySavingsTransactionSubmittedOnDateAndTransactionDate() throws JsonProcessingException {
+    public void verifySavingsTransactionSubmittedOnDateAndTransactionDate() {
         LocalDate today = Utils.getLocalDateOfTenant();
         try {
-            enableBusinessDate(requestSpec, responseSpec, true);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, today);
 
             LocalDate depositDate = Utils.getDateAsLocalDate(depositDateString);
@@ -124,7 +128,8 @@ public class SavingsAccountTransactionTest {
             performSavingsTransaction(savingsId, "100", depositDate, true);
             performSavingsTransaction(savingsId, "50", withdrawDate, false);
         } finally {
-            enableBusinessDate(requestSpec, responseSpec, false);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
         }
     }
 
@@ -275,10 +280,6 @@ public class SavingsAccountTransactionTest {
             throw new RuntimeException(e);
         }
         log.info("\nFinished all threads");
-    }
-
-    private void enableBusinessDate(RequestSpecification requestSpec, ResponseSpecification responseSpec, boolean enable) {
-        GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, enable);
     }
 
     private void performSavingsTransaction(Integer savingsId, String amount, LocalDate transactionDate, boolean isDeposit) {
@@ -456,7 +457,7 @@ public class SavingsAccountTransactionTest {
     // Reset configuration fields
     @AfterEach
     public void tearDown() {
-        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
-        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
+        globalConfigurationHelper.resetAllDefaultGlobalConfigurations();
+        globalConfigurationHelper.verifyAllDefaultGlobalConfigurations();
     }
 }

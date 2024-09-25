@@ -29,10 +29,10 @@ import org.springframework.stereotype.Component;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class GlobalConfigurationGlobalInitializerStep implements FineractGlobalInitializerStep {
 
-    public static final String CONFIG_KEY_ENABLE_ADDRESS = "Enable-Address";
+    public static final String CONFIG_KEY_ENABLE_ADDRESS = "enable-address";
     public static final String CONFIG_KEY_ENABLE_INTEREST_CALCULATION = "interest-charged-from-date-same-as-disbursal-date";
-    public static final String CONFIG_KEY_ENABLE_BUSINESS_DATE = "enable_business_date";
-    public static final String CONFIG_KEY_ENABLE_RECALCULATE_COB_DATE = "enable_automatic_cob_date_adjustment";
+    public static final String CONFIG_KEY_ENABLE_BUSINESS_DATE = "enable-business-date";
+    public static final String CONFIG_KEY_ENABLE_RECALCULATE_COB_DATE = "enable-automatic-cob-date-adjustment";
     public static final String CONFIG_KEY_DAYS_BEFORE_REPAYMENT_IS_DUE = "days-before-repayment-is-due";
     public static final String CONFIG_KEY_DAYS_AFTER_REPAYMENT_IS_OVERDUE = "days-after-repayment-is-overdue";
     public static final String CONFIG_KEY_ENABLE_AUTO_GENERATED_EXTERNAL_ID = "enable-auto-generated-external-id";
