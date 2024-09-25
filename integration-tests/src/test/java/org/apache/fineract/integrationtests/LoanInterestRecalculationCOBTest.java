@@ -169,6 +169,20 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
             validateFullyUnpaidRepaymentPeriod(loanDetails, 4, "01 May 2023", 2041.57, 0.0, 0.0, 17.01);
 
         });
+        runAt("20 April 2023", () -> {
+            Long loanId = loanIdRef.get();
+
+            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            logLoanDetails(loanDetails);
+
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 2, "01 March 2023", 1975.17, 0.0, 0.0, 66.67);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 3, "01 April 2023", 1975.17, 0.0, 0.0, 66.67);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 4, "01 May 2023", 2074.49, 0.0, 0.0, 48.56);
+
+        });
         payoffOnDateAndVerifyStatus("1 February 2023", loanIdRef.get());
     }
 

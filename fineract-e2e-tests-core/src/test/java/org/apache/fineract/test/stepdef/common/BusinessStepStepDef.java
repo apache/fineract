@@ -22,8 +22,12 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.BusinessStep;
+import org.apache.fineract.client.models.GetBusinessStepConfigResponse;
 import org.apache.fineract.client.models.UpdateBusinessStepConfigRequest;
 import org.apache.fineract.client.services.BusinessStepConfigurationApi;
 import org.apache.fineract.test.helper.ErrorHelper;
@@ -31,6 +35,7 @@ import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.springframework.beans.factory.annotation.Autowired;
 import retrofit2.Response;
 
+@Slf4j
 public class BusinessStepStepDef extends AbstractStepDef {
 
     private static final String WORKFLOW_NAME_LOAN_CLOSE_OF_BUSINESS = "LOAN_CLOSE_OF_BUSINESS";
@@ -148,5 +153,57 @@ public class BusinessStepStepDef extends AbstractStepDef {
         Response<Void> response = businessStepConfigurationApi.updateJobBusinessStepConfig(WORKFLOW_NAME_LOAN_CLOSE_OF_BUSINESS, request)
                 .execute();
         ErrorHelper.checkSuccessfulApiCall(response);
+    }
+
+    @Given("Admin puts {string} business step into LOAN_CLOSE_OF_BUSINESS workflow")
+    public void putGivenJobInCOB(String businessStepName) throws IOException {
+        List<BusinessStep> businessSteps = retrieveLoanCOBJobSteps();
+        if (businessSteps.stream().anyMatch(businessStep -> businessStep.getStepName().equals(businessStepName))) {
+            return;
+        }
+
+        businessSteps.add(new BusinessStep().stepName(businessStepName).order((long) (1 + businessSteps.size())));
+
+        UpdateBusinessStepConfigRequest request = new UpdateBusinessStepConfigRequest().businessSteps(businessSteps);
+        Response<Void> response = businessStepConfigurationApi.updateJobBusinessStepConfig(WORKFLOW_NAME_LOAN_CLOSE_OF_BUSINESS, request)
+                .execute();
+        ErrorHelper.checkSuccessfulApiCall(response);
+
+        logChanges();
+    }
+
+    @Then("Admin removes {string} business step into LOAN_CLOSE_OF_BUSINESS workflow")
+    public void removeGivenJobInCOB(String businessStepName) throws IOException {
+        List<BusinessStep> businessSteps = retrieveLoanCOBJobSteps();
+        businessSteps.removeIf(businessStep -> businessStep.getStepName().equals(businessStepName));
+
+        UpdateBusinessStepConfigRequest request = new UpdateBusinessStepConfigRequest().businessSteps(businessSteps);
+        Response<Void> response = businessStepConfigurationApi.updateJobBusinessStepConfig(WORKFLOW_NAME_LOAN_CLOSE_OF_BUSINESS, request)
+                .execute();
+        ErrorHelper.checkSuccessfulApiCall(response);
+
+        logChanges();
+    }
+
+    private List<BusinessStep> retrieveLoanCOBJobSteps() throws IOException {
+        Response<GetBusinessStepConfigResponse> businessStepConfigResponse = businessStepConfigurationApi
+                .retrieveAllConfiguredBusinessStep(WORKFLOW_NAME_LOAN_CLOSE_OF_BUSINESS).execute();
+        ErrorHelper.checkSuccessfulApiCall(businessStepConfigResponse);
+        return businessStepConfigResponse.body().getBusinessSteps();
+    }
+
+    private void logChanges() throws IOException {
+        // --- log changes ---
+        Response<GetBusinessStepConfigResponse> changesResponse = businessStepConfigurationApi
+                .retrieveAllConfiguredBusinessStep(WORKFLOW_NAME_LOAN_CLOSE_OF_BUSINESS).execute();
+        List<BusinessStep> businessStepsChanged = changesResponse.body().getBusinessSteps();
+        List<String> changes = businessStepsChanged//
+                .stream()//
+                .sorted(Comparator.comparingLong(BusinessStep::getOrder))//
+                .map(BusinessStep::getStepName)//
+                .collect(Collectors.toList());//
+
+        log.info("Business steps has been CHANGED to the following:");
+        changes.forEach(e -> log.info(e));
     }
 }
