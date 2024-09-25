@@ -424,7 +424,7 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
             verifyTransactions(loanId.get(), //
                     transaction(1000.0, "Disbursement", disbursementDay, 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
                     transaction(20.0, "Accrual", "01 February 2023", 0, 0, 0, 0, 20, 0.0, 0.0),
-                    transaction(50.0, "Repayment", "10 January 2023", 950, 50, 0, 0, 0, 0.0, 0.0),
+                    transaction(50.0, "Repayment", "10 January 2023", 970, 30, 0, 0, 20, 0.0, 0.0),
                     transaction(20.0, "Accrual Activity", "01 February 2023", 0, 0, 0.0, 0.0, 20.0, 0.0, 0.0));
 
         });
