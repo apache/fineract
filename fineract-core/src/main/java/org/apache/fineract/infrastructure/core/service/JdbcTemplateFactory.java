@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.external.service;
+package org.apache.fineract.infrastructure.core.service;
 
 import javax.sql.DataSource;
 import lombok.RequiredArgsConstructor;

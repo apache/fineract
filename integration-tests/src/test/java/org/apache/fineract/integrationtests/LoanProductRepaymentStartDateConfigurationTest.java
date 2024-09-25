@@ -32,9 +32,11 @@ import java.util.UUID;
 import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdResponse;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
@@ -52,6 +54,7 @@ public class LoanProductRepaymentStartDateConfigurationTest {
     private RequestSpecification requestSpec;
     private LoanTransactionHelper loanTransactionHelper;
     private ClientHelper clientHelper;
+    private GlobalConfigurationHelper globalConfigurationHelper;
 
     @BeforeEach
     public void setup() {
@@ -61,6 +64,7 @@ public class LoanProductRepaymentStartDateConfigurationTest {
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
         this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+        this.globalConfigurationHelper = new GlobalConfigurationHelper();
     }
 
     @Test
@@ -126,7 +130,8 @@ public class LoanProductRepaymentStartDateConfigurationTest {
             // Set business date
             LocalDate businessDate = LocalDate.of(2023, 3, 3);
 
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
 
             // Loan ExternalId
@@ -265,7 +270,8 @@ public class LoanProductRepaymentStartDateConfigurationTest {
             assertEquals(500.00, loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod());
 
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
         }
 
     }
@@ -280,7 +286,8 @@ public class LoanProductRepaymentStartDateConfigurationTest {
             // Set business date
             LocalDate businessDate = LocalDate.of(2023, 3, 3);
 
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
 
             // Loan ExternalId
@@ -422,7 +429,8 @@ public class LoanProductRepaymentStartDateConfigurationTest {
             assertEquals(333.34, loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod());
 
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
         }
 
     }

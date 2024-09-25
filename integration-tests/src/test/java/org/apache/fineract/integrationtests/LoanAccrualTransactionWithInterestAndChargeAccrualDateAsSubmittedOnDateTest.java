@@ -26,8 +26,9 @@ import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.junit.jupiter.api.Test;
 
@@ -41,7 +42,8 @@ public class LoanAccrualTransactionWithInterestAndChargeAccrualDateAsSubmittedOn
 
             try {
                 // Configure Charge accrual date as submitted on date
-                GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "submitted-date");
+                globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE,
+                        new PutGlobalConfigurationsRequest().stringValue("submitted-date"));
 
                 // Create Client
                 Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
@@ -102,7 +104,8 @@ public class LoanAccrualTransactionWithInterestAndChargeAccrualDateAsSubmittedOn
                         transaction(500.0, "Disbursement", "26 April 2024", 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0));
 
             } finally {
-                GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "due-date");
+                globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE,
+                        new PutGlobalConfigurationsRequest().stringValue("due-date"));
             }
 
         });
@@ -115,7 +118,8 @@ public class LoanAccrualTransactionWithInterestAndChargeAccrualDateAsSubmittedOn
 
             try {
                 // Configure Charge accrual date as submitted on date
-                GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "submitted-date");
+                globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE,
+                        new PutGlobalConfigurationsRequest().stringValue("submitted-date"));
 
                 // Create Client
                 Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
@@ -200,7 +204,8 @@ public class LoanAccrualTransactionWithInterestAndChargeAccrualDateAsSubmittedOn
                         transaction(500.0, "Disbursement", "26 April 2024", 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0));
 
             } finally {
-                GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "due-date");
+                globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE,
+                        new PutGlobalConfigurationsRequest().stringValue("due-date"));
             }
 
         });

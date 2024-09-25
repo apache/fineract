@@ -32,10 +32,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.AllowAttributeOverrides;
 import org.apache.fineract.client.models.ChargeData;
@@ -44,17 +42,17 @@ import org.apache.fineract.client.models.GetLoanFeeToIncomeAccountMappings;
 import org.apache.fineract.client.models.GetLoanPaymentChannelToFundSourceMappings;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.client.models.PostPaymentTypesRequest;
 import org.apache.fineract.client.models.PostPaymentTypesResponse;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -64,19 +62,15 @@ import org.apache.fineract.integrationtests.common.funds.FundsHelper;
 import org.apache.fineract.integrationtests.common.funds.FundsResourceHandler;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductHelper;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
-import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-@ExtendWith(LoanTestLifecycleExtension.class)
-public class UndoRepaymentWithDownPaymentIntegrationTest {
+public class UndoRepaymentWithDownPaymentIntegrationTest extends BaseLoanIntegrationTest {
 
     private static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
     private ResponseSpecification responseSpec;
@@ -147,7 +141,8 @@ public class UndoRepaymentWithDownPaymentIntegrationTest {
 
     @Test
     public void undoRepaymentWithDownPaymentAndAdvancedPaymentAllocationTest() {
-        GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                new PutGlobalConfigurationsRequest().enabled(true));
 
         String loanExternalIdStr = UUID.randomUUID().toString();
 
@@ -364,30 +359,5 @@ public class UndoRepaymentWithDownPaymentIntegrationTest {
         }
 
         return Long.valueOf(fundId);
-    }
-
-    private AdvancedPaymentData createDefaultPaymentAllocation(String futureInstallmentAllocationRule) {
-        AdvancedPaymentData advancedPaymentData = new AdvancedPaymentData();
-        advancedPaymentData.setTransactionType("DEFAULT");
-        advancedPaymentData.setFutureInstallmentAllocationRule(futureInstallmentAllocationRule);
-
-        List<PaymentAllocationOrder> paymentAllocationOrders = getPaymentAllocationOrder(PaymentAllocationType.PAST_DUE_PENALTY,
-                PaymentAllocationType.PAST_DUE_FEE, PaymentAllocationType.PAST_DUE_PRINCIPAL, PaymentAllocationType.PAST_DUE_INTEREST,
-                PaymentAllocationType.DUE_PENALTY, PaymentAllocationType.DUE_FEE, PaymentAllocationType.DUE_PRINCIPAL,
-                PaymentAllocationType.DUE_INTEREST, PaymentAllocationType.IN_ADVANCE_PENALTY, PaymentAllocationType.IN_ADVANCE_FEE,
-                PaymentAllocationType.IN_ADVANCE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_INTEREST);
-
-        advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrders);
-        return advancedPaymentData;
-    }
-
-    private List<PaymentAllocationOrder> getPaymentAllocationOrder(PaymentAllocationType... paymentAllocationTypes) {
-        AtomicInteger integer = new AtomicInteger(1);
-        return Arrays.stream(paymentAllocationTypes).map(pat -> {
-            PaymentAllocationOrder paymentAllocationOrder = new PaymentAllocationOrder();
-            paymentAllocationOrder.setPaymentAllocationRule(pat.name());
-            paymentAllocationOrder.setOrder(integer.getAndIncrement());
-            return paymentAllocationOrder;
-        }).toList();
     }
 }

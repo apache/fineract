@@ -36,8 +36,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.fineract.client.models.GetSavingsAccountTransactionsPageItem;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.models.SavingsAccountTransactionsSearchResponse;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
@@ -76,6 +78,7 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
     private SavingsProductHelper savingsProductHelper;
     private SavingsAccountHelper savingsAccountHelper;
     private SavingsAccountHelper savingsAccountHelperValidationError;
+    private GlobalConfigurationHelper globalConfigurationHelper;
 
     @BeforeEach
     public void setup() {
@@ -87,6 +90,7 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
         this.responseSpecForValidationError = new ResponseSpecBuilder().expectStatusCode(400).build();
         this.savingsAccountHelperValidationError = new SavingsAccountHelper(this.requestSpec, this.responseSpecForValidationError);
         this.savingsProductHelper = new SavingsProductHelper();
+        this.globalConfigurationHelper = new GlobalConfigurationHelper();
     }
 
     @Test
@@ -167,14 +171,16 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
         final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
 
         try {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, true);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
 
             this.savingsAccountHelper.depositToSavingsAccount(savingsId, "100", firstDepositDate, CommonConstants.RESPONSE_RESOURCE_ID);
             this.savingsAccountHelper.depositToSavingsAccount(savingsId, "300", secondDepositDate, CommonConstants.RESPONSE_RESOURCE_ID);
             this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "100", withdrawDate, CommonConstants.RESPONSE_RESOURCE_ID);
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, false);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
         }
         String submittedDate = DateUtils.format(businessDate, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE);
         TransactionSearchRequest searchParameters = new TransactionSearchRequest()
@@ -454,8 +460,8 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
     // Reset configuration fields
     @AfterEach
     public void tearDown() {
-        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
-        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
+        globalConfigurationHelper.resetAllDefaultGlobalConfigurations();
+        globalConfigurationHelper.verifyAllDefaultGlobalConfigurations();
     }
 
 }

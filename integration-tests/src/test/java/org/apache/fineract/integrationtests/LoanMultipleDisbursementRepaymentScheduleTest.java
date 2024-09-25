@@ -39,11 +39,12 @@ import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -52,14 +53,11 @@ import org.apache.fineract.integrationtests.common.accounting.PeriodicAccrualAcc
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-@ExtendWith(LoanTestLifecycleExtension.class)
-public class LoanMultipleDisbursementRepaymentScheduleTest {
+public class LoanMultipleDisbursementRepaymentScheduleTest extends BaseLoanIntegrationTest {
 
     private static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
     private ResponseSpecification responseSpec;
@@ -92,9 +90,10 @@ public class LoanMultipleDisbursementRepaymentScheduleTest {
             final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
 
             // Set business date
-            LocalDate currentDate = LocalDate.of(2023, 07, 7);
+            LocalDate currentDate = LocalDate.of(2023, 7, 7);
 
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, currentDate);
 
             // Loan ExternalId
@@ -124,7 +123,7 @@ public class LoanMultipleDisbursementRepaymentScheduleTest {
 
             // run cob
 
-            currentDate = LocalDate.of(2023, 07, 12);
+            currentDate = LocalDate.of(2023, 7, 12);
 
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, currentDate);
 
@@ -136,7 +135,7 @@ public class LoanMultipleDisbursementRepaymentScheduleTest {
 
             // make Merchant Issued Refund
 
-            currentDate = LocalDate.of(2023, 07, 21);
+            currentDate = LocalDate.of(2023, 7, 21);
 
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, currentDate);
 
@@ -150,7 +149,7 @@ public class LoanMultipleDisbursementRepaymentScheduleTest {
             schedulerJobHelper.executeAndAwaitJob(jobName);
 
             // make another disbursement
-            currentDate = LocalDate.of(2023, 07, 24);
+            currentDate = LocalDate.of(2023, 7, 24);
 
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, currentDate);
 
@@ -169,7 +168,8 @@ public class LoanMultipleDisbursementRepaymentScheduleTest {
             assertEquals(1, activePeriods);
 
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
         }
 
     }

@@ -63,15 +63,16 @@ import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PutDelinquencyBucketResponse;
 import org.apache.fineract.client.models.PutDelinquencyRangeResponse;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdResponse;
 import org.apache.fineract.cob.data.JobBusinessStepConfigData;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.BusinessStepConfigurationHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
@@ -314,7 +315,8 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
         try {
             // Given
             final LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
 
             final LocalDate bussinesLocalDate = Utils.getDateAsLocalDate("01 March 2012");
             log.info("Current date {}", bussinesLocalDate);
@@ -402,14 +404,16 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
             assertEquals(getDelinquencyTagsHistory.get(0).getDelinquencyRange().getClassification(), classificationExpected);
             log.info("Delinquency Tag Item with Lifted On {}", getDelinquencyTagsHistory.get(0).getLiftedOnDate());
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
         }
     }
 
     @Test
     public void testLoanClassificationRealtimeWithCharges() {
         try {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
 
             final LocalDate bussinesLocalDate = Utils.getDateAsLocalDate("01 April 2012");
             log.info("Current date {}", bussinesLocalDate);
@@ -497,7 +501,8 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
             // Evaluate a Delinquency Tag set after add charge to the Loan
             assertEquals(getLoansLoanIdResponse.getDelinquencyRange().getClassification(), classificationExpected);
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
         }
     }
 
@@ -711,7 +716,8 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
     @Test
     public void testLoanClassificationJob() {
         try {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
 
             LocalDate businessDate = Utils.getLocalDateOfTenant();
             businessDate = businessDate.minusDays(37);
@@ -794,14 +800,16 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
             assertEquals(secondTestCase.getClassification(), classificationExpected);
 
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
         }
     }
 
     @Test
     public void testLoanClassificationStepAsPartOfCOB() {
         try {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
 
             LocalDate bussinesLocalDate = Utils.getDateAsLocalDate("01 April 2012");
             log.info("Current date {}", bussinesLocalDate);
@@ -896,14 +904,16 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
             assertEquals(getLoanProductsProductResponse.getDelinquencyBucket().getName(), delinquencyBucket.getName());
             assertEquals(secondTestCase.getClassification(), classificationExpected);
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
         }
     }
 
     @Test
     public void testLoanClassificationToValidateNegatives() {
         try {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
 
             LocalDate bussinesLocalDate = Utils.getDateAsLocalDate("01 January 2012");
             log.info("Current date {}", bussinesLocalDate);
@@ -975,14 +985,16 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
             assertEquals(0, getLoansLoanIdCollectionData.getPastDueDays());
 
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
         }
     }
 
     @Test
     public void testLoanClassificationUsingAgeingArrears() {
         try {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
 
             LocalDate bussinesLocalDate = Utils.getDateAsLocalDate("01 January 2012");
             log.info("Current date {}", bussinesLocalDate);
@@ -1064,7 +1076,8 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
             assertEquals(0, getLoansLoanIdCollectionData.getPastDueDays());
 
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
         }
     }
 
@@ -1394,7 +1407,8 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
     @Test
     public void testLoanClassificationOnlyForActiveLoanWithCOB() {
         try {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
             final String operationDate = "01 January 2012";
 
             LocalDate bussinesLocalDate = Utils.getDateAsLocalDate(operationDate);
@@ -1445,7 +1459,8 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
             assertEquals(0, delinquent.getDelinquentAmount());
 
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
         }
     }
 

@@ -35,7 +35,6 @@ import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.fineract.client.models.GetClientClientIdAddressesResponse;
 import org.apache.fineract.client.models.GetClientsClientIdResponse;
 import org.apache.fineract.client.models.GlobalConfigurationPropertyData;
@@ -43,6 +42,8 @@ import org.apache.fineract.client.models.PostClientClientIdAddressesRequest;
 import org.apache.fineract.client.models.PostClientClientIdAddressesResponse;
 import org.apache.fineract.client.models.PostClientsAddressRequest;
 import org.apache.fineract.client.models.PostClientsRequest;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -58,6 +59,7 @@ public class ClientTest {
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private ClientHelper clientHelper;
+    private GlobalConfigurationHelper globalConfigurationHelper;
 
     @BeforeEach
     public void setup() {
@@ -66,12 +68,13 @@ public class ClientTest {
         requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         clientHelper = new ClientHelper(requestSpec, responseSpec);
+        globalConfigurationHelper = new GlobalConfigurationHelper();
     }
 
     @AfterEach
     public void tearDown() {
-        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(requestSpec, responseSpec);
-        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(requestSpec, responseSpec);
+        globalConfigurationHelper.resetAllDefaultGlobalConfigurations();
+        globalConfigurationHelper.verifyAllDefaultGlobalConfigurations();
     }
 
     @Test
@@ -203,15 +206,11 @@ public class ClientTest {
     @Test
     public void testClientAddressCreationWorks() {
         // given
-        GlobalConfigurationPropertyData addressEnabledConfig = GlobalConfigurationHelper.getGlobalConfigurationByName(requestSpec,
-                responseSpec, "Enable-Address");
-        Long configId = addressEnabledConfig.getId();
-
-        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, configId, true);
-        GlobalConfigurationPropertyData updatedAddressEnabledConfig = GlobalConfigurationHelper.getGlobalConfigurationByName(requestSpec,
-                responseSpec, "Enable-Address");
-        boolean isAddressEnabled = BooleanUtils.toBoolean(updatedAddressEnabledConfig.getEnabled());
-        assertThat(isAddressEnabled).isTrue();
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_ADDRESS,
+                new PutGlobalConfigurationsRequest().enabled(true));
+        GlobalConfigurationPropertyData updatedAddressEnabledConfig = globalConfigurationHelper
+                .getGlobalConfigurationByName(GlobalConfigurationConstants.ENABLE_ADDRESS);
+        assertThat(updatedAddressEnabledConfig.getEnabled()).isTrue();
 
         Integer addressTypeId = CodeHelper.createAddressTypeCodeValue(requestSpec, responseSpec,
                 Utils.randomStringGenerator("Residential address", 4), 0);

@@ -53,7 +53,7 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Working days", description = "The days of the week that are workdays.\n" + "\n"
         + "Rescheduling of repayments when it falls on a non-working is turned on /off by enable/disable reschedule-future-repayments parameter in Global configurations\n"
         + "\n"
-        + "Allow transactions on non-working days is configurable by enabling/disbaling the allow-transactions-on-non_workingday parameter in Global configurations.")
+        + "Allow transactions on non-working days is configurable by enabling/disbaling the allow-transactions-on-non-workingday parameter in Global configurations.")
 @RequiredArgsConstructor
 public class WorkingDaysApiResource {
 

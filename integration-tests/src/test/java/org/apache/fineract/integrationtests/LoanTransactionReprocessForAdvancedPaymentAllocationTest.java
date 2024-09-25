@@ -31,20 +31,17 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
-import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
@@ -53,11 +50,10 @@ import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuil
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
-import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class LoanTransactionReprocessForAdvancedPaymentAllocationTest {
+public class LoanTransactionReprocessForAdvancedPaymentAllocationTest extends BaseLoanIntegrationTest {
 
     private static LoanTransactionHelper LOAN_TRANSACTION_HELPER;
     private static ResponseSpecification RESPONSE_SPEC;
@@ -83,7 +79,8 @@ public class LoanTransactionReprocessForAdvancedPaymentAllocationTest {
             // Set business date
             LocalDate businessDate = LocalDate.of(2023, 3, 15);
 
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, Boolean.TRUE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
             BusinessDateHelper.updateBusinessDate(REQUEST_SPEC, RESPONSE_SPEC, BusinessDateType.BUSINESS_DATE, businessDate);
 
             // Accounts oof periodic accrual
@@ -164,7 +161,8 @@ public class LoanTransactionReprocessForAdvancedPaymentAllocationTest {
             verifyTransaction(LocalDate.of(2023, 2, 20), 50.0f, 40.0f, 0.0f, 0.0f, 10.0f, loanId, "repayment");
 
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, Boolean.FALSE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
         }
     }
 
@@ -179,31 +177,6 @@ public class LoanTransactionReprocessForAdvancedPaymentAllocationTest {
                 .withDisallowExpectedDisbursements(true).build();
         return LOAN_TRANSACTION_HELPER.getLoanProductId(loanProductCreateJSON);
 
-    }
-
-    private AdvancedPaymentData createDefaultPaymentAllocation(String futureInstallmentAllocationRule) {
-        AdvancedPaymentData advancedPaymentData = new AdvancedPaymentData();
-        advancedPaymentData.setTransactionType("DEFAULT");
-        advancedPaymentData.setFutureInstallmentAllocationRule(futureInstallmentAllocationRule);
-
-        List<PaymentAllocationOrder> paymentAllocationOrders = getPaymentAllocationOrder(PaymentAllocationType.PAST_DUE_PENALTY,
-                PaymentAllocationType.PAST_DUE_FEE, PaymentAllocationType.PAST_DUE_PRINCIPAL, PaymentAllocationType.PAST_DUE_INTEREST,
-                PaymentAllocationType.DUE_PENALTY, PaymentAllocationType.DUE_FEE, PaymentAllocationType.DUE_PRINCIPAL,
-                PaymentAllocationType.DUE_INTEREST, PaymentAllocationType.IN_ADVANCE_PENALTY, PaymentAllocationType.IN_ADVANCE_FEE,
-                PaymentAllocationType.IN_ADVANCE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_INTEREST);
-
-        advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrders);
-        return advancedPaymentData;
-    }
-
-    private List<PaymentAllocationOrder> getPaymentAllocationOrder(PaymentAllocationType... paymentAllocationTypes) {
-        AtomicInteger integer = new AtomicInteger(1);
-        return Arrays.stream(paymentAllocationTypes).map(pat -> {
-            PaymentAllocationOrder paymentAllocationOrder = new PaymentAllocationOrder();
-            paymentAllocationOrder.setPaymentAllocationRule(pat.name());
-            paymentAllocationOrder.setOrder(integer.getAndIncrement());
-            return paymentAllocationOrder;
-        }).toList();
     }
 
     private Integer createLoanAccount(final Integer clientID, final Integer loanProductID, final String externalId) {

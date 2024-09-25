@@ -61,10 +61,12 @@ import org.apache.fineract.client.models.GetDataTablesResponse;
 import org.apache.fineract.client.models.PagedLocalRequestAdvancedQueryData;
 import org.apache.fineract.client.models.PagedLocalRequestAdvancedQueryRequest;
 import org.apache.fineract.client.models.PostDataTablesResponse;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.models.ResultsetColumnHeaderData;
 import org.apache.fineract.client.models.SortOrder;
 import org.apache.fineract.client.models.TableQueryData;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
@@ -106,6 +108,7 @@ public class DatatableAdvancedQueryTest {
     private DatatableHelper datatableHelper;
     private SavingsProductHelper savingsProductHelper;
     private SavingsAccountHelper savingsAccountHelper;
+    private GlobalConfigurationHelper globalConfigurationHelper;
 
     @BeforeEach
     public void setup() {
@@ -116,6 +119,7 @@ public class DatatableAdvancedQueryTest {
         datatableHelper = new DatatableHelper(requestSpec, responseSpec);
         savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
         savingsProductHelper = new SavingsProductHelper();
+        globalConfigurationHelper = new GlobalConfigurationHelper();
     }
 
     @Test
@@ -126,7 +130,8 @@ public class DatatableAdvancedQueryTest {
         LocalDate yesterday = today.minus(1, ChronoUnit.DAYS);
         String yesterdayS = DateUtils.format(yesterday, SAVINGS_DATE_FORMAT);
         try {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, true);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, today);
 
             final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, yesterdayS);
@@ -197,7 +202,8 @@ public class DatatableAdvancedQueryTest {
             deleteDatatable(datatable, transactionIdD1, transactionIdD2, transactionIdW1);
 
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, false);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
         }
     }
 
@@ -210,7 +216,8 @@ public class DatatableAdvancedQueryTest {
         LocalDate yesterday = today.minus(1, ChronoUnit.DAYS);
         String yesterdayS = DateUtils.format(yesterday, SAVINGS_DATE_FORMAT);
         try {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, true);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, today);
 
             final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, yesterdayS);
@@ -298,7 +305,8 @@ public class DatatableAdvancedQueryTest {
             deleteDatatable(datatable, transactionIdD1, transactionIdD2, transactionIdW1);
 
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, false);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
         }
     }
 

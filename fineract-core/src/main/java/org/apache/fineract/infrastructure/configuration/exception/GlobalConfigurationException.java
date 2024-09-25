@@ -16,32 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.entityaccess;
+package org.apache.fineract.infrastructure.configuration.exception;
 
-public final class FineractEntityAccessConstants {
+public class GlobalConfigurationException extends RuntimeException {
 
-    private FineractEntityAccessConstants() {
-
-    }
-
-    public static final String ENTITY_ACCESS_CODENAME = "Entity to Entity Access Types";
-
-    /***
-     * Enum of all parameters passed in while creating/updating an entity access
-     ***/
-    public enum EntityAccessJSONinputParams {
-
-        ENTITY_TYPE("entityType"), ENTITY_ID("entityId"), ENTITY_ACCESS_TYPE_ID("entityAccessTypeId"), SECOND_ENTITY_TYPE(
-                "secondEntityType"), SECOND_ENTITY_ID("secondEntityId");
-
-        private final String value;
-
-        EntityAccessJSONinputParams(final String value) {
-            this.value = value;
-        }
-
-        public String getValue() {
-            return this.value;
-        }
+    public GlobalConfigurationException(final String name) {
+        super("Global configuration with name: '" + name
+                + "' is not in the supported format! Global configuration name can only contains lowercase letters or -, and must start with letters!");
     }
 }

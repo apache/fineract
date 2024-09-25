@@ -37,6 +37,7 @@ import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationProperty;
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationRepositoryWrapper;
@@ -55,7 +56,6 @@ import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
-import org.apache.fineract.infrastructure.entityaccess.FineractEntityAccessConstants;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelation;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelationRepository;
@@ -1760,7 +1760,7 @@ public final class LoanApplicationValidator {
 
     private void officeSpecificLoanProductValidation(final Long productId, final Long officeId) {
         final GlobalConfigurationProperty restrictToUserOfficeProperty = this.globalConfigurationRepository
-                .findOneByNameWithNotFoundDetection(FineractEntityAccessConstants.GLOBAL_CONFIG_FOR_OFFICE_SPECIFIC_PRODUCTS);
+                .findOneByNameWithNotFoundDetection(GlobalConfigurationConstants.OFFICE_SPECIFIC_PRODUCTS_ENABLED);
         if (restrictToUserOfficeProperty.isEnabled()) {
             FineractEntityRelation fineractEntityRelation = fineractEntityRelationRepository
                     .findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS.getStr());

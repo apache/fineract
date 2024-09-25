@@ -28,41 +28,34 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import java.util.HashMap;
 import java.util.UUID;
 import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdSummary;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.cob.data.JobBusinessStepConfigData;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.BusinessStepConfigurationHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-@ExtendWith(LoanTestLifecycleExtension.class)
-public class LoanAccountArrearsAgeingCOBBusinessStepTest {
+public class LoanAccountArrearsAgeingCOBBusinessStepTest extends BaseLoanIntegrationTest {
 
     private ResponseSpecification responseSpec;
-    private ResponseSpecification responseSpecErr400;
-    private ResponseSpecification responseSpecErr503;
     private RequestSpecification requestSpec;
     private ClientHelper clientHelper;
     private LoanTransactionHelper loanTransactionHelper;
-    private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
     public static final String UPDATE_LOAN_ARREARS_AGING = "UPDATE_LOAN_ARREARS_AGING";
 
     @BeforeEach
@@ -71,8 +64,6 @@ public class LoanAccountArrearsAgeingCOBBusinessStepTest {
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.responseSpecErr400 = new ResponseSpecBuilder().expectStatusCode(400).build();
-        this.responseSpecErr503 = new ResponseSpecBuilder().expectStatusCode(503).build();
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
         this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
     }
@@ -81,7 +72,8 @@ public class LoanAccountArrearsAgeingCOBBusinessStepTest {
     public void loanArrearsAgeingCOBBusinessStepTest() {
         // Set Business Date
         try {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
 
             LocalDate businessDate = Utils.getLocalDateOfTenant();
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
@@ -148,7 +140,8 @@ public class LoanAccountArrearsAgeingCOBBusinessStepTest {
             assertEquals(loan2Summary.getPrincipalOverdue(), 1000.00);
             assertEquals(loan2Summary.getTotalOverdue(), 1000.00);
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
         }
     }
 

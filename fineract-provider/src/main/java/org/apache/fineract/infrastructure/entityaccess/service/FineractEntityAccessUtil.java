@@ -21,9 +21,9 @@ package org.apache.fineract.infrastructure.entityaccess.service;
 import java.time.LocalDate;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationProperty;
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationRepositoryWrapper;
-import org.apache.fineract.infrastructure.entityaccess.FineractEntityAccessConstants;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelation;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelationRepositoryWrapper;
@@ -77,13 +77,13 @@ public class FineractEntityAccessUtil {
         // i.e. this product or charge is specific for this office.
 
         final GlobalConfigurationProperty property = this.globalConfigurationRepository
-                .findOneByNameWithNotFoundDetection(FineractEntityAccessConstants.GLOBAL_CONFIG_FOR_OFFICE_SPECIFIC_PRODUCTS);
+                .findOneByNameWithNotFoundDetection(GlobalConfigurationConstants.OFFICE_SPECIFIC_PRODUCTS_ENABLED);
         if (property.isEnabled()) {
             // If this property is enabled, then Fineract need to restrict
             // access to this loan product to only the office of the current
             // user
             final GlobalConfigurationProperty restrictToUserOfficeProperty = this.globalConfigurationRepository
-                    .findOneByNameWithNotFoundDetection(FineractEntityAccessConstants.GLOBAL_CONFIG_FOR_RESTRICT_PRODUCTS_TO_USER_OFFICE);
+                    .findOneByNameWithNotFoundDetection(GlobalConfigurationConstants.RESTRICT_PRODUCTS_TO_USER_OFFICE);
 
             if (restrictToUserOfficeProperty.isEnabled()) {
                 final Long officeId = thisUser.getOffice().getId();
@@ -105,7 +105,7 @@ public class FineractEntityAccessUtil {
         String inClause = "";
 
         final GlobalConfigurationProperty property = this.globalConfigurationRepository
-                .findOneByNameWithNotFoundDetection(FineractEntityAccessConstants.GLOBAL_CONFIG_FOR_OFFICE_SPECIFIC_PRODUCTS);
+                .findOneByNameWithNotFoundDetection(GlobalConfigurationConstants.OFFICE_SPECIFIC_PRODUCTS_ENABLED);
 
         if (property.isEnabled()) {
             // Get 'SQL In Clause' for fetching only products/charges that are

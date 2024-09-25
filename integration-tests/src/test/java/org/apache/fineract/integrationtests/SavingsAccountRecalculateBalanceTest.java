@@ -66,6 +66,7 @@ public class SavingsAccountRecalculateBalanceTest {
     private SavingsProductHelper savingsProductHelper;
     private SchedulerJobHelper scheduleJobHelper;
     private PaymentTypeHelper paymentTypeHelper;
+    private GlobalConfigurationHelper globalConfigurationHelper;
 
     @BeforeEach
     public void setup() {
@@ -75,6 +76,7 @@ public class SavingsAccountRecalculateBalanceTest {
         this.requestSpec.header("Fineract-Platform-TenantId", "default");
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.paymentTypeHelper = new PaymentTypeHelper();
+        this.globalConfigurationHelper = new GlobalConfigurationHelper();
     }
 
     @Test
@@ -224,7 +226,7 @@ public class SavingsAccountRecalculateBalanceTest {
 
     @AfterEach
     public void tearDown() {
-        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
-        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
+        globalConfigurationHelper.resetAllDefaultGlobalConfigurations();
+        globalConfigurationHelper.verifyAllDefaultGlobalConfigurations();
     }
 }

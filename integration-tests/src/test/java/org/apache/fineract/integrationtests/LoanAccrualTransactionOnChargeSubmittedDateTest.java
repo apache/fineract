@@ -40,11 +40,12 @@ import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.LoanRescheduleRequestHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -60,7 +61,7 @@ import org.apache.fineract.integrationtests.inlinecob.InlineLoanCOBHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class LoanAccrualTransactionOnChargeSubmittedDateTest {
+public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanIntegrationTest {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -98,12 +99,14 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
             final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
 
             // Set business date
-            LocalDate currentDate = LocalDate.of(2023, 03, 3);
+            LocalDate currentDate = LocalDate.of(2023, 3, 3);
             final String accrualRunTillDate = dateFormatter.format(currentDate);
 
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, currentDate);
-            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "submitted-date");
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE,
+                    new PutGlobalConfigurationsRequest().stringValue("submitted-date"));
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
 
@@ -146,7 +149,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
             checkAccrualTransaction(currentDate, 0.0f, 10.0f, 10.0f, loanId);
 
             // Set business date
-            LocalDate futureDate = LocalDate.of(2023, 03, 4);
+            LocalDate futureDate = LocalDate.of(2023, 3, 4);
             final String nextAccrualRunDate = dateFormatter.format(futureDate);
 
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, futureDate);
@@ -174,8 +177,10 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
             checkAccrualTransaction(futureDate, 0.0f, 10.0f, 0.0f, loanId);
 
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
-            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "due-date");
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE,
+                    new PutGlobalConfigurationsRequest().stringValue("due-date"));
         }
 
     }
@@ -192,12 +197,14 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
             final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
 
             // Set business date
-            LocalDate currentDate = LocalDate.of(2023, 03, 3);
+            LocalDate currentDate = LocalDate.of(2023, 3, 3);
             final String accrualRunTillDate = dateFormatter.format(currentDate);
 
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, currentDate);
-            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "submitted-date");
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE,
+                    new PutGlobalConfigurationsRequest().stringValue("submitted-date"));
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
 
@@ -241,7 +248,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
             checkAccrualTransaction(currentDate, 0.0f, 10.0f, 10.0f, loanId);
 
             // Set business date
-            LocalDate futureDate = LocalDate.of(2023, 03, 4);
+            LocalDate futureDate = LocalDate.of(2023, 3, 4);
             final String nextAccrualRunDate = dateFormatter.format(futureDate);
 
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, futureDate);
@@ -269,8 +276,10 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
             checkAccrualTransaction(futureDate, 0.0f, 10.0f, 0.0f, loanId);
 
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
-            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "due-date");
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE,
+                    new PutGlobalConfigurationsRequest().stringValue("due-date"));
         }
     }
 
@@ -286,12 +295,14 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
             final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
 
             // Set business date
-            LocalDate currentDate = LocalDate.of(2023, 03, 3);
+            LocalDate currentDate = LocalDate.of(2023, 3, 3);
             final String accrualRunTillDate = dateFormatter.format(currentDate);
 
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, currentDate);
-            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "submitted-date");
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE,
+                    new PutGlobalConfigurationsRequest().stringValue("submitted-date"));
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
 
@@ -337,7 +348,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
             checkAccrualTransaction(currentDate, 0.0f, 10.0f, 10.0f, loanId);
 
             // Set business date
-            LocalDate futureDate = LocalDate.of(2023, 03, 4);
+            LocalDate futureDate = LocalDate.of(2023, 3, 4);
             final String nextAccrualRunDate = dateFormatter.format(futureDate);
 
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, futureDate);
@@ -366,8 +377,10 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
             checkAccrualTransaction(futureDate, 0.0f, 10.0f, 0.0f, loanId);
 
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
-            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "due-date");
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE,
+                    new PutGlobalConfigurationsRequest().stringValue("due-date"));
         }
     }
 
@@ -383,12 +396,14 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
             final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
 
             // Set business date
-            LocalDate currentDate = LocalDate.of(2023, 03, 3);
+            LocalDate currentDate = LocalDate.of(2023, 3, 3);
             final String accrualRunTillDate = dateFormatter.format(currentDate);
 
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, currentDate);
-            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "submitted-date");
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE,
+                    new PutGlobalConfigurationsRequest().stringValue("submitted-date"));
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
 
@@ -432,7 +447,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
             checkAccrualTransaction(currentDate, 0.0f, 10.0f, 10.0f, loanId);
 
             // Set business date
-            LocalDate futureDate = LocalDate.of(2023, 03, 4);
+            LocalDate futureDate = LocalDate.of(2023, 3, 4);
             final String nextAccrualRunDate = dateFormatter.format(futureDate);
 
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, futureDate);
@@ -460,8 +475,10 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
             checkAccrualTransaction(futureDate, 0.0f, 10.0f, 0.0f, loanId);
 
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
-            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "due-date");
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE,
+                    new PutGlobalConfigurationsRequest().stringValue("due-date"));
         }
     }
 
@@ -477,12 +494,14 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
             final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
 
             // Set business date
-            LocalDate currentDate = LocalDate.of(2023, 03, 3);
+            LocalDate currentDate = LocalDate.of(2023, 3, 3);
             final String accrualRunTillDate = dateFormatter.format(currentDate);
 
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, currentDate);
-            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "submitted-date");
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE,
+                    new PutGlobalConfigurationsRequest().stringValue("submitted-date"));
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
 
@@ -529,8 +548,10 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
             checkAccrualTransactionsForMultipleRepaymentSchedulesChargeDueDate(currentDate, loanId);
 
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
-            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "due-date");
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE,
+                    new PutGlobalConfigurationsRequest().stringValue("due-date"));
         }
     }
 
@@ -546,11 +567,13 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
             final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
 
             // Set business date
-            LocalDate currentDate = LocalDate.of(2023, 03, 3);
+            LocalDate currentDate = LocalDate.of(2023, 3, 3);
 
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, currentDate);
-            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "submitted-date");
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE,
+                    new PutGlobalConfigurationsRequest().stringValue("submitted-date"));
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
 
@@ -588,7 +611,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
             checkAccrualTransaction(currentDate, 0.0f, 0.0f, 10.0f, loanId);
 
             // Set business date
-            LocalDate futureDate = LocalDate.of(2023, 03, 4);
+            LocalDate futureDate = LocalDate.of(2023, 3, 4);
 
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, futureDate);
 
@@ -599,8 +622,10 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
             checkAccrualTransaction(currentDate, 0.0f, 0.0f, 10.0f, loanId);
 
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
-            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "due-date");
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE,
+                    new PutGlobalConfigurationsRequest().stringValue("due-date"));
         }
     }
 
@@ -617,9 +642,11 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
             // Set business date
             LocalDate currentDate = LocalDate.of(2023, 05, 19);
 
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, currentDate);
-            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "submitted-date");
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE,
+                    new PutGlobalConfigurationsRequest().stringValue("submitted-date"));
 
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
@@ -721,8 +748,10 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
             verifyPeriodDates(periods);
 
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
-            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "due-date");
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE,
+                    new PutGlobalConfigurationsRequest().stringValue("due-date"));
         }
     }
 

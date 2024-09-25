@@ -59,7 +59,7 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Global Configuration", description = "Global configuration related to set of supported enable/disable configurations:\n" + "\n"
         + "maker-checker - defaults to false - if true turns on maker-checker functionality\n"
         + "reschedule-future-repayments - defaults to false - if true reschedules repayemnts which falls on a non-working day to configured repayment rescheduling rule\n"
-        + "allow-transactions-on-non_workingday - defaults to false - if true allows transactions on non-working days\n"
+        + "allow-transactions-on-non-workingday - defaults to false - if true allows transactions on non-working days\n"
         + "reschedule-repayments-on-holidays - defaults to false - if true reschedules repayemnts which falls on a non-working day to defined reschedule date\n"
         + "allow-transactions-on-holiday - defaults to false - if true allows transactions on holidays\n"
         + "savings-interest-posting-current-period-end - Set it at the database level before any savings interest is posted. When set as false(default), interest will be posted on the first date of next period. If set as true, interest will be posted on last date of current period. There is no difference in the interest amount posted.\n"
@@ -123,7 +123,7 @@ public class GlobalConfigurationApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Global Configuration", description = "Returns a global enable/disable configuration.\n" + "\n"
-            + "Example Requests:\n" + "\n" + "configurations/name/Enable-Address")
+            + "Example Requests:\n" + "\n" + "configurations/name/enable-address")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GlobalConfigurationPropertyData.class))) })
     public String retrieveOneByName(@PathParam("name") @Parameter(description = "name") final String name, @Context final UriInfo uriInfo) {
@@ -149,6 +149,31 @@ public class GlobalConfigurationApiResource {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .updateGlobalConfiguration(configId) //
+                .withJson(apiRequestBodyAsJson) //
+                .build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
+    }
+
+    @PUT
+    @Path("/name/{configName}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Update Global Configuration by name", description = "Updates an enable/disable global configuration item by name")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = GlobalConfigurationApiResourceSwagger.PutGlobalConfigurationsRequest.class)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GlobalConfigurationApiResourceSwagger.PutGlobalConfigurationsResponse.class))) })
+    public String updateConfigurationByName(@PathParam("configName") @Parameter(description = "configName") final String configName,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
+
+        // TODO: Would be better to support string based identifier in Commands and resolve the entity by name in the
+        // service
+        final GlobalConfigurationPropertyData configurationData = this.readPlatformService.retrieveGlobalConfiguration(configName);
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
+                .updateGlobalConfiguration(configurationData.getId()) //
                 .withJson(apiRequestBodyAsJson) //
                 .build();
 
