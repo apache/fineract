@@ -58,9 +58,9 @@ Feature: COBFeature
     When Admin successfully disburse the loan on "01 July 2023" with "1000" EUR transaction amount
     Then Loan status will be "ACTIVE"
     Then Admin checks that last closed business date of loan is "null"
-    When Admin sets the business date to "10 August 2023"
+    When Admin sets the business date to "09 August 2023"
     When Admin runs inline COB job for Loan
-    Then Admin checks that last closed business date of loan is "09 August 2023"
+    Then Admin checks that last closed business date of loan is "08 August 2023"
     Then Admin checks that delinquency range is: "RANGE_3" and has delinquentDate "2023-08-03"
     Then Loan delinquency history has the following details:
       | Range (Classification) | Added on date  | Lifted on date |
@@ -68,7 +68,7 @@ Feature: COBFeature
       | RANGE_1                | 04 August 2023 | 09 August 2023 |
     When Admin sets the business date to "12 August 2023"
     When Admin runs COB job
-    Then Admin checks that last closed business date of loan is "09 August 2023"
+    Then Admin checks that last closed business date of loan is "08 August 2023"
     Then Loan delinquency history has the following details:
       | Range (Classification) | Added on date  | Lifted on date |
       | RANGE_3                | 09 August 2023 |                |
@@ -89,21 +89,21 @@ Feature: COBFeature
     Then Admin checks that delinquency range is: "RANGE_3" and has delinquentDate "2023-08-03"
     Then Loan delinquency history has the following details:
       | Range (Classification) | Added on date  | Lifted on date |
-      | RANGE_3                | 09 August 2023 |                |
+      | RANGE_3                | 10 August 2023 |                |
       | RANGE_1                | 04 August 2023 | 09 August 2023 |
     And Customer makes "AUTOPAY" repayment on "10 August 2023" with 1000 EUR transaction amount
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     Then Admin checks that delinquency range is: "NO_DELINQUENCY" and has delinquentDate ""
     Then Loan delinquency history has the following details:
       | Range (Classification) | Added on date  | Lifted on date |
-      | RANGE_3                | 09 August 2023 | 10 August 2023 |
+      | RANGE_3                | 10 August 2023 | 10 August 2023 |
       | RANGE_1                | 04 August 2023 | 09 August 2023 |
     When Admin sets the business date to "11 August 2023"
     When Admin runs COB job
     Then Admin checks that last closed business date of loan is "09 August 2023"
     Then Loan delinquency history has the following details:
       | Range (Classification) | Added on date  | Lifted on date |
-      | RANGE_3                | 09 August 2023 | 10 August 2023 |
+      | RANGE_3                | 10 August 2023 | 10 August 2023 |
       | RANGE_1                | 04 August 2023 | 09 August 2023 |
 
 
@@ -121,21 +121,21 @@ Feature: COBFeature
     Then Admin checks that delinquency range is: "RANGE_3" and has delinquentDate "2023-08-03"
     Then Loan delinquency history has the following details:
       | Range (Classification) | Added on date  | Lifted on date |
-      | RANGE_3                | 09 August 2023 |                |
+      | RANGE_3                | 10 August 2023 |                |
       | RANGE_1                | 04 August 2023 | 09 August 2023 |
     And Customer makes "AUTOPAY" repayment on "10 August 2023" with 1200 EUR transaction amount
     Then Loan status will be "OVERPAID"
     Then Admin checks that delinquency range is: "NO_DELINQUENCY" and has delinquentDate ""
     Then Loan delinquency history has the following details:
       | Range (Classification) | Added on date  | Lifted on date |
-      | RANGE_3                | 09 August 2023 | 10 August 2023 |
+      | RANGE_3                | 10 August 2023 | 10 August 2023 |
       | RANGE_1                | 04 August 2023 | 09 August 2023 |
     When Admin sets the business date to "11 August 2023"
     When Admin runs COB job
     Then Admin checks that last closed business date of loan is "09 August 2023"
     Then Loan delinquency history has the following details:
       | Range (Classification) | Added on date  | Lifted on date |
-      | RANGE_3                | 09 August 2023 | 10 August 2023 |
+      | RANGE_3                | 10 August 2023 | 10 August 2023 |
       | RANGE_1                | 04 August 2023 | 09 August 2023 |
 
    @Skip

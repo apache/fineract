@@ -37,7 +37,9 @@ public class ApplyChargeToOverdueLoansBusinessStep implements LoanCOBBusinessSte
     public Loan execute(Loan loan) {
         final Collection<OverdueLoanScheduleData> overdueLoanScheduleDataList = loanReadPlatformService
                 .retrieveAllOverdueInstallmentsForLoan(loan);
-        loanChargeWritePlatformService.applyOverdueChargesForLoan(loan.getId(), overdueLoanScheduleDataList);
+        if (!overdueLoanScheduleDataList.isEmpty()) {
+            loanChargeWritePlatformService.applyOverdueChargesForLoan(loan.getId(), overdueLoanScheduleDataList);
+        }
         return loan;
     }
 
