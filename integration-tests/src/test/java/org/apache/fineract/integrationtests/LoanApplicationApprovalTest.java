@@ -160,7 +160,7 @@ public class LoanApplicationApprovalTest {
         log.info("----------------------------------LOAN PRODUCT CREATED WITH ID------------------------------------------- {}",
                 loanProductId);
 
-        loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpecForStatusCode400);
+        loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpecForStatusCode403);
         final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("1")
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments("1").withRepaymentEveryAfter("1")
                 .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance()
@@ -169,8 +169,7 @@ public class LoanApplicationApprovalTest {
                 .withRepaymentStrategy(AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
                 .build(clientId.toString(), loanProductId.toString(), null);
         List<HashMap> error = (List<HashMap>) loanTransactionHelper.createLoanAccount(loanApplicationJSON, CommonConstants.RESPONSE_ERROR);
-        assertEquals(
-                "validation.msg.loan.transactionProcessingStrategyCode.strategy.cannot.be.advanced.payment.allocation.if.not.configured",
+        assertEquals("strategy.cannot.be.advanced.payment.allocation.if.not.configured",
                 error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
     }

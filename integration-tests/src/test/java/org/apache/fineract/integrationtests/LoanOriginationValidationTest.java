@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -169,6 +171,94 @@ public class LoanOriginationValidationTest extends BaseLoanIntegrationTest {
                                     .transactionAmount(BigDecimal.valueOf(100.0)).locale("en")));
 
             Assertions.assertTrue(callFailedRuntimeException.getMessage().contains("The parameter `actualDisbursementDate` is mandatory."));
+        });
+    }
+
+    // uc3: Negative Test: Loan application without required parameters
+    // 1. Create a Loan product
+    // 2. Submit Loan application without required parameters
+    @Test
+    public void uc3() {
+        String operationDate = "15 August 2024";
+        runAt(operationDate, () -> {
+
+            LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
+            PostLoanProductsResponse loanProductResponse = loanProductHelper
+                    .createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                            .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString()));
+            // Product Id null
+            final PostLoansRequest applicationRequest01 = applyLoanRequest(client.getClientId(), null, operationDate, 100.0, 5)
+                    .numberOfRepayments(6)//
+                    .loanTermFrequency(6)//
+                    .loanTermFrequencyType(2)//
+                    .repaymentEvery(1)//
+                    .repaymentFrequencyType(2)//
+            ;//
+            CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class,
+                    () -> loanTransactionHelper.applyLoan(applicationRequest01));
+            assertEquals(400, callFailedRuntimeException.getResponse().code());
+            Assertions.assertTrue(callFailedRuntimeException.getMessage().contains("The parameter `productId` is mandatory."));
+
+            // Transaction Processing Strategy Code null
+            final PostLoansRequest applicationRequest02 = applyLoanRequest(client.getClientId(), loanProductResponse.getResourceId(),
+                    operationDate, 100.0, 5).numberOfRepayments(6)//
+                    .loanTermFrequency(6)//
+                    .loanTermFrequencyType(2)//
+                    .transactionProcessingStrategyCode(null)//
+                    .repaymentEvery(1)//
+                    .repaymentFrequencyType(2)//
+            ;//
+
+            callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class,
+                    () -> loanTransactionHelper.applyLoan(applicationRequest02));
+            assertEquals(400, callFailedRuntimeException.getResponse().code());
+            Assertions.assertTrue(
+                    callFailedRuntimeException.getMessage().contains("The parameter `transactionProcessingStrategyCode` is mandatory."));
+
+            final PostLoansRequest applicationRequest03 = applyLoanRequest(null, loanProductResponse.getResourceId(), operationDate, 100.0,
+                    5).numberOfRepayments(6)//
+                    .loanTermFrequency(6)//
+                    .loanTermFrequencyType(2)//
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
+                    .repaymentEvery(1)//
+                    .repaymentFrequencyType(2)//
+            ;//
+            callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class,
+                    () -> loanTransactionHelper.applyLoan(applicationRequest03));
+            LOG.info("DETAIL: {}", callFailedRuntimeException.getMessage());
+            assertEquals(400, callFailedRuntimeException.getResponse().code());
+            Assertions.assertTrue(callFailedRuntimeException.getMessage().contains("The parameter `clientId` is mandatory."));
+
+            // Submitted Date null
+            final PostLoansRequest applicationRequest04 = applyLoanRequest(client.getClientId(), loanProductResponse.getResourceId(),
+                    operationDate, 100.0, 5).numberOfRepayments(6)//
+                    .submittedOnDate(null) //
+                    .loanTermFrequency(6)//
+                    .loanTermFrequencyType(2)//
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
+                    .repaymentEvery(1)//
+                    .repaymentFrequencyType(2)//
+            ;//
+            callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class,
+                    () -> loanTransactionHelper.applyLoan(applicationRequest04));
+            assertEquals(400, callFailedRuntimeException.getResponse().code());
+            Assertions.assertTrue(callFailedRuntimeException.getMessage().contains("The parameter `submittedOnDate` is mandatory."));
+
+            // Expected disbursement Date null
+            final PostLoansRequest applicationRequest05 = applyLoanRequest(client.getClientId(), loanProductResponse.getResourceId(),
+                    operationDate, 100.0, 5).numberOfRepayments(6)//
+                    .expectedDisbursementDate(null) //
+                    .loanTermFrequency(6)//
+                    .loanTermFrequencyType(2)//
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
+                    .repaymentEvery(1)//
+                    .repaymentFrequencyType(2)//
+            ;//
+            callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class,
+                    () -> loanTransactionHelper.applyLoan(applicationRequest05));
+            assertEquals(400, callFailedRuntimeException.getResponse().code());
+            Assertions
+                    .assertTrue(callFailedRuntimeException.getMessage().contains("The parameter `expectedDisbursementDate` is mandatory."));
         });
     }
 
