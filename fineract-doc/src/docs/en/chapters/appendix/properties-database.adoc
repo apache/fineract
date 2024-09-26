@@ -7,91 +7,91 @@
 |fineract.tenant.host
 |FINERACT_DEFAULT_TENANTDB_HOSTNAME
 |localhost
-|TBD
+|This property sets the hostname of the default tenant database.
 
 |fineract.tenant.port
 |FINERACT_DEFAULT_TENANTDB_PORT
 |3306
-|TBD
+|This property sets the port of the default tenant database.
 
 |fineract.tenant.username
 |FINERACT_DEFAULT_TENANTDB_UID
 |root
-|TBD
+|This property sets the username of the default tenant database.
 
 |fineract.tenant.password
 |FINERACT_DEFAULT_TENANTDB_PWD
 |mysql
-|TBD
+|This property sets the password of the default tenant database.
 
 |fineract.tenant.parameters
 |FINERACT_DEFAULT_TENANTDB_CONN_PARAMS
 |
-|TBD
+|This property sets the connection parameters of the default tenant database. eg. whether ssl is enabled or not
 
 |fineract.tenant.timezone
 |FINERACT_DEFAULT_TENANTDB_TIMEZONE
 |Asia/Kolkata
-|TBD
+|This property sets the timezone of the default tenant
 
 |fineract.tenant.identifier
 |FINERACT_DEFAULT_TENANTDB_IDENTIFIER
 |default
-|TBD
+|This property sets the unique identifier for the tenant within fineract
 
 |fineract.tenant.name
 |FINERACT_DEFAULT_TENANTDB_NAME
 |fineract_default
-|TBD
+|This property sets the database name of the default tenant
 
 |fineract.tenant.description
 |FINERACT_DEFAULT_TENANTDB_DESCRIPTION
 |Default Demo Tenant
-|TBD
+|This property sets the description of the default tenant
 
 |fineract.tenant.master-password
 |FINERACT_DEFAULT_TENANTDB_MASTER_PASSWORD
 |fineract
-|TBD
+|The password used to encrypt sensitive tenant data within the database
 
 |fineract.tenant.encryption
 |FINERACT_DEFAULT_TENANTDB_ENCRYPTION
 |AES/CBC/PKCS5Padding
-|TBD
+|This property sets the symmetric encryption algorithm used to encrypt sensitive tenant data within the database e.g tenant database password
 
 |spring.liquibase.enabled
 |FINERACT_LIQUIBASE_ENABLED
 |true
-|TBD
+|If set to true, liquibase will be enabled and the instance running this configuration will run migrations
 
 |fineract.tenant.read-only-name
 |FINERACT_DEFAULT_TENANTDB_RO_NAME
 |
-|
+|For read only configuration, set this to the name of the read only tenant database
 
 |fineract.tenant.read-only-host
 |FINERACT_DEFAULT_TENANTDB_RO_HOSTNAME
 |
-|
+|For read only configuration, set this to the hostname of the read only tenant database
 
 |fineract.tenant.read-only-port
 |FINERACT_DEFAULT_TENANTDB_RO_PORT
 |
-|
+|For read only configuration, set this to the port of the read only tenant database
 
 |fineract.tenant.read-only-username
 |FINERACT_DEFAULT_TENANTDB_RO_UID
 |
-|
+|For read only configuration, set this to the username of the read only tenant database
 
 |fineract.tenant.read-only-password
 |FINERACT_DEFAULT_TENANTDB_RO_PWD
 |
-|
+|For read only configuration, set this to the password of the read only tenant database
 
 |fineract.tenant.read-only-parameters
 |FINERACT_DEFAULT_TENANTDB_RO_CONN_PARAMS
 |
-|
+|For read only configuration, set this to the connection parameters of the read only tenant database
 
 |===

@@ -7,36 +7,36 @@
 |server.tomcat.accept-count
 |FINERACT_SERVER_TOMCAT_ACCEPT_COUNT
 |100
-|TBD
+|The property specifies the maximum number of concurrent connection requests that embedded Tomcat can queue. If this limit is reached, incoming connection requests will be rejected.
 
 |server.tomcat.accesslog.enabled
 |FINERACT_SERVER_TOMCAT_ACCESSLOG_ENABLED
 |false
-|TBD
+|If set to true, tomcat will log access requests to file
 
 |server.tomcat.max-connections
 |FINERACT_SERVER_TOMCAT_MAX_CONNECTIONS
 |8192
-|TBD
+|Sets the maximum number of simultaneous connections Tomcat can handle.
 
 |server.tomcat.max-http-form-post-size
 |FINERACT_SERVER_TOMCAT_MAX_HTTP_FORM_POST_SIZE
 |2MB
-|TBD
+|The property in sets the maximum size of HTTP POST requests that Tomcat can handle
 
 |server.tomcat.max-keep-alive-requests
 |FINERACT_SERVER_TOMCAT_MAX_KEEP_ALIVE_REQUESTS
 |100
-|TBD
+|The property specifies the maximum number of HTTP requests that can be sent over a single persistent connection (HTTP Keep-Alive) before Tomcat closes the connection
 
 |server.tomcat.threads.max
 |FINERACT_SERVER_TOMCAT_THREADS_MAX
 |200
-|TBD
+|The property sets the maximum number of threads that Tomcat can use to process requests
 
 |server.tomcat.threads.min-spare
 |FINERACT_SERVER_TOMCAT_THREADS_MIN_SPARE
 |10
-|TBD
+|The property specifies the minimum number of spare (idle) threads that Tomcat should maintain
 |===
 

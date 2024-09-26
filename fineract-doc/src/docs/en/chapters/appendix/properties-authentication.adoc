@@ -7,16 +7,21 @@
 |fineract.security.basicauth.enabled
 |FINERACT_SECURITY_BASICAUTH_ENABLED
 |true
-|TBD
+|When set to true, the supported authentication method will be basic authentication.
 
 |fineract.security.oauth.enabled
 |FINERACT_SECURITY_OAUTH_ENABLED
 |false
-|TBD
+|When set to true, the supported authentication method will be OAuth.
 
 |fineract.security.2fa.enabled
 |FINERACT_SECURITY_2FA_ENABLED
 |false
-|TBD
+|Set the value to true enable two-factor authentication. For this to work as expected, ensure that you have set the correct email/sms configuration
+
+|spring.security.oauth2.resourceserver.jwt.issuer-uri
+|FINERACT_SERVER_OAUTH_RESOURCE_URL
+|http://localhost:9000/auth/realms/fineract
+|If OAuth is enabled and a custom resouce server (different from what is provided) is required, set the issuer-uri here.
 |===
 

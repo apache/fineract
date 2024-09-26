@@ -7,30 +7,30 @@
 |server.ssl.enabled
 |FINERACT_SERVER_SSL_ENABLED
 |true
-|TBD
+|When set to true, SSL (Secure Sockets Layer) or TLS (Transport Layer Security) will be enabled for the server.
 
 |server.ssl.protocol
 |FINERACT_SERVER_SSL_PROTOCOL
 |TLS
-|TBD
+|This property allows you to define specific SSL/TLS protocol version the server will use when establishing secure connections. Common protocols include TLSv1.2, TLSv1.3, etc.
 
 |server.ssl.ciphers
 |FINERACT_SERVER_SSL_CIPHERS
 |TLS_RSA_WITH_AES_128_CBC_SHA256
-|TBD
+|This property allows you to control the cipher suites that fineract will accept for secure connections
 
 |server.ssl.enabled-protocols
 |FINERACT_SERVER_SSL_PROTOCOLS
 |TLSv1.2
-|TBD
+|This property allows you to define a list of SSL/TLS protocol versions that the server will support when establishing secure connections
 
 |server.ssl.key-store
 |FINERACT_SERVER_SSL_KEY_STORE
 |classpath:keystore.jks
-|TBD
+|The property is used to specify the location of the SSL key store file that contains the server's private key and the associated certificate
 
 |server.ssl.key-store-password
 |FINERACT_SERVER_SSL_KEY_STORE_PASSWORD
 |openmf
-|TBD
+|The property defines the password for the keystore specified under property **server.ssl.key-store**
 |===
