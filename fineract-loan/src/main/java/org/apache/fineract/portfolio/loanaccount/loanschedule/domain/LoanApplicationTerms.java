@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -60,34 +61,34 @@ import org.apache.fineract.portfolio.loanproduct.domain.RepaymentStartDateType;
 @Slf4j
 public final class LoanApplicationTerms {
 
-    private final ApplicationCurrency currency;
+    private ApplicationCurrency currency;
 
-    private final Calendar loanCalendar;
+    private Calendar loanCalendar;
     private Integer loanTermFrequency;
-    private final PeriodFrequencyType loanTermPeriodFrequencyType;
+    private PeriodFrequencyType loanTermPeriodFrequencyType;
     private Integer numberOfRepayments;
     private Integer actualNumberOfRepayments;
-    private final Integer repaymentEvery;
-    private final PeriodFrequencyType repaymentPeriodFrequencyType;
+    private Integer repaymentEvery;
+    private PeriodFrequencyType repaymentPeriodFrequencyType;
 
     private long variationDays = 0L;
-    private final Integer fixedLength;
-    private final Integer nthDay;
+    private Integer fixedLength;
+    private Integer nthDay;
 
-    private final DayOfWeekType weekDayType;
-    private final AmortizationMethod amortizationMethod;
+    private DayOfWeekType weekDayType;
+    private AmortizationMethod amortizationMethod;
 
-    private final InterestMethod interestMethod;
+    private InterestMethod interestMethod;
     private BigDecimal interestRatePerPeriod;
-    private final PeriodFrequencyType interestRatePeriodFrequencyType;
+    private PeriodFrequencyType interestRatePeriodFrequencyType;
     private BigDecimal annualNominalInterestRate;
-    private final InterestCalculationPeriodMethod interestCalculationPeriodMethod;
-    private final boolean allowPartialPeriodInterestCalcualtion;
+    private InterestCalculationPeriodMethod interestCalculationPeriodMethod;
+    private boolean allowPartialPeriodInterestCalcualtion;
 
     private Money principal;
-    private final LocalDate expectedDisbursementDate;
-    private final LocalDate repaymentsStartingFromDate;
-    private final LocalDate calculatedRepaymentsStartingFromDate;
+    private LocalDate expectedDisbursementDate;
+    private LocalDate repaymentsStartingFromDate;
+    private LocalDate calculatedRepaymentsStartingFromDate;
     /**
      * Integer representing the number of 'repayment frequencies' or installments where 'grace' should apply to the
      * principal component of a loans repayment period (installment).
@@ -110,7 +111,7 @@ public final class LoanApplicationTerms {
      *
      * <b>Note:</b> The loan is <i>interest-free</i> for the period of time indicated.
      */
-    private final Integer interestChargingGrace;
+    private Integer interestChargingGrace;
 
     /**
      * Legacy method of support 'grace' on the charging of interest on a loan.
@@ -124,16 +125,16 @@ public final class LoanApplicationTerms {
      * </p>
      */
     private LocalDate interestChargedFromDate;
-    private final Money inArrearsTolerance;
+    private Money inArrearsTolerance;
 
-    private final Integer graceOnArrearsAgeing;
+    private Integer graceOnArrearsAgeing;
 
     // added
     private LocalDate loanEndDate;
 
-    private final List<DisbursementData> disbursementDatas;
+    private List<DisbursementData> disbursementDatas;
 
-    private final boolean multiDisburseLoan;
+    private boolean multiDisburseLoan;
 
     private BigDecimal fixedEmiAmount;
 
@@ -143,63 +144,63 @@ public final class LoanApplicationTerms {
 
     private BigDecimal currentPeriodFixedPrincipalAmount;
 
-    private final BigDecimal actualFixedEmiAmount;
+    private BigDecimal actualFixedEmiAmount;
 
-    private final BigDecimal maxOutstandingBalance;
+    private BigDecimal maxOutstandingBalance;
 
     private Money totalInterestDue;
 
-    private final DaysInMonthType daysInMonthType;
+    private DaysInMonthType daysInMonthType;
 
-    private final DaysInYearType daysInYearType;
+    private DaysInYearType daysInYearType;
 
-    private final boolean interestRecalculationEnabled;
+    private boolean interestRecalculationEnabled;
 
-    private final LoanRescheduleStrategyMethod rescheduleStrategyMethod;
+    private LoanRescheduleStrategyMethod rescheduleStrategyMethod;
 
-    private final InterestRecalculationCompoundingMethod interestRecalculationCompoundingMethod;
+    private InterestRecalculationCompoundingMethod interestRecalculationCompoundingMethod;
 
-    private final CalendarInstance restCalendarInstance;
+    private CalendarInstance restCalendarInstance;
 
-    private final RecalculationFrequencyType recalculationFrequencyType;
+    private RecalculationFrequencyType recalculationFrequencyType;
 
-    private final CalendarInstance compoundingCalendarInstance;
+    private CalendarInstance compoundingCalendarInstance;
 
-    private final RecalculationFrequencyType compoundingFrequencyType;
-    private final boolean allowCompoundingOnEod;
+    private RecalculationFrequencyType compoundingFrequencyType;
+    private boolean allowCompoundingOnEod;
 
-    private final BigDecimal principalThresholdForLastInstalment;
-    private final Integer installmentAmountInMultiplesOf;
+    private BigDecimal principalThresholdForLastInstalment;
+    private Integer installmentAmountInMultiplesOf;
 
-    private final LoanPreClosureInterestCalculationStrategy preClosureInterestCalculationStrategy;
+    private LoanPreClosureInterestCalculationStrategy preClosureInterestCalculationStrategy;
 
-    private Money approvedPrincipal = null;
+    private Money approvedPrincipal;
 
-    private final LoanTermVariationsDataWrapper variationsDataWrapper;
+    private LoanTermVariationsDataWrapper variationsDataWrapper;
 
     private Money adjustPrincipalForFlatLoans;
 
     private LocalDate seedDate;
 
-    private final CalendarHistoryDataWrapper calendarHistoryDataWrapper;
+    private CalendarHistoryDataWrapper calendarHistoryDataWrapper;
 
-    private final Boolean isInterestChargedFromDateSameAsDisbursalDateEnabled;
+    private Boolean isInterestChargedFromDateSameAsDisbursalDateEnabled;
 
-    private final Integer numberOfDays;
+    private Integer numberOfDays;
 
-    private final boolean isSkipRepaymentOnFirstDayOfMonth;
+    private boolean isSkipRepaymentOnFirstDayOfMonth;
 
-    private final boolean isFirstRepaymentDateAllowedOnHoliday;
+    private boolean isFirstRepaymentDateAllowedOnHoliday;
 
-    private final boolean isInterestToBeRecoveredFirstWhenGreaterThanEMI;
+    private boolean isInterestToBeRecoveredFirstWhenGreaterThanEMI;
 
     private boolean isPrincipalCompoundingDisabledForOverdueLoans;
 
-    private final HolidayDetailDTO holidayDetailDTO;
+    private HolidayDetailDTO holidayDetailDTO;
 
-    private final Set<Integer> periodNumbersApplicableForPrincipalGrace = new HashSet<>();
+    private Set<Integer> periodNumbersApplicableForPrincipalGrace = new HashSet<>();
 
-    private final Set<Integer> periodNumbersApplicableForInterestGrace = new HashSet<>();
+    private Set<Integer> periodNumbersApplicableForInterestGrace = new HashSet<>();
 
     // used for FLAT loans when interest rate changed
     private Integer excludePeriodsForCalculation = 0;
@@ -212,7 +213,7 @@ public final class LoanApplicationTerms {
     private int extraPeriods = 0;
     private boolean isEqualAmortization;
     private Money interestTobeApproppriated;
-    private final BigDecimal fixedPrincipalPercentagePerInstallment;
+    private BigDecimal fixedPrincipalPercentagePerInstallment;
 
     private LocalDate newScheduledDueDateStart;
     private boolean isDownPaymentEnabled;
@@ -223,10 +224,179 @@ public final class LoanApplicationTerms {
     private RepaymentStartDateType repaymentStartDateType;
     private LocalDate submittedOnDate;
     private Money disbursedPrincipal;
-    private final LoanScheduleType loanScheduleType;
-    private final LoanScheduleProcessingType loanScheduleProcessingType;
-    private final boolean enableAccrualActivityPosting;
-    private final List<LoanSupportedInterestRefundTypes> supportedInterestRefundTypes;
+    private LoanScheduleType loanScheduleType;
+    private LoanScheduleProcessingType loanScheduleProcessingType;
+    private boolean enableAccrualActivityPosting;
+    private List<LoanSupportedInterestRefundTypes> supportedInterestRefundTypes;
+
+    private LoanApplicationTerms(Builder builder) {
+        this.currency = builder.currency;
+        this.loanTermFrequency = builder.loanTermFrequency;
+        this.loanTermPeriodFrequencyType = builder.loanTermPeriodFrequencyType;
+        this.numberOfRepayments = builder.numberOfRepayments;
+        this.repaymentEvery = builder.repaymentEvery;
+        this.repaymentPeriodFrequencyType = builder.repaymentPeriodFrequencyType;
+        this.interestRatePerPeriod = builder.interestRatePerPeriod;
+        this.interestRatePeriodFrequencyType = builder.interestRatePeriodFrequencyType;
+        this.annualNominalInterestRate = builder.annualNominalInterestRate;
+        this.principal = builder.principal;
+        this.expectedDisbursementDate = builder.expectedDisbursementDate;
+        this.repaymentsStartingFromDate = builder.repaymentsStartingFromDate;
+        this.daysInMonthType = builder.daysInMonthType;
+        this.daysInYearType = builder.daysInYearType;
+        this.variationsDataWrapper = builder.variationsDataWrapper;
+        this.fixedLength = builder.fixedLength;
+        this.inArrearsTolerance = builder.inArrearsTolerance;
+        this.disbursementDatas = builder.disbursementDatas;
+        this.downPaymentAmount = builder.downPaymentAmount;
+    }
+
+    public static class Builder {
+
+        private ApplicationCurrency currency;
+        private Integer loanTermFrequency;
+        private PeriodFrequencyType loanTermPeriodFrequencyType;
+        private Integer numberOfRepayments;
+        private Integer repaymentEvery;
+        private PeriodFrequencyType repaymentPeriodFrequencyType;
+        private BigDecimal interestRatePerPeriod;
+        private PeriodFrequencyType interestRatePeriodFrequencyType;
+        private BigDecimal annualNominalInterestRate;
+        private Money principal;
+        private LocalDate expectedDisbursementDate;
+        private LocalDate repaymentsStartingFromDate;
+        private DaysInMonthType daysInMonthType;
+        private DaysInYearType daysInYearType;
+        private LoanTermVariationsDataWrapper variationsDataWrapper;
+        private Integer fixedLength;
+        private Money inArrearsTolerance;
+        private List<DisbursementData> disbursementDatas;
+        private Money downPaymentAmount;
+
+        public Builder currency(ApplicationCurrency currency) {
+            this.currency = currency;
+            return this;
+        }
+
+        public Builder loanTermFrequency(Integer loanTermFrequency) {
+            this.loanTermFrequency = loanTermFrequency;
+            return this;
+        }
+
+        public Builder loanTermPeriodFrequencyType(PeriodFrequencyType loanTermPeriodFrequencyType) {
+            this.loanTermPeriodFrequencyType = loanTermPeriodFrequencyType;
+            return this;
+        }
+
+        public Builder numberOfRepayments(Integer numberOfRepayments) {
+            this.numberOfRepayments = numberOfRepayments;
+            return this;
+        }
+
+        public Builder repaymentEvery(Integer repaymentEvery) {
+            this.repaymentEvery = repaymentEvery;
+            return this;
+        }
+
+        public Builder repaymentPeriodFrequencyType(PeriodFrequencyType repaymentPeriodFrequencyType) {
+            this.repaymentPeriodFrequencyType = repaymentPeriodFrequencyType;
+            return this;
+        }
+
+        public Builder interestRatePerPeriod(BigDecimal interestRatePerPeriod) {
+            this.interestRatePerPeriod = interestRatePerPeriod;
+            return this;
+        }
+
+        public Builder interestRatePeriodFrequencyType(PeriodFrequencyType interestRatePeriodFrequencyType) {
+            this.interestRatePeriodFrequencyType = interestRatePeriodFrequencyType;
+            return this;
+        }
+
+        public Builder annualNominalInterestRate(BigDecimal annualNominalInterestRate) {
+            this.annualNominalInterestRate = annualNominalInterestRate;
+            return this;
+        }
+
+        public Builder principal(Money principal) {
+            this.principal = principal;
+            return this;
+        }
+
+        public Builder expectedDisbursementDate(LocalDate expectedDisbursementDate) {
+            this.expectedDisbursementDate = expectedDisbursementDate;
+            return this;
+        }
+
+        public Builder repaymentsStartingFromDate(LocalDate repaymentsStartingFromDate) {
+            this.repaymentsStartingFromDate = repaymentsStartingFromDate;
+            return this;
+        }
+
+        public Builder daysInMonthType(DaysInMonthType daysInMonthType) {
+            this.daysInMonthType = daysInMonthType;
+            return this;
+        }
+
+        public Builder daysInYearType(DaysInYearType daysInYearType) {
+            this.daysInYearType = daysInYearType;
+            return this;
+        }
+
+        public Builder variationsDataWrapper(LoanTermVariationsDataWrapper variationsDataWrapper) {
+            this.variationsDataWrapper = variationsDataWrapper;
+            return this;
+        }
+
+        public Builder fixedLength(Integer fixedLength) {
+            this.fixedLength = fixedLength;
+            return this;
+        }
+
+        public Builder inArrearsTolerance(Money inArrearsTolerance) {
+            this.inArrearsTolerance = inArrearsTolerance;
+            return this;
+        }
+
+        public Builder disbursementDatas(List<DisbursementData> disbursementDatas) {
+            this.disbursementDatas = disbursementDatas;
+            return this;
+        }
+
+        public Builder downPaymentAmount(Money downPaymentAmount) {
+            this.downPaymentAmount = downPaymentAmount;
+            return this;
+        }
+
+        public LoanApplicationTerms build() {
+            return new LoanApplicationTerms(this);
+        }
+    }
+
+    public static LoanApplicationTerms assembleFrom(LoanRepaymentScheduleModelData modelData) {
+        Money principal = Money.of(modelData.currency().toData(), modelData.disbursementAmount());
+        Money downPaymentAmount = Money.zero(modelData.currency().toData());
+
+        if (modelData.downPaymentEnabled()) {
+            downPaymentAmount = Money.of(modelData.currency().toData(),
+                    MathUtil.percentageOf(principal.getAmount(), modelData.disbursementAmount(), 19));
+            if (modelData.installmentAmountInMultiplesOf() != null) {
+                downPaymentAmount = Money.roundToMultiplesOf(downPaymentAmount, modelData.installmentAmountInMultiplesOf());
+            }
+        }
+
+        return new Builder().currency(modelData.currency()).loanTermFrequency(modelData.numberOfRepayments())
+                .loanTermPeriodFrequencyType(PeriodFrequencyType.valueOf(modelData.repaymentFrequencyType()))
+                .numberOfRepayments(modelData.numberOfRepayments()).repaymentEvery(modelData.repaymentFrequency())
+                .repaymentPeriodFrequencyType(PeriodFrequencyType.valueOf(modelData.repaymentFrequencyType()))
+                .interestRatePerPeriod(modelData.annualNominalInterestRate())
+                .interestRatePeriodFrequencyType(PeriodFrequencyType.valueOf(modelData.repaymentFrequencyType()))
+                .annualNominalInterestRate(modelData.annualNominalInterestRate()).principal(principal)
+                .expectedDisbursementDate(modelData.disbursementDate()).repaymentsStartingFromDate(modelData.scheduleGenerationStartDate())
+                .daysInMonthType(modelData.daysInMonth()).daysInYearType(modelData.daysInYear()).fixedLength(modelData.fixedLength())
+                .inArrearsTolerance(Money.zero(modelData.currency().toData())).disbursementDatas(new ArrayList<>())
+                .downPaymentAmount(downPaymentAmount).build();
+    }
 
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency currency, final Integer loanTermFrequency,
             final PeriodFrequencyType loanTermPeriodFrequencyType, final Integer numberOfRepayments, final Integer repaymentEvery,
