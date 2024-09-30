@@ -44,13 +44,12 @@ public record ProgressiveLoanInterestScheduleModel(List<ProgressiveLoanInterestR
     }
 
     public BigDecimal getInterestRate(final LocalDate effectiveDate) {
-        return interestRates.isEmpty() ? loanProductRelatedDetail.getNominalInterestRatePerPeriod() : findInterestRate(effectiveDate);
+        return interestRates.isEmpty() ? loanProductRelatedDetail.getAnnualNominalInterestRate() : findInterestRate(effectiveDate);
     }
 
     private BigDecimal findInterestRate(final LocalDate effectiveDate) {
         return interestRates.stream().filter(ir -> !ir.effectiveFrom().isAfter(effectiveDate))
-                .map(ProgressiveLoanInterestRate::interestRate).findFirst()
-                .orElse(loanProductRelatedDetail.getNominalInterestRatePerPeriod());
+                .map(ProgressiveLoanInterestRate::interestRate).findFirst().orElse(loanProductRelatedDetail.getAnnualNominalInterestRate());
     }
 
     public int getLoanTermInDays() {

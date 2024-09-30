@@ -1216,6 +1216,7 @@ public abstract class BaseLoanIntegrationTest {
 
         public static final Integer MONTHS = 2;
         public static final Integer YEARS = 3;
+        public static final Integer WHOLE_TERM = 4;
     }
 
     public static class TransactionProcessingStrategyCode {
