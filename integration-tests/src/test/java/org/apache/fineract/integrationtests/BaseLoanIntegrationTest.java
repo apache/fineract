@@ -194,6 +194,13 @@ public abstract class BaseLoanIntegrationTest {
                 principalDue, principalDue, 0, feeDue, feeDue, 0, penaltyDue, penaltyDue, 0, interestDue, interestDue, 0, 0, paidLate);
     }
 
+    protected static void validateFullyPaidRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, String dueDate,
+            double principalDue, double feeDue, double penaltyDue, double interestDue, double paidLate, double paidInAdvance) {
+        validateRepaymentPeriod(loanDetails, index, LocalDate.parse(dueDate, DateTimeFormatter.ofPattern(DATETIME_PATTERN, Locale.ENGLISH)),
+                principalDue, principalDue, 0, feeDue, feeDue, 0, penaltyDue, penaltyDue, 0, interestDue, interestDue, 0, paidInAdvance,
+                paidLate);
+    }
+
     protected static void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, LocalDate dueDate, double principalDue,
             double feeDue, double penaltyDue, double interestDue) {
         validateRepaymentPeriod(loanDetails, index, dueDate, principalDue, 0, principalDue, feeDue, 0, feeDue, penaltyDue, 0, penaltyDue,
@@ -1228,5 +1235,10 @@ public abstract class BaseLoanIntegrationTest {
         public static final Integer DAYS_360 = 360;
         public static final Integer DAYS_364 = 364;
         public static final Integer DAYS_365 = 365;
+    }
+
+    public static class FuturePaymentAllocationRule {
+
+        public static final String LAST_INSTALLMENT = "LAST_INSTALLMENT";
     }
 }
