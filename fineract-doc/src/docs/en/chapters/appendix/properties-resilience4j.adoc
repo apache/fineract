@@ -1,0 +1,98 @@
+= Resilience4j Properties
+
+For a deeper understanding of resilience4j, refer to the https://resilience4j.readme.io/docs/getting-started[Official website]
+
+.Resilience4j  Properties
+|===
+|Name |Env Variable |Default Value |Description
+
+|resilience4j.retry.instances.executeCommand.max-attempts
+|FINERACT_COMMAND_PROCESSING_RETRY_MAX_ATTEMPTS
+|3
+|The number of attempts that resilience4j will attempt to execute a command after a failed execution. Refer to  org. apache. fineract. commands. service. SynchronousCommandProcessingService#executeCommand for more details
+
+|resilience4j.retry.instances.executeCommand.wait-duration
+|FINERACT_COMMAND_PROCESSING_RETRY_WAIT_DURATION
+|1s
+|The fixed time value that the retry instance will wait before the next attempt can be made to execute a command
+
+|resilience4j.retry.instances.executeCommand.enable-exponential-backoff
+|FINERACT_COMMAND_PROCESSING_RETRY_ENABLE_EXPONENTIAL_BACKOFF
+|true
+|If set to true, the wait-duration will increase exponentially between each retry to execute a command
+
+|resilience4j.retry.instances.executeCommand.retryExceptions
+|FINERACT_COMMAND_PROCESSING_RETRY_EXPONENTIAL_BACKOFF_MULTIPLIER
+|org.springframework.dao.ConcurrencyFailureException,org.eclipse.persistence.exceptions.OptimisticLockException,jakarta.persistence.OptimisticLockException,org.springframework.orm.jpa.JpaOptimisticLockingFailureException,org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessUnderProcessingException
+|This property specifies the list of exceptions that the execute command retry instance will retry on
+
+|resilience4j.retry.instances.processJobDetailForExecution.max-attempts
+|FINERACT_PROCESS_JOB_DETAIL_RETRY_MAX_ATTEMPTS
+|3
+|The number of attempts that resilience4j will attempt to process job details for execution. Refer to org.apache.fineract.infrastructure.jobs.service.JobRegisterServiceImpl#processJobDetailForExecution for more details
+
+|resilience4j.retry.instances.processJobDetailForExecution.wait-duration
+|FINERACT_PROCESS_JOB_DETAIL_RETRY_WAIT_DURATION
+|1s
+|The fixed time value that the retry instance will wait before the next attempt can be made
+
+|resilience4j.retry.instances.processJobDetailForExecution.enable-exponential-backoff
+|FINERACT_PROCESS_JOB_DETAIL_RETRY_ENABLE_EXPONENTIAL_BACKOFF
+|true
+|If set to true, the wait-duration will increase exponentially between each retry to process job detail
+
+|resilience4j.retry.instances.processJobDetailForExecution.exponential-backoff-multiplier
+|FINERACT_PROCESS_JOB_DETAIL_RETRY_EXPONENTIAL_BACKOFF_MULTIPLIER
+|2
+|The multiplier for exponential backoff, this is useful only when enable-exponential-backoff is set to true
+
+|resilience4j.retry.instances.recalculateInterest.max-attempts
+|FINERACT_PROCESS_RECALCULATE_INTEREST_RETRY_MAX_ATTEMPTS
+|3
+|The number of attempts that resilience4j will attempt to run recalculate interest. Refer to  org.apache.fineract.portfolio.loanaccount.service. LoanWritePlatformServiceJpaRepositoryImpl#recalculateInterest for more details
+
+|resilience4j.retry.instances.recalculateInterest.wait-duration
+|FINERACT_PROCESS_RECALCULATE_INTEREST_RETRY_WAIT_DURATION
+|1s
+|The fixed time value that the retry instance will wait before the next attempt can be made
+
+|resilience4j.retry.instances.recalculateInterest.enable-exponential-backoff
+|FINERACT_PROCESS_RECALCULATE_INTEREST_RETRY_ENABLE_EXPONENTIAL_BACKOFF
+|true
+|If set to true, the wait-duration will increase exponentially between each retry to recalculate interest
+
+|resilience4j.retry.instances.recalculateInterest.exponential-backoff-multiplier
+|FINERACT_PROCESS_RECALCULATE_INTEREST_RETRY_EXPONENTIAL_BACKOFF_MULTIPLIER
+|2
+|The multiplier for exponential backoff, this is useful only when enable-exponential-backoff is set to true
+
+|resilience4j.retry.instances.recalculateInterest.retryException
+|FINERACT_PROCESS_RECALCULATE_INTEREST_RETRY_EXCEPTIONS
+|org.springframework.dao.ConcurrencyFailureException,org.eclipse.persistence.exceptions.OptimisticLockException,jakarta.persistence.OptimisticLockException,org.springframework.orm.jpa.JpaOptimisticLockingFailureException
+|This property specifies the list of exceptions that the recalculateInterest retry instance will retry on
+
+|resilience4j.retry.instances.postInterest.max-attempts
+|FINERACT_PROCESS_POST_INTEREST_RETRY_MAX_ATTEMPTS
+|3
+|The number of attempts that resilience4j will attempt to run post interest. Refer to  org.apache.fineract.portfolio.loanaccount.service. LoanWritePlatformServiceJpaRepositoryImpl#postInterest for more details
+
+|resilience4j.retry.instances.postInterest.wait-duration=
+|FINERACT_PROCESS_POST_INTEREST_RETRY_WAIT_DURATION
+|1s
+|The fixed time value that the retry instance will wait before the next attempt can be made
+
+|resilience4j.retry.instances.postInterest.enable-exponential-backoff
+|FINERACT_PROCESS_POST_INTEREST_RETRY_ENABLE_EXPONENTIAL_BACKOFF
+|true
+|If set to true, the wait-duration will increase exponentially between each retry to post interest
+
+|resilience4j.retry.instances.postInterest.exponential-backoff-multiplier
+|FINERACT_PROCESS_POST_INTEREST_RETRY_EXPONENTIAL_BACKOFF_MULTIPLIER
+|2
+|The multiplier for exponential backoff, this is useful only when enable-exponential-backoff is set to true
+
+|resilience4j.retry.instances.postInterest.retryExceptions
+|FINERACT_PROCESS_POST_INTEREST_RETRY_EXCEPTIONS
+|org.springframework.dao.ConcurrencyFailureException,org.eclipse.persistence.exceptions.OptimisticLockException,jakarta.persistence.OptimisticLockException,org.springframework.orm.jpa.JpaOptimisticLockingFailureException
+|This property specifies the list of exceptions that the post interest retry instance will retry on
+|===

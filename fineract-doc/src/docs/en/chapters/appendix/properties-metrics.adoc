@@ -1,0 +1,64 @@
+= Metrics Properties
+
+For further understanding of the configurations properties related to metrics, refer to https://docs.spring.io/spring-boot/docs/2.0.5.RELEASE/reference/html/production-ready-metrics.html[Springboot metrics docs]
+
+.Metrics Properties
+|===
+|Name |Env Variable |Default Value |Description
+
+
+|management.info.git.mode
+|
+|FULL
+|Mode for displaying Git information in the `/info` endpoint.
+
+|management.endpoints.web.exposure.include
+|FINERACT_MANAGEMENT_ENDPOINT_WEB_EXPOSURE_INCLUDE
+|health,info,prometheus
+|Comma-separated list of endpoints that should be exposed over the web.
+
+|management.tracing.enabled
+|FINERACT_MANAGEMENT_METRICS_TAGS_APPLICATION
+|fineract
+|Whether tracing is enabled.
+
+|management.metrics.distribution.percentiles-histogram.http.server.requests
+|FINERACT_MANAGEMENT_METRICS_DISTRIBUTION_HTTP_SERVER_REQUESTS
+|false
+|Whether to publish percentile histograms for HTTP server requests.
+
+|management.otlp.metrics.export.url
+|FINERACT_MANAGEMENT_OLTP_METRICS_EXPORT_URL
+|http://tempo:4318/v1/traces
+|URL to export OTLP metrics.
+
+|management.otlp.metrics.export.aggregationTemporality
+|FINERACT_MANAGEMENT_OLTP_METRICS_EXPORT_AGGREGATION_TEMPORALITY
+|cumulative
+|Aggregation temporality for OTLP metrics export.
+
+|management.prometheus.metrics.export.enabled
+|FINERACT_MANAGEMENT_PROMETHEUS_ENABLED
+|false
+|Whether to enable Prometheus metrics export.
+
+|spring.cloud.aws.cloudwatch.enabled
+|FINERACT_MANAGEMENT_CLOUDWATCH_ENABLED
+|false
+|Whether to enable AWS CloudWatch integration.
+
+|management.metrics.export.cloudwatch.enabled
+|FINERACT_MANAGEMENT_CLOUDWATCH_ENABLED
+|false
+|Whether to enable CloudWatch metrics export.
+
+|management.metrics.export.cloudwatch.namespace
+|FINERACT_MANAGEMENT_CLOUDWATCH_NAMESPACE
+|fineract
+|Namespace for CloudWatch metrics.
+
+|management.metrics.export.cloudwatch.step
+|FINERACT_MANAGEMENT_CLOUDWATCH_STEP
+|1m
+|Step size for CloudWatch metrics export.
+|===
