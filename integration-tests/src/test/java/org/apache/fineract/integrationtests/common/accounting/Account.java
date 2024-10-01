@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.integrationtests.common.accounting;
 
+import lombok.ToString;
+
+@ToString
 public class Account {
 
     public enum AccountType {
