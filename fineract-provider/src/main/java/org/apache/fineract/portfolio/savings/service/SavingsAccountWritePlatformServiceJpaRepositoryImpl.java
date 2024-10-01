@@ -52,6 +52,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.configuration.exception.GlobalConfigurationNotEnabledException;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -72,6 +73,9 @@ import org.apache.fineract.infrastructure.event.business.domain.savings.SavingsC
 import org.apache.fineract.infrastructure.event.business.domain.savings.SavingsPostInterestBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.interoperation.domain.InteropIdentifier;
+import org.apache.fineract.interoperation.domain.InteropIdentifierType;
+import org.apache.fineract.interoperation.service.InteropService;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
@@ -94,6 +98,7 @@ import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
+import org.apache.fineract.portfolio.paymentdetail.PaymentDetailConstants;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
@@ -128,6 +133,8 @@ import org.apache.fineract.portfolio.savings.exception.TransactionUpdateNotAllow
 import org.apache.fineract.portfolio.transfer.api.TransferApiConstants;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -165,6 +172,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private final GSIMRepositoy gsimRepository;
     private final SavingsAccountInterestPostingService savingsAccountInterestPostingService;
     private final ErrorHandler errorHandler;
+    private final InteropService interopService;
+    private static final Logger logger = LoggerFactory.getLogger(SavingsAccountWritePlatformServiceJpaRepositoryImpl.class);
 
     @Transactional
     @Override
@@ -397,6 +406,58 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         return new CommandProcessingResultBuilder() //
                 .withEntityId(withdrawal.getId()) //
+                .withOfficeId(account.officeId()) //
+                .withClientId(account.clientId()) //
+                .withGroupId(account.groupId()) //
+                .withSavingsId(savingsId) //
+                .with(changes)//
+                .build();
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult withdrawToLinkedAccount(final Long savingsId, final JsonCommand command) {
+
+        boolean isPaymentHubIntegrationEnabled = configurationDomainService.isPaymentHubIntegrationEnabled();
+        if (!isPaymentHubIntegrationEnabled) {
+            throw new GlobalConfigurationNotEnabledException("enable-payment-hub-integration");
+        }
+
+        this.savingsAccountTransactionDataValidator.validate(command);
+
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
+        final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
+
+        final Locale locale = command.extractLocale();
+        final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
+
+        final Map<String, Object> changes = new LinkedHashMap<>();
+        final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
+
+        final boolean backdatedTxnsAllowedTill = this.savingAccountAssembler.getPivotConfigStatus();
+
+        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, backdatedTxnsAllowedTill);
+
+        InteropIdentifier identifier1 = interopService.getIndentifierByAccount(account);
+        InteropIdentifierType identifierType = identifier1.getType();
+        String identifierValue = identifier1.getValue();
+
+        changes.put(PaymentDetailConstants.routingCodeParamName, identifierType);
+        changes.put(PaymentDetailConstants.accountNumberParamName, identifierValue);
+
+        paymentDetail.setRoutingCode(identifierType.toString());
+        paymentDetail.setAccountNumber(identifierValue);
+
+        checkClientOrGroupActive(account);
+
+        this.savingsAccountTransactionDataValidator.validateTransactionWithPivotDate(transactionDate, account);
+
+        SdkWithdrawalService sdkWithdrawalService = new SdkWithdrawalServiceImpl();
+        String id = sdkWithdrawalService.processWithdrawal(identifierType.toString(), identifierValue, paymentDetail.getRoutingCode(),
+                paymentDetail.getAccountNumber(), transactionAmount.toString(), account.getCurrency().getCode());
+        logger.info("withdrawal transaction started with id: " + id);
+
+        return new CommandProcessingResultBuilder() //
                 .withOfficeId(account.officeId()) //
                 .withClientId(account.clientId()) //
                 .withGroupId(account.groupId()) //

@@ -16,16 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.interoperation.domain;
+package org.apache.fineract.infrastructure.core.exception;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.stereotype.Repository;
+public class ConfigurationNotEnabledException extends AbstractPlatformException {
 
-@Repository
-public interface InteropIdentifierRepository extends JpaRepository<InteropIdentifier, Long>, JpaSpecificationExecutor<InteropIdentifier> {
+    protected ConfigurationNotEnabledException(String globalisationMessageCode, String defaultUserMessage,
+            final Object... defaultUserMessageArgs) {
+        super(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
+    }
 
-    InteropIdentifier findOneByTypeAndValueAndSubType(InteropIdentifierType idType, String value, String subType);
-
-    InteropIdentifier findOneByAccountId(Long accountId);
 }

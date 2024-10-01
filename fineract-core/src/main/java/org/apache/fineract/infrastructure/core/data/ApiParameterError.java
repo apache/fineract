@@ -67,6 +67,11 @@ public final class ApiParameterError {
         return new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs, "id", null);
     }
 
+    public static ApiParameterError resourceIdentifierNotEnabled(final String globalisationMessageCode, final String defaultUserMessage,
+            final Object... defaultUserMessageArgs) {
+        return new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs, "configuration", null);
+    }
+
     public static ApiParameterError parameterError(final String globalisationMessageCode, final String defaultUserMessage,
             final String parameterName, final Object... defaultUserMessageArgs) {
         return new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs, parameterName, null);

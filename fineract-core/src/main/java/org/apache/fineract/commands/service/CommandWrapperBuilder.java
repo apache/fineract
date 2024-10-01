@@ -1148,6 +1148,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder disburseLoanToLinkedAccountApplication(final Long loanId) {
+        this.actionName = "DISBURSETOLINKEDACCOUNT";
+        this.entityName = "LOAN";
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId;
+        return this;
+    }
+
     public CommandWrapperBuilder disburseWithoutAutoDownPayment(final Long loanId) {
         this.actionName = "DISBURSEWITHOUTAUTODOWNPAYMENT";
         this.entityName = "LOAN";
@@ -1556,6 +1565,15 @@ public class CommandWrapperBuilder {
 
     public CommandWrapperBuilder savingsAccountWithdrawal(final Long accountId) {
         this.actionName = "WITHDRAWAL";
+        this.entityName = "SAVINGSACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = null;
+        this.href = "/savingsaccounts/" + accountId + "/transactions";
+        return this;
+    }
+
+    public CommandWrapperBuilder savingsAccountWithdrawToLinkedAccount(final Long accountId) {
+        this.actionName = "WITHDRAWTOLINKEDACCOUNT";
         this.entityName = "SAVINGSACCOUNT";
         this.savingsId = accountId;
         this.entityId = null;

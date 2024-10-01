@@ -28,6 +28,13 @@ apply plugin: 'com.google.cloud.tools.jib'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'se.thinkcode.cucumber-runner'
 
+
+repositories {
+    maven {
+        url = uri('https://jfrog.sandbox.fynarfin.io/artifactory/fyn-libs-snapshot')
+    }
+}
+
 check.dependsOn('cucumber')
 
 compileJava.doLast {
@@ -164,7 +171,7 @@ configurations.driver.each {File file ->
 task createDB {
     description= "Creates the MariaDB Database. Needs database name to be passed (like: -PdbName=someDBname)"
     doLast {
-        def sql = Sql.newInstance( 'jdbc:mariadb://localhost:3306/', mysqlUser, mysqlPassword, 'org.mariadb.jdbc.Driver' )
+        def sql = Sql.newInstance( 'jdbc:mariadb://localhost:3307/', mysqlUser, mysqlPassword, 'org.mariadb.jdbc.Driver' )
         sql.execute( 'CREATE DATABASE '+"`$dbName` CHARACTER SET utf8mb4" )
     }
 }
@@ -172,7 +179,7 @@ task createDB {
 task dropDB {
     description= "Drops the specified MariaDB database. The database name has to be passed (like: -PdbName=someDBname)"
     doLast {
-        def sql = Sql.newInstance( 'jdbc:mariadb://localhost:3306/', mysqlUser, mysqlPassword, 'org.mariadb.jdbc.Driver' )
+        def sql = Sql.newInstance( 'jdbc:mariadb://localhost:3307/', mysqlUser, mysqlPassword, 'org.mariadb.jdbc.Driver' )
         sql.execute( 'DROP DATABASE '+"`$dbName`")
     }
 }
@@ -225,6 +232,7 @@ bootRun {
     dependencies {
         implementation 'org.mariadb.jdbc:mariadb-java-client'
         implementation 'org.postgresql:postgresql'
+        implementation 'org.pheesdk:PaymentHubSDK:1.0.0'
     }
 }
 
@@ -280,6 +288,7 @@ jib {
     dependencies {
         implementation 'org.mariadb.jdbc:mariadb-java-client'
         implementation 'org.postgresql:postgresql'
+        implementation 'org.pheesdk:PaymentHubSDK:1.0.0'
     }
 
     pluginExtensions {

@@ -745,7 +745,7 @@ public class GlobalConfigurationHelper {
     }
 
     public static Integer updateEnablePaymentHubIntegrationConfiguration(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final String stringValue) {
+                                                                         final ResponseSpecification responseSpec, final String stringValue) {
         long configId = 60;
         final HashMap<String, String> map = new HashMap<>();
         map.put("stringValue", stringValue);

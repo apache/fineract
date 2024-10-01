@@ -16,16 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.interoperation.domain;
+package org.apache.fineract.portfolio.loanaccount.service;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.stereotype.Repository;
+import org.pheesdk.transfer.Utils.SdkApiException;
+import org.pheesdk.transfer.Utils.SdkValidationException;
 
-@Repository
-public interface InteropIdentifierRepository extends JpaRepository<InteropIdentifier, Long>, JpaSpecificationExecutor<InteropIdentifier> {
+public interface SdkDisbursalService {
 
-    InteropIdentifier findOneByTypeAndValueAndSubType(InteropIdentifierType idType, String value, String subType);
-
-    InteropIdentifier findOneByAccountId(Long accountId);
+    String processDisbursal(String payerType, String payerId, String payeeType, String payeeId, String amount, String currencyCode)
+            throws SdkApiException, SdkValidationException;
 }

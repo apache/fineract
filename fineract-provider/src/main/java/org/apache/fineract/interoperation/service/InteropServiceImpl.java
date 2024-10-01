@@ -266,6 +266,21 @@ public class InteropServiceImpl implements InteropService {
     @NotNull
     @Transactional
     @Override
+    public InteropIdentifier getIndentifierByAccount(@NotNull SavingsAccount account) {
+        InteropIdentifier identifier = findIdentifier(account);
+        return identifier;
+    }
+
+    @NotNull
+    @Transactional
+    @Override
+    public InteropIdentifier getIdentifierByAccountId(@NotNull Long accountId) {
+        return identifierRepository.findOneByAccountId(accountId);
+    }
+
+    @NotNull
+    @Transactional
+    @Override
     public InteropIdentifierAccountResponseData registerAccountIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue,
             String subIdOrType, @NotNull JsonCommand command) {
         InteropIdentifierRequestData request = dataValidator.validateAndParseCreateIdentifier(idType, idValue, subIdOrType, command);
@@ -639,6 +654,10 @@ public class InteropServiceImpl implements InteropService {
 
     public InteropIdentifier findIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue, String subIdOrType) {
         return identifierRepository.findOneByTypeAndValueAndSubType(idType, idValue, subIdOrType);
+    }
+
+    public InteropIdentifier findIdentifier(@NotNull SavingsAccount account) {
+        return identifierRepository.findOneByAccountId(account.getId());
     }
 
     /*

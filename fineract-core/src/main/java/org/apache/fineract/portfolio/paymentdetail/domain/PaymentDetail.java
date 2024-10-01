@@ -25,6 +25,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.Map;
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -35,6 +36,7 @@ import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
 
 @Entity
 @Getter
+@Setter
 @Table(name = "m_payment_detail")
 public class PaymentDetail extends AbstractPersistableCustom<Long> {
 

@@ -20,6 +20,12 @@ description = 'Fineract Integration Tests'
 
 apply plugin: 'com.bmuschko.cargo'
 
+repositories {
+    maven {
+        url = uri('https://jfrog.sandbox.fynarfin.io/artifactory/fyn-libs-snapshot')
+    }
+}
+
 // Configuration for the Gradle Cargo plugin
 // https://github.com/bmuschko/gradle-cargo-plugin
 configurations {

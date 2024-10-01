@@ -35,6 +35,7 @@ import org.apache.fineract.infrastructure.event.business.domain.savings.transact
 import org.apache.fineract.infrastructure.event.business.domain.savings.transaction.SavingsWithdrawalBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.interoperation.service.InteropService;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
@@ -45,6 +46,7 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionDTO;
 import org.apache.fineract.portfolio.savings.exception.DepositAccountTransactionNotAllowedException;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountDomainService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,6 +61,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
     private final ConfigurationDomainService configurationDomainService;
     private final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final InteropService interopService;
 
     @Autowired
     public SavingsAccountDomainServiceJpa(final SavingsAccountRepositoryWrapper savingsAccountRepository,
@@ -67,7 +70,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
             final JournalEntryWritePlatformService journalEntryWritePlatformService,
             final ConfigurationDomainService configurationDomainService, final PlatformSecurityContext context,
             final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository,
-            final BusinessEventNotifierService businessEventNotifierService) {
+            final BusinessEventNotifierService businessEventNotifierService, @Lazy final InteropService interopService) {
         this.savingsAccountRepository = savingsAccountRepository;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
         this.applicationCurrencyRepositoryWrapper = applicationCurrencyRepositoryWrapper;
@@ -76,6 +79,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         this.context = context;
         this.depositAccountOnHoldTransactionRepository = depositAccountOnHoldTransactionRepository;
         this.businessEventNotifierService = businessEventNotifierService;
+        this.interopService = interopService;
     }
 
     @Transactional

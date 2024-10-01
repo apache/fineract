@@ -33,6 +33,7 @@ import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChe
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
+import org.apache.fineract.interoperation.service.InteropService;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepository;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
@@ -361,7 +362,8 @@ public class LoanAccountConfiguration {
             ExternalIdFactory externalIdFactory, ReplayedTransactionBusinessEventService replayedTransactionBusinessEventService,
             LoanAccrualTransactionBusinessEventService loanAccrualTransactionBusinessEventService, ErrorHandler errorHandler,
             LoanDownPaymentHandlerService loanDownPaymentHandlerService, AccountTransferRepository accountTransferRepository,
-            LoanTransactionAssembler loanTransactionAssembler, LoanAccrualsProcessingService loanAccrualsProcessingService) {
+            LoanTransactionAssembler loanTransactionAssembler, LoanAccrualsProcessingService loanAccrualsProcessingService,
+            InteropService interopService) {
         return new LoanWritePlatformServiceJpaRepositoryImpl(transactionProcessorFactory, context, loanTransactionValidator,
                 loanUpdateCommandFromApiJsonDeserializer, loanRepositoryWrapper, loanAccountDomainService, noteRepository,
                 loanTransactionRepository, loanTransactionRelationRepository, loanAssembler, journalEntryWritePlatformService,
@@ -375,7 +377,7 @@ public class LoanAccountConfiguration {
                 postDatedChecksRepository, loanRepaymentScheduleInstallmentRepository, defaultLoanLifecycleStateMachine,
                 loanAccountLockService, externalIdFactory, replayedTransactionBusinessEventService,
                 loanAccrualTransactionBusinessEventService, errorHandler, loanDownPaymentHandlerService, accountTransferRepository,
-                loanTransactionAssembler, loanAccrualsProcessingService);
+                loanTransactionAssembler, loanAccrualsProcessingService, interopService);
     }
 
     @Bean
