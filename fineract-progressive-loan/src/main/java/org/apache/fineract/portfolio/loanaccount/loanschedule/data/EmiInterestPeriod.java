@@ -18,16 +18,23 @@
  */
 package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 
+import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.apache.fineract.organisation.monetary.domain.Money;
-import org.jetbrains.annotations.NotNull;
 
-@AllArgsConstructor
+@EqualsAndHashCode(exclude = { "repaymentPeriod" })
 @Data
-public class ProgressiveLoanInterestRepaymentInterestPeriod implements Comparable<ProgressiveLoanInterestRepaymentInterestPeriod> {
+public class EmiInterestPeriod implements Comparable<EmiInterestPeriod> {
+
+    @ToString.Exclude
+    private EmiRepaymentPeriod repaymentPeriod;
+
+    @ToString.Exclude
+    private EmiRepaymentPeriod originalRepaymentPeriod;
 
     private LocalDate fromDate;
     private LocalDate dueDate;
@@ -38,12 +45,26 @@ public class ProgressiveLoanInterestRepaymentInterestPeriod implements Comparabl
     private Money correctionAmount;
     private Money interestDue;
 
-    public ProgressiveLoanInterestRepaymentInterestPeriod(final ProgressiveLoanInterestRepaymentInterestPeriod period) {
-        this(period.fromDate, period.dueDate, period.rateFactorMinus1, period.disbursedAmount, period.correctionAmount, period.interestDue);
+    public EmiInterestPeriod(EmiRepaymentPeriod repaymentPeriod, LocalDate fromDate, LocalDate dueDate, BigDecimal rateFactorMinus1,
+            Money disbursedAmount, Money correctionAmount, Money interestDue) {
+        this.repaymentPeriod = repaymentPeriod;
+        this.fromDate = fromDate;
+        this.dueDate = dueDate;
+        this.rateFactorMinus1 = rateFactorMinus1;
+        this.disbursedAmount = disbursedAmount;
+        this.correctionAmount = correctionAmount;
+        this.interestDue = interestDue;
+        this.originalRepaymentPeriod = repaymentPeriod;
+    }
+
+    public EmiInterestPeriod(final EmiInterestPeriod period, final EmiRepaymentPeriod repaymentPeriod) {
+        this(repaymentPeriod, period.fromDate, period.dueDate, period.rateFactorMinus1, period.disbursedAmount, period.correctionAmount,
+                period.interestDue);
+        this.originalRepaymentPeriod = period.originalRepaymentPeriod;
     }
 
     @Override
-    public int compareTo(@NotNull ProgressiveLoanInterestRepaymentInterestPeriod o) {
+    public int compareTo(@NotNull EmiInterestPeriod o) {
         return dueDate.compareTo(o.dueDate);
     }
 

@@ -16,29 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanproduct.calc;
+package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 
 import java.math.BigDecimal;
-import java.util.List;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.apache.fineract.organisation.monetary.domain.Money;
+import java.time.LocalDate;
+import org.jetbrains.annotations.NotNull;
 
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-public class EMICalculationResult {
+public record EmiInterestRate(LocalDate effectiveFrom, //
+        LocalDate validFrom, //
+        BigDecimal interestRate //
+) implements Comparable<EmiInterestRate> {
 
-    @Getter
-    private final Money equalMonthlyInstallmentValue;
-    private final List<BigDecimal> repaymentPeriodRateFactorMinus1List;
-
-    private int counter = 0;
-
-    public BigDecimal getNextRepaymentPeriodRateFactorMinus1() {
-        return counter < repaymentPeriodRateFactorMinus1List.size() ? repaymentPeriodRateFactorMinus1List.get(counter++) : BigDecimal.ZERO;
-    }
-
-    public void reset() {
-        counter = 0;
+    @Override
+    public int compareTo(@NotNull EmiInterestRate o) {
+        return this.effectiveFrom().compareTo(o.effectiveFrom());
     }
 }

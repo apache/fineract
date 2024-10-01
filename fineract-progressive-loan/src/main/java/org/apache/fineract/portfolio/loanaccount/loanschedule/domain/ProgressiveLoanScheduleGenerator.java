@@ -44,10 +44,10 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.EmiRepaymentPeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleModelDownPaymentPeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleParams;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.data.ProgressiveLoanInterestRepaymentModel;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.ProgressiveLoanInterestScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.exception.MultiDisbursementOutstandingAmoutException;
 import org.apache.fineract.portfolio.loanproduct.calc.EMICalculator;
@@ -114,11 +114,11 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
             repaymentPeriod.setPeriodNumber(scheduleParams.getInstalmentNumber());
 
             for (var interestRateChange : loanApplicationTerms.getLoanTermVariations().getInterestRateFromInstallment()) {
-                final LocalDate interestRateChangeEffectiveDate = interestRateChange.getTermVariationApplicableFrom().minusDays(1);
+                final LocalDate interestRateSubmittedOnDate = interestRateChange.getTermVariationApplicableFrom();
                 final BigDecimal newInterestRate = interestRateChange.getDecimalValue();
-                if (interestRateChangeEffectiveDate.isAfter(repaymentPeriod.getFromDate())
-                        && !interestRateChangeEffectiveDate.isAfter(repaymentPeriod.getDueDate())) {
-                    emiCalculator.changeInterestRate(interestScheduleModel, interestRateChangeEffectiveDate, newInterestRate);
+                if (interestRateSubmittedOnDate.isAfter(repaymentPeriod.getFromDate())
+                        && !interestRateSubmittedOnDate.isAfter(repaymentPeriod.getDueDate())) {
+                    emiCalculator.changeInterestRate(interestScheduleModel, interestRateSubmittedOnDate, newInterestRate);
                 }
             }
 
@@ -190,8 +190,7 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
             }
 
             Money outstandingBalance = emiCalculator.findInterestRepaymentPeriod(interestScheduleModel, periodDueDate)
-                    .map(ProgressiveLoanInterestRepaymentModel::getOutstandingBalance)
-                    .orElse(Money.zero(loanApplicationTerms.getCurrency()));
+                    .map(EmiRepaymentPeriod::getOutstandingBalance).orElse(Money.zero(loanApplicationTerms.getCurrency()));
 
             final Money disbursedAmount = Money.of(loanApplicationTerms.getCurrency(), disbursementData.getPrincipal());
             final LoanScheduleModelDisbursementPeriod disbursementPeriod = LoanScheduleModelDisbursementPeriod
@@ -229,7 +228,7 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
 
             final Money disbursementRemainingBalance = disbursedAmount.minus(downPaymentAmount);
             scheduleParams.addPrincipalToBeScheduled(disbursementRemainingBalance);
-            emiCalculator.addDisbursement(interestScheduleModel, disbursementDate, disbursementRemainingBalance);
+            emiCalculator.addDisbursement(interestScheduleModel, disbursementDate, periodDueDate, disbursementRemainingBalance);
         }
     }
 
@@ -265,8 +264,7 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
                 .filter(it -> transactionDate.isAfter(it.getFromDate()) && !transactionDate.isAfter(it.getDueDate())).findFirst()
                 .orElse(installments.get(0));
 
-        ProgressiveLoanInterestRepaymentModel result = emiCalculator
-                .getPayableDetails(model, actualInstallment.getDueDate(), transactionDate).orElseThrow();
+        EmiRepaymentPeriod result = emiCalculator.getPayableDetails(model, actualInstallment.getDueDate(), transactionDate).orElseThrow();
 
         OutstandingAmountsDTO amounts = new OutstandingAmountsDTO(currency) //
                 .principal(result.getOutstandingBalance()) //
