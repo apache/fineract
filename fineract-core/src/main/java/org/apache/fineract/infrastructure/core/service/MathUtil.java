@@ -481,4 +481,14 @@ public final class MathUtil {
     public static BigDecimal stripTrailingZeros(final BigDecimal value) {
         return value == null ? null : new BigDecimal(value.stripTrailingZeros().toPlainString());
     }
+
+    /**
+     * @return calculates maximum of the two values considering null values
+     * @param notNull
+     *            if true then null parameter is omitted, otherwise returns null
+     */
+    public static Money max(Money first, Money second, boolean notNull) {
+        return notNull ? first == null ? second : second == null ? first : max(first, second, false)
+                : isGreaterThan(first, second) ? first : second;
+    }
 }

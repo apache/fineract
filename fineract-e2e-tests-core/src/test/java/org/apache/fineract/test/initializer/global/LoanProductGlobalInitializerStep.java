@@ -497,10 +497,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .recalculationRestFrequencyType(2)//
                 .recalculationRestFrequencyInterval(1)//
                 .paymentAllocation(List.of(//
-                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
-                        createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
-                        createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
-                        createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT")));//
         Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterest36030InterestRecalcTillPreClose = loanProductsApi
                 .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRecalcTillPreclose).execute();
         TestContext.INSTANCE.set(

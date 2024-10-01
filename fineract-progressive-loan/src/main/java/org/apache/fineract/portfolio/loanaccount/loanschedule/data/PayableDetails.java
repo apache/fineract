@@ -18,15 +18,14 @@
  */
 package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import org.jetbrains.annotations.NotNull;
+import lombok.Data;
+import org.apache.fineract.organisation.monetary.domain.Money;
 
-public record ProgressiveLoanInterestRate(LocalDate effectiveFrom, LocalDate validFrom,
-        BigDecimal interestRate) implements Comparable<ProgressiveLoanInterestRate> {
+@Data
+public class PayableDetails {
 
-    @Override
-    public int compareTo(@NotNull ProgressiveLoanInterestRate o) {
-        return this.effectiveFrom().compareTo(o.effectiveFrom());
-    }
+    private final Money emi;
+    private final Money payablePrincipal;
+    private final Money payableInterest;
+    private final Money outstandingBalance;
 }
