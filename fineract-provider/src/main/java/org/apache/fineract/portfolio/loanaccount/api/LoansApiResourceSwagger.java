@@ -1267,6 +1267,19 @@ final class LoansApiResourceSwagger {
         public BigDecimal disbursedAmountPercentageForDownPayment;
         @Schema(example = "false")
         public Boolean enableAutoRepaymentForDownPayment;
+
+        public List<PostLoansRequestChargeData> charges;
+
+        static final class PostLoansRequestChargeData {
+
+            private PostLoansRequestChargeData() {}
+
+            @Schema(example = "1")
+            public Long chargeId;
+
+            @Schema(example = "1.0")
+            public BigDecimal amount;
+        }
     }
 
     @Schema(description = "PostLoansResponse")
