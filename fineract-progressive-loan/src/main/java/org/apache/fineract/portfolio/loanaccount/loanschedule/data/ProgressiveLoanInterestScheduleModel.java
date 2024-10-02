@@ -94,7 +94,8 @@ public class ProgressiveLoanInterestScheduleModel {
 
         return interestPeriods.stream()
                 .map(interestPeriod -> new EmiInterestPeriod(interestPeriod,
-                        repaymentPeriodDueDateMap.get(interestPeriod.getRepaymentPeriod().getDueDate())))
+                        repaymentPeriodDueDateMap.get(interestPeriod.getRepaymentPeriod().getDueDate()),
+                        repaymentPeriodDueDateMap.get(interestPeriod.getOriginalRepaymentPeriod().getDueDate())))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 

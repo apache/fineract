@@ -26,7 +26,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.apache.fineract.organisation.monetary.domain.Money;
 
-@EqualsAndHashCode(exclude = { "repaymentPeriod" })
+@EqualsAndHashCode(exclude = { "repaymentPeriod", "originalRepaymentPeriod" })
 @Data
 public class EmiInterestPeriod implements Comparable<EmiInterestPeriod> {
 
@@ -48,19 +48,19 @@ public class EmiInterestPeriod implements Comparable<EmiInterestPeriod> {
     public EmiInterestPeriod(EmiRepaymentPeriod repaymentPeriod, LocalDate fromDate, LocalDate dueDate, BigDecimal rateFactorMinus1,
             Money disbursedAmount, Money correctionAmount, Money interestDue) {
         this.repaymentPeriod = repaymentPeriod;
+        this.originalRepaymentPeriod = repaymentPeriod;
         this.fromDate = fromDate;
         this.dueDate = dueDate;
         this.rateFactorMinus1 = rateFactorMinus1;
         this.disbursedAmount = disbursedAmount;
         this.correctionAmount = correctionAmount;
         this.interestDue = interestDue;
-        this.originalRepaymentPeriod = repaymentPeriod;
     }
 
-    public EmiInterestPeriod(final EmiInterestPeriod period, final EmiRepaymentPeriod repaymentPeriod) {
-        this(repaymentPeriod, period.fromDate, period.dueDate, period.rateFactorMinus1, period.disbursedAmount, period.correctionAmount,
-                period.interestDue);
-        this.originalRepaymentPeriod = period.originalRepaymentPeriod;
+    public EmiInterestPeriod(final EmiInterestPeriod interestPeriod, final EmiRepaymentPeriod repaymentPeriod, final EmiRepaymentPeriod originalRepaymentPeriod) {
+        this(repaymentPeriod, interestPeriod.fromDate, interestPeriod.dueDate, interestPeriod.rateFactorMinus1, interestPeriod.disbursedAmount, interestPeriod.correctionAmount,
+                interestPeriod.interestDue);
+        this.originalRepaymentPeriod = originalRepaymentPeriod;
     }
 
     @Override
