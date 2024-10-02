@@ -57,9 +57,10 @@ public class EmiInterestPeriod implements Comparable<EmiInterestPeriod> {
         this.interestDue = interestDue;
     }
 
-    public EmiInterestPeriod(final EmiInterestPeriod interestPeriod, final EmiRepaymentPeriod repaymentPeriod, final EmiRepaymentPeriod originalRepaymentPeriod) {
-        this(repaymentPeriod, interestPeriod.fromDate, interestPeriod.dueDate, interestPeriod.rateFactorMinus1, interestPeriod.disbursedAmount, interestPeriod.correctionAmount,
-                interestPeriod.interestDue);
+    public EmiInterestPeriod(final EmiInterestPeriod interestPeriod, final EmiRepaymentPeriod repaymentPeriod,
+            final EmiRepaymentPeriod originalRepaymentPeriod) {
+        this(repaymentPeriod, interestPeriod.fromDate, interestPeriod.dueDate, interestPeriod.rateFactorMinus1,
+                interestPeriod.disbursedAmount, interestPeriod.correctionAmount, interestPeriod.interestDue);
         this.originalRepaymentPeriod = originalRepaymentPeriod;
     }
 

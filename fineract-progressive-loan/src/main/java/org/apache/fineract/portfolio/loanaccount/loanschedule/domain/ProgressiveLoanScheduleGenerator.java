@@ -18,8 +18,6 @@
  */
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
-import static org.apache.fineract.portfolio.loanproduct.domain.LoanPreClosureInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE;
-
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
@@ -122,20 +120,19 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
                 }
             }
 
-            emiCalculator.findInterestRepaymentPeriod(interestScheduleModel, repaymentPeriod.getDueDate())
-                    .ifPresent(interestRepaymentPeriod -> {
-                        final Money principalDue = interestRepaymentPeriod.getPrincipalDue();
-                        final Money interestDue = interestRepaymentPeriod.getInterestDue();
+            emiCalculator.findRepaymentPeriod(interestScheduleModel, repaymentPeriod.getDueDate()).ifPresent(interestRepaymentPeriod -> {
+                final Money principalDue = interestRepaymentPeriod.getPrincipalDue();
+                final Money interestDue = interestRepaymentPeriod.getInterestDue();
 
-                        repaymentPeriod.addPrincipalAmount(principalDue);
-                        repaymentPeriod.addInterestAmount(interestDue);
-                        repaymentPeriod.setOutstandingLoanBalance(interestRepaymentPeriod.getRemainingBalance());
+                repaymentPeriod.addPrincipalAmount(principalDue);
+                repaymentPeriod.addInterestAmount(interestDue);
+                repaymentPeriod.setOutstandingLoanBalance(interestRepaymentPeriod.getRemainingBalance());
 
-                        scheduleParams.addTotalCumulativePrincipal(principalDue);
-                        scheduleParams.addTotalCumulativeInterest(interestDue);
-                        // add everything
-                        scheduleParams.addTotalRepaymentExpected(principalDue.plus(interestDue));
-                    });
+                scheduleParams.addTotalCumulativePrincipal(principalDue);
+                scheduleParams.addTotalCumulativeInterest(interestDue);
+                // add everything
+                scheduleParams.addTotalRepaymentExpected(principalDue.plus(interestDue));
+            });
 
             applyChargesForCurrentPeriod(repaymentPeriod, loanCharges, scheduleParams, currency, mc);
             periods.add(repaymentPeriod);
@@ -189,7 +186,7 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
                 continue;
             }
 
-            Money outstandingBalance = emiCalculator.findInterestRepaymentPeriod(interestScheduleModel, periodDueDate)
+            Money outstandingBalance = emiCalculator.findRepaymentPeriod(interestScheduleModel, periodDueDate)
                     .map(EmiRepaymentPeriod::getOutstandingBalance).orElse(Money.zero(loanApplicationTerms.getCurrency()));
 
             final Money disbursedAmount = Money.of(loanApplicationTerms.getCurrency(), disbursementData.getPrincipal());
@@ -228,7 +225,7 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
 
             final Money disbursementRemainingBalance = disbursedAmount.minus(downPaymentAmount);
             scheduleParams.addPrincipalToBeScheduled(disbursementRemainingBalance);
-            emiCalculator.addDisbursement(interestScheduleModel, disbursementDate, periodDueDate, disbursementRemainingBalance);
+            emiCalculator.addDisbursement(interestScheduleModel, periodDueDate, disbursementDate, disbursementRemainingBalance);
         }
     }
 

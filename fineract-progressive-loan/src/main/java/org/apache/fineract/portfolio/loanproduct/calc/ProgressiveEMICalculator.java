@@ -69,7 +69,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     }
 
     @Override
-    public Optional<EmiRepaymentPeriod> findInterestRepaymentPeriod(final ProgressiveLoanInterestScheduleModel scheduleModel,
+    public Optional<EmiRepaymentPeriod> findRepaymentPeriod(final ProgressiveLoanInterestScheduleModel scheduleModel,
             final LocalDate repaymentPeriodDueDate) {
         if (scheduleModel == null) {
             return Optional.empty();
