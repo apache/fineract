@@ -1486,24 +1486,20 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                                             transactionAmountUnprocessed, loanTransactionToRepaymentScheduleMapping,
                                             inAdvanceInstallmentCharges, balances, LoanRepaymentScheduleInstallment.PaymentAction.PAY);
 
-                                    switch (paymentAllocationType) {
-                                        case IN_ADVANCE_PRINCIPAL -> {
-                                            Money balance = switch (strategy) {
-                                                case TILL_PRE_CLOSURE_DATE -> payableDetails.getOutstandingBalance();
-                                                case TILL_REST_FREQUENCY_DATE -> payableDetails.getRemainingBalance();
-                                                default -> throw new IllegalStateException();
-                                            };
-                                            emiCalculator.addBalanceCorrection(model, inAdvanceInstallment.getDueDate(), payDate,
-                                                    balance.multipliedBy(-1));
-                                            emiCalculator.addBalanceCorrection(model, inAdvanceInstallment.getDueDate(), payDate,
-                                                    payableDetails.getPrincipalDue().minus(paidPortion));
-                                        }
-                                        case IN_ADVANCE_INTEREST -> {
-                                            emiCalculator.addBalanceCorrection(model, inAdvanceInstallment.getDueDate(), payDate,
-                                                    payableDetails.getInterestDue().minus(paidPortion));
-                                        }
-                                        default -> {
-                                        }
+                                    if (paymentAllocationType.equals(PaymentAllocationType.IN_ADVANCE_PRINCIPAL)) {
+                                        emiCalculator.addBalanceCorrection(model, inAdvanceInstallment.getDueDate(), payDate,
+                                                paidPortion.negated());
+                                        model.repaymentPeriods().forEach(rm -> {
+                                            LoanRepaymentScheduleInstallment installment = transactionCtx.getInstallments().stream()
+                                                    .filter(ri -> ri.getDueDate().equals(rm.getDueDate()) && !ri.isDownPayment())
+                                                    .findFirst().orElse(null);
+                                            if (installment != null) {
+                                                installment.updatePrincipal(rm.getPrincipalDue().getAmount());
+                                                installment.updateInterestCharged(rm.getInterestDue().getAmount());
+                                                installment.updateObligationsMet(transactionCtx.getCurrency(),
+                                                        loanTransaction.getTransactionDate());
+                                            }
+                                        });
                                     }
                                 } else {
                                     // Adjust the portion for the last installment
