@@ -290,30 +290,23 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
                         && Objects.equals(statusId, businessEvent.getStatusId().doubleValue())
                         && Objects.equals(principalDisbursed, businessEvent.getPrincipalDisbursed())
                         && Objects.equals(principalOutstanding, businessEvent.getPrincipalOutstanding())
-                        && emiAmountVariationsMatch((List<Map<String, Object>>) externalEvent.getPayLoad().get("emiAmountVariations"),
-                                businessEvent.emiAmountVariationType);
+                        && loanTermVariationsMatch((List<Map<String, Object>>) externalEvent.getPayLoad().get("loanTermVariations"),
+                                businessEvent.loanTermVariationType);
             }).count();
             Assertions.assertEquals(1, count, "Expected business event not found " + businessEvent);
         }
     }
 
-    private boolean emiAmountVariationsMatch(List<Map<String, Object>> emiAmountVariations, List<String> expectedTypes) {
+    private boolean loanTermVariationsMatch(final List<Map<String, Object>> loanTermVariations, final List<String> expectedTypes) {
         if (CollectionUtils.isEmpty(expectedTypes)) {
             return true;
         }
-        int numberOfMatches = 0;
-        if (CollectionUtils.isNotEmpty(emiAmountVariations)) {
-            for (String expectedType : expectedTypes) {
-                int i = 0;
-                while (i < emiAmountVariations.size() && !StringUtils
-                        .equals((String) ((Map<String, Object>) emiAmountVariations.get(i).get("termType")).get("value"), expectedType)) {
-                    i++;
-                }
-                if (i < emiAmountVariations.size()) {
-                    numberOfMatches++;
-                }
-            }
-        }
+        final long numberOfMatches = expectedTypes
+                .stream().filter(
+                        expectedType -> loanTermVariations.stream()
+                                .anyMatch(variation -> StringUtils
+                                        .equals((String) ((Map<String, Object>) variation.get("termType")).get("value"), expectedType)))
+                .count();
 
         return numberOfMatches == expectedTypes.size();
     }
@@ -335,6 +328,6 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
         private Integer statusId;
         private Double principalDisbursed;
         private Double principalOutstanding;
-        private List<String> emiAmountVariationType;
+        private List<String> loanTermVariationType;
     }
 }

@@ -94,6 +94,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
+import org.apache.fineract.integrationtests.common.LoanRescheduleRequestHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -176,6 +177,8 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
     private static final BusinessDateHelper BUSINESS_DATE_HELPER = new BusinessDateHelper();
     private static final ChargesHelper CHARGES_HELPER = new ChargesHelper();
     private static final ClientHelper CLIENT_HELPER = new ClientHelper(REQUEST_SPEC, RESPONSE_SPEC);
+    private static final LoanRescheduleRequestHelper LOAN_RESCHEDULE_REQUEST_HELPER = new LoanRescheduleRequestHelper(REQUEST_SPEC,
+            RESPONSE_SPEC);
 
     private static RequestSpecification createRequestSpecification() {
         RequestSpecification request = new RequestSpecBuilder().setContentType(ContentType.JSON).build();

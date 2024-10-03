@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.client.models.BatchResponse;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
@@ -863,5 +864,19 @@ public final class ErrorMessageHelper {
         String expectedToStr = expected.toString();
         return String.format("Wrong value in LoanDeteils/fixedLength. %nActual value is: %s %nExpected Value is: %s", actualToStr,
                 expectedToStr);
+    }
+
+    public static String wrongValueInLineInLoanTermVariations(final int line, final List<List<String>> actual,
+            final List<String> expected) {
+        final String actualValues = actual.stream().map(List::toString).collect(Collectors.joining(System.lineSeparator()));
+
+        return String.format(
+                "%nWrong value in loan term variations tab line %d.%nActual values in line (with the same term variation applicable from) are:%n%s%nExpected values in line:%n%s",
+                line, actualValues, expected);
+    }
+
+    public static String wrongNumberOfLinesInLoanTermVariations(final int actual, final int expected) {
+        return String.format("Number of lines in loan term variations is not correct. Actual value is: %d - Expected value is: %d", actual,
+                expected);
     }
 }

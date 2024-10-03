@@ -609,6 +609,17 @@
         },
         {
             "default": null,
+            "name": "loanTermVariations",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.loan.v1.LoanTermVariationsDataV1"
+                }
+            ]
+        },
+        {
+            "default": null,
             "name": "clientActiveLoanOptions",
             "type": [
                 "null",

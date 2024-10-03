@@ -146,6 +146,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanSchedul
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleCalculationPlatformService;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleHistoryReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanTermVariationsRepository;
 import org.apache.fineract.portfolio.loanaccount.service.GLIMAccountInfoReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
@@ -287,6 +288,7 @@ public class LoansApiResource {
     private final SqlValidator sqlValidator;
     private final LoanSummaryBalancesRepository loanSummaryBalancesRepository;
     private final ClientReadPlatformService clientReadPlatformService;
+    private final LoanTermVariationsRepository loanTermVariationsRepository;
 
     /*
      * This template API is used for loan approval, ideally this should be invoked on loan that are pending for
@@ -897,7 +899,8 @@ public class LoansApiResource {
         Collection<NoteData> notes = null;
         PortfolioAccountData linkedAccount = null;
         Collection<DisbursementData> disbursementData = null;
-        Collection<LoanTermVariationsData> emiAmountVariations = null;
+        List<LoanTermVariationsData> emiAmountVariations = null;
+        List<LoanTermVariationsData> loanTermVariations = null;
         Collection<LoanCollateralResponseData> loanCollateralManagements;
         Collection<LoanCollateralManagementData> loanCollateralManagementData = new ArrayList<>();
         CollectionData collectionData = this.delinquencyReadPlatformService.calculateLoanCollectionData(resolvedLoanId);
@@ -911,7 +914,8 @@ public class LoansApiResource {
                         DataTableApiConstant.transactionsAssociateParamName, DataTableApiConstant.chargesAssociateParamName,
                         DataTableApiConstant.guarantorsAssociateParamName, DataTableApiConstant.collateralAssociateParamName,
                         DataTableApiConstant.notesAssociateParamName, DataTableApiConstant.linkedAccountAssociateParamName,
-                        DataTableApiConstant.multiDisburseDetailsAssociateParamName, DataTableApiConstant.collectionAssociateParamName));
+                        DataTableApiConstant.multiDisburseDetailsAssociateParamName, DataTableApiConstant.collectionAssociateParamName,
+                        DataTableApiConstant.loanTermVariationsAssociateParamName));
             }
 
             ApiParameterHelper.excludeAssociationsForResponseIfProvided(exclude, associationParameters);
@@ -938,8 +942,13 @@ public class LoansApiResource {
             if (associationParameters.contains(DataTableApiConstant.emiAmountVariationsAssociateParamName)
                     || associationParameters.contains(DataTableApiConstant.repaymentScheduleAssociateParamName)) {
                 mandatoryResponseParameters.add(DataTableApiConstant.emiAmountVariationsAssociateParamName);
-                emiAmountVariations = this.loanReadPlatformService.retrieveLoanTermVariations(resolvedLoanId,
+                emiAmountVariations = this.loanTermVariationsRepository.findLoanTermVariationsByLoanIdAndTermType(resolvedLoanId,
                         LoanTermVariationType.EMI_AMOUNT.getValue());
+            }
+
+            if (associationParameters.contains(DataTableApiConstant.loanTermVariationsAssociateParamName)) {
+                mandatoryResponseParameters.add(DataTableApiConstant.loanTermVariationsAssociateParamName);
+                loanTermVariations = this.loanTermVariationsRepository.findLoanTermVariationsByLoanId(resolvedLoanId);
             }
 
             if (associationParameters.contains(DataTableApiConstant.repaymentScheduleAssociateParamName)) {
@@ -1118,7 +1127,8 @@ public class LoansApiResource {
                 interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers, loanPurposeOptions,
                 loanCollateralOptions, calendarOptions, notes, accountLinkingOptions, linkedAccount, disbursementData, emiAmountVariations,
                 overdueCharges, paidInAdvanceTemplate, interestRatesPeriods, clientActiveLoanOptions, rates, isRatesEnabled, collectionData,
-                LoanScheduleType.getValuesAsEnumOptionDataList(), LoanScheduleProcessingType.getValuesAsEnumOptionDataList());
+                LoanScheduleType.getValuesAsEnumOptionDataList(), LoanScheduleProcessingType.getValuesAsEnumOptionDataList(),
+                loanTermVariations);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);

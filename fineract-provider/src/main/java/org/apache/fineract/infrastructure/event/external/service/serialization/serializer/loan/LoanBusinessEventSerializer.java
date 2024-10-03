@@ -20,7 +20,6 @@ package org.apache.fineract.infrastructure.event.external.service.serialization.
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.generic.GenericContainer;
 import org.apache.commons.collections4.CollectionUtils;
@@ -86,9 +85,10 @@ public class LoanBusinessEventSerializer implements BusinessEventSerializer {
         List<LoanInstallmentDelinquencyBucketDataV1> installmentsDelinquencyData = installmentLevelDelinquencyEventProducer
                 .calculateInstallmentLevelDelinquencyData(event.get(), data.getCurrency());
 
-        Set<LoanTermVariations> activeLoanTermVariations = event.get().getActiveLoanTermVariations();
-        if (activeLoanTermVariations != null) {
-            data.setEmiAmountVariations(activeLoanTermVariations.stream().map(LoanTermVariations::toData).toList());
+        List<LoanTermVariations> activeLoanTermVariations = event.get().getActiveLoanTermVariations();
+
+        if (!activeLoanTermVariations.isEmpty()) {
+            data.setLoanTermVariations(activeLoanTermVariations.stream().map(LoanTermVariations::toData).toList());
         }
 
         LoanAccountDataV1 result = mapper.map(data);
