@@ -100,7 +100,6 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentScheduleInsta
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleAccrualData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanSummaryData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionRelationData;
@@ -114,7 +113,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTra
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSubStatus;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
@@ -1738,33 +1736,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         final LoanDisbursementDetailMapper rm = new LoanDisbursementDetailMapper(sqlGenerator);
         final String sql = "select " + rm.schema() + " where dd.loan_id=? and dd.id=? group by dd.id, lc.amount_waived_derived";
         return this.jdbcTemplate.queryForObject(sql, rm, loanId, disbursementId); // NOSONAR
-    }
-
-    @Override
-    public Collection<LoanTermVariationsData> retrieveLoanTermVariations(Long loanId, Integer termType) {
-        final LoanTermVariationsMapper rm = new LoanTermVariationsMapper();
-        final String sql = "select " + rm.schema() + " where tv.loan_id=? and tv.term_type=?";
-        return this.jdbcTemplate.query(sql, rm, loanId, termType); // NOSONAR
-    }
-
-    private static final class LoanTermVariationsMapper implements RowMapper<LoanTermVariationsData> {
-
-        public String schema() {
-            return "tv.id as id,tv.applicable_date as variationApplicableFrom,tv.decimal_value as decimalValue, tv.date_value as dateValue, tv.is_specific_to_installment as isSpecificToInstallment "
-                    + "from m_loan_term_variations tv";
-        }
-
-        @Override
-        public LoanTermVariationsData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-            final Long id = rs.getLong("id");
-            final LocalDate variationApplicableFrom = JdbcSupport.getLocalDate(rs, "variationApplicableFrom");
-            final BigDecimal decimalValue = rs.getBigDecimal("decimalValue");
-            final LocalDate dateValue = JdbcSupport.getLocalDate(rs, "dateValue");
-            final boolean isSpecificToInstallment = rs.getBoolean("isSpecificToInstallment");
-
-            return new LoanTermVariationsData(id, LoanEnumerations.loanVariationType(LoanTermVariationType.EMI_AMOUNT),
-                    variationApplicableFrom, decimalValue, dateValue, isSpecificToInstallment);
-        }
     }
 
     @Override

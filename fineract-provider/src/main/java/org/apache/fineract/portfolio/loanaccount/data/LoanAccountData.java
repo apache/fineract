@@ -194,6 +194,7 @@ public class LoanAccountData {
     private Boolean canDisburse;
 
     private Collection<LoanTermVariationsData> emiAmountVariations;
+    private Collection<LoanTermVariationsData> loanTermVariations;
     private Collection<LoanAccountSummaryData> clientActiveLoanOptions;
     private Boolean canUseForTopup;
     // TODO: avoid prefix "is"
@@ -521,7 +522,7 @@ public class LoanAccountData {
             final PaidInAdvanceData paidInAdvance, Collection<InterestRatePeriodData> interestRatesPeriods,
             final Collection<LoanAccountSummaryData> clientActiveLoanOptions, final List<RateData> rates, final Boolean isRatesEnabled,
             final CollectionData delinquent, final List<EnumOptionData> loanScheduleTypeOptions,
-            final List<EnumOptionData> loanScheduleProcessingTypeOptions) {
+            final List<EnumOptionData> loanScheduleProcessingTypeOptions, final List<LoanTermVariationsData> loanTermVariations) {
 
         // TODO: why are these variables 'calendarData', 'chargeTemplate' never used (see original private constructor)
 
@@ -541,7 +542,7 @@ public class LoanAccountData {
                 .setOverdueCharges(overdueCharges).setPaidInAdvance(paidInAdvance).setInterestRatesPeriods(interestRatesPeriods)
                 .setClientActiveLoanOptions(clientActiveLoanOptions).setRates(rates).setIsRatesEnabled(isRatesEnabled)
                 .setDelinquent(delinquent).setLoanScheduleTypeOptions(loanScheduleTypeOptions)
-                .setLoanScheduleProcessingTypeOptions(loanScheduleProcessingTypeOptions);
+                .setLoanScheduleProcessingTypeOptions(loanScheduleProcessingTypeOptions).setLoanTermVariations(loanTermVariations);
     }
 
     public LoanAccountData associationsAndTemplate(final Collection<LoanProductData> productOptions,

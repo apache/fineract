@@ -123,7 +123,7 @@ public class JobExecutionRepository {
 
     public Long getNotCompletedPartitionsCount(Long jobExecutionId, String partitionerStepName) {
         return namedParameterJdbcTemplate.queryForObject("""
-                    SELECT COUNT(bse.STEP_EXECUTION_ID)
+                    SELECT COUNT(BSE.STEP_EXECUTION_ID)
                     FROM BATCH_STEP_EXECUTION BSE
                     WHERE
                         BSE.JOB_EXECUTION_ID = :jobExecutionId

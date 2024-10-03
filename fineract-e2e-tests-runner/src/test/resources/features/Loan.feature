@@ -5728,3 +5728,32 @@ Feature: Loan
       | 5  | 31   | 01 June 2024     |                  | 16.93           | 16.81         | 0.2      | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
       | 6  | 30   | 01 July 2024     |                  | 0.0             | 16.93         | 0.1      | 0.0  | 0.0       | 17.03 | 0.0   | 0.0        | 0.0  | 17.03       |
     When Admin removes "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
+
+  Scenario: Loan Details Emi Amount Variations - AssociationsAll
+    Given Global configuration "is-interest-to-be-recovered-first-when-greater-than-emi" is enabled
+    Given Global configuration "enable-business-date" is enabled
+    When Admin sets the business date to "1 January 2023"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with emi and the following data:
+      | LoanProduct                                                                                     | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1_INTEREST_DECLINING_BALANCE_SAR_RECALCULATION_SAME_AS_REPAYMENT_COMPOUNDING_NONE_MULTIDISB   | 01 January 2023   | 10000          | 12                     | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+    And Admin successfully approves the loan on "1 January 2023" with "100" amount and expected disbursement date on "1 January 2023"
+    When Admin successfully disburse the loan on "1 January 2023" with "100" EUR transaction amount and "50" fixed emi amount
+    Then Loan emi amount variations has 1 variation, with the following data:
+      | Term Type Id | Term Type Code         | Term Type Value | Applicable From | Decimal Value | Date Value      | Is Specific To Installment | Is Processed |
+      | 1            | loanTermType.emiAmount | emiAmount       | 01 January 2023 | 50.0          |                 | false                      |              |
+
+  Scenario: Loan Details Loan Term Variations
+    Given Global configuration "is-interest-to-be-recovered-first-when-greater-than-emi" is enabled
+    Given Global configuration "enable-business-date" is enabled
+    When Admin sets the business date to "1 January 2023"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with emi and the following data:
+      | LoanProduct                                                                                     | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1_INTEREST_DECLINING_BALANCE_SAR_RECALCULATION_SAME_AS_REPAYMENT_COMPOUNDING_NONE_MULTIDISB   | 01 January 2023   | 10000          | 12                     | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+    And Admin successfully approves the loan on "1 January 2023" with "100" amount and expected disbursement date on "1 January 2023"
+    When Admin successfully disburse the loan on "1 January 2023" with "100" EUR transaction amount, "50" EUR fixed emi amount and adjust repayment date on "15 January 2023"
+    Then Loan term variations has 2 variation, with the following data:
+      | Term Type Id | Term Type Code         | Term Type Value | Applicable From  | Decimal Value | Date Value      | Is Specific To Installment | Is Processed |
+      | 1            | loanTermType.emiAmount | emiAmount       | 01 January 2023  | 50.0          |                 | false                      |              |
+      | 4            | loanTermType.dueDate   | dueDate         | 01 February 2023 | 50.0          | 15 January 2023 | false                      |              |

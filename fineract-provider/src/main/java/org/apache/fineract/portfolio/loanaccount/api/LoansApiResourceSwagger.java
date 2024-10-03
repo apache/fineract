@@ -432,11 +432,6 @@ final class LoansApiResourceSwagger {
 
             private GetLoansLoanIdSummary() {}
 
-            static final class GetLoansLoanIdEmiVariations {
-
-                private GetLoansLoanIdEmiVariations() {}
-            }
-
             static final class GetLoansLoanIdLinkedAccount {
 
                 private GetLoansLoanIdLinkedAccount() {}
@@ -606,7 +601,6 @@ final class LoansApiResourceSwagger {
             public Double maxOutstandingLoanBalance;
             @Schema(example = "false")
             public Boolean canDisburse;
-            public Set<GetLoansLoanIdEmiVariations> emiAmountVariations;
             @Schema(example = "true")
             public Boolean inArrears;
             @Schema(example = "false")
@@ -1072,6 +1066,38 @@ final class LoansApiResourceSwagger {
 
         }
 
+        static final class GetLoansLoanIdLoanTermVariations {
+
+            private GetLoansLoanIdLoanTermVariations() {}
+
+            static final class GetLoansLoanIdLoanTermEnumData {
+
+                private GetLoansLoanIdLoanTermEnumData() {}
+
+                @Schema(example = "1")
+                public Long id;
+                @Schema(example = "loanTermType.emiAmount")
+                public String code;
+                @Schema(example = "emiAmount")
+                public String value;
+            }
+
+            @Schema(example = "1")
+            public Long id;
+            @Schema(description = "Enum option data")
+            public GetLoansLoanIdLoanTermEnumData termType;
+            @Schema(example = "[2024, 1, 1]")
+            public LocalDate termVariationApplicableFrom;
+            @Schema(example = "200.000000")
+            public Double decimalValue;
+            @Schema(example = "[2024, 1, 1]")
+            public LocalDate dateValue;
+            @Schema(example = "false")
+            public boolean isSpecificToInstallment;
+            @Schema(example = "false")
+            public boolean isProcessed;
+        }
+
         @Schema(example = "1")
         public Long id;
         @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
@@ -1172,6 +1198,10 @@ final class LoansApiResourceSwagger {
         public EnumOptionData loanScheduleType;
         @Schema(example = "HORIZONTAL")
         public EnumOptionData loanScheduleProcessingType;
+        @Schema(description = "List of GetLoansLoanIdLoanTermVariations")
+        public List<GetLoansLoanIdLoanTermVariations> emiAmountVariations;
+        @Schema(description = "List of GetLoansLoanIdLoanTermVariations")
+        public List<GetLoansLoanIdLoanTermVariations> loanTermVariations;
     }
 
     @Schema(description = "GetLoansResponse")
@@ -1267,6 +1297,8 @@ final class LoansApiResourceSwagger {
         public BigDecimal disbursedAmountPercentageForDownPayment;
         @Schema(example = "false")
         public Boolean enableAutoRepaymentForDownPayment;
+        @Schema(example = "10.00")
+        public BigDecimal fixedEmiAmount;
 
         public List<PostLoansRequestChargeData> charges;
 
@@ -1588,6 +1620,10 @@ final class LoansApiResourceSwagger {
         public String withdrawnOnDate;
         @Schema(description = "List of PostLoansLoanIdDisbursementData")
         public List<PostLoansLoanIdDisbursementData> disbursementData;
+        @Schema(example = "500.00")
+        public BigDecimal fixedEmiAmount;
+        @Schema(example = "28 July 2022")
+        public String adjustRepaymentDate;
     }
 
     @Schema(description = "PostLoansLoanIdResponse")
