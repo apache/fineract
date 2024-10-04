@@ -90,15 +90,6 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 .ifPresent((repaymentPeriod) -> calculateEMIValueAndRateFactors(repaymentPeriod.getDueDate(), scheduleModel));
     }
 
-    // private static Predicate<EmiInterestPeriod> operationRelatedPreviousInterestPeriod(EmiRepaymentPeriod
-    // repaymentPeriod,
-    // LocalDate operationDate) {
-    // return interestPeriod -> operationDate.isAfter(interestPeriod.getFromDate())
-    // && (operationDate.isBefore(interestPeriod.getDueDate()) ||
-    // (repaymentPeriod.getDueDate().equals(interestPeriod.getDueDate())
-    // && !operationDate.isBefore(repaymentPeriod.getDueDate())));
-    // }
-
     @Override
     public void changeInterestRate(final ProgressiveLoanInterestScheduleModel scheduleModel, final LocalDate newInterestSubmittedOnDate,
             final BigDecimal newInterestRate) {
