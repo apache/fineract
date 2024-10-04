@@ -714,7 +714,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         oldTransaction.updateExternalId(null);
         oldTransaction.getLoanChargesPaid().clear();
         // Adding Replayed relation from newly created transaction to reversed transaction
-        oldTransaction.getLoanTransactionRelations()
+        newTransaction.getLoanTransactionRelations()
                 .add(LoanTransactionRelation.linkToTransaction(newTransaction, oldTransaction, LoanTransactionRelationTypeEnum.REPLAYED));
 
         // if chargeback is getting reverse-replayed, find the original transaction with CHARGEBACK relation and point
