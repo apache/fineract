@@ -72,6 +72,7 @@ import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
@@ -776,15 +777,34 @@ public final class LoanTransactionValidator {
         }
     }
 
-    public void validateActivityNotBeforeLastTransactionDate(final Loan loan, final LocalDate activityDate) {
+    public void validateActivityNotBeforeLastTransactionDate(final Loan loan, final LocalDate activityDate, final LoanEvent event) {
         if (!(loan.repaymentScheduleDetail().isInterestRecalculationEnabled() || loan.loanProduct().isHoldGuaranteeFunds())) {
             return;
         }
         LocalDate lastTransactionDate = loan.getLastUserTransactionDate();
         if (DateUtils.isAfter(lastTransactionDate, activityDate)) {
-            String errorMessage = "The date on which a repayment or waiver is made cannot be earlier than last transaction date";
-            String action = "repayment.or.waiver";
-            String postfix = "cannot.be.made.before.last.transaction.date";
+            String errorMessage = null;
+            String action = null;
+            String postfix = null;
+            switch (event) {
+                case LOAN_REPAYMENT_OR_WAIVER -> {
+                    errorMessage = "The date on which a repayment or waiver is made cannot be earlier than last transaction date";
+                    action = "repayment.or.waiver";
+                    postfix = "cannot.be.made.before.last.transaction.date";
+                }
+                case WRITE_OFF_OUTSTANDING -> {
+                    errorMessage = "The date on which a write off is made cannot be earlier than last transaction date";
+                    action = "writeoff";
+                    postfix = "cannot.be.made.before.last.transaction.date";
+                }
+                case LOAN_CHARGE_PAYMENT -> {
+                    errorMessage = "The date on which a charge payment is made cannot be earlier than last transaction date";
+                    action = "charge.payment";
+                    postfix = "cannot.be.made.before.last.transaction.date";
+                }
+                default -> {
+                }
+            }
             throw new InvalidLoanStateTransitionException(action, postfix, errorMessage, lastTransactionDate);
         }
     }
@@ -831,7 +851,7 @@ public final class LoanTransactionValidator {
         validateLoanHasNoLaterChargeRefundTransactionToReverseOrCreateATransaction(loan, transactionDate, "created");
 
         validateClientOfficeJoiningDateIsBeforeTransactionDate(loan, transactionDate);
-        validateActivityNotBeforeLastTransactionDate(loan, transactionDate);
+        validateActivityNotBeforeLastTransactionDate(loan, transactionDate, LoanEvent.LOAN_REPAYMENT_OR_WAIVER);
         HolidayDetailDTO holidayDetailDTO = loanUtilService.constructHolidayDTO(loan.getOfficeId(), loan.getDisbursementDate());
         validateRepaymentDateIsOnHoliday(transactionDate, holidayDetailDTO.isAllowTransactionsOnHoliday(), holidayDetailDTO.getHolidays());
         validateRepaymentDateIsOnNonWorkingDay(transactionDate, holidayDetailDTO.getWorkingDays(),

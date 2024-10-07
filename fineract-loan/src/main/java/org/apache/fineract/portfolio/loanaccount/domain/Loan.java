@@ -2665,12 +2665,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
             final LoanLifecycleStateMachine loanLifecycleStateMachine, final LoanTransaction transactionForAdjustment,
             final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
             final ScheduleGeneratorDTO scheduleGeneratorDTO, final ExternalId reversalExternalId) {
-        HolidayDetailDTO holidayDetailDTO = scheduleGeneratorDTO.getHolidayDetailDTO();
-        validateActivityNotBeforeLastTransactionDate(LoanEvent.LOAN_REPAYMENT_OR_WAIVER, transactionForAdjustment.getTransactionDate());
-        validateRepaymentDateIsOnHoliday(newTransactionDetail.getTransactionDate(), holidayDetailDTO.isAllowTransactionsOnHoliday(),
-                holidayDetailDTO.getHolidays());
-        validateRepaymentDateIsOnNonWorkingDay(newTransactionDetail.getTransactionDate(), holidayDetailDTO.getWorkingDays(),
-                holidayDetailDTO.isAllowTransactionsOnNonWorkingDay());
 
         ChangedTransactionDetail changedTransactionDetail = null;
 
