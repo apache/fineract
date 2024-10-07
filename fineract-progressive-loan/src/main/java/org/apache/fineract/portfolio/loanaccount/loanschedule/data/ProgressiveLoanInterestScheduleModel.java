@@ -59,10 +59,11 @@ public class ProgressiveLoanInterestScheduleModel {
     }
 
     private ProgressiveLoanInterestScheduleModel(List<EmiRepaymentPeriod> repaymentPeriods, final List<EmiInterestPeriod> interestPeriods,
-            LoanProductRelatedDetail loanProductRelatedDetail, Integer installmentAmountInMultiplesOf, MathContext mc) {
+            final List<EmiInterestRate> interestRates, LoanProductRelatedDetail loanProductRelatedDetail,
+            Integer installmentAmountInMultiplesOf, MathContext mc) {
         this.repaymentPeriods = repaymentPeriods;
         this.interestPeriods = interestPeriods;
-        this.interestRates = new ArrayList<>();
+        this.interestRates = interestRates;
         this.loanProductRelatedDetail = loanProductRelatedDetail;
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
         this.mc = mc;
@@ -81,8 +82,8 @@ public class ProgressiveLoanInterestScheduleModel {
     public ProgressiveLoanInterestScheduleModel deepCopy() {
         final var repaymentPeriodCopies = copyRepaymentPeriods(this.repaymentPeriods);
         final var interestPeriodCopies = copyInterestPeriods(this.interestPeriods, repaymentPeriodCopies);
-        return new ProgressiveLoanInterestScheduleModel(repaymentPeriodCopies, interestPeriodCopies, loanProductRelatedDetail,
-                installmentAmountInMultiplesOf, mc);
+        return new ProgressiveLoanInterestScheduleModel(repaymentPeriodCopies, interestPeriodCopies, new ArrayList<>(this.interestRates),
+                loanProductRelatedDetail, installmentAmountInMultiplesOf, mc);
     }
 
     private List<EmiInterestPeriod> copyInterestPeriods(final List<EmiInterestPeriod> interestPeriods,
