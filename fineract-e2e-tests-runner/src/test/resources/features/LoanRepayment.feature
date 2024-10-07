@@ -3377,3 +3377,21 @@ Feature: LoanRepayment
       |    |      | 23 July 2024   |                | 111.92          |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
       | 1  | 31   | 23 August 2024 | 23 August 2024 | 0.0             | 111.92        | 0.0      | 0.0  | 5.0       | 116.92 | 116.92 | 114.72     | 0.0  | 0.0         |
       | 2  | 2    | 25 August 2024 | 23 August 2024 | 0.0             | 0.0           | 0.0      | 0.0  | 7.8       | 7.8    | 7.8    | 7.8        | 0.0  | 0.0         |
+
+  @AdvancedPaymentAllocation @ProgressiveLoanSchedule
+  Scenario: Progressive loan, undo earlier repayment
+    Given Global configuration "enable-business-date" is enabled
+    When Admin sets the business date to "23 June 2024"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                  | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_TILL_PRECLOSE | 23 June 2024      | 400            | 7.0                    | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "23 June 2024" with "400" amount and expected disbursement date on "23 June 2024"
+    When Admin successfully disburse the loan on "23 June 2024" with "400" EUR transaction amount
+    When Admin sets the business date to "24 June 2024"
+    And Customer makes "AUTOPAY" repayment on "24 June 2024" with 100 EUR transaction amount
+    When Admin sets the business date to "10 September 2024"
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "10 September 2024" with 400 EUR transaction amount and self-generated Idempotency key
+    When Admin makes Credit Balance Refund transaction on "10 September 2024" with 91.21 EUR transaction amount
+    When Customer undo "1"th "Repayment" transaction made on "24 June 2024"
+    Then Loan status will be "ACTIVE"
