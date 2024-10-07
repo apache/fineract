@@ -525,8 +525,8 @@ class ProgressiveEMICalculatorTest {
                 Money.of(monetaryCurrency, BigDecimal.valueOf(-15.77)));
 
         details = emiCalculator.getPayableDetails(interestSchedule, LocalDate.of(2024, 7, 1), LocalDate.of(2024, 7, 1)).get();
-        Assertions.assertEquals(15.77, toDouble(details.getOutstandingBalance().getAmount()));
-        Assertions.assertEquals(0.0, toDouble(details.getCorrectionAmount().getAmount()));
+        Assertions.assertEquals(0.0, toDouble(details.getOutstandingBalance().getAmount()));
+        Assertions.assertEquals(-15.77, toDouble(details.getCorrectionAmount().getAmount()));
         Assertions.assertEquals(15.77, toDouble(details.getPrincipalDue().getAmount()));
         Assertions.assertEquals(0.0, toDouble(details.getInterestDue().getAmount()));
 
@@ -534,7 +534,6 @@ class ProgressiveEMICalculatorTest {
         checkDisbursementOnPeriod(interestSchedule, 0, disbursedAmount);
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
         checkPeriod(interestSchedule, 1, 0, 17.01, 0.002816091954, 0.24, 0.24, 16.77, 66.80);
-        checkPeriod(interestSchedule, 5, 0, 15.77, 0.003017241379, 0.0, 0.0, 15.77, 0.0);
         checkPeriod(interestSchedule, 5, 0, 15.77, 0.003017241379, 0.0, 0.0, 15.77, 0.0);
         checkPeriod(interestSchedule, 5, 1, 15.77, 0.005833333333, 0.0, 0.0, 15.77, 0.0);
         checkPeriod(interestSchedule, 5, 2, 15.77, 0.005833333333, 0.0, 0.0, 15.77, 0.0);
@@ -1142,17 +1141,15 @@ class ProgressiveEMICalculatorTest {
     }
 
     private static void checkPeriod(final ProgressiveLoanInterestScheduleModel interestScheduleModel, final int repaymentIdx,
-            final Integer interestIdx, final double emiValue, final double rateFactorMinus1, final double interestDue,
+            final int interestIdx, final double emiValue, final double rateFactorMinus1, final double interestDue,
             final double interestDueCumulated, final double principalDue, final double remaingBalance) {
         final var repaymentPeriod = interestScheduleModel.repaymentPeriods().get(repaymentIdx);
-        final var interestPeriod = interestIdx != null && interestIdx < repaymentPeriod.getInterestPeriods().size()
-                ? repaymentPeriod.getInterestPeriods().get(interestIdx)
-                : null;
+        final var interestPeriod = repaymentPeriod.getInterestPeriods().get(interestIdx);
 
         Assertions.assertEquals(emiValue, toDouble(repaymentPeriod.getEqualMonthlyInstallment().getAmount()));
-        Assertions.assertEquals(rateFactorMinus1, interestPeriod != null ? toDouble(interestPeriod.getRateFactorMinus1()) : null);
-        Assertions.assertEquals(interestDue, interestPeriod != null ? toDouble(interestPeriod.getInterestDue().getAmount()) : null);
-        Assertions.assertEquals(interestDueCumulated, interestPeriod != null ? toDouble(repaymentPeriod.getInterestDue().getAmount()) : null);
+        Assertions.assertEquals(rateFactorMinus1, toDouble(interestPeriod.getRateFactorMinus1()));
+        Assertions.assertEquals(interestDue, toDouble(interestPeriod.getInterestDue().getAmount()));
+        Assertions.assertEquals(interestDueCumulated, toDouble(repaymentPeriod.getInterestDue().getAmount()));
         Assertions.assertEquals(principalDue, toDouble(repaymentPeriod.getPrincipalDue().getAmount()));
         Assertions.assertEquals(remaingBalance, toDouble(repaymentPeriod.getRemainingBalance().getAmount()));
     }

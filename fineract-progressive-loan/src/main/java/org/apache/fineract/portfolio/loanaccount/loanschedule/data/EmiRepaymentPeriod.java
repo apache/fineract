@@ -31,12 +31,14 @@ import lombok.Setter;
 import lombok.ToString;
 import org.apache.fineract.organisation.monetary.domain.Money;
 
-@ToString(exclude = { "previous", "next" })
-@EqualsAndHashCode(exclude = { "previous", "next", "interestPeriodsAll" })
+@ToString
+@EqualsAndHashCode(exclude = { "previous", "next" })
 public class EmiRepaymentPeriod {
 
+    @ToString.Exclude
     private final EmiRepaymentPeriod previous;
     @Setter
+    @ToString.Exclude
     private EmiRepaymentPeriod next;
 
     @Getter
@@ -46,7 +48,6 @@ public class EmiRepaymentPeriod {
 
     @Getter
     private List<EmiInterestPeriod> interestPeriods;
-    private List<EmiInterestPeriod> interestPeriodsAll;
 
     @Getter
     @Setter
@@ -84,7 +85,6 @@ public class EmiRepaymentPeriod {
     }
 
     public void updateInterestPeriods(final List<EmiInterestPeriod> interestPeriods) {
-        this.interestPeriodsAll = interestPeriods;
         this.interestPeriods = interestPeriods.stream()
                 .filter(interestPeriod -> interestPeriod.getRepaymentPeriod().equals(this)
                         || interestPeriod.getRepaymentPeriod().getDueDate().equals(this.dueDate))
@@ -118,10 +118,8 @@ public class EmiRepaymentPeriod {
     }
 
     public Money getDisbursedAmountInPeriod() {
-        return interestPeriodsAll.stream()
-                .filter(interestPeriod -> this.equals(interestPeriod.getOriginalRepaymentPeriod()))
-                .map(EmiInterestPeriod::getDisbursedAmount)
-                .reduce(Money.zero(equalMonthlyInstallment.getCurrency()), Money::plus);
+        return interestPeriods.stream().map(EmiInterestPeriod::getDisbursedAmount).reduce(Money.zero(equalMonthlyInstallment.getCurrency()),
+                Money::plus);
     }
 
     public Money getInterestDue() {
@@ -134,9 +132,7 @@ public class EmiRepaymentPeriod {
     }
 
     public Money getCorrectionAmount() {
-        return interestPeriodsAll.stream()
-                .filter(interestPeriod -> this.equals(interestPeriod.getOriginalRepaymentPeriod()))
-                .map(EmiInterestPeriod::getCorrectionAmount)
+        return interestPeriods.stream().map(EmiInterestPeriod::getCorrectionAmount)
                 .reduce(Money.zero(equalMonthlyInstallment.getCurrency()), Money::plus);
     }
 

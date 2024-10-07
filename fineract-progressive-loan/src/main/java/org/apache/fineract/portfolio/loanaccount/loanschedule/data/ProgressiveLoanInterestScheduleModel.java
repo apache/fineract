@@ -229,42 +229,22 @@ public class ProgressiveLoanInterestScheduleModel {
                 .findFirst();
     }
 
-//    private Consumer<EmiRepaymentPeriod> updateInterestPeriodOnRepaymentPeriod(final LocalDate balanceChangeDate,
-//            final Money disbursedAmount, final Money correctionAmount, final boolean tillBalanceChangeDate) {
-//        return repaymentPeriod -> {
-//            if (tillBalanceChangeDate && balanceChangeDate.isEqual(repaymentPeriod.getFromDate())) {
-//                insertInterestPeriodIntoStart(repaymentPeriod, disbursedAmount, correctionAmount);
-//                return;
-//            }
-//
-//            final var interestPeriodOptional = findInterestPeriodForBalanceChange(repaymentPeriod, balanceChangeDate);
-//            if (interestPeriodOptional.isPresent()) {
-//                interestPeriodOptional.get().addDisbursedAmount(disbursedAmount);
-//                interestPeriodOptional.get().addCorrectionAmount(correctionAmount);
-//            } else {
-//                insertInterestPeriod(repaymentPeriod, balanceChangeDate, disbursedAmount, correctionAmount);
-//            }
-//        };
-//    }
-
-    private void updateInterestPeriodOnRepaymentPeriod(final LocalDate balanceChangeDate,
+    private Consumer<EmiRepaymentPeriod> updateInterestPeriodOnRepaymentPeriod(final LocalDate balanceChangeDate,
             final Money disbursedAmount, final Money correctionAmount, final boolean tillBalanceChangeDate) {
-        interestPeriods.stream()
-                .filter(interestPeriod -> !interestPeriod.getFromDate().isBefore(balanceChangeDate))
-                .findFirst()
-                .ifPresent(interestPeriod -> {
-                    if (tillBalanceChangeDate && balanceChangeDate.isEqual(interestPeriod.getOriginalRepaymentPeriod().getFromDate())) {
-                        insertInterestPeriodIntoStart(interestPeriod, disbursedAmount, correctionAmount);
-                        return;
-                    }
+        return repaymentPeriod -> {
+            if (tillBalanceChangeDate && balanceChangeDate.isEqual(repaymentPeriod.getFromDate())) {
+                insertInterestPeriodIntoStart(repaymentPeriod, disbursedAmount, correctionAmount);
+                return;
+            }
 
-                    if (!interestPeriod.getFromDate().isEqual(balanceChangeDate)) {
-                        insertInterestPeriod(repaymentPeriod, balanceChangeDate, disbursedAmount, correctionAmount);
-                        return;
-                    }
-                    interestPeriod.addDisbursedAmount(disbursedAmount);
-                    interestPeriod.addCorrectionAmount(correctionAmount);
-                });
+            final var interestPeriodOptional = findInterestPeriodForBalanceChange(repaymentPeriod, balanceChangeDate);
+            if (interestPeriodOptional.isPresent()) {
+                interestPeriodOptional.get().addDisbursedAmount(disbursedAmount);
+                interestPeriodOptional.get().addCorrectionAmount(correctionAmount);
+            } else {
+                insertInterestPeriod(repaymentPeriod, balanceChangeDate, disbursedAmount, correctionAmount);
+            }
+        };
     }
 
     Optional<EmiInterestPeriod> findInterestPeriodForBalanceChange(final EmiRepaymentPeriod repaymentPeriod,
@@ -301,17 +281,14 @@ public class ProgressiveLoanInterestScheduleModel {
         repaymentPeriod.updateInterestPeriods(interestPeriods);
     }
 
-    void insertInterestPeriodIntoStart(final EmiInterestPeriod interestPeriod, final Money disbursedAmount,
+    void insertInterestPeriodIntoStart(final EmiRepaymentPeriod repaymentPeriod, final Money disbursedAmount,
             final Money correctionAmount) {
         final Money zeroAmount = Money.zero(disbursedAmount.getCurrency());
-        // interestPeriod FromDate is after disb.date because this case when disbursement date is different then interest
+        // interestPeriodFromDate is after disb.date because this case when disbursement date is different then interest
         // we always have at least one period
-//        final EmiInterestPeriod selectedInterestPeriod = repaymentPeriod.getInterestPeriods().stream()
-//                .filter(ip -> ip.getFromDate().equals(repaymentPeriod.getFromDate())).findFirst()
-//                .orElse(repaymentPeriod.getInterestPeriods().get(0));
-
-        // TODO: innen folyt. kov.
-        final EmiInterestPeriod selectedInterestPeriod = interestPeriod;
+        final EmiInterestPeriod selectedInterestPeriod = repaymentPeriod.getInterestPeriods().stream()
+                .filter(ip -> ip.getFromDate().equals(repaymentPeriod.getFromDate())).findFirst()
+                .orElse(repaymentPeriod.getInterestPeriods().get(0));
 
         final LocalDate interestPeriodDueDate = selectedInterestPeriod.getFromDate();
         final var newInterestPeriod = new EmiInterestPeriod(selectedInterestPeriod.getRepaymentPeriod(),

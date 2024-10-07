@@ -32,6 +32,7 @@ public class EmiInterestPeriod implements Comparable<EmiInterestPeriod> {
 
     @ToString.Exclude
     private EmiRepaymentPeriod repaymentPeriod;
+
     @ToString.Exclude
     private EmiRepaymentPeriod originalRepaymentPeriod;
 
