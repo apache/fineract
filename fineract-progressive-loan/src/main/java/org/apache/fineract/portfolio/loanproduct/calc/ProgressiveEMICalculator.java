@@ -119,6 +119,16 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     }
 
     @Override
+    public void payInterest(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate repaymentPeriodDueDate, LocalDate transactionDate, Money interestAmount) {
+
+    }
+
+    @Override
+    public void payPrincipal(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate repaymentPeriodDueDate, LocalDate transactionDate, Money principalAmount) {
+
+    }
+
+    @Override
     public Optional<EmiRepaymentPeriod> getPayableDetails(final ProgressiveLoanInterestScheduleModel scheduleModel,
             final LocalDate periodDueDate, final LocalDate payDate) {
         return scheduleModel.deepCopy().insertVirtualInterestPeriod(periodDueDate, payDate).stream().peek(repaymentPeriod -> {
