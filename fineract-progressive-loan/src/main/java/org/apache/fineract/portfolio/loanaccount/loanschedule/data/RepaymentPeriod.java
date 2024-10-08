@@ -124,4 +124,8 @@ public class RepaymentPeriod {
     public Money getUnrecognizedInterest() {
         return getCalculatedDueInterest().minus(getDueInterest());
     }
+
+    public boolean isLast() {
+        return next == null;
+    }
 }

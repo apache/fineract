@@ -577,22 +577,9 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             balanceCorrection = balanceCorrection.plus(interestPeriod.getCorrectionAmount());
             // }
 
-            final boolean cumulatedInterestAndBalanceChangeIsGreaterThanEmiValue = balanceCorrection //
-                    .abs() //
-                    .plus(cumulatedInterest) //
-                    .plus(calculatedInterest) //
-                    .isGreaterThan(repaymentPeriod.getEmi()); //
-            final boolean shouldMoveToNextRepaymentPeriod = (!repaymentPeriod.isLastPeriod()
-                    && cumulatedInterestAndBalanceChangeIsGreaterThanEmiValue) || moveAllTheRestAsWell;
-            if (shouldMoveToNextRepaymentPeriod) {
-                balanceCorrection = balanceCorrection.minus(interestPeriod.getCorrectionAmount());
-                movedInterestPeriods.add(interestPeriod);
-                moveInterestPeriodToNextRepaymentPeriod(interestPeriod);
-                moveAllTheRestAsWell = true;
-            } else {
+
                 cumulatedInterest = cumulatedInterest.plus(calculatedInterest);
                 outstandingBalance = outstandingBalanceForInterestCalculation;
-            }
         }
 
         repaymentPeriod.getInterestPeriods().removeAll(movedInterestPeriods);
@@ -608,14 +595,6 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         final Money remainingBalance = outstandingBalance.minus(calculatedPrincipal).minus(balanceCorrection);
         repaymentPeriod.setPrincipalDue(calculatedPrincipal);
         repaymentPeriod.setRemainingBalance(remainingBalance);
-    }
-
-    void moveInterestPeriodToNextRepaymentPeriod(final InterestPeriod interestPeriod) {
-        interestPeriod.getRepaymentPeriod().getNext().ifPresent(nextRepaymentPeriod -> {
-            interestPeriod.setRepaymentPeriod(nextRepaymentPeriod);
-            nextRepaymentPeriod.addInterestPeriod(interestPeriod);
-            interestPeriod.setCorrectionAmount(interestPeriod.getCorrectionAmount().zero());
-        });
     }
 
     @Override
