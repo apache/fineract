@@ -100,8 +100,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     @Override
     public void changeInterestRate(final ProgressiveLoanInterestScheduleModel scheduleModel, final LocalDate newInterestSubmittedOnDate,
             final BigDecimal newInterestRate) {
-        var interestPeriod = scheduleModel.addInterestRate(newInterestSubmittedOnDate, newInterestRate);
-        calculateEMIValueAndRateFactors(interestPeriod.getRepaymentPeriod().getDueDate(), scheduleModel);
+        var repaymentPeriod = scheduleModel.addInterestRate(newInterestSubmittedOnDate, newInterestRate);
+        calculateEMIValueAndRateFactors(repaymentPeriod.getDueDate(), scheduleModel);
     }
 
     @Override
@@ -222,8 +222,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
     void calculateRateFactorMinus1ForRepaymentPeriod(final RepaymentPeriod repaymentPeriod,
             final ProgressiveLoanInterestScheduleModel scheduleModel) {
-        repaymentPeriod.getInterestPeriods().forEach(interestPeriod -> interestPeriod
-                .setRateFactorMinus1(calculateRateFactorMinus1PerPeriod(repaymentPeriod, interestPeriod, scheduleModel)));
+        final var interestPeriod = new InterestPeriod(repaymentPeriod, repaymentPeriod.getFromDate(), repaymentPeriod.getDueDate(), null, null);
+        repaymentPeriod.setRateFactor(calculateRateFactorMinus1PerPeriod(repaymentPeriod, interestPeriod, scheduleModel));
     }
 
     /**
@@ -244,7 +244,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         final BigDecimal actualDaysInPeriod = BigDecimal
                 .valueOf(DateUtils.getDifferenceInDays(interestPeriod.getFromDate(), interestPeriod.getDueDate()));
         final BigDecimal calculatedDaysInPeriod = BigDecimal.valueOf(DateUtils.getDifferenceInDays(
-                interestPeriod.getOriginalRepaymentPeriod().getFromDate(), interestPeriod.getOriginalRepaymentPeriod().getDueDate()));
+                repaymentPeriod.getFromDate(), repaymentPeriod.getDueDate()));
         final int numberOfYearsDifferenceInPeriod = interestPeriod.getDueDate().getYear() - interestPeriod.getFromDate().getYear();
         final boolean partialPeriodCalculationNeeded = daysInYearType == DaysInYearType.ACTUAL && numberOfYearsDifferenceInPeriod > 0;
 
