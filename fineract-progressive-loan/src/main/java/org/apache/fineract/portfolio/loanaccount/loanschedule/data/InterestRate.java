@@ -22,13 +22,13 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import org.jetbrains.annotations.NotNull;
 
-public record EmiInterestRate(LocalDate effectiveFrom, //
-        LocalDate validFrom, //
-        BigDecimal interestRate //
-) implements Comparable<EmiInterestRate> {
+public record InterestRate(LocalDate effectiveFrom, //
+                           LocalDate validFrom, //
+                           BigDecimal interestRate //
+) implements Comparable<InterestRate> {
 
     @Override
-    public int compareTo(@NotNull EmiInterestRate o) {
+    public int compareTo(@NotNull InterestRate o) {
         return this.effectiveFrom().compareTo(o.effectiveFrom());
     }
 }

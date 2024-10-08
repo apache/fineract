@@ -72,6 +72,22 @@ public class RepaymentPeriod {
         getInterestPeriods().add(new InterestPeriod(this, getFromDate(), getDueDate(), getZero(), getZero()));
     }
 
+    public RepaymentPeriod(RepaymentPeriod repaymentPeriod,RepaymentPeriod previous) {
+        this.previous = previous;
+        if(previous != null) {
+            previous.setNext(this);
+        }
+        this.fromDate = repaymentPeriod.fromDate;
+        this.dueDate = repaymentPeriod.dueDate;
+        this.emi = repaymentPeriod.emi;
+        this.rateFactor = repaymentPeriod.rateFactor;
+        this.interestPeriods = new ArrayList<>();
+        //There is always at least 1 interest period, by default with same from-due date as repayment period
+        for (var interestPeriod : repaymentPeriod.interestPeriods) {
+            interestPeriods.add(new InterestPeriod(interestPeriod, this));
+        }
+    }
+
     public Optional<RepaymentPeriod> getPrevious() {
         return Optional.ofNullable(previous);
     }

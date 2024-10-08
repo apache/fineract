@@ -24,15 +24,13 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
+
 import lombok.Data;
 import lombok.experimental.Accessors;
-import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 
@@ -41,8 +39,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail
 public class ProgressiveLoanInterestScheduleModel {
 
     private final List<RepaymentPeriod> repaymentPeriods;
-    private final List<InterestPeriod> interestPeriods;
-    private final List<EmiInterestRate> interestRates;
+    private final List<InterestRate> interestRates;
     private final LoanProductRelatedDetail loanProductRelatedDetail;
     private final Integer installmentAmountInMultiplesOf;
     private final MathContext mc;
@@ -50,84 +47,35 @@ public class ProgressiveLoanInterestScheduleModel {
     public ProgressiveLoanInterestScheduleModel(List<RepaymentPeriod> repaymentPeriods,
             LoanProductRelatedDetail loanProductRelatedDetail, Integer installmentAmountInMultiplesOf, MathContext mc) {
         this.repaymentPeriods = repaymentPeriods;
-        this.interestPeriods = createInterestPeriodsBasedOnRepaymentPeriods(repaymentPeriods, loanProductRelatedDetail.getCurrency());
         this.interestRates = new ArrayList<>();
         this.loanProductRelatedDetail = loanProductRelatedDetail;
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
         this.mc = mc;
-        refreshInterestPeriodsAssociations();
     }
 
-    private ProgressiveLoanInterestScheduleModel(List<RepaymentPeriod> repaymentPeriods, final List<InterestPeriod> interestPeriods,
-                                                 final List<EmiInterestRate> interestRates, LoanProductRelatedDetail loanProductRelatedDetail,
+    private ProgressiveLoanInterestScheduleModel(List<RepaymentPeriod> repaymentPeriods,
+                                                 final List<InterestRate> interestRates, LoanProductRelatedDetail loanProductRelatedDetail,
                                                  Integer installmentAmountInMultiplesOf, MathContext mc) {
-        this.repaymentPeriods = repaymentPeriods;
-        this.interestPeriods = interestPeriods;
-        this.interestRates = interestRates;
+        this.repaymentPeriods = copyRepaymentPeriods(repaymentPeriods);
+        this.interestRates = new ArrayList<>(interestRates);
         this.loanProductRelatedDetail = loanProductRelatedDetail;
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
         this.mc = mc;
-        refreshInterestPeriodsAssociations();
-    }
-
-    private List<InterestPeriod> createInterestPeriodsBasedOnRepaymentPeriods(final List<RepaymentPeriod> repayments,
-                                                                              final MonetaryCurrency currency) {
-        final Money zeroAmount = Money.zero(currency);
-        return repayments
-                .stream().map(repaymentPeriod -> new InterestPeriod(repaymentPeriod, repaymentPeriod.getFromDate(),
-                                                                    repaymentPeriod.getDueDate(), BigDecimal.ZERO, zeroAmount, zeroAmount, zeroAmount))
-                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     public ProgressiveLoanInterestScheduleModel deepCopy() {
-        final var repaymentPeriodCopies = copyRepaymentPeriods(this.repaymentPeriods);
-        final var interestPeriodCopies = copyInterestPeriods(this.interestPeriods, repaymentPeriodCopies);
-        return new ProgressiveLoanInterestScheduleModel(repaymentPeriodCopies, interestPeriodCopies, new ArrayList<>(this.interestRates),
-                loanProductRelatedDetail, installmentAmountInMultiplesOf, mc);
-    }
-
-    private List<InterestPeriod> copyInterestPeriods(final List<InterestPeriod> interestPeriods,
-                                                     final List<RepaymentPeriod> repaymentPeriods) {
-        var repaymentPeriodDueDateMap = new HashMap<LocalDate, RepaymentPeriod>();
-        for (var repaymentPeriod : repaymentPeriods) {
-            repaymentPeriodDueDateMap.put(repaymentPeriod.getDueDate(), repaymentPeriod);
-        }
-
-        return interestPeriods.stream()
-                .map(interestPeriod -> new InterestPeriod(interestPeriod,
-                                                          repaymentPeriodDueDateMap.get(interestPeriod.getRepaymentPeriod().getDueDate()),
-                                                          repaymentPeriodDueDateMap.get(interestPeriod.getOriginalRepaymentPeriod().getDueDate())))
-                .collect(Collectors.toCollection(ArrayList::new));
+        return new ProgressiveLoanInterestScheduleModel(repaymentPeriods, interestRates, loanProductRelatedDetail, installmentAmountInMultiplesOf, mc);
     }
 
     private List<RepaymentPeriod> copyRepaymentPeriods(final List<RepaymentPeriod> repaymentPeriods) {
         final List<RepaymentPeriod> repaymentCopies = new ArrayList<>(repaymentPeriods.size() + 3);
         RepaymentPeriod previousPeriod = null;
-        for (var repaymentModel : this.repaymentPeriods()) {
-            var currentPeriod = new RepaymentPeriod(repaymentModel, previousPeriod);
-            if (previousPeriod != null) {
-                previousPeriod.setNext(currentPeriod);
-            }
+        for (var repaymentPeriod : repaymentPeriods) {
+            var currentPeriod = new RepaymentPeriod(repaymentPeriod, previousPeriod);
             previousPeriod = currentPeriod;
             repaymentCopies.add(currentPeriod);
         }
         return repaymentCopies;
-    }
-
-    public void refreshInterestPeriodsAssociations() {
-        repaymentPeriods.forEach(repayment -> repayment.updateInterestPeriods(interestPeriods));
-    }
-
-    public void resetInterestPeriodsAssociations() {
-        repaymentPeriods.forEach(repaymentPeriod -> {
-            for (var interestPeriod : repaymentPeriod.getInterestPeriods()) {
-                if (!interestPeriod.getFromDate().isBefore(repaymentPeriod.getFromDate())
-                        && (repaymentPeriod.isLastPeriod() || interestPeriod.getFromDate().isBefore(repaymentPeriod.getDueDate()))) {
-                    interestPeriod.setRepaymentPeriod(repaymentPeriod);
-                }
-            }
-            repaymentPeriod.updateInterestPeriods(interestPeriods);
-        });
     }
 
     public BigDecimal getInterestRate(final LocalDate effectiveDate) {
@@ -135,7 +83,7 @@ public class ProgressiveLoanInterestScheduleModel {
     }
 
     private BigDecimal findInterestRate(final LocalDate effectiveDate) {
-        return interestRates.stream().filter(ir -> !ir.effectiveFrom().isAfter(effectiveDate)).map(EmiInterestRate::interestRate)
+        return interestRates.stream().filter(ir -> !ir.effectiveFrom().isAfter(effectiveDate)).map(InterestRate::interestRate)
                 .findFirst().orElse(loanProductRelatedDetail.getAnnualNominalInterestRate());
     }
 
@@ -169,7 +117,7 @@ public class ProgressiveLoanInterestScheduleModel {
     public InterestPeriod addInterestRate(final LocalDate newInterestSubmittedOnDate, final BigDecimal newInterestRate) {
         final LocalDate newInterestEffectiveDate = newInterestSubmittedOnDate.minusDays(1);
 
-        interestRates.add(new EmiInterestRate(newInterestEffectiveDate, newInterestSubmittedOnDate, newInterestRate));
+        interestRates.add(new InterestRate(newInterestEffectiveDate, newInterestSubmittedOnDate, newInterestRate));
         interestRates.sort(Collections.reverseOrder());
 
         return findInterestPeriodForInterestChange(newInterestEffectiveDate)

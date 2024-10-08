@@ -55,8 +55,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         final ArrayList<RepaymentPeriod> interestRepaymentModelList = new ArrayList<>(periods.size());
         RepaymentPeriod previousPeriod = null;
         for (final LoanScheduleModelRepaymentPeriod period : periods) {
-            RepaymentPeriod currentPeriod = new RepaymentPeriod(period.periodFromDate(), period.periodDueDate(), zeroAmount,
-                                                                previousPeriod);
+            RepaymentPeriod currentPeriod = new RepaymentPeriod(previousPeriod, period.periodFromDate(), period.periodDueDate(), zeroAmount, BigDecimal.ZERO);
             if (previousPeriod != null) {
                 previousPeriod.setNext(currentPeriod);
             }
@@ -83,7 +82,6 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     @Override
     public void addDisbursement(final ProgressiveLoanInterestScheduleModel scheduleModel, final LocalDate repaymentPeriodDueDate,
             final LocalDate disbursementDueDate, final Money disbursedAmount) {
-        scheduleModel.resetInterestPeriodsAssociations(); // TODO: recalculate interest from the beginning
         scheduleModel
                 .changeOutstandingBalanceAndUpdateInterestPeriods(repaymentPeriodDueDate, disbursementDueDate, disbursedAmount,
                         Money.zero(disbursedAmount.getCurrency()))
@@ -102,7 +100,6 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     @Override
     public void changeInterestRate(final ProgressiveLoanInterestScheduleModel scheduleModel, final LocalDate newInterestSubmittedOnDate,
             final BigDecimal newInterestRate) {
-        scheduleModel.resetInterestPeriodsAssociations(); // TODO: recalculate interest from the beginning
         var interestPeriod = scheduleModel.addInterestRate(newInterestSubmittedOnDate, newInterestRate);
         calculateEMIValueAndRateFactors(interestPeriod.getRepaymentPeriod().getDueDate(), scheduleModel);
     }

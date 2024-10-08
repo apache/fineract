@@ -56,6 +56,14 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
         this.balanceCorrectionAmount = balanceCorrectionAmount;
     }
 
+    public InterestPeriod(InterestPeriod interestPeriod, RepaymentPeriod repaymentPeriod) {
+        this.repaymentPeriod = repaymentPeriod;
+        this.fromDate = interestPeriod.fromDate;
+        this.dueDate = interestPeriod.dueDate;
+        this.outstandingLoanBalance = interestPeriod.outstandingLoanBalance;
+        this.balanceCorrectionAmount = interestPeriod.balanceCorrectionAmount;
+    }
+
     @Override
     public int compareTo(@NotNull InterestPeriod o) {
         return dueDate.compareTo(o.dueDate);
