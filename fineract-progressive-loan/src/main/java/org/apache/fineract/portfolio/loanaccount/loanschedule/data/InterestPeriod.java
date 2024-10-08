@@ -19,65 +19,69 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 
 import jakarta.validation.constraints.NotNull;
+import static java.time.temporal.ChronoUnit.DAYS;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
+import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
-import org.apache.fineract.organisation.monetary.domain.Money;
 
-@EqualsAndHashCode(exclude = { "repaymentPeriod", "originalRepaymentPeriod" })
-@Data
-public class EmiInterestPeriod implements Comparable<EmiInterestPeriod> {
+@EqualsAndHashCode(exclude = {"repaymentPeriod"})
+public class InterestPeriod implements Comparable<InterestPeriod> {
 
     @ToString.Exclude
-    private EmiRepaymentPeriod repaymentPeriod;
-
-    @ToString.Exclude
-    private EmiRepaymentPeriod originalRepaymentPeriod;
-
-    private LocalDate fromDate;
+    @Getter
+    private final RepaymentPeriod repaymentPeriod;
+    @Getter
+    private final LocalDate fromDate;
+    @Getter
+    @Setter
     private LocalDate dueDate;
+    @Getter
+    @Setter
+    private Money outstandingLoanBalance;
+    @Getter
+    private Money balanceCorrectionAmount;
 
-    private BigDecimal rateFactorMinus1;
-
-    private Money disbursedAmount;
-    private Money correctionAmount;
-    private Money interestDue;
-
-    public EmiInterestPeriod(EmiRepaymentPeriod repaymentPeriod, LocalDate fromDate, LocalDate dueDate, BigDecimal rateFactorMinus1,
-            Money disbursedAmount, Money correctionAmount, Money interestDue) {
+    public InterestPeriod(RepaymentPeriod repaymentPeriod, LocalDate fromDate, LocalDate dueDate, Money outstandingLoanBalance, Money balanceCorrectionAmount) {
         this.repaymentPeriod = repaymentPeriod;
-        this.originalRepaymentPeriod = repaymentPeriod;
         this.fromDate = fromDate;
         this.dueDate = dueDate;
-        this.rateFactorMinus1 = rateFactorMinus1;
-        this.disbursedAmount = disbursedAmount;
-        this.correctionAmount = correctionAmount;
-        this.interestDue = interestDue;
-    }
-
-    public EmiInterestPeriod(final EmiInterestPeriod interestPeriod, final EmiRepaymentPeriod repaymentPeriod,
-            final EmiRepaymentPeriod originalRepaymentPeriod) {
-        this(repaymentPeriod, interestPeriod.fromDate, interestPeriod.dueDate, interestPeriod.rateFactorMinus1,
-                interestPeriod.disbursedAmount, interestPeriod.correctionAmount, interestPeriod.interestDue);
-        this.originalRepaymentPeriod = originalRepaymentPeriod;
+        this.outstandingLoanBalance = outstandingLoanBalance;
+        this.balanceCorrectionAmount = balanceCorrectionAmount;
     }
 
     @Override
-    public int compareTo(@NotNull EmiInterestPeriod o) {
+    public int compareTo(@NotNull InterestPeriod o) {
         return dueDate.compareTo(o.dueDate);
     }
 
-    public void addDisbursedAmount(final Money outstandingBalance) {
-        if (outstandingBalance != null && !outstandingBalance.isZero()) {
-            this.disbursedAmount = this.disbursedAmount.add(outstandingBalance);
+    public void addBalanceCorrectionAmount(final Money balanceCorrectionAmount) {
+        if (!MathUtil.isEmpty(balanceCorrectionAmount)) {
+            this.balanceCorrectionAmount = this.balanceCorrectionAmount.add(balanceCorrectionAmount);
         }
     }
 
-    public void addCorrectionAmount(final Money correctionAmount) {
-        if (correctionAmount != null && !correctionAmount.isZero()) {
-            this.correctionAmount = this.correctionAmount.add(correctionAmount);
+    public void addOutstandingLoanBalance(final Money outstandingLoanBalance) {
+        if (!MathUtil.isEmpty(outstandingLoanBalance)) {
+            this.outstandingLoanBalance = this.outstandingLoanBalance.add(outstandingLoanBalance);
         }
+    }
+
+    public BigDecimal getRateFactor() {
+        long numberOfDaysOfIP = DAYS.between(dueDate, fromDate);
+        long numberOfDaysOfRP = DAYS.between(repaymentPeriod.getDueDate(), repaymentPeriod.getFromDate());
+        return repaymentPeriod.getRateFactor() //
+                .divide(BigDecimal.valueOf(numberOfDaysOfRP), MoneyHelper.getMathContext()) //
+                .multiply(BigDecimal.valueOf(numberOfDaysOfIP)); //
+    }
+
+    public Money getCalculatedDueInterest() {
+        return outstandingLoanBalance.multipliedBy(getRateFactor());
     }
 }

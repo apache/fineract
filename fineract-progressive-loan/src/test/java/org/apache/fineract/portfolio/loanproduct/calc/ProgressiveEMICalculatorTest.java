@@ -34,7 +34,7 @@ import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.data.EmiRepaymentPeriod;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.RepaymentPeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.ProgressiveLoanInterestScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelRepaymentPeriod;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
@@ -372,7 +372,7 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 1, 1), disbursedAmount);
 
         // schedule 1st period 1st day
-        EmiRepaymentPeriod repaymentDetails = emiCalculator
+        RepaymentPeriod repaymentDetails = emiCalculator
                 .getPayableDetails(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 1, 1)).get();
         Assertions.assertEquals(100, toDouble(repaymentDetails.getOutstandingBalance().getAmount()));
         Assertions.assertEquals(82.99, toDouble(repaymentDetails.getRemainingBalance().getAmount()));
@@ -391,7 +391,7 @@ class ProgressiveEMICalculatorTest {
         final Money op1stCorrectionAmount = Money.of(monetaryCurrency, BigDecimal.valueOf(-16.77));
 
         // get remaining balance and dues for a date
-        final EmiRepaymentPeriod repaymentDetails1st = emiCalculator
+        final RepaymentPeriod repaymentDetails1st = emiCalculator
                 .getPayableDetails(interestSchedule, op1stCorrectionPeriodDueDate, op1stCorrectionDate).get();
         Assertions.assertEquals(83.57, toDouble(repaymentDetails1st.getOutstandingBalance().getAmount()));
         Assertions.assertEquals(16.77, toDouble(repaymentDetails1st.getPrincipalDue().getAmount()));
@@ -414,7 +414,7 @@ class ProgressiveEMICalculatorTest {
         final Money op2ndCorrectionAmount = Money.of(monetaryCurrency, BigDecimal.valueOf(-16.42));
 
         // get remaining balance and dues for a date
-        final EmiRepaymentPeriod repaymentDetails2st = emiCalculator
+        final RepaymentPeriod repaymentDetails2st = emiCalculator
                 .getPayableDetails(interestSchedule, op2ndCorrectionPeriodDueDate, op2ndCorrectionDate).get();
         Assertions.assertEquals(66.80, toDouble(repaymentDetails2st.getOutstandingBalance().getAmount()));
         Assertions.assertEquals(16.81, toDouble(repaymentDetails2st.getPrincipalDue().getAmount()));
@@ -433,7 +433,7 @@ class ProgressiveEMICalculatorTest {
         // check numbers on last period due date
         LocalDate periodDueDate = LocalDate.of(2024, 7, 1);
         LocalDate payDate = LocalDate.of(2024, 7, 1);
-        final EmiRepaymentPeriod repaymentDetails3rd = emiCalculator.getPayableDetails(interestSchedule, periodDueDate, payDate).get();
+        final RepaymentPeriod repaymentDetails3rd = emiCalculator.getPayableDetails(interestSchedule, periodDueDate, payDate).get();
         Assertions.assertEquals(16.75, toDouble(repaymentDetails3rd.getOutstandingBalance().getAmount()));
         Assertions.assertEquals(16.75, toDouble(repaymentDetails3rd.getPrincipalDue().getAmount()));
         Assertions.assertEquals(0.1, toDouble(repaymentDetails3rd.getInterestDue().getAmount()));
@@ -441,7 +441,7 @@ class ProgressiveEMICalculatorTest {
         // check numbers after the last period due date
         periodDueDate = LocalDate.of(2024, 7, 1);
         payDate = LocalDate.of(2024, 7, 15);
-        final EmiRepaymentPeriod repaymentDetails4th = emiCalculator.getPayableDetails(interestSchedule, periodDueDate, payDate).get();
+        final RepaymentPeriod repaymentDetails4th = emiCalculator.getPayableDetails(interestSchedule, periodDueDate, payDate).get();
         Assertions.assertEquals(16.75, toDouble(repaymentDetails4th.getOutstandingBalance().getAmount()));
         Assertions.assertEquals(16.75, toDouble(repaymentDetails4th.getPrincipalDue().getAmount()));
         Assertions.assertEquals(0.14, toDouble(repaymentDetails4th.getInterestDue().getAmount()));
@@ -494,13 +494,13 @@ class ProgressiveEMICalculatorTest {
         final Money op1stCorrectionAmount = Money.of(monetaryCurrency, BigDecimal.valueOf(-16.77));
 
         // get remaining balance and dues for a date
-        final EmiRepaymentPeriod repaymentDetails1st = emiCalculator
+        final RepaymentPeriod repaymentDetails1st = emiCalculator
                 .getPayableDetails(interestSchedule, op1stCorrectionPeriodDueDate, op1stCorrectionDate).get();
         Assertions.assertEquals(83.57, toDouble(repaymentDetails1st.getOutstandingBalance().getAmount()));
         Assertions.assertEquals(16.77, toDouble(repaymentDetails1st.getPrincipalDue().getAmount()));
         Assertions.assertEquals(0.24, toDouble(repaymentDetails1st.getInterestDue().getAmount()));
 
-        EmiRepaymentPeriod details = null;
+        RepaymentPeriod details = null;
         // check getPayableDetails forcast
         details = emiCalculator.getPayableDetails(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 1)).get();
         Assertions.assertEquals(83.57, toDouble(details.getOutstandingBalance().getAmount()));
@@ -577,13 +577,13 @@ class ProgressiveEMICalculatorTest {
         final Money op1stCorrectionAmount = Money.of(monetaryCurrency, BigDecimal.valueOf(-16.75));
 
         // get remaining balance and dues for a date
-        final EmiRepaymentPeriod repaymentDetails1st = emiCalculator
+        final RepaymentPeriod repaymentDetails1st = emiCalculator
                 .getPayableDetails(interestSchedule, op1stCorrectionPeriodDueDate, op1stCorrectionDate).get();
         Assertions.assertEquals(100.0, toDouble(repaymentDetails1st.getOutstandingBalance().getAmount()));
         Assertions.assertEquals(16.75, toDouble(repaymentDetails1st.getPrincipalDue().getAmount()));
         Assertions.assertEquals(0.26, toDouble(repaymentDetails1st.getInterestDue().getAmount()));
 
-        EmiRepaymentPeriod details = null;
+        RepaymentPeriod details = null;
         // check getPayableDetails forecast
         details = emiCalculator.getPayableDetails(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 1)).get();
         Assertions.assertEquals(83.57, toDouble(details.getOutstandingBalance().getAmount()));
@@ -1146,7 +1146,7 @@ class ProgressiveEMICalculatorTest {
         final var repaymentPeriod = interestScheduleModel.repaymentPeriods().get(repaymentIdx);
         final var interestPeriod = repaymentPeriod.getInterestPeriods().get(interestIdx);
 
-        Assertions.assertEquals(emiValue, toDouble(repaymentPeriod.getEqualMonthlyInstallment().getAmount()));
+        Assertions.assertEquals(emiValue, toDouble(repaymentPeriod.getEmi().getAmount()));
         Assertions.assertEquals(rateFactorMinus1, toDouble(interestPeriod.getRateFactorMinus1()));
         Assertions.assertEquals(interestDue, toDouble(interestPeriod.getInterestDue().getAmount()));
         Assertions.assertEquals(interestDueCumulated, toDouble(repaymentPeriod.getInterestDue().getAmount()));

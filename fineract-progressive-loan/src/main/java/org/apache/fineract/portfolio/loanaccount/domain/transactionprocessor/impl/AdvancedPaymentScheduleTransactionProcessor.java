@@ -79,7 +79,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParamet
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.AbstractLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.data.EmiRepaymentPeriod;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.RepaymentPeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.ProgressiveLoanInterestScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanproduct.calc.EMICalculator;
@@ -1470,7 +1470,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                                             throw new IllegalStateException("Unexpected PreClosureInterestCalculationStrategy: NONE");
                                     };
 
-                                    EmiRepaymentPeriod payableDetails = emiCalculator
+                                    RepaymentPeriod payableDetails = emiCalculator
                                             .getPayableDetails(model, inAdvanceInstallment.getDueDate(), payDate).orElseThrow();
 
                                     switch (paymentAllocationType) {

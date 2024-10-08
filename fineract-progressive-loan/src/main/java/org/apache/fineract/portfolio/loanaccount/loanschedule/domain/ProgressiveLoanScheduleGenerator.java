@@ -42,7 +42,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.data.EmiRepaymentPeriod;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.RepaymentPeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleModelDownPaymentPeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleParams;
@@ -187,7 +187,7 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
             }
 
             Money outstandingBalance = emiCalculator.findRepaymentPeriod(interestScheduleModel, periodDueDate)
-                    .map(EmiRepaymentPeriod::getOutstandingBalance).orElse(Money.zero(loanApplicationTerms.getCurrency()));
+                    .map(RepaymentPeriod::getOutstandingBalance).orElse(Money.zero(loanApplicationTerms.getCurrency()));
 
             final Money disbursedAmount = Money.of(loanApplicationTerms.getCurrency(), disbursementData.getPrincipal());
             final LoanScheduleModelDisbursementPeriod disbursementPeriod = LoanScheduleModelDisbursementPeriod
@@ -261,7 +261,7 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
                 .filter(it -> transactionDate.isAfter(it.getFromDate()) && !transactionDate.isAfter(it.getDueDate())).findFirst()
                 .orElse(installments.get(0));
 
-        EmiRepaymentPeriod result = emiCalculator.getPayableDetails(model, actualInstallment.getDueDate(), transactionDate).orElseThrow();
+        RepaymentPeriod result = emiCalculator.getPayableDetails(model, actualInstallment.getDueDate(), transactionDate).orElseThrow();
 
         OutstandingAmountsDTO amounts = new OutstandingAmountsDTO(currency) //
                 .principal(result.getOutstandingBalance()) //

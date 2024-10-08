@@ -18,21 +18,20 @@
  */
 package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.apache.fineract.organisation.monetary.domain.Money;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 @ToString
-@EqualsAndHashCode(exclude = { "previous", "next" })
+@EqualsAndHashCode(exclude = {"previous", "next"})
 public class RepaymentPeriod {
 
     @ToString.Exclude
@@ -40,55 +39,37 @@ public class RepaymentPeriod {
     @Setter
     @ToString.Exclude
     private RepaymentPeriod next;
-
     @Getter
     private final LocalDate fromDate;
     @Getter
     private final LocalDate dueDate;
-
     @Getter
-    private List<EmiInterestPeriod> interestPeriods;
-
+    private final List<InterestPeriod> interestPeriods;
     @Getter
     @Setter
-    private Money equalMonthlyInstallment;
+    private Money emi;
     @Getter
     @Setter
-    private Money principalDue;
+    private BigDecimal rateFactor;
     @Getter
     @Setter
-    private Money remainingBalance;
+    private Money paidPrincipal;
+    @Getter
+    @Setter
+    private Money paidInterest;
 
-    public RepaymentPeriod(final LocalDate fromDate, final LocalDate dueDate, final Money equalMonthlyInstallment,
-                           final RepaymentPeriod previous) {
+    public RepaymentPeriod(RepaymentPeriod previous, LocalDate fromDate, LocalDate dueDate, Money emi, BigDecimal rateFactor) {
         this.previous = previous;
-        this.next = null;
+        if(previous != null) {
+            previous.setNext(this);
+        }
         this.fromDate = fromDate;
         this.dueDate = dueDate;
-        this.equalMonthlyInstallment = equalMonthlyInstallment;
-
-        final Money zeroAmount = Money.zero(equalMonthlyInstallment.getCurrency());
-        this.remainingBalance = zeroAmount;
-        this.principalDue = zeroAmount;
+        this.emi = emi;
+        this.rateFactor = rateFactor;
         this.interestPeriods = new ArrayList<>();
-    }
-
-    public RepaymentPeriod(final RepaymentPeriod repaymentModel, final RepaymentPeriod previous) {
-        this.previous = previous;
-        this.next = null;
-        this.fromDate = repaymentModel.fromDate;
-        this.dueDate = repaymentModel.dueDate;
-        this.equalMonthlyInstallment = repaymentModel.equalMonthlyInstallment;
-        this.remainingBalance = repaymentModel.remainingBalance;
-        this.principalDue = repaymentModel.principalDue;
-        this.interestPeriods = new ArrayList<>();
-    }
-
-    public void updateInterestPeriods(final List<EmiInterestPeriod> interestPeriods) {
-        this.interestPeriods = interestPeriods.stream()
-                .filter(interestPeriod -> interestPeriod.getRepaymentPeriod().equals(this)
-                        || interestPeriod.getRepaymentPeriod().getDueDate().equals(this.dueDate))
-                .collect(Collectors.toCollection(ArrayList::new));
+        //There is always at least 1 interest period, by default with same from-due date as repayment period
+        getInterestPeriods().add(new InterestPeriod(this, getFromDate(), getDueDate(), getZero(), getZero()));
     }
 
     public Optional<RepaymentPeriod> getPrevious() {
@@ -99,44 +80,32 @@ public class RepaymentPeriod {
         return Optional.ofNullable(next);
     }
 
-    /**
-     * Add and sort interest periods
-     *
-     * @param interestPeriod
-     */
-    public void addInterestPeriod(EmiInterestPeriod interestPeriod) {
-        interestPeriods.add(interestPeriod);
-        Collections.sort(interestPeriods);
+    public Money getCalculatedDueInterest() {
+        return getInterestPeriods().stream().map(InterestPeriod::getCalculatedDueInterest).reduce(getZero(), Money::plus);
     }
 
-    public boolean isLastPeriod() {
-        return next == null;
+    private Money getZero() {
+        //EMI is always initiated
+        return getEmi().zero();
     }
 
-    public BigDecimal getRateFactor() {
-        return interestPeriods.stream().map(EmiInterestPeriod::getRateFactorMinus1).reduce(BigDecimal.ONE, BigDecimal::add);
+    public Money getCalculatedDuePrincipal() {
+        return getEmi().minus(getCalculatedDueInterest());
     }
 
-    public Money getDisbursedAmountInPeriod() {
-        return interestPeriods.stream().map(EmiInterestPeriod::getDisbursedAmount).reduce(Money.zero(equalMonthlyInstallment.getCurrency()),
-                Money::plus);
+    public boolean isFullyPaid() {
+        return getEmi().equals(getPaidPrincipal().plus(getPaidInterest()));
     }
 
-    public Money getInterestDue() {
-        return interestPeriods.stream().map(EmiInterestPeriod::getInterestDue).reduce(Money.zero(equalMonthlyInstallment.getCurrency()),
-                Money::plus);
+    public Money getDueInterest() {
+        return getPaidPrincipal().compareTo(getCalculatedDuePrincipal()) > 0 ? getEmi().minus(getPaidPrincipal()) : getCalculatedDueInterest();
     }
 
-    public Money getInitialBalance() {
-        return previous != null ? previous.getRemainingBalance() : Money.zero(equalMonthlyInstallment.getCurrency());
+    public Money getDuePrincipal() {
+        return getEmi().minus(getDueInterest());
     }
 
-    public Money getCorrectionAmount() {
-        return interestPeriods.stream().map(EmiInterestPeriod::getCorrectionAmount)
-                .reduce(Money.zero(equalMonthlyInstallment.getCurrency()), Money::plus);
-    }
-
-    public Money getOutstandingBalance() {
-        return getInitialBalance().plus(getDisbursedAmountInPeriod()).plus(getCorrectionAmount());
+    public Money getUnrecognizedInterest() {
+        return getCalculatedDueInterest().minus(getDueInterest());
     }
 }
