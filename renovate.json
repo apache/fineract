@@ -30,10 +30,14 @@
     "matchPackageNames": ["org.apache.oltu.oauth2:org.apache.oltu.oauth2.client"],
     "allowedVersions": "<=1.0.1"
   },
-  {
-    "matchPackageNames": ["org.apache.oltu.oauth2:org.apache.oltu.oauth2.httpclient4"],
-    "allowedVersions": "<=1.0.1"
-  },
+    {
+      "matchPackageNames": ["org.apache.oltu.oauth2:org.apache.oltu.oauth2.httpclient4"],
+      "allowedVersions": "<=1.0.1"
+    },
+    {
+      "matchPackageNames": ["com.sun.mail:jakarta.mail", "com.icegreen:greenmail-junit5"],
+      "allowedVersions": "<=2.0.1"
+    },
   {
     "matchPackageNames": ["org.eclipse.persistence:eclipselink"],
     "allowedVersions": "<=4.0.2",
