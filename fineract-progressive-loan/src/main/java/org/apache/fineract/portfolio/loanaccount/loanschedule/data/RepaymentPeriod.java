@@ -27,6 +27,7 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -88,6 +89,11 @@ public class RepaymentPeriod {
         }
     }
 
+    public void addInterestPeriod(InterestPeriod interestPeriod) {
+        interestPeriods.add(interestPeriod);
+        Collections.sort(interestPeriods);
+    }
+
     public Optional<RepaymentPeriod> getPrevious() {
         return Optional.ofNullable(previous);
     }
@@ -125,7 +131,7 @@ public class RepaymentPeriod {
         return getCalculatedDueInterest().minus(getDueInterest());
     }
 
-    public boolean isLast() {
+    public boolean isLastPeriod() {
         return next == null;
     }
 }
