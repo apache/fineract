@@ -627,11 +627,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         List<RepaymentPeriod> repaymentModels = new ArrayList<>();
         RepaymentPeriod previousPeriod = null;
         for (var repaymentModel : repaymentModelsWithoutDownPayment) {
-            RepaymentPeriod currentPeriod = new RepaymentPeriod(repaymentModel.getFromDate(), repaymentModel.getDueDate(),
-                                                                Money.zero(repaymentModel.getLoan().getCurrency()), previousPeriod);
-            if (previousPeriod != null) {
-                previousPeriod.setNext(currentPeriod);
-            }
+            RepaymentPeriod currentPeriod = new RepaymentPeriod(previousPeriod, repaymentModel.getFromDate(), repaymentModel.getDueDate(),
+                                                                Money.zero(repaymentModel.getLoan().getCurrency()), BigDecimal.ZERO);
             previousPeriod = currentPeriod;
             repaymentModels.add(currentPeriod);
         }
