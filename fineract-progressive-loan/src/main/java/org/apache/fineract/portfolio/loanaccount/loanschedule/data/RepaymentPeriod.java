@@ -33,13 +33,13 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 
 @ToString
 @EqualsAndHashCode(exclude = { "previous", "next" })
-public class EmiRepaymentPeriod {
+public class RepaymentPeriod {
 
     @ToString.Exclude
-    private final EmiRepaymentPeriod previous;
+    private final RepaymentPeriod previous;
     @Setter
     @ToString.Exclude
-    private EmiRepaymentPeriod next;
+    private RepaymentPeriod next;
 
     @Getter
     private final LocalDate fromDate;
@@ -59,8 +59,8 @@ public class EmiRepaymentPeriod {
     @Setter
     private Money remainingBalance;
 
-    public EmiRepaymentPeriod(final LocalDate fromDate, final LocalDate dueDate, final Money equalMonthlyInstallment,
-            final EmiRepaymentPeriod previous) {
+    public RepaymentPeriod(final LocalDate fromDate, final LocalDate dueDate, final Money equalMonthlyInstallment,
+                           final RepaymentPeriod previous) {
         this.previous = previous;
         this.next = null;
         this.fromDate = fromDate;
@@ -73,7 +73,7 @@ public class EmiRepaymentPeriod {
         this.interestPeriods = new ArrayList<>();
     }
 
-    public EmiRepaymentPeriod(final EmiRepaymentPeriod repaymentModel, final EmiRepaymentPeriod previous) {
+    public RepaymentPeriod(final RepaymentPeriod repaymentModel, final RepaymentPeriod previous) {
         this.previous = previous;
         this.next = null;
         this.fromDate = repaymentModel.fromDate;
@@ -91,11 +91,11 @@ public class EmiRepaymentPeriod {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public Optional<EmiRepaymentPeriod> getPrevious() {
+    public Optional<RepaymentPeriod> getPrevious() {
         return Optional.ofNullable(previous);
     }
 
-    public Optional<EmiRepaymentPeriod> getNext() {
+    public Optional<RepaymentPeriod> getNext() {
         return Optional.ofNullable(next);
     }
 
