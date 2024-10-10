@@ -50,6 +50,7 @@ dependencies {
             )
     implementation(
             'org.springframework.boot:spring-boot-starter-web',
+            'org.springframework.boot:spring-boot-starter-aop',
             'org.springframework.boot:spring-boot-starter-security',
             'org.springframework.boot:spring-boot-starter-cache',
             'org.springframework.boot:spring-boot-starter-oauth2-resource-server',
@@ -85,6 +86,7 @@ dependencies {
             'com.squareup.okhttp3:okhttp',
             'com.squareup.okhttp3:okhttp-urlconnection',
 
+            'com.github.ben-manes.caffeine:caffeine:3.1.8',
             'org.apache.commons:commons-lang3',
             'commons-io:commons-io',
             'org.apache.poi:poi',

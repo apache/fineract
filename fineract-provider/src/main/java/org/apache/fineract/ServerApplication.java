@@ -21,9 +21,11 @@ package org.apache.fineract;
 import java.io.IOException;
 import org.apache.fineract.infrastructure.core.boot.FineractLiquibaseOnlyApplicationConfiguration;
 import org.apache.fineract.infrastructure.core.boot.FineractWebApplicationConfiguration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
 
 /**
@@ -38,7 +40,8 @@ import org.springframework.context.annotation.Import;
  * It's the old/classic Mifos (non-X) Workspace 2.0 reborn for Fineract! ;-)
  *
  */
-
+@SpringBootApplication
+@EnableAspectJAutoProxy
 public class ServerApplication extends SpringBootServletInitializer {
 
     @Import({ FineractWebApplicationConfiguration.class, FineractLiquibaseOnlyApplicationConfiguration.class })
