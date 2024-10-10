@@ -125,6 +125,7 @@ import org.apache.fineract.portfolio.loanaccount.exception.LoanChargeRefundExcep
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.DefaultScheduledDateGenerator;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.ScheduledDateGenerator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeApiJsonValidator;
 import org.apache.fineract.portfolio.loanproduct.data.LoanOverdueDTO;
@@ -998,7 +999,9 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                     chargeDefinition.getName());
         } else if (loanCharge.getDueLocalDate() != null) {
             // TODO: Review, error message seems not valid if interest recalculation is not enabled.
-            LocalDate validationDate = loan.repaymentScheduleDetail().isInterestRecalculationEnabled() ? loan.getLastUserTransactionDate()
+            boolean isCumulative = loan.getLoanRepaymentScheduleDetail().getLoanScheduleType().equals(LoanScheduleType.CUMULATIVE);
+            LocalDate validationDate = loan.repaymentScheduleDetail().isInterestRecalculationEnabled() && isCumulative
+                    ? loan.getLastUserTransactionDate()
                     : loan.getDisbursementDate();
             if (DateUtils.isBefore(loanCharge.getDueLocalDate(), validationDate)) {
                 final String defaultUserMessage = "charge with date before last transaction date can not be added to loan.";
