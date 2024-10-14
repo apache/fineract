@@ -55,6 +55,8 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.transaction
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionGoodwillCreditPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionInterestPaymentWaiverPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionInterestPaymentWaiverPreBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionInterestRefundPostBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionInterestRefundPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionMakeRepaymentPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionMakeRepaymentPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionMerchantIssuedRefundPostBusinessEvent;
@@ -89,11 +91,14 @@ import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanRefundRequestData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
+import org.apache.fineract.portfolio.loanaccount.service.InterestRefundService;
+import org.apache.fineract.portfolio.loanaccount.service.InterestRefundServiceDelegate;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualTransactionBusinessEventService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualsProcessingService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.portfolio.loanaccount.service.ReplayedTransactionBusinessEventService;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedInterestRefundTypes;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
@@ -133,6 +138,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper;
     private final DelinquencyReadPlatformService delinquencyReadPlatformService;
     private final LoanAccrualsProcessingService loanAccrualsProcessingService;
+    private final InterestRefundServiceDelegate interestRefundServiceDelegate;
 
     @Transactional
     @Override
@@ -157,6 +163,26 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             loanCollateralManagement.setIsReleased(isReleased);
         }
         this.loanCollateralManagementRepository.saveAll(loanCollateralManagementSet);
+    }
+
+    @Transactional
+    public LoanTransaction createInterestRefundLoanTransaction(Loan loan, final LocalDate transactionDate,
+            BigDecimal relatedRefundTransactionAmount) {
+        InterestRefundService interestRefundService = interestRefundServiceDelegate.lookupInterestRefundService(loan);
+        if (interestRefundService == null) {
+            return null;
+        }
+        BigDecimal interestRefundAmount = interestRefundService.calculateInterestRefundAmount(loan.getId(), relatedRefundTransactionAmount,
+                transactionDate);
+
+        final ExternalId txnExternalId = externalIdFactory.create();
+
+        businessEventNotifierService.notifyPreBusinessEvent(new LoanTransactionInterestRefundPreBusinessEvent(loan));
+
+        LoanTransaction newInterestRefundTransaction;
+        newInterestRefundTransaction = LoanTransaction.interestRefund(loan, interestRefundAmount, transactionDate, txnExternalId);
+
+        return newInterestRefundTransaction;
     }
 
     @Transactional
@@ -199,6 +225,18 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom,
                 holidayDetailDto);
 
+        boolean shouldCreateInterestRefundTransaction = loan.getLoanProductRelatedDetail().getSupportedInterestRefundTypes().stream()
+                .map(LoanSupportedInterestRefundTypes::getTransactionType)
+                .anyMatch(transactionType -> transactionType.equals(repaymentTransactionType));
+        LoanTransaction newInterestRefundTransaction = null;
+
+        if (shouldCreateInterestRefundTransaction) {
+            newInterestRefundTransaction = createInterestRefundLoanTransaction(loan, transactionDate, transactionAmount);
+            if (newInterestRefundTransaction != null) {
+                loan.addLoanTransaction(newInterestRefundTransaction);
+            }
+        }
+
         final ChangedTransactionDetail changedTransactionDetail = loan.makeRepayment(newRepaymentTransaction,
                 defaultLoanLifecycleStateMachine, existingTransactionIds, existingReversedTransactionIds, isRecoveryRepayment,
                 scheduleGeneratorDTO, isHolidayValidationDone);
@@ -209,6 +247,9 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
 
         saveLoanTransactionWithDataIntegrityViolationChecks(newRepaymentTransaction);
+        if (newInterestRefundTransaction != null) {
+            saveLoanTransactionWithDataIntegrityViolationChecks(newInterestRefundTransaction);
+        }
 
         /***
          * TODO Vishwas Batch save is giving me a HibernateOptimisticLockingFailureException, looping and saving for the
@@ -243,7 +284,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
             businessEventNotifierService.notifyPostBusinessEvent(transactionRepaymentEvent);
         }
-
         // disable all active standing orders linked to this loan if status
         // changes to closed
         disableStandingInstructionsLinkedToClosedLoan(loan);
@@ -276,7 +316,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 }
             }
         }
-
+        if (shouldCreateInterestRefundTransaction && newInterestRefundTransaction != null) {
+            businessEventNotifierService
+                    .notifyPostBusinessEvent(new LoanTransactionInterestRefundPostBusinessEvent(newInterestRefundTransaction));
+        }
         return newRepaymentTransaction;
     }
 
@@ -299,6 +342,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             repaymentEvent = new LoanTransactionRecoveryPaymentPreBusinessEvent(loan);
         } else if (repaymentTransactionType.isDownPayment()) {
             repaymentEvent = new LoanTransactionDownPaymentPreBusinessEvent(loan);
+        } else if (repaymentTransactionType.isInterestRefund()) {
+            repaymentEvent = new LoanTransactionInterestRefundPreBusinessEvent(loan);
         }
         return repaymentEvent;
     }
@@ -322,6 +367,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             repaymentEvent = new LoanTransactionRecoveryPaymentPostBusinessEvent(transaction);
         } else if (repaymentTransactionType.isDownPayment()) {
             repaymentEvent = new LoanTransactionDownPaymentPostBusinessEvent(transaction);
+        } else if (repaymentTransactionType.isInterestRefund()) {
+            repaymentEvent = new LoanTransactionInterestRefundPostBusinessEvent(transaction);
         }
         return repaymentEvent;
     }

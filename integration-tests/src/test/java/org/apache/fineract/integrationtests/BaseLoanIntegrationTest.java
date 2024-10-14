@@ -1281,6 +1281,13 @@ public abstract class BaseLoanIntegrationTest {
         public static final Integer DAYS_365 = 365;
     }
 
+    public static class DaysInMonthType {
+
+        public static final Integer INVALID = 0;
+        public static final Integer ACTUAL = 1;
+        public static final Integer DAYS_30 = 30;
+    }
+
     public static class FuturePaymentAllocationRule {
 
         public static final String LAST_INSTALLMENT = "LAST_INSTALLMENT";
