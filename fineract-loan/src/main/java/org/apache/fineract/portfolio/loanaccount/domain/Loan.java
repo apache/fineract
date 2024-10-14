@@ -1717,7 +1717,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     }
 
     public List<Long> findExistingTransactionIds() {
-        return getLoanTransactions().stream() //
+        return getLoanTransactions().stream().filter(loanTransaction -> loanTransaction.getId() != null)//
                 .filter(loanTransaction -> loanTransaction.getId() != null) //
                 .map(LoanTransaction::getId) //
                 .collect(Collectors.toList());
