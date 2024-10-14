@@ -30,14 +30,26 @@
     "matchPackageNames": ["org.apache.oltu.oauth2:org.apache.oltu.oauth2.client"],
     "allowedVersions": "<=1.0.1"
   },
-    {
-      "matchPackageNames": ["org.apache.oltu.oauth2:org.apache.oltu.oauth2.httpclient4"],
-      "allowedVersions": "<=1.0.1"
-    },
-    {
-      "matchPackageNames": ["com.sun.mail:jakarta.mail", "com.icegreen:greenmail-junit5"],
-      "allowedVersions": "<=2.0.1"
-    },
+  {
+    "matchPackageNames": ["org.apache.oltu.oauth2:org.apache.oltu.oauth2.httpclient4"],
+    "allowedVersions": "<=1.0.1"
+  },
+  {
+    "matchPackageNames": ["com.sun.mail:jakarta.mail", "com.icegreen:greenmail-junit5"],
+    "allowedVersions": "<=2.0.1"
+  },
+  {
+    "matchPackageNames": ["io.swagger.core.v3.swagger-gradle-plugin"],
+    "allowedVersions": "<=2.2.25"
+  },
+  {
+    "matchPackageNames": ["org.openapi.generator"],
+    "allowedVersions": "<=7.8.0"
+  },
+  {
+    "matchPackageNames": ["org.asciidoctor.jvm.convert", "org.asciidoctor.jvm.pdf"],
+    "allowedVersions": "<=3.3.2"
+  },
   {
     "matchPackageNames": ["org.eclipse.persistence:eclipselink"],
     "allowedVersions": "<=4.0.2",

@@ -18,9 +18,6 @@
  */
 apply plugin: 'org.asciidoctor.jvm.convert'
 apply plugin: 'org.asciidoctor.jvm.pdf'
-// apply plugin: 'org.asciidoctor.jvm.revealjs'
-// apply plugin: 'org.asciidoctor.jvm.epub'
-// apply plugin: 'org.asciidoctor.kindlegen.base'
 
 asciidoctorj {
     version = '2.5.3'
@@ -61,20 +58,6 @@ asciidoctor {
 
     dependsOn(':fineract-client:clean', ':fineract-client:buildAsciidoc')
 }
-
-// asciidoctorEpub {
-//     languages 'en'
-//
-//     baseDir 'src/docs'
-//     sourceDir 'src/docs'
-//     sources {
-//         include('index.adoc')
-//     }
-//     outputDir 'build/docs/epub'
-//     ebookFormats 'epub3'
-//
-//     dependsOn ':fineract-client:buildAsciidoc'
-// }
 
 asciidoctorPdf {
     languages 'en'
