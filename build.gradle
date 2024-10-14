@@ -712,10 +712,10 @@ configure(project.fineractCustomProjects) {
                 'com.google.truth.extensions:truth-java8-extension',
                 'io.github.classgraph:classgraph',
                 'io.cucumber:cucumber-core',
-                'io.cucumber:cucumber-java:7.20.0',
-                'io.cucumber:cucumber-java8:7.20.0',
-                'io.cucumber:cucumber-junit-platform-engine:7.20.0',
-                'io.cucumber:cucumber-spring:7.20.0',
+                'io.cucumber:cucumber-java:7.20.1',
+                'io.cucumber:cucumber-java8:7.20.1',
+                'io.cucumber:cucumber-junit-platform-engine:7.20.1',
+                'io.cucumber:cucumber-spring:7.20.1',
                 )
 
         testCompileOnly('org.projectlombok:lombok')

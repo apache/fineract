@@ -44,9 +44,9 @@ dependencies {
     testImplementation 'com.googlecode.json-simple:json-simple:1.1.1'
     testImplementation 'com.google.code.gson:gson:2.11.0'
 
-    testImplementation 'io.cucumber:cucumber-java:7.20.0'
-    testImplementation 'io.cucumber:cucumber-junit:7.20.0'
-    testImplementation 'io.cucumber:cucumber-spring:7.20.0'
+    testImplementation 'io.cucumber:cucumber-java:7.20.1'
+    testImplementation 'io.cucumber:cucumber-junit:7.20.1'
+    testImplementation 'io.cucumber:cucumber-spring:7.20.1'
 
     testImplementation 'io.qameta.allure:allure-cucumber7-jvm:2.29.0'
 
@@ -57,8 +57,8 @@ dependencies {
     testCompileOnly 'org.projectlombok:lombok:1.18.34'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.34'
 
-    testImplementation "ch.qos.logback:logback-core:1.5.9"
-    testImplementation "ch.qos.logback:logback-classic:1.5.9"
+    testImplementation "ch.qos.logback:logback-core:1.5.10"
+    testImplementation "ch.qos.logback:logback-classic:1.5.10"
 
     testImplementation 'org.apache.activemq:activemq-client:6.1.3'
     testImplementation "org.apache.avro:avro:1.12.0"
