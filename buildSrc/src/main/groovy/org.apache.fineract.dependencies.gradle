@@ -28,14 +28,14 @@ dependencyManagement {
         mavenBom 'org.springframework:spring-framework-bom:6.1.13'
         mavenBom 'org.springframework.boot:spring-boot-dependencies:3.3.4'
         mavenBom 'io.awspring.cloud:spring-cloud-aws-dependencies:3.2.0'
-        mavenBom 'io.opentelemetry:opentelemetry-bom:1.42.1'
+        mavenBom 'io.opentelemetry:opentelemetry-bom:1.43.0'
         mavenBom 'org.jetbrains.kotlin:kotlin-bom:1.9.25'
         mavenBom 'org.junit:junit-bom:5.11.2'
         mavenBom 'com.fasterxml.jackson:jackson-bom:2.18.0'
-        mavenBom 'io.cucumber:cucumber-bom:7.20.0'
+        mavenBom 'io.cucumber:cucumber-bom:7.20.1'
         mavenBom 'io.netty:netty-bom:4.1.114.Final'
         mavenBom 'org.mockito:mockito-bom:5.14.1'
-        mavenBom 'software.amazon.awssdk:bom:2.28.17'
+        mavenBom 'software.amazon.awssdk:bom:2.28.21'
         mavenBom 'io.github.resilience4j:resilience4j-bom:2.2.0'
     }
 
@@ -44,8 +44,8 @@ dependencyManagement {
         // We do not use :+ to get the latest available version available on Maven Central, as that could suddenly break things.
         // We use the Renovate Bot to automatically propose Pull Requests (PRs) when upgrades for all of these versions are available.
 
-        dependency 'ch.qos.logback:logback-core:1.5.8'
-        dependency 'ch.qos.logback:logback-classic:1.5.8'
+        dependency 'ch.qos.logback:logback-core:1.5.10'
+        dependency 'ch.qos.logback:logback-classic:1.5.10'
         dependency 'ch.qos.logback.contrib:logback-json-classic:0.1.5'
         dependency 'ch.qos.logback.contrib:logback-jackson:0.1.5'
         dependency 'org.codehaus.janino:janino:3.1.12'
@@ -117,7 +117,7 @@ dependencyManagement {
         dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
         dependency 'jakarta.jms:jakarta.jms-api:3.1.0'
         dependency 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
-        dependency 'org.glassfish.jersey.media:jersey-media-multipart:3.1.8'
+        dependency 'org.glassfish.jersey.media:jersey-media-multipart:3.1.9'
         dependency 'org.glassfish.jaxb:jaxb-runtime:2.3.6' // Swagger needs exactly this version
         dependency 'org.apache.bval:org.apache.bval.bundle:3.0.1'
         dependency 'joda-time:joda-time:2.13.0'
@@ -245,9 +245,9 @@ dependencyManagement {
 
         dependency 'com.github.tomakehurst:wiremock-standalone:3.0.1'
 
-        dependency 'io.cucumber:cucumber-java:7.20.0'
-        dependency 'io.cucumber:cucumber-java8:7.20.0'
-        dependency 'io.cucumber:cucumber-junit-platform-engine:7.20.0'
-        dependency 'io.cucumber:cucumber-spring:7.20.0'
+        dependency 'io.cucumber:cucumber-java:7.20.1'
+        dependency 'io.cucumber:cucumber-java8:7.20.1'
+        dependency 'io.cucumber:cucumber-junit-platform-engine:7.20.1'
+        dependency 'io.cucumber:cucumber-spring:7.20.1'
     }
 }
