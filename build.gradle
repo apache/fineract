@@ -100,7 +100,7 @@ plugins {
     id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.23' apply false
     id 'com.gorylenko.gradle-git-properties' version '2.4.2' apply false
     id 'org.asciidoctor.jvm.convert' version '3.3.2' apply false
-    id 'org.asciidoctor.jvm.pdf' version '3.3.2' apply false
+    id 'org.asciidoctor.jvm.pdf' version '4.0.3' apply false
     id 'com.google.cloud.tools.jib' version '3.4.3' apply false
     id 'org.sonarqube' version '4.4.1.3373'
     id 'com.github.andygoossens.modernizer' version '1.9.3' apply false
