@@ -138,9 +138,6 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                     }
 
                     if (!FIRST_REQUEST_PROCESSED) {
-                        final String baseUrl = request.getRequestURL().toString().replace(request.getPathInfo(), "/");
-                        System.setProperty("baseUrl", baseUrl);
-
                         final boolean ehcacheEnabled = configurationDomainService.isEhcacheEnabled();
                         if (ehcacheEnabled) {
                             cacheWritePlatformService.switchToCache(CacheType.SINGLE_NODE);
