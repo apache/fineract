@@ -89,6 +89,7 @@ import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
+import org.apache.fineract.portfolio.note.domain.NoteType;
 import org.apache.fineract.portfolio.savings.data.GroupSavingsIndividualMonitoringAccountData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
@@ -841,7 +842,14 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
     private Optional<Note> createNote(String submittedOnNote, Loan newLoanApplication) {
         if (StringUtils.isNotBlank(submittedOnNote)) {
-            final Note note = Note.loanNote(newLoanApplication, submittedOnNote);
+
+            final Note note = Note.builder() //
+                    .loan(newLoanApplication) //
+                    .client(newLoanApplication.client()) //
+                    .noteTypeId(NoteType.LOAN.getValue()) //
+                    .note(submittedOnNote) //
+                    .build();
+
             this.noteRepository.save(note);
             return Optional.of(note);
         } else {

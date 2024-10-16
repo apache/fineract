@@ -202,6 +202,7 @@ import org.apache.fineract.portfolio.loanproduct.exception.LinkedAccountRequired
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
+import org.apache.fineract.portfolio.note.domain.NoteType;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.data.PostDatedChecksStatus;
@@ -481,7 +482,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
             final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
-                final Note note = Note.loanNote(loan, noteText);
+
+                final Note note = Note.builder() //
+                        .loan(loan) //
+                        .client(loan.client()) //
+                        .noteTypeId(NoteType.LOAN.getValue()) //
+                        .note(noteText) //
+                        .build();
+
                 this.noteRepository.save(note);
             }
             // auto create standing instruction
@@ -831,7 +839,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
                 final String noteText = command.stringValueOfParameterNamed("note");
                 if (StringUtils.isNotBlank(noteText)) {
-                    final Note note = Note.loanNote(loan, noteText);
+
+                    final Note note = Note.builder() //
+                            .loan(loan) //
+                            .client(loan.client()) //
+                            .noteTypeId(NoteType.LOAN.getValue()) //
+                            .note(noteText) //
+                            .build();
+
                     this.noteRepository.save(note);
                 }
                 if (changedTransactionDetail != null) {
@@ -948,7 +963,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             if (command.hasParameter("note")) {
                 noteText = command.stringValueOfParameterNamed("note");
                 if (StringUtils.isNotBlank(noteText)) {
-                    final Note note = Note.loanNote(loan, noteText);
+
+                    final Note note = Note.builder() //
+                            .loan(loan) //
+                            .client(loan.client()) //
+                            .noteTypeId(NoteType.LOAN.getValue()) //
+                            .note(noteText) //
+                            .build();
+
                     this.noteRepository.save(note);
                 }
             }
@@ -1293,7 +1315,15 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     private void saveNote(String noteText, Loan loan, LoanTransaction loanTransaction) {
         if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.loanTransactionNote(loan, loanTransaction, noteText);
+
+            final Note note = Note.builder() //
+                    .loan(loan) //
+                    .client(loan.client()) //
+                    .loanTransaction(loanTransaction) //
+                    .noteTypeId(NoteType.LOAN_TRANSACTION.getValue()) //
+                    .note(noteText) //
+                    .build();
+
             this.noteRepository.save(note);
         }
     }
@@ -1618,9 +1648,21 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
              * If a new transaction is not created, associate note with the transaction to be adjusted
              **/
             if (thereIsNewTransaction) {
-                note = Note.loanTransactionNote(loan, newTransactionDetail, noteText);
+                note = Note.builder() //
+                        .loan(loan) //
+                        .client(loan.client()) //
+                        .loanTransaction(newTransactionDetail) //
+                        .noteTypeId(NoteType.LOAN_TRANSACTION.getValue()) //
+                        .note(noteText) //
+                        .build();
             } else {
-                note = Note.loanTransactionNote(loan, transactionToAdjust, noteText);
+                note = Note.builder() //
+                        .loan(loan) //
+                        .client(loan.client()) //
+                        .loanTransaction(transactionToAdjust) //
+                        .noteTypeId(NoteType.LOAN_TRANSACTION.getValue()) //
+                        .note(noteText) //
+                        .build();
             }
             this.noteRepository.save(note);
         }
@@ -1748,7 +1790,15 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final String noteText = command.stringValueOfParameterNamed(LoanApiConstants.noteParamName);
         if (StringUtils.isNotBlank(noteText)) {
             changes.put("note", noteText);
-            Note note = Note.loanTransactionNote(loan, newTransaction, noteText);
+
+            Note note = Note.builder() //
+                    .loan(loan) //
+                    .client(loan.client()) //
+                    .loanTransaction(newTransaction) //
+                    .noteTypeId(NoteType.LOAN_TRANSACTION.getValue()) //
+                    .note(noteText) //
+                    .build();
+
             this.noteRepository.save(note);
         }
 
@@ -1854,7 +1904,15 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
             changes.put("note", noteText);
-            final Note note = Note.loanTransactionNote(loan, waiveInterestTransaction, noteText);
+
+            final Note note = Note.builder() //
+                    .loan(loan) //
+                    .client(loan.client()) //
+                    .loanTransaction(waiveInterestTransaction) //
+                    .noteTypeId(NoteType.LOAN_TRANSACTION.getValue()) //
+                    .note(noteText) //
+                    .build();
+
             this.noteRepository.save(note);
         }
 
@@ -1941,7 +1999,15 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
             changes.put("note", noteText);
-            final Note note = Note.loanTransactionNote(loan, writeOff, noteText);
+
+            final Note note = Note.builder() //
+                    .loan(loan) //
+                    .client(loan.client()) //
+                    .loanTransaction(writeOff) //
+                    .noteTypeId(NoteType.LOAN_TRANSACTION.getValue()) //
+                    .note(noteText) //
+                    .build();
+
             this.noteRepository.save(note);
         }
 
@@ -2018,7 +2084,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
             changes.put("note", noteText);
-            final Note note = Note.loanNote(loan, noteText);
+
+            final Note note = Note.builder() //
+                    .loan(loan) //
+                    .client(loan.client()) //
+                    .noteTypeId(NoteType.LOAN.getValue()) //
+                    .note(noteText) //
+                    .build();
+
             this.noteRepository.save(note);
         }
 
@@ -2106,7 +2179,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
             changes.put("note", noteText);
-            final Note note = Note.loanNote(loan, noteText);
+
+            final Note note = Note.builder() //
+                    .loan(loan) //
+                    .client(loan.client()) //
+                    .noteTypeId(NoteType.LOAN.getValue()) //
+                    .note(noteText) //
+                    .build();
+
             this.noteRepository.save(note);
         }
         businessEventNotifierService.notifyPostBusinessEvent(new LoanCloseAsRescheduleBusinessEvent(loan));
@@ -3177,7 +3257,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             if (command.hasParameter("note")) {
                 noteText = command.stringValueOfParameterNamed("note");
                 if (StringUtils.isNotBlank(noteText)) {
-                    final Note note = Note.loanNote(loan, noteText);
+
+                    final Note note = Note.builder() //
+                            .loan(loan) //
+                            .client(loan.client()) //
+                            .noteTypeId(NoteType.LOAN.getValue()) //
+                            .note(noteText) //
+                            .build();
+
                     this.noteRepository.save(note);
                 }
             }
@@ -3300,7 +3387,15 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         String noteText = command.stringValueOfParameterNamed(LoanApiConstants.noteParameterName);
         if (StringUtils.isNotBlank(noteText)) {
             changes.put(LoanApiConstants.noteParameterName, noteText);
-            final Note note = Note.loanTransactionNote(loan, chargeOffTransaction, noteText);
+
+            final Note note = Note.builder() //
+                    .loan(loan) //
+                    .client(loan.client()) //
+                    .loanTransaction(chargeOffTransaction) //
+                    .noteTypeId(NoteType.LOAN_TRANSACTION.getValue()) //
+                    .note(noteText) //
+                    .build();
+
             this.noteRepository.save(note);
         }
 

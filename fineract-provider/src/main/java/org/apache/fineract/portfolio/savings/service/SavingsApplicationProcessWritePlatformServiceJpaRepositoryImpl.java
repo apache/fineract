@@ -70,6 +70,7 @@ import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.group.exception.GroupNotFoundException;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
+import org.apache.fineract.portfolio.note.domain.NoteType;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountDataDTO;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountDataValidator;
@@ -453,7 +454,12 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
             final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
-                final Note note = Note.savingNote(savingsAccount, noteText);
+                final Note note = Note.builder() //
+                        .savingsAccount(savingsAccount) //
+                        .client(savingsAccount.getClient()) //
+                        .noteTypeId(NoteType.SAVING_ACCOUNT.getValue()) //
+                        .note(noteText) //
+                        .build();
                 changes.put("note", noteText);
                 this.noteRepository.save(note);
             }
@@ -514,7 +520,12 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
             final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
-                final Note note = Note.savingNote(savingsAccount, noteText);
+                final Note note = Note.builder() //
+                        .savingsAccount(savingsAccount) //
+                        .client(savingsAccount.getClient()) //
+                        .noteTypeId(NoteType.SAVING_ACCOUNT.getValue()) //
+                        .note(noteText) //
+                        .build();
                 changes.put("note", noteText);
                 this.noteRepository.save(note);
             }
@@ -575,7 +586,12 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
             final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
-                final Note note = Note.savingNote(savingsAccount, noteText);
+                final Note note = Note.builder() //
+                        .savingsAccount(savingsAccount) //
+                        .client(savingsAccount.getClient()) //
+                        .noteTypeId(NoteType.SAVING_ACCOUNT.getValue()) //
+                        .note(noteText) //
+                        .build();
                 changes.put("note", noteText);
                 this.noteRepository.save(note);
             }
@@ -611,7 +627,12 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
             final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
-                final Note note = Note.savingNote(savingsAccount, noteText);
+                final Note note = Note.builder() //
+                        .savingsAccount(savingsAccount) //
+                        .client(savingsAccount.getClient()) //
+                        .noteTypeId(NoteType.SAVING_ACCOUNT.getValue()) //
+                        .note(noteText) //
+                        .build();
                 changes.put("note", noteText);
                 this.noteRepository.save(note);
             }

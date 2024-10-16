@@ -96,6 +96,7 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.portfolio.loanaccount.service.ReplayedTransactionBusinessEventService;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
+import org.apache.fineract.portfolio.note.domain.NoteType;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.data.PostDatedChecksStatus;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
@@ -226,7 +227,15 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         loan = saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.loanTransactionNote(loan, newRepaymentTransaction, noteText);
+
+            final Note note = Note.builder() //
+                    .loan(loan) //
+                    .client(loan.client()) //
+                    .loanTransaction(newRepaymentTransaction) //
+                    .noteTypeId(NoteType.LOAN_TRANSACTION.getValue()) //
+                    .note(noteText) //
+                    .build();
+
             this.noteRepository.save(note);
         }
 
@@ -413,7 +422,15 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.loanTransactionNote(loan, newPaymentTransaction, noteText);
+
+            final Note note = Note.builder() //
+                    .loan(loan) //
+                    .client(loan.client()) //
+                    .loanTransaction(newPaymentTransaction) //
+                    .noteTypeId(NoteType.LOAN_TRANSACTION.getValue()) //
+                    .note(noteText) //
+                    .build();
+
             this.noteRepository.save(note);
         }
 
@@ -500,7 +517,14 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         this.loanRepositoryWrapper.saveAndFlush(loan);
 
         if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.loanTransactionNote(loan, newRefundTransaction, noteText);
+            final Note note = Note.builder() //
+                    .loan(loan) //
+                    .client(loan.client()) //
+                    .loanTransaction(newRefundTransaction) //
+                    .noteTypeId(NoteType.LOAN_TRANSACTION.getValue()) //
+                    .note(noteText) //
+                    .build();
+
             this.noteRepository.save(note);
         }
 
@@ -549,7 +573,15 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.loanTransactionNote(loan, disbursementTransaction, noteText);
+
+            final Note note = Note.builder() //
+                    .loan(loan) //
+                    .client(loan.client()) //
+                    .loanTransaction(disbursementTransaction) //
+                    .noteTypeId(NoteType.LOAN_TRANSACTION.getValue()) //
+                    .note(noteText) //
+                    .build();
+
             this.noteRepository.save(note);
         }
 
@@ -638,7 +670,15 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         newCreditBalanceRefundTransaction = this.loanTransactionRepository.saveAndFlush(newCreditBalanceRefundTransaction);
 
         if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.loanTransactionNote(loan, newCreditBalanceRefundTransaction, noteText);
+
+            final Note note = Note.builder() //
+                    .loan(loan) //
+                    .client(loan.client()) //
+                    .loanTransaction(newCreditBalanceRefundTransaction) //
+                    .noteTypeId(NoteType.LOAN_TRANSACTION.getValue()) //
+                    .note(noteText) //
+                    .build();
+
             this.noteRepository.save(note);
         }
 
@@ -682,7 +722,15 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         this.loanTransactionRepository.saveAndFlush(newRefundTransaction);
 
         if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.loanTransactionNote(loan, newRefundTransaction, noteText);
+
+            final Note note = Note.builder() //
+                    .loan(loan) //
+                    .client(loan.client()) //
+                    .loanTransaction(newRefundTransaction) //
+                    .noteTypeId(NoteType.LOAN_TRANSACTION.getValue()) //
+                    .note(noteText) //
+                    .build();
+
             this.noteRepository.save(note);
         }
 
@@ -772,7 +820,14 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         if (StringUtils.isNotBlank(noteText)) {
             changes.put("note", noteText);
-            final Note note = Note.loanNote(loan, noteText);
+
+            final Note note = Note.builder() //
+                    .loan(loan) //
+                    .client(loan.client()) //
+                    .noteTypeId(NoteType.LOAN.getValue()) //
+                    .note(noteText) //
+                    .build();
+
             this.noteRepository.save(note);
         }
 
