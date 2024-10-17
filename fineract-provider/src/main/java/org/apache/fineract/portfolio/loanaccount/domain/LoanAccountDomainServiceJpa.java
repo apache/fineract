@@ -179,8 +179,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
          * .validateRepaymentDateWithMeetingDate(transactionDate, calendarInstance); }
          */
 
-        final List<Long> existingTransactionIds = new ArrayList<>();
-        final List<Long> existingReversedTransactionIds = new ArrayList<>();
+        List<Long> existingTransactionIds = new ArrayList<>();
+        List<Long> existingReversedTransactionIds = new ArrayList<>();
 
         final Money repaymentAmount = Money.of(loan.getCurrency(), transactionAmount);
         LoanTransaction newRepaymentTransaction;
@@ -206,6 +206,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         if (loan.getLoanRepaymentScheduleDetail().isInterestRecalculationEnabled()) {
             loanAccrualsProcessingService.reprocessExistingAccruals(loan);
             loanAccrualsProcessingService.processIncomePostingAndAccruals(loan);
+
+            existingReversedTransactionIds = new ArrayList<>(loan.findExistingReversedTransactionIds());
         }
 
         saveLoanTransactionWithDataIntegrityViolationChecks(newRepaymentTransaction);

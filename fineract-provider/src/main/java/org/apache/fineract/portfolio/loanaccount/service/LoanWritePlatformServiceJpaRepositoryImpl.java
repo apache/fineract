@@ -491,8 +491,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
         }
 
-        existingTransactionIds = new ArrayList<>(loan.findExistingTransactionIds());
-        existingReversedTransactionIds = new ArrayList<>(loan.findExistingReversedTransactionIds());
         final Set<LoanCharge> loanCharges = loan.getActiveCharges();
         final Map<Long, BigDecimal> disBuLoanCharges = new HashMap<>();
         for (final LoanCharge loanCharge : loanCharges) {
@@ -512,7 +510,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 businessEventNotifierService.notifyPostBusinessEvent(new LoanAccrualTransactionCreatedBusinessEvent(savedLoanTransaction));
             }
         }
-        postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
 
         for (final Map.Entry<Long, BigDecimal> entrySet : disBuLoanCharges.entrySet()) {
             final PortfolioAccountData savingAccountData = this.accountAssociationsReadPlatformService.retriveLoanLinkedAssociation(loanId);
