@@ -239,7 +239,6 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
                 reprocessNonPeriodicAccruals(loan, accruals);
             }
         }
-
     }
 
     /**

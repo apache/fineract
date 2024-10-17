@@ -650,7 +650,8 @@ public abstract class BaseLoanIntegrationTest {
     // not all journal entries have been validated - since there might be duplicates
     protected void verifyJournalEntries(Long loanId, Journal... entries) {
         GetJournalEntriesTransactionIdResponse journalEntriesForLoan = journalEntryHelper.getJournalEntriesForLoan(loanId);
-        Assertions.assertEquals(entries.length, journalEntriesForLoan.getPageItems().size());
+        Assertions.assertEquals(entries.length, journalEntriesForLoan.getPageItems().size(),
+                "Actual is: " + lineSeparator() + journalEntriesForLoan.getPageItems().toString());
         Arrays.stream(entries).forEach(journalEntry -> {
             boolean found = journalEntriesForLoan.getPageItems().stream()
                     .anyMatch(item -> Objects.equals(item.getAmount(), journalEntry.amount)
