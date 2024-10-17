@@ -46,6 +46,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -178,6 +179,58 @@ class ProgressiveEMICalculatorTest {
         Assertions.assertTrue(interestScheduleModel.repaymentPeriods() != null);
         Assertions.assertEquals(4, interestScheduleModel.repaymentPeriods().size());
         Assertions.assertEquals(121, interestScheduleModel.getLoanTermInDays());
+    }
+
+    @Test
+    @Timeout(1) // seconds
+    public void testEMICalculation_performance() {
+
+        final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
+
+        expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+        expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+        expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+        expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+        expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+        expectedRepaymentPeriods.add(repayment(7, LocalDate.of(2024, 7, 1), LocalDate.of(2024, 8, 1)));
+        expectedRepaymentPeriods.add(repayment(8, LocalDate.of(2024, 8, 1), LocalDate.of(2024, 9, 1)));
+        expectedRepaymentPeriods.add(repayment(9, LocalDate.of(2024, 9, 1), LocalDate.of(2024, 10, 1)));
+        expectedRepaymentPeriods.add(repayment(10, LocalDate.of(2024, 10, 1), LocalDate.of(2024, 11, 1)));
+        expectedRepaymentPeriods.add(repayment(11, LocalDate.of(2024, 11, 1), LocalDate.of(2024, 12, 1)));
+        expectedRepaymentPeriods.add(repayment(12, LocalDate.of(2024, 12, 1), LocalDate.of(2025, 1, 1)));
+
+        final BigDecimal interestRate = BigDecimal.valueOf(7.0);
+        final Integer installmentAmountInMultiplesOf = null;
+
+        Mockito.when(loanProductRelatedDetail.getAnnualNominalInterestRate()).thenReturn(interestRate);
+        Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
+        Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.DAYS_30.getValue());
+        Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.MONTHS);
+        Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
+        Mockito.when(loanProductRelatedDetail.getCurrency()).thenReturn(monetaryCurrency);
+
+        final ProgressiveLoanInterestScheduleModel interestSchedule = emiCalculator.generateInterestScheduleModel(expectedRepaymentPeriods,
+                loanProductRelatedDetail, installmentAmountInMultiplesOf);
+
+        final Money disbursedAmount = toMoney(100.0);
+        emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
+
+        Assertions.assertEquals(interestSchedule.getLoanTermInDays(), 366);
+        Assertions.assertEquals(interestSchedule.repaymentPeriods().size(), 12);
+
+        List<RepaymentPeriod> repaymentPeriods = interestSchedule.repaymentPeriods();
+        for (int i = 0; i < repaymentPeriods.size(); i++) {
+            final RepaymentPeriod repaymentPeriod = repaymentPeriods.get(i);
+            Assertions.assertTrue(0 < toDouble(repaymentPeriod.getDuePrincipal().getAmount()));
+            Assertions.assertTrue(0 < toDouble(repaymentPeriod.getDueInterest().getAmount()));
+            if (i == repaymentPeriods.size() - 1) {
+                Assertions.assertEquals(0.0, toDouble(repaymentPeriod.getOutstandingLoanBalance().getAmount()));
+            } else {
+                Assertions.assertEquals(8.65, toDouble(repaymentPeriod.getEmi().getAmount()));
+                Assertions.assertTrue(0 < toDouble(repaymentPeriod.getOutstandingLoanBalance().getAmount()));
+            }
+        }
     }
 
     @Test
