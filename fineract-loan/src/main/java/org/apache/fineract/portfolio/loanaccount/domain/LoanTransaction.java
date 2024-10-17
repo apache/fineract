@@ -189,6 +189,11 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
                 chargeRefundChargeType);
     }
 
+    public static LoanTransaction interestRefund(final Loan loan, final BigDecimal amount, final LocalDate date,
+            final ExternalId externalId) {
+        return new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.INTEREST_REFUND, null, amount, date, externalId);
+    }
+
     public static LoanTransaction chargeAdjustment(final Loan loan, final BigDecimal amount, final LocalDate transactionDate,
             final ExternalId externalId, PaymentDetail paymentDetail) {
         return new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.CHARGE_ADJUSTMENT, paymentDetail, amount, transactionDate,
@@ -596,7 +601,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
 
     public boolean isRepaymentLikeType() {
         return isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit() || isChargeRefund()
-                || isChargeAdjustment() || isDownPayment() || isInterestPaymentWaiver();
+                || isChargeAdjustment() || isDownPayment() || isInterestPaymentWaiver() || isInterestRefund();
     }
 
     public boolean isTypeAllowedForChargeback() {
@@ -1116,6 +1121,10 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
 
     public boolean isOverPaid() {
         return MathUtil.isGreaterThanZero(overPaymentPortion);
+    }
+
+    public boolean isInterestRefund() {
+        return getTypeOf().isInterestRefund();
     }
 
     // TODO missing hashCode(), equals(Object obj), but probably OK as long as
