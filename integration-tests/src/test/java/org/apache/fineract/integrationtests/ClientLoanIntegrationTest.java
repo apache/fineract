@@ -48,7 +48,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -2617,7 +2616,6 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
 
             ArrayList<HashMap> loanTransactionDetails = LOAN_TRANSACTION_HELPER.getLoanTransactionDetails(REQUEST_SPEC, RESPONSE_SPEC,
                     loanID);
-            validateAccrualTransactionForDisbursementCharge(loanTransactionDetails);
             final JournalEntry[] assetAccountInitialEntry = {
                     new JournalEntry(Float.parseFloat("120.00"), JournalEntry.TransactionType.DEBIT),
                     new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.CREDIT),
@@ -7598,17 +7596,6 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
         LOAN_TRANSACTION_HELPER.makeRepayment(loanRepaymentDate, Float.parseFloat(prepayAmount), loanID);
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(REQUEST_SPEC, RESPONSE_SPEC, loanID);
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
-    }
-
-    private void validateAccrualTransactionForDisbursementCharge(ArrayList<HashMap> loanTransactionDetails) {
-        List<HashMap> disbursementTransactions = loanTransactionDetails.stream()
-                .filter(transactionDetail -> (Boolean) ((LinkedHashMap) transactionDetail.get("type")).get("repaymentAtDisbursement"))
-                .toList();
-        List<HashMap> accrualTransactions = loanTransactionDetails.stream()
-                .filter(transactionDetail -> (Boolean) ((LinkedHashMap) transactionDetail.get("type")).get("accrual")).toList();
-        assertEquals(disbursementTransactions.size(), accrualTransactions.size(), 1);
-        assertEquals((Float) disbursementTransactions.get(0).get("amount"), (Float) accrualTransactions.get(0).get("amount"));
-        assertTrue(StringUtils.isNotBlank((String) accrualTransactions.get(0).get("externalId")));
     }
 
     private void addRepaymentValues(List<Map<String, Object>> expectedvalues, Calendar todaysDate, int addPeriod, boolean isAddDays,

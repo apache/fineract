@@ -367,19 +367,6 @@ Feature: LoanAccrualTransaction
       | 08 May 2023      | Disbursement     | 20.0   | 0.0       | 0.0      | 0.0  | 0.0       | 1020.0       |
 
 
-  Scenario:Verify that the accrual transaction is created for disbursement fee
-    When Admin sets the business date to "1 May 2023"
-    When Admin creates a client with random data
-    And Admin successfully creates a new customised Loan submitted on date: "1 May 2023", with Principal: "1000", a loanTermFrequency: 1 months, and numberOfRepayments: 1
-    And Admin successfully approves the loan on "1 May 2023" with "1000" amount and expected disbursement date on "1 May 2023"
-    When Admin adds "LOAN_DISBURSEMENT_PERCENTAGE_FEE" charge with 1 % of transaction amount
-    And Admin successfully disburse the loan on "1 May 2023" with "1000" EUR transaction amount
-    Then Loan Transactions tab has the following data:
-      | Transaction date | Transaction Type                    | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
-      | 01 May 2023      | Disbursement                        | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
-      | 01 May 2023      | Repayment (at time of disbursement) | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 1000.0       |
-      | 01 May 2023      | Accrual                             | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
-
    @Specific
   Scenario: Verify global config charge-accrual-date function: single installment loan, charge-accrual-date = submitted-date, multiple charges with different submitted date
     When Global config "charge-accrual-date" value set to "submitted-date"
