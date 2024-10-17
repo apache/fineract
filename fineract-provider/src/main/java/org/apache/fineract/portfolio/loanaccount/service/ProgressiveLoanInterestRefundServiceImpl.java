@@ -103,13 +103,14 @@ public class ProgressiveLoanInterestRefundServiceImpl implements InterestRefundS
         return payableInterest.add(paidInterest);
     }
 
+
     @Override
     @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
     public BigDecimal calculateInterestRefundAmount(Long loanId, BigDecimal relatedRefundTransactionAmount,
             LocalDate relatedRefundTransactionDate) {
         Loan loan = loanAssembler.assembleFrom(loanId);
-        BigDecimal totalInterestBeforeRefund = totalInterest(loan, BigDecimal.ZERO, relatedRefundTransactionDate);
-        BigDecimal totalInterestAfterRefund = totalInterest(loan, relatedRefundTransactionAmount, relatedRefundTransactionDate);
+       BigDecimal totalInterestBeforeRefund = totalInterest(loan, BigDecimal.ZERO, relatedRefundTransactionDate);
+       BigDecimal totalInterestAfterRefund = totalInterest(loan, relatedRefundTransactionAmount, relatedRefundTransactionDate);
         return totalInterestBeforeRefund.subtract(totalInterestAfterRefund);
     }
 }
