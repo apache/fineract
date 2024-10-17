@@ -81,7 +81,6 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.LoanUndoDis
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanUndoLastDisbursalBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanUpdateDisbursementDataBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanWithdrawTransferBusinessEvent;
-import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualTransactionCreatedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanChargeOffPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanChargeOffPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanDisbursalTransactionBusinessEvent;
@@ -152,7 +151,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonit
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidBy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
@@ -491,8 +489,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
         }
 
-        existingTransactionIds = new ArrayList<>(loan.findExistingTransactionIds());
-        existingReversedTransactionIds = new ArrayList<>(loan.findExistingReversedTransactionIds());
         final Set<LoanCharge> loanCharges = loan.getActiveCharges();
         final Map<Long, BigDecimal> disBuLoanCharges = new HashMap<>();
         for (final LoanCharge loanCharge : loanCharges) {
@@ -500,19 +496,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     && loanCharge.isChargePending()) {
                 disBuLoanCharges.put(loanCharge.getId(), loanCharge.amountOutstanding());
             }
-            if (loanCharge.isDisbursementCharge()) {
-                LoanTransaction loanTransaction = LoanTransaction.accrueTransaction(loan, loan.getOffice(), actualDisbursementDate,
-                        loanCharge.amount(), null, loanCharge.amount(), null, externalIdFactory.create());
-                loanTransaction.updateLoan(loan);
-                LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(loanTransaction, loanCharge,
-                        loanCharge.getAmount(loan.getCurrency()).getAmount(), 1);
-                loanTransaction.getLoanChargesPaid().add(loanChargePaidBy);
-                loan.addLoanTransaction(loanTransaction);
-                LoanTransaction savedLoanTransaction = loanTransactionRepository.saveAndFlush(loanTransaction);
-                businessEventNotifierService.notifyPostBusinessEvent(new LoanAccrualTransactionCreatedBusinessEvent(savedLoanTransaction));
-            }
         }
-        postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
 
         for (final Map.Entry<Long, BigDecimal> entrySet : disBuLoanCharges.entrySet()) {
             final PortfolioAccountData savingAccountData = this.accountAssociationsReadPlatformService.retriveLoanLinkedAssociation(loanId);

@@ -102,9 +102,7 @@ public class LoanRepaymentTest extends BaseLoanIntegrationTest {
             // verify transactions
             verifyTransactions(loanId, //
                     transaction(1000.0, "Disbursement", "01 January 2023"), //
-                    transaction(25.0, "Repayment (at time of disbursement)", "01 January 2023"), //
-                    transaction(10.0, "Accrual", "01 January 2023"), //
-                    transaction(15.0, "Accrual", "01 January 2023") //
+                    transaction(25.0, "Repayment (at time of disbursement)", "01 January 2023") //
             );
 
             // verify journal entries
@@ -112,11 +110,7 @@ public class LoanRepaymentTest extends BaseLoanIntegrationTest {
                     journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
                     journalEntry(1000.0, fundSource, "CREDIT"), //
                     journalEntry(25.0, feeIncomeAccount, "CREDIT"), //
-                    journalEntry(25.0, fundSource, "DEBIT"), //
-                    journalEntry(10.0, feeReceivableAccount, "DEBIT"), //
-                    journalEntry(10.0, feeIncomeAccount, "CREDIT"), //
-                    journalEntry(15.0, feeReceivableAccount, "DEBIT"), //
-                    journalEntry(15.0, feeIncomeAccount, "CREDIT") //
+                    journalEntry(25.0, fundSource, "DEBIT") //
             );
 
             // repay 500
@@ -127,6 +121,16 @@ public class LoanRepaymentTest extends BaseLoanIntegrationTest {
                     transaction(1000.0, "Disbursement", "01 January 2023"), //
                     transaction(25.0, "Repayment (at time of disbursement)", "01 January 2023"), //
                     transaction(500.0, "Repayment", "01 January 2023") //
+            );
+
+            // verify journal entries
+            verifyJournalEntries(loanId, //
+                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
+                    journalEntry(1000.0, fundSource, "CREDIT"), //
+                    journalEntry(25.0, feeIncomeAccount, "CREDIT"), //
+                    journalEntry(25.0, fundSource, "DEBIT"), //
+                    journalEntry(500.0, loansReceivableAccount, "CREDIT"), //
+                    journalEntry(500.0, fundSource, "DEBIT") //
             );
         });
     }
