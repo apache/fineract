@@ -19,6 +19,7 @@
 package org.apache.fineract.organisation.teller.exception;
 
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 /**
  * Indicates that a teller could not be found.
@@ -39,5 +40,9 @@ public class TellerNotFoundException extends AbstractPlatformResourceNotFoundExc
      */
     public TellerNotFoundException(Long tellerId) {
         super(ERROR_MESSAGE_CODE, DEFAULT_ERROR_MESSAGE, tellerId);
+    }
+
+    public TellerNotFoundException(Long id, EmptyResultDataAccessException e) {
+        super("error.msg.teller.id.invalid", "Teller with identifier " + id + " does not exist", id, e);
     }
 }

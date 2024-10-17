@@ -300,9 +300,9 @@ public class TellerApiResource {
     @Path("{tellerId}/cashiers/{cashierId}/transactions")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Retrieve Cashier Transaction", description = "")
+    @Operation(summary = "Retrieve Cashier Transactions", description = "")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = TellerApiResourceSwagger.GetTellersTellerIdCashiersCashiersIdTransactionsResponse.class)))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.GetTellersTellerIdCashiersCashiersIdTransactionsResponse.class))) })
     public String getTransactionsForCashier(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
             @PathParam("cashierId") @Parameter(description = "cashierId") final Long cashierId,
             @QueryParam("currencyCode") @Parameter(description = "currencyCode") final String currencyCode,
@@ -331,10 +331,10 @@ public class TellerApiResource {
     @Path("{tellerId}/cashiers/{cashierId}/summaryandtransactions")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Transactions Wtih Summary For Cashier", description = "")
+    @Operation(summary = "Retrieve Transactions With Summary For Cashier", description = "")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.GetTellersTellerIdCashiersCashiersIdSummaryAndTransactionsResponse.class))) })
-    public String getTransactionsWtihSummaryForCashier(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
+    public String getTransactionsWithSummaryForCashier(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
             @PathParam("cashierId") @Parameter(description = "cashierId") final Long cashierId,
             @QueryParam("currencyCode") @Parameter(description = "currencyCode") final String currencyCode,
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
