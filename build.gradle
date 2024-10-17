@@ -18,6 +18,17 @@
  */
 // TODO: this is work in progress, please follow FINERACT-1171
 buildscript {
+    configurations.classpath {
+        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+            if (details.requested.group == 'com.burgstaller' && details.requested.name == 'okhttp-digest' && details.requested.version == '1.10') {
+                details.useTarget "io.github.rburgst:${details.requested.name}:1.21"
+                details.because 'Dependency has moved'
+            }
+        }
+    }
+}
+
+buildscript {
     ext {
         jacocoVersion = '0.8.10'
         retrofitVersion = '2.9.0'

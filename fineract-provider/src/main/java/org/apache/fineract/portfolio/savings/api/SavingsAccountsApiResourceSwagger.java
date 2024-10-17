@@ -208,6 +208,7 @@ final class SavingsAccountsApiResourceSwagger {
             public GetSavingsInterestCalculationType interestCalculationType;
             public GetSavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType;
             public GetSavingsSummary summary;
+            public LocalDate dateOfBirth;
         }
 
         @Schema(example = "1")
