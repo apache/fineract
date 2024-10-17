@@ -62,6 +62,24 @@ public class DatabaseSpecificSQLGenerator {
         return (columnType.isStringType() || columnType.isAnyDateType()) ? format("'%s'", value) : value;
     }
 
+    public String castToDate(String fieldName) {
+        if (databaseTypeResolver.isMySQL()) {
+            return "DATE(" + fieldName + ")";
+        } else if (databaseTypeResolver.isPostgreSQL()) {
+            return fieldName + "::date";
+        }
+        throw new UnsupportedOperationException("Unsupported database type");
+    }
+
+    public String castToTime(String fieldName) {
+        if (databaseTypeResolver.isMySQL()) {
+            return "TIME(" + fieldName + ")";
+        } else if (databaseTypeResolver.isPostgreSQL()) {
+            return fieldName + "::time";
+        }
+        throw new UnsupportedOperationException("Unsupported database type");
+    }
+
     public String groupConcat(String arg) {
         if (databaseTypeResolver.isMySQL()) {
             return format("GROUP_CONCAT(%s)", arg);
@@ -146,6 +164,16 @@ public class DatabaseSpecificSQLGenerator {
             return format("(%s::TIMESTAMP - %s * INTERVAL '1 %s')", date, multiplier, unit);
         } else {
             throw new IllegalStateException("Database type is not supported for subtracting date " + databaseTypeResolver.databaseType());
+        }
+    }
+
+    public String addDate(String date, int multiplier, String unit) {
+        if (databaseTypeResolver.isMySQL()) {
+            return format("DATE_ADD(%s, INTERVAL %s %s)", date, multiplier, unit);
+        } else if (databaseTypeResolver.isPostgreSQL()) {
+            return format("(%s::TIMESTAMP + %s * INTERVAL '1 %s')", date, multiplier, unit);
+        } else {
+            throw new IllegalStateException("Database type is not supported for adding date " + databaseTypeResolver.databaseType());
         }
     }
 
