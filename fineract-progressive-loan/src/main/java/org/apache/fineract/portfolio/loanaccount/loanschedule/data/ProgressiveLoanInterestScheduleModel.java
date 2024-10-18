@@ -19,28 +19,56 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
+import lombok.Data;
+import lombok.experimental.Accessors;
+import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 
-public record ProgressiveLoanInterestScheduleModel(List<ProgressiveLoanInterestRepaymentModel> repayments, //
-        List<ProgressiveLoanInterestRate> interestRates, //
-        LoanProductRelatedDetail loanProductRelatedDetail, //
-        Integer installmentAmountInMultiplesOf, //
-        MathContext mc) {
+@Data
+@Accessors(fluent = true)
+public class ProgressiveLoanInterestScheduleModel {
 
-    public ProgressiveLoanInterestScheduleModel(List<ProgressiveLoanInterestRepaymentModel> repayments,
-            LoanProductRelatedDetail loanProductRelatedDetail, Integer installmentAmountInMultiplesOf, MathContext mc) {
-        this(repayments, new ArrayList<>(1), loanProductRelatedDetail, installmentAmountInMultiplesOf, mc);
+    private final List<RepaymentPeriod> repaymentPeriods;
+    private final List<InterestRate> interestRates;
+    private final LoanProductRelatedDetail loanProductRelatedDetail;
+    private final Integer installmentAmountInMultiplesOf;
+
+    public ProgressiveLoanInterestScheduleModel(List<RepaymentPeriod> repaymentPeriods, LoanProductRelatedDetail loanProductRelatedDetail,
+            Integer installmentAmountInMultiplesOf) {
+        this.repaymentPeriods = repaymentPeriods;
+        this.interestRates = new ArrayList<>();
+        this.loanProductRelatedDetail = loanProductRelatedDetail;
+        this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
     }
 
-    public void addInterestRate(final LocalDate newInterestDueDate, final BigDecimal newInterestRate) {
-        interestRates.add(new ProgressiveLoanInterestRate(newInterestDueDate, newInterestDueDate.plusDays(1), newInterestRate));
-        interestRates.sort(Collections.reverseOrder());
+    private ProgressiveLoanInterestScheduleModel(List<RepaymentPeriod> repaymentPeriods, final List<InterestRate> interestRates,
+            LoanProductRelatedDetail loanProductRelatedDetail, Integer installmentAmountInMultiplesOf) {
+        this.repaymentPeriods = copyRepaymentPeriods(repaymentPeriods);
+        this.interestRates = new ArrayList<>(interestRates);
+        this.loanProductRelatedDetail = loanProductRelatedDetail;
+        this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
+    }
+
+    public ProgressiveLoanInterestScheduleModel deepCopy() {
+        return new ProgressiveLoanInterestScheduleModel(repaymentPeriods, interestRates, loanProductRelatedDetail,
+                installmentAmountInMultiplesOf);
+    }
+
+    private List<RepaymentPeriod> copyRepaymentPeriods(final List<RepaymentPeriod> repaymentPeriods) {
+        final List<RepaymentPeriod> repaymentCopies = new ArrayList<>(repaymentPeriods.size());
+        RepaymentPeriod previousPeriod = null;
+        for (RepaymentPeriod repaymentPeriod : repaymentPeriods) {
+            RepaymentPeriod currentPeriod = new RepaymentPeriod(previousPeriod, repaymentPeriod);
+            previousPeriod = currentPeriod;
+            repaymentCopies.add(currentPeriod);
+        }
+        return repaymentCopies;
     }
 
     public BigDecimal getInterestRate(final LocalDate effectiveDate) {
@@ -48,16 +76,110 @@ public record ProgressiveLoanInterestScheduleModel(List<ProgressiveLoanInterestR
     }
 
     private BigDecimal findInterestRate(final LocalDate effectiveDate) {
-        return interestRates.stream().filter(ir -> !ir.effectiveFrom().isAfter(effectiveDate))
-                .map(ProgressiveLoanInterestRate::interestRate).findFirst().orElse(loanProductRelatedDetail.getAnnualNominalInterestRate());
+        return interestRates.stream().filter(ir -> !ir.effectiveFrom().isAfter(effectiveDate)).map(InterestRate::interestRate).findFirst()
+                .orElse(loanProductRelatedDetail.getAnnualNominalInterestRate());
+    }
+
+    public Optional<RepaymentPeriod> findRepaymentPeriod(final LocalDate repaymentPeriodDueDate) {
+        if (repaymentPeriodDueDate == null) {
+            return Optional.empty();
+        }
+        return repaymentPeriods.stream()//
+                .filter(repaymentPeriodItem -> repaymentPeriodItem.getDueDate().isEqual(repaymentPeriodDueDate))//
+                .findFirst();
+    }
+
+    public List<RepaymentPeriod> getRelatedRepaymentPeriods(final LocalDate calculateFromRepaymentPeriodDueDate) {
+        if (calculateFromRepaymentPeriodDueDate == null) {
+            return repaymentPeriods;
+        }
+        return repaymentPeriods.stream()//
+                .filter(period -> !period.getDueDate().isBefore(calculateFromRepaymentPeriodDueDate))//
+                .toList();//
     }
 
     public int getLoanTermInDays() {
-        if (repayments.isEmpty()) {
+        if (repaymentPeriods.isEmpty()) {
             return 0;
         }
-        final var firstPeriod = repayments.get(0);
-        final var lastPeriod = repayments.size() > 1 ? repayments.get(repayments.size() - 1) : firstPeriod;
+        final RepaymentPeriod firstPeriod = repaymentPeriods.get(0);
+        final RepaymentPeriod lastPeriod = repaymentPeriods.size() > 1 ? repaymentPeriods.get(repaymentPeriods.size() - 1) : firstPeriod;
         return Math.toIntExact(ChronoUnit.DAYS.between(firstPeriod.getFromDate(), lastPeriod.getDueDate()));
+    }
+
+    public LocalDate getMaturityDate() {
+        return !repaymentPeriods.isEmpty() ? repaymentPeriods.get(repaymentPeriods.size() - 1).getDueDate() : null;
+    }
+
+    public Optional<RepaymentPeriod> changeOutstandingBalanceAndUpdateInterestPeriods(final LocalDate balanceChangeDate,
+            final Money disbursedAmount, final Money correctionAmount) {
+        return findRepaymentPeriodForBalanceChange(balanceChangeDate).stream()//
+                .peek(updateInterestPeriodOnRepaymentPeriod(balanceChangeDate, disbursedAmount, correctionAmount))//
+                .findFirst();//
+    }
+
+    Optional<RepaymentPeriod> findRepaymentPeriodForBalanceChange(final LocalDate balanceChangeDate) {
+        if (balanceChangeDate == null) {
+            return Optional.empty();
+        }
+        return repaymentPeriods.stream()//
+                .filter(repaymentPeriod -> {
+                    if (repaymentPeriod.getPrevious().isPresent()) {
+                        return balanceChangeDate.isAfter(repaymentPeriod.getFromDate())
+                                && !balanceChangeDate.isAfter(repaymentPeriod.getDueDate());
+                    } else {
+                        return !balanceChangeDate.isBefore(repaymentPeriod.getFromDate())
+                                && !balanceChangeDate.isAfter(repaymentPeriod.getDueDate());
+                    }
+                })//
+                .findFirst();
+    }
+
+    private Consumer<RepaymentPeriod> updateInterestPeriodOnRepaymentPeriod(final LocalDate balanceChangeDate, final Money disbursedAmount,
+            final Money correctionAmount) {
+        return repaymentPeriod -> {
+            final Optional<InterestPeriod> interestPeriodOptional = findInterestPeriodForBalanceChange(repaymentPeriod, balanceChangeDate);
+            if (interestPeriodOptional.isPresent()) {
+                interestPeriodOptional.get().addDisbursementAmount(disbursedAmount);
+                interestPeriodOptional.get().addBalanceCorrectionAmount(correctionAmount);
+            } else {
+                insertInterestPeriod(repaymentPeriod, balanceChangeDate, disbursedAmount, correctionAmount);
+            }
+        };
+    }
+
+    Optional<InterestPeriod> findInterestPeriodForBalanceChange(final RepaymentPeriod repaymentPeriod, final LocalDate balanceChangeDate) {
+        if (repaymentPeriod == null || balanceChangeDate == null) {
+            return Optional.empty();
+        }
+        return repaymentPeriod.getInterestPeriods().stream()//
+                .filter(interestPeriod -> balanceChangeDate.isEqual(interestPeriod.getDueDate()))//
+                .findFirst();
+    }
+
+    void insertInterestPeriod(final RepaymentPeriod repaymentPeriod, final LocalDate balanceChangeDate, final Money disbursedAmount,
+            final Money correctionAmount) {
+        final InterestPeriod previousInterestPeriod;
+        if (balanceChangeDate.isAfter(repaymentPeriod.getFromDate())) {
+            previousInterestPeriod = repaymentPeriod.getInterestPeriods().get(repaymentPeriod.getInterestPeriods().size() - 1);//
+        } else {
+            previousInterestPeriod = repaymentPeriod.getInterestPeriods().stream()
+                    .filter(ip -> balanceChangeDate.isAfter(ip.getFromDate()) && !balanceChangeDate.isAfter(ip.getDueDate()))//
+                    .reduce((first, second) -> second)//
+                    .orElse(repaymentPeriod.getInterestPeriods().get(0));
+        }
+        LocalDate originalDueDate = previousInterestPeriod.getDueDate();
+        LocalDate newDueDate = balanceChangeDate.isBefore(previousInterestPeriod.getFromDate()) ? previousInterestPeriod.getFromDate()
+                : balanceChangeDate.isAfter(previousInterestPeriod.getDueDate()) ? previousInterestPeriod.getDueDate() : balanceChangeDate;
+        previousInterestPeriod.setDueDate(newDueDate);
+        previousInterestPeriod.addDisbursementAmount(disbursedAmount);
+        previousInterestPeriod.addBalanceCorrectionAmount(correctionAmount);
+        final InterestPeriod interestPeriod = new InterestPeriod(repaymentPeriod, previousInterestPeriod.getDueDate(), originalDueDate,
+                BigDecimal.ZERO, getZero(), getZero(), getZero());
+        repaymentPeriod.getInterestPeriods().add(interestPeriod);
+    }
+
+    private Money getZero() {
+        return Money.zero(loanProductRelatedDetail.getCurrency());
     }
 }
