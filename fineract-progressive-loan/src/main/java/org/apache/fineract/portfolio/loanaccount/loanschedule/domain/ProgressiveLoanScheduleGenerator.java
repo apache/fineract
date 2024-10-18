@@ -185,7 +185,7 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
     private void processDisbursements(final LoanApplicationTerms loanApplicationTerms,
             final ArrayList<DisbursementData> disbursementDataList, final LoanScheduleParams scheduleParams,
             final ProgressiveLoanInterestScheduleModel interestScheduleModel, final List<LoanScheduleModelPeriod> periods,
-            final BigDecimal chargesDueAtTimeOfDisbursement, final boolean includeDisbursementsAfterMaturityDate) {
+            final BigDecimal chargesDueAtTimeOfDisbursement, final boolean includeDisbursementsAfterMaturityDate, final MathContext mc) {
 
         for (DisbursementData disbursementData : disbursementDataList) {
             final LocalDate disbursementDate = disbursementData.disbursementDate();

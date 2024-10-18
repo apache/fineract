@@ -425,6 +425,10 @@ public class Money implements Comparable<Money> {
         return isGreaterThan(Money.zero(getCurrency()));
     }
 
+    public boolean isGreaterThanZero(MathContext mc) {
+        return isGreaterThan(Money.zero(getCurrency(), mc));
+    }
+
     public boolean isLessThan(final Money other) {
         return compareTo(other) < 0;
     }
@@ -490,6 +494,10 @@ public class Money implements Comparable<Money> {
 
     public Money zero() {
         return Money.zero(getCurrency());
+    }
+
+    public Money zero(MathContext mc) {
+        return Money.zero(getCurrency(), mc);
     }
 
     public MathContext getMc() {

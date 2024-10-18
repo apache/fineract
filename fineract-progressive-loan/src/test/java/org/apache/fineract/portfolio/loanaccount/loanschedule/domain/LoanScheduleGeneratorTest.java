@@ -43,7 +43,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class LoanScheduleGeneratorTest {
 
-    private static final ProgressiveEMICalculator emiCalculator = new ProgressiveEMICalculator(null);
+    private static final ProgressiveEMICalculator emiCalculator = new ProgressiveEMICalculator();
     private static final ApplicationCurrency APPLICATION_CURRENCY = new ApplicationCurrency("USD", "USD", 2, 1, "USD", "$");
     private static final MonetaryCurrency MONETARY_CURRENCY = MonetaryCurrency.fromApplicationCurrency(APPLICATION_CURRENCY);
     private static final BigDecimal DISBURSEMENT_AMOUNT = BigDecimal.valueOf(192.22);
