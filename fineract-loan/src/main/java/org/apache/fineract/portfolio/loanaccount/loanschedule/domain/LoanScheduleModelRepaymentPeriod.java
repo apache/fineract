@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -46,18 +47,20 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
     private final Set<LoanInterestRecalcualtionAdditionalDetails> loanCompoundingDetails = new HashSet<>();
     private boolean isEMIFixedSpecificToInstallment = false;
     BigDecimal rescheduleInterestPortion;
+    private final MathContext mc;
 
     public static LoanScheduleModelRepaymentPeriod repayment(final int periodNumber, final LocalDate startDate,
             final LocalDate scheduledDueDate, final Money principalDue, final Money outstandingLoanBalance, final Money interestDue,
-            final Money feeChargesDue, final Money penaltyChargesDue, final Money totalDue, boolean recalculatedInterestComponent) {
+            final Money feeChargesDue, final Money penaltyChargesDue, final Money totalDue, boolean recalculatedInterestComponent,
+            final MathContext mc) {
 
         return new LoanScheduleModelRepaymentPeriod(periodNumber, startDate, scheduledDueDate, principalDue, outstandingLoanBalance,
-                interestDue, feeChargesDue, penaltyChargesDue, totalDue, recalculatedInterestComponent);
+                interestDue, feeChargesDue, penaltyChargesDue, totalDue, recalculatedInterestComponent, mc);
     }
 
     public LoanScheduleModelRepaymentPeriod(final int periodNumber, final LocalDate fromDate, final LocalDate dueDate,
             final Money principalDue, final Money outstandingLoanBalance, final Money interestDue, final Money feeChargesDue,
-            final Money penaltyChargesDue, final Money totalDue, final boolean recalculatedInterestComponent) {
+            final Money penaltyChargesDue, final Money totalDue, final boolean recalculatedInterestComponent, final MathContext mc) {
         this.periodNumber = periodNumber;
         this.fromDate = fromDate;
         this.dueDate = dueDate;
@@ -68,6 +71,7 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
         this.penaltyChargesDue = penaltyChargesDue;
         this.totalDue = totalDue;
         this.recalculatedInterestComponent = recalculatedInterestComponent;
+        this.mc = mc;
     }
 
     @Override
@@ -144,15 +148,15 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
 
     @Override
     public void addLoanCharges(BigDecimal feeCharge, BigDecimal penaltyCharge) {
-        this.feeChargesDue = this.feeChargesDue.plus(feeCharge);
-        this.penaltyChargesDue = this.penaltyChargesDue.plus(penaltyCharge);
-        this.totalDue = this.totalDue.plus(feeCharge).plus(penaltyCharge);
+        this.feeChargesDue = this.feeChargesDue.plus(feeCharge, mc);
+        this.penaltyChargesDue = this.penaltyChargesDue.plus(penaltyCharge, mc);
+        this.totalDue = this.totalDue.plus(feeCharge, mc).plus(penaltyCharge, mc);
     }
 
     @Override
     public void addPrincipalAmount(final Money principalDue) {
-        this.principalDue = this.principalDue.plus(principalDue);
-        this.totalDue = this.totalDue.plus(principalDue);
+        this.principalDue = this.principalDue.plus(principalDue, mc);
+        this.totalDue = this.totalDue.plus(principalDue, mc);
     }
 
     @Override
@@ -162,8 +166,8 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
 
     @Override
     public void addInterestAmount(Money interestDue) {
-        this.interestDue = this.interestDue.plus(interestDue);
-        this.totalDue = this.totalDue.plus(interestDue);
+        this.interestDue = this.interestDue.plus(interestDue, mc);
+        this.totalDue = this.totalDue.plus(interestDue, mc);
     }
 
     public void setPeriodNumber(int periodNumber) {

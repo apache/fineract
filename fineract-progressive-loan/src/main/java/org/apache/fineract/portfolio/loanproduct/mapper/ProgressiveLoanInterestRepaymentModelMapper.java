@@ -18,7 +18,9 @@
  */
 package org.apache.fineract.portfolio.loanproduct.mapper;
 
+import java.math.MathContext;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -28,10 +30,13 @@ import org.mapstruct.Mapper;
 @Mapper(config = MapstructMapperConfig.class)
 public interface ProgressiveLoanInterestRepaymentModelMapper {
 
-    List<ProgressiveLoanInterestRepaymentModel> map(List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments);
+    default List<ProgressiveLoanInterestRepaymentModel> map(List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
+            MathContext mc) {
+        return repaymentScheduleInstallments.stream().map(installment -> map(installment, mc)).collect(Collectors.toList());
+    }
 
-    default ProgressiveLoanInterestRepaymentModel map(LoanRepaymentScheduleInstallment repaymentScheduleInstallment) {
+    default ProgressiveLoanInterestRepaymentModel map(LoanRepaymentScheduleInstallment repaymentScheduleInstallment, MathContext mc) {
         return new ProgressiveLoanInterestRepaymentModel(repaymentScheduleInstallment.getFromDate(),
-                repaymentScheduleInstallment.getDueDate(), Money.zero(repaymentScheduleInstallment.getLoan().getCurrency()));
+                repaymentScheduleInstallment.getDueDate(), Money.zero(repaymentScheduleInstallment.getLoan().getCurrency()), mc);
     }
 }

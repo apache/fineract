@@ -1052,7 +1052,7 @@ class ProgressiveEMICalculatorTest {
     private static LoanScheduleModelRepaymentPeriod repayment(int periodNumber, LocalDate fromDate, LocalDate dueDate) {
         final Money zeroAmount = Money.zero(monetaryCurrency);
         return LoanScheduleModelRepaymentPeriod.repayment(periodNumber, fromDate, dueDate, zeroAmount, zeroAmount, zeroAmount, zeroAmount,
-                zeroAmount, zeroAmount, false);
+                zeroAmount, zeroAmount, false, MoneyHelper.getMathContext());
     }
 
     @NotNull

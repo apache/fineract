@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
+import java.math.MathContext;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -45,7 +46,7 @@ import org.springframework.stereotype.Component;
 public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
 
     @Override
-    public List<LoanScheduleModelRepaymentPeriod> generateRepaymentPeriods(final LocalDate scheduleStartDate,
+    public List<LoanScheduleModelRepaymentPeriod> generateRepaymentPeriods(final MathContext mc, final LocalDate scheduleStartDate,
             final LoanApplicationTerms loanApplicationTerms, final HolidayDetailDTO holidayDetailDTO) {
         final Money zeroAmount = Money.zero(loanApplicationTerms.getCurrency());
         final int numberOfRepayments = loanApplicationTerms.getNumberOfRepayments();
@@ -65,7 +66,7 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             }
             nextRepaymentDate = applyLoanTermVariations(loanApplicationTerms, nextRepaymentDate);
             repaymentPeriods.add(LoanScheduleModelRepaymentPeriod.repayment(repaymentPeriodNumber, lastRepaymentDate, nextRepaymentDate,
-                    zeroAmount, zeroAmount, zeroAmount, zeroAmount, zeroAmount, zeroAmount, false));
+                    zeroAmount, zeroAmount, zeroAmount, zeroAmount, zeroAmount, zeroAmount, false, mc));
             lastRepaymentDate = nextRepaymentDate;
             isFirstRepayment = false;
         }

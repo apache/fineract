@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import lombok.Data;
@@ -39,14 +40,17 @@ public class ProgressiveLoanInterestRepaymentModel {
     private Money remainingBalance;
 
     private Money initialBalance;
+    private MathContext mc;
 
-    public ProgressiveLoanInterestRepaymentModel(final LocalDate fromDate, final LocalDate dueDate, final Money equalMonthlyInstallment) {
+    public ProgressiveLoanInterestRepaymentModel(final LocalDate fromDate, final LocalDate dueDate, final Money equalMonthlyInstallment,
+            final MathContext mc) {
         this.fromDate = fromDate;
         this.dueDate = dueDate;
         this.equalMonthlyInstallment = equalMonthlyInstallment;
         this.isLastPeriod = false;
+        this.mc = mc;
 
-        final Money zeroAmount = Money.zero(equalMonthlyInstallment.getCurrency());
+        final Money zeroAmount = Money.zero(equalMonthlyInstallment.getCurrency(), mc);
         this.initialBalance = zeroAmount;
         this.remainingBalance = zeroAmount;
         this.principalDue = zeroAmount;
@@ -64,6 +68,7 @@ public class ProgressiveLoanInterestRepaymentModel {
         this.remainingBalance = repaymentModel.remainingBalance;
         this.principalDue = repaymentModel.principalDue;
         this.interestPeriods = new LinkedList<>();
+        this.mc = repaymentModel.mc;
         for (final ProgressiveLoanInterestRepaymentInterestPeriod interestPeriod : repaymentModel.interestPeriods) {
             this.interestPeriods.add(new ProgressiveLoanInterestRepaymentInterestPeriod(interestPeriod));
         }
@@ -76,17 +81,17 @@ public class ProgressiveLoanInterestRepaymentModel {
 
     public Money getDisbursedAmountInPeriod() {
         return interestPeriods.stream().map(ProgressiveLoanInterestRepaymentInterestPeriod::getDisbursedAmount)
-                .reduce(Money.zero(equalMonthlyInstallment.getCurrency()), Money::plus);
+                .reduce(Money.zero(equalMonthlyInstallment.getCurrency(), mc), (m1, m2) -> m1.plus(m2, mc));
     }
 
     public Money getInterestDue() {
         return interestPeriods.stream().map(ProgressiveLoanInterestRepaymentInterestPeriod::getInterestDue)
-                .reduce(Money.zero(equalMonthlyInstallment.getCurrency()), Money::plus);
+                .reduce(Money.zero(equalMonthlyInstallment.getCurrency(), mc), (m1, m2) -> m1.plus(m2, mc));
     }
 
     public Money getCorrectionAmount() {
         return interestPeriods.stream().map(ProgressiveLoanInterestRepaymentInterestPeriod::getCorrectionAmount)
-                .reduce(Money.zero(equalMonthlyInstallment.getCurrency()), Money::plus);
+                .reduce(Money.zero(equalMonthlyInstallment.getCurrency(), mc), (m1, m2) -> m1.plus(m2, mc));
     }
 
     public Money getOutstandingBalance() {

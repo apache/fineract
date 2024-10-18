@@ -32,6 +32,8 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail
 
 public interface EMICalculator {
 
+    void setMathContext(final MathContext mc);
+
     ProgressiveLoanInterestScheduleModel generateInterestScheduleModel(List<LoanScheduleModelRepaymentPeriod> periods,
             LoanProductRelatedDetail loanProductRelatedDetail, Integer installmentAmountInMultiplesOf, MathContext mc);
 
