@@ -155,7 +155,7 @@ public class RepaymentPeriod {
                         .minus(getDuePrincipal())//
                         .plus(getPaidPrincipal());//
                 return MathUtil.negativeToZero(calculatedOutStandingLoanBalance);
-            }, () -> interestPeriods);
+            }, () -> new Object[] { paidPrincipal, paidInterest, interestPeriods });
         }
         return outstandingBalanceCalculation.get();
     }

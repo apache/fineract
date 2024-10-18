@@ -186,9 +186,6 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         calculateOutstandingBalance(scheduleModel);
         calculateLastUnpaidRepaymentPeriodEMI(scheduleModel);
         checkAndAdjustEmiIfNeededOnRelatedRepaymentPeriods(scheduleModel, relatedRepaymentPeriods);
-        // TODO: optimalize
-        calculateOutstandingBalance(scheduleModel);
-        calculateLastUnpaidRepaymentPeriodEMI(scheduleModel);
     }
 
     private void calculateLastUnpaidRepaymentPeriodEMI(ProgressiveLoanInterestScheduleModel scheduleModel) {
@@ -235,6 +232,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                     period.setEmi(adjustedEqualMonthlyInstallmentValue);
                 }
             });
+            calculateOutstandingBalance(newScheduleModel);
+            calculateLastUnpaidRepaymentPeriodEMI(newScheduleModel);
             final Money newEmiDifference = getDifferenceBetweenLastTwoPeriod(newScheduleModel.repaymentPeriods(), scheduleModel);
             final boolean newEmiHasLessDifference = newEmiDifference.abs().isLessThan(emiDifference.abs());
             if (!newEmiHasLessDifference) {
@@ -252,6 +251,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 final RepaymentPeriod newRepaymentPeriod = relatedPeriodFromNewModelIterator.next();
                 relatedRepaymentPeriod.setEmi(newRepaymentPeriod.getEmi());
             });
+            calculateOutstandingBalance(scheduleModel);
         }
     }
 

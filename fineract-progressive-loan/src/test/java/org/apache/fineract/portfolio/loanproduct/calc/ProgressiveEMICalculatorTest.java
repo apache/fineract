@@ -234,6 +234,43 @@ class ProgressiveEMICalculatorTest {
     }
 
     @Test
+    public void testEMICalculation_CheckEmiButNewEmiNotBetterThanOriginal() {
+
+        final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
+
+        expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+        expectedRepaymentPeriods.add(repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+        expectedRepaymentPeriods.add(repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+        expectedRepaymentPeriods.add(repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+        expectedRepaymentPeriods.add(repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+
+        final BigDecimal interestRate = BigDecimal.valueOf(15.678);
+        final Integer installmentAmountInMultiplesOf = null;
+
+        Mockito.when(loanProductRelatedDetail.getAnnualNominalInterestRate()).thenReturn(interestRate);
+        Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_365.getValue());
+        Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.ACTUAL.getValue());
+        Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.MONTHS);
+        Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
+        Mockito.when(loanProductRelatedDetail.getCurrency()).thenReturn(monetaryCurrency);
+
+        final ProgressiveLoanInterestScheduleModel interestSchedule = emiCalculator.generateInterestScheduleModel(expectedRepaymentPeriods,
+                loanProductRelatedDetail, installmentAmountInMultiplesOf);
+
+        final Money disbursedAmount = toMoney(100.0);
+        emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
+
+        checkPeriod(interestSchedule, 0, 0, 17.43, 0.0, 0.0, 1.33, 16.1, 83.9);
+        checkPeriod(interestSchedule, 0, 1, 17.43, 0.013315561644, 1.33, 16.1, 83.9);
+        checkPeriod(interestSchedule, 1, 0, 17.43, 0.012456493151, 1.05, 16.38, 67.52);
+        checkPeriod(interestSchedule, 2, 0, 17.43, 0.013315561644, 0.90, 16.53, 50.99);
+        checkPeriod(interestSchedule, 3, 0, 17.43, 0.012886027397, 0.66, 16.77, 34.22);
+        checkPeriod(interestSchedule, 4, 0, 17.43, 0.013315561644, 0.46, 16.97, 17.25);
+        checkPeriod(interestSchedule, 5, 0, 17.47, 0.012886027397, 0.22, 17.25, 0.0);
+    }
+
+    @Test
     public void testEMICalculation_disbursedAmt100_dayInYears360_daysInMonth30_repayEvery1Month() {
 
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
