@@ -566,7 +566,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
             return interestPortionOfTransaction;
         }
         final Money interestDue = getInterestOutstanding(currency);
-        if (!DateUtils.isEqual(this.loan.getActualDisbursementDate(), transactionDate)) {
+        if (this.loan == null || !DateUtils.isEqual(this.loan.getActualDisbursementDate(), transactionDate)) {
             if (transactionAmountRemaining.isGreaterThanOrEqualTo(interestDue)) {
                 this.interestPaid = getInterestPaid(currency).plus(interestDue).getAmount();
                 interestPortionOfTransaction = interestPortionOfTransaction.plus(interestDue);
