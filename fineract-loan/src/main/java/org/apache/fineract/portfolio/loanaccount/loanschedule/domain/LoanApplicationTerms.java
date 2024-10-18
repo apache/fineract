@@ -373,15 +373,15 @@ public final class LoanApplicationTerms {
         }
     }
 
-    public static LoanApplicationTerms assembleFrom(LoanRepaymentScheduleModelData modelData) {
-        Money principal = Money.of(modelData.currency().toData(), modelData.disbursementAmount());
-        Money downPaymentAmount = Money.zero(modelData.currency().toData());
+    public static LoanApplicationTerms assembleFrom(LoanRepaymentScheduleModelData modelData, MathContext mc) {
+        Money principal = Money.of(modelData.currency().toData(), modelData.disbursementAmount(), mc);
+        Money downPaymentAmount = Money.zero(modelData.currency().toData(), mc);
 
         if (modelData.downPaymentEnabled()) {
             downPaymentAmount = Money.of(modelData.currency().toData(),
-                    MathUtil.percentageOf(principal.getAmount(), modelData.disbursementAmount(), 19));
+                    MathUtil.percentageOf(principal.getAmount(), modelData.disbursementAmount(), mc), mc);
             if (modelData.installmentAmountInMultiplesOf() != null) {
-                downPaymentAmount = Money.roundToMultiplesOf(downPaymentAmount, modelData.installmentAmountInMultiplesOf());
+                downPaymentAmount = Money.roundToMultiplesOf(downPaymentAmount, modelData.installmentAmountInMultiplesOf(), mc);
             }
         }
 
@@ -394,7 +394,7 @@ public final class LoanApplicationTerms {
                 .annualNominalInterestRate(modelData.annualNominalInterestRate()).principal(principal)
                 .expectedDisbursementDate(modelData.disbursementDate()).repaymentsStartingFromDate(modelData.scheduleGenerationStartDate())
                 .daysInMonthType(modelData.daysInMonth()).daysInYearType(modelData.daysInYear()).fixedLength(modelData.fixedLength())
-                .inArrearsTolerance(Money.zero(modelData.currency().toData())).disbursementDatas(new ArrayList<>())
+                .inArrearsTolerance(Money.zero(modelData.currency().toData(), mc)).disbursementDatas(new ArrayList<>())
                 .downPaymentAmount(downPaymentAmount).build();
     }
 

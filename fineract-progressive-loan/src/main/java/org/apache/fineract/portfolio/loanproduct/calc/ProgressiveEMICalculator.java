@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanproduct.calc;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.time.LocalDate;
 import java.time.Year;
 import java.util.ArrayList;
@@ -48,18 +49,25 @@ import org.springframework.stereotype.Component;
 @DependsOn("moneyHelper")
 public final class ProgressiveEMICalculator implements EMICalculator {
 
+    private MathContext mc;
+
     private static final BigDecimal DIVISOR_100 = new BigDecimal("100");
     private static final BigDecimal ONE_WEEK_IN_DAYS = BigDecimal.valueOf(7);
 
     @Override
+    public void setMathContext(final MathContext mc) {
+        this.mc = mc;
+    }
+
+    @Override
     public ProgressiveLoanInterestScheduleModel generateInterestScheduleModel(final List<LoanScheduleModelRepaymentPeriod> periods,
             final LoanProductRelatedDetail loanProductRelatedDetail, final Integer installmentAmountInMultiplesOf) {
-        final Money zeroAmount = Money.zero(loanProductRelatedDetail.getCurrency());
+        final Money zeroAmount = Money.zero(loanProductRelatedDetail.getCurrency(), mc);
         final ArrayList<RepaymentPeriod> interestRepaymentModelList = new ArrayList<>(periods.size());
         RepaymentPeriod previousPeriod = null;
         for (final LoanScheduleModelRepaymentPeriod period : periods) {
-            RepaymentPeriod currentPeriod = new RepaymentPeriod(previousPeriod, period.periodFromDate(), period.periodDueDate(),
-                    zeroAmount);
+            RepaymentPeriod currentPeriod = new RepaymentPeriod(previousPeriod, period.periodFromDate(), period.periodDueDate(), zeroAmount,
+                    mc);
             previousPeriod = currentPeriod;
             interestRepaymentModelList.add(currentPeriod);
 
@@ -85,7 +93,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             final Money disbursedAmount) {
         scheduleModel
                 .changeOutstandingBalanceAndUpdateInterestPeriods(disbursementDueDate, disbursedAmount,
-                        Money.zero(disbursedAmount.getCurrency()))
+                        Money.zero(disbursedAmount.getCurrency(), mc))
                 .ifPresent((repaymentPeriod) -> calculateEMIValueAndRateFactors(repaymentPeriod.getDueDate(), scheduleModel));
     }
 
@@ -130,7 +138,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     @Override
     public PayableDetails getPayableDetails(final ProgressiveLoanInterestScheduleModel scheduleModel,
             final LocalDate repaymentPeriodDueDate, final LocalDate targetDate) {
-        RepaymentPeriod repaymentPeriod = scheduleModel.deepCopy().repaymentPeriods().stream()
+        RepaymentPeriod repaymentPeriod = scheduleModel.deepCopy(mc).repaymentPeriods().stream()
                 .filter(rp -> rp.getDueDate().equals(repaymentPeriodDueDate)).findFirst().orElseThrow();
         LocalDate adjustedTargetDate = targetDate;
         InterestPeriod interestPeriod;
@@ -193,17 +201,17 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
     private void calculateLastUnpaidRepaymentPeriodEMI(ProgressiveLoanInterestScheduleModel scheduleModel) {
         Money totalDueInterest = scheduleModel.repaymentPeriods().stream().map(RepaymentPeriod::getDueInterest)
-                .reduce(Money.zero(scheduleModel.loanProductRelatedDetail().getCurrency()), Money::plus); // 1.46
+                .reduce(Money.zero(scheduleModel.loanProductRelatedDetail().getCurrency(), mc), (m1, m2) -> m1.plus(m2, mc)); // 1.46
         Money totalEMI = scheduleModel.repaymentPeriods().stream().map(RepaymentPeriod::getEmi)
-                .reduce(Money.zero(scheduleModel.loanProductRelatedDetail().getCurrency()), Money::plus); // 101.48
+                .reduce(Money.zero(scheduleModel.loanProductRelatedDetail().getCurrency(), mc), (m1, m2) -> m1.plus(m2, mc)); // 101.48
         Money totalDisbursedAmount = scheduleModel.repaymentPeriods().stream()
                 .flatMap(rp -> rp.getInterestPeriods().stream().map(InterestPeriod::getDisbursementAmount))
-                .reduce(Money.zero(scheduleModel.loanProductRelatedDetail().getCurrency()), Money::plus); // 100
+                .reduce(Money.zero(scheduleModel.loanProductRelatedDetail().getCurrency(), mc), (m1, m2) -> m1.plus(m2, mc)); // 100
 
-        Money diff = totalDisbursedAmount.plus(totalDueInterest).minus(totalEMI);
+        Money diff = totalDisbursedAmount.plus(totalDueInterest, mc).minus(totalEMI, mc);
         Optional<RepaymentPeriod> findLastUnpaidRepaymentPeriod = scheduleModel.repaymentPeriods().stream().filter(rp -> !rp.isFullyPaid())
                 .reduce((first, second) -> second);
-        findLastUnpaidRepaymentPeriod.ifPresent(repaymentPeriod -> repaymentPeriod.setEmi(repaymentPeriod.getEmi().add(diff)));
+        findLastUnpaidRepaymentPeriod.ifPresent(repaymentPeriod -> repaymentPeriod.setEmi(repaymentPeriod.getEmi().add(diff, mc)));
     }
 
     private void calculateOutstandingBalance(ProgressiveLoanInterestScheduleModel scheduleModel) {
@@ -215,28 +223,29 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         final Money emiDifference = getDifferenceBetweenLastTwoPeriod(relatedRepaymentPeriods, scheduleModel);
         final int numberOfRelatedPeriods = relatedRepaymentPeriods.size();
         double lowerHalfOfRelatedPeriods = Math.floor(numberOfRelatedPeriods / 2.0);
-        if (emiDifference.isZero() || lowerHalfOfRelatedPeriods == 0.0) {
+        if (emiDifference.isZero(mc) || lowerHalfOfRelatedPeriods == 0.0) {
             return;
         }
         final Money originalEmi = relatedRepaymentPeriods.get(numberOfRelatedPeriods - 2).getEmi();
-        boolean shouldBeAdjusted = emiDifference.abs().multipliedBy(100)
-                .isGreaterThan(Money.of(originalEmi.getCurrency(), BigDecimal.valueOf(lowerHalfOfRelatedPeriods)));
+        boolean shouldBeAdjusted = emiDifference.abs(mc).multipliedBy(100, mc)
+                .isGreaterThan(Money.of(originalEmi.getCurrency(), BigDecimal.valueOf(lowerHalfOfRelatedPeriods), mc));
 
         if (shouldBeAdjusted) {
-            Money adjustment = emiDifference.dividedBy(numberOfRelatedPeriods, MoneyHelper.getMathContext().getRoundingMode());
-            Money adjustedEqualMonthlyInstallmentValue = applyInstallmentAmountInMultiplesOf(scheduleModel, originalEmi.plus(adjustment));
+            Money adjustment = emiDifference.dividedBy(numberOfRelatedPeriods, mc.getRoundingMode(), mc);
+            Money adjustedEqualMonthlyInstallmentValue = applyInstallmentAmountInMultiplesOf(scheduleModel,
+                    originalEmi.plus(adjustment, mc));
             if (adjustedEqualMonthlyInstallmentValue.isEqualTo(originalEmi)) {
                 return;
             }
             final LocalDate relatedPeriodsFirstDueDate = relatedRepaymentPeriods.get(0).getDueDate();
-            final ProgressiveLoanInterestScheduleModel newScheduleModel = scheduleModel.deepCopy();
+            final ProgressiveLoanInterestScheduleModel newScheduleModel = scheduleModel.deepCopy(mc);
             newScheduleModel.repaymentPeriods().forEach(period -> {
                 if (!period.getDueDate().isBefore(relatedPeriodsFirstDueDate)) {
                     period.setEmi(adjustedEqualMonthlyInstallmentValue);
                 }
             });
             final Money newEmiDifference = getDifferenceBetweenLastTwoPeriod(newScheduleModel.repaymentPeriods(), scheduleModel);
-            final boolean newEmiHasLessDifference = newEmiDifference.abs().isLessThan(emiDifference.abs());
+            final boolean newEmiHasLessDifference = newEmiDifference.abs(mc).isLessThan(emiDifference.abs(mc));
             if (!newEmiHasLessDifference) {
                 return;
             }
@@ -264,7 +273,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
      * @return Rate Interest Rate in fraction format
      */
     BigDecimal calcNominalInterestRatePercentage(final BigDecimal interestRate) {
-        return MathUtil.nullToZero(interestRate).divide(DIVISOR_100, MoneyHelper.getMathContext());
+        return MathUtil.nullToZero(interestRate).divide(DIVISOR_100, mc);
     }
 
     /**
@@ -377,7 +386,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         final Money outstandingBalance = startPeriod.getInitialBalanceForEmiRecalculation();
 
         final Money equalMonthlyInstallment = Money.of(outstandingBalance.getCurrency(),
-                calculateEMIValue(rateFactorN, outstandingBalance.getAmount(), fnResult));
+                calculateEMIValue(rateFactorN, outstandingBalance.getAmount(), fnResult), mc);
         final Money finalEqualMonthlyInstallment = applyInstallmentAmountInMultiplesOf(scheduleModel, equalMonthlyInstallment);
 
         repaymentPeriods.forEach(period -> period.setEmi(finalEqualMonthlyInstallment));
@@ -394,11 +403,11 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             final ProgressiveLoanInterestScheduleModel scheduleModel) {
         int numberOfUpcomingPeriods = repaymentPeriods.size();
         if (numberOfUpcomingPeriods < 2) {
-            return Money.zero(scheduleModel.loanProductRelatedDetail().getCurrency());
+            return Money.zero(scheduleModel.loanProductRelatedDetail().getCurrency(), mc);
         }
         final RepaymentPeriod lastPeriod = repaymentPeriods.get(numberOfUpcomingPeriods - 1);
         final RepaymentPeriod penultimatePeriod = repaymentPeriods.get(numberOfUpcomingPeriods - 2);
-        return lastPeriod.getEmi().minus(penultimatePeriod.getEmi());
+        return lastPeriod.getEmi().minus(penultimatePeriod.getEmi(), mc);
     }
 
     /**
@@ -406,7 +415,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
      */
     BigDecimal calculateRateFactorPlus1N(final List<RepaymentPeriod> periods) {
         return periods.stream().map(RepaymentPeriod::getRateFactorPlus1).reduce(BigDecimal.ONE,
-                (BigDecimal acc, BigDecimal value) -> acc.multiply(value, MoneyHelper.getMathContext()));
+                (BigDecimal acc, BigDecimal value) -> acc.multiply(value, mc));
     }
 
     /**
@@ -423,8 +432,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
      * Calculate the EMI (Equal Monthly Installment) value
      */
     BigDecimal calculateEMIValue(final BigDecimal rateFactorPlus1N, final BigDecimal outstandingBalanceForRest, final BigDecimal fnResult) {
-        return rateFactorPlus1N.multiply(outstandingBalanceForRest, MoneyHelper.getMathContext()).divide(fnResult,
-                MoneyHelper.getMathContext());
+        return rateFactorPlus1N.multiply(outstandingBalanceForRest, mc).divide(fnResult, mc);
     }
 
     /**
@@ -551,12 +559,12 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             final BigDecimal repaymentEvery, final BigDecimal daysInYear, final BigDecimal actualDaysInPeriod,
             final BigDecimal calculatedDaysInPeriod) {
         final BigDecimal interestFractionPerPeriod = repaymentPeriodMultiplierInDays//
-                .multiply(repaymentEvery, MoneyHelper.getMathContext())//
-                .divide(daysInYear, MoneyHelper.getMathContext());//
+                .multiply(repaymentEvery, mc)//
+                .divide(daysInYear, mc);//
         return interestRate//
-                .multiply(interestFractionPerPeriod, MoneyHelper.getMathContext())//
-                .multiply(actualDaysInPeriod, MoneyHelper.getMathContext())//
-                .divide(calculatedDaysInPeriod, MoneyHelper.getMathContext());//
+                .multiply(interestFractionPerPeriod, mc)//
+                .multiply(actualDaysInPeriod, mc)//
+                .divide(calculatedDaysInPeriod, mc);//
     }
 
     /**
@@ -567,9 +575,9 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             final BigDecimal cumulatedPeriodRatio, final BigDecimal actualDaysInPeriod, final BigDecimal calculatedDaysInPeriod) {
         final BigDecimal interestFractionPerPeriod = repaymentEvery.multiply(cumulatedPeriodRatio);
         return interestRate//
-                .multiply(interestFractionPerPeriod, MoneyHelper.getMathContext())//
-                .multiply(actualDaysInPeriod, MoneyHelper.getMathContext())//
-                .divide(calculatedDaysInPeriod, MoneyHelper.getMathContext());//
+                .multiply(interestFractionPerPeriod, mc)//
+                .multiply(actualDaysInPeriod, mc)//
+                .divide(calculatedDaysInPeriod, mc);//
     }
 
     /**
@@ -583,7 +591,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
      *
      */
     BigDecimal fnValue(final BigDecimal previousFnValue, final BigDecimal currentRateFactor) {
-        return BigDecimal.ONE.add(previousFnValue.multiply(currentRateFactor, MoneyHelper.getMathContext()), MoneyHelper.getMathContext());
+        return BigDecimal.ONE.add(previousFnValue.multiply(currentRateFactor, mc), mc);
     }
 
     @Override
@@ -596,7 +604,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         RepaymentPeriod previousPeriod = null;
         for (LoanRepaymentScheduleInstallment repaymentModel : repaymentModelsWithoutDownPayment) {
             RepaymentPeriod currentPeriod = new RepaymentPeriod(previousPeriod, repaymentModel.getFromDate(), repaymentModel.getDueDate(),
-                    Money.zero(repaymentModel.getLoan().getCurrency()));
+                    Money.zero(repaymentModel.getLoan().getCurrency(), mc), mc);
             previousPeriod = currentPeriod;
             repaymentModels.add(currentPeriod);
         }

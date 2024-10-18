@@ -32,15 +32,11 @@ import java.util.List;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
-import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.loanproduct.calc.ProgressiveEMICalculator;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -48,7 +44,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class LoanScheduleGeneratorTest {
 
     private static final ProgressiveEMICalculator emiCalculator = new ProgressiveEMICalculator();
-    private static MockedStatic<MoneyHelper> moneyHelper = Mockito.mockStatic(MoneyHelper.class);
     private static final ApplicationCurrency APPLICATION_CURRENCY = new ApplicationCurrency("USD", "USD", 2, 1, "USD", "$");
     private static final MonetaryCurrency MONETARY_CURRENCY = MonetaryCurrency.fromApplicationCurrency(APPLICATION_CURRENCY);
     private static final BigDecimal DISBURSEMENT_AMOUNT = BigDecimal.valueOf(192.22);
@@ -57,17 +52,7 @@ class LoanScheduleGeneratorTest {
     private static final int REPAYMENT_FREQUENCY = 1;
     private static final String REPAYMENT_FREQUENCY_TYPE = "MONTHS";
     private static final LocalDate DISBURSEMENT_DATE = LocalDate.of(2024, 1, 15);
-
-    @BeforeAll
-    public static void init() {
-        moneyHelper.when(MoneyHelper::getRoundingMode).thenReturn(RoundingMode.HALF_EVEN);
-        moneyHelper.when(MoneyHelper::getMathContext).thenReturn(new MathContext(12, RoundingMode.HALF_EVEN));
-    }
-
-    @AfterAll
-    public static void destruct() {
-        moneyHelper.close();
-    }
+    private static final MathContext mc = new MathContext(12, RoundingMode.HALF_EVEN);
 
     @Test
     void testGenerateLoanSchedule() {
@@ -75,7 +60,6 @@ class LoanScheduleGeneratorTest {
                 DISBURSEMENT_AMOUNT, DISBURSEMENT_DATE, NUMBER_OF_REPAYMENTS, REPAYMENT_FREQUENCY, REPAYMENT_FREQUENCY_TYPE,
                 NOMINAL_INTEREST_RATE, true, DaysInMonthType.DAYS_30, DaysInYearType.DAYS_360, null, null, null);
 
-        final MathContext mc = MoneyHelper.getMathContext();
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
 
         expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
@@ -87,7 +71,7 @@ class LoanScheduleGeneratorTest {
 
         ScheduledDateGenerator mockScheduledDateGenerator = Mockito.mock(ScheduledDateGenerator.class);
         ProgressiveLoanScheduleGenerator generator = new ProgressiveLoanScheduleGenerator(mockScheduledDateGenerator, emiCalculator);
-        when(mockScheduledDateGenerator.generateRepaymentPeriods(any(), any(), any())).thenReturn(expectedRepaymentPeriods);
+        when(mockScheduledDateGenerator.generateRepaymentPeriods(any(), any(), any(), any())).thenReturn(expectedRepaymentPeriods);
 
         LoanScheduleModel loanSchedule = generator.generate(mc, modelData);
         List<LoanScheduleModelPeriod> periods = loanSchedule.getPeriods();
@@ -125,8 +109,8 @@ class LoanScheduleGeneratorTest {
     }
 
     private static LoanScheduleModelRepaymentPeriod repayment(int periodNumber, LocalDate fromDate, LocalDate dueDate) {
-        final Money zeroAmount = Money.zero(MONETARY_CURRENCY);
+        final Money zeroAmount = Money.zero(MONETARY_CURRENCY, mc);
         return LoanScheduleModelRepaymentPeriod.repayment(periodNumber, fromDate, dueDate, zeroAmount, zeroAmount, zeroAmount, zeroAmount,
-                zeroAmount, zeroAmount, false);
+                zeroAmount, zeroAmount, false, mc);
     }
 }

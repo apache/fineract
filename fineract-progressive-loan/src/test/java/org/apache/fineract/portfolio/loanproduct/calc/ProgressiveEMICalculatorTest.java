@@ -81,6 +81,7 @@ class ProgressiveEMICalculatorTest {
         // When
         moneyHelper.when(MoneyHelper::getRoundingMode).thenReturn(RoundingMode.HALF_EVEN);
         moneyHelper.when(MoneyHelper::getMathContext).thenReturn(new MathContext(12, RoundingMode.HALF_EVEN));
+        emiCalculator.setMathContext(MoneyHelper.getMathContext());
     }
 
     @AfterAll
@@ -994,7 +995,7 @@ class ProgressiveEMICalculatorTest {
     private static LoanScheduleModelRepaymentPeriod repayment(int periodNumber, LocalDate fromDate, LocalDate dueDate) {
         final Money zeroAmount = Money.zero(monetaryCurrency);
         return LoanScheduleModelRepaymentPeriod.repayment(periodNumber, fromDate, dueDate, zeroAmount, zeroAmount, zeroAmount, zeroAmount,
-                zeroAmount, zeroAmount, false);
+                zeroAmount, zeroAmount, false, MoneyHelper.getMathContext());
     }
 
     @NotNull
