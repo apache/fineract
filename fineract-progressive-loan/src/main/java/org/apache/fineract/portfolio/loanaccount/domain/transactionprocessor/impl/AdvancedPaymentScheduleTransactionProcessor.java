@@ -96,6 +96,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRepaymentScheduleTransactionProcessor {
 
     public static final String ADVANCED_PAYMENT_ALLOCATION_STRATEGY = "advanced-payment-allocation-strategy";
+    public static final String ADVANCED_PAYMENT_ALLOCATION_STRATEGY_NAME = "Advanced payment allocation strategy";
 
     public final EMICalculator emiCalculator;
 
@@ -106,7 +107,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
     @Override
     public String getName() {
-        return "Advanced payment allocation strategy";
+        return ADVANCED_PAYMENT_ALLOCATION_STRATEGY_NAME;
     }
 
     @Override
@@ -232,8 +233,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             case CHARGEBACK -> handleChargeback(loanTransaction, ctx);
             case CREDIT_BALANCE_REFUND ->
                 handleCreditBalanceRefund(loanTransaction, ctx.getCurrency(), ctx.getInstallments(), ctx.getOverpaymentHolder());
-            case REPAYMENT, MERCHANT_ISSUED_REFUND, PAYOUT_REFUND, GOODWILL_CREDIT, CHARGE_REFUND, CHARGE_ADJUSTMENT, DOWN_PAYMENT,
-                    WAIVE_INTEREST, RECOVERY_REPAYMENT, INTEREST_PAYMENT_WAIVER ->
+            case INTEREST_REFUND, REPAYMENT, MERCHANT_ISSUED_REFUND, PAYOUT_REFUND, GOODWILL_CREDIT, CHARGE_REFUND, CHARGE_ADJUSTMENT,
+                    DOWN_PAYMENT, WAIVE_INTEREST, RECOVERY_REPAYMENT, INTEREST_PAYMENT_WAIVER ->
                 handleRepayment(loanTransaction, ctx);
             case CHARGE_OFF -> handleChargeOff(loanTransaction, ctx);
             case CHARGE_PAYMENT -> handleChargePayment(loanTransaction, ctx);

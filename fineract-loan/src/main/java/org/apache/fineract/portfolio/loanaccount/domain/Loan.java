@@ -1718,6 +1718,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     public List<Long> findExistingTransactionIds() {
         return getLoanTransactions().stream() //
+                .filter(loanTransaction -> loanTransaction.getId() != null) //
                 .map(LoanTransaction::getId) //
                 .collect(Collectors.toList());
     }
@@ -1725,6 +1726,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     public List<Long> findExistingReversedTransactionIds() {
         return getLoanTransactions().stream() //
                 .filter(LoanTransaction::isReversed) //
+                .filter(loanTransaction -> loanTransaction.getId() != null) //
                 .map(LoanTransaction::getId) //
                 .collect(Collectors.toList());
     }
@@ -2256,7 +2258,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     private void validateRepaymentTypeAccountStatus(LoanTransaction repaymentTransaction, LoanEvent event) {
         if (repaymentTransaction.isGoodwillCredit() || repaymentTransaction.isInterestPaymentWaiver()
                 || repaymentTransaction.isMerchantIssuedRefund() || repaymentTransaction.isPayoutRefund()
-                || repaymentTransaction.isChargeRefund() || repaymentTransaction.isRepayment() || repaymentTransaction.isDownPayment()) {
+                || repaymentTransaction.isChargeRefund() || repaymentTransaction.isRepayment() || repaymentTransaction.isDownPayment()
+                || repaymentTransaction.isInterestRefund()) {
 
             if (!(isOpen() || isClosedObligationsMet() || isOverPaid())) {
                 final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
