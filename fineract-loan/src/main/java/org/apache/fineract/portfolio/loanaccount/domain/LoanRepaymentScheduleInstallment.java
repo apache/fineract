@@ -566,15 +566,19 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
             return interestPortionOfTransaction;
         }
         final Money interestDue = getInterestOutstanding(currency);
-        if (transactionAmountRemaining.isGreaterThanOrEqualTo(interestDue)) {
-            this.interestPaid = getInterestPaid(currency).plus(interestDue).getAmount();
-            interestPortionOfTransaction = interestPortionOfTransaction.plus(interestDue);
-        } else {
-            this.interestPaid = getInterestPaid(currency).plus(transactionAmountRemaining).getAmount();
-            interestPortionOfTransaction = interestPortionOfTransaction.plus(transactionAmountRemaining);
+        if (!DateUtils.isEqual(this.loan.getActualDisbursementDate(), transactionDate)) {
+            if (transactionAmountRemaining.isGreaterThanOrEqualTo(interestDue)) {
+                this.interestPaid = getInterestPaid(currency).plus(interestDue).getAmount();
+                interestPortionOfTransaction = interestPortionOfTransaction.plus(interestDue);
+            } else {
+                this.interestPaid = getInterestPaid(currency).plus(transactionAmountRemaining).getAmount();
+                interestPortionOfTransaction = interestPortionOfTransaction.plus(transactionAmountRemaining);
+            }
         }
 
-        this.interestPaid = defaultToNullIfZero(this.interestPaid);
+        if (this.interestPaid != null) {
+            this.interestPaid = defaultToNullIfZero(this.interestPaid);
+        }
 
         checkIfRepaymentPeriodObligationsAreMet(transactionDate, currency);
 
