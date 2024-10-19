@@ -603,7 +603,7 @@ public final class SavingsProductData implements Serializable {
     }
 
     public boolean isAccrualBasedAccountingEnabled() {
-        return isUpfrontAccrualAccounting() || isPeriodicAccrualAccounting();
+        return isUpfrontAccrualAccounting() && isPeriodicAccrualAccounting();
     }
 
     public boolean isUpfrontAccrualAccounting() {
