@@ -45,6 +45,7 @@ import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketRepository;
+import org.apache.fineract.portfolio.delinquency.exception.DelinquencyBucketNotFoundException;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRate;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRateRepositoryWrapper;
 import org.apache.fineract.portfolio.fund.domain.Fund;
@@ -173,7 +174,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
         DelinquencyBucket delinquencyBucket = null;
         if (delinquencyBucketId != null) {
             delinquencyBucket = delinquencyBucketRepository.findById(delinquencyBucketId)
-                    .orElseThrow(() -> new FundNotFoundException(delinquencyBucketId));
+                    .orElseThrow(() -> DelinquencyBucketNotFoundException.notFound(delinquencyBucketId));
         }
         return delinquencyBucket;
     }
