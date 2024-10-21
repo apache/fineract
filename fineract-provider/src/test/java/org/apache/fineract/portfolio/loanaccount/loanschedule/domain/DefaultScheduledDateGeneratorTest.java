@@ -37,6 +37,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -82,6 +84,7 @@ public class DefaultScheduledDateGeneratorTest {
     public void test_generateRepaymentPeriods() {
         // given
         HolidayDetailDTO holidayDetailDTO = createHolidayDTO();
+        MathContext mathContext = new MathContext(12, RoundingMode.HALF_EVEN);
 
         ApplicationCurrency dollarCurrency = new ApplicationCurrency("USD", "US Dollar", 2, 0, "currency.USD", "$");
         Money principalAmount = Money.of(fromApplicationCurrency(dollarCurrency), BigDecimal.valueOf(100));
@@ -98,8 +101,8 @@ public class DefaultScheduledDateGeneratorTest {
                 submittedOnDate, CUMULATIVE, LoanScheduleProcessingType.HORIZONTAL, null, false, null);
 
         // when
-        List<? extends LoanScheduleModelPeriod> result = underTest.generateRepaymentPeriods(expectedDisbursementDate, loanApplicationTerms,
-                holidayDetailDTO);
+        List<? extends LoanScheduleModelPeriod> result = underTest.generateRepaymentPeriods(mathContext, expectedDisbursementDate,
+                loanApplicationTerms, holidayDetailDTO);
 
         // then
         assertThat(result.size()).isEqualTo(4);

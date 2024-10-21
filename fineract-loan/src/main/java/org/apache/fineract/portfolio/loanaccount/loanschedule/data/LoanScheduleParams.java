@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 
+import java.math.MathContext;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -98,6 +99,7 @@ public final class LoanScheduleParams {
     private int loanTermInDays;
     private final MonetaryCurrency currency;
     private final boolean applyInterestRecalculation;
+    private final MathContext mc;
 
     private LoanScheduleParams(final int periodNumber, final int instalmentNumber, int loanTermInDays, LocalDate periodStartDate,
             final LocalDate actualRepaymentDate, final Money totalCumulativePrincipal, final Money totalCumulativeInterest,
@@ -108,7 +110,7 @@ public final class LoanScheduleParams {
             final Money outstandingBalanceAsPerRest, final List<LoanRepaymentScheduleInstallment> installments,
             final Collection<RecalculationDetail> recalculationDetails,
             final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor, final LocalDate scheduleTillDate,
-            final boolean partialUpdate, final MonetaryCurrency currency, final boolean applyInterestRecalculation) {
+            final boolean partialUpdate, final MonetaryCurrency currency, final boolean applyInterestRecalculation, final MathContext mc) {
         this.periodNumber = periodNumber;
         this.instalmentNumber = instalmentNumber;
         this.loanTermInDays = loanTermInDays;
@@ -136,8 +138,9 @@ public final class LoanScheduleParams {
         this.partialUpdate = partialUpdate;
         this.currency = currency;
         this.applyInterestRecalculation = applyInterestRecalculation;
+        this.mc = mc;
         if (this.currency != null) {
-            this.compoundedInLastInstallment = Money.zero(this.currency);
+            this.compoundedInLastInstallment = Money.zero(this.currency, mc);
         }
     }
 
@@ -150,19 +153,19 @@ public final class LoanScheduleParams {
             final Money principalToBeScheduled, final Money outstandingBalance, final Money outstandingBalanceAsPerRest,
             final List<LoanRepaymentScheduleInstallment> installments, final Collection<RecalculationDetail> recalculationDetails,
             final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor, final LocalDate scheduleTillDate,
-            final MonetaryCurrency currency, final boolean applyInterestRecalculation) {
+            final MonetaryCurrency currency, final boolean applyInterestRecalculation, final MathContext mc) {
         final boolean partialUpdate = true;
         return new LoanScheduleParams(periodNumber, instalmentNumber, loanTermInDays, periodStartDate, actualRepaymentDate,
                 totalCumulativePrincipal, totalCumulativeInterest, totalFeeChargesCharged, totalPenaltyChargesCharged,
                 totalRepaymentExpected, totalOutstandingInterestPaymentDueToGrace, reducePrincipal, principalPortionMap, latePaymentMap,
                 compoundingMap, unCompoundedAmount, disburseDetailMap, principalToBeScheduled, outstandingBalance,
                 outstandingBalanceAsPerRest, installments, recalculationDetails, loanRepaymentScheduleTransactionProcessor,
-                scheduleTillDate, partialUpdate, currency, applyInterestRecalculation);
+                scheduleTillDate, partialUpdate, currency, applyInterestRecalculation, mc);
     }
 
     public static LoanScheduleParams createLoanScheduleParamsForCompleteUpdate(final Collection<RecalculationDetail> recalculationDetails,
             final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor, final LocalDate scheduleTillDate,
-            final boolean applyInterestRecalculation) {
+            final boolean applyInterestRecalculation, MathContext mc) {
         final int periodNumber = 1;
         final int instalmentNumber = 1;
         final LocalDate periodStartDate = null;
@@ -191,22 +194,22 @@ public final class LoanScheduleParams {
                 totalRepaymentExpected, totalOutstandingInterestPaymentDueToGrace, reducePrincipal, principalPortionMap, latePaymentMap,
                 compoundingMap, unCompoundedAmount, disburseDetailMap, principalToBeScheduled, outstandingBalance,
                 outstandingBalanceAsPerRest, installments, recalculationDetails, loanRepaymentScheduleTransactionProcessor,
-                scheduleTillDate, partialUpdate, currency, applyInterestRecalculation);
+                scheduleTillDate, partialUpdate, currency, applyInterestRecalculation, mc);
     }
 
     public static LoanScheduleParams createLoanScheduleParams(final MonetaryCurrency currency, final Money chargesDueAtTimeOfDisbursement,
-            final LocalDate periodStartDate, final Money principalToBeScheduled) {
+            final LocalDate periodStartDate, final Money principalToBeScheduled, final MathContext mc) {
         final int loanTermInDays = 0;
         final int periodNumber = 1;
         final int instalmentNumber = 1;
-        final Money totalCumulativePrincipal = Money.zero(currency);
-        final Money totalCumulativeInterest = Money.zero(currency);
-        final Money totalOutstandingInterestPaymentDueToGrace = Money.zero(currency);
+        final Money totalCumulativePrincipal = Money.zero(currency, mc);
+        final Money totalCumulativeInterest = Money.zero(currency, mc);
+        final Money totalOutstandingInterestPaymentDueToGrace = Money.zero(currency, mc);
         final LocalDate actualRepaymentDate = periodStartDate;
         final Money totalFeeChargesCharged = chargesDueAtTimeOfDisbursement;
-        final Money totalPenaltyChargesCharged = Money.zero(currency);
+        final Money totalPenaltyChargesCharged = Money.zero(currency, mc);
         final Money totalRepaymentExpected = chargesDueAtTimeOfDisbursement;
-        final Money reducePrincipal = Money.zero(currency);
+        final Money reducePrincipal = Money.zero(currency, mc);
         final Map<LocalDate, Money> principalPortionMap = new HashMap<>();
         final Map<LocalDate, Money> latePaymentMap = new HashMap<>();
         final Map<LocalDate, Money> compoundingMap = new TreeMap<>();
@@ -218,27 +221,28 @@ public final class LoanScheduleParams {
         final Collection<RecalculationDetail> recalculationDetails = null;
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = null;
         final LocalDate scheduleTillDate = null;
-        final Money unCompoundedAmount = Money.zero(currency);
+        final Money unCompoundedAmount = Money.zero(currency, mc);
         final boolean applyInterestRecalculation = false;
         return new LoanScheduleParams(periodNumber, instalmentNumber, loanTermInDays, periodStartDate, actualRepaymentDate,
                 totalCumulativePrincipal, totalCumulativeInterest, totalFeeChargesCharged, totalPenaltyChargesCharged,
                 totalRepaymentExpected, totalOutstandingInterestPaymentDueToGrace, reducePrincipal, principalPortionMap, latePaymentMap,
                 compoundingMap, unCompoundedAmount, disburseDetailMap, principalToBeScheduled, outstandingBalance,
                 outstandingBalanceAsPerRest, installments, recalculationDetails, loanRepaymentScheduleTransactionProcessor,
-                scheduleTillDate, partialUpdate, currency, applyInterestRecalculation);
+                scheduleTillDate, partialUpdate, currency, applyInterestRecalculation, mc);
     }
 
     public static LoanScheduleParams createLoanScheduleParams(final MonetaryCurrency currency, final Money chargesDueAtTimeOfDisbursement,
-            final LocalDate periodStartDate, final Money principalToBeScheduled, final LoanScheduleParams loanScheduleParams) {
+            final LocalDate periodStartDate, final Money principalToBeScheduled, final LoanScheduleParams loanScheduleParams,
+            MathContext mc) {
         final int loanTermInDays = 0;
         final int periodNumber = 1;
         final int instalmentNumber = 1;
-        final Money totalCumulativePrincipal = Money.zero(currency);
-        final Money totalCumulativeInterest = Money.zero(currency);
-        final Money totalOutstandingInterestPaymentDueToGrace = Money.zero(currency);
+        final Money totalCumulativePrincipal = Money.zero(currency, mc);
+        final Money totalCumulativeInterest = Money.zero(currency, mc);
+        final Money totalOutstandingInterestPaymentDueToGrace = Money.zero(currency, mc);
         final LocalDate actualRepaymentDate = periodStartDate;
         final Money totalFeeChargesCharged = chargesDueAtTimeOfDisbursement;
-        final Money totalPenaltyChargesCharged = Money.zero(currency);
+        final Money totalPenaltyChargesCharged = Money.zero(currency, mc);
         final Money totalRepaymentExpected = chargesDueAtTimeOfDisbursement;
         final Money reducePrincipal = Money.zero(currency);
         final Map<LocalDate, Money> principalPortionMap = new HashMap<>();
@@ -253,13 +257,13 @@ public final class LoanScheduleParams {
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanScheduleParams.loanRepaymentScheduleTransactionProcessor;
         final LocalDate scheduleTillDate = loanScheduleParams.scheduleTillDate;
         final boolean applyInterestRecalculation = loanScheduleParams.applyInterestRecalculation;
-        final Money unCompoundedAmount = Money.zero(currency);
+        final Money unCompoundedAmount = Money.zero(currency, mc);
         return new LoanScheduleParams(periodNumber, instalmentNumber, loanTermInDays, periodStartDate, actualRepaymentDate,
                 totalCumulativePrincipal, totalCumulativeInterest, totalFeeChargesCharged, totalPenaltyChargesCharged,
                 totalRepaymentExpected, totalOutstandingInterestPaymentDueToGrace, reducePrincipal, principalPortionMap, latePaymentMap,
                 compoundingMap, unCompoundedAmount, disburseDetailMap, principalToBeScheduled, outstandingBalance,
                 outstandingBalanceAsPerRest, installments, recalculationDetails, loanRepaymentScheduleTransactionProcessor,
-                scheduleTillDate, partialUpdate, currency, applyInterestRecalculation);
+                scheduleTillDate, partialUpdate, currency, applyInterestRecalculation, mc);
     }
 
     public int getPeriodNumber() {
@@ -288,7 +292,7 @@ public final class LoanScheduleParams {
 
     public void addTotalCumulativePrincipal(final Money totalCumulativePrincipal) {
         if (this.totalCumulativePrincipal != null) {
-            this.totalCumulativePrincipal = this.totalCumulativePrincipal.plus(totalCumulativePrincipal);
+            this.totalCumulativePrincipal = this.totalCumulativePrincipal.plus(totalCumulativePrincipal, mc);
         } else {
             this.totalCumulativePrincipal = totalCumulativePrincipal;
         }
@@ -300,7 +304,7 @@ public final class LoanScheduleParams {
 
     public void addTotalCumulativeInterest(final Money totalCumulativeInterest) {
         if (this.totalCumulativeInterest != null) {
-            this.totalCumulativeInterest = this.totalCumulativeInterest.plus(totalCumulativeInterest);
+            this.totalCumulativeInterest = this.totalCumulativeInterest.plus(totalCumulativeInterest, mc);
         } else {
             this.totalCumulativeInterest = totalCumulativeInterest;
         }
@@ -312,7 +316,7 @@ public final class LoanScheduleParams {
 
     public void addTotalFeeChargesCharged(final Money totalFeeChargesCharged) {
         if (this.totalFeeChargesCharged != null) {
-            this.totalFeeChargesCharged = this.totalFeeChargesCharged.plus(totalFeeChargesCharged);
+            this.totalFeeChargesCharged = this.totalFeeChargesCharged.plus(totalFeeChargesCharged, mc);
         } else {
             this.totalFeeChargesCharged = totalFeeChargesCharged;
         }
@@ -324,7 +328,7 @@ public final class LoanScheduleParams {
 
     public void addTotalPenaltyChargesCharged(final Money totalPenaltyChargesCharged) {
         if (this.totalPenaltyChargesCharged != null) {
-            this.totalPenaltyChargesCharged = this.totalPenaltyChargesCharged.plus(totalPenaltyChargesCharged);
+            this.totalPenaltyChargesCharged = this.totalPenaltyChargesCharged.plus(totalPenaltyChargesCharged, mc);
         } else {
             this.totalPenaltyChargesCharged = totalPenaltyChargesCharged;
         }
@@ -336,7 +340,7 @@ public final class LoanScheduleParams {
 
     public void addTotalRepaymentExpected(final Money totalRepaymentExpected) {
         if (this.totalRepaymentExpected != null) {
-            this.totalRepaymentExpected = this.totalRepaymentExpected.plus(totalRepaymentExpected);
+            this.totalRepaymentExpected = this.totalRepaymentExpected.plus(totalRepaymentExpected, mc);
         } else {
             this.totalRepaymentExpected = totalRepaymentExpected;
         }
@@ -428,7 +432,7 @@ public final class LoanScheduleParams {
 
     public void addReducePrincipal(Money reducePrincipal) {
         if (this.reducePrincipal != null) {
-            this.reducePrincipal = this.reducePrincipal.plus(reducePrincipal);
+            this.reducePrincipal = this.reducePrincipal.plus(reducePrincipal, mc);
         } else {
             this.reducePrincipal = reducePrincipal;
         }
@@ -436,13 +440,13 @@ public final class LoanScheduleParams {
 
     public void reduceReducePrincipal(Money reducePrincipal) {
         if (this.reducePrincipal != null) {
-            this.reducePrincipal = this.reducePrincipal.minus(reducePrincipal);
+            this.reducePrincipal = this.reducePrincipal.minus(reducePrincipal, mc);
         }
     }
 
     public void addPrincipalToBeScheduled(Money principalToBeScheduled) {
         if (this.principalToBeScheduled != null) {
-            this.principalToBeScheduled = this.principalToBeScheduled.plus(principalToBeScheduled);
+            this.principalToBeScheduled = this.principalToBeScheduled.plus(principalToBeScheduled, mc);
         } else {
             this.principalToBeScheduled = principalToBeScheduled;
         }
@@ -450,7 +454,7 @@ public final class LoanScheduleParams {
 
     public void addOutstandingBalance(Money outstandingBalance) {
         if (this.outstandingBalance != null) {
-            this.outstandingBalance = this.outstandingBalance.plus(outstandingBalance);
+            this.outstandingBalance = this.outstandingBalance.plus(outstandingBalance, mc);
         } else {
             this.outstandingBalance = outstandingBalance;
         }
@@ -458,13 +462,13 @@ public final class LoanScheduleParams {
 
     public void reduceOutstandingBalance(Money outstandingBalance) {
         if (this.outstandingBalance != null) {
-            this.outstandingBalance = this.outstandingBalance.minus(outstandingBalance);
+            this.outstandingBalance = this.outstandingBalance.minus(outstandingBalance, mc);
         }
     }
 
     public void addOutstandingBalanceAsPerRest(Money outstandingBalanceAsPerRest) {
         if (this.outstandingBalanceAsPerRest != null) {
-            this.outstandingBalanceAsPerRest = this.outstandingBalanceAsPerRest.plus(outstandingBalanceAsPerRest);
+            this.outstandingBalanceAsPerRest = this.outstandingBalanceAsPerRest.plus(outstandingBalanceAsPerRest, mc);
         } else {
             this.outstandingBalanceAsPerRest = outstandingBalanceAsPerRest;
         }
@@ -472,7 +476,7 @@ public final class LoanScheduleParams {
 
     public void reduceOutstandingBalanceAsPerRest(Money outstandingBalanceAsPerRest) {
         if (this.outstandingBalanceAsPerRest != null) {
-            this.outstandingBalanceAsPerRest = this.outstandingBalanceAsPerRest.minus(outstandingBalanceAsPerRest);
+            this.outstandingBalanceAsPerRest = this.outstandingBalanceAsPerRest.minus(outstandingBalanceAsPerRest, mc);
         }
     }
 
@@ -522,7 +526,7 @@ public final class LoanScheduleParams {
 
     public void minusUnCompoundedAmount(Money unCompoundedAmount) {
         if (this.unCompoundedAmount != null) {
-            this.unCompoundedAmount = this.unCompoundedAmount.minus(unCompoundedAmount);
+            this.unCompoundedAmount = this.unCompoundedAmount.minus(unCompoundedAmount, mc);
         }
     }
 

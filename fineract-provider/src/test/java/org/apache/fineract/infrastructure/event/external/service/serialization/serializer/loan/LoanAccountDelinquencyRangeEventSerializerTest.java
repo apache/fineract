@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -116,8 +117,12 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
     @Mock
     private AvroDateTimeMapper mapper;
 
+    private MockedStatic<MoneyHelper> moneyHelper = Mockito.mockStatic(MoneyHelper.class);
+
     @BeforeEach
     public void setUp() {
+        moneyHelper.when(MoneyHelper::getMathContext).thenReturn(new MathContext(12, RoundingMode.UP));
+        moneyHelper.when(MoneyHelper::getRoundingMode).thenReturn(RoundingMode.UP);
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         ThreadLocalContextUtil
@@ -127,6 +132,7 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
     @AfterEach
     public void tearDown() {
         ThreadLocalContextUtil.reset();
+        moneyHelper.close();
     }
 
     @Test
@@ -141,7 +147,6 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
         LoanAccountData loanAccountData = mock(LoanAccountData.class);
         CollectionData delinquentData = mock(CollectionData.class);
         MonetaryCurrency loanCurrency = new MonetaryCurrency("CODE", 1, 1);
-        MockedStatic<MoneyHelper> moneyHelper = Mockito.mockStatic(MoneyHelper.class);
         String delinquentDateAsStr = "2022-12-01";
         LocalDate delinquentDate = LocalDate.parse(delinquentDateAsStr);
 
@@ -168,8 +173,6 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
         when(loanChargeReadPlatformService.retrieveLoanCharges(anyLong())).thenAnswer(a -> repaymentScheduleInstallments.get(0)
                 .getInstallmentCharges().stream().map(c -> c.getLoanCharge().toData()).collect(Collectors.toList()));
 
-        moneyHelper.when(() -> MoneyHelper.getRoundingMode()).thenReturn(RoundingMode.UP);
-
         // when
         LoanAccountDelinquencyRangeDataV1 data = (LoanAccountDelinquencyRangeDataV1) serializer.toAvroDTO(event);
 
@@ -190,8 +193,6 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
         assertEquals(0, data.getAmount().getFeeAmount().compareTo(new BigDecimal("5.0")));
         assertEquals(0, data.getAmount().getPenaltyAmount().compareTo(new BigDecimal("50.0")));
         assertEquals(delinquentDateAsStr, data.getDelinquentDate());
-
-        moneyHelper.close();
     }
 
     @Test
@@ -206,7 +207,6 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
         LoanAccountData loanAccountData = mock(LoanAccountData.class);
         CollectionData delinquentData = mock(CollectionData.class);
         MonetaryCurrency loanCurrency = new MonetaryCurrency("CODE", 1, 1);
-        MockedStatic<MoneyHelper> moneyHelper = Mockito.mockStatic(MoneyHelper.class);
         String delinquentDateAsStr = "2022-12-01";
         LocalDate delinquentDate = LocalDate.parse(delinquentDateAsStr);
         when(loanForProcessing.getId()).thenReturn(1L);
@@ -263,8 +263,6 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
         when(loanForProcessing.getLoanCharges()).thenAnswer(a -> repaymentScheduleInstallments.get(0).getInstallmentCharges().stream()
                 .map(c -> c.getLoanCharge()).collect(Collectors.toList()));
 
-        moneyHelper.when(() -> MoneyHelper.getRoundingMode()).thenReturn(RoundingMode.UP);
-
         // when
         LoanAccountDelinquencyRangeDataV1 data = (LoanAccountDelinquencyRangeDataV1) serializer.toAvroDTO(event);
 
@@ -314,7 +312,6 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
         assertEquals(0, installmentDelinquencyBucketDataV1_2.getAmount().getFeeAmount().compareTo(new BigDecimal("0.0")));
         assertEquals(0, installmentDelinquencyBucketDataV1_2.getAmount().getPenaltyAmount().compareTo(new BigDecimal("0.0")));
         assertEquals(0, installmentDelinquencyBucketDataV1_2.getCharges().size());
-        moneyHelper.close();
     }
 
     @Test

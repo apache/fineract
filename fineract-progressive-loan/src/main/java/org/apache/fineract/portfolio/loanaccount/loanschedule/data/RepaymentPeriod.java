@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,20 +55,23 @@ public class RepaymentPeriod {
     private Memo<Money> calculatedDueInterestCalculation;
     private Memo<Money> dueInterestCalculation;
     private Memo<Money> outstandingBalanceCalculation;
+    private final MathContext mc;
 
-    public RepaymentPeriod(RepaymentPeriod previous, LocalDate fromDate, LocalDate dueDate, Money emi) {
+    public RepaymentPeriod(RepaymentPeriod previous, LocalDate fromDate, LocalDate dueDate, Money emi, MathContext mc) {
         this.previous = previous;
         this.fromDate = fromDate;
         this.dueDate = dueDate;
         this.emi = emi;
+        this.mc = mc;
         this.interestPeriods = new ArrayList<>();
         // There is always at least 1 interest period, by default with same from-due date as repayment period
-        getInterestPeriods().add(new InterestPeriod(this, getFromDate(), getDueDate(), BigDecimal.ZERO, getZero(), getZero(), getZero()));
-        this.paidInterest = getZero();
-        this.paidPrincipal = getZero();
+        getInterestPeriods()
+                .add(new InterestPeriod(this, getFromDate(), getDueDate(), BigDecimal.ZERO, getZero(mc), getZero(mc), getZero(mc), mc));
+        this.paidInterest = getZero(mc);
+        this.paidPrincipal = getZero(mc);
     }
 
-    public RepaymentPeriod(RepaymentPeriod previous, RepaymentPeriod repaymentPeriod) {
+    public RepaymentPeriod(RepaymentPeriod previous, RepaymentPeriod repaymentPeriod, MathContext mc) {
         this.previous = previous;
         this.fromDate = repaymentPeriod.fromDate;
         this.dueDate = repaymentPeriod.dueDate;
@@ -75,9 +79,10 @@ public class RepaymentPeriod {
         this.interestPeriods = new ArrayList<>();
         this.paidPrincipal = repaymentPeriod.paidPrincipal;
         this.paidInterest = repaymentPeriod.paidInterest;
+        this.mc = mc;
         // There is always at least 1 interest period, by default with same from-due date as repayment period
         for (InterestPeriod interestPeriod : repaymentPeriod.interestPeriods) {
-            interestPeriods.add(new InterestPeriod(this, interestPeriod));
+            interestPeriods.add(new InterestPeriod(this, interestPeriod, mc));
         }
     }
 
@@ -105,21 +110,21 @@ public class RepaymentPeriod {
     }
 
     private Money calculateCalculatedDueInterest() {
-        Money calculatedDueInterest = getInterestPeriods().stream().map(InterestPeriod::getCalculatedDueInterest).reduce(getZero(),
-                Money::plus);
+        Money calculatedDueInterest = getInterestPeriods().stream().map(InterestPeriod::getCalculatedDueInterest).reduce(getZero(mc),
+                (m1, m2) -> m1.plus(m2, mc));
         if (getPrevious().isPresent()) {
-            calculatedDueInterest = calculatedDueInterest.add(getPrevious().get().getUnrecognizedInterest());
+            calculatedDueInterest = calculatedDueInterest.add(getPrevious().get().getUnrecognizedInterest(), mc);
         }
         return calculatedDueInterest;
     }
 
-    private Money getZero() {
+    private Money getZero(MathContext mc) {
         // EMI is always initiated
-        return this.emi.zero();
+        return this.emi.zero(mc);
     }
 
     public Money getCalculatedDuePrincipal() {
-        return getEmi().minus(getCalculatedDueInterest());
+        return getEmi().minus(getCalculatedDueInterest(), mc);
     }
 
     public boolean isFullyPaid() {
@@ -138,11 +143,11 @@ public class RepaymentPeriod {
 
     public Money getDuePrincipal() {
         // Due principal might be the maximum paid if there is pay-off or early repayment
-        return MathUtil.max(getEmi().minus(getDueInterest()), getPaidPrincipal(), false);
+        return MathUtil.max(getEmi().minus(getDueInterest(), mc), getPaidPrincipal(), false);
     }
 
     public Money getUnrecognizedInterest() {
-        return getCalculatedDueInterest().minus(getDueInterest());
+        return getCalculatedDueInterest().minus(getDueInterest(), mc);
     }
 
     public Money getOutstandingLoanBalance() {
@@ -150,22 +155,22 @@ public class RepaymentPeriod {
             outstandingBalanceCalculation = Memo.of(() -> {
                 InterestPeriod lastInstallmentPeriod = getInterestPeriods().get(getInterestPeriods().size() - 1);
                 Money calculatedOutStandingLoanBalance = lastInstallmentPeriod.getOutstandingLoanBalance() //
-                        .plus(lastInstallmentPeriod.getBalanceCorrectionAmount()) //
-                        .plus(lastInstallmentPeriod.getDisbursementAmount()) //
-                        .minus(getDuePrincipal())//
-                        .plus(getPaidPrincipal());//
-                return MathUtil.negativeToZero(calculatedOutStandingLoanBalance);
+                        .plus(lastInstallmentPeriod.getBalanceCorrectionAmount(), mc) //
+                        .plus(lastInstallmentPeriod.getDisbursementAmount(), mc) //
+                        .minus(getDuePrincipal(), mc)//
+                        .plus(getPaidPrincipal(), mc);//
+                return MathUtil.negativeToZero(calculatedOutStandingLoanBalance, mc);
             }, () -> new Object[] { paidPrincipal, paidInterest, interestPeriods });
         }
         return outstandingBalanceCalculation.get();
     }
 
     public void addPaidPrincipalAmount(Money paidPrincipal) {
-        this.paidPrincipal = MathUtil.plus(this.paidPrincipal, paidPrincipal);
+        this.paidPrincipal = MathUtil.plus(this.paidPrincipal, paidPrincipal, mc);
     }
 
     public void addPaidInterestAmount(Money paidInterest) {
-        this.paidInterest = MathUtil.plus(this.paidInterest, paidInterest);
+        this.paidInterest = MathUtil.plus(this.paidInterest, paidInterest, mc);
     }
 
     public Money getInitialBalanceForEmiRecalculation() {
@@ -173,10 +178,10 @@ public class RepaymentPeriod {
         if (getPrevious().isPresent()) {
             initialBalance = getPrevious().get().getOutstandingLoanBalance();
         } else {
-            initialBalance = getZero();
+            initialBalance = getZero(mc);
         }
-        Money totalDisbursedAmount = getInterestPeriods().stream().map(InterestPeriod::getDisbursementAmount).reduce(getZero(),
-                Money::plus);
-        return initialBalance.add(totalDisbursedAmount);
+        Money totalDisbursedAmount = getInterestPeriods().stream().map(InterestPeriod::getDisbursementAmount).reduce(getZero(mc),
+                (m1, m2) -> m1.plus(m2, mc));
+        return initialBalance.add(totalDisbursedAmount, mc);
     }
 }

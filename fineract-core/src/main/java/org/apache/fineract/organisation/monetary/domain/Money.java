@@ -21,11 +21,14 @@ package org.apache.fineract.organisation.monetary.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.Iterator;
+import lombok.Getter;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 @Embeddable
+@Getter
 public class Money implements Comparable<Money> {
 
     @Column(name = "currency_code", length = 3)
@@ -40,6 +43,16 @@ public class Money implements Comparable<Money> {
     @Column(name = "amount", scale = 6, precision = 19)
     private BigDecimal amount;
 
+    private final transient MathContext mc;
+
+    protected Money() {
+        this.currencyCode = null;
+        this.currencyDigitsAfterDecimal = 0;
+        this.inMultiplesOf = 0;
+        this.amount = null;
+        this.mc = getMc();
+    }
+
     public static Money total(final Money... monies) {
         if (monies.length == 0) {
             throw new IllegalArgumentException("Money array must not be empty");
@@ -53,7 +66,7 @@ public class Money implements Comparable<Money> {
 
     public static Money total(final Iterable<? extends Money> monies) {
         final Iterator<? extends Money> it = monies.iterator();
-        if (it.hasNext() == false) {
+        if (!it.hasNext()) {
             throw new IllegalArgumentException("Money iterator must not be empty");
         }
         Money total = it.next();
@@ -63,34 +76,47 @@ public class Money implements Comparable<Money> {
         return total;
     }
 
+    public static Money of(final MonetaryCurrency currency, final BigDecimal newAmount, final MathContext mc) {
+        return new Money(currency.getCode(), currency.getDigitsAfterDecimal(), defaultToZeroIfNull(newAmount),
+                currency.getCurrencyInMultiplesOf(), mc);
+    }
+
     public static Money of(final MonetaryCurrency currency, final BigDecimal newAmount) {
         return new Money(currency.getCode(), currency.getDigitsAfterDecimal(), defaultToZeroIfNull(newAmount),
-                currency.getCurrencyInMultiplesOf());
+                currency.getCurrencyInMultiplesOf(), null);
     }
 
     public static Money of(final CurrencyData currency, final BigDecimal newAmount) {
-        return new Money(currency.getCode(), currency.getDecimalPlaces(), defaultToZeroIfNull(newAmount), currency.getInMultiplesOf());
+        return new Money(currency.getCode(), currency.getDecimalPlaces(), defaultToZeroIfNull(newAmount), currency.getInMultiplesOf(),
+                null);
+    }
+
+    public static Money of(final CurrencyData currency, final BigDecimal newAmount, final MathContext mc) {
+        return new Money(currency.getCode(), currency.getDecimalPlaces(), defaultToZeroIfNull(newAmount), currency.getInMultiplesOf(), mc);
     }
 
     public static Money zero(final MonetaryCurrency currency) {
-        return new Money(currency.getCode(), currency.getDigitsAfterDecimal(), BigDecimal.ZERO, currency.getCurrencyInMultiplesOf());
+        return new Money(currency.getCode(), currency.getDigitsAfterDecimal(), BigDecimal.ZERO, currency.getCurrencyInMultiplesOf(), null);
+    }
+
+    public static Money zero(final MonetaryCurrency currency, MathContext mc) {
+        return new Money(currency.getCode(), currency.getDigitsAfterDecimal(), BigDecimal.ZERO, currency.getCurrencyInMultiplesOf(), mc);
+    }
+
+    public static Money zero(final CurrencyData currency, MathContext mc) {
+        return new Money(currency.getCode(), currency.getDecimalPlaces(), BigDecimal.ZERO, currency.getInMultiplesOf(), mc);
     }
 
     public static Money zero(final CurrencyData currency) {
-        return new Money(currency.getCode(), currency.getDecimalPlaces(), BigDecimal.ZERO, currency.getInMultiplesOf());
+        return new Money(currency.getCode(), currency.getDecimalPlaces(), BigDecimal.ZERO, currency.getInMultiplesOf(), null);
     }
 
-    protected Money() {
-        this.currencyCode = null;
-        this.currencyDigitsAfterDecimal = 0;
-        this.inMultiplesOf = 0;
-        this.amount = null;
-    }
-
-    private Money(final String currencyCode, final int digitsAfterDecimal, final BigDecimal amount, final Integer inMultiplesOf) {
+    private Money(final String currencyCode, final int digitsAfterDecimal, final BigDecimal amount, final Integer inMultiplesOf,
+            final MathContext mc) {
         this.currencyCode = currencyCode;
         this.currencyDigitsAfterDecimal = digitsAfterDecimal;
         this.inMultiplesOf = inMultiplesOf;
+        this.mc = mc;
 
         final BigDecimal amountZeroed = defaultToZeroIfNull(amount);
         final BigDecimal amountStripped = amountZeroed.stripTrailingZeros();
@@ -101,7 +127,7 @@ public class Money implements Comparable<Money> {
             final double existingVal = amountScaled.doubleValue();
             amountScaled = BigDecimal.valueOf(roundToMultiplesOf(existingVal, inMultiplesOf));
         }
-        this.amount = amountScaled.setScale(this.currencyDigitsAfterDecimal, MoneyHelper.getRoundingMode());
+        this.amount = amountScaled.setScale(this.currencyDigitsAfterDecimal, getMc().getRoundingMode());
     }
 
     public static double roundToMultiplesOf(final double existingVal, final Integer inMultiplesOf) {
@@ -130,10 +156,14 @@ public class Money implements Comparable<Money> {
     }
 
     public static Money roundToMultiplesOf(final Money existingVal, final Integer inMultiplesOf) {
+        return roundToMultiplesOf(existingVal, inMultiplesOf, MoneyHelper.getMathContext());
+    }
+
+    public static Money roundToMultiplesOf(final Money existingVal, final Integer inMultiplesOf, final MathContext mc) {
         BigDecimal amountScaled = existingVal.getAmount();
         BigDecimal inMultiplesOfValue = BigDecimal.valueOf(inMultiplesOf.intValue());
         if (inMultiplesOfValue.compareTo(BigDecimal.ZERO) > 0) {
-            amountScaled = amountScaled.divide(inMultiplesOfValue, 0, MoneyHelper.getRoundingMode()).multiply(inMultiplesOfValue);
+            amountScaled = amountScaled.divide(inMultiplesOfValue, 0, mc.getRoundingMode()).multiply(inMultiplesOfValue);
         }
         return Money.of(existingVal.getCurrency(), amountScaled);
     }
@@ -171,7 +201,7 @@ public class Money implements Comparable<Money> {
     }
 
     public Money copy() {
-        return new Money(this.currencyCode, this.currencyDigitsAfterDecimal, this.amount.stripTrailingZeros(), this.inMultiplesOf);
+        return new Money(this.currencyCode, this.currencyDigitsAfterDecimal, this.amount.stripTrailingZeros(), this.inMultiplesOf, this.mc);
     }
 
     public Money plus(final Iterable<? extends Money> moniesToAdd) {
@@ -188,12 +218,25 @@ public class Money implements Comparable<Money> {
         return this.plus(toAdd.getAmount());
     }
 
+    public Money plus(final Money moneyToAdd, final MathContext mc) {
+        final Money toAdd = checkCurrencyEqual(moneyToAdd);
+        return this.plus(toAdd.getAmount(), mc);
+    }
+
     public Money plus(final BigDecimal amountToAdd) {
         if (amountToAdd == null || amountToAdd.compareTo(BigDecimal.ZERO) == 0) {
             return this;
         }
         final BigDecimal newAmount = this.amount.add(amountToAdd);
         return Money.of(monetaryCurrency(), newAmount);
+    }
+
+    public Money plus(final BigDecimal amountToAdd, MathContext mc) {
+        if (amountToAdd == null || amountToAdd.compareTo(BigDecimal.ZERO) == 0) {
+            return this;
+        }
+        final BigDecimal newAmount = this.amount.add(amountToAdd);
+        return Money.of(monetaryCurrency(), newAmount, mc);
     }
 
     public Money plus(final double amountToAdd) {
@@ -209,9 +252,19 @@ public class Money implements Comparable<Money> {
         return this.minus(toSubtract.getAmount());
     }
 
+    public Money minus(final Money moneyToSubtract, final MathContext mc) {
+        final Money toSubtract = checkCurrencyEqual(moneyToSubtract);
+        return this.minus(toSubtract.getAmount(), mc);
+    }
+
     public Money add(final Money moneyToAdd) {
         final Money toAdd = checkCurrencyEqual(moneyToAdd);
         return this.add(toAdd.getAmount());
+    }
+
+    public Money add(final Money moneyToAdd, final MathContext mc) {
+        final Money toAdd = checkCurrencyEqual(moneyToAdd);
+        return this.add(toAdd.getAmount(), mc);
     }
 
     public Money add(final BigDecimal amountToAdd) {
@@ -222,6 +275,14 @@ public class Money implements Comparable<Money> {
         return Money.of(monetaryCurrency(), newAmount);
     }
 
+    public Money add(final BigDecimal amountToAdd, final MathContext mc) {
+        if (amountToAdd == null || amountToAdd.compareTo(BigDecimal.ZERO) == 0) {
+            return this;
+        }
+        final BigDecimal newAmount = this.amount.add(amountToAdd);
+        return Money.of(monetaryCurrency(), newAmount, mc);
+    }
+
     public Money minus(final BigDecimal amountToSubtract) {
         if (amountToSubtract == null || amountToSubtract.compareTo(BigDecimal.ZERO) == 0) {
             return this;
@@ -230,8 +291,16 @@ public class Money implements Comparable<Money> {
         return Money.of(monetaryCurrency(), newAmount);
     }
 
+    public Money minus(final BigDecimal amountToSubtract, final MathContext mc) {
+        if (amountToSubtract == null || amountToSubtract.compareTo(BigDecimal.ZERO) == 0) {
+            return this;
+        }
+        final BigDecimal newAmount = this.amount.subtract(amountToSubtract);
+        return Money.of(monetaryCurrency(), newAmount, mc);
+    }
+
     private Money checkCurrencyEqual(final Money money) {
-        if (isSameCurrency(money) == false) {
+        if (!isSameCurrency(money)) {
             throw new UnsupportedOperationException("currencies are different.");
         }
         return money;
@@ -247,6 +316,14 @@ public class Money implements Comparable<Money> {
         }
         final BigDecimal newAmount = this.amount.divide(valueToDivideBy, roundingMode);
         return Money.of(monetaryCurrency(), newAmount);
+    }
+
+    public Money dividedBy(final BigDecimal valueToDivideBy, final RoundingMode roundingMode, final MathContext mc) {
+        if (valueToDivideBy.compareTo(BigDecimal.ONE) == 0) {
+            return this;
+        }
+        final BigDecimal newAmount = this.amount.divide(valueToDivideBy, roundingMode);
+        return Money.of(monetaryCurrency(), newAmount, mc);
     }
 
     public Money dividedBy(final double valueToDivideBy, final RoundingMode roundingMode) {
@@ -265,12 +342,28 @@ public class Money implements Comparable<Money> {
         return Money.of(monetaryCurrency(), newAmount);
     }
 
+    public Money dividedBy(final long valueToDivideBy, final RoundingMode roundingMode, final MathContext mc) {
+        if (valueToDivideBy == 1) {
+            return this;
+        }
+        final BigDecimal newAmount = this.amount.divide(BigDecimal.valueOf(valueToDivideBy), roundingMode);
+        return Money.of(monetaryCurrency(), newAmount, mc);
+    }
+
     public Money multipliedBy(final BigDecimal valueToMultiplyBy) {
         if (valueToMultiplyBy.compareTo(BigDecimal.ONE) == 0) {
             return this;
         }
         final BigDecimal newAmount = this.amount.multiply(valueToMultiplyBy);
         return Money.of(monetaryCurrency(), newAmount);
+    }
+
+    public Money multipliedBy(final BigDecimal valueToMultiplyBy, final MathContext mc) {
+        if (valueToMultiplyBy.compareTo(BigDecimal.ONE) == 0) {
+            return this;
+        }
+        final BigDecimal newAmount = this.amount.multiply(valueToMultiplyBy);
+        return Money.of(monetaryCurrency(), newAmount, mc);
     }
 
     public Money multipliedBy(final double valueToMultiplyBy) {
@@ -287,6 +380,14 @@ public class Money implements Comparable<Money> {
         }
         final BigDecimal newAmount = this.amount.multiply(BigDecimal.valueOf(valueToMultiplyBy));
         return Money.of(monetaryCurrency(), newAmount);
+    }
+
+    public Money multipliedBy(final long valueToMultiplyBy, final MathContext mc) {
+        if (valueToMultiplyBy == 1) {
+            return this;
+        }
+        final BigDecimal newAmount = this.amount.multiply(BigDecimal.valueOf(valueToMultiplyBy));
+        return Money.of(monetaryCurrency(), newAmount, mc);
     }
 
     public Money multiplyRetainScale(final BigDecimal valueToMultiplyBy, final RoundingMode roundingMode) {
@@ -309,15 +410,18 @@ public class Money implements Comparable<Money> {
 
     @Override
     public int compareTo(final Money other) {
-        final Money otherMoney = other;
-        if (this.currencyCode.equals(otherMoney.currencyCode) == false) {
+        if (!this.currencyCode.equals(other.currencyCode)) {
             throw new UnsupportedOperationException("currencies arent different");
         }
-        return this.amount.compareTo(otherMoney.amount);
+        return this.amount.compareTo(other.amount);
     }
 
     public boolean isZero() {
         return isEqualTo(Money.zero(getCurrency()));
+    }
+
+    public boolean isZero(final MathContext mc) {
+        return isEqualTo(Money.zero(getCurrency(), mc));
     }
 
     public boolean isEqualTo(final Money other) {
@@ -340,6 +444,10 @@ public class Money implements Comparable<Money> {
         return isGreaterThan(Money.zero(getCurrency()));
     }
 
+    public boolean isGreaterThanZero(MathContext mc) {
+        return isGreaterThan(Money.zero(getCurrency(), mc));
+    }
+
     public boolean isLessThan(final Money other) {
         return compareTo(other) < 0;
     }
@@ -348,20 +456,12 @@ public class Money implements Comparable<Money> {
         return isLessThan(Money.zero(getCurrency()));
     }
 
-    public String getCurrencyCode() {
-        return this.currencyCode;
-    }
-
-    public int getCurrencyDigitsAfterDecimal() {
-        return this.currencyDigitsAfterDecimal;
+    public boolean isLessThanZero(final MathContext mc) {
+        return isLessThan(Money.zero(getCurrency(), mc));
     }
 
     public Integer getCurrencyInMultiplesOf() {
         return this.inMultiplesOf;
-    }
-
-    public BigDecimal getAmount() {
-        return this.amount;
     }
 
     public BigDecimal getAmountDefaultedToNullIfZero() {
@@ -388,8 +488,19 @@ public class Money implements Comparable<Money> {
         return Money.of(monetaryCurrency(), this.amount.negate());
     }
 
+    public Money negated(final MathContext mc) {
+        if (isZero(mc)) {
+            return this;
+        }
+        return Money.of(monetaryCurrency(), this.amount.negate(), mc);
+    }
+
     public Money abs() {
         return isLessThanZero() ? negated() : this;
+    }
+
+    public Money abs(MathContext mc) {
+        return isLessThanZero(mc) ? negated(mc) : this;
     }
 
     public MonetaryCurrency getCurrency() {
@@ -402,5 +513,13 @@ public class Money implements Comparable<Money> {
 
     public Money zero() {
         return Money.zero(getCurrency());
+    }
+
+    public Money zero(MathContext mc) {
+        return Money.zero(getCurrency(), mc);
+    }
+
+    public MathContext getMc() {
+        return mc != null ? mc : MoneyHelper.getMathContext();
     }
 }
