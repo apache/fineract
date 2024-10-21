@@ -176,7 +176,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         final Integer installmentAmountInMultiplesOf = loan.getLoanProduct().getInstallmentAmountInMultiplesOf();
         final LoanProductRelatedDetail loanProductRelatedDetail = loan.getLoanRepaymentScheduleDetail();
         ProgressiveLoanInterestScheduleModel scheduleModel = emiCalculator.generateModel(loanProductRelatedDetail,
-                installmentAmountInMultiplesOf, installments);
+                installmentAmountInMultiplesOf, installments, overpaymentHolder.getMoneyObject().getMc());
         ProgressiveTransactionCtx ctx = new ProgressiveTransactionCtx(currency, installments, charges, overpaymentHolder,
                 changedTransactionDetail, scheduleModel);
 

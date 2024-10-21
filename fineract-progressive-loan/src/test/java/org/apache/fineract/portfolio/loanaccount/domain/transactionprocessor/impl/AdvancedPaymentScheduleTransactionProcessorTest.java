@@ -35,6 +35,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -90,11 +91,12 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
     private static final MonetaryCurrency MONETARY_CURRENCY = new MonetaryCurrency("USD", 2, 1);
     private static final MockedStatic<MoneyHelper> MONEY_HELPER = mockStatic(MoneyHelper.class);
     private AdvancedPaymentScheduleTransactionProcessor underTest;
-    private final EMICalculator emiCalculator = Mockito.mock(EMICalculator.class);
+    private static final EMICalculator emiCalculator = Mockito.mock(EMICalculator.class);
 
     @BeforeAll
     public static void init() {
         MONEY_HELPER.when(MoneyHelper::getRoundingMode).thenReturn(RoundingMode.HALF_EVEN);
+        MONEY_HELPER.when(MoneyHelper::getMathContext).thenReturn(new MathContext(12, RoundingMode.HALF_EVEN));
     }
 
     @AfterAll

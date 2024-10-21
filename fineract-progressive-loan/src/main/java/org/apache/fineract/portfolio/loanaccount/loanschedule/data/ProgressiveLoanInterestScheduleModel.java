@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -38,33 +39,36 @@ public class ProgressiveLoanInterestScheduleModel {
     private final List<InterestRate> interestRates;
     private final LoanProductRelatedDetail loanProductRelatedDetail;
     private final Integer installmentAmountInMultiplesOf;
+    private MathContext mc;
 
     public ProgressiveLoanInterestScheduleModel(List<RepaymentPeriod> repaymentPeriods, LoanProductRelatedDetail loanProductRelatedDetail,
-            Integer installmentAmountInMultiplesOf) {
+            Integer installmentAmountInMultiplesOf, MathContext mc) {
         this.repaymentPeriods = repaymentPeriods;
         this.interestRates = new ArrayList<>();
         this.loanProductRelatedDetail = loanProductRelatedDetail;
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
+        this.mc = mc;
     }
 
     private ProgressiveLoanInterestScheduleModel(List<RepaymentPeriod> repaymentPeriods, final List<InterestRate> interestRates,
-            LoanProductRelatedDetail loanProductRelatedDetail, Integer installmentAmountInMultiplesOf) {
+            LoanProductRelatedDetail loanProductRelatedDetail, Integer installmentAmountInMultiplesOf, MathContext mc) {
+        this.mc = mc;
         this.repaymentPeriods = copyRepaymentPeriods(repaymentPeriods);
         this.interestRates = new ArrayList<>(interestRates);
         this.loanProductRelatedDetail = loanProductRelatedDetail;
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
     }
 
-    public ProgressiveLoanInterestScheduleModel deepCopy() {
+    public ProgressiveLoanInterestScheduleModel deepCopy(MathContext mc) {
         return new ProgressiveLoanInterestScheduleModel(repaymentPeriods, interestRates, loanProductRelatedDetail,
-                installmentAmountInMultiplesOf);
+                installmentAmountInMultiplesOf, mc);
     }
 
     private List<RepaymentPeriod> copyRepaymentPeriods(final List<RepaymentPeriod> repaymentPeriods) {
         final List<RepaymentPeriod> repaymentCopies = new ArrayList<>(repaymentPeriods.size());
         RepaymentPeriod previousPeriod = null;
         for (RepaymentPeriod repaymentPeriod : repaymentPeriods) {
-            RepaymentPeriod currentPeriod = new RepaymentPeriod(previousPeriod, repaymentPeriod);
+            RepaymentPeriod currentPeriod = new RepaymentPeriod(previousPeriod, repaymentPeriod, mc);
             previousPeriod = currentPeriod;
             repaymentCopies.add(currentPeriod);
         }
@@ -175,11 +179,11 @@ public class ProgressiveLoanInterestScheduleModel {
         previousInterestPeriod.addDisbursementAmount(disbursedAmount);
         previousInterestPeriod.addBalanceCorrectionAmount(correctionAmount);
         final InterestPeriod interestPeriod = new InterestPeriod(repaymentPeriod, previousInterestPeriod.getDueDate(), originalDueDate,
-                BigDecimal.ZERO, getZero(), getZero(), getZero());
+                BigDecimal.ZERO, getZero(mc), getZero(mc), getZero(mc), mc);
         repaymentPeriod.getInterestPeriods().add(interestPeriod);
     }
 
-    private Money getZero() {
-        return Money.zero(loanProductRelatedDetail.getCurrency());
+    private Money getZero(MathContext mc) {
+        return Money.zero(loanProductRelatedDetail.getCurrency(), mc);
     }
 }

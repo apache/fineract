@@ -249,6 +249,8 @@ public final class LoanApplicationTerms {
         this.inArrearsTolerance = builder.inArrearsTolerance;
         this.disbursementDatas = builder.disbursementDatas;
         this.downPaymentAmount = builder.downPaymentAmount;
+        this.submittedOnDate = builder.submittedOnDate;
+        this.seedDate = builder.seedDate;
     }
 
     public static class Builder {
@@ -272,6 +274,8 @@ public final class LoanApplicationTerms {
         private Money inArrearsTolerance;
         private List<DisbursementData> disbursementDatas;
         private Money downPaymentAmount;
+        private LocalDate submittedOnDate;
+        private LocalDate seedDate;
 
         public Builder currency(ApplicationCurrency currency) {
             this.currency = currency;
@@ -343,11 +347,6 @@ public final class LoanApplicationTerms {
             return this;
         }
 
-        public Builder variationsDataWrapper(LoanTermVariationsDataWrapper variationsDataWrapper) {
-            this.variationsDataWrapper = variationsDataWrapper;
-            return this;
-        }
-
         public Builder fixedLength(Integer fixedLength) {
             this.fixedLength = fixedLength;
             return this;
@@ -368,21 +367,39 @@ public final class LoanApplicationTerms {
             return this;
         }
 
+        public Builder submittedOnDate(LocalDate submittedOnDate) {
+            this.submittedOnDate = submittedOnDate;
+            return this;
+        }
+
+        public Builder seedDate(LocalDate seedDate) {
+            this.seedDate = seedDate;
+            return this;
+        }
+
         public LoanApplicationTerms build() {
             return new LoanApplicationTerms(this);
         }
     }
 
-    public static LoanApplicationTerms assembleFrom(LoanRepaymentScheduleModelData modelData) {
-        Money principal = Money.of(modelData.currency().toData(), modelData.disbursementAmount());
-        Money downPaymentAmount = Money.zero(modelData.currency().toData());
+    public static LoanApplicationTerms assembleFrom(LoanRepaymentScheduleModelData modelData, MathContext mc) {
+        Money principal = Money.of(modelData.currency().toData(), modelData.disbursementAmount(), mc);
+        Money downPaymentAmount = Money.zero(modelData.currency().toData(), mc);
 
         if (modelData.downPaymentEnabled()) {
             downPaymentAmount = Money.of(modelData.currency().toData(),
-                    MathUtil.percentageOf(principal.getAmount(), modelData.disbursementAmount(), 19));
+                    MathUtil.percentageOf(principal.getAmount(), modelData.disbursementAmount(), mc), mc);
             if (modelData.installmentAmountInMultiplesOf() != null) {
-                downPaymentAmount = Money.roundToMultiplesOf(downPaymentAmount, modelData.installmentAmountInMultiplesOf());
+                downPaymentAmount = Money.roundToMultiplesOf(downPaymentAmount, modelData.installmentAmountInMultiplesOf(), mc);
             }
+        }
+
+        LocalDate seedDate;
+
+        if (modelData.disbursementDate() != null) {
+            seedDate = modelData.disbursementDate();
+        } else {
+            seedDate = modelData.scheduleGenerationStartDate();
         }
 
         return new Builder().currency(modelData.currency()).loanTermFrequency(modelData.numberOfRepayments())
@@ -394,8 +411,8 @@ public final class LoanApplicationTerms {
                 .annualNominalInterestRate(modelData.annualNominalInterestRate()).principal(principal)
                 .expectedDisbursementDate(modelData.disbursementDate()).repaymentsStartingFromDate(modelData.scheduleGenerationStartDate())
                 .daysInMonthType(modelData.daysInMonth()).daysInYearType(modelData.daysInYear()).fixedLength(modelData.fixedLength())
-                .inArrearsTolerance(Money.zero(modelData.currency().toData())).disbursementDatas(new ArrayList<>())
-                .downPaymentAmount(downPaymentAmount).build();
+                .inArrearsTolerance(Money.zero(modelData.currency().toData(), mc)).disbursementDatas(new ArrayList<>())
+                .downPaymentAmount(downPaymentAmount).submittedOnDate(modelData.scheduleGenerationStartDate()).seedDate(seedDate).build();
     }
 
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency currency, final Integer loanTermFrequency,

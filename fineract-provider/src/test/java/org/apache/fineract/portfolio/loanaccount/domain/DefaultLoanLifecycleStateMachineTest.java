@@ -25,6 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanStatusChangedBusinessEvent;
@@ -55,7 +56,8 @@ class DefaultLoanLifecycleStateMachineTest {
     public void setUp() {
 
         moneyHelperStatic = Mockito.mockStatic(MoneyHelper.class);
-        moneyHelperStatic.when(() -> MoneyHelper.getRoundingMode()).thenReturn(RoundingMode.UP);
+        moneyHelperStatic.when(MoneyHelper::getMathContext).thenReturn(new MathContext(12, RoundingMode.UP));
+        moneyHelperStatic.when(MoneyHelper::getRoundingMode).thenReturn(RoundingMode.UP);
         underTest = new DefaultLoanLifecycleStateMachine(businessEventNotifierService);
     }
 

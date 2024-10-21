@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanproduct.calc;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -33,10 +34,10 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail
 public interface EMICalculator {
 
     ProgressiveLoanInterestScheduleModel generateInterestScheduleModel(List<LoanScheduleModelRepaymentPeriod> periods,
-            LoanProductRelatedDetail loanProductRelatedDetail, Integer installmentAmountInMultiplesOf);
+            LoanProductRelatedDetail loanProductRelatedDetail, Integer installmentAmountInMultiplesOf, MathContext mc);
 
     ProgressiveLoanInterestScheduleModel generateModel(LoanProductRelatedDetail loanProductRelatedDetail,
-            Integer installmentAmountInMultiplesOf, List<LoanRepaymentScheduleInstallment> repaymentPeriods);
+            Integer installmentAmountInMultiplesOf, List<LoanRepaymentScheduleInstallment> repaymentPeriods, MathContext mc);
 
     Optional<RepaymentPeriod> findRepaymentPeriod(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate dueDate);
 

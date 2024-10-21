@@ -65,6 +65,7 @@ public class MoneyHelper {
     public static void fetchRoundingModeFromGlobalConfig() {
         roundingMode = RoundingMode.valueOf(staticConfigurationDomainService.getRoundingMode());
         log.info("Fetch Rounding Mode from Global Config {}", roundingMode.name());
+        mathContext = null;
     }
 
 }

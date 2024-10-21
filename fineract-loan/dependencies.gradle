@@ -59,6 +59,11 @@ dependencies {
             'org.apache.commons:commons-collections4'
 
             )
+    implementation ('org.mnode.ical4j:ical4j') {
+        exclude group: 'commons-logging'
+        exclude group: 'javax.activation'
+        exclude group: 'com.sun.mail', module: 'javax.mail'
+    }
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor 'org.mapstruct:mapstruct-processor'

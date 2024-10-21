@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
+import java.math.MathContext;
 import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.organisation.workingdays.data.AdjustedDateDetailsDTO;
@@ -27,8 +28,8 @@ import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 
 public interface ScheduledDateGenerator {
 
-    List<LoanScheduleModelRepaymentPeriod> generateRepaymentPeriods(LocalDate scheduledDueDate, LoanApplicationTerms loanApplicationTerms,
-            HolidayDetailDTO holidayDetailDTO);
+    List<LoanScheduleModelRepaymentPeriod> generateRepaymentPeriods(MathContext mc, LocalDate scheduledDueDate,
+            LoanApplicationTerms loanApplicationTerms, HolidayDetailDTO holidayDetailDTO);
 
     LocalDate getLastRepaymentDate(LoanApplicationTerms loanApplicationTerms, HolidayDetailDTO holidayDetailDTO);
 
