@@ -57,23 +57,23 @@ public class GenerateAdhocClientScheduleTasklet implements Tasklet {
                         switch (ReportRunFrequency.fromId(adhoc.getReportRunFrequency())) {
                             case DAILY -> {
                                 next = start.plusDays(1);
-                                run = Math.toIntExact(ChronoUnit.DAYS.between(start, end)) >= 1;
+                                run = DateUtils.getExactDifferenceInDays(start, end) >= 1;
                             }
                             case WEEKLY -> {
                                 next = start.plusDays(7);
-                                run = Math.toIntExact(ChronoUnit.DAYS.between(start, end)) >= 7;
+                                run = DateUtils.getExactDifferenceInDays(start, end) >= 7;
                             }
                             case MONTHLY -> {
                                 next = start.plusMonths(1);
-                                run = Math.toIntExact(ChronoUnit.MONTHS.between(start, end)) >= 1;
+                                run = DateUtils.getExactDifference(start, end, ChronoUnit.MONTHS) >= 1;
                             }
                             case YEARLY -> {
                                 next = start.plusYears(1);
-                                run = Math.toIntExact(ChronoUnit.YEARS.between(start, end)) >= 1;
+                                run = DateUtils.getExactDifference(start, end, ChronoUnit.YEARS) >= 1;
                             }
                             case CUSTOM -> {
                                 next = start.plusDays((long) adhoc.getReportRunEvery());
-                                run = Math.toIntExact(ChronoUnit.DAYS.between(start, end)) >= adhoc.getReportRunEvery();
+                                run = DateUtils.getExactDifferenceInDays(start, end) >= adhoc.getReportRunEvery();
                             }
                         }
                     }

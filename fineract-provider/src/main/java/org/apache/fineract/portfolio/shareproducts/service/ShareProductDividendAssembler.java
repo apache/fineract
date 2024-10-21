@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.shareproducts.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -102,13 +101,13 @@ public class ShareProductDividendAssembler {
                     if (DateUtils.isBefore(shareStartDate, lastDividendPostDate)) {
                         shareStartDate = lastDividendPostDate;
                     }
-                    int numberOfPurchseDays = Math.toIntExact(ChronoUnit.DAYS.between(shareStartDate, postingDate));
+                    int numberOfPurchseDays = DateUtils.getExactDifferenceInDays(shareStartDate, postingDate);
                     if (type.isPurchased() && numberOfPurchseDays < minimumActivePeriod) {
                         continue;
                     }
 
                     if (lastDividendAppliedDate != null) {
-                        numberOfShareDaysPerAccount += Math.toIntExact(ChronoUnit.DAYS.between(lastDividendAppliedDate, shareStartDate))
+                        numberOfShareDaysPerAccount += DateUtils.getExactDifferenceInDays(lastDividendAppliedDate, shareStartDate)
                                 * numberOfShares;
                     }
                     lastDividendAppliedDate = shareStartDate;
@@ -121,8 +120,7 @@ public class ShareProductDividendAssembler {
                 }
             }
             if (lastDividendAppliedDate != null) {
-                numberOfShareDaysPerAccount += Math.toIntExact(ChronoUnit.DAYS.between(lastDividendAppliedDate, postingDate))
-                        * numberOfShares;
+                numberOfShareDaysPerAccount += DateUtils.getExactDifferenceInDays(lastDividendAppliedDate, postingDate) * numberOfShares;
             }
             numberOfShareDays += numberOfShareDaysPerAccount;
             numberOfSharesdaysPerAccount.put(accountData.getId(), numberOfShareDaysPerAccount);

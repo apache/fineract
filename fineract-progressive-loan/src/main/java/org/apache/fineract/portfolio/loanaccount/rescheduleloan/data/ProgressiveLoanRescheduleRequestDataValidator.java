@@ -109,7 +109,7 @@ public class ProgressiveLoanRescheduleRequestDataValidator implements LoanResche
         if (hasInterestRateChange) {
             installment = loan.getRelatedRepaymentScheduleInstallment(rescheduleFromDate);
         } else {
-            installment = loan.getRepaymentScheduleInstallment(rescheduleFromDate);
+            installment = loan.fetchLoanRepaymentScheduleInstallmentByDueDate(rescheduleFromDate);
         }
 
         validateReschedulingInstallment(dataValidatorBuilder, installment);
@@ -161,7 +161,7 @@ public class ProgressiveLoanRescheduleRequestDataValidator implements LoanResche
                         loan.getId(), rescheduleFromDate);
             }
         } else {
-            installment = loan.getRepaymentScheduleInstallment(rescheduleFromDate);
+            installment = loan.fetchLoanRepaymentScheduleInstallmentByDueDate(rescheduleFromDate);
         }
         validateReschedulingInstallment(dataValidatorBuilder, installment);
         validateForOverdueCharges(dataValidatorBuilder, loan, installment);

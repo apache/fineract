@@ -44,5 +44,4 @@ public class ProgressiveTransactionCtx extends TransactionCtx {
         super(currency, installments, charges, overpaymentHolder, changedTransactionDetail);
         this.model = model;
     }
-
 }

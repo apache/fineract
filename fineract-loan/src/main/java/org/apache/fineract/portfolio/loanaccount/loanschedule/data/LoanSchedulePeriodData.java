@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 
@@ -155,7 +154,7 @@ public final class LoanSchedulePeriodData {
         this.obligationsMetOnDate = null;
         this.complete = null;
         if (fromDate != null) {
-            this.daysInPeriod = Math.toIntExact(ChronoUnit.DAYS.between(this.fromDate, this.dueDate));
+            this.daysInPeriod = DateUtils.getExactDifferenceInDays(this.fromDate, this.dueDate);
         } else {
             this.daysInPeriod = null;
         }
@@ -222,7 +221,7 @@ public final class LoanSchedulePeriodData {
         this.obligationsMetOnDate = null;
         this.complete = null;
         if (fromDate != null) {
-            this.daysInPeriod = Math.toIntExact(ChronoUnit.DAYS.between(this.fromDate, this.dueDate));
+            this.daysInPeriod = DateUtils.getExactDifferenceInDays(this.fromDate, this.dueDate);
         } else {
             this.daysInPeriod = null;
         }
@@ -347,7 +346,7 @@ public final class LoanSchedulePeriodData {
         this.obligationsMetOnDate = obligationsMetOnDate;
         this.complete = complete;
         if (fromDate != null) {
-            this.daysInPeriod = Math.toIntExact(ChronoUnit.DAYS.between(this.fromDate, this.dueDate));
+            this.daysInPeriod = DateUtils.getExactDifferenceInDays(this.fromDate, this.dueDate);
         } else {
             this.daysInPeriod = null;
         }

@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,6 +29,7 @@ import java.util.TreeSet;
 import java.util.function.Consumer;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 
@@ -117,7 +117,7 @@ public class ProgressiveLoanInterestScheduleModel {
         }
         final RepaymentPeriod firstPeriod = repaymentPeriods.get(0);
         final RepaymentPeriod lastPeriod = repaymentPeriods.size() > 1 ? repaymentPeriods.get(repaymentPeriods.size() - 1) : firstPeriod;
-        return Math.toIntExact(ChronoUnit.DAYS.between(firstPeriod.getFromDate(), lastPeriod.getDueDate()));
+        return DateUtils.getExactDifferenceInDays(firstPeriod.getFromDate(), lastPeriod.getDueDate());
     }
 
     public LocalDate getMaturityDate() {

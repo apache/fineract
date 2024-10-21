@@ -405,12 +405,16 @@ public class LoanAssembler {
                     .map(r -> new LoanPaymentAllocationRule(loanApplication, r.getTransactionType(), r.getAllocationTypes(),
                             r.getFutureInstallmentAllocationRule()))
                     .toList();
-            loanApplication.setPaymentAllocationRules(loanPaymentAllocationRules);
+            List<LoanPaymentAllocationRule> paymentAllocationRules = loanApplication.getPaymentAllocationRules();
+            paymentAllocationRules.clear();
+            paymentAllocationRules.addAll(loanPaymentAllocationRules);
 
             if (loanProduct.getCreditAllocationRules() != null && !loanProduct.getCreditAllocationRules().isEmpty()) {
                 List<LoanCreditAllocationRule> loanCreditAllocationRules = loanProduct.getCreditAllocationRules().stream()
                         .map(r -> new LoanCreditAllocationRule(loanApplication, r.getTransactionType(), r.getAllocationTypes())).toList();
-                loanApplication.setCreditAllocationRules(loanCreditAllocationRules);
+                List<LoanCreditAllocationRule> creditAllocationRules = loanApplication.getCreditAllocationRules();
+                creditAllocationRules.clear();
+                creditAllocationRules.addAll(loanCreditAllocationRules);
             }
         }
     }

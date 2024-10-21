@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Objects;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 
 @Embeddable
@@ -335,16 +336,16 @@ public class InterestRateChartSlabFields {
         final SavingsPeriodFrequencyType periodFrequencyType = SavingsPeriodFrequencyType.fromInt(periodType());
         switch (periodFrequencyType) {
             case DAYS:
-                actualDepositPeriod = Math.toIntExact(ChronoUnit.DAYS.between(periodStartDate, periodEndDate));
+                actualDepositPeriod = DateUtils.getExactDifferenceInDays(periodStartDate, periodEndDate);
             break;
             case WEEKS:
-                actualDepositPeriod = Math.toIntExact(ChronoUnit.WEEKS.between(periodStartDate, periodEndDate));
+                actualDepositPeriod = DateUtils.getExactDifference(periodStartDate, periodEndDate, ChronoUnit.WEEKS);
             break;
             case MONTHS:
-                actualDepositPeriod = Math.toIntExact(ChronoUnit.MONTHS.between(periodStartDate, periodEndDate));
+                actualDepositPeriod = DateUtils.getExactDifference(periodStartDate, periodEndDate, ChronoUnit.MONTHS);
             break;
             case YEARS:
-                actualDepositPeriod = Math.toIntExact(ChronoUnit.YEARS.between(periodStartDate, periodEndDate));
+                actualDepositPeriod = DateUtils.getExactDifference(periodStartDate, periodEndDate, ChronoUnit.YEARS);
             break;
             case INVALID:
                 actualDepositPeriod = 0;// default value

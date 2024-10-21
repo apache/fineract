@@ -20,7 +20,6 @@ package org.apache.fineract.accounting.glaccount.jobs.updatetrialbalancedetails;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,7 +50,7 @@ public class UpdateTrialBalanceDetailsTasklet implements Tasklet {
                 .append("where je.transaction_date > (select coalesce(MAX(created_date),'2010-01-01') from m_trial_balance)");
         final List<LocalDate> tbGaps = jdbcTemplate.queryForList(tbGapSqlBuilder.toString(), LocalDate.class);
         for (LocalDate tbGap : tbGaps) {
-            int days = Math.toIntExact(ChronoUnit.DAYS.between(tbGap, DateUtils.getBusinessLocalDate()));
+            int days = DateUtils.getExactDifferenceInDays(tbGap, DateUtils.getBusinessLocalDate());
             if (days < 1) {
                 continue;
             }

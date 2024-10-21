@@ -203,8 +203,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 LoanCharge loanCharge = changeOperation.getLoanCharge().get();
                 processSingleCharge(loanCharge, currency, installments, disbursementDate);
                 if (!loanCharge.isFullyPaid() && !overpaidTransactions.isEmpty()) {
-                    overpaidTransactions = processOverpaidTransactions(overpaidTransactions, currency, installments, charges,
-                            changedTransactionDetail, overpaymentHolder, scheduleModel);
+                    overpaidTransactions = processOverpaidTransactions(overpaidTransactions, ctx);
                 }
             }
         }
@@ -636,12 +635,11 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         }
     }
 
-    private List<LoanTransaction> processOverpaidTransactions(List<LoanTransaction> overpaidTransactions, MonetaryCurrency currency,
-            List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges, ChangedTransactionDetail changedTransactionDetail,
-            MoneyHolder overpaymentHolder, ProgressiveLoanInterestScheduleModel scheduleModel) {
+    private List<LoanTransaction> processOverpaidTransactions(List<LoanTransaction> overpaidTransactions, ProgressiveTransactionCtx ctx) {
         List<LoanTransaction> remainingTransactions = new ArrayList<>(overpaidTransactions);
-        TransactionCtx ctx = new ProgressiveTransactionCtx(currency, installments, charges, overpaymentHolder, changedTransactionDetail,
-                scheduleModel);
+        MonetaryCurrency currency = ctx.getCurrency();
+        MoneyHolder overpaymentHolder = ctx.getOverpaymentHolder();
+        Set<LoanCharge> charges = ctx.getCharges();
         Money zero = Money.zero(currency);
         for (LoanTransaction transaction : overpaidTransactions) {
             Money overpayment = transaction.getOverPaymentPortion(currency);
@@ -1150,9 +1148,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         int firstNormalInstallmentNumber = LoanRepaymentScheduleProcessingWrapper
                 .fetchFirstNormalInstallmentNumber(transactionCtx.getInstallments());
         for (final LoanRepaymentScheduleInstallment installment : transactionCtx.getInstallments()) {
-            boolean isDue = installment.getInstallmentNumber().equals(firstNormalInstallmentNumber)
-                    ? loanCharge.isDueForCollectionFromIncludingAndUpToAndIncluding(startDate, installment.getDueDate())
-                    : loanCharge.isDueForCollectionFromAndUpToAndIncluding(startDate, installment.getDueDate());
+            boolean isDue = loanCharge.isDueInPeriod(startDate, installment.getDueDate(),
+                    installment.getInstallmentNumber().equals(firstNormalInstallmentNumber));
             if (isDue) {
                 Integer installmentNumber = installment.getInstallmentNumber();
                 Money paidAmount = loanCharge.updatePaidAmountBy(amountToBePaid, installmentNumber, zero);
@@ -1612,12 +1609,11 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     }
 
     @NotNull
-    private Set<LoanCharge> getLoanChargesOfInstallment(Set<LoanCharge> charges, LoanRepaymentScheduleInstallment currentInstallment,
-            int firstNormalInstallmentNumber) {
-        return charges.stream().filter(loanCharge -> currentInstallment.getInstallmentNumber().equals(firstNormalInstallmentNumber)
-                ? loanCharge.isDueForCollectionFromIncludingAndUpToAndIncluding(currentInstallment.getFromDate(),
-                        currentInstallment.getDueDate())
-                : loanCharge.isDueForCollectionFromAndUpToAndIncluding(currentInstallment.getFromDate(), currentInstallment.getDueDate()))
+    private Set<LoanCharge> getLoanChargesOfInstallment(Set<LoanCharge> charges, LoanRepaymentScheduleInstallment installment,
+            int firstInstallmentNumber) {
+        boolean isFirstInstallment = installment.getInstallmentNumber().equals(firstInstallmentNumber);
+        return charges.stream()
+                .filter(loanCharge -> loanCharge.isDueInPeriod(installment.getFromDate(), installment.getDueDate(), isFirstInstallment))
                 .collect(Collectors.toSet());
     }
 

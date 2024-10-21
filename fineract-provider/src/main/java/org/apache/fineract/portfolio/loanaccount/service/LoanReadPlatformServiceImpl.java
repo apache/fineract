@@ -25,7 +25,6 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1245,7 +1244,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
 
                 Integer daysInPeriod = 0;
                 if (fromDate != null) {
-                    daysInPeriod = Math.toIntExact(ChronoUnit.DAYS.between(fromDate, dueDate));
+                    daysInPeriod = DateUtils.getExactDifferenceInDays(fromDate, dueDate);
                     loanTermInDays = loanTermInDays + daysInPeriod;
                 }
 

@@ -305,8 +305,23 @@ public final class DateUtils {
         return first != null && (second == null || first.isAfter(second));
     }
 
-    public static long getDifferenceInDays(final LocalDate localDateBefore, final LocalDate localDateAfter) {
-        return DAYS.between(localDateBefore, localDateAfter);
+    public static long getDifference(LocalDate first, LocalDate second, @NotNull ChronoUnit unit) {
+        if (first == null || second == null) {
+            throw new IllegalArgumentException("Dates must not be null to get difference");
+        }
+        return unit.between(first, second);
+    }
+
+    public static int getExactDifference(LocalDate first, LocalDate second, @NotNull ChronoUnit unit) {
+        return Math.toIntExact(getDifference(first, second, unit));
+    }
+
+    public static long getDifferenceInDays(LocalDate first, LocalDate second) {
+        return getDifference(first, second, DAYS);
+    }
+
+    public static int getExactDifferenceInDays(LocalDate first, LocalDate second) {
+        return getExactDifference(first, second, DAYS);
     }
 
     // Parse, format
@@ -362,17 +377,29 @@ public final class DateUtils {
      *
      * @param targetDate
      *            the date to be checked
-     * @param startDate
+     * @param fromDate
      *            the start date of the range
-     * @param endDate
+     * @param toDate
      *            the end date of the range
      * @return true if targetDate is within range or equal to start/end dates, otherwise false
      */
-    public static boolean isDateWithinRange(LocalDate targetDate, LocalDate startDate, LocalDate endDate) {
-        if (targetDate == null || startDate == null || endDate == null) {
+    public static boolean isDateWithinRange(LocalDate targetDate, LocalDate fromDate, LocalDate toDate) {
+        if (targetDate == null || fromDate == null || toDate == null) {
             throw new IllegalArgumentException("Dates must not be null");
         }
-        return !targetDate.isBefore(startDate) && !targetDate.isAfter(endDate);
+        return isDateInRangeInclusive(targetDate, fromDate, toDate);
+    }
+
+    public static boolean isDateInRangeInclusive(LocalDate targetDate, LocalDate fromDate, LocalDate toDate) {
+        return fromDate != null && !DateUtils.isBefore(targetDate, fromDate) && !DateUtils.isAfter(targetDate, toDate);
+    }
+
+    public static boolean isDateInRangeExclusive(LocalDate targetDate, LocalDate fromDate, LocalDate toDate) {
+        return fromDate != null && DateUtils.isAfter(targetDate, fromDate) && DateUtils.isBefore(targetDate, toDate);
+    }
+
+    public static boolean isDateInRangeFromExclusiveToInclusive(LocalDate targetDate, LocalDate fromDate, LocalDate toDate) {
+        return fromDate != null && DateUtils.isAfter(targetDate, fromDate) && !DateUtils.isAfter(targetDate, toDate);
     }
 
     @NotNull
@@ -397,15 +424,5 @@ public final class DateUtils {
             formatter = locale == null ? DateTimeFormatter.ofPattern(format) : DateTimeFormatter.ofPattern(format, locale);
         }
         return formatter;
-    }
-
-    public static boolean occursOnDayFromExclusiveAndUpToAndIncluding(final LocalDate fromNotInclusive, final LocalDate upToAndInclusive,
-            final LocalDate target) {
-        return DateUtils.isAfter(target, fromNotInclusive) && !DateUtils.isAfter(target, upToAndInclusive);
-    }
-
-    public static boolean occursOnDayFromAndUpToAndIncluding(final LocalDate fromAndInclusive, final LocalDate upToAndInclusive,
-            final LocalDate target) {
-        return target != null && !DateUtils.isBefore(target, fromAndInclusive) && !DateUtils.isAfter(target, upToAndInclusive);
     }
 }

@@ -22,12 +22,12 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -181,7 +181,7 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
 
                 Integer daysInPeriod = 0;
                 if (fromDate != null) {
-                    daysInPeriod = Math.toIntExact(ChronoUnit.DAYS.between(fromDate, dueDate));
+                    daysInPeriod = DateUtils.getExactDifferenceInDays(fromDate, dueDate);
                     loanTermInDays = loanTermInDays + daysInPeriod;
                 }
 

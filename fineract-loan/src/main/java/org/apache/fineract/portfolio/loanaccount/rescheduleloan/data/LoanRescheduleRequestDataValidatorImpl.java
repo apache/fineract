@@ -100,7 +100,7 @@ public class LoanRescheduleRequestDataValidatorImpl implements LoanRescheduleReq
             dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.emiParamName).value(emi).notNull().positiveAmount();
 
             if (endDate != null) {
-                LoanRepaymentScheduleInstallment endInstallment = loan.getRepaymentScheduleInstallment(endDate);
+                LoanRepaymentScheduleInstallment endInstallment = loan.fetchLoanRepaymentScheduleInstallmentByDueDate(endDate);
 
                 if (endInstallment == null) {
                     dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.endDateParamName)
@@ -257,7 +257,7 @@ public class LoanRescheduleRequestDataValidatorImpl implements LoanRescheduleReq
             validateIsThereAnyIncomingChange(fromJsonHelper, jsonElement, dataValidatorBuilder);
             validateMultiDisburseLoan(loan, dataValidatorBuilder);
 
-            LoanRepaymentScheduleInstallment installment = loan.getRepaymentScheduleInstallment(rescheduleFromDate);
+            LoanRepaymentScheduleInstallment installment = loan.fetchLoanRepaymentScheduleInstallmentByDueDate(rescheduleFromDate);
             validateReschedulingInstallment(dataValidatorBuilder, installment);
             validateForOverdueCharges(dataValidatorBuilder, loan, installment);
 
@@ -307,7 +307,7 @@ public class LoanRescheduleRequestDataValidatorImpl implements LoanRescheduleReq
             LoanRepaymentScheduleInstallment installment;
 
             validateLoanIsActive(loan, dataValidatorBuilder);
-            installment = loan.getRepaymentScheduleInstallment(rescheduleFromDate);
+            installment = loan.fetchLoanRepaymentScheduleInstallmentByDueDate(rescheduleFromDate);
 
             validateReschedulingInstallment(dataValidatorBuilder, installment);
             validateForOverdueCharges(dataValidatorBuilder, loan, installment);

@@ -113,9 +113,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 for (final LoanRepaymentScheduleInstallment installment : installments) {
                     boolean isFirstPeriod = installment.getInstallmentNumber().equals(firstNormalInstallmentNumber);
                     for (final LoanCharge loanCharge : transferCharges) {
-                        boolean isDue = isFirstPeriod
-                                ? loanCharge.isDueForCollectionFromIncludingAndUpToAndIncluding(startDate, installment.getDueDate())
-                                : loanCharge.isDueForCollectionFromAndUpToAndIncluding(startDate, installment.getDueDate());
+                        boolean isDue = loanCharge.isDueInPeriod(startDate, installment.getDueDate(), isFirstPeriod);
                         if (isDue) {
                             Money amountForProcess = loanCharge.getAmount(currency);
                             if (amountForProcess.isGreaterThan(loanTransaction.getAmount(currency))) {
@@ -227,11 +225,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         final int firstNormalInstallmentNumber = LoanRepaymentScheduleProcessingWrapper.fetchFirstNormalInstallmentNumber(installments);
 
         final LoanRepaymentScheduleInstallment currentInstallment = installments.stream()
-                .filter(installment -> installment.getInstallmentNumber().equals(firstNormalInstallmentNumber)
-                        ? DateUtils.occursOnDayFromExclusiveAndUpToAndIncluding(installment.getFromDate(), installment.getDueDate(),
-                                loanTransaction.getTransactionDate())
-                        : DateUtils.occursOnDayFromAndUpToAndIncluding(installment.getFromDate(), installment.getDueDate(),
-                                loanTransaction.getTransactionDate()))
+                .filter(installment -> LoanRepaymentScheduleProcessingWrapper.isInPeriod(loanTransaction.getTransactionDate(), installment,
+                        installment.getInstallmentNumber().equals(firstNormalInstallmentNumber)))
                 .findFirst().orElseThrow();
 
         interestPortion = interestPortion.plus(currentInstallment.getInterestCharged(currency));

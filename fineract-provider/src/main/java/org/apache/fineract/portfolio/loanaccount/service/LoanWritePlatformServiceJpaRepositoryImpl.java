@@ -1081,8 +1081,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             loan.addLoanTransaction(newInterestPaymentWaiverTransaction);
         }
 
-        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loan.getTransactionProcessorFactory()
-                .determineProcessor(loan.getTransactionProcessingStrategyCode());
+        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loan.getTransactionProcessor();
 
         final LoanRepaymentScheduleInstallment currentInstallment = loan
                 .fetchLoanRepaymentScheduleInstallmentByDueDate(newInterestPaymentWaiverTransaction.getTransactionDate());

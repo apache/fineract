@@ -616,14 +616,8 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return this.loan.hasIdentifyOf(loanId);
     }
 
-    public boolean isDueForCollectionFromAndUpToAndIncluding(final LocalDate fromNotInclusive, final LocalDate upToAndInclusive) {
-        final LocalDate dueDate = getDueLocalDate();
-        return DateUtils.occursOnDayFromExclusiveAndUpToAndIncluding(fromNotInclusive, upToAndInclusive, dueDate);
-    }
-
-    public boolean isDueForCollectionFromIncludingAndUpToAndIncluding(final LocalDate fromAndInclusive, final LocalDate upToAndInclusive) {
-        final LocalDate dueDate = getDueLocalDate();
-        return DateUtils.occursOnDayFromAndUpToAndIncluding(fromAndInclusive, upToAndInclusive, dueDate);
+    public boolean isDueInPeriod(final LocalDate fromDate, final LocalDate toDate, boolean isFirstPeriod) {
+        return LoanRepaymentScheduleProcessingWrapper.isInPeriod(getDueLocalDate(), fromDate, toDate, isFirstPeriod);
     }
 
     public boolean isFeeCharge() {

@@ -144,7 +144,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(charge.getAmountOutstanding(currency)).thenReturn(chargeAmountMoney);
         when(loanTransaction.getLoan()).thenReturn(loan);
         when(loan.getDisbursementDate()).thenReturn(disbursementDate);
-        when(charge.isDueForCollectionFromIncludingAndUpToAndIncluding(disbursementDate, installment.getDueDate())).thenReturn(true);
+        when(charge.isDueInPeriod(disbursementDate, installment.getDueDate(), true)).thenReturn(true);
         when(installment.getInstallmentNumber()).thenReturn(1);
         when(charge.updatePaidAmountBy(refEq(chargeAmountMoney), eq(1), refEq(zero))).thenReturn(chargeAmountMoney);
         when(loanTransaction.isPenaltyPayment()).thenReturn(false);
@@ -188,7 +188,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(charge.getAmountOutstanding(currency)).thenReturn(chargeAmountMoney);
         when(loanTransaction.getLoan()).thenReturn(loan);
         when(loan.getDisbursementDate()).thenReturn(disbursementDate);
-        when(charge.isDueForCollectionFromIncludingAndUpToAndIncluding(disbursementDate, installment.getDueDate())).thenReturn(true);
+        when(charge.isDueInPeriod(disbursementDate, installment.getDueDate(), true)).thenReturn(true);
         when(installment.getInstallmentNumber()).thenReturn(1);
         when(charge.updatePaidAmountBy(refEq(transactionAmountMoney), eq(1), refEq(zero))).thenReturn(transactionAmountMoney);
         when(loanTransaction.isPenaltyPayment()).thenReturn(false);
@@ -236,7 +236,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(loanTransaction.getLoan().getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
         when(loanProductRelatedDetail.getLoanScheduleProcessingType()).thenReturn(LoanScheduleProcessingType.HORIZONTAL);
         when(loan.getDisbursementDate()).thenReturn(disbursementDate);
-        when(charge.isDueForCollectionFromIncludingAndUpToAndIncluding(disbursementDate, installment.getDueDate())).thenReturn(true);
+        when(charge.isDueInPeriod(disbursementDate, installment.getDueDate(), true)).thenReturn(true);
         when(installment.getInstallmentNumber()).thenReturn(1);
         when(charge.updatePaidAmountBy(refEq(chargeAmountMoney), eq(1), refEq(zero))).thenReturn(chargeAmountMoney);
         when(loanTransaction.isPenaltyPayment()).thenReturn(false);

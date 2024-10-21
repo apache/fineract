@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -87,7 +88,7 @@ public class LoanRepaymentScheduleProcessingWrapper {
         Money cumulative = Money.zero(monetaryCurrency);
         for (final LoanCharge loanCharge : loanCharges) {
             if (loanCharge.isFeeCharge() && !loanCharge.isDueAtDisbursement()) {
-                boolean isDue = loanChargeIsDue(periodStart, periodEnd, isFirstPeriod, loanCharge);
+                boolean isDue = loanCharge.isDueInPeriod(periodStart, periodEnd, isFirstPeriod);
                 if (loanCharge.isInstalmentFee() && isInstallmentChargeApplicable) {
                     cumulative = cumulative.plus(getInstallmentFee(monetaryCurrency, period, loanCharge));
                 } else if (loanCharge.isOverdueInstallmentCharge() && isDue && loanCharge.getChargeCalculation().isPercentageBased()) {
@@ -133,7 +134,7 @@ public class LoanRepaymentScheduleProcessingWrapper {
 
         for (final LoanCharge loanCharge : loanCharges) {
             if (predicate.test(loanCharge)) {
-                boolean isDue = loanChargeIsDue(periodStart, periodEnd, isFirstPeriod, loanCharge);
+                boolean isDue = loanCharge.isDueInPeriod(periodStart, periodEnd, isFirstPeriod);
                 if (loanCharge.isInstalmentFee() && isInstallmentChargeApplicable) {
                     LoanInstallmentCharge loanChargePerInstallment = loanCharge.getInstallmentLoanCharge(periodEnd);
                     if (loanChargePerInstallment != null) {
@@ -156,7 +157,7 @@ public class LoanRepaymentScheduleProcessingWrapper {
 
         for (final LoanCharge loanCharge : loanCharges) {
             if (chargePredicate.test(loanCharge)) {
-                boolean isDue = loanChargeIsDue(periodStart, periodEnd, isFirstPeriod, loanCharge);
+                boolean isDue = loanCharge.isDueInPeriod(periodStart, periodEnd, isFirstPeriod);
                 if (loanCharge.isInstalmentFee() && isInstallmentChargeApplicable) {
                     LoanInstallmentCharge loanChargePerInstallment = loanCharge.getInstallmentLoanCharge(periodEnd);
                     if (loanChargePerInstallment != null) {
@@ -175,11 +176,6 @@ public class LoanRepaymentScheduleProcessingWrapper {
         return loanCharge -> loanCharge.isFeeCharge() && !loanCharge.isDueAtDisbursement();
     }
 
-    private boolean loanChargeIsDue(LocalDate periodStart, LocalDate periodEnd, boolean isFirstPeriod, LoanCharge loanCharge) {
-        return isFirstPeriod ? loanCharge.isDueForCollectionFromIncludingAndUpToAndIncluding(periodStart, periodEnd)
-                : loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd);
-    }
-
     private Money cumulativePenaltyChargesDueWithin(final LocalDate periodStart, final LocalDate periodEnd,
             final Set<LoanCharge> loanCharges, final MonetaryCurrency currency, LoanRepaymentScheduleInstallment period,
             final Money totalPrincipal, final Money totalInterest, boolean isInstallmentChargeApplicable, boolean isFirstPeriod) {
@@ -188,7 +184,7 @@ public class LoanRepaymentScheduleProcessingWrapper {
 
         for (final LoanCharge loanCharge : loanCharges) {
             if (loanCharge.isPenaltyCharge()) {
-                boolean isDue = loanChargeIsDue(periodStart, periodEnd, isFirstPeriod, loanCharge);
+                boolean isDue = loanCharge.isDueInPeriod(periodStart, periodEnd, isFirstPeriod);
                 if (loanCharge.isInstalmentFee() && isInstallmentChargeApplicable) {
                     cumulative = cumulative.plus(getInstallmentFee(currency, period, loanCharge));
                 } else if (loanCharge.isOverdueInstallmentCharge() && isDue && loanCharge.getChargeCalculation().isPercentageBased()) {
@@ -242,17 +238,24 @@ public class LoanRepaymentScheduleProcessingWrapper {
                 .filter(repaymentPeriod -> !repaymentPeriod.isDownPayment()).findFirst().orElseThrow().getInstallmentNumber();
     }
 
-    public static boolean isInPeriod(LocalDate transactionDate, LoanRepaymentScheduleInstallment targetInstallment,
+    public static boolean isInPeriod(LocalDate targetDate, LoanRepaymentScheduleInstallment targetInstallment,
             List<LoanRepaymentScheduleInstallment> installments) {
         int firstPeriod = fetchFirstNormalInstallmentNumber(installments);
-        return isInPeriod(transactionDate, targetInstallment, targetInstallment.getInstallmentNumber().equals(firstPeriod));
+        return isInPeriod(targetDate, targetInstallment, targetInstallment.getInstallmentNumber().equals(firstPeriod));
     }
 
-    private static boolean isInPeriod(LocalDate transactionDate, LoanRepaymentScheduleInstallment targetInstallment,
-            boolean isFirstPeriod) {
-        LocalDate fromDate = targetInstallment.getFromDate();
-        LocalDate dueDate = targetInstallment.getDueDate();
-        return isFirstPeriod ? DateUtils.occursOnDayFromAndUpToAndIncluding(fromDate, dueDate, transactionDate)
-                : DateUtils.occursOnDayFromExclusiveAndUpToAndIncluding(fromDate, dueDate, transactionDate);
+    public static boolean isInPeriod(LocalDate targetDate, LoanRepaymentScheduleInstallment installment, boolean isFirstPeriod) {
+        return isInPeriod(targetDate, installment.getFromDate(), installment.getDueDate(), isFirstPeriod);
+    }
+
+    public static boolean isInPeriod(LocalDate targetDate, LocalDate fromDate, LocalDate toDate, boolean isFirstPeriod) {
+        return isFirstPeriod ? DateUtils.isDateInRangeInclusive(targetDate, fromDate, toDate)
+                : DateUtils.isDateInRangeFromExclusiveToInclusive(targetDate, fromDate, toDate);
+    }
+
+    public static Optional<LoanRepaymentScheduleInstallment> findInPeriod(LocalDate targetDate,
+            List<LoanRepaymentScheduleInstallment> installments) {
+        int firstNumber = fetchFirstNormalInstallmentNumber(installments);
+        return installments.stream().filter(e -> isInPeriod(targetDate, e, e.getInstallmentNumber().equals(firstNumber))).findFirst();
     }
 }

@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -108,7 +107,7 @@ public class CumulativeDecliningBalanceInterestLoanScheduleGenerator extends Abs
             for (Map.Entry<LocalDate, Money> principal : principalVariation.entrySet()) {
 
                 if (!DateUtils.isAfter(principal.getKey(), periodEndDate)) {
-                    int interestForDays = Math.toIntExact(ChronoUnit.DAYS.between(interestStartDate, principal.getKey()));
+                    int interestForDays = DateUtils.getExactDifferenceInDays(interestStartDate, principal.getKey());
                     if (interestForDays > 0) {
                         final PrincipalInterest result = loanApplicationTerms.calculateTotalInterestForPeriod(calculator,
                                 interestCalculationGraceOnRepaymentPeriodFraction, periodNumber, mc, cumulatingInterestDueToGrace,

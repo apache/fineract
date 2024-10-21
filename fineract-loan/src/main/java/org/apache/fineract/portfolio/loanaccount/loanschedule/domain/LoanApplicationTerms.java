@@ -953,7 +953,7 @@ public final class LoanApplicationTerms {
                     loanStartDate = getInterestChargedFromLocalDate();
                 }
 
-                final int periodsInLoanTermInteger = Math.toIntExact(ChronoUnit.DAYS.between(loanStartDate, this.loanEndDate));
+                final int periodsInLoanTermInteger = DateUtils.getExactDifferenceInDays(loanStartDate, this.loanEndDate);
                 periodsInLoanTerm = BigDecimal.valueOf(periodsInLoanTermInteger);
             break;
             case INVALID:
@@ -976,17 +976,17 @@ public final class LoanApplicationTerms {
         BigDecimal numberOfPeriods = BigDecimal.ZERO;
         switch (this.repaymentPeriodFrequencyType) {
             case DAYS:
-                int numOfDays = Math.toIntExact(ChronoUnit.DAYS.between(startDate, endDate));
+                int numOfDays = DateUtils.getExactDifferenceInDays(startDate, endDate);
                 numberOfPeriods = BigDecimal.valueOf((double) numOfDays);
             break;
             case WEEKS:
-                int numberOfWeeks = Math.toIntExact(ChronoUnit.WEEKS.between(startDate, endDate));
-                int daysLeftAfterWeeks = Math.toIntExact(ChronoUnit.DAYS.between(startDate.plusWeeks(numberOfWeeks), endDate));
+                int numberOfWeeks = DateUtils.getExactDifference(startDate, endDate, ChronoUnit.WEEKS);
+                int daysLeftAfterWeeks = DateUtils.getExactDifferenceInDays(startDate.plusWeeks(numberOfWeeks), endDate);
                 numberOfPeriods = numberOfPeriods.add(BigDecimal.valueOf(numberOfWeeks))
                         .add(BigDecimal.valueOf((double) daysLeftAfterWeeks / 7));
             break;
             case MONTHS:
-                int numberOfMonths = Math.toIntExact(ChronoUnit.MONTHS.between(startDate, endDate));
+                int numberOfMonths = DateUtils.getExactDifference(startDate, endDate, ChronoUnit.MONTHS);
                 LocalDate startDateAfterConsideringMonths = null;
                 LocalDate endDateAfterConsideringMonths = null;
                 int diffDays = 0;
@@ -1007,7 +1007,7 @@ public final class LoanApplicationTerms {
                                 this.holidayDetailDTO.getWorkingDays(), isSkipRepaymentOnFirstDayOfMonth, numberOfDays);
                     }
                     if (!DateUtils.isEqual(expectedStartDate, startDate)) {
-                        diffDays = Math.toIntExact(ChronoUnit.DAYS.between(startDate, expectedStartDate));
+                        diffDays = DateUtils.getExactDifferenceInDays(startDate, expectedStartDate);
                     }
                     if (numberOfMonths == 0) {
                         startDateAfterConsideringMonths = expectedStartDate;
@@ -1022,19 +1022,19 @@ public final class LoanApplicationTerms {
                             CalendarUtils.getMeetingFrequencyFromPeriodFrequencyType(getLoanTermPeriodFrequencyType()),
                             this.holidayDetailDTO.getWorkingDays(), isSkipRepaymentOnFirstDayOfMonth, numberOfDays);
                 }
-                int daysLeftAfterMonths = Math.toIntExact(ChronoUnit.DAYS.between(startDateAfterConsideringMonths, endDate)) + diffDays;
-                int daysInPeriodAfterMonths = Math
-                        .toIntExact(ChronoUnit.DAYS.between(startDateAfterConsideringMonths, endDateAfterConsideringMonths));
+                int daysLeftAfterMonths = DateUtils.getExactDifferenceInDays(startDateAfterConsideringMonths, endDate) + diffDays;
+                int daysInPeriodAfterMonths = DateUtils.getExactDifferenceInDays(startDateAfterConsideringMonths,
+                        endDateAfterConsideringMonths);
                 numberOfPeriods = numberOfPeriods.add(BigDecimal.valueOf(numberOfMonths))
                         .add(BigDecimal.valueOf((double) daysLeftAfterMonths / daysInPeriodAfterMonths));
             break;
             case YEARS:
-                int numberOfYears = Math.toIntExact(ChronoUnit.YEARS.between(startDate, endDate));
+                int numberOfYears = DateUtils.getExactDifference(startDate, endDate, ChronoUnit.YEARS);
                 LocalDate startDateAfterConsideringYears = startDate.plusYears(numberOfYears);
                 LocalDate endDateAfterConsideringYears = startDate.plusYears(numberOfYears + 1);
-                int daysLeftAfterYears = Math.toIntExact(ChronoUnit.DAYS.between(startDateAfterConsideringYears, endDate));
-                int daysInPeriodAfterYears = Math
-                        .toIntExact(ChronoUnit.DAYS.between(startDateAfterConsideringYears, endDateAfterConsideringYears));
+                int daysLeftAfterYears = DateUtils.getExactDifferenceInDays(startDateAfterConsideringYears, endDate);
+                int daysInPeriodAfterYears = DateUtils.getExactDifferenceInDays(startDateAfterConsideringYears,
+                        endDateAfterConsideringYears);
                 numberOfPeriods = numberOfPeriods.add(BigDecimal.valueOf(numberOfYears))
                         .add(BigDecimal.valueOf((double) daysLeftAfterYears / daysInPeriodAfterYears));
             break;
@@ -1208,7 +1208,7 @@ public final class LoanApplicationTerms {
             break;
             case DAILY:
                 // For daily work out number of days in the period
-                BigDecimal numberOfDaysInPeriod = BigDecimal.valueOf(ChronoUnit.DAYS.between(periodStartDate, periodEndDate));
+                BigDecimal numberOfDaysInPeriod = BigDecimal.valueOf(DateUtils.getDifferenceInDays(periodStartDate, periodEndDate));
 
                 final BigDecimal oneDayOfYearInterestRate = this.annualNominalInterestRate.divide(loanTermPeriodsInYearBigDecimal, mc)
                         .divide(divisor, mc);
@@ -1270,7 +1270,7 @@ public final class LoanApplicationTerms {
             final Money outstandingBalance, final LocalDate fromDate, final LocalDate toDate) {
 
         long loanTermPeriodsInOneYear = calculator.calculate(PeriodFrequencyType.DAYS).longValue();
-        int repaymentEvery = Math.toIntExact(ChronoUnit.DAYS.between(fromDate, toDate));
+        int repaymentEvery = DateUtils.getExactDifferenceInDays(fromDate, toDate);
         if (isFallingInRepaymentPeriod(fromDate, toDate)) {
             loanTermPeriodsInOneYear = calculatePeriodsInOneYear(calculator);
             repaymentEvery = getPeriodsBetween(fromDate, toDate);
@@ -1681,7 +1681,7 @@ public final class LoanApplicationTerms {
         if (this.interestCalculationPeriodMethod.getValue().equals(InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD.getValue())) {
             switch (this.repaymentPeriodFrequencyType) {
                 case WEEKS:
-                    int days = Math.toIntExact(ChronoUnit.DAYS.between(fromDate, toDate));
+                    int days = DateUtils.getExactDifferenceInDays(fromDate, toDate);
                     isSameAsRepaymentPeriod = (days % 7) == 0;
                 break;
                 case MONTHS:
@@ -1715,16 +1715,16 @@ public final class LoanApplicationTerms {
         Integer numberOfPeriods = 0;
         switch (this.repaymentPeriodFrequencyType) {
             case DAYS:
-                numberOfPeriods = Math.toIntExact(ChronoUnit.DAYS.between(fromDate, toDate));
+                numberOfPeriods = DateUtils.getExactDifferenceInDays(fromDate, toDate);
             break;
             case WEEKS:
-                numberOfPeriods = Math.toIntExact(ChronoUnit.WEEKS.between(fromDate, toDate));
+                numberOfPeriods = DateUtils.getExactDifference(fromDate, toDate, ChronoUnit.WEEKS);
             break;
             case MONTHS:
-                numberOfPeriods = Math.toIntExact(ChronoUnit.MONTHS.between(fromDate, toDate));
+                numberOfPeriods = DateUtils.getExactDifference(fromDate, toDate, ChronoUnit.MONTHS);
             break;
             case YEARS:
-                numberOfPeriods = Math.toIntExact(ChronoUnit.YEARS.between(fromDate, toDate));
+                numberOfPeriods = DateUtils.getExactDifference(fromDate, toDate, ChronoUnit.YEARS);
             break;
             default:
             break;

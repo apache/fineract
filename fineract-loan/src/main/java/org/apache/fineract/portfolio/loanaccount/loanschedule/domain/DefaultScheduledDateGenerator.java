@@ -317,11 +317,11 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
         boolean isScheduledDate = false;
         switch (frequency) {
             case DAYS:
-                int diff = Math.toIntExact(ChronoUnit.DAYS.between(startDate, date));
+                int diff = DateUtils.getExactDifferenceInDays(startDate, date);
                 isScheduledDate = (diff % repaidEvery) == 0;
             break;
             case WEEKS:
-                int weekDiff = Math.toIntExact(ChronoUnit.WEEKS.between(startDate, date));
+                int weekDiff = DateUtils.getExactDifference(startDate, date, ChronoUnit.WEEKS);
                 isScheduledDate = (weekDiff % repaidEvery) == 0;
                 if (isScheduledDate) {
                     LocalDate modifiedDate = startDate.plusWeeks(weekDiff);
@@ -329,7 +329,7 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
                 }
             break;
             case MONTHS:
-                int monthDiff = Math.toIntExact(ChronoUnit.MONTHS.between(startDate, date));
+                int monthDiff = DateUtils.getExactDifference(startDate, date, ChronoUnit.MONTHS);
                 isScheduledDate = (monthDiff % repaidEvery) == 0;
                 if (isScheduledDate) {
                     LocalDate modifiedDate = startDate.plusMonths(monthDiff);
@@ -337,7 +337,7 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
                 }
             break;
             case YEARS:
-                int yearDiff = Math.toIntExact(ChronoUnit.YEARS.between(startDate, date));
+                int yearDiff = DateUtils.getExactDifference(startDate, date, ChronoUnit.YEARS);
                 isScheduledDate = (yearDiff % repaidEvery) == 0;
                 if (isScheduledDate) {
                     LocalDate modifiedDate = startDate.plusYears(yearDiff);

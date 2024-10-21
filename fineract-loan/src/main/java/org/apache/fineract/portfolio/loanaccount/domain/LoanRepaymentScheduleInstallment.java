@@ -31,6 +31,7 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -38,6 +39,7 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanproduct.domain.AllocationType;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
 
+@Getter
 @Entity
 @Table(name = "m_loan_repayment_schedule")
 public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDateTimeCustom<Long>
@@ -265,30 +267,6 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         return result;
     }
 
-    public Loan getLoan() {
-        return this.loan;
-    }
-
-    public Integer getInstallmentNumber() {
-        return this.installmentNumber;
-    }
-
-    public LocalDate getFromDate() {
-        return this.fromDate;
-    }
-
-    public void setPostDatedChecksToNull() {
-        this.postDatedChecks = null;
-    }
-
-    public Set<PostDatedChecks> getPostDatedCheck() {
-        return this.postDatedChecks;
-    }
-
-    public LocalDate getDueDate() {
-        return this.dueDate;
-    }
-
     public Money getCreditedPrincipal(final MonetaryCurrency currency) {
         return Money.of(currency, this.creditedPrincipal);
     }
@@ -413,16 +391,12 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
                 .plus(getPenaltyChargesOutstanding(currency));
     }
 
-    public void updateLoan(final Loan loan) {
+    void updateLoan(final Loan loan) {
         this.loan = loan;
     }
 
     public boolean isPartlyPaid() {
         return !this.obligationsMet && (this.interestPaid != null || this.feeChargesPaid != null || this.principalCompleted != null);
-    }
-
-    public boolean isObligationsMet() {
-        return this.obligationsMet;
     }
 
     public boolean isNotFullyPaidOff() {
@@ -879,18 +853,6 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         }
     }
 
-    public BigDecimal getTotalPaidInAdvance() {
-        return this.totalPaidInAdvance;
-    }
-
-    public BigDecimal getTotalPaidLate() {
-        return this.totalPaidLate;
-    }
-
-    public LocalDate getObligationsMetOnDate() {
-        return this.obligationsMetOnDate;
-    }
-
     /********** UNPAY COMPONENTS ****/
 
     public Money unpayPenaltyChargesComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
@@ -1023,10 +985,6 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
                 .plus(getPrincipalCompleted(currency));
     }
 
-    public BigDecimal getRescheduleInterestPortion() {
-        return rescheduleInterestPortion;
-    }
-
     public void setRescheduleInterestPortion(BigDecimal rescheduleInterestPortion) {
         this.rescheduleInterestPortion = rescheduleInterestPortion;
     }
@@ -1039,24 +997,12 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         this.penaltyChargesWaived = newPenaltyChargesCharged;
     }
 
-    public Set<LoanInstallmentCharge> getInstallmentCharges() {
-        return installmentCharges;
-    }
-
-    public boolean isAdditional() {
-        return additional;
-    }
-
     public void markAsAdditional() {
         this.additional = true;
     }
 
     public Set<LoanTransactionToRepaymentScheduleMapping> getLoanTransactionToRepaymentScheduleMappings() {
         return this.loanTransactionToRepaymentScheduleMappings;
-    }
-
-    public boolean isDownPayment() {
-        return isDownPayment;
     }
 
     public void resetBalances() {
@@ -1076,9 +1022,5 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
 
     public enum PaymentAction {
         PAY, UNPAY
-    }
-
-    public boolean isReAged() {
-        return isReAged;
     }
 }

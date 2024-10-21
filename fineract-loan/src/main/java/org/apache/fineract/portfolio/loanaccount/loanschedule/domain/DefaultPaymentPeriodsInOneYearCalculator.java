@@ -21,9 +21,9 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.springframework.stereotype.Component;
 
@@ -71,8 +71,8 @@ public class DefaultPaymentPeriodsInOneYearCalculator implements PaymentPeriodsI
             periodFraction = BigDecimal.ONE;
         } else if (interestChargedFromLocalDate != null && repaymentPeriod.contains(interestChargedFromLocalDate)) {
 
-            final int numberOfDaysInterestCalculationGraceInPeriod = Math
-                    .toIntExact(ChronoUnit.DAYS.between(repaymentPeriodStartDate, interestChargedFromLocalDate));
+            final int numberOfDaysInterestCalculationGraceInPeriod = DateUtils.getExactDifferenceInDays(repaymentPeriodStartDate,
+                    interestChargedFromLocalDate);
             periodFraction = calculateRepaymentPeriodFraction(repaymentPeriodFrequencyType, repaidEvery,
                     numberOfDaysInterestCalculationGraceInPeriod, mc);
         }
