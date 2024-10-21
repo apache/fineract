@@ -94,6 +94,7 @@ import org.apache.fineract.integrationtests.common.loans.LoanProductHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
+import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.apache.fineract.integrationtests.inlinecob.InlineLoanCOBHelper;
 import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
@@ -250,6 +251,9 @@ public abstract class BaseLoanIntegrationTest {
     }
 
     protected PostLoanProductsRequest create4IProgressive() {
+        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
+        Assertions.assertNotNull(delinquencyBucketId);
+
         return new PostLoanProductsRequest().name(Utils.uniqueRandomStringGenerator("4I_PROGRESSIVE_", 6))//
                 .shortName(Utils.uniqueRandomStringGenerator("", 4))//
                 .description("4 installment product - progressive")//
@@ -342,7 +346,7 @@ public abstract class BaseLoanIntegrationTest {
                         .graceOnPrincipalAndInterestPayment(true)//
                         .graceOnArrearsAgeing(true)//
                 ).isEqualAmortization(false)//
-                .delinquencyBucketId(1L)//
+                .delinquencyBucketId(delinquencyBucketId.longValue())//
                 .enableDownPayment(false)//
                 .enableInstallmentLevelDelinquency(false)//
                 .loanScheduleType("PROGRESSIVE")//

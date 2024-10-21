@@ -24,6 +24,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 import org.apache.fineract.integrationtests.common.Utils;
 
 public final class FundsResourceHandler {
@@ -38,6 +39,11 @@ public final class FundsResourceHandler {
     public static Integer createFund(final String fundJSON, final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_FUNDS_URL, fundJSON, "resourceId");
+    }
+
+    public static Integer createFund(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+        FundsHelper fh = FundsHelper.create(Utils.uniqueRandomStringGenerator("", 10)).externalId(UUID.randomUUID().toString()).build();
+        return createFund(fh.toJSON(), requestSpec, responseSpec);
     }
 
     public static List<FundsHelper> retrieveAllFunds(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
