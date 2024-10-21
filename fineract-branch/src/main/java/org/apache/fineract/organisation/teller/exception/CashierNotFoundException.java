@@ -40,4 +40,5 @@ public class CashierNotFoundException extends AbstractPlatformResourceNotFoundEx
     public CashierNotFoundException(Long cashierId) {
         super(ERROR_MESSAGE_CODE, DEFAULT_ERROR_MESSAGE, cashierId);
     }
+
 }
