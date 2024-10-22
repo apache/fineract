@@ -25,6 +25,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
@@ -37,6 +39,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
 
 @Entity
+@Getter
 @Table(name = "m_note")
 public class Note extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
@@ -56,6 +59,7 @@ public class Note extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     @JoinColumn(name = "loan_transaction_id", nullable = true)
     private LoanTransaction loanTransaction;
 
+    @Setter
     @Column(name = "note", length = 1000)
     private String note;
 
@@ -119,7 +123,7 @@ public class Note extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         this.noteTypeId = NoteType.CLIENT.getValue();
     }
 
-    private Note(final Group group, final String note) {
+    public Note(final Group group, final String note) {
         this.group = group;
         this.note = note;
         this.client = null;
@@ -178,9 +182,5 @@ public class Note extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     public boolean isNotAgainstClientWithIdOf(final Long clientId) {
         return !this.client.identifiedBy(clientId);
-    }
-
-    public String getNote() {
-        return note;
     }
 }
