@@ -84,6 +84,7 @@ import org.apache.fineract.portfolio.loanaccount.exception.LoanChargeRefundExcep
 import org.apache.fineract.portfolio.loanaccount.exception.LoanDisbursalException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanRepaymentScheduleNotFoundException;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.jetbrains.annotations.NotNull;
@@ -778,7 +779,8 @@ public final class LoanTransactionValidator {
     }
 
     public void validateActivityNotBeforeLastTransactionDate(final Loan loan, final LocalDate activityDate, final LoanEvent event) {
-        if (!(loan.repaymentScheduleDetail().isInterestRecalculationEnabled() || loan.loanProduct().isHoldGuaranteeFunds())) {
+        if (!(loan.repaymentScheduleDetail().isInterestRecalculationEnabled() || loan.loanProduct().isHoldGuaranteeFunds())
+                || !loan.getLoanRepaymentScheduleDetail().getLoanScheduleType().equals(LoanScheduleType.CUMULATIVE)) {
             return;
         }
         LocalDate lastTransactionDate = loan.getLastUserTransactionDate();

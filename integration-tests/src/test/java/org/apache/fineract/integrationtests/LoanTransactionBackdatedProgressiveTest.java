@@ -105,4 +105,14 @@ public class LoanTransactionBackdatedProgressiveTest extends BaseLoanIntegration
         });
     }
 
+    @Test
+    public void testProgressiveBackdatedInterestPaymentWaiver() {
+        runAt("01 July 2024", () -> {
+            loanTransactionHelper.makeInterestPaymentWaiver(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+                    .transactionDate("5 June 2024").locale("en").transactionAmount(100.0));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            Assertions.assertTrue(loanDetails.getTransactions().size() >= 2);
+        });
+    }
 }
