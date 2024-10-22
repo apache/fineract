@@ -783,6 +783,38 @@
                 "null",
                 "boolean"
             ]
+        },
+        {
+            "default": null,
+            "name": "enableInstallmentLevelDelinquency",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "default": null,
+            "name": "enableDownPayment",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "default": null,
+            "name": "disbursedAmountPercentageForDownPayment",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "enableAutoRepaymentForDownPayment",
+            "type": [
+                "null",
+                "boolean"
+            ]
         }
     ]
 }

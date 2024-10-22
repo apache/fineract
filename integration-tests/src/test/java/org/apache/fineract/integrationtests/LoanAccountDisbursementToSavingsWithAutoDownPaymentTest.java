@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.apache.fineract.accounting.common.AccountingConstants;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
@@ -38,12 +39,16 @@ import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.SavingsAccountTransactionsSearchResponse;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
+import org.apache.fineract.infrastructure.event.external.service.validation.ExternalEventDTO;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
+import org.apache.fineract.integrationtests.common.ExternalEventConfigurationHelper;
 import org.apache.fineract.integrationtests.common.accounting.FinancialActivityAccountHelper;
+import org.apache.fineract.integrationtests.common.externalevents.ExternalEventHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -55,6 +60,8 @@ public class LoanAccountDisbursementToSavingsWithAutoDownPaymentTest extends Bas
     @Test
     public void loanDisbursementToSavingsWithAutoDownPaymentAndStandingInstructionsTest() {
         runAt("01 March 2023", () -> {
+            enableLoanBalanceChangedBusinessEvent();
+            ExternalEventHelper.deleteAllExternalEvents(requestSpec, createResponseSpecification(Matchers.is(204)));
 
             // loan external Id
             String loanExternalIdStr = UUID.randomUUID().toString();
@@ -103,6 +110,8 @@ public class LoanAccountDisbursementToSavingsWithAutoDownPaymentTest extends Bas
             // verify savings transactions
             verifySavingsTransactions(savingsAccountId, savingsAccountHelper);
 
+            verifyBusinessEvent();
+            disableLoanBalanceChangedBusinessEvent();
         });
     }
 
@@ -235,6 +244,37 @@ public class LoanAccountDisbursementToSavingsWithAutoDownPaymentTest extends Bas
 
         assertTrue(isTransactionFound, "No Transaction entries are posted");
 
+    }
+
+    private void enableLoanBalanceChangedBusinessEvent() {
+        final Map<String, Boolean> updatedConfigurations = ExternalEventConfigurationHelper.updateExternalEventConfigurations(requestSpec,
+                responseSpec, "{\"externalEventConfigurations\":{\"LoanBalanceChangedBusinessEvent\":true}}\n");
+        Assertions.assertEquals(updatedConfigurations.size(), 1);
+        Assertions.assertTrue(updatedConfigurations.containsKey("LoanBalanceChangedBusinessEvent"));
+        Assertions.assertTrue(updatedConfigurations.get("LoanBalanceChangedBusinessEvent"));
+    }
+
+    private void disableLoanBalanceChangedBusinessEvent() {
+        final Map<String, Boolean> updatedConfigurations = ExternalEventConfigurationHelper.updateExternalEventConfigurations(requestSpec,
+                responseSpec, "{\"externalEventConfigurations\":{\"LoanBalanceChangedBusinessEvent\":false}}\n");
+        Assertions.assertEquals(updatedConfigurations.size(), 1);
+        Assertions.assertTrue(updatedConfigurations.containsKey("LoanBalanceChangedBusinessEvent"));
+        Assertions.assertFalse(updatedConfigurations.get("LoanBalanceChangedBusinessEvent"));
+    }
+
+    private void verifyBusinessEvent() {
+        List<ExternalEventDTO> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+        String type = "LoanBalanceChangedBusinessEvent";
+
+        final Optional<ExternalEventDTO> optionalExternalEventDTO = allExternalEvents.stream().filter(event -> event.getType().equals(type))
+                .findFirst();
+        Assertions.assertTrue(optionalExternalEventDTO.isPresent());
+
+        final ExternalEventDTO externalEventDTO = optionalExternalEventDTO.get();
+        Assertions.assertEquals(externalEventDTO.getPayLoad().get("enableDownPayment"), Boolean.TRUE);
+        Assertions.assertEquals(externalEventDTO.getPayLoad().get("enableAutoRepaymentForDownPayment"), Boolean.TRUE);
+        Assertions.assertEquals(externalEventDTO.getPayLoad().get("disbursedAmountPercentageForDownPayment"),
+                DOWN_PAYMENT_PERCENTAGE.doubleValue());
     }
 
     /**
