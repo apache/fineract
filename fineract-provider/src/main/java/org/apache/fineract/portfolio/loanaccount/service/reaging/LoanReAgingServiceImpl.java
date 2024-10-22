@@ -55,6 +55,7 @@ import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFou
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
+import org.apache.fineract.portfolio.note.domain.NoteType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -191,7 +192,14 @@ public class LoanReAgingServiceImpl {
     private void persistNote(Loan loan, JsonCommand command, Map<String, Object> changes) {
         if (command.hasParameter("note")) {
             final String note = command.stringValueOfParameterNamed("note");
-            final Note newNote = Note.loanNote(loan, note);
+
+            final Note newNote = Note.builder() //
+                    .loan(loan) //
+                    .client(loan.client()) //
+                    .noteTypeId(NoteType.LOAN.getValue()) //
+                    .note(note) //
+                    .build();
+
             changes.put("note", note);
 
             this.noteRepository.saveAndFlush(newNote);

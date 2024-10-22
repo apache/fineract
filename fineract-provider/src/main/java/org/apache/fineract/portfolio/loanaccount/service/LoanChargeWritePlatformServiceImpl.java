@@ -132,6 +132,7 @@ import org.apache.fineract.portfolio.loanproduct.data.LoanOverdueDTO;
 import org.apache.fineract.portfolio.loanproduct.exception.LinkedAccountRequiredException;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
+import org.apache.fineract.portfolio.note.domain.NoteType;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
@@ -745,7 +746,14 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.loanNote(loan, noteText);
+
+            final Note note = Note.builder() //
+                    .loan(loan) //
+                    .client(loan.client()) //
+                    .noteTypeId(NoteType.LOAN.getValue()) //
+                    .note(noteText) //
+                    .build();
+
             changes.put("note", noteText);
             this.noteRepository.save(note);
         }

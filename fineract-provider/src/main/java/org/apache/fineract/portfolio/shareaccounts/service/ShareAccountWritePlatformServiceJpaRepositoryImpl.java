@@ -46,6 +46,7 @@ import org.apache.fineract.portfolio.account.service.AccountNumberGenerator;
 import org.apache.fineract.portfolio.accounts.constants.ShareAccountApiConstants;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
+import org.apache.fineract.portfolio.note.domain.NoteType;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionEnumData;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountChargePaidBy;
@@ -236,7 +237,12 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                 this.shareAccountRepository.save(account);
                 final String noteText = jsonCommand.stringValueOfParameterNamed("note");
                 if (StringUtils.isNotBlank(noteText)) {
-                    final Note note = Note.shareNote(account, noteText);
+                    final Note note = Note.builder() //
+                            .shareAccount(account) //
+                            .client(account.getClient()) //
+                            .noteTypeId(NoteType.SHARE_ACCOUNT.getValue()) //
+                            .note(noteText) //
+                            .build();
                     changes.put("note", noteText);
                     this.noteRepository.save(note);
                 }
@@ -279,7 +285,12 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                 this.shareAccountRepository.save(account);
                 final String noteText = jsonCommand.stringValueOfParameterNamed("note");
                 if (StringUtils.isNotBlank(noteText)) {
-                    final Note note = Note.shareNote(account, noteText);
+                    final Note note = Note.builder() //
+                            .shareAccount(account) //
+                            .client(account.getClient()) //
+                            .noteTypeId(NoteType.SHARE_ACCOUNT.getValue()) //
+                            .note(noteText) //
+                            .build();
                     changes.put("note", noteText);
                     this.noteRepository.save(note);
                 }
@@ -313,7 +324,12 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                 this.shareAccountRepository.save(account);
                 final String noteText = jsonCommand.stringValueOfParameterNamed("note");
                 if (StringUtils.isNotBlank(noteText)) {
-                    final Note note = Note.shareNote(account, noteText);
+                    final Note note = Note.builder() //
+                            .shareAccount(account) //
+                            .client(account.getClient()) //
+                            .noteTypeId(NoteType.SHARE_ACCOUNT.getValue()) //
+                            .note(noteText) //
+                            .build();
                     changes.put("note", noteText);
                     this.noteRepository.save(note);
                 }
@@ -474,7 +490,12 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                 this.shareAccountRepository.saveAndFlush(account);
                 final String noteText = jsonCommand.stringValueOfParameterNamed("note");
                 if (StringUtils.isNotBlank(noteText)) {
-                    final Note note = Note.shareNote(account, noteText);
+                    final Note note = Note.builder() //
+                            .shareAccount(account) //
+                            .client(account.getClient()) //
+                            .noteTypeId(NoteType.SHARE_ACCOUNT.getValue()) //
+                            .note(noteText) //
+                            .build();
                     changes.put("note", noteText);
                     this.noteRepository.save(note);
                 }
