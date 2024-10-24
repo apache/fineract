@@ -221,7 +221,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 .isGreaterThan(Money.of(originalEmi.getCurrency(), BigDecimal.valueOf(lowerHalfOfRelatedPeriods), mc));
 
         if (shouldBeAdjusted) {
-            Money adjustment = emiDifference.dividedBy(numberOfRelatedPeriods, mc.getRoundingMode(), mc);
+            Money adjustment = emiDifference.dividedBy(numberOfRelatedPeriods, mc);
             Money adjustedEqualMonthlyInstallmentValue = applyInstallmentAmountInMultiplesOf(scheduleModel,
                     originalEmi.plus(adjustment, mc));
             if (adjustedEqualMonthlyInstallmentValue.isEqualTo(originalEmi)) {

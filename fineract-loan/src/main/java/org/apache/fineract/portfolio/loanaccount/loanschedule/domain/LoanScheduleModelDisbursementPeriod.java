@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
+import lombok.Getter;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanInterestRecalcualtionAdditionalDetails;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
@@ -28,6 +29,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleP
 /**
  * Domain representation of a Loan Schedule Disbursement Period (not used for persistence)
  */
+@Getter
 public final class LoanScheduleModelDisbursementPeriod implements LoanScheduleModelPeriod {
 
     @SuppressWarnings("unused")

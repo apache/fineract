@@ -463,13 +463,7 @@ public final class MathUtil {
      * @return
      */
     public static BigDecimal percentageOf(final BigDecimal value, final BigDecimal percentage, final int precision) {
-        BigDecimal percentageOf = BigDecimal.ZERO;
-        if (isGreaterThanZero(value)) {
-            final MathContext mc = new MathContext(precision, MoneyHelper.getRoundingMode());
-            final BigDecimal multiplicand = percentage.divide(BigDecimal.valueOf(100L), mc);
-            percentageOf = value.multiply(multiplicand, mc);
-        }
-        return percentageOf;
+        return percentageOf(value, percentage, new MathContext(precision, MoneyHelper.getRoundingMode()));
     }
 
     /**

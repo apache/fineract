@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -30,16 +31,20 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleP
 /**
  * Domain representation of a Loan Schedule (not used for persistence)
  */
+@Getter
 public final class LoanScheduleModel {
 
+    @Getter
     private final List<LoanScheduleModelPeriod> periods;
     private final ApplicationCurrency applicationCurrency;
     private final int loanTermInDays;
     private final Money totalPrincipalDisbursed;
     private final BigDecimal totalPrincipalExpected;
     private final BigDecimal totalPrincipalPaid;
+    @Getter
     private final BigDecimal totalInterestCharged;
     private final BigDecimal totalFeeChargesCharged;
+    @Getter
     private final BigDecimal totalPenaltyChargesCharged;
     private final BigDecimal totalRepaymentExpected;
     private final BigDecimal totalOutstanding;
@@ -112,18 +117,6 @@ public final class LoanScheduleModel {
                 this.totalPrincipalExpected, this.totalPrincipalPaid, this.totalInterestCharged, this.totalFeeChargesCharged,
                 this.totalPenaltyChargesCharged, totalWaived, totalWrittenOff, this.totalRepaymentExpected, totalRepayment,
                 totalPaidInAdvance, totalPaidLate, this.totalOutstanding, totalCredits);
-    }
-
-    public List<LoanScheduleModelPeriod> getPeriods() {
-        return this.periods;
-    }
-
-    public BigDecimal getTotalPenaltyChargesCharged() {
-        return this.totalPenaltyChargesCharged;
-    }
-
-    public BigDecimal getTotalInterestCharged() {
-        return this.totalInterestCharged;
     }
 
 }

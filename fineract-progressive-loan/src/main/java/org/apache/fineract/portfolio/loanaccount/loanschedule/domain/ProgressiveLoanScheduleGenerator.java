@@ -45,6 +45,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.imp
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleModelDownPaymentPeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleParams;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePlan;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.PayableDetails;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.ProgressiveLoanInterestScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.exception.MultiDisbursementOutstandingAmoutException;
@@ -165,11 +166,10 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
                 scheduleParams.getTotalRepaymentExpected().getAmount(), totalOutstanding);
     }
 
-    public LoanScheduleModel generate(final MathContext mc, final LoanRepaymentScheduleModelData modelData) {
+    public LoanSchedulePlan generate(final MathContext mc, final LoanRepaymentScheduleModelData modelData) {
 
         LoanApplicationTerms loanApplicationTerms = LoanApplicationTerms.assembleFrom(modelData, mc);
-
-        return generate(mc, loanApplicationTerms, null, null);
+        return LoanSchedulePlan.from(generate(mc, loanApplicationTerms, null, null));
     }
 
     private void prepareDisbursementsOnLoanApplicationTerms(final LoanApplicationTerms loanApplicationTerms) {
@@ -221,22 +221,22 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
             Money downPaymentAmount = Money.zero(loanApplicationTerms.getCurrency(), mc);
             if (loanApplicationTerms.isDownPaymentEnabled()) {
                 downPaymentAmount = Money.of(loanApplicationTerms.getCurrency(), MathUtil.percentageOf(disbursedAmount.getAmount(),
-                        loanApplicationTerms.getDisbursedAmountPercentageForDownPayment(), 19));
+                        loanApplicationTerms.getDisbursedAmountPercentageForDownPayment(), mc), mc);
                 if (loanApplicationTerms.getInstallmentAmountInMultiplesOf() != null) {
                     downPaymentAmount = Money.roundToMultiplesOf(downPaymentAmount,
-                            loanApplicationTerms.getInstallmentAmountInMultiplesOf());
+                            loanApplicationTerms.getInstallmentAmountInMultiplesOf(), mc);
                 }
 
                 LoanScheduleModelDownPaymentPeriod downPaymentPeriod = LoanScheduleModelDownPaymentPeriod.downPayment(
                         scheduleParams.getInstalmentNumber(), disbursementDate, downPaymentAmount,
-                        outstandingBalance.plus(disbursedAmount).minus(downPaymentAmount));
+                        outstandingBalance.plus(disbursedAmount, mc).minus(downPaymentAmount, mc));
                 periods.add(downPaymentPeriod);
 
                 scheduleParams.addTotalRepaymentExpected(downPaymentAmount);
                 scheduleParams.incrementInstalmentNumber();
             }
 
-            final Money disbursementRemainingBalance = disbursedAmount.minus(downPaymentAmount);
+            final Money disbursementRemainingBalance = disbursedAmount.minus(downPaymentAmount, mc);
             scheduleParams.addPrincipalToBeScheduled(disbursementRemainingBalance);
             emiCalculator.addDisbursement(interestScheduleModel, disbursementDate, disbursementRemainingBalance);
         }

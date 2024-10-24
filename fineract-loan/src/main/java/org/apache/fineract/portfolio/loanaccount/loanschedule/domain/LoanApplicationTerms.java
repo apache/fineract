@@ -248,9 +248,20 @@ public final class LoanApplicationTerms {
         this.fixedLength = builder.fixedLength;
         this.inArrearsTolerance = builder.inArrearsTolerance;
         this.disbursementDatas = builder.disbursementDatas;
-        this.downPaymentAmount = builder.downPaymentAmount;
         this.submittedOnDate = builder.submittedOnDate;
         this.seedDate = builder.seedDate;
+        this.isDownPaymentEnabled = builder.isDownPaymentEnabled;
+        this.disbursedAmountPercentageForDownPayment = builder.downPaymentPercentage;
+        if (isDownPaymentEnabled) {
+            this.downPaymentAmount = Money.of(getCurrency(),
+                    MathUtil.percentageOf(getPrincipal().getAmount(), getDisbursedAmountPercentageForDownPayment(), builder.mc),
+                    builder.mc);
+            if (getInstallmentAmountInMultiplesOf() != null) {
+                this.downPaymentAmount = Money.roundToMultiplesOf(this.downPaymentAmount, getInstallmentAmountInMultiplesOf(), builder.mc);
+            }
+        } else {
+            this.downPaymentAmount = Money.zero(getCurrency(), builder.mc);
+        }
     }
 
     public static class Builder {
@@ -273,9 +284,11 @@ public final class LoanApplicationTerms {
         private Integer fixedLength;
         private Money inArrearsTolerance;
         private List<DisbursementData> disbursementDatas;
-        private Money downPaymentAmount;
+        private BigDecimal downPaymentPercentage;
+        private boolean isDownPaymentEnabled;
         private LocalDate submittedOnDate;
         private LocalDate seedDate;
+        private MathContext mc;
 
         public Builder currency(ApplicationCurrency currency) {
             this.currency = currency;
@@ -362,8 +375,8 @@ public final class LoanApplicationTerms {
             return this;
         }
 
-        public Builder downPaymentAmount(Money downPaymentAmount) {
-            this.downPaymentAmount = downPaymentAmount;
+        public Builder downPaymentPercentage(BigDecimal downPaymentPercentage) {
+            this.downPaymentPercentage = downPaymentPercentage;
             return this;
         }
 
@@ -377,6 +390,16 @@ public final class LoanApplicationTerms {
             return this;
         }
 
+        public Builder isDownPaymentEnabled(boolean isDownPaymentEnabled) {
+            this.isDownPaymentEnabled = isDownPaymentEnabled;
+            return this;
+        }
+
+        public Builder mc(MathContext mc) {
+            this.mc = mc;
+            return this;
+        }
+
         public LoanApplicationTerms build() {
             return new LoanApplicationTerms(this);
         }
@@ -384,15 +407,7 @@ public final class LoanApplicationTerms {
 
     public static LoanApplicationTerms assembleFrom(LoanRepaymentScheduleModelData modelData, MathContext mc) {
         Money principal = Money.of(modelData.currency().toData(), modelData.disbursementAmount(), mc);
-        Money downPaymentAmount = Money.zero(modelData.currency().toData(), mc);
-
-        if (modelData.downPaymentEnabled()) {
-            downPaymentAmount = Money.of(modelData.currency().toData(),
-                    MathUtil.percentageOf(principal.getAmount(), modelData.disbursementAmount(), mc), mc);
-            if (modelData.installmentAmountInMultiplesOf() != null) {
-                downPaymentAmount = Money.roundToMultiplesOf(downPaymentAmount, modelData.installmentAmountInMultiplesOf(), mc);
-            }
-        }
+        BigDecimal downPaymentPercentage = modelData.downPaymentPercentage();
 
         LocalDate seedDate;
 
@@ -412,7 +427,8 @@ public final class LoanApplicationTerms {
                 .expectedDisbursementDate(modelData.disbursementDate()).repaymentsStartingFromDate(modelData.scheduleGenerationStartDate())
                 .daysInMonthType(modelData.daysInMonth()).daysInYearType(modelData.daysInYear()).fixedLength(modelData.fixedLength())
                 .inArrearsTolerance(Money.zero(modelData.currency().toData(), mc)).disbursementDatas(new ArrayList<>())
-                .downPaymentAmount(downPaymentAmount).submittedOnDate(modelData.scheduleGenerationStartDate()).seedDate(seedDate).build();
+                .isDownPaymentEnabled(modelData.downPaymentEnabled()).downPaymentPercentage(downPaymentPercentage)
+                .submittedOnDate(modelData.scheduleGenerationStartDate()).seedDate(seedDate).mc(mc).build();
     }
 
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency currency, final Integer loanTermFrequency,
@@ -679,7 +695,7 @@ public final class LoanApplicationTerms {
         } else if (this.actualFixedEmiAmount != null) {
             final Money difference = this.principal.minus(totalCumulativePrincipalToDate);
             final Money principalThreshold = principalForPeriod.multipliedBy(this.principalThresholdForLastInstalment).dividedBy(100,
-                    MoneyHelper.getRoundingMode());
+                    MoneyHelper.getMathContext());
             if (difference.isLessThan(principalThreshold)) {
                 adjusted = principalForPeriod.plus(difference.abs());
             }
@@ -734,8 +750,7 @@ public final class LoanApplicationTerms {
 
                 final Money totalInterestPerInstallment = calculateTotalInterestPerInstallmentWithoutGrace(calculator, mc);
 
-                final Money totalGraceOnInterestCharged = totalInterestPerInstallment.multiplyRetainScale(getInterestChargingGrace(),
-                        mc.getRoundingMode());
+                final Money totalGraceOnInterestCharged = totalInterestPerInstallment.multiplyRetainScale(getInterestChargingGrace(), mc);
 
                 totalInterestCharged = totalInterestChargedForLoanTerm.minus(totalGraceOnInterestCharged);
             break;
@@ -901,7 +916,7 @@ public final class LoanApplicationTerms {
             case FLAT:
                 final BigDecimal interestRateForLoanTerm = calculateFlatInterestRateForLoanTerm(calculator, mc);
                 totalInterestDue = this.disbursedPrincipal.minus(totalPrincipalAccountedForInterestCalcualtion)
-                        .multiplyRetainScale(interestRateForLoanTerm, mc.getRoundingMode());
+                        .multiplyRetainScale(interestRateForLoanTerm, mc);
 
             break;
             case DECLINING_BALANCE:
@@ -1041,12 +1056,12 @@ public final class LoanApplicationTerms {
     }
 
     private Money flatInterestPerInstallment(final MathContext mc, final Money totalInterestForLoanTerm) {
-        Money interestPerInstallment = totalInterestForLoanTerm.dividedBy(
-                Long.valueOf(this.actualNumberOfRepayments) - defaultToZeroIfNull(this.excludePeriodsForCalculation), mc.getRoundingMode());
+        Money interestPerInstallment = totalInterestForLoanTerm
+                .dividedBy(Long.valueOf(this.actualNumberOfRepayments) - defaultToZeroIfNull(this.excludePeriodsForCalculation), mc);
         if (this.excludePeriodsForCalculation < this.periodsCompleted) {
             Money interestLeft = this.totalInterestDue.minus(this.totalInterestAccounted);
-            interestPerInstallment = interestLeft.dividedBy(
-                    Long.valueOf(this.actualNumberOfRepayments) - defaultToZeroIfNull(this.periodsCompleted), mc.getRoundingMode());
+            interestPerInstallment = interestLeft
+                    .dividedBy(Long.valueOf(this.actualNumberOfRepayments) - defaultToZeroIfNull(this.periodsCompleted), mc);
         }
 
         return interestPerInstallment;
@@ -1059,19 +1074,17 @@ public final class LoanApplicationTerms {
         if (getFixedEmiAmount() == null) {
             if (this.fixedPrincipalPercentagePerInstallment != null) {
                 principalPerPeriod = this.principal.minus(totalPrincipalAccounted)
-                        .percentageOf(this.fixedPrincipalPercentagePerInstallment, mc.getRoundingMode())
-                        .plus(this.adjustPrincipalForFlatLoans);
+                        .percentageOf(this.fixedPrincipalPercentagePerInstallment, mc).plus(this.adjustPrincipalForFlatLoans);
             } else {
-                principalPerPeriod = this.principal.minus(totalPrincipalAccounted)
-                        .dividedBy(totalRepaymentsWithCapitalPayment, mc.getRoundingMode()).plus(this.adjustPrincipalForFlatLoans);
+                principalPerPeriod = this.principal.minus(totalPrincipalAccounted).dividedBy(totalRepaymentsWithCapitalPayment, mc)
+                        .plus(this.adjustPrincipalForFlatLoans);
             }
             if (isPrincipalGraceApplicableForThisPeriod(periodNumber)) {
                 principalPerPeriod = principalPerPeriod.zero();
             }
             if (!isPrincipalGraceApplicableForThisPeriod(periodNumber) && currentPeriodFixedPrincipalAmount != null) {
-                this.adjustPrincipalForFlatLoans = this.adjustPrincipalForFlatLoans
-                        .plus(principalPerPeriod.minus(currentPeriodFixedPrincipalAmount)
-                                .dividedBy(this.actualNumberOfRepayments - periodNumber, mc.getRoundingMode()));
+                this.adjustPrincipalForFlatLoans = this.adjustPrincipalForFlatLoans.plus(principalPerPeriod
+                        .minus(currentPeriodFixedPrincipalAmount).dividedBy(this.actualNumberOfRepayments - periodNumber, mc));
                 principalPerPeriod = this.principal.zero().plus(currentPeriodFixedPrincipalAmount);
 
             }
@@ -1146,13 +1159,12 @@ public final class LoanApplicationTerms {
 
             Integer interestPaymentDuePeriods = calculateNumberOfRemainingInterestPaymentPeriods(this.actualNumberOfRepayments,
                     this.excludePeriodsForCalculation);
-            interestForInstallment = realTotalInterestForLoan.dividedBy(BigDecimal.valueOf(interestPaymentDuePeriods),
-                    mc.getRoundingMode());
+            interestForInstallment = realTotalInterestForLoan.dividedBy(BigDecimal.valueOf(interestPaymentDuePeriods), mc);
             if (this.excludePeriodsForCalculation < this.periodsCompleted) {
                 Money interestLeft = this.totalInterestDue.minus(this.totalInterestAccounted);
                 Integer interestDuePeriods = calculateNumberOfRemainingInterestPaymentPeriods(this.actualNumberOfRepayments,
                         this.periodsCompleted);
-                interestForInstallment = interestLeft.dividedBy(Long.valueOf(interestDuePeriods), mc.getRoundingMode());
+                interestForInstallment = interestLeft.dividedBy(Long.valueOf(interestDuePeriods), mc);
             }
             if (!this.periodNumbersApplicableForInterestGrace.isEmpty()) {
                 int periodsElapsed = calculateLastInterestGracePeriod(periodNumber);
@@ -1160,7 +1172,7 @@ public final class LoanApplicationTerms {
                     Money interestLeft = this.totalInterestDue.minus(this.totalInterestAccounted);
                     Integer interestDuePeriods = calculateNumberOfRemainingInterestPaymentPeriods(this.actualNumberOfRepayments,
                             periodsElapsed);
-                    interestForInstallment = interestLeft.dividedBy(Long.valueOf(interestDuePeriods), mc.getRoundingMode());
+                    interestForInstallment = interestLeft.dividedBy(Long.valueOf(interestDuePeriods), mc);
                 }
             }
 
@@ -1416,7 +1428,7 @@ public final class LoanApplicationTerms {
 
         final BigDecimal periodicInterestRate = periodicInterestRate(calculator, mc, this.daysInMonthType, this.daysInYearType,
                 periodStartDate, periodEndDate);// 0.021232877 ob:14911.64
-        interestDue = outstandingBalance.multiplyRetainScale(periodicInterestRate, mc.getRoundingMode());
+        interestDue = outstandingBalance.multiplyRetainScale(periodicInterestRate, mc);
 
         return interestDue;
     }
@@ -1463,11 +1475,11 @@ public final class LoanApplicationTerms {
         if (this.fixedPrincipalAmount == null) {
             final Integer numberOfPrincipalPaymentPeriods = calculateNumberOfRemainingPrincipalPaymentPeriods(this.actualNumberOfRepayments,
                     periodNumber);
-            principal = this.principal.dividedBy(numberOfPrincipalPaymentPeriods, mc.getRoundingMode());
+            principal = this.principal.dividedBy(numberOfPrincipalPaymentPeriods, mc);
             this.fixedPrincipalAmount = principal.getAmount();
         }
         if (this.fixedPrincipalPercentagePerInstallment != null) {
-            principal = this.principal.percentageOf(this.fixedPrincipalPercentagePerInstallment, mc.getRoundingMode());
+            principal = this.principal.percentageOf(this.fixedPrincipalPercentagePerInstallment, mc);
         } else {
             principal = Money.of(getCurrency(), getFixedPrincipalAmount());
         }
@@ -1480,7 +1492,7 @@ public final class LoanApplicationTerms {
     public void updateFixedPrincipalAmount(final MathContext mc, final int periodNumber, final Money outstandingAmount) {
         final Integer numberOfPrincipalPaymentPeriods = calculateNumberOfRemainingPrincipalPaymentPeriods(this.actualNumberOfRepayments,
                 periodNumber - 1);
-        Money principal = outstandingAmount.dividedBy(numberOfPrincipalPaymentPeriods, mc.getRoundingMode());
+        Money principal = outstandingAmount.dividedBy(numberOfPrincipalPaymentPeriods, mc);
         this.fixedPrincipalAmount = principal.getAmount();
     }
 
