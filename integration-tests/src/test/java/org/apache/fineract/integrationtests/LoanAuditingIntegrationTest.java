@@ -35,7 +35,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -93,12 +92,12 @@ public class LoanAuditingIntegrationTest {
         final Account expenseAccount = this.accountHelper.createExpenseAccount();
         final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
 
-        final Integer loanProductID = createLoanProduct("0", "0", LoanProductTestBuilder.DEFAULT_STRATEGY, "2", assetAccount, incomeAccount,
-                expenseAccount, overpaymentAccount);
+        final Integer loanProductID = this.loanTransactionHelper.createLoanProduct("0", "0", LoanProductTestBuilder.DEFAULT_STRATEGY, "2",
+                assetAccount, incomeAccount, expenseAccount, overpaymentAccount);
         OffsetDateTime now = Utils.getAuditDateTimeToCompare();
 
-        final Integer loanID = applyForLoanApplicationWithPaymentStrategyAndPastMonth(clientID, loanProductID, Collections.emptyList(),
-                null, "10000", LoanApplicationTestBuilder.DEFAULT_STRATEGY, "10 July 2022", "11 July 2022");
+        final Integer loanID = this.loanTransactionHelper.applyForLoanApplicationWithPaymentStrategyAndPastMonth(clientID, loanProductID,
+                Collections.emptyList(), null, "10000", LoanApplicationTestBuilder.DEFAULT_STRATEGY, "10 July 2022", "11 July 2022");
         Assertions.assertNotNull(loanID);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
@@ -141,45 +140,4 @@ public class LoanAuditingIntegrationTest {
         assertEquals(userId, auditFieldsResponse.get(LAST_MODIFIED_BY));
         assertTrue(DateUtils.isEqual(now2, lastModifiedDate, ChronoUnit.MINUTES));
     }
-
-    private Integer applyForLoanApplicationWithPaymentStrategyAndPastMonth(final Integer clientID, final Integer loanProductID,
-            List<HashMap> charges, final String savingsId, String principal, final String repaymentStrategy, final String submittedOnDate,
-            final String disbursementDate) {
-        LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
-
-        final String loanApplicationJSON = new LoanApplicationTestBuilder() //
-                .withPrincipal(principal) //
-                .withLoanTermFrequency("6") //
-                .withLoanTermFrequencyAsMonths() //
-                .withNumberOfRepayments("6") //
-                .withRepaymentEveryAfter("1") //
-                .withRepaymentFrequencyTypeAsMonths() //
-                .withInterestRatePerPeriod("2") //
-                .withAmortizationTypeAsEqualInstallments() //
-                .withInterestTypeAsFlatBalance() //
-                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
-                .withExpectedDisbursementDate(disbursementDate) //
-                .withSubmittedOnDate(submittedOnDate) //
-                .withRepaymentStrategy(repaymentStrategy) //
-                .withCharges(charges).build(clientID.toString(), loanProductID.toString(), savingsId);
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
-    }
-
-    private Integer createLoanProduct(final String inMultiplesOf, final String digitsAfterDecimal, final String repaymentStrategy,
-            final String accountingRule, final Account... accounts) {
-        LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("10000000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withRepaymentStrategy(repaymentStrategy) //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .currencyDetails(digitsAfterDecimal, inMultiplesOf).withAccounting(accountingRule, accounts).build(null);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
-    }
-
 }

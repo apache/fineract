@@ -32,6 +32,7 @@ import org.apache.fineract.infrastructure.jobs.exception.LoanIdsHardLockedExcept
 import org.apache.fineract.useradministration.exception.UnAuthenticatedUserException;
 import org.apache.http.HttpStatus;
 import org.springframework.context.annotation.Conditional;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @RequiredArgsConstructor
@@ -84,7 +85,7 @@ public class LoanCOBApiFilter extends OncePerRequestFilter {
                     }
                 }
             } catch (UnAuthenticatedUserException e) {
-                Reject.reject(null, HttpStatus.SC_UNAUTHORIZED).toServletResponse(response);
+                throw new AuthenticationCredentialsNotFoundException("Not Authenticated", e);
             }
         }
     }
