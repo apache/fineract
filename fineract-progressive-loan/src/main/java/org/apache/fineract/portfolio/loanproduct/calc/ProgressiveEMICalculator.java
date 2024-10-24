@@ -84,7 +84,23 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         scheduleModel
                 .changeOutstandingBalanceAndUpdateInterestPeriods(disbursementDueDate, disbursedAmount,
                         Money.zero(disbursedAmount.getCurrency(), scheduleModel.mc()))
-                .ifPresent((repaymentPeriod) -> calculateEMIValueAndRateFactors(repaymentPeriod.getDueDate(), scheduleModel));
+                .ifPresent((repaymentPeriod) -> calculateEMIValueAndRateFactors(
+                        getEffectiveRepaymentDueDate(scheduleModel, repaymentPeriod, disbursementDueDate), scheduleModel));
+    }
+
+    private LocalDate getEffectiveRepaymentDueDate(final ProgressiveLoanInterestScheduleModel scheduleModel,
+            final RepaymentPeriod changedRepaymentPeriod, final LocalDate disbursementDueDate) {
+        final boolean isRelatedToNextRepaymentPeriod = changedRepaymentPeriod.getDueDate().isEqual(disbursementDueDate);
+        if (isRelatedToNextRepaymentPeriod) {
+            final Optional<RepaymentPeriod> nextRepaymentPeriod = scheduleModel.repaymentPeriods().stream()
+                    .filter(repaymentPeriod -> changedRepaymentPeriod.equals(repaymentPeriod.getPrevious().orElse(null))).findFirst();
+            if (nextRepaymentPeriod.isPresent()) {
+                return nextRepaymentPeriod.get().getDueDate();
+            }
+            // Currently N+1 scenario is not supported. Disbursement on Last Repayment due date affects the last
+            // repayment period.
+        }
+        return changedRepaymentPeriod.getDueDate();
     }
 
     @Override
