@@ -66,6 +66,7 @@ public class LoanProductsRequestFactory {
     public static final String NAME_PREFIX_INTEREST_FLAT_LP2 = "LP2InterestFlat-";
     public static final String NAME_PREFIX_INTEREST_DECLINING = "LP1InterestDeclining-";
     public static final String NAME_PREFIX_INTEREST_DECLINING_RECALCULATION = "LP1InterestDecliningRecalculation-";
+    public static final String NAME_PREFIX_INTEREST_RECALCULATION_WITH_DOWN_PAYMENT_LP3 = "LP3InterestRecalculationWithDownPayment-";
     public static final String NAME_PREFIX_LP2_EMI = "LP2Emi-";
     public static final String SHORT_NAME_PREFIX = "p";
     public static final String SHORT_NAME_PREFIX_INTEREST = "i";
@@ -94,8 +95,11 @@ public class LoanProductsRequestFactory {
     public static final String TRANSACTION_PROCESSING_STRATEGY_CODE = TransactionProcessingStrategyCode.PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER.value;
     public static final String TRANSACTION_PROCESSING_STRATEGY_CODE_ADVANCED = TransactionProcessingStrategyCode.ADVANCED_PAYMENT_ALLOCATION.value;
     public static final Integer DAYS_IN_YEAR_TYPE = DaysInYearType.ACTUAL.value;
+    public static final Integer DAYS_IN_YEAR_TYPE_360 = DaysInYearType.DAYS360.value;
     public static final Integer DAYS_IN_MONTH_TYPE = DaysInMonthType.ACTUAL.value;
+    public static final Integer DAYS_IN_MONTH_TYPE_30 = DaysInMonthType.DAYS30.value;
     public static final Integer LOAN_ACCOUNTING_RULE = AccountingRule.ACCRUAL_PERIODIC.value;
+    public static final Integer LOAN_ACCOUNTING_RULE_NONE = AccountingRule.NONE.value;
     public static final String OVER_APPLIED_CALCULATION_TYPE = "percentage";
     public static final Integer OVER_APPLIED_NUMBER = 50;
     public static final Integer DELINQUENCY_BUCKET_ID = DelinquencyBucket.BASIC_DELINQUENCY_BUCKET.value;
@@ -655,6 +659,38 @@ public class LoanProductsRequestFactory {
                 .interestRecalculationCompoundingMethod(INTEREST_RECALCULATION_COMPOUND_METHOD_NONE)//
                 .recalculationRestFrequencyType(FREQUENCY_FOR_RECALCULATE_OUTSTANDING_DAILY)//
                 .recalculationRestFrequencyInterval(1);//
+    }
+
+    public PostLoanProductsRequest defaultLoanProductsRequestLP2InterestDailyRecalculationWithDownPayment() {
+        final String name = Utils.randomNameGenerator(NAME_PREFIX_INTEREST_RECALCULATION_WITH_DOWN_PAYMENT_LP3, 4);
+        final String shortName = Utils.randomNameGenerator(SHORT_NAME_PREFIX_INTEREST, 3);
+
+        return new PostLoanProductsRequest().name(name).shortName(shortName)
+                .description(DESCRIPTION_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE).startDate(null).closeDate(null)
+                .accountMovesOutOfNPAOnlyOnArrearsCompletion(false).accountingRule(LOAN_ACCOUNTING_RULE_NONE)
+                .allowApprovedDisbursedAmountsOverApplied(true)
+                .allowAttributeOverrides(new AllowAttributeOverrides().amortizationType(true).interestType(true)
+                        .transactionProcessingStrategyCode(true).interestCalculationPeriodType(true).inArrearsTolerance(true)
+                        .repaymentEvery(true).graceOnPrincipalAndInterestPayment(true).graceOnArrearsAgeing(true))
+                .allowPartialPeriodInterestCalcualtion(false).allowVariableInstallments(false).amortizationType(AMORTIZATION_TYPE)
+                .canDefineInstallmentAmount(true).canUseForTopup(false).charges(new ArrayList<>()).creditAllocation(new ArrayList<>())
+                .currencyCode(CURRENCY_CODE).dateFormat(DATE_FORMAT).daysInMonthType(DAYS_IN_MONTH_TYPE_30)
+                .daysInYearType(DAYS_IN_YEAR_TYPE_360).delinquencyBucketId(DELINQUENCY_BUCKET_ID.longValue()).digitsAfterDecimal(2)
+                .disallowExpectedDisbursements(true).dueDaysForRepaymentEvent(1).enableDownPayment(false)
+                .enableInstallmentLevelDelinquency(true).fixedLength(null).holdGuaranteeFunds(false).inMultiplesOf(0)
+                .includeInBorrowerCycle(false).interestCalculationPeriodType(0).interestRateFrequencyType(3).interestRatePerPeriod(9.99)
+                .interestRateVariationsForBorrowerCycle(new ArrayList<>()).interestRecalculationCompoundingMethod(0).interestType(0)
+                .isArrearsBasedOnOriginalSchedule(false).isEqualAmortization(false).isInterestRecalculationEnabled(true)
+                .isLinkedToFloatingInterestRates(false).loanScheduleProcessingType("HORIZONTAL").loanScheduleType("PROGRESSIVE")
+                .locale(LOCALE_EN).maxInterestRatePerPeriod((double) 50).maxNumberOfRepayments(48).maxPrincipal((double) 10000)
+                .maxTrancheCount(10).minInterestRatePerPeriod((double) 0).minNumberOfRepayments(1).minPrincipal((double) 1)
+                .multiDisburseLoan(true).numberOfRepaymentVariationsForBorrowerCycle(new ArrayList<>()).numberOfRepayments(3)
+                .outstandingLoanBalance((double) 10000).overAppliedCalculationType("flat").overAppliedNumber(10000)
+                .overDueDaysForRepaymentEvent(2).preClosureInterestCalculationStrategy(1).principal((double) 40)
+                .principalThresholdForLastInstallment(50).principalVariationsForBorrowerCycle(new ArrayList<>())
+                .recalculationRestFrequencyInterval(1).recalculationRestFrequencyType(2).repaymentEvery(1).repaymentFrequencyType(2L)
+                .repaymentStartDateType(2).rescheduleStrategyMethod(4).supportedInterestRefundTypes(new ArrayList<>())
+                .transactionProcessingStrategyCode(TRANSACTION_PROCESSING_STRATEGY_CODE_ADVANCED).useBorrowerCycle(false);
     }
 
     public PostLoanProductsRequest defaultLoanProductsRequestLP2() {

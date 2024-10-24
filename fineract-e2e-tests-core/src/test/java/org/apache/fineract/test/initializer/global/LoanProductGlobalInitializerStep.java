@@ -548,6 +548,36 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .createLoanProduct(loanProductsRequestLP2AdvPmtAllocProgressiveLoanScheduleHorizontal).execute();
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL,
                 responseLP2AdvPmtAllocProgressiveLoanScheduleHorizontal);
+
+        // LP2 with Down-payment + advanced custom payment allocation + progressive loan schedule + horizontal
+        // (LP2_DOWNPAYMENT_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL)
+        String name44 = DefaultLoanProduct.LP2_ADV_CUST_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL.getName();
+
+        PostLoanProductsRequest loanProductsRequestAdvCustomPaymentAllocationProgressiveLoanSchedule = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2InterestDailyRecalculationWithDownPayment()//
+                .name(name44)//
+                .paymentAllocation(List.of(//
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT",
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.PAST_DUE_INTEREST, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.PAST_DUE_PRINCIPAL, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.PAST_DUE_PENALTY, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.PAST_DUE_FEE, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.DUE_INTEREST, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.DUE_PRINCIPAL, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.DUE_PENALTY, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.DUE_FEE, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_INTEREST, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_PRINCIPAL, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_PENALTY, //
+                                LoanProductPaymentAllocationRule.AllocationTypesEnum.IN_ADVANCE_FEE), //
+                        createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                        createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                        createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
+        Response<PostLoanProductsResponse> responseLoanProductsRequestAdvCustomPaymentAllocationProgressiveLoanSchedule = loanProductsApi
+                .createLoanProduct(loanProductsRequestAdvCustomPaymentAllocationProgressiveLoanSchedule).execute();
+        TestContext.INSTANCE.set(
+                TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADVANCED_CUSTOM_PAYMENT_ALLOCATION_PROGRESSIVE_LOAN_SCHEDULE,
+                responseLoanProductsRequestAdvCustomPaymentAllocationProgressiveLoanSchedule);
     }
 
     public static AdvancedPaymentData createPaymentAllocation(String transactionType, String futureInstallmentAllocationRule,

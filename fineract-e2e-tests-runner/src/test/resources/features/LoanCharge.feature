@@ -109,7 +109,6 @@ Feature: LoanCharge
     Then Loan has 260 outstanding amount
 
 #    TODO clear, make it work properly
-  @Skip
   Scenario: Charge adjustment works properly
     When Admin sets the business date to "22 October 2022"
     When Admin creates a client with random data
@@ -147,7 +146,7 @@ Feature: LoanCharge
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 1000          | 0        | 0    | 10        | 1010 | 3    | 3          | 0    | 1007        |
-    Then Loan Transactions tab has a transaction with date: "23 October 2022", and with the following data:
+    Then Loan Transactions tab has a transaction with date: "04 November 2022", and with the following data:
       | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | Charge Adjustment | 3.0    | 0.0       | 0.0      | 0.0  | 3.0       | 1000.0       |
 
@@ -163,7 +162,7 @@ Feature: LoanCharge
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 1000          | 0        | 0    | 10        | 1010 | 11   | 11         | 0    | 999         |
-    Then Loan Transactions tab has a transaction with date: "25 October 2022", and with the following data:
+    Then Loan Transactions tab has a transaction with date: "04 November 2022", and with the following data:
       | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | Charge Adjustment | 3.0    | 1.0       | 0.0      | 0.0  | 2.0       | 999.0        |
 
@@ -1673,3 +1672,39 @@ Feature: LoanCharge
     Then Loan Charges tab has the following data:
       | Name    | isPenalty | Payment due at     | Due as of        | Calculation type | Due   | Paid | Waived | Outstanding |
       | NSF fee | true      | Specified due date | 22 February 2023 | Flat             | 100.0 | 0.0  | 100.0  | 0.0         |
+
+  Scenario: Verify that there are no payable interest after charge adjustment made on the same date for progressive loan with custom payment allocation order
+    When Admin sets the business date to "27 September 2024"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_CUST_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 27 Sep 2024       | 100            | 9.99                   | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "27 September 2024" with "40" amount and expected disbursement date on "27 September 2024"
+    When Admin successfully disburse the loan on "27 September 2024" with "40" EUR transaction amount
+    Then Loan Repayment schedule has 1 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date          | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 27 September 2024 |                    | 40.0            |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 30   | 27 October 2024   |                    | 0.0             | 40.0          | 0.33     | 0.0  | 0.0       | 40.33 | 0.0   | 0.0        | 0.0  | 40.33       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      | 40.0          | 0.33     | 0.0  | 0.0       | 40.33 | 0.0   | 0.0        | 0.0  | 40.33       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 27 September 2024 | Disbursement     | 40.0   | 0.0       | 0.0      | 0.0  | 0.0       | 40.0         |
+      | 27 September 2024 | Accrual          | 0.33   | 0.0       | 0.33     | 0.0  | 0.0       | 0.0          |
+    When Admin adds "LOAN_NSF_FEE" due date charge with "27 September 2024" due date and 1 EUR transaction amount
+    When Admin makes a charge adjustment for the last "LOAN_NSF_FEE" type charge which is due on "27 September 2024" with 1 EUR transaction amount and externalId ""
+    Then Loan has 40.32 outstanding amount
+    Then Loan Repayment schedule has 1 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 27 September 2024 |                   | 40.0            |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 30   | 27 October 2024   |                   | 0.0             | 40.0          | 0.32     | 0.0  | 1.0       | 41.32 | 1.0   | 1.0        | 0.0  | 40.32       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      | 40.0          | 0.32     | 0.0  | 1.0       | 41.32 | 1.0   | 1.0        | 0.0  | 40.32       |
+    Then Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 27 September 2024 | Disbursement      | 40.0   | 0.0       | 0.0      | 0.0  | 0.0       | 40.0         |
+      | 27 September 2024 | Accrual           | 0.33   | 0.0       | 0.33     | 0.0  | 0.0       | 0.0          |
+      | 27 September 2024 | Accrual           | 1.0    | 0.0       | 0.0      | 0.0  | 1.0       | 0.0          |
+      | 27 September 2024 | Charge Adjustment | 1.0    | 1.0       | 0.0      | 0.0  | 0.0       | 39.0         |
