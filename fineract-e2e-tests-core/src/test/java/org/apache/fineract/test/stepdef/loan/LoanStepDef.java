@@ -1141,13 +1141,10 @@ public class LoanStepDef extends AbstractStepDef {
         List<List<String>> data = table.asLists();
         for (int i = 1; i < data.size(); i++) {
             List<String> expectedValues = data.get(i);
-            String transactionDateExpected = expectedValues.get(0);
             List<List<String>> actualValuesList = transactions.stream()//
-                    .filter(t -> transactionDateExpected.equals(FORMATTER.format(t.getDate())))//
                     .map(t -> fetchValuesOfTransaction(table.row(0), t))//
                     .collect(Collectors.toList());//
-            boolean containsExpectedValues = actualValuesList.stream()//
-                    .anyMatch(actualValues -> actualValues.equals(expectedValues));//
+            boolean containsExpectedValues = actualValuesList.get(i - 1).equals(expectedValues);//
             assertThat(containsExpectedValues).as(ErrorMessageHelper.wrongValueInLineInTransactionsTab(i, actualValuesList, expectedValues))
                     .isTrue();
         }
