@@ -48,6 +48,7 @@ import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdLoanChargeData;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.LoanProduct;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostClientsResponse;
@@ -55,6 +56,7 @@ import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
 import org.apache.fineract.client.models.PostCreateRescheduleLoansResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
@@ -5271,6 +5273,84 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
 
             Assertions.assertTrue(callFailedRuntimeException.getMessage()
                     .contains("Adjust last, unpaid period is only supported for Progressive loan schedule type"));
+        });
+    }
+
+    // UC149: Validate TotalUnpaidAccruedDueInterest in Zero when Interest paid is higher than Accrued Interest
+    // 1. Create a Loan product with Adv. Pment. Alloc. and with Declining Balance, Accrual accounting and Daily Accrual
+    // Activity
+    // 2. Submit Loan, approve and Disburse
+    // 3. Add a Loan Specific Due date charge
+    // 4. Add a Repayment higher than accrued interest to validate TotalUnpaidAccruedDueInterest equal to Zero
+    @Test
+    public void uc149() {
+        String operationDate = "22 April 2024";
+        AtomicLong createdLoanId = new AtomicLong();
+        AtomicLong createdLoanChargeId = new AtomicLong();
+        AtomicLong createdLoanAccrualId = new AtomicLong();
+        runAt(operationDate, () -> {
+            Long clientId = client.getClientId();
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                    .interestRateFrequencyType(YEARS).numberOfRepayments(4)//
+                    .maxInterestRatePerPeriod((double) 0)//
+                    .repaymentEvery(1)//
+                    .repaymentFrequencyType(1L)//
+                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .multiDisburseLoan(false)//
+                    .disallowExpectedDisbursements(null)//
+                    .allowApprovedDisbursedAmountsOverApplied(null)//
+                    .overAppliedCalculationType(null)//
+                    .overAppliedNumber(null)//
+                    .installmentAmountInMultiplesOf(null)//
+                    .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString()) //
+            ;//
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), operationDate, 400.0, 6);
+
+            applicationRequest = applicationRequest.interestCalculationPeriodType(DAYS).interestRatePerPeriod(BigDecimal.ZERO)
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY);
+
+            PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            createdLoanId.set(loanResponse.getLoanId());
+
+            loanTransactionHelper.approveLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest()
+                    .approvedLoanAmount(BigDecimal.valueOf(400.0)).dateFormat(DATETIME_PATTERN).approvedOnDate(operationDate).locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest().actualDisbursementDate(operationDate)
+                    .dateFormat(DATETIME_PATTERN).transactionAmount(BigDecimal.valueOf(400.0)).locale("en"));
+
+            addRepaymentForLoan(createdLoanId.get(), 600.00, operationDate);
+
+            createdLoanChargeId.set(addCharge(createdLoanId.get(), true, 30, operationDate));
+
+            executeInlineCOB(createdLoanId.get());
+            final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
+            // Validate Loan Accrual transaction
+            final GetLoansLoanIdTransactions loanTransaction = loanDetails.getTransactions().stream()
+                    .filter(t -> Boolean.TRUE.equals(t.getType().getAccrual())).toList().get(0);
+            assertNotNull(loanTransaction);
+            createdLoanAccrualId.set(loanTransaction.getId());
+        });
+
+        runAt("10 October 2024", () -> {
+            PostLoansLoanIdChargesChargeIdRequest request = new PostLoansLoanIdChargesChargeIdRequest().amount(15.0).locale("en");
+            loanTransactionHelper.chargeAdjustment(createdLoanId.get(), createdLoanChargeId.get(), request);
+
+            loanTransactionHelper.makeGoodwillCredit(createdLoanId.get(), new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(DATETIME_PATTERN).transactionDate(operationDate).locale("en").transactionAmount(15.0));
+
+            final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
+            // Get the Repayment transaction
+            GetLoansLoanIdTransactions loanTransaction = loanDetails.getTransactions().stream()
+                    .filter(t -> Boolean.TRUE.equals(t.getType().getRepayment())).toList().get(0);
+            loanTransactionHelper.reverseRepayment(Math.toIntExact(createdLoanId.get()), Math.toIntExact(loanTransaction.getId()),
+                    operationDate);
+
+            // Validate Loan Accrual transaction
+            loanTransaction = loanDetails.getTransactions().stream().filter(t -> Boolean.TRUE.equals(t.getType().getAccrual())).toList()
+                    .get(0);
+            assertNotNull(loanTransaction);
+            assertEquals(loanTransaction.getId(), createdLoanAccrualId.get());
         });
     }
 
