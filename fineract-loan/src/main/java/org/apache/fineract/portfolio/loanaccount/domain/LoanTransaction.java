@@ -206,6 +206,12 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
                 externalId);
     }
 
+    public static LoanTransaction refund(Loan loan, LoanTransactionType loanTransactionType, BigDecimal transactionAmount,
+            PaymentDetail paymentDetail, LocalDate transactionDate, ExternalId txnExternalId) {
+        return new LoanTransaction(loan, loan.getOffice(), loanTransactionType, paymentDetail, transactionAmount, transactionDate,
+                txnExternalId);
+    }
+
     public void setLoanTransactionToRepaymentScheduleMappings(final Integer installmentId, final BigDecimal chargePerInstallment) {
         for (LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping : this.loanTransactionToRepaymentScheduleMappings) {
             final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = loanTransactionToRepaymentScheduleMapping

@@ -85,7 +85,6 @@ import org.apache.fineract.portfolio.charge.exception.LoanChargeNotFoundExceptio
 import org.apache.fineract.portfolio.charge.exception.LoanChargeWaiveCannotBeReversedException;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
-import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagement;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
@@ -98,7 +97,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidBy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeRepository;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanInstallmentCharge;
@@ -727,21 +725,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                 paymentDetail);
 
         // Update loan transaction on repayment.
-        if (loan.getLoanType().isIndividualAccount()) {
-            Set<LoanCollateralManagement> loanCollateralManagements = loan.getLoanCollateralManagements();
-            for (LoanCollateralManagement loanCollateralManagement : loanCollateralManagements) {
-                loanCollateralManagement.setLoanTransactionData(loanTransaction);
-                ClientCollateralManagement clientCollateralManagement = loanCollateralManagement.getClientCollateralManagement();
-
-                if (loan.getStatus().isClosed()) {
-                    loanCollateralManagement.setIsReleased(true);
-                    BigDecimal quantity = loanCollateralManagement.getQuantity();
-                    clientCollateralManagement.updateQuantity(clientCollateralManagement.getQuantity().add(quantity));
-                    loanCollateralManagement.setClientCollateralManagement(clientCollateralManagement);
-                }
-            }
-            this.loanAccountDomainService.updateLoanCollateralTransaction(loanCollateralManagements);
-        }
+        loanAccountDomainService.updateAndSaveLoanCollateralTransactionsForIndividualAccounts(loan, loanTransaction);
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
