@@ -20,18 +20,24 @@ package org.apache.fineract.infrastructure.jobs.filter;
 
 import static org.apache.fineract.infrastructure.jobs.filter.LoanCOBFilterHelper.LOAN_GLIMACCOUNT_PATH_PATTERN;
 import static org.apache.fineract.infrastructure.jobs.filter.LoanCOBFilterHelper.LOAN_PATH_PATTERN;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import com.sun.research.ws.wadl.HTTPMethods;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -58,6 +64,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequestRepository;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.apache.fineract.useradministration.exception.UnAuthenticatedUserException;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -71,6 +78,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -444,5 +452,42 @@ class LoanCOBApiFilterTest {
 
         testObj.doFilterInternal(request, response, filterChain);
         verify(response, times(1)).setStatus(HttpStatus.SC_CONFLICT);
+    }
+
+    @Test
+    void shouldThrowAuthenticationCredentialsNotFoundException_WhenUnAuthenticatedUserExceptionIsThrown() throws IOException {
+        LoanCOBFilterHelper spyHelper = spy(helper);
+        testObj = new LoanCOBApiFilter(spyHelper);
+        MockHttpServletRequest request = mock(MockHttpServletRequest.class);
+        MockHttpServletResponse response = mock(MockHttpServletResponse.class);
+        FilterChain filterChain = mock(FilterChain.class);
+
+        final byte[] cachedBody = new byte[0];
+        given(request.getInputStream())
+                .willReturn(new BodyCachingHttpServletRequestWrapper.CachedBodyServletInputStream(new ByteArrayInputStream(cachedBody)));
+        doReturn(true).when(spyHelper).isOnApiList(any(BodyCachingHttpServletRequestWrapper.class));
+        doThrow(new UnAuthenticatedUserException()).when(spyHelper).isBypassUser();
+
+        assertThrows(AuthenticationCredentialsNotFoundException.class, () -> testObj.doFilterInternal(request, response, filterChain));
+        verifyNoInteractions(filterChain);
+    }
+
+    @Test
+    void shouldProceed_WhenAuthenticatedUser() throws Exception {
+        LoanCOBFilterHelper spyHelper = spy(helper);
+        testObj = new LoanCOBApiFilter(spyHelper);
+        MockHttpServletRequest request = mock(MockHttpServletRequest.class);
+        MockHttpServletResponse response = mock(MockHttpServletResponse.class);
+        FilterChain filterChain = mock(FilterChain.class);
+
+        final byte[] cachedBody = new byte[0];
+        given(request.getInputStream())
+                .willReturn(new BodyCachingHttpServletRequestWrapper.CachedBodyServletInputStream(new ByteArrayInputStream(cachedBody)));
+        doReturn(true).when(spyHelper).isOnApiList(any(BodyCachingHttpServletRequestWrapper.class));
+        doReturn(true).when(spyHelper).isBypassUser();
+
+        testObj.doFilterInternal(request, response, filterChain);
+
+        verify(filterChain, times(1)).doFilter(any(HttpServletRequest.class), any(HttpServletResponse.class));
     }
 }
