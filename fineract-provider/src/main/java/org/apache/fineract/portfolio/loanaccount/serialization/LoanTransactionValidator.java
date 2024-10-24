@@ -60,7 +60,6 @@ import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.apache.fineract.portfolio.calendar.exception.NotValidRecurringDateException;
-import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
 import org.apache.fineract.portfolio.collateralmanagement.exception.LoanCollateralAmountNotSufficientException;
@@ -77,6 +76,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleIns
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.exception.DateMismatchException;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanStateTransitionException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationDateException;
@@ -84,6 +84,7 @@ import org.apache.fineract.portfolio.loanaccount.exception.LoanChargeRefundExcep
 import org.apache.fineract.portfolio.loanaccount.exception.LoanDisbursalException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanRepaymentScheduleNotFoundException;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.jetbrains.annotations.NotNull;
@@ -409,7 +410,10 @@ public final class LoanTransactionValidator {
     }
 
     public void validateNewRepaymentTransaction(final String json) {
+        validatePaymentTransaction(json);
+    }
 
+    private void validatePaymentTransaction(String json) {
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
         }
@@ -436,21 +440,6 @@ public final class LoanTransactionValidator {
 
         validatePaymentDetails(baseDataValidator, element);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
-    }
-
-    public void validateRepaymentDateWithMeetingDate(final LocalDate repaymentDate, final CalendarInstance calendarInstance) {
-        if (null != calendarInstance) {
-            final Calendar calendar = calendarInstance.getCalendar();
-            if (calendar != null && repaymentDate != null) {
-                // Disbursement date should fall on a meeting date
-                if (!CalendarUtils.isValidRecurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(), repaymentDate)) {
-                    final String errorMessage = "Transaction date '" + repaymentDate.toString() + "' does not fall on a meeting date.";
-                    throw new NotValidRecurringDateException("loan.transaction.date", errorMessage, repaymentDate.toString(),
-                            calendar.getTitle());
-                }
-
-            }
-        }
     }
 
     private void validatePaymentDetails(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
@@ -870,6 +859,93 @@ public final class LoanTransactionValidator {
                 final String errorMessage = "The transaction amount cannot exceed threshold.";
                 throw new InvalidLoanStateTransitionException("transaction", "amount.exceeds.threshold", errorMessage);
             }
+        }
+    }
+
+    public void validateRefund(String json) {
+        validatePaymentTransaction(json);
+    }
+
+    public void validateRefund(final Loan loan, LoanTransactionType loanTransactionType, final LocalDate transactionDate,
+            ScheduleGeneratorDTO scheduleGeneratorDTO) {
+        checkClientOrGroupActive(loan);
+        validateLoanStatusIsActiveOrFullyPaidOrOverpaid(loan);
+        validateActivityNotBeforeClientOrGroupTransferDate(loan, transactionDate);
+        validateRepaymentTypeTransactionNotBeforeAChargeRefund(loan, loanTransactionType, transactionDate);
+        validateTransactionNotBeforeLastTransactionDate(loan, loanTransactionType, transactionDate);
+        validateRepaymentDateIsOnHoliday(transactionDate, scheduleGeneratorDTO.getHolidayDetailDTO().isAllowTransactionsOnHoliday(),
+                scheduleGeneratorDTO.getHolidayDetailDTO().getHolidays());
+        validateRepaymentDateIsOnNonWorkingDay(transactionDate, scheduleGeneratorDTO.getHolidayDetailDTO().getWorkingDays(),
+                scheduleGeneratorDTO.getHolidayDetailDTO().isAllowTransactionsOnNonWorkingDay());
+        validateTransactionShouldNotBeInTheFuture(transactionDate);
+        validateTransactionAmountNotExceedThresholdForMultiDisburseLoan(loan);
+    }
+
+    private void checkClientOrGroupActive(final Loan loan) {
+        final Client client = loan.client();
+        if (client != null && client.isNotActive()) {
+            throw new ClientNotActiveException(client.getId());
+        }
+        final Group group = loan.group();
+        if (group != null && group.isNotActive()) {
+            throw new GroupNotActiveException(group.getId());
+        }
+    }
+
+    private void validateActivityNotBeforeClientOrGroupTransferDate(final Loan loan, final LocalDate transactionDate) {
+        if (loan.getClient() != null && loan.getClient().getOfficeJoiningDate() != null) {
+            final LocalDate clientOfficeJoiningDate = loan.getClient().getOfficeJoiningDate();
+            if (DateUtils.isBefore(transactionDate, clientOfficeJoiningDate)) {
+                String errorMessage = "The date on which the transaction is made cannot be earlier than client's transfer date to this office";
+                String action = "repayment.or.waiver";
+                String postfix = "cannot.be.made.before.client.transfer.date";
+                throw new InvalidLoanStateTransitionException(action, postfix, errorMessage, clientOfficeJoiningDate);
+            }
+        }
+    }
+
+    public void validateRepaymentTypeTransactionNotBeforeAChargeRefund(final Loan loan, final LoanTransactionType loanTransactionType,
+            final LocalDate transactionDate) {
+        if (loanTransactionType.isRepaymentType() && !loanTransactionType.isChargeRefund()) {
+            for (LoanTransaction txn : loan.getLoanTransactions()) {
+                if (txn.isChargeRefund() && DateUtils.isBefore(transactionDate, txn.getTransactionDate())) {
+                    final String errorMessage = "loan.transaction.cant.be.created.because.later.charge.refund.exists";
+                    final String details = "Loan Transaction: " + loan.getId() + " Can't be created because a Later Charge Refund Exists.";
+                    throw new LoanChargeRefundException(errorMessage, details);
+                }
+            }
+        }
+    }
+
+    private void validateTransactionNotBeforeLastTransactionDate(final Loan loan, LoanTransactionType loanTransactionType,
+            final LocalDate transactionDate) {
+        if (!((LoanScheduleType.CUMULATIVE.equals(loan.getLoanProductRelatedDetail().getLoanScheduleType())
+                && loan.getLoanRepaymentScheduleDetail().isInterestRecalculationEnabled())
+                || loan.getLoanProduct().isHoldGuaranteeFunds())) {
+            return;
+        }
+        LocalDate lastTransactionDate = loan.getLastUserTransactionDate();
+
+        String humanReadable;
+        String action;
+        switch (loanTransactionType) {
+            case MERCHANT_ISSUED_REFUND -> {
+                humanReadable = "merchant issued refund";
+                action = "merchant.issued.refund";
+            }
+            case PAYOUT_REFUND -> {
+                humanReadable = "payout refund";
+                action = "payout.refund";
+            }
+            default -> {
+                humanReadable = "transaction";
+                action = "transaction";
+            }
+        }
+        if (DateUtils.isAfter(lastTransactionDate, transactionDate)) {
+            String errorMessage = "The date on which the " + humanReadable + " is made cannot be earlier than last transaction date";
+            String postfix = "cannot.be.made.before.last.transaction.date";
+            throw new InvalidLoanStateTransitionException(action, postfix, errorMessage, lastTransactionDate);
         }
     }
 }

@@ -23,11 +23,13 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.delinquency.validator.LoanDelinquencyActionData;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanRefundRequestData;
+import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 
 public interface LoanAccountDomainService {
@@ -53,8 +55,6 @@ public interface LoanAccountDomainService {
 
     LoanTransaction makeRefundForActiveLoan(Long accountId, CommandProcessingResultBuilder builderResult, LocalDate transactionDate,
             BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, ExternalId txnExternalId);
-
-    void updateLoanCollateralTransaction(Set<LoanCollateralManagement> loanCollateralManagementList);
 
     void updateLoanCollateralStatus(Set<LoanCollateralManagement> loanCollateralManagementSet, boolean isReleased);
 
@@ -94,6 +94,13 @@ public interface LoanAccountDomainService {
     LoanTransaction creditBalanceRefund(Loan loan, LocalDate transactionDate, BigDecimal transactionAmount, String noteText,
             ExternalId externalId, PaymentDetail paymentDetail);
 
+    Pair<LoanTransaction, LoanTransaction> makeRefund(Loan loan, ScheduleGeneratorDTO scheduleGeneratorDTO,
+            LoanTransactionType loanTransactionType, LocalDate transactionDate, BigDecimal transactionAmount, PaymentDetail paymentDetail,
+            ExternalId txnExternalId);
+
+    void updateAndSavePostDatedChecksForIndividualAccount(Loan loan, LoanTransaction transaction);
+
     LoanTransaction applyInterestRefund(Loan loan, LoanRefundRequestData loanRefundRequest);
 
+    void updateAndSaveLoanCollateralTransactionsForIndividualAccounts(Loan loan, LoanTransaction transaction);
 }

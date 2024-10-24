@@ -28,6 +28,7 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -80,6 +81,7 @@ import org.apache.fineract.portfolio.account.domain.StandingInstructionRepositor
 import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
+import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagement;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyAction;
 import org.apache.fineract.portfolio.delinquency.helper.DelinquencyEffectivePauseHelper;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
@@ -91,6 +93,9 @@ import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanRefundRequestData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.service.InterestRefundService;
 import org.apache.fineract.portfolio.loanaccount.service.InterestRefundServiceDelegate;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualTransactionBusinessEventService;
@@ -139,6 +144,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final DelinquencyReadPlatformService delinquencyReadPlatformService;
     private final LoanAccrualsProcessingService loanAccrualsProcessingService;
     private final InterestRefundServiceDelegate interestRefundServiceDelegate;
+    private final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessorFactory;
 
     @Transactional
     @Override
@@ -152,12 +158,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
     @Transactional
     @Override
-    public void updateLoanCollateralTransaction(Set<LoanCollateralManagement> loanCollateralManagementSet) {
-        this.loanCollateralManagementRepository.saveAll(loanCollateralManagementSet);
-    }
-
-    @Transactional
-    @Override
     public void updateLoanCollateralStatus(Set<LoanCollateralManagement> loanCollateralManagementSet, boolean isReleased) {
         for (LoanCollateralManagement loanCollateralManagement : loanCollateralManagementSet) {
             loanCollateralManagement.setIsReleased(isReleased);
@@ -165,8 +165,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         this.loanCollateralManagementRepository.saveAll(loanCollateralManagementSet);
     }
 
-    @Transactional
-    public LoanTransaction createInterestRefundLoanTransaction(Loan loan, final LocalDate transactionDate,
+    private LoanTransaction createInterestRefundLoanTransaction(Loan loan, final LocalDate transactionDate,
             BigDecimal relatedRefundTransactionAmount) {
         InterestRefundService interestRefundService = interestRefundServiceDelegate.lookupInterestRefundService(loan);
         if (interestRefundService == null) {
@@ -174,15 +173,9 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
         BigDecimal interestRefundAmount = interestRefundService.calculateInterestRefundAmount(loan.getId(), relatedRefundTransactionAmount,
                 transactionDate);
-
         final ExternalId txnExternalId = externalIdFactory.create();
-
         businessEventNotifierService.notifyPreBusinessEvent(new LoanTransactionInterestRefundPreBusinessEvent(loan));
-
-        LoanTransaction newInterestRefundTransaction;
-        newInterestRefundTransaction = LoanTransaction.interestRefund(loan, interestRefundAmount, transactionDate, txnExternalId);
-
-        return newInterestRefundTransaction;
+        return LoanTransaction.interestRefund(loan, interestRefundAmount, transactionDate, txnExternalId);
     }
 
     @Transactional
@@ -225,18 +218,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom,
                 holidayDetailDto);
 
-        boolean shouldCreateInterestRefundTransaction = loan.getLoanProductRelatedDetail().getSupportedInterestRefundTypes().stream()
-                .map(LoanSupportedInterestRefundTypes::getTransactionType)
-                .anyMatch(transactionType -> transactionType.equals(repaymentTransactionType));
-        LoanTransaction newInterestRefundTransaction = null;
-
-        if (shouldCreateInterestRefundTransaction) {
-            newInterestRefundTransaction = createInterestRefundLoanTransaction(loan, transactionDate, transactionAmount);
-            if (newInterestRefundTransaction != null) {
-                loan.addLoanTransaction(newInterestRefundTransaction);
-            }
-        }
-
         final ChangedTransactionDetail changedTransactionDetail = loan.makeRepayment(newRepaymentTransaction,
                 defaultLoanLifecycleStateMachine, existingTransactionIds, existingReversedTransactionIds, isRecoveryRepayment,
                 scheduleGeneratorDTO, isHolidayValidationDone);
@@ -247,9 +228,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
 
         saveLoanTransactionWithDataIntegrityViolationChecks(newRepaymentTransaction);
-        if (newInterestRefundTransaction != null) {
-            saveLoanTransactionWithDataIntegrityViolationChecks(newInterestRefundTransaction);
-        }
 
         /***
          * TODO Vishwas Batch save is giving me a HibernateOptimisticLockingFailureException, looping and saving for the
@@ -259,7 +237,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         if (changedTransactionDetail != null) {
             for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
                 saveLoanTransactionWithDataIntegrityViolationChecks(mapEntry.getValue());
-                updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
+                updateLoanTransferTransaction(mapEntry.getKey(), mapEntry.getValue());
             }
             // Trigger transaction replayed event
             replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
@@ -316,10 +294,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 }
             }
         }
-        if (shouldCreateInterestRefundTransaction && newInterestRefundTransaction != null) {
-            businessEventNotifierService
-                    .notifyPostBusinessEvent(new LoanTransactionInterestRefundPostBusinessEvent(newInterestRefundTransaction));
-        }
+
         return newRepaymentTransaction;
     }
 
@@ -649,7 +624,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
     }
 
-    private void updateLoanTransaction(final Long loanTransactionId, final LoanTransaction newLoanTransaction) {
+    private void updateLoanTransferTransaction(final Long loanTransactionId, final LoanTransaction newLoanTransaction) {
         final AccountTransferTransaction transferTransaction = this.accountTransferRepository.findByToLoanTransactionId(loanTransactionId);
         if (transferTransaction != null) {
             transferTransaction.updateToLoanTransaction(newLoanTransaction);
@@ -810,7 +785,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         if (changedTransactionDetail != null) {
             for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
                 saveLoanTransactionWithDataIntegrityViolationChecks(mapEntry.getValue());
-                updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
+                updateLoanTransferTransaction(mapEntry.getKey(), mapEntry.getValue());
             }
             // Trigger transaction replayed event
             replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
@@ -848,6 +823,158 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     }
 
     @Override
+    public void updateAndSaveLoanCollateralTransactionsForIndividualAccounts(Loan loan, LoanTransaction loanTransaction) {
+        if (loan.getLoanType().isIndividualAccount()) {
+            Set<LoanCollateralManagement> loanCollateralManagements = loan.getLoanCollateralManagements();
+            for (LoanCollateralManagement loanCollateralManagement : loanCollateralManagements) {
+                if (loanTransaction != null) {
+                    loanCollateralManagement.setLoanTransactionData(loanTransaction);
+                }
+                ClientCollateralManagement clientCollateralManagement = loanCollateralManagement.getClientCollateralManagement();
+
+                if (loan.getStatus().isClosed()) {
+                    loanCollateralManagement.setIsReleased(true);
+                    BigDecimal quantity = loanCollateralManagement.getQuantity();
+                    clientCollateralManagement.updateQuantity(clientCollateralManagement.getQuantity().add(quantity));
+                    loanCollateralManagement.setClientCollateralManagement(clientCollateralManagement);
+                }
+            }
+            this.loanCollateralManagementRepository.saveAll(loanCollateralManagements);
+        }
+    }
+
+    @Override
+    public Pair<LoanTransaction, LoanTransaction> makeRefund(final Loan loan, final ScheduleGeneratorDTO scheduleGeneratorDTO,
+            final LoanTransactionType loanTransactionType, final LocalDate transactionDate, final BigDecimal transactionAmount,
+            final PaymentDetail paymentDetail, final ExternalId txnExternalId) {
+        // Pre-processing business event
+        switch (loanTransactionType) {
+            case MERCHANT_ISSUED_REFUND ->
+                businessEventNotifierService.notifyPreBusinessEvent(new LoanTransactionMerchantIssuedRefundPreBusinessEvent(loan));
+            case PAYOUT_REFUND ->
+                businessEventNotifierService.notifyPreBusinessEvent(new LoanTransactionPayoutRefundPreBusinessEvent(loan));
+            default ->
+                throw new UnsupportedOperationException(String.format("Not configured loan transaction type: %s!", loanTransactionType));
+        }
+        LoanTransaction refundTransaction = LoanTransaction.refund(loan, loanTransactionType, transactionAmount, paymentDetail,
+                transactionDate, txnExternalId);
+
+        final boolean isTransactionChronologicallyLatest = loan.isChronologicallyLatestRepaymentOrWaiver(refundTransaction);
+        loan.getLoanTransactions().add(refundTransaction);
+
+        boolean shouldCreateInterestRefundTransaction = loan.getLoanProductRelatedDetail().getSupportedInterestRefundTypes().stream()
+                .map(LoanSupportedInterestRefundTypes::getTransactionType)
+                .anyMatch(transactionType -> transactionType.equals(loanTransactionType));
+        LoanTransaction interestRefundTransaction = null;
+
+        if (shouldCreateInterestRefundTransaction) {
+            interestRefundTransaction = createInterestRefundLoanTransaction(loan, transactionDate, transactionAmount);
+            if (interestRefundTransaction != null) {
+                loan.addLoanTransaction(interestRefundTransaction);
+            }
+        }
+
+        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = transactionProcessorFactory
+                .determineProcessor(loan.getTransactionProcessingStrategyCode());
+
+        final LoanRepaymentScheduleInstallment currentInstallment = loan.fetchLoanRepaymentScheduleInstallmentByDueDate(transactionDate);
+
+        boolean reprocess = loan.getLoanRepaymentScheduleDetail().isInterestRecalculationEnabled() //
+                || loan.isForeclosure() //
+                || !isTransactionChronologicallyLatest //
+                || !DateUtils.isEqualBusinessDate(transactionDate) //
+                || currentInstallment == null //
+                || !currentInstallment.getTotalOutstanding(loan.getCurrency()).isEqualTo(refundTransaction.getAmount(loan.getCurrency())); //
+
+        if (!reprocess) {
+            loanRepaymentScheduleTransactionProcessor.processLatestTransaction(refundTransaction,
+                    new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
+                            new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+        } else {
+            if (loan.getLoanRepaymentScheduleDetail().isInterestRecalculationEnabled()) {
+                loan.regenerateRepaymentScheduleWithInterestRecalculation(scheduleGeneratorDTO);
+            }
+            final List<LoanTransaction> allNonContraTransactionsPostDisbursement = loan.retrieveListOfTransactionsForReprocessing();
+            ChangedTransactionDetail changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(
+                    loan.getDisbursementDate(), allNonContraTransactionsPostDisbursement, loan.getCurrency(),
+                    loan.getRepaymentScheduleInstallments(), loan.getActiveCharges());
+            for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
+                mapEntry.getValue().updateLoan(loan);
+            }
+
+            loan.getLoanTransactions().addAll(changedTransactionDetail.getNewTransactionMappings().values());
+
+            // Store and flush newly created transaction to generate PK
+            saveLoanTransactionWithDataIntegrityViolationChecks(refundTransaction);
+            if (interestRefundTransaction != null) {
+                saveLoanTransactionWithDataIntegrityViolationChecks(interestRefundTransaction);
+            }
+            /*
+             * TODO Vishwas Batch save is giving me a HibernateOptimisticLockingFailureException, looping and saving for
+             * the time being, not a major issue for now as this loop is entered only in edge cases (when a payment is
+             * made before the latest payment recorded against the loan)
+             */
+            // Apply reprocessed transactions (if applicable)
+            for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
+                saveLoanTransactionWithDataIntegrityViolationChecks(mapEntry.getValue());
+                updateLoanTransferTransaction(mapEntry.getKey(), mapEntry.getValue());
+            }
+            // Trigger transaction replayed event
+            replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
+        }
+
+        loan.updateLoanSummaryDerivedFields();
+        loan.doPostLoanTransactionChecks(transactionDate, defaultLoanLifecycleStateMachine);
+
+        switch (loanTransactionType) {
+            case MERCHANT_ISSUED_REFUND -> businessEventNotifierService
+                    .notifyPostBusinessEvent(new LoanTransactionMerchantIssuedRefundPostBusinessEvent(refundTransaction));
+            case PAYOUT_REFUND ->
+                businessEventNotifierService.notifyPostBusinessEvent(new LoanTransactionPayoutRefundPostBusinessEvent(refundTransaction));
+            default ->
+                throw new UnsupportedOperationException(String.format("Not configured loan transaction type: %s!", loanTransactionType));
+        }
+
+        if (interestRefundTransaction != null) {
+            businessEventNotifierService
+                    .notifyPostBusinessEvent(new LoanTransactionInterestRefundPostBusinessEvent(interestRefundTransaction));
+        }
+        return Pair.of(refundTransaction, interestRefundTransaction);
+    }
+
+    @Override
+    public void updateAndSavePostDatedChecksForIndividualAccount(final Loan loan, final LoanTransaction transaction) {
+        if (loan.getLoanType().isIndividualAccount()) {
+            // Mark Post Dated Check as paid.
+            final Set<LoanTransactionToRepaymentScheduleMapping> loanTransactionToRepaymentScheduleMappings = transaction
+                    .getLoanTransactionToRepaymentScheduleMappings();
+
+            if (loanTransactionToRepaymentScheduleMappings != null) {
+                for (LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping : loanTransactionToRepaymentScheduleMappings) {
+                    LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = loanTransactionToRepaymentScheduleMapping
+                            .getLoanRepaymentScheduleInstallment();
+                    if (loanRepaymentScheduleInstallment != null) {
+                        final boolean isPaid = loanRepaymentScheduleInstallment.isNotFullyPaidOff();
+                        PostDatedChecks postDatedChecks = this.postDatedChecksRepository
+                                .getPendingPostDatedCheck(loanRepaymentScheduleInstallment);
+
+                        if (postDatedChecks != null) {
+                            if (!isPaid) {
+                                postDatedChecks.setStatus(PostDatedChecksStatus.POST_DATED_CHECKS_PAID);
+                            } else {
+                                postDatedChecks.setStatus(PostDatedChecksStatus.POST_DATED_CHECKS_PENDING);
+                            }
+                            this.postDatedChecksRepository.saveAndFlush(postDatedChecks);
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
     public LoanTransaction applyInterestRefund(final Loan loan, final LoanRefundRequestData loanRefundRequest) {
         final PaymentDetail paymentDetail = null;
         final LocalDate transactionDate = DateUtils.getBusinessLocalDate();
@@ -868,5 +995,4 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         return interestRefundTransaction;
     }
-
 }
