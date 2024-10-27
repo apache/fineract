@@ -21,7 +21,7 @@ version: "3.8"
 services:
   fineract:
     # user: "${FINERACT_USER}:${FINERACT_GROUP}"
-    image: fineract:latest
+    image: apache/fineract:latest
     volumes:
       - ${PWD}/config/docker/logback/logback-override.xml:/app/logback-override.xml
       - ${PWD}/config/docker/aws/etc/credentials:/etc/aws/credentials:ro
