@@ -18,7 +18,7 @@ version: "3.8"
 services:
   mariadb:
     container_name: mariadb
-    image: mariadb:11.2
+    image: mariadb:11.4
     volumes:
       - ${PWD}/config/docker/mysql/conf.d/server_collation.cnf:/etc/mysql/conf.d/server_collation.cnf:ro
       - ${PWD}/config/docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:Z,ro
