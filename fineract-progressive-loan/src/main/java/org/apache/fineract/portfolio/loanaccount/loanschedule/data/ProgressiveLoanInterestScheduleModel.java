@@ -179,11 +179,11 @@ public class ProgressiveLoanInterestScheduleModel {
         previousInterestPeriod.addDisbursementAmount(disbursedAmount);
         previousInterestPeriod.addBalanceCorrectionAmount(correctionAmount);
         final InterestPeriod interestPeriod = new InterestPeriod(repaymentPeriod, previousInterestPeriod.getDueDate(), originalDueDate,
-                BigDecimal.ZERO, getZero(mc), getZero(mc), getZero(mc), mc);
+                BigDecimal.ZERO, getZero(), getZero(), getZero(), mc);
         repaymentPeriod.getInterestPeriods().add(interestPeriod);
     }
 
-    private Money getZero(MathContext mc) {
+    private Money getZero() {
         return Money.zero(loanProductRelatedDetail.getCurrency(), mc);
     }
 }

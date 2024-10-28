@@ -183,7 +183,7 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             Assertions.assertNotNull(postLoansLoanIdTransactionsResponse.getResourceId());
 
             verifyBusinessEvents(new LoanTransactionBusinessEvent("LoanTransactionInterestRefundPostBusinessEvent", "22 January 2021", 5.75,
-                    994.25, 5.75, 0.0, 0.0, 0.0));
+                    0.0, 5.75, 0.0, 0.0, 0.0));
         });
         enableLoanInterestRefundPstBusinessEvent(false);
     }

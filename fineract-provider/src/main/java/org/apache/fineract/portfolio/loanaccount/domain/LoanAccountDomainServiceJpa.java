@@ -860,7 +860,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 transactionDate, txnExternalId);
 
         final boolean isTransactionChronologicallyLatest = loan.isChronologicallyLatestRepaymentOrWaiver(refundTransaction);
-        loan.getLoanTransactions().add(refundTransaction);
 
         boolean shouldCreateInterestRefundTransaction = loan.getLoanProductRelatedDetail().getSupportedInterestRefundTypes().stream()
                 .map(LoanSupportedInterestRefundTypes::getTransactionType)
@@ -869,9 +868,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         if (shouldCreateInterestRefundTransaction) {
             interestRefundTransaction = createInterestRefundLoanTransaction(loan, transactionDate, transactionAmount);
-            if (interestRefundTransaction != null) {
-                loan.addLoanTransaction(interestRefundTransaction);
-            }
         }
 
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = transactionProcessorFactory
@@ -887,12 +883,23 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 || !currentInstallment.getTotalOutstanding(loan.getCurrency()).isEqualTo(refundTransaction.getAmount(loan.getCurrency())); //
 
         if (!reprocess) {
+            loan.getLoanTransactions().add(refundTransaction);
             loanRepaymentScheduleTransactionProcessor.processLatestTransaction(refundTransaction,
                     new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
                             new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+            if (interestRefundTransaction != null) {
+                loan.addLoanTransaction(interestRefundTransaction);
+                loanRepaymentScheduleTransactionProcessor.processLatestTransaction(interestRefundTransaction,
+                        new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
+                                new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+            }
         } else {
             if (loan.getLoanRepaymentScheduleDetail().isInterestRecalculationEnabled()) {
                 loan.regenerateRepaymentScheduleWithInterestRecalculation(scheduleGeneratorDTO);
+            }
+            loan.getLoanTransactions().add(refundTransaction);
+            if (interestRefundTransaction != null) {
+                loan.addLoanTransaction(interestRefundTransaction);
             }
             final List<LoanTransaction> allNonContraTransactionsPostDisbursement = loan.retrieveListOfTransactionsForReprocessing();
             ChangedTransactionDetail changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(

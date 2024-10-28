@@ -145,8 +145,10 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     public PayableDetails getPayableDetails(final ProgressiveLoanInterestScheduleModel scheduleModel,
             final LocalDate repaymentPeriodDueDate, final LocalDate targetDate) {
         MathContext mc = scheduleModel.mc();
-        RepaymentPeriod repaymentPeriod = scheduleModel.deepCopy(mc).repaymentPeriods().stream()
+        ProgressiveLoanInterestScheduleModel scheduleModelCopy = scheduleModel.deepCopy(mc);
+        RepaymentPeriod repaymentPeriod = scheduleModelCopy.repaymentPeriods().stream()
                 .filter(rp -> rp.getDueDate().equals(repaymentPeriodDueDate)).findFirst().orElseThrow();
+
         LocalDate adjustedTargetDate = targetDate;
         InterestPeriod interestPeriod;
         if (!targetDate.isAfter(repaymentPeriod.getFromDate())) {
@@ -162,22 +164,12 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         interestPeriod.setDueDate(adjustedTargetDate);
         int index = repaymentPeriod.getInterestPeriods().indexOf(interestPeriod);
         repaymentPeriod.getInterestPeriods().subList(index + 1, repaymentPeriod.getInterestPeriods().size()).clear();
-        calculateRateFactorForRepaymentPeriod(repaymentPeriod, scheduleModel);
+        scheduleModelCopy.repaymentPeriods().forEach(rp -> rp.getInterestPeriods().removeIf(ip -> ip.getDueDate().isAfter(targetDate)));
+        calculateRateFactorForPeriods(scheduleModelCopy.repaymentPeriods(), scheduleModelCopy);
+        calculateOutstandingBalance(scheduleModelCopy);
+        calculateLastUnpaidRepaymentPeriodEMI(scheduleModelCopy);
 
-        // TODO: gather all the unrecognized interest from previous periods based on target date
-        Money payableInterest = targetDate.isBefore(repaymentPeriod.getFromDate())
-                ? Money.zero(scheduleModel.loanProductRelatedDetail().getCurrency(), mc)
-                : repaymentPeriod.getDueInterest();
-        Money outstandingLoanBalance = interestPeriod.getOutstandingLoanBalance().add(interestPeriod.getDisbursementAmount());
-
-        Money calculatedEmi = outstandingLoanBalance.plus(payableInterest, mc);
-        if (calculatedEmi.isLessThan(repaymentPeriod.getEmi())) {
-            // Review this logic
-            repaymentPeriod.setEmi(outstandingLoanBalance.plus(payableInterest).plus(repaymentPeriod.getPaidInterest(), mc)
-                    .plus(repaymentPeriod.getPaidPrincipal(), mc));
-        }
-        Money payablePrincipal = repaymentPeriod.getEmi().minus(payableInterest, mc);
-        return new PayableDetails(repaymentPeriod.getEmi(), payablePrincipal, payableInterest,
+        return new PayableDetails(repaymentPeriod.getEmi(), repaymentPeriod.getDuePrincipal(), repaymentPeriod.getDueInterest(),
                 interestPeriod.getOutstandingLoanBalance().add(interestPeriod.getDisbursementAmount(), mc));
     }
 

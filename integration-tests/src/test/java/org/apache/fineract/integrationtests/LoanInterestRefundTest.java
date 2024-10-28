@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum.REPLAYED;
+
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -28,6 +30,7 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
@@ -142,10 +145,37 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
             Assertions.assertNotNull(postLoansLoanIdTransactionsResponse.getResourceId());
 
             logTransactions(loanId);
-            verifyTransactions(loanId, transaction(1000.0, "Disbursement", "01 January 2021"),
-                    transaction(1000.0, "Payout Refund", "22 January 2021"), transaction(5.75, "Accrual", "22 January 2021"),
-                    transaction(5.75, "Interest Refund", "22 January 2021"));
+            verifyTransactions(loanId, //
+                    transaction(1000.0, "Disbursement", "01 January 2021"), //
+                    transaction(1000.0, "Payout Refund", "22 January 2021"), //
+                    transaction(5.75, "Interest Refund", "22 January 2021"), //
+                    transaction(5.75, "Accrual", "22 January 2021")); //
+
+            checkTransactionWasNotReverseReplayed(postLoansLoanIdTransactionsResponse.getLoanId(),
+                    postLoansLoanIdTransactionsResponse.getResourceId());
+            checkTransactionWasNotReverseReplayed(postLoansLoanIdTransactionsResponse.getLoanId(),
+                    postLoansLoanIdTransactionsResponse.getSubResourceId());
+
+            verifyTRJournalEntries(postLoansLoanIdTransactionsResponse.getResourceId(), journalEntry(1000, fundSource, "DEBIT"), //
+                    journalEntry(5.75, interestReceivableAccount, "CREDIT"), //
+                    journalEntry(994.25, loansReceivableAccount, "CREDIT"));
+
+            verifyTRJournalEntries(postLoansLoanIdTransactionsResponse.getSubResourceId(),
+                    journalEntry(5.75, interestIncomeAccount, "DEBIT"), //
+                    journalEntry(5.75, loansReceivableAccount, "CREDIT")); //
         });
+    }
+
+    private void checkTransactionWasNotReverseReplayed(Long loanId, Long transactionId) {
+        GetLoansLoanIdTransactionsTransactionIdResponse loanTransactionDetails = loanTransactionHelper.getLoanTransactionDetails(loanId,
+                transactionId);
+        if (loanTransactionDetails.getTransactionRelations() != null) {
+            loanTransactionDetails.getTransactionRelations().forEach(transactionRelation -> {
+                if (REPLAYED.name().equals(transactionRelation.getRelationType())) {
+                    Assertions.fail("Transaction was replayed!");
+                }
+            });
+        }
     }
 
     @Test
