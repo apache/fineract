@@ -162,7 +162,7 @@ public class SavingsAccrualWritePlatformServiceImpl implements SavingsAccrualWri
 
         List<LocalDate> postedAsOnTransactionDates = savingsAccount.getManualPostingDates();
         final SavingsPostingInterestPeriodType postingPeriodType = SavingsPostingInterestPeriodType
-                .fromInt(savingsAccount.getInterestPostingPeriodType());
+                .fromInt(savingsAccount.getInterestCalculationType());
 
         final SavingsCompoundingInterestPeriodType compoundingPeriodType = SavingsCompoundingInterestPeriodType
                 .fromInt(savingsAccount.getInterestCompoundingPeriodType());
