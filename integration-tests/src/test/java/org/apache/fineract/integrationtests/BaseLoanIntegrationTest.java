@@ -295,7 +295,6 @@ public abstract class BaseLoanIntegrationTest {
                 .allowCompoundingOnEod(false)//
                 .canDefineInstallmentAmount(true)//
                 .repaymentStartDateType(1)//
-                .supportedInterestRefundTypes(List.of())//
                 .charges(List.of())//
                 .principalVariationsForBorrowerCycle(List.of())//
                 .interestRateVariationsForBorrowerCycle(List.of())//
@@ -1295,5 +1294,11 @@ public abstract class BaseLoanIntegrationTest {
     public static class FuturePaymentAllocationRule {
 
         public static final String LAST_INSTALLMENT = "LAST_INSTALLMENT";
+    }
+
+    public static class SupportedInterestRefundTypesItem {
+
+        public static final String MERCHANT_ISSUED_REFUND = "MERCHANT_ISSUED_REFUND";
+        public static final String PAYOUT_REFUND = "PAYOUT_REFUND";
     }
 }

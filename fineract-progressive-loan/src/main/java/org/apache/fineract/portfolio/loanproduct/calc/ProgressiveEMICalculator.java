@@ -165,6 +165,11 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             interestPeriod = repaymentPeriod.getInterestPeriods().stream()
                     .filter(ip -> targetDate.isAfter(ip.getFromDate()) && !targetDate.isAfter(ip.getDueDate())).findFirst().orElseThrow();
         }
+        scheduleModelCopy.repaymentPeriods().stream()
+                .filter(rp -> targetDate.isAfter(rp.getFromDate()) && !targetDate.isAfter(rp.getDueDate())).findFirst()
+                .ifPresent(rp -> rp.getInterestPeriods().stream()
+                        .filter(ip -> targetDate.isAfter(ip.getFromDate()) && !targetDate.isAfter(ip.getDueDate()))
+                        .reduce((one, two) -> two).ifPresent(ip -> ip.setDueDate(targetDate)));
         interestPeriod.setDueDate(adjustedTargetDate);
         int index = repaymentPeriod.getInterestPeriods().indexOf(interestPeriod);
         repaymentPeriod.getInterestPeriods().subList(index + 1, repaymentPeriod.getInterestPeriods().size()).clear();
