@@ -868,6 +868,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         if (shouldCreateInterestRefundTransaction) {
             interestRefundTransaction = createInterestRefundLoanTransaction(loan, transactionDate, transactionAmount);
+            if (interestRefundTransaction != null) {
+                interestRefundTransaction.getLoanTransactionRelations().add(LoanTransactionRelation
+                        .linkToTransaction(interestRefundTransaction, refundTransaction, LoanTransactionRelationTypeEnum.RELATED));
+            }
         }
 
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = transactionProcessorFactory

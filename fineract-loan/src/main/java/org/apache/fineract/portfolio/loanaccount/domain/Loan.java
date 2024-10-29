@@ -2686,6 +2686,19 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         transactionForAdjustment.reverse(reversalExternalId);
         transactionForAdjustment.manuallyAdjustedOrReversed();
 
+        if (transactionForAdjustment.getTypeOf().equals(LoanTransactionType.MERCHANT_ISSUED_REFUND)
+                || transactionForAdjustment.getTypeOf().equals(LoanTransactionType.PAYOUT_REFUND)) {
+            getLoanTransactions().stream() //
+                    .filter(LoanTransaction::isNotReversed)
+                    .filter(loanTransaction -> loanTransaction.getLoanTransactionRelations().stream()
+                            .anyMatch(relation -> relation.getRelationType().equals(LoanTransactionRelationTypeEnum.RELATED)
+                                    && relation.getToTransaction().getId().equals(transactionForAdjustment.getId())))
+                    .forEach(loanTransaction -> {
+                        loanTransaction.reverse();
+                        loanTransaction.manuallyAdjustedOrReversed();
+                    });
+        }
+
         if (isClosedWrittenOff()) {
             // find write off transaction and reverse it
             final LoanTransaction writeOffTransaction = findWriteOffTransaction();
