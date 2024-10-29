@@ -24,24 +24,38 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.jetbrains.annotations.NotNull;
 
 @Getter
-public class ChargeOrTransaction implements Comparable<ChargeOrTransaction> {
+public class ChangeOperation implements Comparable<ChangeOperation> {
 
+    private final Optional<LoanTermVariationsData> interestRateChange;
     private final Optional<LoanCharge> loanCharge;
     private final Optional<LoanTransaction> loanTransaction;
 
-    public ChargeOrTransaction(LoanCharge loanCharge) {
+    public ChangeOperation(LoanCharge loanCharge) {
+        this.interestRateChange = Optional.empty();
         this.loanCharge = Optional.of(loanCharge);
         this.loanTransaction = Optional.empty();
     }
 
-    public ChargeOrTransaction(LoanTransaction loanTransaction) {
+    public ChangeOperation(LoanTransaction loanTransaction) {
+        this.interestRateChange = Optional.empty();
         this.loanTransaction = Optional.of(loanTransaction);
         this.loanCharge = Optional.empty();
+    }
+
+    public ChangeOperation(LoanTermVariationsData interestRateChange) {
+        this.interestRateChange = Optional.of(interestRateChange);
+        this.loanTransaction = Optional.empty();
+        this.loanCharge = Optional.empty();
+    }
+
+    public boolean isInterestRateChange() {
+        return interestRateChange.isPresent();
     }
 
     public boolean isTransaction() {
@@ -52,8 +66,18 @@ public class ChargeOrTransaction implements Comparable<ChargeOrTransaction> {
         return loanCharge.isPresent();
     }
 
+    private boolean isAccrualActivity() {
+        return isTransaction() && loanTransaction.get().isAccrualActivity();
+    }
+
+    private boolean isBackdatedCharge() {
+        return isCharge() && DateUtils.isBefore(loanCharge.get().getDueDate(), loanCharge.get().getSubmittedOnDate());
+    }
+
     private LocalDate getEffectiveDate() {
-        if (loanCharge.isPresent()) {
+        if (interestRateChange.isPresent()) {
+            return getSubmittedOnDate();
+        } else if (loanCharge.isPresent()) {
             if (isBackdatedCharge()) {
                 return loanCharge.get().getDueDate();
             } else {
@@ -66,16 +90,10 @@ public class ChargeOrTransaction implements Comparable<ChargeOrTransaction> {
         }
     }
 
-    private boolean isAccrualActivity() {
-        return isTransaction() && loanTransaction.get().isAccrualActivity();
-    }
-
-    private boolean isBackdatedCharge() {
-        return isCharge() && DateUtils.isBefore(loanCharge.get().getDueDate(), loanCharge.get().getSubmittedOnDate());
-    }
-
     private LocalDate getSubmittedOnDate() {
-        if (loanCharge.isPresent()) {
+        if (interestRateChange.isPresent()) {
+            return interestRateChange.get().getTermVariationApplicableFrom();
+        } else if (loanCharge.isPresent()) {
             return loanCharge.get().getSubmittedOnDate();
         } else if (loanTransaction.isPresent()) {
             return loanTransaction.get().getSubmittedOnDate();
@@ -85,7 +103,9 @@ public class ChargeOrTransaction implements Comparable<ChargeOrTransaction> {
     }
 
     private OffsetDateTime getCreatedDateTime() {
-        if (loanCharge.isPresent() && loanCharge.get().getCreatedDate().isPresent()) {
+        if (interestRateChange.isPresent()) {
+            return DateUtils.getOffsetDateTimeOfTenantFromLocalDate(getSubmittedOnDate());
+        } else if (loanCharge.isPresent() && loanCharge.get().getCreatedDate().isPresent()) {
             return loanCharge.get().getCreatedDate().get();
         } else if (loanTransaction.isPresent()) {
             return loanTransaction.get().getCreatedDateTime();
@@ -96,16 +116,16 @@ public class ChargeOrTransaction implements Comparable<ChargeOrTransaction> {
 
     @Override
     @SuppressFBWarnings(value = "EQ_COMPARETO_USE_OBJECT_EQUALS", justification = "TODO: fix this! See: https://stackoverflow.com/questions/2609037/findbugs-how-to-solve-eq-compareto-use-object-equals")
-    public int compareTo(@NotNull ChargeOrTransaction o) {
+    public int compareTo(@NotNull ChangeOperation o) {
         int datePortion = DateUtils.compare(this.getEffectiveDate(), o.getEffectiveDate());
         if (datePortion == 0) {
-            boolean isAccrual = isAccrualActivity();
+            final boolean isAccrual = isAccrualActivity();
             if (isAccrual != o.isAccrualActivity()) {
                 return isAccrual ? 1 : -1;
             }
             int submittedDate = DateUtils.compare(getSubmittedOnDate(), o.getSubmittedOnDate());
             if (submittedDate == 0) {
-                return DateUtils.compare(getCreatedDateTime(), o.getCreatedDateTime());
+                return DateUtils.compare(getCreatedDateTime(), o.getCreatedDateTime(), null);
             }
             return submittedDate;
         }

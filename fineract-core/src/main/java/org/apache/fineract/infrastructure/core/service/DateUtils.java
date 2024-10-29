@@ -79,6 +79,11 @@ public final class DateUtils {
         return truncate == null ? now : now.truncatedTo(truncate);
     }
 
+    @NotNull
+    public static OffsetDateTime getOffsetDateTimeOfTenantFromLocalDate(@NotNull final LocalDate date) {
+        return OffsetDateTime.of(date.atStartOfDay(), getOffsetDateTimeOfTenant().getOffset());
+    }
+
     public static LocalDateTime getLocalDateTimeOfSystem() {
         return getLocalDateTimeOfSystem(null);
     }

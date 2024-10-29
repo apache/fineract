@@ -22,9 +22,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import org.jetbrains.annotations.NotNull;
 
-public record InterestRate(LocalDate effectiveFrom, //
-        LocalDate validFrom, //
-        BigDecimal interestRate //
+public record InterestRate(//
+        LocalDate effectiveFrom, //
+        BigDecimal interestRate//
 ) implements Comparable<InterestRate> {
 
     @Override

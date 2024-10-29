@@ -127,8 +127,12 @@ public class RepaymentPeriod {
         return getEmi().minus(getCalculatedDueInterest(), mc);
     }
 
+    public Money getTotalPaidAmount() {
+        return getPaidPrincipal().plus(getPaidInterest());
+    }
+
     public boolean isFullyPaid() {
-        return getEmi().isEqualTo(getPaidPrincipal().plus(getPaidInterest()));
+        return getEmi().isEqualTo(getTotalPaidAmount());
     }
 
     public Money getDueInterest() {
