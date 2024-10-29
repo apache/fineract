@@ -280,6 +280,9 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
                 .principal(result.getOutstandingBalance()) //
                 .interest(result.getPayableInterest());
 
+        installments.stream().filter(installment -> installment.getDueDate().isBefore(onDate))
+                .forEach(installment -> amounts.plusInterest(installment.getInterestOutstanding(currency)));
+
         installments.forEach(installment -> amounts //
                 .plusFeeCharges(installment.getFeeChargesOutstanding(currency))
                 .plusPenaltyCharges(installment.getPenaltyChargesOutstanding(currency)));
