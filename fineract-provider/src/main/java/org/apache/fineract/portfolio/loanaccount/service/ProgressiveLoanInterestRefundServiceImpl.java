@@ -27,13 +27,17 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.ProgressiveLoanInterestScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.starter.AdvancedPaymentScheduleTransactionProcessorCondition;
 import org.apache.fineract.portfolio.loanproduct.calc.EMICalculator;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedInterestRefundTypes;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -78,15 +82,28 @@ public class ProgressiveLoanInterestRefundServiceImpl implements InterestRefundS
         BigDecimal payableInterest = BigDecimal.ZERO;
         if (loan.getLoanTransactions().stream().anyMatch(LoanTransaction::isDisbursement)) {
             List<LoanTransaction> transactionsToReprocess = new ArrayList<>();
-            loan.getLoanTransactions().stream().filter(lt -> !lt.isReversed()) //
-                    .filter(lt -> !lt.isAccrual() && !lt.isAccrualActivity()) //
+            List<LoanTransactionType> interestRefundTypes = loan.getLoanProductRelatedDetail().getSupportedInterestRefundTypes().stream()
+                    .map(LoanSupportedInterestRefundTypes::getTransactionType).toList();
+            // add already interest refunded amounts to refund amount
+            // it is necessary to avoid multi disbursed refund
+            loan.getLoanTransactions().stream() //
+                    .filter(lt -> !lt.isReversed()) //
+                    .filter(lt -> interestRefundTypes.contains(lt.getTypeOf())) //
+                    .forEach(t -> refundFinal.set(refundFinal.get().add(t.getAmount()))); //
+            loan.getLoanTransactions().stream() //
+                    .filter(lt -> !lt.isReversed()) //
+                    .filter(lt -> !lt.isAccrual() && !lt.isAccrualActivity() && !lt.isInterestRefund()) //
+                    .filter(loanTransaction -> !interestRefundTypes.contains(loanTransaction.getTypeOf())) //
                     .forEach(lt -> simulateRepaymentForDisbursements(lt, refundFinal, transactionsToReprocess)); //
 
             List<LoanRepaymentScheduleInstallment> installmentsToReprocess = new ArrayList<>(
                     loan.getRepaymentScheduleInstallments().stream().filter(i -> !i.isReAged() && !i.isAdditional()).toList());
 
-            ProgressiveLoanInterestScheduleModel modelAfter = processor.reprocessProgressiveLoanTransactions(loan.getDisbursementDate(),
-                    transactionsToReprocess, loan.getCurrency(), installmentsToReprocess, loan.getActiveCharges()).getRight();
+            Pair<ChangedTransactionDetail, ProgressiveLoanInterestScheduleModel> reprocessResult = processor
+                    .reprocessProgressiveLoanTransactions(loan.getDisbursementDate(), transactionsToReprocess, loan.getCurrency(),
+                            installmentsToReprocess, loan.getActiveCharges());
+            loan.getLoanTransactions().addAll(reprocessResult.getLeft().getCurrentTransactionToOldId().keySet());
+            ProgressiveLoanInterestScheduleModel modelAfter = reprocessResult.getRight();
 
             payableInterest = installmentsToReprocess.stream() //
                     .map(installment -> emiCalculator //
