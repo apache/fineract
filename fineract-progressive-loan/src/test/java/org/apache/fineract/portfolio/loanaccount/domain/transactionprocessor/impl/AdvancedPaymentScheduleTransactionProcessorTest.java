@@ -24,9 +24,11 @@ import static org.apache.fineract.portfolio.loanproduct.domain.AllocationType.IN
 import static org.apache.fineract.portfolio.loanproduct.domain.AllocationType.PENALTY;
 import static org.apache.fineract.portfolio.loanproduct.domain.AllocationType.PRINCIPAL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.refEq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -64,6 +66,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationT
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.ProgressiveLoanInterestScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanproduct.calc.EMICalculator;
 import org.apache.fineract.portfolio.loanproduct.domain.AllocationType;
@@ -421,6 +424,87 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         assertEquals(0, fee.getValue().getAmount().compareTo(BigDecimal.valueOf(10.0)));
         assertEquals(0, penalty.getValue().getAmount().compareTo(BigDecimal.valueOf(5.0)));
         assertEquals(0, interest.getValue().getAmount().compareTo(BigDecimal.ZERO));
+    }
+
+    @Test
+    public void testProcessLatestTransaction_PassesThroughHandlingPaymentAllocationForInterestBearingProgressiveLoan() {
+        // Set up transaction amount, currency, and dates
+        BigDecimal transactionAmount = BigDecimal.valueOf(100.00);
+        LocalDate disbursementDate = LocalDate.of(2023, 1, 1);
+        LocalDate transactionDate = disbursementDate.plusMonths(1);
+
+        MonetaryCurrency currency = MONETARY_CURRENCY;
+        Money transactionAmountMoney = Money.of(currency, transactionAmount);
+
+        // Set up LoanTransaction
+        LoanTransaction loanTransaction = mock(LoanTransaction.class);
+        when(loanTransaction.getTypeOf()).thenReturn(LoanTransactionType.CHARGE_PAYMENT);
+        when(loanTransaction.getAmount()).thenReturn(transactionAmount);
+        when(loanTransaction.getAmount(currency)).thenReturn(transactionAmountMoney);
+        when(loanTransaction.getTransactionDate()).thenReturn(transactionDate);
+
+        // Set up Loan and related details
+        Loan loan = mock(Loan.class);
+        LoanProductRelatedDetail loanProductRelatedDetail = mock(LoanProductRelatedDetail.class);
+        LoanPaymentAllocationRule loanPaymentAllocationRule = mock(LoanPaymentAllocationRule.class);
+        when(loan.isInterestBearing()).thenReturn(true);
+        when(loanProductRelatedDetail.isInterestRecalculationEnabled()).thenReturn(true);
+
+        when(loanTransaction.getLoan()).thenReturn(loan);
+        when(loan.loanCurrency()).thenReturn(currency);
+        when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
+        when(loanProductRelatedDetail.getLoanScheduleProcessingType()).thenReturn(LoanScheduleProcessingType.HORIZONTAL);
+        when(loan.getPaymentAllocationRules()).thenReturn(List.of(loanPaymentAllocationRule));
+        when(loan.isInterestBearing()).thenReturn(true);
+        when(loanProductRelatedDetail.isInterestRecalculationEnabled()).thenReturn(true);
+
+        when(loanPaymentAllocationRule.getTransactionType()).thenReturn(PaymentAllocationTransactionType.DEFAULT);
+        when(loanPaymentAllocationRule.getAllocationTypes())
+                .thenReturn(List.of(PaymentAllocationType.DUE_PRINCIPAL, PaymentAllocationType.DUE_INTEREST));
+
+        // Create an installment that is due
+        LoanRepaymentScheduleInstallment installment = spy(
+                new LoanRepaymentScheduleInstallment(loan, 1, disbursementDate, transactionDate, BigDecimal.valueOf(100L),
+                        BigDecimal.valueOf(0L), BigDecimal.valueOf(100L), BigDecimal.valueOf(0L), false, null, BigDecimal.ZERO));
+
+        // Let's set up a credit transaction so that its transaction date coincides with the payment due date
+        when(loanTransaction.getTransactionDate()).thenReturn(transactionDate);
+        when(loanTransaction.isOn(transactionDate)).thenReturn(true);
+
+        List<LoanRepaymentScheduleInstallment> installments = List.of(installment);
+        MoneyHolder overpaymentHolder = new MoneyHolder(Money.zero(currency));
+        ProgressiveLoanInterestScheduleModel model = mock(ProgressiveLoanInterestScheduleModel.class);
+        when(model.getMaturityDate()).thenReturn(LocalDate.of(2023, 12, 31));
+        ChangedTransactionDetail changedTransactionDetail = mock(ChangedTransactionDetail.class);
+
+        // Set up TransactionCtx with installments and charges
+        TransactionCtx ctx = new ProgressiveTransactionCtx(currency, installments, Set.of(), overpaymentHolder, changedTransactionDetail,
+                model);
+
+        // Mock additional necessary methods
+        LoanCharge loanCharge = mock(LoanCharge.class);
+        when(loanTransaction.getLoanChargesPaid())
+                .thenReturn(Set.of(new LoanChargePaidBy(loanTransaction, loanCharge, transactionAmount, 1)));
+        when(loanCharge.getAmountOutstanding(currency)).thenReturn(transactionAmountMoney);
+        when(loanTransaction.isAfter(any(LocalDate.class))).thenReturn(true); // Mock to simulate past due date check
+
+        // Run the processLatestTransaction method
+        underTest.processLatestTransaction(loanTransaction, ctx);
+
+        // Verification of expected behavior
+        ArgumentCaptor<Money> paidPortionCaptor = ArgumentCaptor.forClass(Money.class);
+        ArgumentCaptor<LocalDate> payDateCaptor = ArgumentCaptor.forClass(LocalDate.class);
+
+        // Verify `payPrincipal` is called when allocation type is DUE_PRINCIPAL
+        Mockito.verify(emiCalculator, atLeastOnce()).payPrincipal(eq(model), eq(transactionDate), payDateCaptor.capture(),
+                paidPortionCaptor.capture());
+        Money paidPortion = paidPortionCaptor.getValue();
+        LocalDate payDate = payDateCaptor.getValue();
+
+        // Assert that `paidPortion` and `payDate` match expected values
+        assertNotNull(paidPortion);
+        assertNotNull(payDate);
+        assertEquals(transactionAmountMoney.toString(), paidPortion.toString());
     }
 
     private LoanRepaymentScheduleInstallment createMockInstallment(LocalDate localDate, boolean isAdditional) {

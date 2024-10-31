@@ -1552,6 +1552,14 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         Money paidPortion;
         ProgressiveLoanInterestScheduleModel model = ctx.getModel();
         LocalDate payDate = loanTransaction.getTransactionDate();
+
+        if (installment.isDownPayment() || installment.getDueDate().isAfter(ctx.getModel().getMaturityDate())) {
+            // Skip interest and principal payment processing for down payment period or periods after loan maturity
+            // date
+            return processPaymentAllocation(paymentAllocationType, installment, loanTransaction, transactionAmountUnprocessed,
+                    loanTransactionToRepaymentScheduleMapping, charges, balances, LoanRepaymentScheduleInstallment.PaymentAction.PAY);
+        }
+
         if (DueType.IN_ADVANCE.equals(paymentAllocationType.getDueType())) {
             payDate = calculateNewPayDateInCaseOfInAdvancePayment(loanTransaction, installment);
             updateRepaymentPeriodBalances(paymentAllocationType, installment, model, payDate);
