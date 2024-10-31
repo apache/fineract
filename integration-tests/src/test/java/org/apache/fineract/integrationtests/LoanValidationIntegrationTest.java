@@ -69,7 +69,7 @@ public class LoanValidationIntegrationTest {
     public void checkPrincipalErrors() {
         final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
         String username = Utils.uniqueRandomStringGenerator("user", 8);
-        UserHelper.createUser(this.requestSpec, this.responseSpec, 1, staffId, username, "P4ssw0rd", "resourceId");
+        UserHelper.createUser(this.requestSpec, this.responseSpec, 1, staffId, username, "A1b2c3d4e5f$", "resourceId");
 
         LOG.info("-------------------------Creating Client---------------------------");
         final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);

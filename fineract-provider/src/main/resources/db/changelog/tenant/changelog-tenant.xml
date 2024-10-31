@@ -170,4 +170,5 @@
     <include file="parts/0149_update_global_configuration_names.xml" relativeToChangelogFile="true" />
     <include file="parts/0150_transaction_summary_with_asset_owner_report_interest_waiver_interest_refund_added.xml" relativeToChangelogFile="true" />
     <include file="parts/0151_interest_refund_business_events.xml" relativeToChangelogFile="true" />
+    <include file="parts/0152_update_password_validation_policy.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

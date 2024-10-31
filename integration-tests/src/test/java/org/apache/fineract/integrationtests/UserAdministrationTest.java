@@ -19,6 +19,7 @@
 
 package org.apache.fineract.integrationtests;
 
+import com.google.gson.JsonObject;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -185,7 +186,7 @@ public class UserAdministrationTest extends IntegrationTest {
     public void testApplicationUserCanChangeOwnPassword() {
         // Admin creates a new user with an empty role
         Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
-        String originalPassword = "aA1qwerty56";
+        String originalPassword = "QwE!5rTy#9uP0";
         String simpleUsername = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
         GetOfficesResponse headOffice = OfficeHelper.getHeadOffice(requestSpec, responseSpec);
         PostUsersRequest createUserRequest = new PostUsersRequest().username(simpleUsername)
@@ -198,7 +199,7 @@ public class UserAdministrationTest extends IntegrationTest {
         Assertions.assertNotNull(userId);
 
         // User updates its own password
-        String updatedPassword = "aA1qwerty56!";
+        String updatedPassword = "QwE!5rTy#9uP0u";
         PutUsersUserIdResponse putUsersUserIdResponse = ok(newFineract(simpleUsername, originalPassword).users.update26(userId,
                 new PutUsersUserIdRequest().password(updatedPassword).repeatPassword(updatedPassword)));
         Assertions.assertNotNull(putUsersUserIdResponse.getResourceId());
@@ -218,7 +219,7 @@ public class UserAdministrationTest extends IntegrationTest {
     public void testApplicationUserShallNotBeAbleToChangeItsOwnRoles() {
         // Admin creates a new user with one role assigned
         Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
-        String password = "aA1qwerty56";
+        String password = "QwE!5rTy#9uP0";
         String simpleUsername = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
         GetOfficesResponse headOffice = OfficeHelper.getHeadOffice(requestSpec, responseSpec);
         PostUsersRequest createUserRequest = new PostUsersRequest().username(simpleUsername)
@@ -243,4 +244,41 @@ public class UserAdministrationTest extends IntegrationTest {
         Assertions.assertTrue(callFailedRuntimeException.getMessage().contains("not.enough.permission.to.update.fields"));
     }
 
+    @Test
+    public void testUserCreationWithValidPassword() {
+        String validPassword = "Abcdef1#2$3%XYZ";
+
+        PostUsersRequest createUserRequest = UserHelper.buildUserRequest(responseSpec, requestSpec, validPassword);
+        PostUsersResponse userCreationResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
+
+        Assertions.assertNotNull(userCreationResponse.getResourceId());
+    }
+
+    @Test
+    public void testUserCreationWithInvalidPasswords() {
+        Map<String, String> invalidPasswords = Map.ofEntries(Map.entry("TooShort", "Ab1#Xyz"), // Less than 12
+                                                                                               // characters
+                Map.entry("NoUppercase", "abcdefg1#2$3%xyz"), // Missing uppercase letter
+                Map.entry("NoLowercase", "ABCDEFG1#2$3%XYZ"), // Missing lowercase letter
+                Map.entry("NoDigit", "Abcdefg#@$%XYZabc"), // Missing digit
+                Map.entry("NoSpecialChar", "Abcdefg123456XYZ"), // Missing special character
+                Map.entry("ContainsWhitespace", "Abcdefg1# 2$3%"), // Contains whitespace
+                Map.entry("RepeatedCharacters", "AAbbcc11##$$%%YY") // Contains repeated characters
+        );
+        this.responseSpec = new ResponseSpecBuilder().build();
+
+        invalidPasswords.forEach((description, password) -> {
+            PostUsersRequest createUserRequest = UserHelper.buildUserRequest(responseSpec, requestSpec, password);
+            JsonObject jsonResponse = UserHelper.createUserWithJsonResponse(requestSpec, responseSpec, createUserRequest);
+            Assertions.assertEquals("400", jsonResponse.get("httpStatusCode").getAsString(), "Expected HTTP 400 for: " + description);
+            Assertions.assertEquals("validation.msg.validation.errors.exist",
+                    jsonResponse.get("userMessageGlobalisationCode").getAsString(), "Expected user message code for: " + description);
+
+            JsonObject errorDetails = jsonResponse.getAsJsonArray("errors").get(0).getAsJsonObject();
+            Assertions.assertEquals("password", errorDetails.get("parameterName").getAsString(),
+                    "Expected validation error parameter name for: " + description);
+            Assertions.assertEquals("validation.msg.user.password.does.not.match.regexp",
+                    errorDetails.get("userMessageGlobalisationCode").getAsString(), "Expected validation code for: " + description);
+        });
+    }
 }

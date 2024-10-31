@@ -76,8 +76,8 @@ public class UserStepDef extends AbstractStepDef {
                 .lastname(username) //
                 .sendPasswordToEmail(Boolean.FALSE) //
                 .officeId(1L) //
-                .password(apiProperties.getPassword()) //
-                .repeatPassword(apiProperties.getPassword()) //
+                .password(apiProperties.getStrongPassword()) //
+                .repeatPassword(apiProperties.getStrongPassword()) //
                 .roles(List.of(roleId));
 
         Response<PostUsersResponse> createUserResponse = usersApi.create15(postUsersRequest).execute();

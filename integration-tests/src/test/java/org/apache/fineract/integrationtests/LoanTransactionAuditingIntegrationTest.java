@@ -79,7 +79,7 @@ public class LoanTransactionAuditingIntegrationTest {
     public void checkAuditDates() throws InterruptedException {
         final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
         String username = Utils.uniqueRandomStringGenerator("user", 8);
-        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, 1, staffId, username, "P4ssw0rd",
+        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, 1, staffId, username, "A1b2c3d4e5f$",
                 "resourceId");
 
         LOG.info("-------------------------Creating Client---------------------------");
@@ -128,7 +128,7 @@ public class LoanTransactionAuditingIntegrationTest {
 
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization",
-                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(username, "P4ssw0rd"));
+                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(username, "A1b2c3d4e5f$"));
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
 
         OffsetDateTime now2 = Utils.getAuditDateTimeToCompare();

@@ -37,6 +37,7 @@ jobs:
           BASE_URL: https://localhost:8443
           TEST_USERNAME: mifos
           TEST_PASSWORD: password
+          TEST_STRONG_PASSWORD: A1b2c3d4e5f$
           TEST_TENANT_ID: default
           INITIALIZATION_ENABLED: true
           EVENT_VERIFICATION_ENABLED: false

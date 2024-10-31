@@ -32,6 +32,8 @@ public class ApiProperties {
     private String username;
     @Value("${fineract-test.api.password}")
     private String password;
+    @Value("${fineract-test.api.strong-password}")
+    private String strongPassword;
     @Value("${fineract-test.api.tenant-id}")
     private String tenantId;
 }

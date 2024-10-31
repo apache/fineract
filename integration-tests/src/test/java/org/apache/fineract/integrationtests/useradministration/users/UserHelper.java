@@ -19,6 +19,8 @@
 package org.apache.fineract.integrationtests.useradministration.users;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
@@ -44,7 +46,7 @@ public final class UserHelper {
     private static final String READ_LOAN_PERMISSION = "READ_LOAN";
 
     public static final String SIMPLE_USER_NAME = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
-    public static final String SIMPLE_USER_PASSWORD = "aA1qwerty56";
+    public static final String SIMPLE_USER_PASSWORD = "QwE!5rTy#9uP0";
     private static boolean SIMPLE_USER_CREATED = false;
 
     private UserHelper() {}
@@ -71,6 +73,13 @@ public final class UserHelper {
         String requestBody = GSON.toJson(request);
         String response = Utils.performServerPost(requestSpec, responseSpec, CREATE_USER_URL, requestBody);
         return GSON.fromJson(response, PostUsersResponse.class);
+    }
+
+    public static JsonObject createUserWithJsonResponse(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            PostUsersRequest request) {
+        String requestBody = GSON.toJson(request);
+        String jsonResponse = Utils.performServerPost(requestSpec, responseSpec, CREATE_USER_URL, requestBody);
+        return JsonParser.parseString(jsonResponse).getAsJsonObject();
     }
 
     public static Object createUserForSelfService(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -159,6 +168,16 @@ public final class UserHelper {
         responseRequestSpec.header("Authorization",
                 "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(SIMPLE_USER_NAME, password));
         return responseRequestSpec;
+    }
+
+    public static PostUsersRequest buildUserRequest(ResponseSpecification responseSpec, RequestSpecification requestSpec, String password) {
+        Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
+        String uniqueUsername = Utils.uniqueRandomStringGenerator("TestUser", 4);
+        GetOfficesResponse headOffice = OfficeHelper.getHeadOffice(requestSpec, responseSpec);
+
+        return new PostUsersRequest().username(uniqueUsername).firstname("Test").lastname("User").email("testuser@example.com")
+                .password(password).repeatPassword(password).sendPasswordToEmail(false).officeId(headOffice.getId())
+                .roles(List.of(roleId.longValue()));
     }
 
     private static String createSimpleRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
