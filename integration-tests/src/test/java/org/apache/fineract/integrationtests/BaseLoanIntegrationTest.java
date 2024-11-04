@@ -867,8 +867,8 @@ public abstract class BaseLoanIntegrationTest {
         return postLoansRequest;
     }
 
-    protected PostLoansRequest applyPin4ProgressiveLoanRequest(Long clientId, Long loanProductId, String loanDisbursementDate,
-            Double amount, Double interestRate, int numberOfRepayments, Consumer<PostLoansRequest> customizer) {
+    protected PostLoansRequest applyLP2ProgressiveLoanRequest(Long clientId, Long loanProductId, String loanDisbursementDate, Double amount,
+            Double interestRate, int numberOfRepayments, Consumer<PostLoansRequest> customizer) {
 
         PostLoansRequest postLoansRequest = new PostLoansRequest().clientId(clientId)
                 .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION_STRATEGY).productId(loanProductId)
@@ -912,7 +912,7 @@ public abstract class BaseLoanIntegrationTest {
 
     protected Long applyAndApproveProgressiveLoan(Long clientId, Long loanProductId, String loanDisbursementDate, Double amount,
             Double interestRate, int numberOfRepayments, Consumer<PostLoansRequest> customizer) {
-        PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applyPin4ProgressiveLoanRequest(clientId, loanProductId,
+        PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applyLP2ProgressiveLoanRequest(clientId, loanProductId,
                 loanDisbursementDate, amount, interestRate, numberOfRepayments, customizer));
 
         PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),

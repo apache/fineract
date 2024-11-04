@@ -5518,6 +5518,197 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
         });
     }
 
+    // UC151: Validate Prepayment calculation till Pay-off date
+    // 1. Create a Loan product with Adv. Pment. Alloc. and with Declining Balance, 7% interest rate
+    // 2. Submit Loan, approve and Disburse
+    // 3. Validate Pay-off amounts on 31/12/2023, 01/01/2024, 02/01/2024, 01/02/2024, 02/02/2024, 15/02/2024, 01/03/2024
+    // 4. Pay 1st installment fully on the due date of the 1st period
+    // 5. Validate Pay-off amounts on 31/12/2023, 01/01/2024, 02/01/2024, 01/02/2024, 02/02/2024, 15/02/2024, 01/03/2024
+    // 6. Pay 2nd installment partially in the middle of 2nd period (15/02/2024)
+    // 7. Validate Pay-off amounts on 31/12/2023, 01/01/2024, 02/01/2024, 01/02/2024, 02/02/2024, 15/02/2024, 01/03/2024
+    // 8. Prepay the loan on 15/02/2024
+    @Test
+    public void uc151() {
+        String operationDate = "01 January 2024";
+        AtomicLong createdLoanId = new AtomicLong();
+        runAt(operationDate, () -> {
+            Long clientId = client.getClientId();
+            PostLoanProductsRequest product = create4IProgressive().interestRateFrequencyType(YEARS).numberOfRepayments(6)//
+                    .repaymentEvery(1)//
+                    .repaymentFrequencyType(1L)//
+                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .multiDisburseLoan(true)//
+                    .maxTrancheCount(10)//
+                    .disallowExpectedDisbursements(true)//
+                    .allowApprovedDisbursedAmountsOverApplied(null)//
+                    .overAppliedCalculationType(null)//
+                    .overAppliedNumber(null)//
+                    .installmentAmountInMultiplesOf(null)//
+                    .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString()) //
+            ;//
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            PostLoansRequest applicationRequest = applyLP2ProgressiveLoanRequest(clientId, loanProductResponse.getResourceId(),
+                    operationDate, 1000.0, 7.0, 6, null);
+
+            applicationRequest = applicationRequest.interestCalculationPeriodType(DAYS)
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY);
+
+            PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            createdLoanId.set(loanResponse.getLoanId());
+
+            loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000.0)).dateFormat(DATETIME_PATTERN)
+                            .approvedOnDate(operationDate).locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest().actualDisbursementDate(operationDate)
+                    .dateFormat(DATETIME_PATTERN).transactionAmount(BigDecimal.valueOf(100.0)).locale("en"));
+
+            // Before 1st disbursement date
+            HashMap prepayAmounts = loanTransactionHelper.getPrepayAmount(requestSpec, responseSpec, createdLoanId.intValue(),
+                    LocalDate.of(2023, 12, 31));
+            assertEquals(100.0f, prepayAmounts.get("amount"));
+            assertEquals(0.0f, prepayAmounts.get("interestPortion"));
+            assertEquals(100.0f, prepayAmounts.get("principalPortion"));
+            // On 1st day
+            prepayAmounts = loanTransactionHelper.getPrepayAmount(requestSpec, responseSpec, createdLoanId.intValue(),
+                    LocalDate.of(2024, 1, 1));
+            assertEquals(100.0f, prepayAmounts.get("amount"));
+            assertEquals(0.0f, prepayAmounts.get("interestPortion"));
+            assertEquals(100.0f, prepayAmounts.get("principalPortion"));
+            // On 2nd day
+            prepayAmounts = loanTransactionHelper.getPrepayAmount(requestSpec, responseSpec, createdLoanId.intValue(),
+                    LocalDate.of(2024, 1, 2));
+            assertEquals(100.02f, prepayAmounts.get("amount"));
+            assertEquals(0.02f, prepayAmounts.get("interestPortion"));
+            assertEquals(100.0f, prepayAmounts.get("principalPortion"));
+            // On due date of 1st period
+            prepayAmounts = loanTransactionHelper.getPrepayAmount(requestSpec, responseSpec, createdLoanId.intValue(),
+                    LocalDate.of(2024, 2, 1));
+            assertEquals(100.58f, prepayAmounts.get("amount"));
+            assertEquals(0.58f, prepayAmounts.get("interestPortion"));
+            assertEquals(100.0f, prepayAmounts.get("principalPortion"));
+            // On the 1st day of 2nd period
+            prepayAmounts = loanTransactionHelper.getPrepayAmount(requestSpec, responseSpec, createdLoanId.intValue(),
+                    LocalDate.of(2024, 2, 2));
+            assertEquals(100.60f, prepayAmounts.get("amount"));
+            assertEquals(0.60f, prepayAmounts.get("interestPortion"));
+            assertEquals(100.0f, prepayAmounts.get("principalPortion"));
+            // In the middle of 2nd period (15 Feb)
+            prepayAmounts = loanTransactionHelper.getPrepayAmount(requestSpec, responseSpec, createdLoanId.intValue(),
+                    LocalDate.of(2024, 2, 15));
+            assertEquals(100.86f, prepayAmounts.get("amount"));
+            assertEquals(0.86f, prepayAmounts.get("interestPortion"));
+            assertEquals(100.0f, prepayAmounts.get("principalPortion"));
+            // On the due date of 2nd period
+            prepayAmounts = loanTransactionHelper.getPrepayAmount(requestSpec, responseSpec, createdLoanId.intValue(),
+                    LocalDate.of(2024, 3, 1));
+            assertEquals(101.16f, prepayAmounts.get("amount"));
+            assertEquals(1.16f, prepayAmounts.get("interestPortion"));
+            assertEquals(100.0f, prepayAmounts.get("principalPortion"));
+        });
+        String repaymentDate = "01 February 2024";
+        runAt(repaymentDate, () -> {
+            loanTransactionHelper.makeLoanRepayment(createdLoanId.get(), new PostLoansLoanIdTransactionsRequest()
+                    .transactionDate(repaymentDate).dateFormat("dd MMMM yyyy").locale("en").transactionAmount(17.01));
+            // Before 1st disbursement date
+            HashMap prepayAmounts = loanTransactionHelper.getPrepayAmount(requestSpec, responseSpec, createdLoanId.intValue(),
+                    LocalDate.of(2023, 12, 31));
+            assertEquals(83.57f, prepayAmounts.get("amount"));
+            assertEquals(0.0f, prepayAmounts.get("interestPortion"));
+            assertEquals(83.57f, prepayAmounts.get("principalPortion"));
+            // On 1st day
+            prepayAmounts = loanTransactionHelper.getPrepayAmount(requestSpec, responseSpec, createdLoanId.intValue(),
+                    LocalDate.of(2024, 1, 1));
+            assertEquals(83.57f, prepayAmounts.get("amount"));
+            assertEquals(0.0f, prepayAmounts.get("interestPortion"));
+            assertEquals(83.57f, prepayAmounts.get("principalPortion"));
+            // On 2nd day
+            prepayAmounts = loanTransactionHelper.getPrepayAmount(requestSpec, responseSpec, createdLoanId.intValue(),
+                    LocalDate.of(2024, 1, 2));
+            assertEquals(83.57f, prepayAmounts.get("amount"));
+            assertEquals(0.00f, prepayAmounts.get("interestPortion"));
+            assertEquals(83.57f, prepayAmounts.get("principalPortion"));
+            // On due date of 1st period
+            prepayAmounts = loanTransactionHelper.getPrepayAmount(requestSpec, responseSpec, createdLoanId.intValue(),
+                    LocalDate.of(2024, 2, 1));
+            assertEquals(83.57f, prepayAmounts.get("amount"));
+            assertEquals(0.0f, prepayAmounts.get("interestPortion"));
+            assertEquals(83.57f, prepayAmounts.get("principalPortion"));
+            // On the 1st day of 2nd period
+            prepayAmounts = loanTransactionHelper.getPrepayAmount(requestSpec, responseSpec, createdLoanId.intValue(),
+                    LocalDate.of(2024, 2, 2));
+            assertEquals(83.59f, prepayAmounts.get("amount"));
+            assertEquals(0.02f, prepayAmounts.get("interestPortion"));
+            assertEquals(83.57f, prepayAmounts.get("principalPortion"));
+            // In the middle of 2nd period (15 Feb)
+            prepayAmounts = loanTransactionHelper.getPrepayAmount(requestSpec, responseSpec, createdLoanId.intValue(),
+                    LocalDate.of(2024, 2, 15));
+            assertEquals(83.81f, prepayAmounts.get("amount"));
+            assertEquals(0.24f, prepayAmounts.get("interestPortion"));
+            assertEquals(83.57f, prepayAmounts.get("principalPortion"));
+            // On the due date of 2nd period
+            prepayAmounts = loanTransactionHelper.getPrepayAmount(requestSpec, responseSpec, createdLoanId.intValue(),
+                    LocalDate.of(2024, 3, 1));
+            assertEquals(84.06f, prepayAmounts.get("amount"));
+            assertEquals(0.49f, prepayAmounts.get("interestPortion"));
+            assertEquals(83.57f, prepayAmounts.get("principalPortion"));
+        });
+
+        String secondRepaymentDate = "15 February 2024";
+        runAt(secondRepaymentDate, () -> {
+            loanTransactionHelper.makeLoanRepayment(createdLoanId.get(), new PostLoansLoanIdTransactionsRequest()
+                    .transactionDate(secondRepaymentDate).dateFormat("dd MMMM yyyy").locale("en").transactionAmount(5.0));
+            // Before 1st disbursement date
+            HashMap prepayAmounts = loanTransactionHelper.getPrepayAmount(requestSpec, responseSpec, createdLoanId.intValue(),
+                    LocalDate.of(2023, 12, 31));
+            assertEquals(78.57f, prepayAmounts.get("amount"));
+            assertEquals(0.0f, prepayAmounts.get("interestPortion"));
+            assertEquals(78.57f, prepayAmounts.get("principalPortion"));
+            // On 1st day
+            prepayAmounts = loanTransactionHelper.getPrepayAmount(requestSpec, responseSpec, createdLoanId.intValue(),
+                    LocalDate.of(2024, 1, 1));
+            assertEquals(78.57f, prepayAmounts.get("amount"));
+            assertEquals(0.0f, prepayAmounts.get("interestPortion"));
+            assertEquals(78.57f, prepayAmounts.get("principalPortion"));
+            // On 2nd day
+            prepayAmounts = loanTransactionHelper.getPrepayAmount(requestSpec, responseSpec, createdLoanId.intValue(),
+                    LocalDate.of(2024, 1, 2));
+            assertEquals(78.57f, prepayAmounts.get("amount"));
+            assertEquals(0.00f, prepayAmounts.get("interestPortion"));
+            assertEquals(78.57f, prepayAmounts.get("principalPortion"));
+            // On due date of 1st period
+            prepayAmounts = loanTransactionHelper.getPrepayAmount(requestSpec, responseSpec, createdLoanId.intValue(),
+                    LocalDate.of(2024, 2, 1));
+            assertEquals(78.57f, prepayAmounts.get("amount"));
+            assertEquals(0.0f, prepayAmounts.get("interestPortion"));
+            assertEquals(78.57f, prepayAmounts.get("principalPortion"));
+            // On the 1st day of 2nd period
+            prepayAmounts = loanTransactionHelper.getPrepayAmount(requestSpec, responseSpec, createdLoanId.intValue(),
+                    LocalDate.of(2024, 2, 2));
+            assertEquals(78.59f, prepayAmounts.get("amount"));
+            assertEquals(0.02f, prepayAmounts.get("interestPortion"));
+            assertEquals(78.57f, prepayAmounts.get("principalPortion"));
+            // In the middle of 2nd period (15 Feb)
+            prepayAmounts = loanTransactionHelper.getPrepayAmount(requestSpec, responseSpec, createdLoanId.intValue(),
+                    LocalDate.of(2024, 2, 15));
+            assertEquals(78.81f, prepayAmounts.get("amount"));
+            assertEquals(0.24f, prepayAmounts.get("interestPortion"));
+            assertEquals(78.57f, prepayAmounts.get("principalPortion"));
+            // On the due date of 2nd period
+            prepayAmounts = loanTransactionHelper.getPrepayAmount(requestSpec, responseSpec, createdLoanId.intValue(),
+                    LocalDate.of(2024, 3, 1));
+            assertEquals(79.05f, prepayAmounts.get("amount"));
+            assertEquals(0.48f, prepayAmounts.get("interestPortion"));
+            assertEquals(78.57f, prepayAmounts.get("principalPortion"));
+
+            loanTransactionHelper.makeLoanRepayment(createdLoanId.get(), new PostLoansLoanIdTransactionsRequest()
+                    .transactionDate(secondRepaymentDate).dateFormat("dd MMMM yyyy").locale("en").transactionAmount(78.81));
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
+            assertTrue(loanDetails.getStatus().getClosedObligationsMet());
+        });
+
+    }
+
     private Long applyAndApproveLoanProgressiveAdvancedPaymentAllocationStrategyMonthlyRepayments(Long clientId, Long loanProductId,
             Integer numberOfRepayments, String loanDisbursementDate, double amount) {
         LOG.info("------------------------------APPLY AND APPROVE LOAN ---------------------------------------");

@@ -25,7 +25,8 @@ import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.data.PayableDetails;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OutstandingDetails;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.PeriodDueDetails;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.ProgressiveLoanInterestScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.RepaymentPeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelRepaymentPeriod;
@@ -55,8 +56,10 @@ public interface EMICalculator {
     void payPrincipal(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate repaymentPeriodDueDate, LocalDate transactionDate,
             Money principalAmount);
 
-    PayableDetails getPayableDetails(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate periodDueDate, LocalDate payDate);
+    PeriodDueDetails getDueAmounts(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate periodDueDate, LocalDate targetDate);
 
-    Money getOutstandingLoanBalance(ProgressiveLoanInterestScheduleModel interestScheduleModel, LocalDate repaymentPeriodDueDate,
+    Money getOutstandingLoanBalanceOfPeriod(ProgressiveLoanInterestScheduleModel interestScheduleModel, LocalDate repaymentPeriodDueDate,
             LocalDate targetDate);
+
+    OutstandingDetails getOutstandingAmountsTillDate(ProgressiveLoanInterestScheduleModel model, LocalDate targetDate);
 }

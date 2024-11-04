@@ -59,7 +59,6 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
-import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
@@ -82,7 +81,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParamet
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.AbstractLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.data.PayableDetails;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.PeriodDueDetails;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.ProgressiveLoanInterestScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanproduct.calc.EMICalculator;
@@ -149,7 +148,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
     // only for progressive loans
     public Pair<ChangedTransactionDetail, ProgressiveLoanInterestScheduleModel> reprocessProgressiveLoanTransactions(
-            LocalDate disbursementDate, List<LoanTransaction> loanTransactions, MonetaryCurrency currency,
+            LocalDate disbursementDate, LocalDate currentDate, List<LoanTransaction> loanTransactions, MonetaryCurrency currency,
             List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges) {
         final ChangedTransactionDetail changedTransactionDetail = new ChangedTransactionDetail();
         if (loanTransactions.isEmpty()) {
@@ -213,7 +212,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             LoanTransaction newTransaction = newTransactionMappings.get(oldTransactionId);
             createNewTransaction(oldTransaction, newTransaction, ctx);
         }
-        recalculateInterestForDate(ThreadLocalContextUtil.getBusinessDate(), ctx);
+        recalculateInterestForDate(currentDate, ctx);
         List<LoanTransaction> txs = changeOperations.stream() //
                 .filter(ChangeOperation::isTransaction) //
                 .map(e -> e.getLoanTransaction().get()).toList();
@@ -248,7 +247,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     @Override
     public ChangedTransactionDetail reprocessLoanTransactions(LocalDate disbursementDate, List<LoanTransaction> loanTransactions,
             MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges) {
-        return reprocessProgressiveLoanTransactions(disbursementDate, loanTransactions, currency, installments, charges).getLeft();
+        LocalDate currentDate = DateUtils.getBusinessLocalDate();
+        return reprocessProgressiveLoanTransactions(disbursementDate, currentDate, loanTransactions, currency, installments, charges)
+                .getLeft();
     }
 
     @NotNull
@@ -1590,11 +1591,11 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
     private void updateRepaymentPeriodBalances(PaymentAllocationType paymentAllocationType,
             LoanRepaymentScheduleInstallment inAdvanceInstallment, ProgressiveLoanInterestScheduleModel model, LocalDate payDate) {
-        PayableDetails payableDetails = emiCalculator.getPayableDetails(model, inAdvanceInstallment.getDueDate(), payDate);
+        PeriodDueDetails payableDetails = emiCalculator.getDueAmounts(model, inAdvanceInstallment.getDueDate(), payDate);
 
         switch (paymentAllocationType) {
-            case IN_ADVANCE_INTEREST -> inAdvanceInstallment.updateInterestCharged(payableDetails.getPayableInterest().getAmount());
-            case IN_ADVANCE_PRINCIPAL -> inAdvanceInstallment.updatePrincipal(payableDetails.getPayablePrincipal().getAmount());
+            case IN_ADVANCE_INTEREST -> inAdvanceInstallment.updateInterestCharged(payableDetails.getDueInterest().getAmount());
+            case IN_ADVANCE_PRINCIPAL -> inAdvanceInstallment.updatePrincipal(payableDetails.getDuePrincipal().getAmount());
             default -> {
             }
         }

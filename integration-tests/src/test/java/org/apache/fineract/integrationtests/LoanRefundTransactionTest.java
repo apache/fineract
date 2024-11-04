@@ -318,7 +318,7 @@ public class LoanRefundTransactionTest extends BaseLoanIntegrationTest {
         final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(
                 create4IProgressive().supportedInterestRefundTypes(new ArrayList<>()).addSupportedInterestRefundTypesItem(refundType));
         PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(
-                applyPin4ProgressiveLoanRequest(clientId, loanProductsResponse.getResourceId(), "01 June 2024", 1000.0, 10.0, 4, null));
+                applyLP2ProgressiveLoanRequest(clientId, loanProductsResponse.getResourceId(), "01 June 2024", 1000.0, 10.0, 4, null));
         Long loanId = postLoansResponse.getLoanId();
         loanTransactionHelper.approveLoan(loanId, approveLoanRequest(1000.0, "01 June 2024"));
         disburseLoan(loanId, BigDecimal.valueOf(1000.0), "01 June 2024");

@@ -1488,6 +1488,15 @@ public class LoanTransactionHelper extends IntegrationTest {
         return response;
     }
 
+    public HashMap getPrepayAmount(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final Integer loanID,
+            final LocalDate transactionDate) {
+        final String URL = "/fineract-provider/api/v1/loans/" + loanID
+                + "/transactions/template?command=prepayLoan&locale=en&dateFormat=yyyy-MM-dd&transactionDate=" + transactionDate + "&"
+                + Utils.TENANT_IDENTIFIER;
+        final HashMap response = Utils.performServerGet(requestSpec, responseSpec, URL, "");
+        return response;
+    }
+
     private String createLoanRefundTransferURL() {
         return "/fineract-provider/api/v1/accounttransfers/refundByTransfer?tenantIdentifier=default";
     }

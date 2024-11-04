@@ -100,15 +100,15 @@ public class ProgressiveLoanInterestRefundServiceImpl implements InterestRefundS
                     loan.getRepaymentScheduleInstallments().stream().filter(i -> !i.isReAged() && !i.isAdditional()).toList());
 
             Pair<ChangedTransactionDetail, ProgressiveLoanInterestScheduleModel> reprocessResult = processor
-                    .reprocessProgressiveLoanTransactions(loan.getDisbursementDate(), transactionsToReprocess, loan.getCurrency(),
-                            installmentsToReprocess, loan.getActiveCharges());
+                    .reprocessProgressiveLoanTransactions(loan.getDisbursementDate(), relatedRefundTransactionDate, transactionsToReprocess,
+                            loan.getCurrency(), installmentsToReprocess, loan.getActiveCharges());
             loan.getLoanTransactions().addAll(reprocessResult.getLeft().getCurrentTransactionToOldId().keySet());
             ProgressiveLoanInterestScheduleModel modelAfter = reprocessResult.getRight();
 
             payableInterest = installmentsToReprocess.stream() //
                     .map(installment -> emiCalculator //
-                            .getPayableDetails(modelAfter, installment.getDueDate(), relatedRefundTransactionDate) //
-                            .getPayableInterest() //
+                            .getDueAmounts(modelAfter, installment.getDueDate(), relatedRefundTransactionDate) //
+                            .getDueInterest() //
                             .getAmount()) //
                     .reduce(BigDecimal.ZERO, BigDecimal::add); //
         }

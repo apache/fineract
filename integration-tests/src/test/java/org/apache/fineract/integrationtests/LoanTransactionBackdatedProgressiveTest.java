@@ -44,7 +44,7 @@ public class LoanTransactionBackdatedProgressiveTest extends BaseLoanIntegration
             clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
             PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(
-                    applyPin4ProgressiveLoanRequest(clientId, loanProductsResponse.getResourceId(), "01 June 2024", 1000.0, 10.0, 4, null));
+                    applyLP2ProgressiveLoanRequest(clientId, loanProductsResponse.getResourceId(), "01 June 2024", 1000.0, 10.0, 4, null));
             loanId = postLoansResponse.getLoanId();
             loanTransactionHelper.approveLoan(loanId, approveLoanRequest(1000.0, "01 June 2024"));
             disburseLoan(loanId, BigDecimal.valueOf(250.0), "01 June 2024");

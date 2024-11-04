@@ -22,10 +22,8 @@ import lombok.Data;
 import org.apache.fineract.organisation.monetary.domain.Money;
 
 @Data
-public class PayableDetails {
+public class OutstandingDetails {
 
-    private final Money emi;
-    private final Money payablePrincipal;
-    private final Money payableInterest;
-    private final Money outstandingBalance;
+    private final Money outstandingPrincipal;
+    private final Money outstandingInterest;
 }
