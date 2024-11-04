@@ -225,7 +225,12 @@ public class LoanScheduleAssembler {
         }
 
         final BigDecimal interestRatePerPeriod = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod", element);
-        final PeriodFrequencyType interestRatePeriodFrequencyType = loanProduct.getInterestPeriodFrequencyType();
+        PeriodFrequencyType interestRatePeriodFrequencyType = loanProduct.getInterestPeriodFrequencyType();
+        if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.interestRateFrequencyTypeParameterName, element)) {
+            final Integer interestRateFrequencyType = this.fromApiJsonHelper
+                    .extractIntegerWithLocaleNamed(LoanApiConstants.interestRateFrequencyTypeParameterName, element);
+            interestRatePeriodFrequencyType = PeriodFrequencyType.fromInt(interestRateFrequencyType);
+        }
 
         BigDecimal annualNominalInterestRate = BigDecimal.ZERO;
         if (interestRatePerPeriod != null) {
@@ -647,7 +652,13 @@ public class LoanScheduleAssembler {
 
     public LoanProductRelatedDetail assembleLoanProductRelatedDetail(final JsonElement element, final LoanProduct loanProduct) {
         final LoanApplicationTerms loanApplicationTerms = assembleLoanApplicationTermsFrom(element, loanProduct);
-        return loanApplicationTerms.toLoanProductRelatedDetail();
+        LoanProductRelatedDetail loanProductRelatedDetail = loanApplicationTerms.toLoanProductRelatedDetail();
+        final String interestRateFrequencyTypeParamName = "interestRateFrequencyType";
+        if (this.fromApiJsonHelper.parameterExists(interestRateFrequencyTypeParamName, element)) {
+            final Integer newValue = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(interestRateFrequencyTypeParamName, element);
+            loanProductRelatedDetail.setInterestPeriodFrequencyType(PeriodFrequencyType.fromInt(newValue));
+        }
+        return loanProductRelatedDetail;
     }
 
     public LoanScheduleModel assembleLoanScheduleFrom(final JsonElement element) {

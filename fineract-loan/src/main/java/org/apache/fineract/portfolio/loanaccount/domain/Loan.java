@@ -3765,6 +3765,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         this.loanRepaymentScheduleDetail.setInterestPeriodFrequencyType(this.loanProduct.getInterestPeriodFrequencyType());
     }
 
+    public void updateInterestRateFrequencyType(PeriodFrequencyType periodFrequencyType) {
+        this.loanRepaymentScheduleDetail.setInterestPeriodFrequencyType(periodFrequencyType);
+    }
+
     public void addLoanTransaction(final LoanTransaction loanTransaction) {
         this.loanTransactions.add(loanTransaction);
     }
