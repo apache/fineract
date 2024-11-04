@@ -69,8 +69,8 @@ public class RepaymentPeriod {
         this.mc = mc;
         this.interestPeriods = new ArrayList<>();
         // There is always at least 1 interest period, by default with same from-due date as repayment period
-        getInterestPeriods()
-                .add(new InterestPeriod(this, getFromDate(), getDueDate(), BigDecimal.ZERO, getZero(mc), getZero(mc), getZero(mc), mc));
+        getInterestPeriods().add(new InterestPeriod(this, getFromDate(), getDueDate(), BigDecimal.ZERO, BigDecimal.ZERO, getZero(mc),
+                getZero(mc), getZero(mc), mc));
         this.paidInterest = getZero(mc);
         this.paidPrincipal = getZero(mc);
     }
@@ -87,7 +87,7 @@ public class RepaymentPeriod {
         this.mc = mc;
         // There is always at least 1 interest period, by default with same from-due date as repayment period
         for (InterestPeriod interestPeriod : repaymentPeriod.interestPeriods) {
-            interestPeriods.add(new InterestPeriod(this, interestPeriod, mc));
+            interestPeriods.add(new InterestPeriod(this, interestPeriod));
         }
     }
 

@@ -1110,6 +1110,138 @@ class ProgressiveEMICalculatorTest {
         checkPeriod(interestSchedule, 5, 0, 16.89, 0.003950916667, 0.07, 16.82, 0.0);
     }
 
+    @Test
+    public void test_dailyInterest_disbursedAmt1000_dayInYears360_daysInMonth30_repayIn1Month() {
+
+        final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
+
+        expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+
+        final BigDecimal interestRate = BigDecimal.valueOf(7.0);
+        final Integer installmentAmountInMultiplesOf = null;
+
+        Mockito.when(loanProductRelatedDetail.getAnnualNominalInterestRate()).thenReturn(interestRate);
+        Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
+        Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.DAYS_30.getValue());
+        Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.MONTHS);
+        Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
+        Mockito.when(loanProductRelatedDetail.getCurrency()).thenReturn(monetaryCurrency);
+
+        final ProgressiveLoanInterestScheduleModel interestModel = emiCalculator.generateInterestScheduleModel(expectedRepaymentPeriods,
+                loanProductRelatedDetail, installmentAmountInMultiplesOf, mc);
+
+        final Money disbursedAmount = toMoney(1000.0);
+        emiCalculator.addDisbursement(interestModel, LocalDate.of(2024, 1, 1), disbursedAmount);
+
+        checkPeriod(interestModel, 0, 0, 1005.83, 0.0, 0.0, 5.83, 1000.0, 0.0);
+        checkPeriod(interestModel, 0, 1, 1005.83, 0.005833333333, 5.83, 1000.0, 0.0);
+
+        final LocalDate dueDate = LocalDate.of(2024, 2, 1);
+        final LocalDate startDay = LocalDate.of(2024, 1, 1);
+
+        checkDailyInterest(interestModel, dueDate, startDay, 1, 0.19, 0.19);
+        checkDailyInterest(interestModel, dueDate, startDay, 2, 0.19, 0.38);
+        checkDailyInterest(interestModel, dueDate, startDay, 3, 0.18, 0.56);
+        checkDailyInterest(interestModel, dueDate, startDay, 4, 0.19, 0.75);
+        checkDailyInterest(interestModel, dueDate, startDay, 5, 0.19, 0.94);
+        checkDailyInterest(interestModel, dueDate, startDay, 6, 0.19, 1.13);
+        checkDailyInterest(interestModel, dueDate, startDay, 7, 0.19, 1.32);
+        checkDailyInterest(interestModel, dueDate, startDay, 8, 0.18, 1.50);
+        checkDailyInterest(interestModel, dueDate, startDay, 9, 0.19, 1.69);
+        checkDailyInterest(interestModel, dueDate, startDay, 10, 0.19, 1.88);
+        checkDailyInterest(interestModel, dueDate, startDay, 11, 0.19, 2.07);
+        checkDailyInterest(interestModel, dueDate, startDay, 12, 0.19, 2.26);
+        checkDailyInterest(interestModel, dueDate, startDay, 13, 0.18, 2.44);
+        checkDailyInterest(interestModel, dueDate, startDay, 14, 0.19, 2.63);
+        checkDailyInterest(interestModel, dueDate, startDay, 15, 0.19, 2.82);
+        checkDailyInterest(interestModel, dueDate, startDay, 16, 0.19, 3.01);
+        checkDailyInterest(interestModel, dueDate, startDay, 17, 0.19, 3.20);
+        checkDailyInterest(interestModel, dueDate, startDay, 18, 0.19, 3.39);
+        checkDailyInterest(interestModel, dueDate, startDay, 19, 0.18, 3.57);
+        checkDailyInterest(interestModel, dueDate, startDay, 20, 0.19, 3.76);
+        checkDailyInterest(interestModel, dueDate, startDay, 21, 0.19, 3.95);
+        checkDailyInterest(interestModel, dueDate, startDay, 22, 0.19, 4.14);
+        checkDailyInterest(interestModel, dueDate, startDay, 23, 0.19, 4.33);
+        checkDailyInterest(interestModel, dueDate, startDay, 24, 0.18, 4.51);
+        checkDailyInterest(interestModel, dueDate, startDay, 25, 0.19, 4.70);
+        checkDailyInterest(interestModel, dueDate, startDay, 26, 0.19, 4.89);
+        checkDailyInterest(interestModel, dueDate, startDay, 27, 0.19, 5.08);
+        checkDailyInterest(interestModel, dueDate, startDay, 28, 0.19, 5.27);
+        checkDailyInterest(interestModel, dueDate, startDay, 29, 0.18, 5.45);
+        checkDailyInterest(interestModel, dueDate, startDay, 30, 0.19, 5.64);
+        checkDailyInterest(interestModel, dueDate, startDay, 31, 0.19, 5.83);
+    }
+
+    @Test
+    public void test_dailyInterest_disbursedAmt2000_dayInYears360_daysInMonth30_repayIn2Month() {
+
+        final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
+
+        expectedRepaymentPeriods.add(repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+
+        final BigDecimal interestRate = BigDecimal.valueOf(7.0);
+        final Integer installmentAmountInMultiplesOf = null;
+
+        Mockito.when(loanProductRelatedDetail.getAnnualNominalInterestRate()).thenReturn(interestRate);
+        Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
+        Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.DAYS_30.getValue());
+        Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.MONTHS);
+        Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
+        Mockito.when(loanProductRelatedDetail.getCurrency()).thenReturn(monetaryCurrency);
+
+        final ProgressiveLoanInterestScheduleModel interestModel = emiCalculator.generateInterestScheduleModel(expectedRepaymentPeriods,
+                loanProductRelatedDetail, installmentAmountInMultiplesOf, mc);
+
+        final Money disbursedAmount1st = toMoney(1000.0);
+        final Money disbursedAmount2nd = toMoney(1000.0);
+        emiCalculator.addDisbursement(interestModel, LocalDate.of(2024, 1, 1), disbursedAmount1st);
+        emiCalculator.addDisbursement(interestModel, LocalDate.of(2024, 1, 15), disbursedAmount2nd);
+
+        checkPeriod(interestModel, 0, 0, 2009.03, 0.0, 0.0, 9.03, 2000.0, 0.0);
+        checkPeriod(interestModel, 0, 1, 2009.03, 0.002634408602, 2.63, 9.03, 2000.0, 0.0);
+        checkPeriod(interestModel, 0, 2, 2009.03, 0.003198924731, 6.40, 9.03, 2000.0, 0.0);
+
+        final LocalDate dueDate = LocalDate.of(2024, 2, 1);
+        final LocalDate startDay = LocalDate.of(2024, 1, 1);
+
+        // 1st 1000 disbursement accruals
+        // Total Interest: 5.83 (31 days), 2.63 (14 days)
+        checkDailyInterest(interestModel, dueDate, startDay, 1, 0.19, 0.19);
+        checkDailyInterest(interestModel, dueDate, startDay, 2, 0.19, 0.38);
+        checkDailyInterest(interestModel, dueDate, startDay, 3, 0.18, 0.56);
+        checkDailyInterest(interestModel, dueDate, startDay, 4, 0.19, 0.75);
+        checkDailyInterest(interestModel, dueDate, startDay, 5, 0.19, 0.94);
+        checkDailyInterest(interestModel, dueDate, startDay, 6, 0.19, 1.13);
+        checkDailyInterest(interestModel, dueDate, startDay, 7, 0.19, 1.32);
+        checkDailyInterest(interestModel, dueDate, startDay, 8, 0.18, 1.50);
+        checkDailyInterest(interestModel, dueDate, startDay, 9, 0.19, 1.69);
+        checkDailyInterest(interestModel, dueDate, startDay, 10, 0.19, 1.88);
+        checkDailyInterest(interestModel, dueDate, startDay, 11, 0.19, 2.07);
+        checkDailyInterest(interestModel, dueDate, startDay, 12, 0.19, 2.26);
+        checkDailyInterest(interestModel, dueDate, startDay, 13, 0.18, 2.44);
+        checkDailyInterest(interestModel, dueDate, startDay, 14, 0.19, 2.63);
+
+        // 2nd 1000 disbursement accruals
+        // Total Interest: 6.40 (17 days)
+        checkDailyInterest(interestModel, dueDate, startDay, 15, 0.38, 3.01);
+        checkDailyInterest(interestModel, dueDate, startDay, 16, 0.37, 3.38);
+        checkDailyInterest(interestModel, dueDate, startDay, 17, 0.38, 3.76);
+        checkDailyInterest(interestModel, dueDate, startDay, 18, 0.38, 4.14);
+        checkDailyInterest(interestModel, dueDate, startDay, 19, 0.37, 4.51);
+        checkDailyInterest(interestModel, dueDate, startDay, 20, 0.38, 4.89);
+        checkDailyInterest(interestModel, dueDate, startDay, 21, 0.38, 5.27);
+        checkDailyInterest(interestModel, dueDate, startDay, 22, 0.37, 5.64);
+        checkDailyInterest(interestModel, dueDate, startDay, 23, 0.38, 6.02);
+        checkDailyInterest(interestModel, dueDate, startDay, 24, 0.37, 6.39);
+        checkDailyInterest(interestModel, dueDate, startDay, 25, 0.38, 6.77);
+        checkDailyInterest(interestModel, dueDate, startDay, 26, 0.38, 7.15);
+        checkDailyInterest(interestModel, dueDate, startDay, 27, 0.37, 7.52);
+        checkDailyInterest(interestModel, dueDate, startDay, 28, 0.38, 7.90);
+        checkDailyInterest(interestModel, dueDate, startDay, 29, 0.38, 8.28);
+        checkDailyInterest(interestModel, dueDate, startDay, 30, 0.37, 8.65);
+        checkDailyInterest(interestModel, dueDate, startDay, 31, 0.38, 9.03);
+    }
+
     private static LoanScheduleModelRepaymentPeriod repayment(int periodNumber, LocalDate fromDate, LocalDate dueDate) {
         final Money zeroAmount = Money.zero(monetaryCurrency);
         return LoanScheduleModelRepaymentPeriod.repayment(periodNumber, fromDate, dueDate, zeroAmount, zeroAmount, zeroAmount, zeroAmount,
@@ -1124,6 +1256,17 @@ class ProgressiveEMICalculatorTest {
         Mockito.when(period.getDueDate()).thenReturn(end);
 
         return period;
+    }
+
+    private static void checkDailyInterest(final ProgressiveLoanInterestScheduleModel interestModel, final LocalDate repaymentPeriodDueDate,
+            final LocalDate interestStartDay, final int dayOffset, final double dailyInterest, final double interest) {
+        Money previousInterest = emiCalculator
+                .getPayableDetails(interestModel, repaymentPeriodDueDate, interestStartDay.plusDays(dayOffset - 1)).getPayableInterest();
+        Money currentInterest = emiCalculator.getPayableDetails(interestModel, repaymentPeriodDueDate, interestStartDay.plusDays(dayOffset))
+                .getPayableInterest();
+
+        Assertions.assertEquals(dailyInterest, toDouble(currentInterest.minus(previousInterest)));
+        Assertions.assertEquals(interest, toDouble(currentInterest));
     }
 
     private static void checkPeriod(final ProgressiveLoanInterestScheduleModel interestScheduleModel, final int repaymentIdx,
