@@ -33,6 +33,7 @@ import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGLAccountMappingRepository;
 import org.apache.fineract.accounting.producttoaccountmapping.exception.ProductToGLAccountMappingInvalidException;
 import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToGLAccountMappingHelper;
+import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.PortfolioProductType;
@@ -46,9 +47,9 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
     public LoanProductToGLAccountMappingHelper(final GLAccountRepository glAccountRepository,
             final ProductToGLAccountMappingRepository glAccountMappingRepository, final FromJsonHelper fromApiJsonHelper,
             final ChargeRepositoryWrapper chargeRepositoryWrapper, final GLAccountRepositoryWrapper accountRepositoryWrapper,
-            final PaymentTypeRepositoryWrapper paymentTypeRepositoryWrapper) {
+            final PaymentTypeRepositoryWrapper paymentTypeRepositoryWrapper, final CodeValueRepository codeValueRepository) {
         super(glAccountRepository, glAccountMappingRepository, fromApiJsonHelper, chargeRepositoryWrapper, accountRepositoryWrapper,
-                paymentTypeRepositoryWrapper);
+                paymentTypeRepositoryWrapper, codeValueRepository);
     }
 
     /***
@@ -136,6 +137,16 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
         // save both fee and penalty charges
         saveChargesToGLAccountMappings(command, element, productId, changes, PortfolioProductType.LOAN, true);
         saveChargesToGLAccountMappings(command, element, productId, changes, PortfolioProductType.LOAN, false);
+    }
+
+    public void saveChargeOffReasonToExpenseAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,
+            final Map<String, Object> changes) {
+        saveChargeOffReasonToGLAccountMappings(command, element, productId, changes, PortfolioProductType.LOAN);
+    }
+
+    public void updateChargeOffReasonToExpenseAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,
+            final Map<String, Object> changes) {
+        updateChargeOffReasonToGLAccountMappings(command, element, productId, changes, PortfolioProductType.LOAN);
     }
 
     public void updateChargesToIncomeAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,
@@ -387,5 +398,4 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
         }
         return gLAccountType;
     }
-
 }

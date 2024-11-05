@@ -150,6 +150,7 @@ public class LoanProductData implements Serializable {
     private Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings;
     private Collection<ChargeToGLAccountMapper> feeToIncomeAccountMappings;
     private Collection<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings;
+    private List<ChargeToGLAccountMapper> chargeOffReasonsToExpenseMappings;
     private final boolean enableAccrualActivityPosting;
 
     // rates
@@ -850,6 +851,7 @@ public class LoanProductData implements Serializable {
         this.paymentChannelToFundSourceMappings = null;
         this.feeToIncomeAccountMappings = null;
         this.penaltyToIncomeAccountMappings = null;
+        this.chargeOffReasonsToExpenseMappings = null;
         this.valueConditionTypeOptions = null;
         this.principalVariationsForBorrowerCycle = principalVariations;
         this.interestRateVariationsForBorrowerCycle = interestRateVariations;
@@ -988,6 +990,7 @@ public class LoanProductData implements Serializable {
         this.paymentChannelToFundSourceMappings = productData.paymentChannelToFundSourceMappings;
         this.feeToIncomeAccountMappings = productData.feeToIncomeAccountMappings;
         this.penaltyToIncomeAccountMappings = productData.penaltyToIncomeAccountMappings;
+        this.chargeOffReasonsToExpenseMappings = productData.chargeOffReasonsToExpenseMappings;
 
         this.chargeOptions = chargeOptions;
         this.penaltyOptions = penaltyOptions;

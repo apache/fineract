@@ -28,6 +28,7 @@ import org.apache.fineract.accounting.glaccount.domain.GLAccountRepository;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGLAccountMappingRepository;
+import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.PortfolioProductType;
@@ -41,9 +42,9 @@ public class ShareProductToGLAccountMappingHelper extends ProductToGLAccountMapp
     public ShareProductToGLAccountMappingHelper(final GLAccountRepository glAccountRepository,
             final ProductToGLAccountMappingRepository glAccountMappingRepository, final FromJsonHelper fromApiJsonHelper,
             final ChargeRepositoryWrapper chargeRepositoryWrapper, final GLAccountRepositoryWrapper accountRepositoryWrapper,
-            final PaymentTypeRepositoryWrapper paymentTypeRepositoryWrapper) {
+            final PaymentTypeRepositoryWrapper paymentTypeRepositoryWrapper, final CodeValueRepository codeValueRepository) {
         super(glAccountRepository, glAccountMappingRepository, fromApiJsonHelper, chargeRepositoryWrapper, accountRepositoryWrapper,
-                paymentTypeRepositoryWrapper);
+                paymentTypeRepositoryWrapper, codeValueRepository);
     }
 
     /***

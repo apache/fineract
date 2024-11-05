@@ -27,6 +27,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -36,6 +37,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingConstants.LoanProductAccountingParams;
 import org.apache.fineract.accounting.common.AccountingValidations;
+import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToGLAccountMappingHelper;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -141,7 +143,9 @@ public final class LoanProductDataValidator {
             LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_INTEREST.getValue(),
             LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_FEES.getValue(),
             LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_PENALTY.getValue(),
-            LoanProductConstants.USE_BORROWER_CYCLE_PARAMETER_NAME,
+            LoanProductAccountingParams.CHARGE_OFF_REASONS_TO_EXPENSE.getValue(),
+            LoanProductAccountingParams.EXPENSE_GL_ACCOUNT_ID.getValue(),
+            LoanProductAccountingParams.CHARGE_OFF_REASON_CODE_VALUE_ID.getValue(), LoanProductConstants.USE_BORROWER_CYCLE_PARAMETER_NAME,
             LoanProductConstants.PRINCIPAL_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME,
             LoanProductConstants.INTEREST_RATE_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME,
             LoanProductConstants.NUMBER_OF_REPAYMENT_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME, LoanProductConstants.SHORT_NAME,
@@ -195,6 +199,7 @@ public final class LoanProductDataValidator {
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
     private final AdvancedPaymentAllocationsJsonParser advancedPaymentAllocationsJsonParser;
     private final AdvancedPaymentAllocationsValidator advancedPaymentAllocationsValidator;
+    private final ProductToGLAccountMappingHelper productToGLAccountMappingHelper;
 
     public void validateForCreate(final JsonCommand command) {
         String json = command.json();
@@ -718,6 +723,7 @@ public final class LoanProductDataValidator {
 
             validatePaymentChannelFundSourceMappings(baseDataValidator, element);
             validateChargeToIncomeAccountMappings(baseDataValidator, element);
+            validateChargeOffToExpenseMappings(baseDataValidator, element);
 
         }
 
@@ -1791,6 +1797,7 @@ public final class LoanProductDataValidator {
 
         validatePaymentChannelFundSourceMappings(baseDataValidator, element);
         validateChargeToIncomeAccountMappings(baseDataValidator, element);
+        validateChargeOffToExpenseMappings(baseDataValidator, element);
 
         validateMinMaxConstraints(element, baseDataValidator, loanProduct);
 
@@ -1960,6 +1967,60 @@ public final class LoanProductDataValidator {
                             .value(incomeAccountId).notNull().integerGreaterThanZero();
                     i++;
                 } while (i < chargeToIncomeAccountMappingArray.size());
+            }
+        }
+    }
+
+    private void validateChargeOffToExpenseMappings(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
+        String parameterName = LoanProductAccountingParams.CHARGE_OFF_REASONS_TO_EXPENSE.getValue();
+
+        if (this.fromApiJsonHelper.parameterExists(parameterName, element)) {
+            final JsonArray chargeOffToExpenseMappingArray = this.fromApiJsonHelper.extractJsonArrayNamed(parameterName, element);
+            if (chargeOffToExpenseMappingArray != null && chargeOffToExpenseMappingArray.size() > 0) {
+                Map<Long, Set<Long>> chargeOffReasonToAccounts = new HashMap<>();
+                List<JsonObject> processedMappings = new ArrayList<>(); // Collect processed mappings for the new method
+
+                int i = 0;
+                do {
+                    final JsonObject jsonObject = chargeOffToExpenseMappingArray.get(i).getAsJsonObject();
+                    final Long expenseGlAccountId = this.fromApiJsonHelper
+                            .extractLongNamed(LoanProductAccountingParams.EXPENSE_GL_ACCOUNT_ID.getValue(), jsonObject);
+                    final Long chargeOffReasonCodeValueId = this.fromApiJsonHelper
+                            .extractLongNamed(LoanProductAccountingParams.CHARGE_OFF_REASON_CODE_VALUE_ID.getValue(), jsonObject);
+
+                    // Validate parameters locally
+                    baseDataValidator.reset()
+                            .parameter(parameterName + OPENING_SQUARE_BRACKET + i + CLOSING_SQUARE_BRACKET + DOT
+                                    + LoanProductAccountingParams.EXPENSE_GL_ACCOUNT_ID.getValue())
+                            .value(expenseGlAccountId).notNull().integerGreaterThanZero();
+                    baseDataValidator.reset()
+                            .parameter(parameterName + OPENING_SQUARE_BRACKET + i + CLOSING_SQUARE_BRACKET + DOT
+                                    + LoanProductAccountingParams.CHARGE_OFF_REASON_CODE_VALUE_ID.getValue())
+                            .value(chargeOffReasonCodeValueId).notNull().integerGreaterThanZero();
+
+                    // Handle duplicate charge-off reason and GL Account validation
+                    chargeOffReasonToAccounts.putIfAbsent(chargeOffReasonCodeValueId, new HashSet<>());
+                    Set<Long> associatedAccounts = chargeOffReasonToAccounts.get(chargeOffReasonCodeValueId);
+
+                    if (associatedAccounts.contains(expenseGlAccountId)) {
+                        baseDataValidator.reset().parameter(parameterName + OPENING_SQUARE_BRACKET + i + CLOSING_SQUARE_BRACKET)
+                                .failWithCode("duplicate.chargeOffReason.and.glAccount");
+                    }
+                    associatedAccounts.add(expenseGlAccountId);
+
+                    if (associatedAccounts.size() > 1) {
+                        baseDataValidator.reset().parameter(parameterName + OPENING_SQUARE_BRACKET + i + CLOSING_SQUARE_BRACKET)
+                                .failWithCode("multiple.glAccounts.for.chargeOffReason");
+                    }
+
+                    // Collect mapping for additional validations
+                    processedMappings.add(jsonObject);
+
+                    i++;
+                } while (i < chargeOffToExpenseMappingArray.size());
+
+                // Call the new validation method for additional checks
+                productToGLAccountMappingHelper.validateChargeOffMappingsInDatabase(processedMappings);
             }
         }
     }

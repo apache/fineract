@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForLoan;
@@ -39,7 +40,11 @@ import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGL
 import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGLAccountMappingRepository;
 import org.apache.fineract.accounting.producttoaccountmapping.exception.ProductToGLAccountMappingInvalidException;
 import org.apache.fineract.accounting.producttoaccountmapping.exception.ProductToGLAccountMappingNotFoundException;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
+import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.PortfolioProductType;
 import org.apache.fineract.portfolio.charge.domain.Charge;
@@ -53,6 +58,7 @@ import org.springframework.stereotype.Component;
 public class ProductToGLAccountMappingHelper {
 
     protected static final List<GLAccountType> ASSET_LIABILITY_TYPES = List.of(GLAccountType.ASSET, GLAccountType.LIABILITY);
+    private static final Integer GL_ACCOUNT_EXPENSE_TYPE = 5;
 
     protected final GLAccountRepository accountRepository;
     protected final ProductToGLAccountMappingRepository accountMappingRepository;
@@ -60,6 +66,7 @@ public class ProductToGLAccountMappingHelper {
     private final ChargeRepositoryWrapper chargeRepositoryWrapper;
     protected final GLAccountRepositoryWrapper accountRepositoryWrapper;
     private final PaymentTypeRepositoryWrapper paymentTypeRepositoryWrapper;
+    private final CodeValueRepository codeValueRepository;
 
     public void saveProductToAccountMapping(final JsonElement element, final String paramName, final Long productId,
             final int placeHolderTypeId, final GLAccountType expectedAccountType, final PortfolioProductType portfolioProductType) {
@@ -190,6 +197,27 @@ public class ProductToGLAccountMappingHelper {
                 final Long chargeId = jsonObject.get(LoanProductAccountingParams.CHARGE_ID.getValue()).getAsLong();
                 final Long incomeAccountId = jsonObject.get(LoanProductAccountingParams.INCOME_ACCOUNT_ID.getValue()).getAsLong();
                 saveChargeToFundSourceMapping(productId, chargeId, incomeAccountId, portfolioProductType, isPenalty);
+            }
+        }
+    }
+
+    public void saveChargeOffReasonToGLAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,
+            final Map<String, Object> changes, final PortfolioProductType portfolioProductType) {
+
+        final String arrayName = LoanProductAccountingParams.CHARGE_OFF_REASONS_TO_EXPENSE.getValue();
+        final JsonArray chargeOffReasonToExpenseAccountMappingArray = this.fromApiJsonHelper.extractJsonArrayNamed(arrayName, element);
+
+        if (chargeOffReasonToExpenseAccountMappingArray != null) {
+            if (changes != null) {
+                changes.put(arrayName, command.jsonFragment(arrayName));
+            }
+
+            for (int i = 0; i < chargeOffReasonToExpenseAccountMappingArray.size(); i++) {
+                final JsonObject jsonObject = chargeOffReasonToExpenseAccountMappingArray.get(i).getAsJsonObject();
+                final Long reasonId = jsonObject.get(LoanProductAccountingParams.CHARGE_OFF_REASON_CODE_VALUE_ID.getValue()).getAsLong();
+                final Long expenseAccountId = jsonObject.get(LoanProductAccountingParams.EXPENSE_GL_ACCOUNT_ID.getValue()).getAsLong();
+
+                saveChargeOffReasonToExpenseMapping(productId, reasonId, expenseAccountId, portfolioProductType);
             }
         }
     }
@@ -356,6 +384,65 @@ public class ProductToGLAccountMappingHelper {
         }
     }
 
+    public void updateChargeOffReasonToGLAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,
+            final Map<String, Object> changes, final PortfolioProductType portfolioProductType) {
+
+        final List<ProductToGLAccountMapping> existingChargeOffReasonToGLAccountMappings = this.accountMappingRepository
+                .findAllChargesOffReasonsMappings(productId, portfolioProductType.getValue());
+        final JsonArray chargeOffReasonToGLAccountMappingArray = this.fromApiJsonHelper
+                .extractJsonArrayNamed(LoanProductAccountingParams.CHARGE_OFF_REASONS_TO_EXPENSE.getValue(), element);
+
+        final Map<Long, Long> inputChargeOffReasonToGLAccountMap = new HashMap<>();
+
+        final Set<Long> existingChargeOffReasons = new HashSet<>();
+        if (chargeOffReasonToGLAccountMappingArray != null) {
+            if (changes != null) {
+                changes.put(LoanProductAccountingParams.CHARGE_OFF_REASONS_TO_EXPENSE.getValue(),
+                        command.jsonFragment(LoanProductAccountingParams.CHARGE_OFF_REASONS_TO_EXPENSE.getValue()));
+            }
+
+            for (int i = 0; i < chargeOffReasonToGLAccountMappingArray.size(); i++) {
+                final JsonObject jsonObject = chargeOffReasonToGLAccountMappingArray.get(i).getAsJsonObject();
+                final Long expenseGlAccountId = jsonObject.get(LoanProductAccountingParams.EXPENSE_GL_ACCOUNT_ID.getValue()).getAsLong();
+                final Long chargeOffReasonCodeValueId = jsonObject
+                        .get(LoanProductAccountingParams.CHARGE_OFF_REASON_CODE_VALUE_ID.getValue()).getAsLong();
+                inputChargeOffReasonToGLAccountMap.put(chargeOffReasonCodeValueId, expenseGlAccountId);
+            }
+
+            // If input map is empty, delete all existing mappings
+            if (inputChargeOffReasonToGLAccountMap.isEmpty()) {
+                this.accountMappingRepository.deleteAllInBatch(existingChargeOffReasonToGLAccountMappings);
+            } else {
+                for (final ProductToGLAccountMapping existingChargeOffReasonToGLAccountMapping : existingChargeOffReasonToGLAccountMappings) {
+                    final Long currentChargeOffReasonId = existingChargeOffReasonToGLAccountMapping.getChargeOffReasonId();
+                    if (currentChargeOffReasonId != null) {
+                        existingChargeOffReasons.add(currentChargeOffReasonId);
+                        // update existing mappings (if required)
+                        if (inputChargeOffReasonToGLAccountMap.containsKey(currentChargeOffReasonId)) {
+                            final Long newGLAccountId = inputChargeOffReasonToGLAccountMap.get(currentChargeOffReasonId);
+                            if (!newGLAccountId.equals(existingChargeOffReasonToGLAccountMapping.getGlAccount().getId())) {
+                                final Optional<GLAccount> glAccount = accountRepository.findById(newGLAccountId);
+                                if (glAccount.isPresent()) {
+                                    existingChargeOffReasonToGLAccountMapping.setGlAccount(glAccount.get());
+                                    this.accountMappingRepository.saveAndFlush(existingChargeOffReasonToGLAccountMapping);
+                                }
+                            }
+                        } // deleted payment type
+                        else {
+                            this.accountMappingRepository.delete(existingChargeOffReasonToGLAccountMapping);
+                        }
+                    }
+                }
+
+                // only the newly added
+                for (Map.Entry<Long, Long> entry : inputChargeOffReasonToGLAccountMap.entrySet().stream()
+                        .filter(e -> !existingChargeOffReasons.contains(e.getKey())).toList()) {
+                    saveChargeOffReasonToExpenseMapping(productId, entry.getKey(), entry.getValue(), portfolioProductType);
+                }
+            }
+        }
+    }
+
     /**
      * @param productId
      *
@@ -400,6 +487,24 @@ public class ProductToGLAccountMappingHelper {
                 .setProductType(portfolioProductType.getValue()).setFinancialAccountType(placeHolderAccountType.getValue())
                 .setCharge(charge);
         this.accountMappingRepository.saveAndFlush(accountMapping);
+    }
+
+    private void saveChargeOffReasonToExpenseMapping(final Long productId, final Long reasonId, final Long expenseAccountId,
+            final PortfolioProductType portfolioProductType) {
+
+        final Optional<GLAccount> glAccount = accountRepository.findById(expenseAccountId);
+
+        final boolean reasonMappingExists = this.accountMappingRepository
+                .findAllChargesOffReasonsMappings(productId, portfolioProductType.getValue()).stream()
+                .anyMatch(mapping -> mapping.getChargeOffReasonId().equals(reasonId));
+
+        if (glAccount.isPresent() && !reasonMappingExists) {
+            final ProductToGLAccountMapping accountMapping = new ProductToGLAccountMapping().setGlAccount(glAccount.get())
+                    .setProductId(productId).setProductType(portfolioProductType.getValue())
+                    .setFinancialAccountType(CashAccountsForLoan.CHARGE_OFF_EXPENSE.getValue()).setChargeOffReasonId(reasonId);
+
+            this.accountMappingRepository.saveAndFlush(accountMapping);
+        }
     }
 
     private List<GLAccountType> getAllowedAccountTypesForFeeMapping() {
@@ -453,6 +558,40 @@ public class ProductToGLAccountMappingHelper {
                 .findByProductIdAndProductType(loanProductId, portfolioProductType.getValue());
         if (productToGLAccountMappings != null && productToGLAccountMappings.size() > 0) {
             this.accountMappingRepository.deleteAllInBatch(productToGLAccountMappings);
+        }
+    }
+
+    public void validateChargeOffMappingsInDatabase(final List<JsonObject> mappings) {
+        final List<ApiParameterError> validationErrors = new ArrayList<>();
+
+        for (JsonObject jsonObject : mappings) {
+            final Long expenseGlAccountId = this.fromApiJsonHelper
+                    .extractLongNamed(LoanProductAccountingParams.EXPENSE_GL_ACCOUNT_ID.getValue(), jsonObject);
+            final Long chargeOffReasonCodeValueId = this.fromApiJsonHelper
+                    .extractLongNamed(LoanProductAccountingParams.CHARGE_OFF_REASON_CODE_VALUE_ID.getValue(), jsonObject);
+
+            // Validation: chargeOffReasonCodeValueId must exist in the database
+            CodeValue codeValue = this.codeValueRepository.findByCodeNameAndId("ChargeOffReasons", chargeOffReasonCodeValueId);
+            if (codeValue == null) {
+                validationErrors.add(ApiParameterError.parameterError("validation.msg.chargeoffreason.invalid",
+                        "Charge-off reason with ID " + chargeOffReasonCodeValueId + " does not exist",
+                        LoanProductAccountingParams.CHARGE_OFF_REASONS_TO_EXPENSE.getValue()));
+            }
+
+            // Validation: expenseGLAccountId must exist as a valid Expense GL account
+            final Optional<GLAccount> glAccount = accountRepository.findById(expenseGlAccountId);
+
+            if (glAccount.isEmpty() || !glAccount.get().getType().equals(GL_ACCOUNT_EXPENSE_TYPE)) {
+                validationErrors.add(ApiParameterError.parameterError("validation.msg.glaccount.not.found",
+                        "GL Account with ID " + expenseGlAccountId + " does not exist or is not an Expense GL account",
+                        LoanProductAccountingParams.EXPENSE_GL_ACCOUNT_ID.getValue()));
+
+            }
+        }
+
+        // Throw all collected validation errors, if any
+        if (!validationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(validationErrors);
         }
     }
 }

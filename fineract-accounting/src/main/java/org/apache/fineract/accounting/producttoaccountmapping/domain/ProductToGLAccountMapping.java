@@ -63,10 +63,13 @@ public class ProductToGLAccountMapping extends AbstractPersistableCustom<Long> {
     @Column(name = "financial_account_type", nullable = true)
     private int financialAccountType;
 
+    @Column(name = "charge_off_reason_id", nullable = true)
+    private Long chargeOffReasonId;
+
     public static ProductToGLAccountMapping createNew(final GLAccount glAccount, final Long productId, final int productType,
-            final int financialAccountType) {
+            final int financialAccountType, final Long chargeOffReasonId) {
 
         return new ProductToGLAccountMapping().setGlAccount(glAccount).setProductId(productId).setProductType(productType)
-                .setFinancialAccountType(financialAccountType);
+                .setFinancialAccountType(financialAccountType).setChargeOffReasonId(chargeOffReasonId);
     }
 }

@@ -46,5 +46,4 @@ public interface ProductToGLAccountMappingReadPlatformService {
     List<PaymentTypeToGLAccountMapper> fetchPaymentTypeToFundSourceMappingsForShareProduct(Long productId);
 
     List<ChargeToGLAccountMapper> fetchFeeToIncomeAccountMappingsForShareProduct(Long productId);
-
 }

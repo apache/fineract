@@ -130,6 +130,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 // advanced accounting mappings
                 this.loanProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, loanProductId, null);
                 this.loanProductToGLAccountMappingHelper.saveChargesToIncomeAccountMappings(command, element, loanProductId, null);
+                this.loanProductToGLAccountMappingHelper.saveChargeOffReasonToExpenseAccountMappings(command, element, loanProductId, null);
             break;
             case ACCRUAL_UPFRONT:
                 // Fall Through
@@ -208,6 +209,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 // advanced accounting mappings
                 this.loanProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, loanProductId, null);
                 this.loanProductToGLAccountMappingHelper.saveChargesToIncomeAccountMappings(command, element, loanProductId, null);
+                this.loanProductToGLAccountMappingHelper.saveChargeOffReasonToExpenseAccountMappings(command, element, loanProductId, null);
             break;
         }
     }
@@ -379,6 +381,8 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                     accountingRuleType);
             this.loanProductToGLAccountMappingHelper.updatePaymentChannelToFundSourceMappings(command, element, loanProductId, changes);
             this.loanProductToGLAccountMappingHelper.updateChargesToIncomeAccountMappings(command, element, loanProductId, changes);
+            this.loanProductToGLAccountMappingHelper.updateChargeOffReasonToExpenseAccountMappings(command, element, loanProductId,
+                    changes);
         }
         return changes;
     }

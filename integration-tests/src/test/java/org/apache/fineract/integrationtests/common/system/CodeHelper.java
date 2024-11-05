@@ -93,6 +93,35 @@ public final class CodeHelper {
         return code;
     }
 
+    public static HashMap<String, Object> getOrCreateCodeValueByCodeIdAndCodeName(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final Integer codeId, final String codeName, final Integer position) {
+
+        ArrayList<HashMap<String, Object>> allCodeValues = CodeHelper.getAllCodeValuesByCodeId(requestSpec, responseSpec, codeId);
+        HashMap<String, Object> codesByName = filterCodesByName(allCodeValues, codeName);
+
+        if (codesByName.isEmpty()) {
+            CodeHelper.createCodeValue(requestSpec, responseSpec, codeId, codeName, position);
+            allCodeValues = CodeHelper.getAllCodeValuesByCodeId(requestSpec, responseSpec, codeId);
+        }
+
+        return filterCodesByName(allCodeValues, codeName);
+    }
+
+    private static HashMap<String, Object> filterCodesByName(ArrayList<HashMap<String, Object>> allCodeValues, String codeName) {
+        final HashMap<String, Object> codes = new HashMap<>();
+
+        for (HashMap<String, Object> map : allCodeValues) {
+            String name = (String) map.get("name");
+            if (name.equals(codeName)) {
+                codes.put("id", map.get("id"));
+                codes.put("name", map.get("name"));
+                break;
+            }
+        }
+
+        return codes;
+    }
+
     public static HashMap<String, Object> retrieveOrCreateCodeValue(Integer codeId, final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
         Integer codeValueId = null;
@@ -117,6 +146,13 @@ public final class CodeHelper {
 
         return Utils.performServerGet(requestSpec, responseSpec, CODE_URL + "?" + Utils.TENANT_IDENTIFIER, "");
 
+    }
+
+    public static ArrayList<HashMap<String, Object>> getAllCodeValuesByCodeId(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final Integer codeId) {
+
+        return Utils.performServerGet(requestSpec, responseSpec,
+                CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "?" + Utils.TENANT_IDENTIFIER, "");
     }
 
     public static Object getSystemDefinedCodes(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
