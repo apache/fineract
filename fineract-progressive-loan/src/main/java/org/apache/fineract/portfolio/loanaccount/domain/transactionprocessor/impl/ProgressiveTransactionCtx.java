@@ -19,14 +19,17 @@
 package org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.ProgressiveLoanInterestScheduleModel;
@@ -37,11 +40,15 @@ public class ProgressiveTransactionCtx extends TransactionCtx {
     private final ProgressiveLoanInterestScheduleModel model;
     @Setter
     private LocalDate lastOverdueBalanceChange = null;
+    private List<LoanTransaction> alreadyProcessedTransactions = new ArrayList<>();
+    @Setter
+    private Money sumOfInterestRefundAmount;
 
     public ProgressiveTransactionCtx(MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments,
             Set<LoanCharge> charges, MoneyHolder overpaymentHolder, ChangedTransactionDetail changedTransactionDetail,
             ProgressiveLoanInterestScheduleModel model) {
         super(currency, installments, charges, overpaymentHolder, changedTransactionDetail);
+        sumOfInterestRefundAmount = model.getZero();
         this.model = model;
     }
 }

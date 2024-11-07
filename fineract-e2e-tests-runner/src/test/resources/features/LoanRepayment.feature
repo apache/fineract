@@ -3969,7 +3969,7 @@ Feature: LoanRepayment
       | 15 January 2024  | Merchant Issued Refund | 50.0   | 48.9      | 1.1      | 0.0  | 0.0       | 126.1        | false    |
       | 15 January 2024  | Interest Refund        | 0.29   | 0.29      | 0.0      | 0.0  | 0.0       | 125.81       | false    |
       | 16 January 2024  | Payout Refund          | 50.0   | 49.95     | 0.05     | 0.0  | 0.0       | 75.86        | false    |
-      | 16 January 2024  | Interest Refund        | 0.31   | 0.31      | 0.0      | 0.0  | 0.0       | 75.55        | false    |
+      | 16 January 2024  | Interest Refund        | 0.3   | 0.3      | 0.0      | 0.0  | 0.0       | 75.56        | false    |
     Then In Loan Transactions the "4"th Transaction has relationship type=RELATED with the "3"th Transaction
     Then In Loan Transactions the "6"th Transaction has relationship type=RELATED with the "5"th Transaction
     When Customer undo "1"th "Merchant Issued Refund" transaction made on "15 January 2024"

@@ -18,15 +18,23 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface InterestRefundService {
 
     boolean canHandle(Loan loan);
 
-    BigDecimal calculateInterestRefundAmount(Long loanId, BigDecimal relatedRefundTransactionAmount,
-            LocalDate relatedRefundTransactionDate);
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
+    Money totalInterestByTransactions(LoanRepaymentScheduleTransactionProcessor processor, Long loanId,
+            LocalDate relatedRefundTransactionDate, List<LoanTransaction> newTransactions, List<Long> oldTransactionIds);
 
+    Money getTotalInterestRefunded(List<LoanTransaction> loanTransactions, MonetaryCurrency currency);
 }

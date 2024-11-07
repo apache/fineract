@@ -21,12 +21,14 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class InterestRefundServiceDelegate {
 
+    @Lazy
     private final List<InterestRefundService> interestRefundService;
 
     public InterestRefundService lookupInterestRefundService(final Loan loan) {

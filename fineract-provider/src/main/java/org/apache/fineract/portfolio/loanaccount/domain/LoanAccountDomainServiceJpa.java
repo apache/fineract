@@ -34,6 +34,7 @@ import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDoma
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
@@ -143,8 +144,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper;
     private final DelinquencyReadPlatformService delinquencyReadPlatformService;
     private final LoanAccrualsProcessingService loanAccrualsProcessingService;
-    private final InterestRefundServiceDelegate interestRefundServiceDelegate;
     private final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessorFactory;
+    private final InterestRefundServiceDelegate interestRefundServiceDelegate;
 
     @Transactional
     @Override
@@ -165,17 +166,26 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         this.loanCollateralManagementRepository.saveAll(loanCollateralManagementSet);
     }
 
-    private LoanTransaction createInterestRefundLoanTransaction(Loan loan, final LocalDate transactionDate,
-            BigDecimal relatedRefundTransactionAmount) {
+    private LoanTransaction createInterestRefundLoanTransaction(Loan loan, LoanTransaction refundTransaction) {
+
         InterestRefundService interestRefundService = interestRefundServiceDelegate.lookupInterestRefundService(loan);
         if (interestRefundService == null) {
             return null;
         }
-        BigDecimal interestRefundAmount = interestRefundService.calculateInterestRefundAmount(loan.getId(), relatedRefundTransactionAmount,
-                transactionDate);
+
+        Money totalInterest = interestRefundService.totalInterestByTransactions(null, loan.getId(), refundTransaction.getTransactionDate(),
+                List.of(), loan.getLoanTransactions().stream().map(AbstractPersistableCustom::getId).toList());
+        Money previouslyRefundedInterests = interestRefundService.getTotalInterestRefunded(loan.getLoanTransactions(), loan.getCurrency());
+
+        Money newTotalInterest = interestRefundService.totalInterestByTransactions(null, loan.getId(),
+                refundTransaction.getTransactionDate(), List.of(refundTransaction),
+                loan.getLoanTransactions().stream().map(AbstractPersistableCustom::getId).toList());
+        BigDecimal interestRefundAmount = totalInterest.minus(previouslyRefundedInterests).minus(newTotalInterest).getAmount();
+
         final ExternalId txnExternalId = externalIdFactory.create();
         businessEventNotifierService.notifyPreBusinessEvent(new LoanTransactionInterestRefundPreBusinessEvent(loan));
-        return LoanTransaction.interestRefund(loan, interestRefundAmount, transactionDate, txnExternalId);
+        return LoanTransaction.interestRefund(loan, interestRefundAmount, refundTransaction.getDateOf(), txnExternalId);
+
     }
 
     @Transactional
@@ -867,7 +877,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         LoanTransaction interestRefundTransaction = null;
 
         if (shouldCreateInterestRefundTransaction) {
-            interestRefundTransaction = createInterestRefundLoanTransaction(loan, transactionDate, transactionAmount);
+            interestRefundTransaction = createInterestRefundLoanTransaction(loan, refundTransaction);
             if (interestRefundTransaction != null) {
                 interestRefundTransaction.getLoanTransactionRelations().add(LoanTransactionRelation
                         .linkToTransaction(interestRefundTransaction, refundTransaction, LoanTransactionRelationTypeEnum.RELATED));

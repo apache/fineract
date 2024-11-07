@@ -57,6 +57,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -85,6 +86,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.Tra
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.PeriodDueDetails;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.ProgressiveLoanInterestScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
+import org.apache.fineract.portfolio.loanaccount.service.InterestRefundService;
 import org.apache.fineract.portfolio.loanproduct.calc.EMICalculator;
 import org.apache.fineract.portfolio.loanproduct.domain.AllocationType;
 import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationTransactionType;
@@ -102,6 +104,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     public static final String ADVANCED_PAYMENT_ALLOCATION_STRATEGY_NAME = "Advanced payment allocation strategy";
 
     public final EMICalculator emiCalculator;
+    public final InterestRefundService interestRefundService;
 
     @Override
     public String getCode() {
@@ -196,6 +199,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 LoanTransaction transaction = changeOperation.getLoanTransaction().get();
                 processSingleTransaction(transaction, ctx);
                 transaction = getProcessedTransaction(changedTransactionDetail, transaction);
+                ctx.getAlreadyProcessedTransactions().add(transaction);
                 if (transaction.isOverPaid() && transaction.isRepaymentLikeType()) { // TODO CREDIT, DEBIT
                     overpaidTransactions.add(transaction);
                 }
@@ -268,9 +272,10 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             case CHARGEBACK -> handleChargeback(loanTransaction, ctx);
             case CREDIT_BALANCE_REFUND ->
                 handleCreditBalanceRefund(loanTransaction, ctx.getCurrency(), ctx.getInstallments(), ctx.getOverpaymentHolder());
-            case INTEREST_REFUND, REPAYMENT, MERCHANT_ISSUED_REFUND, PAYOUT_REFUND, GOODWILL_CREDIT, CHARGE_REFUND, CHARGE_ADJUSTMENT,
-                    DOWN_PAYMENT, WAIVE_INTEREST, RECOVERY_REPAYMENT, INTEREST_PAYMENT_WAIVER ->
+            case REPAYMENT, MERCHANT_ISSUED_REFUND, PAYOUT_REFUND, GOODWILL_CREDIT, CHARGE_REFUND, CHARGE_ADJUSTMENT, DOWN_PAYMENT,
+                    WAIVE_INTEREST, RECOVERY_REPAYMENT, INTEREST_PAYMENT_WAIVER ->
                 handleRepayment(loanTransaction, ctx);
+            case INTEREST_REFUND -> handleInterestRefund(loanTransaction, ctx);
             case CHARGE_OFF -> handleChargeOff(loanTransaction, ctx);
             case CHARGE_PAYMENT -> handleChargePayment(loanTransaction, ctx);
             case WAIVE_CHARGES -> log.debug("WAIVE_CHARGES transaction will not be processed.");
@@ -282,6 +287,25 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 log.warn("Unhandled transaction processing for transaction type: {}", loanTransaction.getTypeOf());
             }
         }
+    }
+
+    private void handleInterestRefund(LoanTransaction loanTransaction, TransactionCtx ctx) {
+
+        if (ctx instanceof ProgressiveTransactionCtx progCtx) {
+            Money interestBeforeRefund = emiCalculator.getSumOfDueInterestsOnDate(progCtx.getModel(), loanTransaction.getDateOf());
+            List<Long> unmodifiedTransactionIds = progCtx.getAlreadyProcessedTransactions().stream().filter(LoanTransaction::isNotReversed)
+                    .map(AbstractPersistableCustom::getId).toList();
+            List<LoanTransaction> modifiedTransactions = new ArrayList<>(progCtx.getAlreadyProcessedTransactions().stream()
+                    .filter(LoanTransaction::isNotReversed).filter(tr -> tr.getId() == null).toList());
+            if (!modifiedTransactions.isEmpty()) {
+                Money interestAfterRefund = interestRefundService.totalInterestByTransactions(this, loanTransaction.getLoan().getId(),
+                        loanTransaction.getDateOf(), modifiedTransactions, unmodifiedTransactionIds);
+                Money newAmount = interestBeforeRefund.minus(progCtx.getSumOfInterestRefundAmount()).minus(interestAfterRefund);
+                loanTransaction.updateAmount(newAmount.getAmount());
+            }
+            progCtx.setSumOfInterestRefundAmount(progCtx.getSumOfInterestRefundAmount().add(loanTransaction.getAmount()));
+        }
+        handleRepayment(loanTransaction, ctx);
     }
 
     private void handleReAmortization(LoanTransaction loanTransaction, TransactionCtx transactionCtx) {

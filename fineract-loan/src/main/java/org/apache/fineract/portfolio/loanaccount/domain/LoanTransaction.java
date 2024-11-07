@@ -1052,6 +1052,10 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
         return getTypeOf().isInterestRefund();
     }
 
+    public void updateAmount(BigDecimal bigDecimal) {
+        this.amount = bigDecimal;
+    }
+
     // TODO missing hashCode(), equals(Object obj), but probably OK as long as
     // this is never stored in a Collection.
 }

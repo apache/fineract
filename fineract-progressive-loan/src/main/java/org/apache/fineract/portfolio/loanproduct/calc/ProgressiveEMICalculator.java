@@ -716,4 +716,22 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
         return new ProgressiveLoanInterestScheduleModel(repaymentModels, loanProductRelatedDetail, installmentAmountInMultiplesOf, mc);
     }
+
+    /**
+     * Calculates the sum of due interests on interest periods.
+     *
+     * @param scheduleModel
+     *            schedule model
+     * @param subjectDate
+     *            the date to calculate the interest for.
+     * @return sum of due interests
+     */
+    @Override
+    public Money getSumOfDueInterestsOnDate(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate subjectDate) {
+        return scheduleModel.repaymentPeriods().stream().map(RepaymentPeriod::getDueDate) //
+                .map(repaymentPeriodDueDate -> getDueAmounts(scheduleModel, repaymentPeriodDueDate, subjectDate) //
+                        .getDueInterest()) //
+                .reduce(scheduleModel.getZero(), Money::add); //
+    }
+
 }
