@@ -199,8 +199,8 @@ public class LoanRescheduleRequestDataValidatorImpl implements LoanRescheduleReq
         jsonCommand.checkForUnsupportedParameters(typeToken, jsonString, createRequestDataParameters);
     }
 
-    public static void validateReschedulingInstallment(DataValidatorBuilder dataValidatorBuilder,
-            LoanRepaymentScheduleInstallment installment) {
+    @Override
+    public void validateReschedulingInstallment(DataValidatorBuilder dataValidatorBuilder, LoanRepaymentScheduleInstallment installment) {
         if (installment == null) {
             dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName)
                     .failWithCode("repayment.schedule.installment.does.not.exist", "Repayment schedule installment does not exist");

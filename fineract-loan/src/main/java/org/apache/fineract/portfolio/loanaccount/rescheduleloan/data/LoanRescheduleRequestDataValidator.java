@@ -19,7 +19,9 @@
 package org.apache.fineract.portfolio.loanaccount.rescheduleloan.data;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
 
 public interface LoanRescheduleRequestDataValidator {
@@ -29,4 +31,6 @@ public interface LoanRescheduleRequestDataValidator {
     void validateForApproveAction(JsonCommand jsonCommand, LoanRescheduleRequest loanRescheduleRequest);
 
     void validateForRejectAction(JsonCommand jsonCommand, LoanRescheduleRequest loanRescheduleRequest);
+
+    void validateReschedulingInstallment(DataValidatorBuilder dataValidatorBuilder, LoanRepaymentScheduleInstallment installment);
 }

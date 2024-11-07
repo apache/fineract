@@ -23,6 +23,7 @@ import static org.apache.fineract.infrastructure.businessdate.domain.BusinessDat
 import static org.apache.fineract.integrationtests.BaseLoanIntegrationTest.TransactionProcessingStrategyCode.ADVANCED_PAYMENT_ALLOCATION_STRATEGY;
 import static org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -712,6 +713,35 @@ public abstract class BaseLoanIntegrationTest {
                 .getLoanDisbursementJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT, String.valueOf(percentageAmount)));
         assertNotNull(chargeId);
         return chargeId.longValue();
+    }
+
+    protected void verifyRepaymentSchedule(GetLoansLoanIdResponse savedLoanResponse, GetLoansLoanIdResponse actualLoanResponse,
+            int totalPeriods, int identicalPeriods) {
+        List<GetLoansLoanIdRepaymentPeriod> savedPeriods = savedLoanResponse.getRepaymentSchedule().getPeriods();
+        List<GetLoansLoanIdRepaymentPeriod> actualPeriods = actualLoanResponse.getRepaymentSchedule().getPeriods();
+
+        assertEquals(totalPeriods, savedPeriods.size(), "Unexpected number of periods in savedPeriods list.");
+        assertEquals(totalPeriods, actualPeriods.size(), "Unexpected number of periods in actualPeriods list.");
+
+        verifyPeriodsEquality(savedPeriods, actualPeriods, 0, identicalPeriods, true);
+
+        verifyPeriodsEquality(savedPeriods, actualPeriods, identicalPeriods, totalPeriods, false);
+    }
+
+    private void verifyPeriodsEquality(List<GetLoansLoanIdRepaymentPeriod> savedPeriods, List<GetLoansLoanIdRepaymentPeriod> actualPeriods,
+            int startIndex, int endIndex, boolean shouldEqual) {
+        for (int i = startIndex; i < endIndex; i++) {
+            Double savedTotalDue = savedPeriods.get(i).getTotalDueForPeriod();
+            Double actualTotalDue = actualPeriods.get(i).getTotalDueForPeriod();
+
+            if (shouldEqual) {
+                assertEquals(savedTotalDue, actualTotalDue, String.format(
+                        "Period %d should be identical in both responses. Expected: %s, Actual: %s", i + 1, savedTotalDue, actualTotalDue));
+            } else {
+                assertNotEquals(savedTotalDue, actualTotalDue, String
+                        .format("Period %d should differ between responses. Saved: %s, Actual: %s", i + 1, savedTotalDue, actualTotalDue));
+            }
+        }
     }
 
     protected void verifyRepaymentSchedule(Long loanId, Installment... installments) {

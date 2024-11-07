@@ -497,6 +497,11 @@ public class LoanProductTestBuilder {
         return this;
     }
 
+    public LoanProductTestBuilder withDisallowExpectedDisbursements() {
+        this.disallowExpectedDisbursements = true;
+        return this;
+    }
+
     public LoanProductTestBuilder withFullAccountingConfig(String accountingRule, FullAccountingConfig fullAccountingConfig) {
         this.accountingRule = accountingRule;
         this.fullAccountingConfig = fullAccountingConfig;
@@ -637,6 +642,11 @@ public class LoanProductTestBuilder {
         this.recalculationRestFrequencyInterval = recalculationRestFrequencyInterval;
         this.recalculationRestFrequencyOnDayType = recalculationRestFrequencyOnDayType;
         this.recalculationRestFrequencyDayOfWeekType = recalculationRestFrequencyDayOfWeekType;
+        return this;
+    }
+
+    public LoanProductTestBuilder withRecalculationRestFrequencyType(final String recalculationRestFrequencyType) {
+        this.recalculationRestFrequencyType = recalculationRestFrequencyType;
         return this;
     }
 

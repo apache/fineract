@@ -29,7 +29,6 @@ import static org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.Loan
 import static org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestDataValidatorImpl.validateRescheduleReasonComment;
 import static org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestDataValidatorImpl.validateRescheduleReasonId;
 import static org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestDataValidatorImpl.validateRescheduleRequestStatus;
-import static org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestDataValidatorImpl.validateReschedulingInstallment;
 import static org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestDataValidatorImpl.validateSubmittedOnDate;
 import static org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestDataValidatorImpl.validateSupportedParameters;
 
@@ -117,6 +116,14 @@ public class ProgressiveLoanRescheduleRequestDataValidator implements LoanResche
 
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+    }
+
+    @Override
+    public void validateReschedulingInstallment(DataValidatorBuilder dataValidatorBuilder, LoanRepaymentScheduleInstallment installment) {
+        if (installment == null) {
+            dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName)
+                    .failWithCode("repayment.schedule.installment.does.not.exist", "Repayment schedule installment does not exist");
         }
     }
 
