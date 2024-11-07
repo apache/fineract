@@ -451,7 +451,7 @@ configure(project.fineractJavaProjects) {
     // Configuration for the Checkstyle plugin
     // https://docs.gradle.org/current/userguide/checkstyle_plugin.html
     dependencies {
-        checkstyle 'com.puppycrawl.tools:checkstyle:10.18.2'
+        checkstyle 'com.puppycrawl.tools:checkstyle:10.20.1'
         checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.44.1'
     }
 
@@ -473,7 +473,7 @@ configure(project.fineractJavaProjects) {
     // Configuration for the errorprone plugin
     // https://github.com/tbroyer/gradle-errorprone-plugin
     dependencies {
-        errorprone "com.google.errorprone:error_prone_core:2.33.0"
+        errorprone "com.google.errorprone:error_prone_core:2.35.1"
     }
 
     tasks.withType(JavaCompile) {

@@ -51,14 +51,14 @@ dependencies {
     testImplementation 'io.qameta.allure:allure-cucumber7-jvm:2.29.0'
 
     testImplementation 'org.assertj:assertj-core:3.26.3'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.3'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.3'
 
     testCompileOnly 'org.projectlombok:lombok:1.18.34'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.34'
 
-    testImplementation "ch.qos.logback:logback-core:1.5.10"
-    testImplementation "ch.qos.logback:logback-classic:1.5.10"
+    testImplementation "ch.qos.logback:logback-core:1.5.12"
+    testImplementation "ch.qos.logback:logback-classic:1.5.12"
 
     testImplementation 'org.apache.activemq:activemq-client:6.1.3'
     testImplementation "org.apache.avro:avro:1.12.0"
