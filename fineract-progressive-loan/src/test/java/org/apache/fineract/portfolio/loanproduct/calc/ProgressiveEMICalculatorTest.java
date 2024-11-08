@@ -474,10 +474,10 @@ class ProgressiveEMICalculatorTest {
         checkPeriod(interestModel, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 66.67);
         checkPeriod(interestModel, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 66.67);
         checkPeriod(interestModel, 1, 0, 17.01, 0.003333333333, 0.22, 0.0, 17.01, 66.56);
-        checkPeriod(interestModel, 2, 0, 16.85, 0.003333333333, 0.22, 0.44, 16.41, 50.15);
-        checkPeriod(interestModel, 3, 0, 16.85, 0.003333333333, 0.17, 16.68, 33.47);
-        checkPeriod(interestModel, 4, 0, 16.85, 0.003333333333, 0.11, 16.74, 16.73);
-        checkPeriod(interestModel, 5, 0, 16.79, 0.003333333333, 0.06, 16.73, 0.0);
+        checkPeriod(interestModel, 2, 0, 16.83, 0.003333333333, 0.22, 0.44, 16.39, 50.17);
+        checkPeriod(interestModel, 3, 0, 16.83, 0.003333333333, 0.17, 16.66, 33.51);
+        checkPeriod(interestModel, 4, 0, 16.83, 0.003333333333, 0.11, 16.72, 16.79);
+        checkPeriod(interestModel, 5, 0, 16.85, 0.003333333333, 0.06, 16.79, 0.0);
     }
 
     @Test

@@ -286,27 +286,40 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     private void checkAndAdjustEmiIfNeededOnRelatedRepaymentPeriods(final ProgressiveLoanInterestScheduleModel scheduleModel,
             final List<RepaymentPeriod> relatedRepaymentPeriods) {
         MathContext mc = scheduleModel.mc();
-        final Money emiDifference = getDifferenceBetweenLastTwoPeriod(relatedRepaymentPeriods, scheduleModel);
+        ProgressiveLoanInterestScheduleModel newScheduleModel = null;
+
         final int numberOfRelatedPeriods = relatedRepaymentPeriods.size();
         double lowerHalfOfRelatedPeriods = Math.floor(numberOfRelatedPeriods / 2.0);
-        if (emiDifference.isZero(mc) || lowerHalfOfRelatedPeriods == 0.0) {
+        if (lowerHalfOfRelatedPeriods == 0.0) {
             return;
         }
-        final Money originalEmi = relatedRepaymentPeriods.get(numberOfRelatedPeriods - 2).getEmi();
-        boolean shouldBeAdjusted = emiDifference.abs(mc).multipliedBy(100, mc)
-                .isGreaterThan(Money.of(originalEmi.getCurrency(), BigDecimal.valueOf(lowerHalfOfRelatedPeriods), mc));
 
-        if (shouldBeAdjusted) {
-            long uncountablePeriods = relatedRepaymentPeriods.stream().filter(rp -> originalEmi.isLessThan(rp.getTotalPaidAmount()))
-                    .count();
+        long uncountablePeriods;
+        int adjustCounter = 0;
+
+        do {
+            final Money emiDifference = getDifferenceBetweenLastTwoPeriod(relatedRepaymentPeriods, scheduleModel);
+            if (emiDifference.isZero(mc)) {
+                break;
+            }
+            final Money originalEmi = relatedRepaymentPeriods.get(numberOfRelatedPeriods - 2).getEmi();
+            boolean shouldBeAdjusted = emiDifference.abs(mc).multipliedBy(100, mc)
+                    .isGreaterThan(Money.of(originalEmi.getCurrency(), BigDecimal.valueOf(lowerHalfOfRelatedPeriods), mc));
+            if (!shouldBeAdjusted) {
+                break;
+            }
+
+            uncountablePeriods = relatedRepaymentPeriods.stream().filter(rp -> originalEmi.isLessThan(rp.getTotalPaidAmount())).count();
             Money adjustment = emiDifference.dividedBy(Math.max(1, numberOfRelatedPeriods - uncountablePeriods), mc);
             Money adjustedEqualMonthlyInstallmentValue = applyInstallmentAmountInMultiplesOf(scheduleModel,
                     originalEmi.plus(adjustment, mc));
             if (adjustedEqualMonthlyInstallmentValue.isEqualTo(originalEmi)) {
-                return;
+                break;
+            }
+            if (newScheduleModel == null) {
+                newScheduleModel = scheduleModel.deepCopy(mc);
             }
             final LocalDate relatedPeriodsFirstDueDate = relatedRepaymentPeriods.get(0).getDueDate();
-            final ProgressiveLoanInterestScheduleModel newScheduleModel = scheduleModel.deepCopy(mc);
             newScheduleModel.repaymentPeriods().forEach(period -> {
                 if (!period.getDueDate().isBefore(relatedPeriodsFirstDueDate)
                         && !adjustedEqualMonthlyInstallmentValue.isLessThan(period.getTotalPaidAmount())) {
@@ -319,7 +332,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             final Money newEmiDifference = getDifferenceBetweenLastTwoPeriod(newScheduleModel.repaymentPeriods(), scheduleModel);
             final boolean newEmiHasLessDifference = newEmiDifference.abs(mc).isLessThan(emiDifference.abs(mc));
             if (!newEmiHasLessDifference) {
-                return;
+                break;
             }
 
             final Iterator<RepaymentPeriod> relatedPeriodFromNewModelIterator = newScheduleModel.repaymentPeriods().stream()//
@@ -335,7 +348,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 relatedRepaymentPeriod.setOriginalEmi(newRepaymentPeriod.getEmi());
             });
             calculateOutstandingBalance(scheduleModel);
-        }
+            adjustCounter++;
+        } while (uncountablePeriods > 0 && adjustCounter < 3);
     }
 
     /**
