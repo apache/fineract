@@ -253,7 +253,8 @@ public class LoanCOBAccountLockCatchupInlineCOBTest extends BaseLoanIntegrationT
             // days behind
             loanCOBCatchUpHelper.executeLoanCOBCatchUp();
 
-            Awaitility.await().atMost(Duration.ofSeconds(30)).with().pollInterval(Duration.ofSeconds(5)) //
+            Awaitility.await().atMost(Duration.ofMinutes(2)).with().pollInterval(Duration.ofSeconds(5)) //
+                    .pollDelay(Duration.ofSeconds(5)) //
                     .until(() -> loanCOBCatchUpHelper.isLoanCOBCatchUpFinishedFor(LocalDate.of(2020, 3, 4))); //
 
             loan = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanID);

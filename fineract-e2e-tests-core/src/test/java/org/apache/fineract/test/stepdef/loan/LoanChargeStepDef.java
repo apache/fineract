@@ -26,6 +26,7 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -258,9 +259,9 @@ public class LoanChargeStepDef extends AbstractStepDef {
         GetLoansLoanIdChargesChargeIdResponse body = chargeDetails.body();
 
         eventAssertion.assertEvent(LoanAddChargeEvent.class, loanChargeResponse.body().getResourceId())
-                .extractingData(LoanChargeDataV1::getName).isEqualTo(body.getName())
-                .extractingData(loanChargeDataV1 -> loanChargeDataV1.getAmount().longValue()).isEqualTo(body.getAmount().longValue())
-                .extractingData(LoanChargeDataV1::getDueDate).isEqualTo(formatter.format(body.getDueDate()));
+                .extractingData(LoanChargeDataV1::getName).isEqualTo(body.getName()).extractingBigDecimal(LoanChargeDataV1::getAmount)
+                .isEqualTo(BigDecimal.valueOf(body.getAmount())).extractingData(LoanChargeDataV1::getDueDate)
+                .isEqualTo(formatter.format(body.getDueDate()));
     }
 
     @Then("Loan charge transaction with the following data results a {int} error and {string} error message")
@@ -300,7 +301,7 @@ public class LoanChargeStepDef extends AbstractStepDef {
         assertThat(errorMessageActual).as(ErrorMessageHelper.wrongErrorMessage(errorMessageActual, errorMessageExpected))
                 .isEqualTo(errorMessageExpected);
 
-        log.info("ERROR CODE: {}", errorCodeActual);
-        log.info("ERROR MESSAGE: {}", errorMessageActual);
+        log.debug("ERROR CODE: {}", errorCodeActual);
+        log.debug("ERROR MESSAGE: {}", errorMessageActual);
     }
 }

@@ -128,9 +128,8 @@ public class EventCheckHelper {
         eventAssertion.assertEvent(LoanCreatedEvent.class, createLoanResponse.body().getLoanId())//
                 .extractingData(LoanAccountDataV1::getId).isEqualTo(body.getId())//
                 .extractingData(loanAccountDataV1 -> loanAccountDataV1.getStatus().getId()).isEqualTo(body.getStatus().getId())//
-                .extractingData(LoanAccountDataV1::getClientId).isEqualTo(Long.valueOf(body.getClientId()))//
-                .extractingData(loanAccountDataV1 -> loanAccountDataV1.getPrincipal().longValue())
-                .isEqualTo(body.getPrincipal().longValue())//
+                .extractingData(LoanAccountDataV1::getClientId).isEqualTo(body.getClientId())//
+                .extractingBigDecimal(LoanAccountDataV1::getPrincipal).isEqualTo(body.getPrincipal())//
                 .extractingData(loanAccountDataV1 -> loanAccountDataV1.getSummary().getCurrency().getCode())
                 .isEqualTo(body.getCurrency().getCode());//
     }
@@ -145,8 +144,7 @@ public class EventCheckHelper {
                 .extractingData(loanAccountDataV1 -> loanAccountDataV1.getStatus().getId()).isEqualTo(body.getStatus().getId())//
                 .extractingData(loanAccountDataV1 -> loanAccountDataV1.getStatus().getCode()).isEqualTo(body.getStatus().getCode())//
                 .extractingData(LoanAccountDataV1::getClientId).isEqualTo(Long.valueOf(body.getClientId()))//
-                .extractingData(loanAccountDataV1 -> loanAccountDataV1.getApprovedPrincipal().longValue())
-                .isEqualTo(body.getApprovedPrincipal().longValue())//
+                .extractingBigDecimal(LoanAccountDataV1::getApprovedPrincipal).isEqualTo(BigDecimal.valueOf(body.getApprovedPrincipal()))//
                 .extractingData(loanAccountDataV1 -> loanAccountDataV1.getTimeline().getApprovedOnDate())//
                 .isEqualTo(FORMATTER_EVENTS.format(body.getTimeline().getApprovedOnDate()))//
                 .extractingData(loanAccountDataV1 -> loanAccountDataV1.getSummary().getCurrency().getCode())
@@ -239,9 +237,9 @@ public class EventCheckHelper {
     }
 
     private boolean areBigDecimalValuesEqual(BigDecimal actual, BigDecimal expected) {
-        log.info("--- Checking BigDecimal values.... ---");
-        log.info("Actual:   {}", actual);
-        log.info("Expected: {}", expected);
+        log.debug("--- Checking BigDecimal values.... ---");
+        log.debug("Actual:   {}", actual);
+        log.debug("Expected: {}", expected);
         return actual.compareTo(expected) == 0;
     }
 
@@ -261,8 +259,7 @@ public class EventCheckHelper {
         eventAssertion.assertEvent(LoanDisbursalTransactionEvent.class, disbursementTransaction.getId())//
                 .extractingData(LoanTransactionDataV1::getLoanId).isEqualTo(body.getId())//
                 .extractingData(LoanTransactionDataV1::getDate).isEqualTo(FORMATTER_EVENTS.format(disbursementTransaction.getDate()))//
-                .extractingData(loanTransactionDataV1 -> loanTransactionDataV1.getAmount().longValue())
-                .isEqualTo(disbursementTransaction.getAmount().longValue());//
+                .extractingBigDecimal(LoanTransactionDataV1::getAmount).isEqualTo(BigDecimal.valueOf(disbursementTransaction.getAmount()));//
     }
 
     public EventAssertion.EventAssertionBuilder<LoanTransactionDataV1> transactionEventCheck(
@@ -291,8 +288,7 @@ public class EventCheckHelper {
         EventAssertion.EventAssertionBuilder<LoanTransactionDataV1> eventBuilder = eventAssertion.assertEvent(eventClass, transactionId);
         eventBuilder.extractingData(LoanTransactionDataV1::getLoanId).isEqualTo(loanDetailsResponse.body().getId())//
                 .extractingData(LoanTransactionDataV1::getDate).isEqualTo(FORMATTER_EVENTS.format(transactionFound.getDate()))//
-                .extractingData(loanTransactionDataV1 -> loanTransactionDataV1.getAmount().longValue())
-                .isEqualTo(transactionFound.getAmount().longValue())//
+                .extractingBigDecimal(LoanTransactionDataV1::getAmount).isEqualTo(BigDecimal.valueOf(transactionFound.getAmount()))//
                 .extractingData(LoanTransactionDataV1::getExternalOwnerId).isEqualTo(externalOwnerId);//
         return eventBuilder;
     }
@@ -316,13 +312,15 @@ public class EventCheckHelper {
                 .isEqualTo(filtered.getOwner().getExternalId()).extractingData(LoanOwnershipTransferDataV1::getTransferExternalId)
                 .isEqualTo(filtered.getTransferExternalId()).extractingData(LoanOwnershipTransferDataV1::getSettlementDate)
                 .isEqualTo(FORMATTER_EVENTS.format(filtered.getSettlementDate()))
-                .extractingData(LoanOwnershipTransferDataV1::getTotalOutstandingBalanceAmount)
+                .extractingBigDecimal(LoanOwnershipTransferDataV1::getTotalOutstandingBalanceAmount)
                 .isEqualTo(totalOutstandingBalanceAmountExpected)
-                .extractingData(LoanOwnershipTransferDataV1::getOutstandingPrincipalPortion).isEqualTo(outstandingPrincipalPortionExpected)
-                .extractingData(LoanOwnershipTransferDataV1::getOutstandingFeePortion).isEqualTo(outstandingFeePortionExpected)
-                .extractingData(LoanOwnershipTransferDataV1::getOutstandingPenaltyPortion).isEqualTo(outstandingPenaltyPortionExpected)
-                .extractingData(LoanOwnershipTransferDataV1::getOutstandingInterestPortion).isEqualTo(outstandingInterestPortionExpected)
-                .extractingData(LoanOwnershipTransferDataV1::getOverPaymentPortion).isEqualTo(overPaymentPortionExpected);
+                .extractingBigDecimal(LoanOwnershipTransferDataV1::getOutstandingPrincipalPortion)
+                .isEqualTo(outstandingPrincipalPortionExpected).extractingBigDecimal(LoanOwnershipTransferDataV1::getOutstandingFeePortion)
+                .isEqualTo(outstandingFeePortionExpected).extractingBigDecimal(LoanOwnershipTransferDataV1::getOutstandingPenaltyPortion)
+                .isEqualTo(outstandingPenaltyPortionExpected)
+                .extractingBigDecimal(LoanOwnershipTransferDataV1::getOutstandingInterestPortion)
+                .isEqualTo(outstandingInterestPortionExpected).extractingBigDecimal(LoanOwnershipTransferDataV1::getOverPaymentPortion)
+                .isEqualTo(overPaymentPortionExpected);
     }
 
     public void loanOwnershipTransferBusinessEventWithStatusCheck(Long loanId, Long transferId, String transferStatus,
@@ -358,15 +356,17 @@ public class EventCheckHelper {
                 .isEqualTo(filtered.getOwner().getExternalId()).extractingData(LoanOwnershipTransferDataV1::getTransferExternalId)
                 .isEqualTo(filtered.getTransferExternalId()).extractingData(LoanOwnershipTransferDataV1::getSettlementDate)
                 .isEqualTo(FORMATTER_EVENTS.format(filtered.getSettlementDate()))
-                .extractingData(LoanOwnershipTransferDataV1::getTotalOutstandingBalanceAmount)
+                .extractingBigDecimal(LoanOwnershipTransferDataV1::getTotalOutstandingBalanceAmount)
                 .isEqualTo(totalOutstandingBalanceAmountExpected)
-                .extractingData(LoanOwnershipTransferDataV1::getOutstandingPrincipalPortion).isEqualTo(outstandingPrincipalPortionExpected)
-                .extractingData(LoanOwnershipTransferDataV1::getOutstandingFeePortion).isEqualTo(outstandingFeePortionExpected)
-                .extractingData(LoanOwnershipTransferDataV1::getOutstandingPenaltyPortion).isEqualTo(outstandingPenaltyPortionExpected)
-                .extractingData(LoanOwnershipTransferDataV1::getOutstandingInterestPortion).isEqualTo(outstandingInterestPortionExpected)
-                .extractingData(LoanOwnershipTransferDataV1::getOverPaymentPortion).isEqualTo(overPaymentPortionExpected)
-                .extractingData(LoanOwnershipTransferDataV1::getTransferStatus).isEqualTo(transferStatusExpected)
-                .extractingData(LoanOwnershipTransferDataV1::getTransferStatusReason).isEqualTo(transferStatusReasonExpected);
+                .extractingBigDecimal(LoanOwnershipTransferDataV1::getOutstandingPrincipalPortion)
+                .isEqualTo(outstandingPrincipalPortionExpected).extractingBigDecimal(LoanOwnershipTransferDataV1::getOutstandingFeePortion)
+                .isEqualTo(outstandingFeePortionExpected).extractingBigDecimal(LoanOwnershipTransferDataV1::getOutstandingPenaltyPortion)
+                .isEqualTo(outstandingPenaltyPortionExpected)
+                .extractingBigDecimal(LoanOwnershipTransferDataV1::getOutstandingInterestPortion)
+                .isEqualTo(outstandingInterestPortionExpected).extractingBigDecimal(LoanOwnershipTransferDataV1::getOverPaymentPortion)
+                .isEqualTo(overPaymentPortionExpected).extractingData(LoanOwnershipTransferDataV1::getTransferStatus)
+                .isEqualTo(transferStatusExpected).extractingData(LoanOwnershipTransferDataV1::getTransferStatusReason)
+                .isEqualTo(transferStatusReasonExpected);
     }
 
     public void loanAccountSnapshotBusinessEventCheck(Long loanId, Long transferId) throws IOException {
@@ -389,17 +389,17 @@ public class EventCheckHelper {
         eventAssertion.assertEvent(LoanAccountSnapshotEvent.class, loanId).extractingData(LoanAccountDataV1::getId).isEqualTo(loanId)
                 .extractingData(LoanAccountDataV1::getExternalOwnerId).isEqualTo(ownerExternalIdExpected)
                 .extractingData(LoanAccountDataV1::getSettlementDate).isEqualTo(settlementDateExpected)
-                .extractingData(loanAccountDataV1 -> loanAccountDataV1.getSummary().getTotalOutstanding())
+                .extractingBigDecimal(loanAccountDataV1 -> loanAccountDataV1.getSummary().getTotalOutstanding())
                 .isEqualTo(totalOutstandingBalanceAmountExpected)
-                .extractingData(loanAccountDataV1 -> loanAccountDataV1.getSummary().getPrincipalOutstanding())
+                .extractingBigDecimal(loanAccountDataV1 -> loanAccountDataV1.getSummary().getPrincipalOutstanding())
                 .isEqualTo(outstandingPrincipalPortionExpected)
-                .extractingData(loanAccountDataV1 -> loanAccountDataV1.getSummary().getFeeChargesOutstanding())
+                .extractingBigDecimal(loanAccountDataV1 -> loanAccountDataV1.getSummary().getFeeChargesOutstanding())
                 .isEqualTo(outstandingFeePortionExpected)
-                .extractingData(loanAccountDataV1 -> loanAccountDataV1.getSummary().getPenaltyChargesOutstanding())
+                .extractingBigDecimal(loanAccountDataV1 -> loanAccountDataV1.getSummary().getPenaltyChargesOutstanding())
                 .isEqualTo(outstandingPenaltyPortionExpected)
-                .extractingData(loanAccountDataV1 -> loanAccountDataV1.getSummary().getInterestOutstanding())
+                .extractingBigDecimal(loanAccountDataV1 -> loanAccountDataV1.getSummary().getInterestOutstanding())
                 .isEqualTo(outstandingInterestPortionExpected)
-                .extractingData(loanAccountDataV1 -> loanAccountDataV1.getSummary().getTotalOverdue())
+                .extractingBigDecimal(loanAccountDataV1 -> loanAccountDataV1.getSummary().getTotalOverdue())
                 .isEqualTo(overPaymentPortionExpected);
     }
 
@@ -435,15 +435,15 @@ public class EventCheckHelper {
                                         pausePeriodEndExpected))//
                                 .isEqualTo(pausePeriodEndExpected);//
 
-                        log.info("LoanAccountDelinquencyPauseChangedBusinessEvent -> isActiveActual:\s{}", isActiveActual);
-                        log.info("LoanAccountDelinquencyPauseChangedBusinessEvent -> pausePeriodStartActual:\s{}", pausePeriodStartActual);
-                        log.info("LoanAccountDelinquencyPauseChangedBusinessEvent -> pausePeriodEndActual:\s{}", pausePeriodEndActual);
+                        log.debug("LoanAccountDelinquencyPauseChangedBusinessEvent -> isActiveActual:\s{}", isActiveActual);
+                        log.debug("LoanAccountDelinquencyPauseChangedBusinessEvent -> pausePeriodStartActual:\s{}", pausePeriodStartActual);
+                        log.debug("LoanAccountDelinquencyPauseChangedBusinessEvent -> pausePeriodEndActual:\s{}", pausePeriodEndActual);
                     }
                     return null;
                 });
     }
 
-    public void installmentLevelDelinquencyRangeChangeEventCheck(Long loanId) throws IOException {
+    public void installmentLevelDelinquencyRangeChangeEventCheck(Long loanId) {
         eventAssertion.assertEvent(LoanDelinquencyRangeChangeEvent.class, loanId).extractingData(loanAccountDelinquencyRangeDataV1 -> {
             // check if sum of total amounts equal the sum of amount types in installmentDelinquencyBuckets
             BigDecimal totalAmountSum = loanAccountDelinquencyRangeDataV1.getInstallmentDelinquencyBuckets().stream()//
@@ -471,13 +471,13 @@ public class EventCheckHelper {
 
             assertThat(totalAmountSum)
                     .as(ErrorMessageHelper.wrongAmountInLoanDelinquencyRangeChangedEventTotalAmount(totalAmountSum, totalAmountSumActual))
-                    .isEqualTo(totalAmountSumActual);
+                    .isEqualByComparingTo(totalAmountSumActual);
 
-            log.info("Nr of installment level delinquency buckets: {}",
+            log.debug("Nr of installment level delinquency buckets: {}",
                     loanAccountDelinquencyRangeDataV1.getInstallmentDelinquencyBuckets().size());
-            log.info("Buckets:");
+            log.debug("Buckets:");
             loanAccountDelinquencyRangeDataV1.getInstallmentDelinquencyBuckets().forEach(e -> {
-                log.info("{}\s-\sTotal amount:\s{}", e.getDelinquencyRange().getClassification(), e.getAmount().getTotalAmount());
+                log.debug("{}\s-\sTotal amount:\s{}", e.getDelinquencyRange().getClassification(), e.getAmount().getTotalAmount());
             });
 
             return null;

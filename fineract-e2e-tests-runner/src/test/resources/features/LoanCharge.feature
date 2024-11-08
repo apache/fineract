@@ -5,6 +5,8 @@ Feature: LoanCharge
   Scenario: Charge creation functionality with locale EN
     When Admin creates a client with random data
     When Admin successfully creates a new customised Loan submitted on date: "1 July 2022", with Principal: "6000", a loanTermFrequency: 24 months, and numberOfRepayments: 24
+    And Admin successfully approves the loan on "1 July 2022" with "6000" amount and expected disbursement date on "1 July 2022"
+    When Admin successfully disburse the loan on "1 July 2022" with "6000" EUR transaction amount
     And Admin adds a 10 % Processing charge to the loan with "en" locale on date: "10 July 2022"
     Then Charge is successfully added to the loan with 600 EUR
 
@@ -12,6 +14,8 @@ Feature: LoanCharge
   Scenario: Charge creation functionality with locale DE
     When Admin creates a client with random data
     When Admin successfully creates a new customised Loan submitted on date: "1 July 2022", with Principal: "6000", a loanTermFrequency: 24 months, and numberOfRepayments: 24
+    And Admin successfully approves the loan on "1 July 2022" with "6000" amount and expected disbursement date on "1 July 2022"
+    When Admin successfully disburse the loan on "1 July 2022" with "6000" EUR transaction amount
     And Admin adds a 10 % Processing charge to the loan with "de_DE" locale on date: "10 Juli 2022"
     Then Charge is successfully added to the loan with 600 EUR
 
@@ -118,261 +122,837 @@ Feature: LoanCharge
     When Admin sets the business date to "23 October 2022"
     And Admin adds an NSF fee because of payment bounce with "23 October 2022" transaction date
     Then Loan has 1010 outstanding amount
+    And Admin runs the Add Periodic Accrual Transactions job
+    Then Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 22 October 2022  |           | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 22 November 2022 |           | 500.0           | 500.0         | 0.0      | 0.0  | 10.0      | 510.0 | 0.0  | 0.0        | 0.0  | 510.0       |
+      | 2  | 30   | 22 December 2022 |           | 0.0             | 500.0         | 0.0      | 0.0  | 0.0       | 500.0 | 0.0  | 0.0        | 0.0  | 500.0       |
     Then Loan Repayment schedule has the following data in Total row:
-      | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
-      | 1000          | 0        | 0    | 10        | 1010 | 0    | 0          | 0    | 1010        |
-##  check transactions last transaction ID type:accrual amount:10, fee:10 depends on NSF penalty or fee / nekunk
-#    TODO Accrual job 500 Error
-#    And Admin runs the Add Periodic Accrual Transactions job
-#    Then Loan Transactions tab has a transaction with date: "04 November 2022", and with the following data:
-#      | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
-#      | Repayment        | 10.0  | 0.0     | 0.0      | 0.0  | 10.0       | 600.0        |
-
-
-##  chek Journal entries for transaction ID --> type/account name/debit-credit amount
-    #    TODO can be done when journal entry paging is fixed
-#    Then The transaction type "Accrual" with date "23 October 2022" has the following journal entries data: Type="ASSET", Account name="Interest/Fee Receivable", Type="INCOME", Account name="Fee Income", Type="", Account name=""
-
-##  check charges --> due/paid/waived/outstanding
-    Then Loan Charges tab has a given charge with the following data:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 1000.0        | 0.0      | 0.0  | 10.0      | 1010.0 | 0.0  | 0.0        | 0.0  | 1010.0      |
+    Then Loan Charges tab has the following data:
       | Name    | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
       | NSF fee | true      | Specified due date | 23 October 2022 | Flat             | 10.0 | 0.0  | 0.0    | 10.0        |
-
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 22 October 2022  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
+      | 23 October 2022  | Accrual          | 10.0   | 0.0       | 0.0      | 0.0  | 10.0      | 0.0          |
+    Then Loan Transactions tab has a "DISBURSEMENT" transaction with date "22 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 1000.0 |
+    Then Loan Transactions tab has a "ACCRUAL" transaction with date "23 October 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable | 10.0  |        |
+      | INCOME | 404007       | Fee Income              |       | 10.0   |
+#    --- charge adjustment for nsf fee with 3 ---
     When Admin sets the business date to "04 November 2022"
-
-##    charge adjustment for nsf fee with 3
     When Admin makes a charge adjustment for the last "LOAN_NSF_FEE" type charge which is due on "23 October 2022" with 3 EUR transaction amount and externalId ""
     Then Loan has 1007 outstanding amount
+    And Admin runs the Add Periodic Accrual Transactions job
+    Then Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 22 October 2022  |           | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 22 November 2022 |           | 500.0           | 500.0         | 0.0      | 0.0  | 10.0      | 510.0 | 3.0  | 3.0        | 0.0  | 507.0       |
+      | 2  | 30   | 22 December 2022 |           | 0.0             | 500.0         | 0.0      | 0.0  | 0.0       | 500.0 | 0.0  | 0.0        | 0.0  | 500.0       |
     Then Loan Repayment schedule has the following data in Total row:
-      | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
-      | 1000          | 0        | 0    | 10        | 1010 | 3    | 3          | 0    | 1007        |
-    Then Loan Transactions tab has a transaction with date: "04 November 2022", and with the following data:
-      | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
-      | Charge Adjustment | 3.0    | 0.0       | 0.0      | 0.0  | 3.0       | 1000.0       |
-
-##  chek Journal entries for transaction ID --> type/account name/debit-credit amount
-#    TODO can be done when journal entry paging is fixed
-#    Then The transaction type "Charge Adjustment" with date "04 November 2022" has the following journal entries data: Type="ASSET", Account name="Interest/Fee Receivable", Type="INCOME", Account name="Fee Income", Type="", Account name=""
-    Then Loan Charges tab has a given charge with the following data:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 1000.0        | 0.0      | 0.0  | 10.0      | 1010.0 | 3.0  | 3.0        | 0.0  | 1007.0      |
+    Then Loan Charges tab has the following data:
       | Name    | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
       | NSF fee | true      | Specified due date | 23 October 2022 | Flat             | 10.0 | 3.0  | 0.0    | 7.0         |
-#
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 22 October 2022  | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
+      | 23 October 2022  | Accrual           | 10.0   | 0.0       | 0.0      | 0.0  | 10.0      | 0.0          |
+      | 04 November 2022 | Charge Adjustment | 3.0    | 0.0       | 0.0      | 0.0  | 3.0       | 1000.0       |
+    Then Loan Transactions tab has a "DISBURSEMENT" transaction with date "22 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 1000.0 |
+    Then Loan Transactions tab has a "ACCRUAL" transaction with date "23 October 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable | 10.0  |        |
+      | INCOME | 404007       | Fee Income              |       | 10.0   |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable |       | 3.0    |
+      | INCOME | 404007       | Fee Income              | 3.0   |        |
+#   --- Backdated repayment with 8 EUR ---
     And Customer makes "AUTOPAY" repayment on "25 October 2022" with 8 EUR transaction amount
     Then Loan has 999 outstanding amount
+    And Admin runs the Add Periodic Accrual Transactions job
+    Then Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 22 October 2022  |           | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 22 November 2022 |           | 500.0           | 500.0         | 0.0      | 0.0  | 10.0      | 510.0 | 11.0 | 11.0       | 0.0  | 499.0       |
+      | 2  | 30   | 22 December 2022 |           | 0.0             | 500.0         | 0.0      | 0.0  | 0.0       | 500.0 | 0.0  | 0.0        | 0.0  | 500.0       |
     Then Loan Repayment schedule has the following data in Total row:
-      | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
-      | 1000          | 0        | 0    | 10        | 1010 | 11   | 11         | 0    | 999         |
-    Then Loan Transactions tab has a transaction with date: "04 November 2022", and with the following data:
-      | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
-      | Charge Adjustment | 3.0    | 1.0       | 0.0      | 0.0  | 2.0       | 999.0        |
-
-#    TODO can be done when journal entry paging is fixed
-#    Then The transaction type "Charge Adjustment" with date "04 November 2022" has the following journal entries data: Type="ASSET", Account name="Interest/Fee Receivable", Type="INCOME", Account name="Fee Income", Type="ASSET", Account name="Loans Receivable"
-    Then Loan Charges tab has a given charge with the following data:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 1000.0        | 0.0      | 0.0  | 10.0      | 1010.0 | 11.0 | 11.0       | 0.0  | 999.0       |
+    Then Loan Charges tab has the following data:
       | Name    | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
       | NSF fee | true      | Specified due date | 23 October 2022 | Flat             | 10.0 | 10.0 | 0.0    | 0.0         |
-#
-##  charge adjustment with 8 will fail
-    When Charge adjustment for the last "LOAN_NSF_FEE" type charge which is due on "23 October 2022" with transaction amount 8 which is higher than the available charge amount results an ERROR
-##  revert last charge adjustment (was amount 3)
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 22 October 2022  | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
+      | 23 October 2022  | Accrual           | 10.0   | 0.0       | 0.0      | 0.0  | 10.0      | 0.0          |
+      | 25 October 2022  | Repayment         | 8.0    | 0.0       | 0.0      | 0.0  | 8.0       | 1000.0       |
+      | 04 November 2022 | Charge Adjustment | 3.0    | 1.0       | 0.0      | 0.0  | 2.0       | 999.0        |
+    Then Loan Transactions tab has a "DISBURSEMENT" transaction with date "22 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 1000.0 |
+    Then Loan Transactions tab has a "ACCRUAL" transaction with date "23 October 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable | 10.0  |        |
+      | INCOME | 404007       | Fee Income              |       | 10.0   |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "25 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 8.0    |
+      | LIABILITY | 145023       | Suspense/Clearing account | 8.0   |        |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable        |       | 1.0    |
+      | ASSET  | 112603       | Interest/Fee Receivable |       | 2.0    |
+      | INCOME | 404007       | Fee Income              | 3.0   |        |
+#  --- charge adjustment with 8 will fail ---
+    Then Charge adjustment for the last "LOAN_NSF_FEE" type charge which is due on "23 October 2022" with transaction amount 8 which is higher than the available charge amount results an ERROR
+#   --- revert last charge adjustment (was amount 3) ---
     When Admin reverts the charge adjustment which was raised on "04 November 2022" with 3 EUR transaction amount
     Then Loan has 1002 outstanding amount
+    And Admin runs the Add Periodic Accrual Transactions job
+    Then Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 22 October 2022  |           | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 22 November 2022 |           | 500.0           | 500.0         | 0.0      | 0.0  | 10.0      | 510.0 | 8.0  | 8.0        | 0.0  | 502.0       |
+      | 2  | 30   | 22 December 2022 |           | 0.0             | 500.0         | 0.0      | 0.0  | 0.0       | 500.0 | 0.0  | 0.0        | 0.0  | 500.0       |
     Then Loan Repayment schedule has the following data in Total row:
-      | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
-      | 1000          | 0        | 0    | 10        | 1010 | 8    | 8          | 0    | 1002        |
-    Then In Loan Transactions the latest Transaction has Transaction type="Charge Adjustment" and is reverted
-#    TODO can be done when journal entry paging is fixed
-#    Then The transaction type "Charge Adjustment" with date "04 November 2022" has the following journal entries data: Type="ASSET", Account name="Interest/Fee Receivable", Type="INCOME", Account name="Fee Income", Type="ASSET", Account name="Loans Receivable"
-    Then Loan Charges tab has a given charge with the following data:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 1000.0        | 0.0      | 0.0  | 10.0      | 1010.0 | 8.0  | 8.0        | 0.0  | 1002.0      |
+    Then Loan Charges tab has the following data:
       | Name    | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
       | NSF fee | true      | Specified due date | 23 October 2022 | Flat             | 10.0 | 8.0  | 0.0    | 2.0         |
-#
-##  Add snooze fee on 10/27/2022 with amount 9 (az eloyo legzen penaltz ez meg fee(
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 22 October 2022  | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 23 October 2022  | Accrual           | 10.0   | 0.0       | 0.0      | 0.0  | 10.0      | 0.0          | false    | false    |
+      | 25 October 2022  | Repayment         | 8.0    | 0.0       | 0.0      | 0.0  | 8.0       | 1000.0       | false    | false    |
+      | 04 November 2022 | Charge Adjustment | 3.0    | 1.0       | 0.0      | 0.0  | 2.0       | 999.0        | true     | true     |
+    Then Loan Transactions tab has a "DISBURSEMENT" transaction with date "22 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 1000.0 |
+    Then Loan Transactions tab has a "ACCRUAL" transaction with date "23 October 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable | 10.0  |        |
+      | INCOME | 404007       | Fee Income              |       | 10.0   |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "25 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 8.0    |
+      | LIABILITY | 145023       | Suspense/Clearing account | 8.0   |        |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable        |       | 1.0    |
+      | ASSET  | 112603       | Interest/Fee Receivable |       | 2.0    |
+      | INCOME | 404007       | Fee Income              | 3.0   |        |
+      | ASSET  | 112601       | Loans Receivable        | 1.0   |        |
+      | ASSET  | 112603       | Interest/Fee Receivable | 2.0   |        |
+      | INCOME | 404007       | Fee Income              |       | 3.0    |
+#   --- Add snooze fee on 10/27/2022 with amount 9 ---
     And Admin adds "LOAN_SNOOZE_FEE" due date charge with "27 October 2022" due date and 9 EUR transaction amount
     Then Loan has 1011 outstanding amount
+    And Admin runs the Add Periodic Accrual Transactions job
+    Then Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 22 October 2022  |           | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 22 November 2022 |           | 500.0           | 500.0         | 0.0      | 9.0  | 10.0      | 519.0 | 8.0  | 8.0        | 0.0  | 511.0       |
+      | 2  | 30   | 22 December 2022 |           | 0.0             | 500.0         | 0.0      | 0.0  | 0.0       | 500.0 | 0.0  | 0.0        | 0.0  | 500.0       |
     Then Loan Repayment schedule has the following data in Total row:
-      | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
-      | 1000          | 0        | 9    | 10        | 1019 | 8    | 8          | 0    | 1011        |
-    Then In Loan Transactions the latest Transaction has Transaction type="Charge Adjustment" and is reverted
-#    TODO can be done when journal entry paging is fixed
-#    Then The transaction type "Charge Adjustment" with date "04 November 2022" has the following journal entries data: Type="ASSET", Account name="Interest/Fee Receivable", Type="INCOME", Account name="Fee Income", Type="ASSET", Account name="Loans Receivable"
-    Then Loan Charges tab has a given charge with the following data:
-      | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due | Paid | Waived | Outstanding |
-      | Snooze fee | false     | Specified due date | 27 October 2022 | Flat             | 9.0 | 0.0  | 0.0    | 9.0         |
-#    Then In Loan Charges the given Charge has the following data:
-#      | nth Charge | Name       | isPenalty | Due as of       | Due | Paid | Waived | Outstanding |
-#      |            | Snooze fee | false     | 27 October 2022 | 9   | 0    | 0      | 9           |
-#
-##    charge adjustment for snooze fee with 4
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 1000.0        | 0.0      | 9.0  | 10.0      | 1019.0 | 8.0  | 8.0        | 0.0  | 1011.0      |
+    Then Loan Charges tab has the following data:
+      | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
+      | Snooze fee | false     | Specified due date | 27 October 2022 | Flat             | 9.0  | 0.0  | 0.0    | 9.0         |
+      | NSF fee    | true      | Specified due date | 23 October 2022 | Flat             | 10.0 | 8.0  | 0.0    | 2.0         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 22 October 2022  | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 23 October 2022  | Accrual           | 10.0   | 0.0       | 0.0      | 0.0  | 10.0      | 0.0          | false    | false    |
+      | 25 October 2022  | Repayment         | 8.0    | 0.0       | 0.0      | 0.0  | 8.0       | 1000.0       | false    | false    |
+      | 04 November 2022 | Charge Adjustment | 3.0    | 1.0       | 0.0      | 0.0  | 2.0       | 999.0        | true     | true     |
+      | 04 November 2022 | Accrual           | 9.0    | 0.0       | 0.0      | 9.0  | 0.0       | 0.0          | false    | false    |
+    Then Loan Transactions tab has a "DISBURSEMENT" transaction with date "22 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 1000.0 |
+    Then Loan Transactions tab has a "ACCRUAL" transaction with date "23 October 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable | 10.0  |        |
+      | INCOME | 404007       | Fee Income              |       | 10.0   |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "25 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 8.0    |
+      | LIABILITY | 145023       | Suspense/Clearing account | 8.0   |        |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable        |       | 1.0    |
+      | ASSET  | 112603       | Interest/Fee Receivable |       | 2.0    |
+      | INCOME | 404007       | Fee Income              | 3.0   |        |
+      | ASSET  | 112601       | Loans Receivable        | 1.0   |        |
+      | ASSET  | 112603       | Interest/Fee Receivable | 2.0   |        |
+      | INCOME | 404007       | Fee Income              |       | 3.0    |
+    Then Loan Transactions tab has a "ACCRUAL" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable | 9.0   |        |
+      | INCOME | 404007       | Fee Income              |       | 9.0    |
+#   --- charge adjustment for snooze fee with 4 ---
     When Admin makes a charge adjustment for the last "LOAN_SNOOZE_FEE" type charge which is due on "27 October 2022" with 4 EUR transaction amount and externalId ""
     Then Loan has 1007 outstanding amount
+    And Admin runs the Add Periodic Accrual Transactions job
+    Then Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 22 October 2022  |           | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 22 November 2022 |           | 500.0           | 500.0         | 0.0      | 9.0  | 10.0      | 519.0 | 12.0 | 12.0       | 0.0  | 507.0       |
+      | 2  | 30   | 22 December 2022 |           | 0.0             | 500.0         | 0.0      | 0.0  | 0.0       | 500.0 | 0.0  | 0.0        | 0.0  | 500.0       |
     Then Loan Repayment schedule has the following data in Total row:
-      | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
-      | 1000          | 0        | 9    | 10        | 1019 | 12   | 12         | 0    | 1007        |
-    Then Loan Transactions tab has a transaction with date: "04 November 2022", and with the following data:
-      | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
-      | Charge Adjustment | 4.0    | 0.0       | 0.0      | 2.0  | 2.0       | 1000.0       |
-
-#    TODO can be done when journal entry paging is fixed
-#    Then The transaction type "Charge Adjustment" with date "04 November 2022" has the following journal entries data: Type="ASSET", Account name="Interest/Fee Receivable", Type="INCOME", Account name="Fee Income", Type="", Account name=""
-    Then Loan Charges tab has a given charge with the following data:
-      | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due | Paid | Waived | Outstanding |
-      | Snooze fee | false     | Specified due date | 27 October 2022 | Flat             | 9.0 | 2.0  | 0.0    | 7.0         |
-#   Then In Loan Charges the given Charge has the following data:
-#      | nth Charge | Name       | isPenalty | Due as of       | Due | Paid | Waived | Outstanding |
-#      |            | Snooze fee | false     | 27 October 2022 | 9   | 2    | 0      | 7           |
-#
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 1000.0        | 0.0      | 9.0  | 10.0      | 1019.0 | 12.0 | 12.0       | 0.0  | 1007.0      |
+    Then Loan Charges tab has the following data:
+      | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
+      | Snooze fee | false     | Specified due date | 27 October 2022 | Flat             | 9.0  | 2.0  | 0.0    | 7.0         |
+      | NSF fee    | true      | Specified due date | 23 October 2022 | Flat             | 10.0 | 10.0 | 0.0    | 0.0         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 22 October 2022  | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 23 October 2022  | Accrual           | 10.0   | 0.0       | 0.0      | 0.0  | 10.0      | 0.0          | false    | false    |
+      | 25 October 2022  | Repayment         | 8.0    | 0.0       | 0.0      | 0.0  | 8.0       | 1000.0       | false    | false    |
+      | 04 November 2022 | Charge Adjustment | 3.0    | 1.0       | 0.0      | 0.0  | 2.0       | 999.0        | true     | true     |
+      | 04 November 2022 | Accrual           | 9.0    | 0.0       | 0.0      | 9.0  | 0.0       | 0.0          | false    | false    |
+      | 04 November 2022 | Charge Adjustment | 4.0    | 0.0       | 0.0      | 2.0  | 2.0       | 1000.0       | false    | false    |
+    Then Loan Transactions tab has a "DISBURSEMENT" transaction with date "22 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 1000.0 |
+    Then Loan Transactions tab has a "ACCRUAL" transaction with date "23 October 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable | 10.0  |        |
+      | INCOME | 404007       | Fee Income              |       | 10.0   |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "25 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 8.0    |
+      | LIABILITY | 145023       | Suspense/Clearing account | 8.0   |        |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable        |       | 1.0    |
+      | ASSET  | 112603       | Interest/Fee Receivable |       | 2.0    |
+      | INCOME | 404007       | Fee Income              | 3.0   |        |
+      | ASSET  | 112601       | Loans Receivable        | 1.0   |        |
+      | ASSET  | 112603       | Interest/Fee Receivable | 2.0   |        |
+      | INCOME | 404007       | Fee Income              |       | 3.0    |
+    Then Loan Transactions tab has a "ACCRUAL" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable | 9.0   |        |
+      | INCOME | 404007       | Fee Income              |       | 9.0    |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable |       | 4.0    |
+      | INCOME | 404007       | Fee Income              | 4.0   |        |
+#   --- Backdated repayment with 507 EUR ---
     And Customer makes "AUTOPAY" repayment on "31 October 2022" with 507 EUR transaction amount
     Then Loan has 500 outstanding amount
+    And Admin runs the Add Periodic Accrual Transactions job
+    Then Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 22 October 2022  |                  | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 22 November 2022 | 04 November 2022 | 500.0           | 500.0         | 0.0      | 9.0  | 10.0      | 519.0 | 519.0 | 519.0      | 0.0  | 0.0         |
+      | 2  | 30   | 22 December 2022 |                  | 0.0             | 500.0         | 0.0      | 0.0  | 0.0       | 500.0 | 0.0   | 0.0        | 0.0  | 500.0       |
     Then Loan Repayment schedule has the following data in Total row:
-      | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
-      | 1000          | 0        | 9    | 10        | 1019 | 519  | 519        | 0    | 500         |
-    Then Loan Transactions tab has a transaction with date: "04 November 2022", and with the following data:
-      | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
-      | Charge Adjustment | 4.0    | 4.0       | 0.0      | 0.0  | 0.0       | 500.0        |
-
-#    TODO can be done when journal entry paging is fixed
-#    Then The transaction type "Charge Adjustment" with date "04 November 2022" has the following journal entries data: Type="ASSET", Account name="Loans Receivable", Type="INCOME", Account name="Fee Income", Type="", Account name=""
-    Then Loan Charges tab has a given charge with the following data:
-      | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due | Paid | Waived | Outstanding |
-      | Snooze fee | false     | Specified due date | 27 October 2022 | Flat             | 9.0 | 9.0  | 0.0    | 0.0         |
-#    Then In Loan Charges the given Charge has the following data:
-#      | nth Charge | Name       | isPenalty | Due as of       | Due | Paid | Waived | Outstanding |
-#      |            | Snooze fee | false     | 27 October 2022 | 9   | 9    | 0      | 0           |
-#
-##      charge adjustment for nsf fee with 5 / hol jegyzi meg az ID-t?
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 1000.0        | 0.0      | 9.0  | 10.0      | 1019.0 | 519.0 | 519.0      | 0.0  | 500.0       |
+    Then Loan Charges tab has the following data:
+      | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
+      | Snooze fee | false     | Specified due date | 27 October 2022 | Flat             | 9.0  | 9.0  | 0.0    | 0.0         |
+      | NSF fee    | true      | Specified due date | 23 October 2022 | Flat             | 10.0 | 10.0 | 0.0    | 0.0         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 22 October 2022  | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 23 October 2022  | Accrual           | 10.0   | 0.0       | 0.0      | 0.0  | 10.0      | 0.0          | false    | false    |
+      | 25 October 2022  | Repayment         | 8.0    | 0.0       | 0.0      | 0.0  | 8.0       | 1000.0       | false    | false    |
+      | 31 October 2022  | Repayment         | 507.0  | 496.0     | 0.0      | 9.0  | 2.0       | 504.0        | false    | false    |
+      | 04 November 2022 | Charge Adjustment | 3.0    | 1.0       | 0.0      | 0.0  | 2.0       | 999.0        | true     | true     |
+      | 04 November 2022 | Accrual           | 9.0    | 0.0       | 0.0      | 9.0  | 0.0       | 0.0          | false    | false    |
+      | 04 November 2022 | Charge Adjustment | 4.0    | 4.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | true     |
+    Then Loan Transactions tab has a "DISBURSEMENT" transaction with date "22 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 1000.0 |
+    Then Loan Transactions tab has a "ACCRUAL" transaction with date "23 October 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable | 10.0  |        |
+      | INCOME | 404007       | Fee Income              |       | 10.0   |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "25 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 8.0    |
+      | LIABILITY | 145023       | Suspense/Clearing account | 8.0   |        |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "31 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112601       | Loans Receivable          |       | 496.0  |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 11.0   |
+      | LIABILITY | 145023       | Suspense/Clearing account | 507.0 |        |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable        |       | 1.0    |
+      | ASSET  | 112603       | Interest/Fee Receivable |       | 2.0    |
+      | INCOME | 404007       | Fee Income              | 3.0   |        |
+      | ASSET  | 112601       | Loans Receivable        | 1.0   |        |
+      | ASSET  | 112603       | Interest/Fee Receivable | 2.0   |        |
+      | INCOME | 404007       | Fee Income              |       | 3.0    |
+    Then Loan Transactions tab has a "ACCRUAL" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable | 9.0   |        |
+      | INCOME | 404007       | Fee Income              |       | 9.0    |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name     | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable |       | 4.0    |
+      | INCOME | 404007       | Fee Income       | 4.0   |        |
+#   --- charge adjustment for nsf fee with 5 ---
     When Admin makes a charge adjustment for the last "LOAN_NSF_FEE" type charge which is due on "23 October 2022" with 5 EUR transaction amount and externalId ""
     Then Loan has 495 outstanding amount
+    And Admin runs the Add Periodic Accrual Transactions job
+    Then Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 22 October 2022  |                  | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 22 November 2022 | 04 November 2022 | 500.0           | 500.0         | 0.0      | 9.0  | 10.0      | 519.0 | 519.0 | 519.0      | 0.0  | 0.0         |
+      | 2  | 30   | 22 December 2022 |                  | 0.0             | 500.0         | 0.0      | 0.0  | 0.0       | 500.0 | 5.0   | 5.0        | 0.0  | 495.0       |
     Then Loan Repayment schedule has the following data in Total row:
-      | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
-      | 1000          | 0        | 9    | 10        | 1019 | 524  | 524        | 0    | 495         |
-    Then Loan Transactions tab has a transaction with date: "04 November 2022", and with the following data:
-      | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
-      | Charge Adjustment | 5.0    | 5.0       | 0.0      | 0.0  | 0.0       | 495.0        |
-
-#    TODO can be done when journal entry paging is fixed
-#    Then The transaction type "Charge Adjustment" with date "04 November 2022" has the following journal entries data: Type="ASSET", Account name="Loans Receivable", Type="INCOME", Account name="Fee Income", Type="", Account name=""
-    Then Loan Charges tab has a given charge with the following data:
-      | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due | Paid | Waived | Outstanding |
-      | Snooze fee | false     | Specified due date | 27 October 2022 | Flat             | 9.0 | 9.0  | 0.0    | 0.0         |
-#    Then In Loan Charges the given Charge has the following data:
-#      | nth Charge | Name       | isPenalty | Due as of       | Due | Paid | Waived | Outstanding |
-#      |            | Snooze fee | false     | 27 October 2022 | 9   | 9    | 0      | 0           |
-
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 1000.0        | 0.0      | 9.0  | 10.0      | 1019.0 | 524.0 | 524.0      | 0.0  | 495.0       |
+    Then Loan Charges tab has the following data:
+      | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
+      | Snooze fee | false     | Specified due date | 27 October 2022 | Flat             | 9.0  | 9.0  | 0.0    | 0.0         |
+      | NSF fee    | true      | Specified due date | 23 October 2022 | Flat             | 10.0 | 10.0 | 0.0    | 0.0         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 22 October 2022  | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 23 October 2022  | Accrual           | 10.0   | 0.0       | 0.0      | 0.0  | 10.0      | 0.0          | false    | false    |
+      | 25 October 2022  | Repayment         | 8.0    | 0.0       | 0.0      | 0.0  | 8.0       | 1000.0       | false    | false    |
+      | 31 October 2022  | Repayment         | 507.0  | 496.0     | 0.0      | 9.0  | 2.0       | 504.0        | false    | false    |
+      | 04 November 2022 | Charge Adjustment | 3.0    | 1.0       | 0.0      | 0.0  | 2.0       | 999.0        | true     | true     |
+      | 04 November 2022 | Accrual           | 9.0    | 0.0       | 0.0      | 9.0  | 0.0       | 0.0          | false    | false    |
+      | 04 November 2022 | Charge Adjustment | 4.0    | 4.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | true     |
+      | 04 November 2022 | Charge Adjustment | 5.0    | 5.0       | 0.0      | 0.0  | 0.0       | 495.0        | false    | false    |
+    Then Loan Transactions tab has a "DISBURSEMENT" transaction with date "22 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 1000.0 |
+    Then Loan Transactions tab has a "ACCRUAL" transaction with date "23 October 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable | 10.0  |        |
+      | INCOME | 404007       | Fee Income              |       | 10.0   |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "25 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 8.0    |
+      | LIABILITY | 145023       | Suspense/Clearing account | 8.0   |        |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "31 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112601       | Loans Receivable          |       | 496.0  |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 11.0   |
+      | LIABILITY | 145023       | Suspense/Clearing account | 507.0 |        |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable        |       | 1.0    |
+      | ASSET  | 112603       | Interest/Fee Receivable |       | 2.0    |
+      | INCOME | 404007       | Fee Income              | 3.0   |        |
+      | ASSET  | 112601       | Loans Receivable        | 1.0   |        |
+      | ASSET  | 112603       | Interest/Fee Receivable | 2.0   |        |
+      | INCOME | 404007       | Fee Income              |       | 3.0    |
+    Then Loan Transactions tab has a "ACCRUAL" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable | 9.0   |        |
+      | INCOME | 404007       | Fee Income              |       | 9.0    |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name     | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable |       | 4.0    |
+      | INCOME | 404007       | Fee Income       | 4.0   |        |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name     | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable |       | 5.0    |
+      | INCOME | 404007       | Fee Income       | 5.0   |        |
+#  --- Backdated repayment with 494 EUR ---
     And Customer makes "AUTOPAY" repayment on "1 November 2022" with 494 EUR transaction amount
     Then Loan has 1 outstanding amount
+    And Admin runs the Add Periodic Accrual Transactions job
+    Then Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 22 October 2022  |                  | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 22 November 2022 | 01 November 2022 | 500.0           | 500.0         | 0.0      | 9.0  | 10.0      | 519.0 | 519.0 | 519.0      | 0.0  | 0.0         |
+      | 2  | 30   | 22 December 2022 |                  | 0.0             | 500.0         | 0.0      | 0.0  | 0.0       | 500.0 | 499.0 | 499.0      | 0.0  | 1.0         |
     Then Loan Repayment schedule has the following data in Total row:
-      | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
-      | 1000          | 0        | 9    | 10        | 1019 | 1018 | 1018       | 0    | 1           |
-    Then Loan Transactions tab has a transaction with date: "04 November 2022", and with the following data:
-      | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
-      | Charge Adjustment | 5.0    | 5.0       | 0.0      | 0.0  | 0.0       | 1.0          |
-
-#    TODO can be done when journal entry paging is fixed
-#    Then The transaction type "Charge Adjustment" with date "04 November 2022" has the following journal entries data: Type="ASSET", Account name="Loans Receivable", Type="INCOME", Account name="Fee Income", Type="", Account name=""
-    Then Loan Charges tab has a given charge with the following data:
-      | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due | Paid | Waived | Outstanding |
-      | Snooze fee | false     | Specified due date | 27 October 2022 | Flat             | 9.0 | 9.0  | 0.0    | 0.0         |
-#    Then In Loan Charges the given Charge has the following data:
-#      | nth Charge | Name       | isPenalty | Due as of       | Due | Paid | Waived | Outstanding |
-#      |            | Snooze fee | false     | 27 October 2022 | 9   | 9    | 0      | 0           |
-#
-#  #    charge adjustment for snooze fee with 1
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      | 1000.0        | 0.0      | 9.0  | 10.0      | 1019.0 | 1018.0 | 1018.0     | 0.0  | 1.0         |
+    Then Loan Charges tab has the following data:
+      | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
+      | Snooze fee | false     | Specified due date | 27 October 2022 | Flat             | 9.0  | 9.0  | 0.0    | 0.0         |
+      | NSF fee    | true      | Specified due date | 23 October 2022 | Flat             | 10.0 | 10.0 | 0.0    | 0.0         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 22 October 2022  | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 23 October 2022  | Accrual           | 10.0   | 0.0       | 0.0      | 0.0  | 10.0      | 0.0          | false    | false    |
+      | 25 October 2022  | Repayment         | 8.0    | 0.0       | 0.0      | 0.0  | 8.0       | 1000.0       | false    | false    |
+      | 31 October 2022  | Repayment         | 507.0  | 496.0     | 0.0      | 9.0  | 2.0       | 504.0        | false    | false    |
+      | 01 November 2022 | Repayment         | 494.0  | 494.0     | 0.0      | 0.0  | 0.0       | 10.0         | false    | false    |
+      | 04 November 2022 | Charge Adjustment | 3.0    | 1.0       | 0.0      | 0.0  | 2.0       | 999.0        | true     | true     |
+      | 04 November 2022 | Accrual           | 9.0    | 0.0       | 0.0      | 9.0  | 0.0       | 0.0          | false    | false    |
+      | 04 November 2022 | Charge Adjustment | 4.0    | 4.0       | 0.0      | 0.0  | 0.0       | 6.0          | false    | true     |
+      | 04 November 2022 | Charge Adjustment | 5.0    | 5.0       | 0.0      | 0.0  | 0.0       | 1.0          | false    | false    |
+    Then Loan Transactions tab has a "DISBURSEMENT" transaction with date "22 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 1000.0 |
+    Then Loan Transactions tab has a "ACCRUAL" transaction with date "23 October 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable | 10.0  |        |
+      | INCOME | 404007       | Fee Income              |       | 10.0   |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "25 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 8.0    |
+      | LIABILITY | 145023       | Suspense/Clearing account | 8.0   |        |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "31 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112601       | Loans Receivable          |       | 496.0  |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 11.0   |
+      | LIABILITY | 145023       | Suspense/Clearing account | 507.0 |        |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "01 November 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112601       | Loans Receivable          |       | 494.0  |
+      | LIABILITY | 145023       | Suspense/Clearing account | 494.0 |        |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable        |       | 1.0    |
+      | ASSET  | 112603       | Interest/Fee Receivable |       | 2.0    |
+      | INCOME | 404007       | Fee Income              | 3.0   |        |
+      | ASSET  | 112601       | Loans Receivable        | 1.0   |        |
+      | ASSET  | 112603       | Interest/Fee Receivable | 2.0   |        |
+      | INCOME | 404007       | Fee Income              |       | 3.0    |
+    Then Loan Transactions tab has a "ACCRUAL" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable | 9.0   |        |
+      | INCOME | 404007       | Fee Income              |       | 9.0    |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name     | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable |       | 4.0    |
+      | INCOME | 404007       | Fee Income       | 4.0   |        |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name     | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable |       | 5.0    |
+      | INCOME | 404007       | Fee Income       | 5.0   |        |
+#   --- charge adjustment for snooze fee with 1 ---
     When Admin makes a charge adjustment for the last "LOAN_SNOOZE_FEE" type charge which is due on "27 October 2022" with 1 EUR transaction amount and externalId ""
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     Then Loan has 0 outstanding amount
+    And Admin runs the Add Periodic Accrual Transactions job
+    Then Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 22 October 2022  |                  | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 22 November 2022 | 01 November 2022 | 500.0           | 500.0         | 0.0      | 9.0  | 10.0      | 519.0 | 519.0 | 519.0      | 0.0  | 0.0         |
+      | 2  | 30   | 22 December 2022 | 04 November 2022 | 0.0             | 500.0         | 0.0      | 0.0  | 0.0       | 500.0 | 500.0 | 500.0      | 0.0  | 0.0         |
     Then Loan Repayment schedule has the following data in Total row:
-      | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
-      | 1000          | 0        | 9    | 10        | 1019 | 1019 | 1019       | 0    | 0           |
-    Then Loan Transactions tab has a transaction with date: "04 November 2022", and with the following data:
-      | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
-      | Charge Adjustment | 1.0    | 1.0       | 0.0      | 0.0  | 0.0       | 0.0          |
-
-#    TODO can be done when journal entry paging is fixed
-#    Then The transaction type "Charge Adjustment" with date "04 November 2022" has the following journal entries data: Type="ASSET", Account name="Loans Receivable", Type="INCOME", Account name="Fee Income", Type="", Account name=""
-    Then Loan Charges tab has a given charge with the following data:
-      | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due | Paid | Waived | Outstanding |
-      | Snooze fee | false     | Specified due date | 27 October 2022 | Flat             | 9.0 | 9.0  | 0.0    | 0.0         |
-#    Then In Loan Charges the given Charge has the following data:
-#      | nth Charge | Name       | isPenalty | Due as of       | Due | Paid | Waived | Outstanding |
-#      |            | Snooze fee | false     | 27 October 2022 | 9   | 9    | 0      | 0           |
-#
-#  #  revert last charge adjustment (was amount 1)
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      | 1000.0        | 0.0      | 9.0  | 10.0      | 1019.0 | 1019.0 | 1019.0     | 0.0  | 0.0         |
+    Then Loan Charges tab has the following data:
+      | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
+      | Snooze fee | false     | Specified due date | 27 October 2022 | Flat             | 9.0  | 9.0  | 0.0    | 0.0         |
+      | NSF fee    | true      | Specified due date | 23 October 2022 | Flat             | 10.0 | 10.0 | 0.0    | 0.0         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 22 October 2022  | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 23 October 2022  | Accrual           | 10.0   | 0.0       | 0.0      | 0.0  | 10.0      | 0.0          | false    | false    |
+      | 25 October 2022  | Repayment         | 8.0    | 0.0       | 0.0      | 0.0  | 8.0       | 1000.0       | false    | false    |
+      | 31 October 2022  | Repayment         | 507.0  | 496.0     | 0.0      | 9.0  | 2.0       | 504.0        | false    | false    |
+      | 01 November 2022 | Repayment         | 494.0  | 494.0     | 0.0      | 0.0  | 0.0       | 10.0         | false    | false    |
+      | 04 November 2022 | Charge Adjustment | 3.0    | 1.0       | 0.0      | 0.0  | 2.0       | 999.0        | true     | true     |
+      | 04 November 2022 | Accrual           | 9.0    | 0.0       | 0.0      | 9.0  | 0.0       | 0.0          | false    | false    |
+      | 04 November 2022 | Charge Adjustment | 4.0    | 4.0       | 0.0      | 0.0  | 0.0       | 6.0          | false    | true     |
+      | 04 November 2022 | Charge Adjustment | 5.0    | 5.0       | 0.0      | 0.0  | 0.0       | 1.0          | false    | false    |
+      | 04 November 2022 | Charge Adjustment | 1.0    | 1.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then Loan Transactions tab has a "DISBURSEMENT" transaction with date "22 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 1000.0 |
+    Then Loan Transactions tab has a "ACCRUAL" transaction with date "23 October 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable | 10.0  |        |
+      | INCOME | 404007       | Fee Income              |       | 10.0   |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "25 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 8.0    |
+      | LIABILITY | 145023       | Suspense/Clearing account | 8.0   |        |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "31 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112601       | Loans Receivable          |       | 496.0  |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 11.0   |
+      | LIABILITY | 145023       | Suspense/Clearing account | 507.0 |        |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "01 November 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112601       | Loans Receivable          |       | 494.0  |
+      | LIABILITY | 145023       | Suspense/Clearing account | 494.0 |        |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable        |       | 1.0    |
+      | ASSET  | 112603       | Interest/Fee Receivable |       | 2.0    |
+      | INCOME | 404007       | Fee Income              | 3.0   |        |
+      | ASSET  | 112601       | Loans Receivable        | 1.0   |        |
+      | ASSET  | 112603       | Interest/Fee Receivable | 2.0   |        |
+      | INCOME | 404007       | Fee Income              |       | 3.0    |
+    Then Loan Transactions tab has a "ACCRUAL" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable | 9.0   |        |
+      | INCOME | 404007       | Fee Income              |       | 9.0    |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name     | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable |       | 4.0    |
+      | INCOME | 404007       | Fee Income       | 4.0   |        |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name     | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable |       | 5.0    |
+      | INCOME | 404007       | Fee Income       | 5.0   |        |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name     | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable |       | 1.0    |
+      | INCOME | 404007       | Fee Income       | 1.0   |        |
+#   --- revert last charge adjustment (was amount 1) ---
     When Admin reverts the charge adjustment which was raised on "04 November 2022" with 1 EUR transaction amount
     Then Loan status will be "ACTIVE"
     Then Loan has 1 outstanding amount
+    And Admin runs the Add Periodic Accrual Transactions job
+    Then Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 22 October 2022  |                  | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 22 November 2022 | 01 November 2022 | 500.0           | 500.0         | 0.0      | 9.0  | 10.0      | 519.0 | 519.0 | 519.0      | 0.0  | 0.0         |
+      | 2  | 30   | 22 December 2022 |                  | 0.0             | 500.0         | 0.0      | 0.0  | 0.0       | 500.0 | 499.0 | 499.0      | 0.0  | 1.0         |
     Then Loan Repayment schedule has the following data in Total row:
-      | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
-      | 1000          | 0        | 9    | 10        | 1019 | 1018 | 1018       | 0    | 1           |
-#    TODO do it with nth transaction and not latest, because accrual is working now, so the last transaction will be accrual and the one before will be the reverted Charge Adjustment
-#    Then In Loan Transactions the latest Transaction has Transaction type="Charge Adjustment" and is reverted
-#    TODO can be done when journal entry paging is fixed
-#    Then The transaction type "Charge Adjustment" with date "04 November 2022" has the following journal entries data: Type="ASSET", Account name="Loans Receivable", Type="INCOME", Account name="Fee Income", Type="", Account name=""
-    Then Loan Charges tab has a given charge with the following data:
-      | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due | Paid | Waived | Outstanding |
-      | Snooze fee | false     | Specified due date | 27 October 2022 | Flat             | 9.0 | 9.0  | 0.0    | 0.0         |
-#    Then In Loan Charges the given Charge has the following data:
-#      | nth Charge | Name       | isPenalty | Due as of       | Due | Paid | Waived | Outstanding |
-#      |            | Snooze fee | false     | 27 October 2022 | 9   | 9    | 0      | 0           |
-#
-#    #    charge adjustment for nsf fee with 1
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      | 1000.0        | 0.0      | 9.0  | 10.0      | 1019.0 | 1018.0 | 1018.0     | 0.0  | 1.0         |
+    Then Loan Charges tab has the following data:
+      | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
+      | Snooze fee | false     | Specified due date | 27 October 2022 | Flat             | 9.0  | 9.0  | 0.0    | 0.0         |
+      | NSF fee    | true      | Specified due date | 23 October 2022 | Flat             | 10.0 | 10.0 | 0.0    | 0.0         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 22 October 2022  | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 23 October 2022  | Accrual           | 10.0   | 0.0       | 0.0      | 0.0  | 10.0      | 0.0          | false    | false    |
+      | 25 October 2022  | Repayment         | 8.0    | 0.0       | 0.0      | 0.0  | 8.0       | 1000.0       | false    | false    |
+      | 31 October 2022  | Repayment         | 507.0  | 496.0     | 0.0      | 9.0  | 2.0       | 504.0        | false    | false    |
+      | 01 November 2022 | Repayment         | 494.0  | 494.0     | 0.0      | 0.0  | 0.0       | 10.0         | false    | false    |
+      | 04 November 2022 | Charge Adjustment | 3.0    | 1.0       | 0.0      | 0.0  | 2.0       | 999.0        | true     | true     |
+      | 04 November 2022 | Accrual           | 9.0    | 0.0       | 0.0      | 9.0  | 0.0       | 0.0          | false    | false    |
+      | 04 November 2022 | Charge Adjustment | 4.0    | 4.0       | 0.0      | 0.0  | 0.0       | 6.0          | false    | true     |
+      | 04 November 2022 | Charge Adjustment | 5.0    | 5.0       | 0.0      | 0.0  | 0.0       | 1.0          | false    | false    |
+      | 04 November 2022 | Charge Adjustment | 1.0    | 1.0       | 0.0      | 0.0  | 0.0       | 0.0          | true     | false    |
+    Then Loan Transactions tab has a "DISBURSEMENT" transaction with date "22 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 1000.0 |
+    Then Loan Transactions tab has a "ACCRUAL" transaction with date "23 October 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable | 10.0  |        |
+      | INCOME | 404007       | Fee Income              |       | 10.0   |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "25 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 8.0    |
+      | LIABILITY | 145023       | Suspense/Clearing account | 8.0   |        |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "31 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112601       | Loans Receivable          |       | 496.0  |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 11.0   |
+      | LIABILITY | 145023       | Suspense/Clearing account | 507.0 |        |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "01 November 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112601       | Loans Receivable          |       | 494.0  |
+      | LIABILITY | 145023       | Suspense/Clearing account | 494.0 |        |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable        |       | 1.0    |
+      | ASSET  | 112603       | Interest/Fee Receivable |       | 2.0    |
+      | INCOME | 404007       | Fee Income              | 3.0   |        |
+      | ASSET  | 112601       | Loans Receivable        | 1.0   |        |
+      | ASSET  | 112603       | Interest/Fee Receivable | 2.0   |        |
+      | INCOME | 404007       | Fee Income              |       | 3.0    |
+    Then Loan Transactions tab has a "ACCRUAL" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable | 9.0   |        |
+      | INCOME | 404007       | Fee Income              |       | 9.0    |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name     | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable |       | 4.0    |
+      | INCOME | 404007       | Fee Income       | 4.0   |        |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name     | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable |       | 5.0    |
+      | INCOME | 404007       | Fee Income       | 5.0   |        |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name     | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable |       | 1.0    |
+      | INCOME | 404007       | Fee Income       | 1.0   |        |
+      | ASSET  | 112601       | Loans Receivable | 1.0   |        |
+      | INCOME | 404007       | Fee Income       |       | 1.0    |
+#   --- charge adjustment for nsf fee with 1 ---
     When Admin makes a charge adjustment for the last "LOAN_NSF_FEE" type charge which is due on "23 October 2022" with 1 EUR transaction amount and externalId ""
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     Then Loan has 0 outstanding amount
+    And Admin runs the Add Periodic Accrual Transactions job
+    Then Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 22 October 2022  |                  | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 22 November 2022 | 01 November 2022 | 500.0           | 500.0         | 0.0      | 9.0  | 10.0      | 519.0 | 519.0 | 519.0      | 0.0  | 0.0         |
+      | 2  | 30   | 22 December 2022 | 04 November 2022 | 0.0             | 500.0         | 0.0      | 0.0  | 0.0       | 500.0 | 500.0 | 500.0      | 0.0  | 0.0         |
     Then Loan Repayment schedule has the following data in Total row:
-      | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
-      | 1000          | 0        | 9    | 10        | 1019 | 1019 | 1019       | 0    | 0           |
-    Then Loan Transactions tab has a transaction with date: "04 November 2022", and with the following data:
-      | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
-      | Charge Adjustment | 1.0    | 1.0       | 0.0      | 0.0  | 0.0       | 0.0          |
-
-#    TODO can be done when journal entry paging is fixed
-#    Then The transaction type "Charge Adjustment" with date "04 November 2022" has the following journal entries data: Type="ASSET", Account name="Loans Receivable", Type="INCOME", Account name="Fee Income", Type="", Account name=""
-    Then Loan Charges tab has a given charge with the following data:
-      | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due | Paid | Waived | Outstanding |
-      | Snooze fee | false     | Specified due date | 27 October 2022 | Flat             | 9.0 | 9.0  | 0.0    | 0.0         |
-#    Then In Loan Charges the given Charge has the following data:
-#      | nth Charge | Name       | isPenalty | Due as of       | Due | Paid | Waived | Outstanding |
-#      |            | Snooze fee | false     | 27 October 2022 | 9   | 9    | 0      | 0           |
-#
-#   #    charge adjustment for nsf fee with 2
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      | 1000.0        | 0.0      | 9.0  | 10.0      | 1019.0 | 1019.0 | 1019.0     | 0.0  | 0.0         |
+    Then Loan Charges tab has the following data:
+      | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
+      | Snooze fee | false     | Specified due date | 27 October 2022 | Flat             | 9.0  | 9.0  | 0.0    | 0.0         |
+      | NSF fee    | true      | Specified due date | 23 October 2022 | Flat             | 10.0 | 10.0 | 0.0    | 0.0         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 22 October 2022  | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 23 October 2022  | Accrual           | 10.0   | 0.0       | 0.0      | 0.0  | 10.0      | 0.0          | false    | false    |
+      | 25 October 2022  | Repayment         | 8.0    | 0.0       | 0.0      | 0.0  | 8.0       | 1000.0       | false    | false    |
+      | 31 October 2022  | Repayment         | 507.0  | 496.0     | 0.0      | 9.0  | 2.0       | 504.0        | false    | false    |
+      | 01 November 2022 | Repayment         | 494.0  | 494.0     | 0.0      | 0.0  | 0.0       | 10.0         | false    | false    |
+      | 04 November 2022 | Charge Adjustment | 3.0    | 1.0       | 0.0      | 0.0  | 2.0       | 999.0        | true     | true     |
+      | 04 November 2022 | Accrual           | 9.0    | 0.0       | 0.0      | 9.0  | 0.0       | 0.0          | false    | false    |
+      | 04 November 2022 | Charge Adjustment | 4.0    | 4.0       | 0.0      | 0.0  | 0.0       | 6.0          | false    | true     |
+      | 04 November 2022 | Charge Adjustment | 5.0    | 5.0       | 0.0      | 0.0  | 0.0       | 1.0          | false    | false    |
+      | 04 November 2022 | Charge Adjustment | 1.0    | 1.0       | 0.0      | 0.0  | 0.0       | 0.0          | true     | false    |
+      | 04 November 2022 | Charge Adjustment | 1.0    | 1.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then Loan Transactions tab has a "DISBURSEMENT" transaction with date "22 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 1000.0 |
+    Then Loan Transactions tab has a "ACCRUAL" transaction with date "23 October 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable | 10.0  |        |
+      | INCOME | 404007       | Fee Income              |       | 10.0   |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "25 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 8.0    |
+      | LIABILITY | 145023       | Suspense/Clearing account | 8.0   |        |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "31 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112601       | Loans Receivable          |       | 496.0  |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 11.0   |
+      | LIABILITY | 145023       | Suspense/Clearing account | 507.0 |        |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "01 November 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112601       | Loans Receivable          |       | 494.0  |
+      | LIABILITY | 145023       | Suspense/Clearing account | 494.0 |        |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable        |       | 1.0    |
+      | ASSET  | 112603       | Interest/Fee Receivable |       | 2.0    |
+      | INCOME | 404007       | Fee Income              | 3.0   |        |
+      | ASSET  | 112601       | Loans Receivable        | 1.0   |        |
+      | ASSET  | 112603       | Interest/Fee Receivable | 2.0   |        |
+      | INCOME | 404007       | Fee Income              |       | 3.0    |
+    Then Loan Transactions tab has a "ACCRUAL" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable | 9.0   |        |
+      | INCOME | 404007       | Fee Income              |       | 9.0    |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name     | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable |       | 4.0    |
+      | INCOME | 404007       | Fee Income       | 4.0   |        |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name     | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable |       | 5.0    |
+      | INCOME | 404007       | Fee Income       | 5.0   |        |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name     | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable |       | 1.0    |
+      | INCOME | 404007       | Fee Income       | 1.0   |        |
+      | ASSET  | 112601       | Loans Receivable | 1.0   |        |
+      | INCOME | 404007       | Fee Income       |       | 1.0    |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name     | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable |       | 1.0    |
+      | INCOME | 404007       | Fee Income       | 1.0   |        |
+#   --- charge adjustment for nsf fee with 2 ---
     When Admin makes a charge adjustment for the last "LOAN_NSF_FEE" type charge which is due on "23 October 2022" with 2 EUR transaction amount and externalId ""
     Then Loan status will be "OVERPAID"
     Then Loan has 0 outstanding amount
+    And Admin runs the Add Periodic Accrual Transactions job
+    Then Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 22 October 2022  |                  | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 22 November 2022 | 01 November 2022 | 500.0           | 500.0         | 0.0      | 9.0  | 10.0      | 519.0 | 519.0 | 519.0      | 0.0  | 0.0         |
+      | 2  | 30   | 22 December 2022 | 04 November 2022 | 0.0             | 500.0         | 0.0      | 0.0  | 0.0       | 500.0 | 500.0 | 500.0      | 0.0  | 0.0         |
     Then Loan Repayment schedule has the following data in Total row:
-      | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
-      | 1000          | 0        | 9    | 10        | 1019 | 1019 | 1019       | 0    | 0           |
-    Then Loan Transactions tab has a transaction with date: "04 November 2022", and with the following data:
-      | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
-      | Charge Adjustment | 2.0    | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          |
-    Then Loan has 2 overpaid amount
-
-#    TODO can be done when journal entry paging is fixed
-#    Then The transaction type "Charge Adjustment" with date "04 November 2022" has the following journal entries data: Type="LIABILITY", Account name="Overpayment account", Type="INCOME", Account name="Fee Income", Type="", Account name=""
-    Then Loan Charges tab has a given charge with the following data:
-      | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due | Paid | Waived | Outstanding |
-      | Snooze fee | false     | Specified due date | 27 October 2022 | Flat             | 9.0 | 9.0  | 0.0    | 0.0         |
-#    Then In Loan Charges the given Charge has the following data:
-#      | nth Charge | Name       | isPenalty | Due as of       | Due | Paid | Waived | Outstanding |
-#      |            | Snooze fee | false     | 27 October 2022 | 9   | 9    | 0      | 0           |
-#
-#  #  revert last charge adjustment (was amount 2)
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      | 1000.0        | 0.0      | 9.0  | 10.0      | 1019.0 | 1019.0 | 1019.0     | 0.0  | 0.0         |
+    Then Loan Charges tab has the following data:
+      | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
+      | Snooze fee | false     | Specified due date | 27 October 2022 | Flat             | 9.0  | 9.0  | 0.0    | 0.0         |
+      | NSF fee    | true      | Specified due date | 23 October 2022 | Flat             | 10.0 | 10.0 | 0.0    | 0.0         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 22 October 2022  | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 23 October 2022  | Accrual           | 10.0   | 0.0       | 0.0      | 0.0  | 10.0      | 0.0          | false    | false    |
+      | 25 October 2022  | Repayment         | 8.0    | 0.0       | 0.0      | 0.0  | 8.0       | 1000.0       | false    | false    |
+      | 31 October 2022  | Repayment         | 507.0  | 496.0     | 0.0      | 9.0  | 2.0       | 504.0        | false    | false    |
+      | 01 November 2022 | Repayment         | 494.0  | 494.0     | 0.0      | 0.0  | 0.0       | 10.0         | false    | false    |
+      | 04 November 2022 | Charge Adjustment | 3.0    | 1.0       | 0.0      | 0.0  | 2.0       | 999.0        | true     | true     |
+      | 04 November 2022 | Accrual           | 9.0    | 0.0       | 0.0      | 9.0  | 0.0       | 0.0          | false    | false    |
+      | 04 November 2022 | Charge Adjustment | 4.0    | 4.0       | 0.0      | 0.0  | 0.0       | 6.0          | false    | true     |
+      | 04 November 2022 | Charge Adjustment | 5.0    | 5.0       | 0.0      | 0.0  | 0.0       | 1.0          | false    | false    |
+      | 04 November 2022 | Charge Adjustment | 1.0    | 1.0       | 0.0      | 0.0  | 0.0       | 0.0          | true     | false    |
+      | 04 November 2022 | Charge Adjustment | 1.0    | 1.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 November 2022 | Charge Adjustment | 2.0    | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then Loan Transactions tab has a "DISBURSEMENT" transaction with date "22 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 1000.0 |
+    Then Loan Transactions tab has a "ACCRUAL" transaction with date "23 October 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable | 10.0  |        |
+      | INCOME | 404007       | Fee Income              |       | 10.0   |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "25 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 8.0    |
+      | LIABILITY | 145023       | Suspense/Clearing account | 8.0   |        |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "31 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112601       | Loans Receivable          |       | 496.0  |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 11.0   |
+      | LIABILITY | 145023       | Suspense/Clearing account | 507.0 |        |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "01 November 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112601       | Loans Receivable          |       | 494.0  |
+      | LIABILITY | 145023       | Suspense/Clearing account | 494.0 |        |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable        |       | 1.0    |
+      | ASSET  | 112603       | Interest/Fee Receivable |       | 2.0    |
+      | INCOME | 404007       | Fee Income              | 3.0   |        |
+      | ASSET  | 112601       | Loans Receivable        | 1.0   |        |
+      | ASSET  | 112603       | Interest/Fee Receivable | 2.0   |        |
+      | INCOME | 404007       | Fee Income              |       | 3.0    |
+    Then Loan Transactions tab has a "ACCRUAL" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable | 9.0   |        |
+      | INCOME | 404007       | Fee Income              |       | 9.0    |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name     | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable |       | 4.0    |
+      | INCOME | 404007       | Fee Income       | 4.0   |        |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name     | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable |       | 5.0    |
+      | INCOME | 404007       | Fee Income       | 5.0   |        |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name     | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable |       | 1.0    |
+      | INCOME | 404007       | Fee Income       | 1.0   |        |
+      | ASSET  | 112601       | Loans Receivable | 1.0   |        |
+      | INCOME | 404007       | Fee Income       |       | 1.0    |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name     | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable |       | 1.0    |
+      | INCOME | 404007       | Fee Income       | 1.0   |        |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type      | Account code | Account name        | Debit | Credit |
+      | LIABILITY | l1           | Overpayment account |       | 2.0    |
+      | INCOME    | 404007       | Fee Income          | 2.0   |        |
+#   --- revert last charge adjustment (was amount 2) ---
     When Admin reverts the charge adjustment which was raised on "04 November 2022" with 2 EUR transaction amount
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     Then Loan has 0 outstanding amount
+    And Admin runs the Add Periodic Accrual Transactions job
+    Then Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 22 October 2022  |                  | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 22 November 2022 | 01 November 2022 | 500.0           | 500.0         | 0.0      | 9.0  | 10.0      | 519.0 | 519.0 | 519.0      | 0.0  | 0.0         |
+      | 2  | 30   | 22 December 2022 | 04 November 2022 | 0.0             | 500.0         | 0.0      | 0.0  | 0.0       | 500.0 | 500.0 | 500.0      | 0.0  | 0.0         |
     Then Loan Repayment schedule has the following data in Total row:
-      | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
-      | 1000          | 0        | 9    | 10        | 1019 | 1019 | 1019       | 0    | 0           |
-    Then In Loan Transactions the latest Transaction has Transaction type="Charge Adjustment" and is reverted
-#    TODO can be done when journal entry paging is fixed
-#    Then The transaction type "Charge Adjustment" with date "04 November 2022" has the following journal entries data: Type="LIABILITY", Account name="Overpayment account", Type="INCOME", Account name="Fee Income", Type="", Account name=""
-    Then Loan Charges tab has a given charge with the following data:
-      | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due | Paid | Waived | Outstanding |
-      | Snooze fee | false     | Specified due date | 27 October 2022 | Flat             | 9.0 | 9.0  | 0.0    | 0.0         |
-#    Then In Loan Charges the given Charge has the following data:
-#      | nth Charge | Name       | isPenalty | Due as of       | Due | Paid | Waived | Outstanding |
-#      |            | Snooze fee | false     | 27 October 2022 | 9   | 9    | 0      | 0           |
-
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      | 1000.0        | 0.0      | 9.0  | 10.0      | 1019.0 | 1019.0 | 1019.0     | 0.0  | 0.0         |
+    Then Loan Charges tab has the following data:
+      | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
+      | Snooze fee | false     | Specified due date | 27 October 2022 | Flat             | 9.0  | 9.0  | 0.0    | 0.0         |
+      | NSF fee    | true      | Specified due date | 23 October 2022 | Flat             | 10.0 | 10.0 | 0.0    | 0.0         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 22 October 2022  | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 23 October 2022  | Accrual           | 10.0   | 0.0       | 0.0      | 0.0  | 10.0      | 0.0          | false    | false    |
+      | 25 October 2022  | Repayment         | 8.0    | 0.0       | 0.0      | 0.0  | 8.0       | 1000.0       | false    | false    |
+      | 31 October 2022  | Repayment         | 507.0  | 496.0     | 0.0      | 9.0  | 2.0       | 504.0        | false    | false    |
+      | 01 November 2022 | Repayment         | 494.0  | 494.0     | 0.0      | 0.0  | 0.0       | 10.0         | false    | false    |
+      | 04 November 2022 | Charge Adjustment | 3.0    | 1.0       | 0.0      | 0.0  | 2.0       | 999.0        | true     | true     |
+      | 04 November 2022 | Accrual           | 9.0    | 0.0       | 0.0      | 9.0  | 0.0       | 0.0          | false    | false    |
+      | 04 November 2022 | Charge Adjustment | 4.0    | 4.0       | 0.0      | 0.0  | 0.0       | 6.0          | false    | true     |
+      | 04 November 2022 | Charge Adjustment | 5.0    | 5.0       | 0.0      | 0.0  | 0.0       | 1.0          | false    | false    |
+      | 04 November 2022 | Charge Adjustment | 1.0    | 1.0       | 0.0      | 0.0  | 0.0       | 0.0          | true     | false    |
+      | 04 November 2022 | Charge Adjustment | 1.0    | 1.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 November 2022 | Charge Adjustment | 2.0    | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | true     | false    |
+    Then Loan Transactions tab has a "DISBURSEMENT" transaction with date "22 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 1000.0 |
+    Then Loan Transactions tab has a "ACCRUAL" transaction with date "23 October 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable | 10.0  |        |
+      | INCOME | 404007       | Fee Income              |       | 10.0   |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "25 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 8.0    |
+      | LIABILITY | 145023       | Suspense/Clearing account | 8.0   |        |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "31 October 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112601       | Loans Receivable          |       | 496.0  |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 11.0   |
+      | LIABILITY | 145023       | Suspense/Clearing account | 507.0 |        |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "01 November 2022" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112601       | Loans Receivable          |       | 494.0  |
+      | LIABILITY | 145023       | Suspense/Clearing account | 494.0 |        |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable        |       | 1.0    |
+      | ASSET  | 112603       | Interest/Fee Receivable |       | 2.0    |
+      | INCOME | 404007       | Fee Income              | 3.0   |        |
+      | ASSET  | 112601       | Loans Receivable        | 1.0   |        |
+      | ASSET  | 112603       | Interest/Fee Receivable | 2.0   |        |
+      | INCOME | 404007       | Fee Income              |       | 3.0    |
+    Then Loan Transactions tab has a "ACCRUAL" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable | 9.0   |        |
+      | INCOME | 404007       | Fee Income              |       | 9.0    |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name     | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable |       | 4.0    |
+      | INCOME | 404007       | Fee Income       | 4.0   |        |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name     | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable |       | 5.0    |
+      | INCOME | 404007       | Fee Income       | 5.0   |        |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name     | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable |       | 1.0    |
+      | INCOME | 404007       | Fee Income       | 1.0   |        |
+      | ASSET  | 112601       | Loans Receivable | 1.0   |        |
+      | INCOME | 404007       | Fee Income       |       | 1.0    |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type   | Account code | Account name     | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable |       | 1.0    |
+      | INCOME | 404007       | Fee Income       | 1.0   |        |
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
+      | Type      | Account code | Account name        | Debit | Credit |
+      | LIABILITY | l1           | Overpayment account |       | 2.0    |
+      | INCOME    | 404007       | Fee Income          | 2.0   |        |
+      | LIABILITY | l1           | Overpayment account | 2.0   |        |
+      | INCOME    | 404007       | Fee Income          |       | 2.0    |
 
   Scenario: Verify that charge can be added to loan on disbursement date (loan status is 'active')
     When Admin sets the business date to "01 January 2023"

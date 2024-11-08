@@ -273,8 +273,8 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
         assertThat(errorMessageActual).as(ErrorMessageHelper.wrongErrorMessage(errorMessageActual, errorMessageExpected))
                 .isEqualTo(errorMessageExpected);
 
-        log.info("ERROR CODE: {}", errorCodeActual);
-        log.info("ERROR MESSAGE: {}", errorMessageActual);
+        log.debug("ERROR CODE: {}", errorCodeActual);
+        log.debug("ERROR MESSAGE: {}", errorMessageActual);
     }
 
     @When("Admin initiate a DELINQUENCY RESUME with startDate: {string}")
@@ -657,7 +657,7 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
                     Long loanLevelDelinquencyRangeIdExpected = delinquencyRange.getId();
                     String loanLevelDelinquencyRangeExpected = delinquencyRange.getClassification();
                     String loanLevelDelinquentDateExpected = FORMATTER.format(delinquent.getDelinquentDate());
-                    BigDecimal loanLevelTotalAmountExpected = new BigDecimal(delinquent.getDelinquentAmount());
+                    BigDecimal loanLevelTotalAmountExpected = BigDecimal.valueOf(delinquent.getDelinquentAmount());
 
                     assertThat(loanLevelDelinquencyRangeId)//
                             .as(ErrorMessageHelper.wrongValueInLoanDelinquencyRangeChangeBusinessEvent4(loanLevelDelinquencyRangeId,
@@ -674,7 +674,7 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
                     assertThat(loanLevelTotalAmount)//
                             .as(ErrorMessageHelper.wrongValueInLoanDelinquencyRangeChangeBusinessEvent6(loanLevelTotalAmount,
                                     loanLevelTotalAmountExpected))//
-                            .isEqualTo(loanLevelTotalAmountExpected);//
+                            .isEqualByComparingTo(loanLevelTotalAmountExpected);//
 
                     List<GetLoansLoanIdLoanInstallmentLevelDelinquency> installmentLevelDelinquencyBucketsExpected = delinquent
                             .getInstallmentLevelDelinquency();
@@ -703,7 +703,7 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
                         assertThat(installmentLevelTotalAmount)//
                                 .as(ErrorMessageHelper.wrongValueInLoanDelinquencyRangeChangeBusinessEvent3(installmentLevelTotalAmount,
                                         installmentLevelTotalAmountExpected))//
-                                .isEqualTo(installmentLevelTotalAmountExpected);//
+                                .isEqualByComparingTo(installmentLevelTotalAmountExpected);//
                     }
                     return null;
                 });
@@ -728,8 +728,8 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
                 .as(ErrorMessageHelper.wrongDataInDelinquentLastRepaymentDate(actualLastRepaymentDate, expectedLastRepaymentDate))//
                 .isEqualTo(expectedLastRepaymentDate);//
 
-        log.info("loanDetails.delinquent.lastRepaymentAmount: {}", actualLastRepaymentAmount);
-        log.info("loanDetails.delinquent.lastRepaymentDate: {}", actualLastRepaymentDate);
+        log.debug("loanDetails.delinquent.lastRepaymentAmount: {}", actualLastRepaymentAmount);
+        log.debug("loanDetails.delinquent.lastRepaymentDate: {}", actualLastRepaymentDate);
     }
 
     private List<String> fetchValuesOfDelinquencyPausePeriods(List<String> header, GetLoansLoanIdDelinquencyPausePeriod t) {
@@ -757,8 +757,8 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
         assertThat(errorMessageActual).as(ErrorMessageHelper.wrongErrorMessage(errorMessageActual, errorMessageExpected))
                 .isEqualTo(errorMessageExpected);
 
-        log.info("ERROR CODE: {}", errorCodeActual);
-        log.info("ERROR MESSAGE: {}", errorMessageActual);
+        log.debug("ERROR CODE: {}", errorCodeActual);
+        log.debug("ERROR MESSAGE: {}", errorMessageActual);
     }
 
     @Then("LoanDelinquencyRangeChangeBusinessEvent is created")

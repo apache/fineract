@@ -101,7 +101,7 @@ public class EventAssertion {
         } else {
             eventMessage = (EventMessage<R>) new EmptyEventMessage();
         }
-        log.info("Assert event: {}", eventMessage.getIdempotencyKey());
+        log.debug("Assert event: {}", eventMessage.getIdempotencyKey());
         return new EventAssertionBuilder<>(eventMessage);
     }
 
@@ -167,7 +167,11 @@ public class EventAssertion {
 
         public EventAssertionBuilder<R> isEqualTo(BigDecimal value) {
             if (eventProperties.isEventVerificationEnabled()) {
-                Assertions.assertThat(extractedValue).isEqualByComparingTo(value);
+                if (extractedValue == null) {
+                    Assertions.assertThat(extractedValue).isEqualTo(value);
+                } else {
+                    Assertions.assertThat(extractedValue).isEqualByComparingTo(value);
+                }
             }
             return new EventAssertionBuilder<>(eventMessage);
         }

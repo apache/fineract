@@ -223,26 +223,29 @@ public class SchedulerJobHelper extends IntegrationTest {
     }
 
     private void awaitJob(Instant beforeExecuteTime, Supplier<Callable<Map<String, String>>> retrieveLastRunHistory) {
-        final Duration timeout = Duration.ofMinutes(4);
-        final Duration pause = Duration.ofSeconds(2);
+        final Duration timeout = Duration.ofMinutes(2);
+        final Duration pause = Duration.ofSeconds(5);
         DateTimeFormatter df = DateTimeFormatter.ISO_INSTANT; // FINERACT-926
         // Await JobDetailData.lastRunHistory [JobDetailHistoryData]
         // jobRunStartTime >= beforeExecuteTime (or timeout)
         // jobRunEndTime to be both set and >= jobRunStartTime (or timeout)
-        Map<String, String> finalLastRunHistory = await().atMost(timeout).pollInterval(pause).until(retrieveLastRunHistory.get(),
-                lastRunHistory -> {
-                    String jobRunStartText = lastRunHistory.get("jobRunStartTime");
-                    if (jobRunStartText == null) {
-                        return false;
-                    }
-                    String jobRunEndText = lastRunHistory.get("jobRunEndTime");
-                    if (jobRunEndText == null) {
-                        return false;
-                    }
-                    Instant jobRunStartTime = df.parse(jobRunStartText, Instant::from);
-                    Instant jobRunEndTime = df.parse(jobRunEndText, Instant::from);
-                    return !jobRunStartTime.isBefore(beforeExecuteTime) && !jobRunEndTime.isBefore(jobRunStartTime);
-                });
+        Map<String, String> finalLastRunHistory = await().atMost(timeout) //
+                .pollInterval(pause) //
+                .pollDelay(pause) //
+                .until(retrieveLastRunHistory.get(), //
+                        lastRunHistory -> {
+                            String jobRunStartText = lastRunHistory.get("jobRunStartTime");
+                            if (jobRunStartText == null) {
+                                return false;
+                            }
+                            String jobRunEndText = lastRunHistory.get("jobRunEndTime");
+                            if (jobRunEndText == null) {
+                                return false;
+                            }
+                            Instant jobRunStartTime = df.parse(jobRunStartText, Instant::from);
+                            Instant jobRunEndTime = df.parse(jobRunEndText, Instant::from);
+                            return !jobRunStartTime.isBefore(beforeExecuteTime) && !jobRunEndTime.isBefore(jobRunStartTime);
+                        });
 
         // Verify triggerType
         MatcherAssert.assertThat(finalLastRunHistory.get("triggerType"), is("application"));

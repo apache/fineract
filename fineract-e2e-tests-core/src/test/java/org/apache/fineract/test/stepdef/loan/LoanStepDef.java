@@ -44,7 +44,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.avro.loan.v1.LoanAccountDataV1;
@@ -386,8 +385,8 @@ public class LoanStepDef extends AbstractStepDef {
         assertThat(errorMessageActual).as(ErrorMessageHelper.wrongErrorMessage(errorMessageActual, errorMessageExpected))
                 .isEqualTo(errorMessageExpected);
 
-        log.info("ERROR CODE: {}", errorCodeActual);
-        log.info("ERROR MESSAGE: {}", errorMessageActual);
+        log.debug("ERROR CODE: {}", errorCodeActual);
+        log.debug("ERROR MESSAGE: {}", errorMessageActual);
     }
 
     @When("Admin creates a fully customized loan with the following data:")
@@ -548,8 +547,8 @@ public class LoanStepDef extends AbstractStepDef {
         assertThat(errorCode).as(ErrorMessageHelper.dateFailureErrorCodeMsg()).isEqualTo(403);
         assertThat(errorMessage).isEqualTo(ErrorMessageHelper.downpaymentDisabledOnProductErrorCodeMsg());
 
-        log.info("Error code: {}", errorCode);
-        log.info("Error message: {}}", errorMessage);
+        log.debug("Error code: {}", errorCode);
+        log.debug("Error message: {}}", errorMessage);
     }
 
     @When("Admin creates a fully customized loan with auto downpayment {double}% and with the following data:")
@@ -845,8 +844,8 @@ public class LoanStepDef extends AbstractStepDef {
 
         assertThat(errorCodeActual).as(ErrorMessageHelper.wrongErrorCode(errorCodeActual, errorCodeExpected)).isEqualTo(errorCodeExpected);
 
-        log.info("ERROR CODE: {}", errorCodeActual);
-        log.info("ERROR MESSAGE: {}", errorMessageActual);
+        log.debug("ERROR CODE: {}", errorCodeActual);
+        log.debug("ERROR MESSAGE: {}", errorMessageActual);
     }
 
     @When("Admin creates a fully customized loan with Advanced payment allocation and with product no Advanced payment allocation set results an error:")
@@ -927,8 +926,8 @@ public class LoanStepDef extends AbstractStepDef {
         assertThat(errorMessageActual).as(ErrorMessageHelper.wrongErrorMessage(errorMessageActual, errorMessageExpected))
                 .isEqualTo(errorMessageExpected);
 
-        log.info("ERROR CODE: {}", errorCodeActual);
-        log.info("ERROR MESSAGE: {}", errorMessageActual);
+        log.debug("ERROR CODE: {}", errorCodeActual);
+        log.debug("ERROR MESSAGE: {}", errorMessageActual);
     }
 
     @When("Admin creates a fully customized loan with installment level delinquency and with the following data:")
@@ -1519,7 +1518,7 @@ public class LoanStepDef extends AbstractStepDef {
 
         assertThat(errorDetails.getHttpStatusCode()).as(ErrorMessageHelper.dateFailureErrorCodeMsg()).isEqualTo(403);
         assertThat(developerMessage).matches(ErrorMessageHelper.disburseMaxAmountFailure());
-        log.info("Error message: {}", developerMessage);
+        log.debug("Error message: {}", developerMessage);
     }
 
     @Then("Loan has {double} outstanding amount")
@@ -2073,18 +2072,24 @@ public class LoanStepDef extends AbstractStepDef {
 
     @When("Admin checks that Loan COB is running until the current business date")
     public void checkLoanCOBCatchUpRunningUntilCOBBusinessDate() {
-        await().pollInterval(2, TimeUnit.SECONDS).atMost(Duration.ofSeconds(20)).until(() -> {
-            Response<IsCatchUpRunningResponse> isCatchUpRunningResponse = loanCobCatchUpApi.isCatchUpRunning().execute();
-            ErrorHelper.checkSuccessfulApiCall(isCatchUpRunningResponse);
-            IsCatchUpRunningResponse isCatchUpRunning = isCatchUpRunningResponse.body();
-            return isCatchUpRunning.getIsCatchUpRunning();
-        });
-        await().pollInterval(2, TimeUnit.SECONDS).atMost(Duration.ofMinutes(4)).until(() -> {
-            Response<IsCatchUpRunningResponse> isCatchUpRunningResponse = loanCobCatchUpApi.isCatchUpRunning().execute();
-            ErrorHelper.checkSuccessfulApiCall(isCatchUpRunningResponse);
-            IsCatchUpRunningResponse isCatchUpRunning = isCatchUpRunningResponse.body();
-            return !isCatchUpRunning.getIsCatchUpRunning();
-        });
+        await().atMost(Duration.ofMinutes(2)) //
+                .pollInterval(Duration.ofSeconds(5)) //
+                .pollDelay(Duration.ofSeconds(5)) //
+                .until(() -> {
+                    Response<IsCatchUpRunningResponse> isCatchUpRunningResponse = loanCobCatchUpApi.isCatchUpRunning().execute();
+                    ErrorHelper.checkSuccessfulApiCall(isCatchUpRunningResponse);
+                    IsCatchUpRunningResponse isCatchUpRunning = isCatchUpRunningResponse.body();
+                    return isCatchUpRunning.getIsCatchUpRunning();
+                });
+        await().atMost(Duration.ofMinutes(4)) //
+                .pollInterval(Duration.ofSeconds(5)) //
+                .pollDelay(Duration.ofSeconds(5)) //
+                .until(() -> {
+                    Response<IsCatchUpRunningResponse> isCatchUpRunningResponse = loanCobCatchUpApi.isCatchUpRunning().execute();
+                    ErrorHelper.checkSuccessfulApiCall(isCatchUpRunningResponse);
+                    IsCatchUpRunningResponse isCatchUpRunning = isCatchUpRunningResponse.body();
+                    return !isCatchUpRunning.getIsCatchUpRunning();
+                });
     }
 
     @Then("Loan's actualMaturityDate is {string}")
@@ -2289,7 +2294,7 @@ public class LoanStepDef extends AbstractStepDef {
             String futureInstallmentAllocationRuleNew) throws IOException {
         DefaultLoanProduct product = DefaultLoanProduct.valueOf(loanProductName);
         Long loanProductId = loanProductResolver.resolve(product);
-        log.info("loanProductId: {}", loanProductId);
+        log.debug("loanProductId: {}", loanProductId);
 
         Response<GetLoanProductsProductIdResponse> loanProductDetails = loanProductsApi.retrieveLoanProductDetails(loanProductId).execute();
         ErrorHelper.checkSuccessfulApiCall(loanProductDetails);
@@ -2319,7 +2324,7 @@ public class LoanStepDef extends AbstractStepDef {
     public void editRepaymentStartDateType(String loanProductName, String repaymentStartDateType) throws IOException {
         DefaultLoanProduct product = DefaultLoanProduct.valueOf(loanProductName);
         Long loanProductId = loanProductResolver.resolve(product);
-        log.info("loanProductId: {}", loanProductId);
+        log.debug("loanProductId: {}", loanProductId);
 
         Map<String, Integer> repaymentStartDateTypeMap = Map.of("DISBURSEMENT_DATE", 1, "SUBMITTED_ON_DATE", 2);
 

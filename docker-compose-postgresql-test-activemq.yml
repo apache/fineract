@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements. See the NOTICE file
 # distributed with this work for additional information
@@ -17,12 +16,30 @@
 # under the License.
 #
 
-FINERACT_REMOTE_JOB_MESSAGE_HANDLER_SPRING_EVENTS_ENABLED=false
-FINERACT_REMOTE_JOB_MESSAGE_HANDLER_JMS_ENABLED=false
-FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_ENABLED=true
-FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-FINERACT_REMOTE_JOB_MESSAGE_HANDLER_KAFKA_TOPIC_NAME=job-topic
-FINERACT_EXTERNAL_EVENTS_ENABLED=true
-FINERACT_EXTERNAL_EVENTS_KAFKA_ENABLED=true
-FINERACT_EXTERNAL_EVENTS_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-FINERACT_EXTERNAL_EVENTS_KAFKA_TOPIC_NAME=external-events
+version: "3.8"
+
+services:
+  activemq:
+    extends:
+      file: ./config/docker/compose/activemq.yml
+      service: activemq
+
+  db:
+    extends:
+      file: ./config/docker/compose/postgresql.yml
+      service: postgresql
+
+  fineract:
+    extends:
+      file: ./config/docker/compose/fineract.yml
+      service: fineract
+    ports:
+      - "8443:8443"
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - ./config/docker/env/fineract.env
+      - ./config/docker/env/fineract-common.env
+      - ./config/docker/env/fineract-postgresql.env
+      - ./config/docker/env/activemq.env

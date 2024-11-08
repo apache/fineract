@@ -150,7 +150,7 @@ public class BusinessStepStepDef extends AbstractStepDef {
     }
 
     private void setBackBusinessStepsToOriginal() throws IOException {
-        log.info("Setting back Business steps to original...");
+        log.debug("Setting back Business steps to original...");
         UpdateBusinessStepConfigRequest request = new UpdateBusinessStepConfigRequest().businessSteps(ORIGINAL_COB_BUSINESS_STEPS);
 
         Response<Void> response = businessStepConfigurationApi.updateJobBusinessStepConfig(WORKFLOW_NAME_LOAN_CLOSE_OF_BUSINESS, request)
@@ -172,7 +172,7 @@ public class BusinessStepStepDef extends AbstractStepDef {
                 .map(BusinessStep::getStepName)//
                 .collect(Collectors.toList());//
 
-        log.info("Business steps has been CHANGED to the following:");
-        changes.forEach(e -> log.info(e));
+        log.debug("Business steps has been CHANGED to the following:");
+        changes.forEach(e -> log.debug(e));
     }
 }

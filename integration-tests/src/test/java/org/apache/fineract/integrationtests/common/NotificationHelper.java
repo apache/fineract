@@ -51,7 +51,9 @@ public final class NotificationHelper {
     // Waiting for notifications to be available is needed due to the asynchronous event processing
     public static void waitUntilNotificationsAreAvailable(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
-        await().atMost(Duration.ofSeconds(30)).pollInterval(Duration.ofMillis(250))
+        await().atMost(Duration.ofSeconds(30)) //
+                .pollInterval(Duration.ofSeconds(5)) //
+                .pollDelay(Duration.ofSeconds(5)) //
                 .until(() -> NotificationHelper.areNotificationsAvailable(requestSpec, responseSpec));
     }
 }

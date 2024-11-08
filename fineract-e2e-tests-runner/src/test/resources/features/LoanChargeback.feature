@@ -1043,7 +1043,7 @@ Feature: LoanChargeback
     When Admin sets the business date to "05 April 2023"
     When Admin adds "LOAN_SNOOZE_FEE" due date charge with "05 April 2023" due date and 20 EUR transaction amount
     Then Loan has 270 outstanding amount
-    And Admin runs COB job
+    And Admin runs inline COB job for Loan
     And Customer makes "AUTOPAY" repayment on "05 April 2023" with 270 EUR transaction amount
     Then Loan has 0 outstanding amount
     And Admin makes "REPAYMENT_ADJUSTMENT_CHARGEBACK" chargeback with 250 EUR transaction amount for Payment nr. 2

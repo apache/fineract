@@ -25,7 +25,7 @@ jobs:
       - name: Build the image
         run: ./gradlew --no-daemon --console=plain :fineract-provider:clean :fineract-provider:build :fineract-provider:jibDockerBuild -x test -x cucumber
       - name: Start the Fineract stack
-        run: docker compose -f docker-compose-postgresql.yml up -d
+        run: docker compose -f docker-compose-postgresql-test-activemq.yml up -d
       - name: Wait for stack to come up
         run: sleep 400
       - name: Check the stack
@@ -39,5 +39,7 @@ jobs:
           TEST_PASSWORD: password
           TEST_TENANT_ID: default
           INITIALIZATION_ENABLED: true
-          EVENT_VERIFICATION_ENABLED: false
+          EVENT_VERIFICATION_ENABLED: true
+          ACTIVEMQ_BROKER_URL: tcp://localhost:61616
+          ACTIVEMQ_TOPIC_NAME: events
         run: ./gradlew --no-daemon --console=plain fineract-e2e-tests-runner:cucumber --tags 'not @Skip' allureReport

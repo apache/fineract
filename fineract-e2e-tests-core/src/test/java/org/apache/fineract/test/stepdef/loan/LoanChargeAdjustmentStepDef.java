@@ -118,8 +118,8 @@ public class LoanChargeAdjustmentStepDef extends AbstractStepDef {
                 .as(ErrorMessageHelper.wrongErrorMessageInFailedChargeAdjustment(developerMessageActual, developerMessageExpected))
                 .isEqualTo(developerMessageExpected);
 
-        log.info("Error code: {}", httpStatusCodeActual);
-        log.info("Error message: {}", developerMessageActual);
+        log.debug("Error code: {}", httpStatusCodeActual);
+        log.debug("Error message: {}", developerMessageActual);
     }
 
     @When("Admin reverts the charge adjustment which was raised on {string} with {double} EUR transaction amount")

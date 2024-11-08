@@ -1006,7 +1006,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .name(name48)//
                 .supportedInterestRefundTypes(Arrays.asList("MERCHANT_ISSUED_REFUND", "PAYOUT_REFUND"))//
                 .paymentAllocation(List.of(//
-                        createPaymentAllocation("DEFAULT", "LAST_INSTALLMENT")));//
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT")));//
         Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRefundInterestRecalculation = loanProductsApi
                 .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRefundRecalculation).execute();
         TestContext.INSTANCE.set(

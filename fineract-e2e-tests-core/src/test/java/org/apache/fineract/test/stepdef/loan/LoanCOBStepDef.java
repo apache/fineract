@@ -60,8 +60,8 @@ public class LoanCOBStepDef extends AbstractStepDef {
         LocalDate cobDate = response.body().getCobBusinessDate();
         LocalDate cobDateMinusOne = cobDate.minusDays(1);
         LocalDate cobProcessedDate = response.body().getCobProcessedDate();
-        log.info("cobDateMinusOne: {}", cobDateMinusOne);
-        log.info("cobProcessedDate: {}", cobProcessedDate);
+        log.debug("cobDateMinusOne: {}", cobDateMinusOne);
+        log.debug("cobProcessedDate: {}", cobProcessedDate);
 
         boolean result = cobDateMinusOne.isAfter(cobProcessedDate);
         assertThat(result).as(ErrorMessageHelper.wrongLastCOBProcessedLoanDate(cobProcessedDate, cobDateMinusOne)).isTrue();
@@ -74,7 +74,7 @@ public class LoanCOBStepDef extends AbstractStepDef {
 
         int size = response.body().getContent().size();
         assertThat(size).as(ErrorMessageHelper.listOfLockedLoansNotEmpty(response)).isEqualTo(0);
-        log.info("Size of List of the locked loans: {}", size);
+        log.debug("Size of List of the locked loans: {}", size);
     }
 
     @Then("The loan account is not locked")

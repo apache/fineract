@@ -61,16 +61,16 @@ Feature: LoanAccrualTransaction
     And Customer makes "AUTOPAY" repayment on "03 January 2023" with 250 EUR transaction amount
     When Admin adds "LOAN_SNOOZE_FEE" due date charge with "04 January 2023" due date and 10 EUR transaction amount
     When Admin sets the business date to "04 January 2023"
-    And Admin runs COB job
+    And Admin runs inline COB job for Loan
     When Admin sets the business date to "05 January 2023"
     And Customer makes "AUTOPAY" repayment on "05 January 2023" with 510 EUR transaction amount
     Then Loan has 0 outstanding amount
-    And Admin makes "REPAYMENT_ADJUSTMENT_CHARGEBACK" chargeback with 250 EUR transaction amount for Payment nr. 2
-    Then Loan has 250 outstanding amount
+    Then LoanAccrualTransactionCreatedBusinessEvent is raised on "05 January 2023"
     Then Loan Transactions tab has a transaction with date: "05 January 2023", and with the following data:
       | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | Accrual          | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
-    Then LoanAccrualTransactionCreatedBusinessEvent is raised on "05 January 2023"
+    And Admin makes "REPAYMENT_ADJUSTMENT_CHARGEBACK" chargeback with 250 EUR transaction amount for Payment nr. 2
+    Then Loan has 250 outstanding amount
 
 
   Scenario: Verify that after periodic accrual transaction job accrual event is raised when loan has a fee-charge added with waive charge and undo waive charge
@@ -322,7 +322,7 @@ Feature: LoanAccrualTransaction
     And  Admin runs COB job
     And Admin successfully disburse the loan on "28 April 2023" with "20" EUR transaction amount
     When Admin sets the business date to "29 April 2023"
-    And Admin runs COB job
+     And Admin runs inline COB job for Loan
     Then Loan Repayment schedule has 1 periods, with the following data for periods:
       | Nr | Days | Date          | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 26 April 2023 |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
@@ -349,7 +349,7 @@ Feature: LoanAccrualTransaction
     Then Loan has 1000 outstanding amount
     When Admin adds "LOAN_SNOOZE_FEE" due date charge with "1 May 2023" due date and 10 EUR transaction amount
     When Admin sets the business date to "2 May 2023"
-    And Admin runs COB job
+    And Admin runs inline COB job for Loan
     When Admin sets the business date to "8 May 2023"
     And Admin successfully disburse the loan on "8 May 2023" with "20" EUR transaction amount
     Then Loan Repayment schedule has 1 periods, with the following data for periods:
