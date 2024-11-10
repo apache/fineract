@@ -24,18 +24,18 @@ dependencyManagement {
     imports {
         mavenBom 'com.squareup.okhttp3:okhttp-bom:4.12.0'
         mavenBom 'org.slf4j:slf4j-bom:2.0.16'
-        mavenBom 'io.micrometer:micrometer-bom:1.13.5'
-        mavenBom 'org.springframework:spring-framework-bom:6.1.13'
-        mavenBom 'org.springframework.boot:spring-boot-dependencies:3.3.4'
-        mavenBom 'io.awspring.cloud:spring-cloud-aws-dependencies:3.2.0'
-        mavenBom 'io.opentelemetry:opentelemetry-bom:1.43.0'
+        mavenBom 'io.micrometer:micrometer-bom:1.13.6'
+        mavenBom 'org.springframework:spring-framework-bom:6.1.14'
+        mavenBom 'org.springframework.boot:spring-boot-dependencies:3.3.5'
+        mavenBom 'io.awspring.cloud:spring-cloud-aws-dependencies:3.2.1'
+        mavenBom 'io.opentelemetry:opentelemetry-bom:1.44.1'
         mavenBom 'org.jetbrains.kotlin:kotlin-bom:2.0.21'
-        mavenBom 'org.junit:junit-bom:5.11.2'
-        mavenBom 'com.fasterxml.jackson:jackson-bom:2.18.0'
+        mavenBom 'org.junit:junit-bom:5.11.3'
+        mavenBom 'com.fasterxml.jackson:jackson-bom:2.18.1'
         mavenBom 'io.cucumber:cucumber-bom:7.20.1'
         mavenBom 'io.netty:netty-bom:4.1.114.Final'
-        mavenBom 'org.mockito:mockito-bom:5.14.1'
-        mavenBom 'software.amazon.awssdk:bom:2.28.21'
+        mavenBom 'org.mockito:mockito-bom:5.14.2'
+        mavenBom 'software.amazon.awssdk:bom:2.29.9'
         mavenBom 'io.github.resilience4j:resilience4j-bom:2.2.0'
     }
 
@@ -44,8 +44,8 @@ dependencyManagement {
         // We do not use :+ to get the latest available version available on Maven Central, as that could suddenly break things.
         // We use the Renovate Bot to automatically propose Pull Requests (PRs) when upgrades for all of these versions are available.
 
-        dependency 'ch.qos.logback:logback-core:1.5.10'
-        dependency 'ch.qos.logback:logback-classic:1.5.10'
+        dependency 'ch.qos.logback:logback-core:1.5.12'
+        dependency 'ch.qos.logback:logback-classic:1.5.12'
         dependency 'ch.qos.logback.contrib:logback-json-classic:0.1.5'
         dependency 'ch.qos.logback.contrib:logback-jackson:0.1.5'
         dependency 'org.codehaus.janino:janino:3.1.12'
@@ -156,8 +156,8 @@ dependencyManagement {
         dependency "commons-codec:commons-codec:1.17.1"
         dependency "org.projectlombok:lombok:1.18.34"
 
-        dependency 'org.bouncycastle:bcpkix-jdk15to18:1.78.1'
-        dependency 'org.bouncycastle:bcprov-jdk15to18:1.78.1'
+        dependency 'org.bouncycastle:bcpkix-jdk15to18:1.79'
+        dependency 'org.bouncycastle:bcprov-jdk15to18:1.79'
         dependency 'org.bouncycastle:bcprov-jdk15on:1.70'
         dependency 'org.bouncycastle:bcpg-jdk15on:1.70'
 
@@ -196,10 +196,10 @@ dependencyManagement {
             exclude 'jakarta.activation:jakarta.activation-api'
         }
 
-        dependency ('org.liquibase:liquibase-core:4.29.2') {
+        dependency ('org.liquibase:liquibase-core:4.30.0') {
             exclude 'javax.xml.bind:jaxb-api'
         }
-        dependency 'org.liquibase.ext:liquibase-postgresql:4.29.2'
+        dependency 'org.liquibase.ext:liquibase-postgresql:4.30.0.1'
 
         dependency ('org.dom4j:dom4j:2.1.4') {
             exclude 'relaxngDatatype:relaxngDatatype' // already in com.sun.xml.bind:jaxb-osgi:2.3.0.1
@@ -222,15 +222,15 @@ dependencyManagement {
             entry 'json-path'
             entry 'xml-path'
         }
-        dependency 'org.apache.groovy:groovy-xml:4.0.23'
-        dependency 'org.apache.groovy:groovy-json:4.0.23'
+        dependency 'org.apache.groovy:groovy-xml:4.0.24'
+        dependency 'org.apache.groovy:groovy-json:4.0.24'
 
-        dependency 'org.mapstruct:mapstruct:1.6.2'
-        dependency 'org.mapstruct:mapstruct-processor:1.6.2'
+        dependency 'org.mapstruct:mapstruct:1.6.3'
+        dependency 'org.mapstruct:mapstruct-processor:1.6.3'
 
         dependency "org.apache.avro:avro:1.12.0"
 
-        dependency ('org.mariadb.jdbc:mariadb-java-client:3.4.1') {
+        dependency ('org.mariadb.jdbc:mariadb-java-client:3.5.0') {
             exclude 'org.slf4j:jcl-over-slf4j'
             exclude 'org.slf4j:slf4j-api'
         }

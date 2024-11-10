@@ -95,20 +95,20 @@ plugins {
     id 'com.github.hierynomus.license' version '0.16.1' apply false
     id 'com.github.jk1.dependency-license-report' version '2.9' apply false
     id 'org.zeroturnaround.gradle.jrebel' version '1.2.0' apply false
-    id 'org.springframework.boot' version '3.3.4' apply false
+    id 'org.springframework.boot' version '3.3.5' apply false
     id 'net.ltgt.errorprone' version '3.1.0' apply false
-    id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.23' apply false
+    id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.25' apply false
     id 'com.gorylenko.gradle-git-properties' version '2.4.2' apply false
     id 'org.asciidoctor.jvm.convert' version '3.3.2' apply false
     id 'org.asciidoctor.jvm.pdf' version '3.3.2' apply false
-    id 'com.google.cloud.tools.jib' version '3.4.3' apply false
+    id 'com.google.cloud.tools.jib' version '3.4.4' apply false
     id 'org.sonarqube' version '4.4.1.3373'
-    id 'com.github.andygoossens.modernizer' version '1.9.3' apply false
+    id 'com.github.andygoossens.modernizer' version '1.10.0' apply false
     // TODO: upgrade to 6.0.4
-    id 'com.github.spotbugs' version '6.0.24' apply false
+    id 'com.github.spotbugs' version '6.0.26' apply false
     id 'se.thinkcode.cucumber-runner' version '0.0.11' apply false
     id "com.github.davidmc24.gradle.plugin.avro-base" version "1.9.1" apply false
-    id 'org.openapi.generator' version '7.8.0' apply false
+    id 'org.openapi.generator' version '7.9.0' apply false
 }
 
 apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.release.gradle"
