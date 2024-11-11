@@ -97,7 +97,7 @@ plugins {
     id 'org.zeroturnaround.gradle.jrebel' version '1.2.0' apply false
     id 'org.springframework.boot' version '3.3.5' apply false
     id 'net.ltgt.errorprone' version '3.1.0' apply false
-    id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.25' apply false
+    id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.23' apply false
     id 'com.gorylenko.gradle-git-properties' version '2.4.2' apply false
     id 'org.asciidoctor.jvm.convert' version '3.3.2' apply false
     id 'org.asciidoctor.jvm.pdf' version '3.3.2' apply false
@@ -108,7 +108,7 @@ plugins {
     id 'com.github.spotbugs' version '6.0.26' apply false
     id 'se.thinkcode.cucumber-runner' version '0.0.11' apply false
     id "com.github.davidmc24.gradle.plugin.avro-base" version "1.9.1" apply false
-    id 'org.openapi.generator' version '7.9.0' apply false
+    id 'org.openapi.generator' version '7.8.0' apply false
 }
 
 apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.release.gradle"
