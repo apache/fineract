@@ -707,7 +707,7 @@ public final class ErrorMessageHelper {
         String actualStr = actual.toString();
 
         return String.format(
-                "%nWrong value in Delinquency actions response line %s. %nActual values in line are: %s %nExpected values in line: \s\s%s",
+                "%nWrong value in Delinquency actions response line %s. %nActual values in line are: %s %nExpected values in line: %s",
                 lineStr, actualStr, expectedStr);
     }
 
@@ -743,7 +743,7 @@ public final class ErrorMessageHelper {
         String expectedStr = expected.toString();
 
         return String.format(
-                "%nWrong value in Installment level delinquency data, line %s. %nActual values in line: \s\s%s %nExpected values in line: %s",
+                "%nWrong value in Installment level delinquency data, line %s. %nActual values in line: %s %nExpected values in line: %s",
                 lineStr, actualStr, expectedStr);
     }
 
@@ -751,8 +751,8 @@ public final class ErrorMessageHelper {
         String actualStr = actual.toString();
         String expectedStr = expected.toString();
 
-        return String.format("%nWrong value in LOAN level delinquency data. %nActual values are:\s\s %s %nExpected values are: %s",
-                actualStr, expectedStr);
+        return String.format("%nWrong value in LOAN level delinquency data. %nActual values are: %s %nExpected values are: %s", actualStr,
+                expectedStr);
     }
 
     public static String nrOfLinesWrongInInstallmentLevelDelinquencyData(int actual, int expected) {

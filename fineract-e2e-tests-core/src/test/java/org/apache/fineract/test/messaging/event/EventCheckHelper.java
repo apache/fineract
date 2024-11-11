@@ -435,9 +435,9 @@ public class EventCheckHelper {
                                         pausePeriodEndExpected))//
                                 .isEqualTo(pausePeriodEndExpected);//
 
-                        log.debug("LoanAccountDelinquencyPauseChangedBusinessEvent -> isActiveActual:\s{}", isActiveActual);
-                        log.debug("LoanAccountDelinquencyPauseChangedBusinessEvent -> pausePeriodStartActual:\s{}", pausePeriodStartActual);
-                        log.debug("LoanAccountDelinquencyPauseChangedBusinessEvent -> pausePeriodEndActual:\s{}", pausePeriodEndActual);
+                        log.debug("LoanAccountDelinquencyPauseChangedBusinessEvent -> isActiveActual: {}", isActiveActual);
+                        log.debug("LoanAccountDelinquencyPauseChangedBusinessEvent -> pausePeriodStartActual: {}", pausePeriodStartActual);
+                        log.debug("LoanAccountDelinquencyPauseChangedBusinessEvent -> pausePeriodEndActual: {}", pausePeriodEndActual);
                     }
                     return null;
                 });
@@ -477,7 +477,7 @@ public class EventCheckHelper {
                     loanAccountDelinquencyRangeDataV1.getInstallmentDelinquencyBuckets().size());
             log.debug("Buckets:");
             loanAccountDelinquencyRangeDataV1.getInstallmentDelinquencyBuckets().forEach(e -> {
-                log.debug("{}\s-\sTotal amount:\s{}", e.getDelinquencyRange().getClassification(), e.getAmount().getTotalAmount());
+                log.debug("{} - Total amount: {}", e.getDelinquencyRange().getClassification(), e.getAmount().getTotalAmount());
             });
 
             return null;
