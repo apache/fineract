@@ -300,7 +300,6 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
                     transaction(312.0, "Repayment", "20 February 2023", 626.0, 312.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(312.0, "Repayment", "20 March 2023", 314.0, 312.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(384.0, "Repayment", "20 April 2023", 0.0, 314.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
-                    transaction(70.0, "Accrual", "20 April 2023", 0.0, 0.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
                     transaction(100.0, "Chargeback", "02 May 2023", 30.0, 30.0, 0.0, 50.0, 20.0, 0.0, 0.0) //
             );
 
@@ -585,7 +584,6 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(1370.0, "Repayment", "20 January 2023", 0, 1250.0, 0.0, 50.0, 20.0, 0.0, 50.0), //
-                    transaction(70.0, "Accrual", "20 January 2023", 0.0, 0.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
                     transaction(100.0, "Chargeback", "02 May 2023", 50.0, 100.0, 0.0, 0.0, 0.0, 0.0, 50.0) //
             );
 
@@ -651,7 +649,6 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(1370.0, "Repayment", "20 January 2023", 0, 1250.0, 0.0, 50.0, 20.0, 0.0, 50.0), //
-                    transaction(70.0, "Accrual", "20 January 2023", 0.0, 0.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
                     transaction(100.0, "Chargeback", "20 January 2023", 30.0, 30.0, 0.0, 50.0, 20.0, 0.0, 50.0) //
             );
 
@@ -718,7 +715,6 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(1370.0, "Repayment", "20 January 2023", 0, 1250.0, 0.0, 50.0, 20.0, 0.0, 50.0), //
-                    transaction(70.0, "Accrual", "20 January 2023", 0.0, 0.0, 0.0, 50.0, 20.0, 0.0, 0.0), //
                     transaction(100.0, "Chargeback", "20 January 2023", 0.0, 30.0, 0.0, 50.0, 20.0, 0.0, 50.0) //
             );
 

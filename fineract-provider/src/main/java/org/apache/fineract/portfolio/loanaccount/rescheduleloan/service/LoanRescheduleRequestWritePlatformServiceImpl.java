@@ -440,7 +440,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             }
             loanAccrualsProcessingService.reprocessExistingAccruals(loan);
             loan.recalculateAllCharges();
-            ChangedTransactionDetail changedTransactionDetail = loan.processTransactions();
+            ChangedTransactionDetail changedTransactionDetail = loan.reprocessTransactions();
 
             this.loanRepaymentScheduleHistoryRepository.saveAll(loanRepaymentScheduleHistoryList);
 

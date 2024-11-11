@@ -29,18 +29,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -77,7 +74,6 @@ import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.domain.ClientEnumerations;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
-import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.common.service.CommonEnumerations;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
@@ -96,7 +92,6 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidByData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanInterestRecalculationData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentScheduleInstallmentData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleAccrualData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanSummaryData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
@@ -1743,258 +1738,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     }
 
     @Override
-    public Collection<LoanScheduleAccrualData> retriveScheduleAccrualData() {
-        final String chargeAccrualDateCriteria = configurationDomainService.getAccrualDateConfigForCharge();
-        if (chargeAccrualDateCriteria.equalsIgnoreCase(ACCRUAL_ON_CHARGE_SUBMITTED_ON_DATE)) {
-            return retrieveScheduleAccrualDataForChargeSubmittedDateProcessing();
-        }
-        return retrieveScheduleAccrualDataForDefaultProcessing();
-    }
-
-    private Collection<LoanScheduleAccrualData> retrieveScheduleAccrualDataForDefaultProcessing() {
-        LocalDate organisationStartDate = this.configurationDomainService.retrieveOrganisationStartDate();
-        LoanScheduleAccrualMapper mapper = new LoanScheduleAccrualMapper();
-        Map<String, Object> paramMap = new HashMap<>(3);
-        final StringBuilder sqlBuilder = new StringBuilder(400);
-        sqlBuilder.append("select ").append(mapper.schema()).append(
-                " where (recaldet.is_compounding_to_be_posted_as_transaction is null or recaldet.is_compounding_to_be_posted_as_transaction = false) ")
-                .append(" and (((ls.fee_charges_amount <> COALESCE(ls.accrual_fee_charges_derived, 0))")
-                .append(" or ( ls.penalty_charges_amount <> COALESCE(ls.accrual_penalty_charges_derived, 0))")
-                .append(" or ( ls.interest_amount <> COALESCE(ls.accrual_interest_derived, 0)))")
-                .append(" and loan.loan_status_id=:active and mpl.accounting_type=:type and loan.is_npa=false and loan.is_charged_off = false and ls.duedate <= :currentDate) ");
-
-        if (organisationStartDate != null) {
-            sqlBuilder.append(" and ls.duedate > :organisationStartDate ");
-        }
-        sqlBuilder.append(" order by loan.id,ls.duedate ");
-
-        paramMap.put("active", LoanStatus.ACTIVE.getValue());
-        paramMap.put("type", AccountingRuleType.ACCRUAL_PERIODIC.getValue());
-        paramMap.put("organisationStartDate", (organisationStartDate == null) ? DateUtils.getBusinessLocalDate() : organisationStartDate);
-        paramMap.put("currentDate", DateUtils.getBusinessLocalDate());
-        return this.namedParameterJdbcTemplate.query(sqlBuilder.toString(), paramMap, mapper);
-
-    }
-
-    private Collection<LoanScheduleAccrualData> retrieveScheduleAccrualDataForChargeSubmittedDateProcessing() {
-        LocalDate organisationStartDate = this.configurationDomainService.retrieveOrganisationStartDate();
-        LoanScheduleAccrualMapper mapper = new LoanScheduleAccrualMapper();
-        Map<String, Object> paramMap = new HashMap<>(3);
-        final StringBuilder sqlBuilder = new StringBuilder(400);
-        sqlBuilder.append("select ").append(mapper.schema()).append(
-                " where (recaldet.is_compounding_to_be_posted_as_transaction is null or recaldet.is_compounding_to_be_posted_as_transaction = false) ")
-                .append(" and (((ls.fee_charges_amount <> COALESCE(ls.accrual_fee_charges_derived, 0))")
-                .append(" or ( ls.penalty_charges_amount <> COALESCE(ls.accrual_penalty_charges_derived, 0))")
-                .append(" or ( ls.interest_amount <> COALESCE(ls.accrual_interest_derived, 0)))")
-                .append(" and loan.loan_status_id=:active and mpl.accounting_type=:type and loan.is_npa=false and loan.is_charged_off = false) ");
-
-        if (organisationStartDate != null) {
-            sqlBuilder.append(" and ls.duedate > :organisationStartDate ");
-        }
-        sqlBuilder.append(" order by loan.id,ls.duedate ");
-
-        paramMap.put("active", LoanStatus.ACTIVE.getValue());
-        paramMap.put("type", AccountingRuleType.ACCRUAL_PERIODIC.getValue());
-        paramMap.put("organisationStartDate", (organisationStartDate == null) ? DateUtils.getBusinessLocalDate() : organisationStartDate);
-        return this.namedParameterJdbcTemplate.query(sqlBuilder.toString(), paramMap, mapper);
-    }
-
-    @Override
-    public Collection<LoanScheduleAccrualData> retrievePeriodicAccrualData(final LocalDate tillDate) {
-        return retrievePeriodicAccrualData(tillDate, null);
-    }
-
-    @Override
-    public Collection<LoanScheduleAccrualData> retrievePeriodicAccrualData(final LocalDate tillDate, final Loan loan) {
-        final String chargeAccrualDateCriteria = configurationDomainService.getAccrualDateConfigForCharge();
-        if (chargeAccrualDateCriteria.equalsIgnoreCase(ACCRUAL_ON_CHARGE_SUBMITTED_ON_DATE)) {
-            return retrievePeriodicAccrualDataForChargeSubmittedDateProcessing(tillDate, loan);
-        }
-        return retrievePeriodicAccrualDataForDefaultProcessing(tillDate, loan);
-    }
-
-    private Collection<LoanScheduleAccrualData> retrievePeriodicAccrualDataForDefaultProcessing(final LocalDate tillDate, final Loan loan) {
-        LoanSchedulePeriodicAccrualMapper mapper = new LoanSchedulePeriodicAccrualMapper();
-        LocalDate organisationStartDate = this.configurationDomainService.retrieveOrganisationStartDate();
-        final StringBuilder sqlBuilder = new StringBuilder(400);
-        sqlBuilder.append("select ").append(mapper.schema()).append(
-                " where (recaldet.is_compounding_to_be_posted_as_transaction is null or recaldet.is_compounding_to_be_posted_as_transaction = false) ")
-                .append(" and (((ls.fee_charges_amount <> COALESCE(ls.accrual_fee_charges_derived, 0))")
-                .append(" or (ls.penalty_charges_amount <> COALESCE(ls.accrual_penalty_charges_derived, 0))")
-                .append(" or (ls.interest_amount <> COALESCE(ls.accrual_interest_derived, 0)))")
-                .append(" and loan.loan_status_id=:active and mpl.accounting_type=:type and (loan.closedon_date <= :tillDate or loan.closedon_date is null)")
-                .append(" and loan.is_npa=false and loan.is_charged_off = false and (ls.duedate <= :tillDate or (ls.duedate > :tillDate and ls.fromdate < :tillDate)")
-                .append(" or (ls.installment = 1 and ls.fromdate = :tillDate))) ");
-        Map<String, Object> paramMap = new HashMap<>(5);
-        if (organisationStartDate != null) {
-            sqlBuilder.append(" and ls.duedate > :organisationStartDate ");
-            paramMap.put("organisationStartDate", organisationStartDate);
-        }
-        if (loan != null) {
-            sqlBuilder.append(" and loan.id= :loanId ");
-            paramMap.put("loanId", loan.getId());
-        }
-        sqlBuilder.append(" order by loan.id,ls.duedate ");
-        paramMap.put("active", LoanStatus.ACTIVE.getValue());
-        paramMap.put("type", AccountingRuleType.ACCRUAL_PERIODIC.getValue());
-        paramMap.put("tillDate", tillDate);
-        return this.namedParameterJdbcTemplate.query(sqlBuilder.toString(), paramMap, mapper);
-    }
-
-    private Collection<LoanScheduleAccrualData> retrievePeriodicAccrualDataForChargeSubmittedDateProcessing(final LocalDate tillDate,
-            final Loan loan) {
-        LoanSchedulePeriodicAccrualMapper mapper = new LoanSchedulePeriodicAccrualMapper();
-        LocalDate organisationStartDate = this.configurationDomainService.retrieveOrganisationStartDate();
-        final StringBuilder sqlBuilder = new StringBuilder(400);
-        sqlBuilder.append("select ").append(mapper.schema()).append(
-                " where (recaldet.is_compounding_to_be_posted_as_transaction is null or recaldet.is_compounding_to_be_posted_as_transaction = false) ")
-                .append(" and (((ls.fee_charges_amount <> COALESCE(ls.accrual_fee_charges_derived, 0))")
-                .append(" or (ls.penalty_charges_amount <> COALESCE(ls.accrual_penalty_charges_derived, 0))")
-                .append(" or (ls.interest_amount <> COALESCE(ls.accrual_interest_derived, 0)))")
-                .append(" and loan.loan_status_id=:active and mpl.accounting_type=:type and (loan.closedon_date <= :tillDate or loan.closedon_date is null)")
-                .append(" and loan.is_npa=false and loan.is_charged_off = false)");
-        Map<String, Object> paramMap = new HashMap<>(5);
-        if (organisationStartDate != null) {
-            sqlBuilder.append(" and ls.duedate > :organisationStartDate ");
-            paramMap.put("organisationStartDate", organisationStartDate);
-        }
-        if (loan != null) {
-            sqlBuilder.append(" and loan.id= :loanId ");
-            paramMap.put("loanId", loan.getId());
-        }
-        sqlBuilder.append(" order by loan.id,ls.duedate ");
-        paramMap.put("active", LoanStatus.ACTIVE.getValue());
-        paramMap.put("type", AccountingRuleType.ACCRUAL_PERIODIC.getValue());
-        paramMap.put("tillDate", tillDate);
-        return this.namedParameterJdbcTemplate.query(sqlBuilder.toString(), paramMap, mapper);
-    }
-
-    private static final class LoanSchedulePeriodicAccrualMapper implements RowMapper<LoanScheduleAccrualData> {
-
-        public String schema() {
-            final StringBuilder sqlBuilder = new StringBuilder(400);
-            sqlBuilder.append("loan.id as loanId , (CASE WHEN loan.client_id is null THEN mg.office_id ELSE mc.office_id END) as officeId,")
-                    .append("loan.accrued_till as accruedTill, loan.repayment_period_frequency_enum as frequencyEnum, ")
-                    .append("loan.interest_calculated_from_date as interestCalculatedFrom, ").append("loan.repay_every as repayEvery,")
-                    .append("ls.installment as installmentNumber, ")
-                    .append("ls.duedate as duedate,ls.fromdate as fromdate ,ls.id as scheduleId,loan.product_id as productId,")
-                    .append("ls.interest_amount as interest, ls.interest_waived_derived as interestWaived,")
-                    .append("ls.penalty_charges_amount as penalty, ").append("ls.fee_charges_amount as charges, ")
-                    .append("ls.credited_penalty as credited_penalty, ").append("ls.credited_fee as credited_fee, ")
-                    .append("ls.accrual_interest_derived as accinterest,ls.accrual_fee_charges_derived as accfeecharege,ls.accrual_penalty_charges_derived as accpenalty,")
-                    .append(" loan.currency_code as currencyCode,loan.currency_digits as currencyDigits,loan.currency_multiplesof as inMultiplesOf,")
-                    .append("curr.display_symbol as currencyDisplaySymbol,curr.name as currencyName,curr.internationalized_name_code as currencyNameCode")
-                    .append(" from m_loan_repayment_schedule ls ").append(" left join m_loan loan on loan.id=ls.loan_id ")
-                    .append(" left join m_product_loan mpl on mpl.id = loan.product_id")
-                    .append(" left join m_client mc on mc.id = loan.client_id ").append(" left join m_group mg on mg.id = loan.group_id")
-                    .append(" left join m_currency curr on curr.code = loan.currency_code")
-                    .append(" left join m_loan_recalculation_details as recaldet on loan.id = recaldet.loan_id ");
-            return sqlBuilder.toString();
-        }
-
-        @Override
-        public LoanScheduleAccrualData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
-
-            final Long loanId = rs.getLong("loanId");
-            final Long officeId = rs.getLong("officeId");
-            final LocalDate accruedTill = JdbcSupport.getLocalDate(rs, "accruedTill");
-            final LocalDate interestCalculatedFrom = JdbcSupport.getLocalDate(rs, "interestCalculatedFrom");
-            final Integer installmentNumber = JdbcSupport.getInteger(rs, "installmentNumber");
-
-            final Integer frequencyEnum = JdbcSupport.getInteger(rs, "frequencyEnum");
-            final Integer repayEvery = JdbcSupport.getInteger(rs, "repayEvery");
-            final PeriodFrequencyType frequency = PeriodFrequencyType.fromInt(frequencyEnum);
-            final LocalDate dueDate = JdbcSupport.getLocalDate(rs, "duedate");
-            final LocalDate fromDate = JdbcSupport.getLocalDate(rs, "fromdate");
-            final Long repaymentScheduleId = rs.getLong("scheduleId");
-            final Long loanProductId = rs.getLong("productId");
-            final BigDecimal interestIncome = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "interest");
-            final BigDecimal feeIncome = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "charges");
-            final BigDecimal penaltyIncome = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "penalty");
-            final BigDecimal interestIncomeWaived = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "interestWaived");
-            final BigDecimal accruedInterestIncome = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "accinterest");
-            final BigDecimal accruedFeeIncome = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "accfeecharege");
-            final BigDecimal accruedPenaltyIncome = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "accpenalty");
-            final BigDecimal creditedFee = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "credited_fee");
-            final BigDecimal creditedPenalty = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "credited_penalty");
-
-            final String currencyCode = rs.getString("currencyCode");
-            final String currencyName = rs.getString("currencyName");
-            final String currencyNameCode = rs.getString("currencyNameCode");
-            final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
-            final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
-            final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
-            final CurrencyData currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf,
-                    currencyDisplaySymbol, currencyNameCode);
-
-            return new LoanScheduleAccrualData(loanId, officeId, installmentNumber, accruedTill, frequency, repayEvery, dueDate, fromDate,
-                    repaymentScheduleId, loanProductId, interestIncome, feeIncome, penaltyIncome, accruedInterestIncome, accruedFeeIncome,
-                    accruedPenaltyIncome, currencyData, interestCalculatedFrom, interestIncomeWaived, creditedFee, creditedPenalty);
-        }
-
-    }
-
-    private static final class LoanScheduleAccrualMapper implements RowMapper<LoanScheduleAccrualData> {
-
-        public String schema() {
-            final StringBuilder sqlBuilder = new StringBuilder(400);
-            sqlBuilder.append("loan.id as loanId, (CASE WHEN loan.client_id is null THEN mg.office_id ELSE mc.office_id END) as officeId,")
-                    .append("ls.duedate as duedate,ls.fromdate as fromdate,ls.id as scheduleId,loan.product_id as productId,")
-                    .append("ls.installment as installmentNumber, ")
-                    .append("ls.interest_amount as interest, ls.interest_waived_derived as interestWaived,")
-                    .append("ls.penalty_charges_amount as penalty, ").append("ls.fee_charges_amount as charges, ")
-                    .append("ls.credited_penalty as credited_penalty, ").append("ls.credited_fee as credited_fee, ")
-                    .append("ls.accrual_interest_derived as accinterest,ls.accrual_fee_charges_derived as accfeecharege,ls.accrual_penalty_charges_derived as accpenalty,")
-                    .append(" loan.currency_code as currencyCode,loan.currency_digits as currencyDigits,loan.currency_multiplesof as inMultiplesOf,")
-                    .append("curr.display_symbol as currencyDisplaySymbol,curr.name as currencyName,curr.internationalized_name_code as currencyNameCode")
-                    .append(" from m_loan_repayment_schedule ls ").append(" left join m_loan loan on loan.id=ls.loan_id ")
-                    .append(" left join m_product_loan mpl on mpl.id = loan.product_id")
-                    .append(" left join m_client mc on mc.id = loan.client_id ").append(" left join m_group mg on mg.id = loan.group_id")
-                    .append(" left join m_currency curr on curr.code = loan.currency_code")
-                    .append(" left join m_loan_recalculation_details as recaldet on loan.id = recaldet.loan_id ");
-            return sqlBuilder.toString();
-        }
-
-        @Override
-        public LoanScheduleAccrualData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
-
-            final Long loanId = rs.getLong("loanId");
-            final Long officeId = rs.getLong("officeId");
-            final Integer installmentNumber = JdbcSupport.getInteger(rs, "installmentNumber");
-            final LocalDate dueDate = JdbcSupport.getLocalDate(rs, "duedate");
-            final LocalDate fromdate = JdbcSupport.getLocalDate(rs, "fromdate");
-            final Long repaymentScheduleId = rs.getLong("scheduleId");
-            final Long loanProductId = rs.getLong("productId");
-            final BigDecimal interestIncome = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "interest");
-            final BigDecimal feeIncome = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "charges");
-            final BigDecimal penaltyIncome = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "penalty");
-            final BigDecimal creditedFee = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "credited_fee");
-            final BigDecimal creditedPenalty = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "credited_penalty");
-
-            final BigDecimal interestIncomeWaived = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "interestWaived");
-            final BigDecimal accruedInterestIncome = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "accinterest");
-            final BigDecimal accruedFeeIncome = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "accfeecharege");
-            final BigDecimal accruedPenaltyIncome = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "accpenalty");
-
-            final String currencyCode = rs.getString("currencyCode");
-            final String currencyName = rs.getString("currencyName");
-            final String currencyNameCode = rs.getString("currencyNameCode");
-            final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
-            final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
-            final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
-            final CurrencyData currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf,
-                    currencyDisplaySymbol, currencyNameCode);
-            final LocalDate accruedTill = null;
-            final PeriodFrequencyType frequency = null;
-            final Integer repayEvery = null;
-            final LocalDate interestCalculatedFrom = null;
-            return new LoanScheduleAccrualData(loanId, officeId, installmentNumber, accruedTill, frequency, repayEvery, dueDate, fromdate,
-                    repaymentScheduleId, loanProductId, interestIncome, feeIncome, penaltyIncome, accruedInterestIncome, accruedFeeIncome,
-                    accruedPenaltyIncome, currencyData, interestCalculatedFrom, interestIncomeWaived, creditedFee, creditedPenalty);
-        }
-    }
-
-    @Override
     public LoanTransactionData retrieveRecoveryPaymentTemplate(Long loanId) {
         final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.RECOVERY_REPAYMENT);
@@ -2147,152 +1890,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     }
 
     @Override
-    public Collection<LoanTransactionData> retrieveWaiverLoanTransactions(final Long loanId) {
-        try {
-
-            final LoanTransactionDerivedComponentMapper rm = new LoanTransactionDerivedComponentMapper(sqlGenerator);
-
-            final String sql = "select " + rm.schema()
-                    + " where tr.loan_id = ? and tr.transaction_type_enum = ? and tr.is_reversed=false order by tr.transaction_date, tr.created_on_utc, tr.id ";
-            return this.jdbcTemplate.query(sql, rm, loanId, LoanTransactionType.WAIVE_INTEREST.getValue()); // NOSONAR
-        } catch (final EmptyResultDataAccessException e) {
-            return null;
-        }
-    }
-
-    @Override
     public boolean isGuaranteeRequired(final Long loanId) {
         final String sql = "select pl.hold_guarantee_funds from m_loan ml inner join m_product_loan pl on pl.id = ml.product_id where ml.id=?";
         return TRUE.equals(this.jdbcTemplate.queryForObject(sql, Boolean.class, loanId));
-    }
-
-    private static final class LoanTransactionDerivedComponentMapper implements RowMapper<LoanTransactionData> {
-
-        private final DatabaseSpecificSQLGenerator sqlGenerator;
-
-        LoanTransactionDerivedComponentMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
-            this.sqlGenerator = sqlGenerator;
-        }
-
-        public String schema() {
-
-            return " tr.id as id, tr.transaction_type_enum as transactionType, tr.transaction_date as " + sqlGenerator.escape("date")
-                    + ", tr.amount as total, tr.principal_portion_derived as principal, tr.interest_portion_derived as interest, "
-                    + " tr.fee_charges_portion_derived as fees, tr.penalty_charges_portion_derived as penalties, "
-                    + " tr.overpayment_portion_derived as overpayment, tr.outstanding_loan_balance_derived as outstandingLoanBalance, "
-                    + " tr.unrecognized_income_portion as unrecognizedIncome, tr.loan_id as loanId, l.external_id as externalLoanId, "
-                    + " tr.external_id as externalId from m_loan_transaction tr " + " left join m_loan l on tr.loan_id = l.id";
-        }
-
-        @Override
-        public LoanTransactionData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
-            final Long id = rs.getLong("id");
-            final Long loanId = rs.getLong("loanId");
-            final String externalLoanIdStr = rs.getString("externalLoanId");
-            final ExternalId externalLoanId = ExternalIdFactory.produce(externalLoanIdStr);
-            final int transactionTypeInt = JdbcSupport.getInteger(rs, "transactionType");
-            final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(transactionTypeInt);
-
-            final LocalDate date = JdbcSupport.getLocalDate(rs, "date");
-            final BigDecimal totalAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "total");
-            final BigDecimal principalPortion = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principal");
-            final BigDecimal interestPortion = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interest");
-            final BigDecimal feeChargesPortion = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "fees");
-            final BigDecimal penaltyChargesPortion = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penalties");
-            final BigDecimal overPaymentPortion = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "overpayment");
-            final BigDecimal unrecognizedIncomePortion = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "unrecognizedIncome");
-            final BigDecimal outstandingLoanBalance = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "outstandingLoanBalance");
-            final String externalIdStr = rs.getString("externalId");
-            final ExternalId externalId = ExternalIdFactory.produce(externalIdStr);
-
-            return new LoanTransactionData(id, transactionType, date, totalAmount, null, principalPortion, interestPortion,
-                    feeChargesPortion, penaltyChargesPortion, overPaymentPortion, unrecognizedIncomePortion, outstandingLoanBalance, false,
-                    externalId, loanId, externalLoanId);
-        }
-    }
-
-    @Override
-    public Collection<LoanSchedulePeriodData> fetchWaiverInterestRepaymentData(final Long loanId) {
-        try {
-
-            final LoanRepaymentWaiverMapper rm = new LoanRepaymentWaiverMapper();
-
-            final String sql = "select " + rm.getSchema()
-                    + " where lrs.loan_id = ? and lrs.interest_waived_derived is not null order by lrs.installment ASC ";
-            return this.jdbcTemplate.query(sql, rm, loanId); // NOSONAR
-        } catch (final EmptyResultDataAccessException e) {
-            return null;
-        }
-
-    }
-
-    private static final class LoanRepaymentWaiverMapper implements RowMapper<LoanSchedulePeriodData> {
-
-        private final String sqlSchema;
-
-        public String getSchema() {
-            return this.sqlSchema;
-        }
-
-        LoanRepaymentWaiverMapper() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("lrs.duedate as dueDate,lrs.interest_waived_derived interestWaived, lrs.installment as installment");
-            sb.append(" from m_loan_repayment_schedule lrs ");
-            sqlSchema = sb.toString();
-        }
-
-        @Override
-        public LoanSchedulePeriodData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
-
-            final Integer period = JdbcSupport.getInteger(rs, "installment");
-            final LocalDate dueDate = JdbcSupport.getLocalDate(rs, "dueDate");
-            final BigDecimal interestWaived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestWaived");
-
-            final LocalDate fromDate = null;
-            final LocalDate obligationsMetOnDate = null;
-            final Boolean complete = false;
-            final BigDecimal principalOriginalDue = null;
-            final BigDecimal principalPaid = null;
-            final BigDecimal principalWrittenOff = null;
-            final BigDecimal principalOutstanding = null;
-            final BigDecimal interestPaid = null;
-            final BigDecimal interestWrittenOff = null;
-            final BigDecimal interestOutstanding = null;
-            final BigDecimal feeChargesDue = null;
-            final BigDecimal feeChargesPaid = null;
-            final BigDecimal feeChargesWaived = null;
-            final BigDecimal feeChargesWrittenOff = null;
-            final BigDecimal feeChargesOutstanding = null;
-            final BigDecimal penaltyChargesDue = null;
-            final BigDecimal penaltyChargesPaid = null;
-            final BigDecimal penaltyChargesWaived = null;
-            final BigDecimal penaltyChargesWrittenOff = null;
-            final BigDecimal penaltyChargesOutstanding = null;
-
-            final BigDecimal totalDueForPeriod = null;
-            final BigDecimal totalPaidInAdvanceForPeriod = null;
-            final BigDecimal totalPaidLateForPeriod = null;
-            final BigDecimal totalActualCostOfLoanForPeriod = null;
-            final BigDecimal outstandingPrincipalBalanceOfLoan = null;
-            final BigDecimal interestDueOnPrincipalOutstanding = null;
-            Long loanId = null;
-            final BigDecimal totalWaived = null;
-            final BigDecimal totalWrittenOff = null;
-            final BigDecimal totalOutstanding = null;
-            final BigDecimal totalPaid = null;
-            final BigDecimal totalInstallmentAmount = null;
-            final BigDecimal totalCredits = null;
-            final BigDecimal totalAccruedInterest = null;
-
-            return LoanSchedulePeriodData.periodWithPayments(loanId, period, fromDate, dueDate, obligationsMetOnDate, complete,
-                    principalOriginalDue, principalPaid, principalWrittenOff, principalOutstanding, outstandingPrincipalBalanceOfLoan,
-                    interestDueOnPrincipalOutstanding, interestPaid, interestWaived, interestWrittenOff, interestOutstanding, feeChargesDue,
-                    feeChargesPaid, feeChargesWaived, feeChargesWrittenOff, feeChargesOutstanding, penaltyChargesDue, penaltyChargesPaid,
-                    penaltyChargesWaived, penaltyChargesWrittenOff, penaltyChargesOutstanding, totalDueForPeriod, totalPaid,
-                    totalPaidInAdvanceForPeriod, totalPaidLateForPeriod, totalWaived, totalWrittenOff, totalOutstanding,
-                    totalActualCostOfLoanForPeriod, totalInstallmentAmount, totalCredits, false, totalAccruedInterest);
-        }
     }
 
     @Override

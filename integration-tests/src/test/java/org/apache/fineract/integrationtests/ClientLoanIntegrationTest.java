@@ -5145,7 +5145,8 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
             for (int i = 1; i < loanSchedule.size(); i++) {
 
                 retrieveDueDate = dateFormat.format(repaymentDate.getTime());
-                amount = (Float) loanSchedule.get(i).get("principalOriginalDue") + (Float) loanSchedule.get(i).get("interestOriginalDue");
+                amount = ((Number) loanSchedule.get(i).get("principalOriginalDue")).floatValue()
+                        + ((Number) loanSchedule.get(i).get("interestOriginalDue")).floatValue();
                 if (currentDate.after(repaymentDate)) {
                     LOAN_TRANSACTION_HELPER.makeRepayment(retrieveDueDate, amount, loanID);
                 } else {

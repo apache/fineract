@@ -101,6 +101,18 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
 
     String FIND_ALL_LOAN_IDS_BY_STATUS_ID = "SELECT loan.id FROM Loan loan WHERE loan.loanStatus = :statusId";
 
+    String LOANS_FOR_ACCRUAL = "select l from Loan l left join l.loanInterestRecalculationDetails recalcDetails "
+            + "where l.loanStatus = 300 and l.isNpa = false and l.chargedOff = false "
+            + "and l.loanProduct.accountingRule = :accountingType "
+            + "and (recalcDetails.isCompoundingToBePostedAsTransaction is null or recalcDetails.isCompoundingToBePostedAsTransaction = false) "
+            + "and (exists (select ls.id from LoanRepaymentScheduleInstallment ls where ls.loan.id = l.id and ls.isDownPayment = false "
+            + "and ((coalesce(ls.interestCharged, 0) - coalesce(ls.interestWaived, 0)) <> coalesce(ls.interestAccrued, 0) "
+            + "or (coalesce(ls.feeChargesCharged, 0) - coalesce(ls.feeChargesWaived, 0)) <> coalesce(ls.feeAccrued, 0) "
+            + "or (coalesce(ls.penaltyCharges, 0) - coalesce(ls.penaltyChargesWaived, 0)) <> coalesce(ls.penaltyAccrued, 0)) ";
+    String FIND_LOANS_FOR_PERIODIC_ACCRUAL = LOANS_FOR_ACCRUAL
+            + "and (:futureCharges = true or ls.fromDate < :tillDate or (ls.installmentNumber = (select min(lsi.installmentNumber) from LoanRepaymentScheduleInstallment lsi where lsi.loan.id = l.id and lsi.isDownPayment = false) and ls.fromDate = :tillDate))))";
+    String FIND_LOANS_FOR_ADD_ACCRUAL = LOANS_FOR_ACCRUAL + "and (:futureCharges = true or ls.dueDate <= :tillDate)))";
+
     @Query(FIND_GROUP_LOANS_DISBURSED_AFTER)
     List<Loan> getGroupLoansDisbursedAfter(@Param("disbursementDate") LocalDate disbursementDate, @Param("groupId") Long groupId,
             @Param("loanType") Integer loanType);
@@ -227,4 +239,12 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
 
     @Query(FIND_ALL_LOAN_IDS_BY_STATUS_ID)
     List<Long> findLoanIdByStatusId(@Param("statusId") Integer statusId);
+
+    @Query(FIND_LOANS_FOR_PERIODIC_ACCRUAL)
+    List<Loan> findLoansForPeriodicAccrual(@Param("accountingType") Integer accountingType, @Param("tillDate") LocalDate tillDate,
+            @Param("futureCharges") boolean futureCharges);
+
+    @Query(FIND_LOANS_FOR_ADD_ACCRUAL)
+    List<Loan> findLoansForAddAccrual(@Param("accountingType") Integer accountingType, @Param("tillDate") LocalDate tillDate,
+            @Param("futureCharges") boolean futureCharges);
 }

@@ -16,27 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.business.domain.loan;
+package org.apache.fineract.infrastructure.event.business.domain.loan.transaction;
 
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 
-public class LoanStatusChangedBusinessEvent extends LoanBusinessEvent {
+public class LoanAccrualAdjustmentTransactionBusinessEvent extends LoanTransactionBusinessEvent {
 
-    private static final String TYPE = "LoanStatusChangedBusinessEvent";
-    private final LoanStatus oldStatus;
+    private static final String TYPE = "LoanAccrualAdjustmentTransactionBusinessEvent";
 
-    public LoanStatusChangedBusinessEvent(Loan value, LoanStatus oldStatus) {
+    public LoanAccrualAdjustmentTransactionBusinessEvent(LoanTransaction value) {
         super(value);
-        this.oldStatus = oldStatus;
     }
 
     @Override
     public String getType() {
         return TYPE;
-    }
-
-    public LoanStatus getOldStatus() {
-        return oldStatus;
     }
 }

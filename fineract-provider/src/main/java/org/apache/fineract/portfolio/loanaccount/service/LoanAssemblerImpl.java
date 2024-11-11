@@ -104,7 +104,7 @@ import org.apache.fineract.portfolio.rate.service.RateAssembler;
 import org.apache.fineract.useradministration.domain.AppUser;
 
 @RequiredArgsConstructor
-public class LoanAssembler {
+public class LoanAssemblerImpl implements LoanAssembler {
 
     private final FromJsonHelper fromApiJsonHelper;
     private final LoanRepositoryWrapper loanRepository;
@@ -136,6 +136,7 @@ public class LoanAssembler {
     private final LoanCollateralManagementMapper loanCollateralManagementMapper;
     private final LoanAccrualsProcessingService loanAccrualsProcessingService;
 
+    @Override
     public Loan assembleFrom(final Long accountId) {
         final Loan loanAccount = this.loanRepository.findOneWithNotFoundDetection(accountId, true);
         loanAccount.setHelpers(defaultLoanLifecycleStateMachine, this.loanSummaryWrapper,
@@ -144,11 +145,13 @@ public class LoanAssembler {
         return loanAccount;
     }
 
+    @Override
     public void setHelpers(final Loan loanAccount) {
         loanAccount.setHelpers(defaultLoanLifecycleStateMachine, this.loanSummaryWrapper,
                 this.loanRepaymentScheduleTransactionProcessorFactory);
     }
 
+    @Override
     public Loan assembleFrom(final JsonCommand command) {
         final JsonElement element = command.parsedJson();
 
@@ -281,6 +284,7 @@ public class LoanAssembler {
 
     // TODO: Review... it might be better somewhere else and rethink due to the account number generation logic is
     // intertwined with GLIM logic
+    @Override
     public void accountNumberGeneration(JsonCommand command, Loan loan) {
         if (loan.isAccountNumberRequiresAutoGeneration()) {
             JsonElement element = command.parsedJson();
@@ -371,6 +375,7 @@ public class LoanAssembler {
         }
     }
 
+    @Override
     public CodeValue findCodeValueByIdIfProvided(final Long codeValueId) {
         CodeValue codeValue = null;
         if (codeValueId != null) {
@@ -379,6 +384,7 @@ public class LoanAssembler {
         return codeValue;
     }
 
+    @Override
     public Fund findFundByIdIfProvided(final Long fundId) {
         Fund fund = null;
         if (fundId != null) {
@@ -387,6 +393,7 @@ public class LoanAssembler {
         return fund;
     }
 
+    @Override
     public Staff findLoanOfficerByIdIfProvided(final Long loanOfficerId) {
         Staff staff = null;
         if (loanOfficerId != null) {
@@ -419,6 +426,7 @@ public class LoanAssembler {
         }
     }
 
+    @Override
     public Map<String, Object> updateFrom(JsonCommand command, Loan loan) {
         final Map<String, Object> changes = new HashMap<>();
         LoanProduct loanProduct;
@@ -844,6 +852,7 @@ public class LoanAssembler {
         return changes;
     }
 
+    @Override
     public Map<String, Object> updateLoanApplicationAttributesForWithdrawal(Loan loan, JsonCommand command, AppUser currentUser) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
 
@@ -868,6 +877,7 @@ public class LoanAssembler {
         return actualChanges;
     }
 
+    @Override
     public Map<String, Object> updateLoanApplicationAttributesForRejection(Loan loan, JsonCommand command, AppUser currentUser) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
 

@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.charge.service;
 
 import java.util.Collection;
+import java.util.List;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 
@@ -53,7 +54,7 @@ public interface ChargeReadPlatformService {
      *            Excludes Given List of Charge Types from the response
      * @return
      */
-    Collection<ChargeData> retrieveLoanAccountApplicableCharges(Long loanId, ChargeTimeType[] excludeChargeTimes);
+    List<ChargeData> retrieveLoanAccountApplicableCharges(Long loanId, ChargeTimeType[] excludeChargeTimes);
 
     /**
      * Returns all charges applicable for a given loan product (filter based on Currency of Selected Loan Product)

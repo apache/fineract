@@ -1613,8 +1613,10 @@ public class LoanStepDef extends AbstractStepDef {
 
     @Then("Loan Repayment schedule has {int} periods, with the following data for periods:")
     public void loanRepaymentSchedulePeriodsCheck(int linesExpected, DataTable table) throws IOException {
+
         Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanCreateResponse.body().getLoanId();
+        String resourceId = String.valueOf(loanId);
 
         Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "repaymentSchedule", "", "").execute();
         ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
@@ -1634,9 +1636,9 @@ public class LoanStepDef extends AbstractStepDef {
 
             boolean containsExpectedValues = actualValuesList.stream().anyMatch(actualValues -> actualValues.equals(expectedValues));
             assertThat(containsExpectedValues)
-                    .as(ErrorMessageHelper.wrongValueInLineInRepaymentSchedule(i, actualValuesList, expectedValues)).isTrue();
+                    .as(ErrorMessageHelper.wrongValueInLineInRepaymentSchedule(resourceId, i, actualValuesList, expectedValues)).isTrue();
 
-            assertThat(linesActual).as(ErrorMessageHelper.wrongNumberOfLinesInRepaymentSchedule(linesActual, linesExpected))
+            assertThat(linesActual).as(ErrorMessageHelper.wrongNumberOfLinesInRepaymentSchedule(resourceId, linesActual, linesExpected))
                     .isEqualTo(linesExpected);
         }
     }
@@ -1660,6 +1662,7 @@ public class LoanStepDef extends AbstractStepDef {
     public void loanTransactionsTransactionWithGivenDateDataCheck(String date, DataTable table) throws IOException {
         Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanCreateResponse.body().getLoanId();
+        String resourceId = String.valueOf(loanId);
 
         Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
         ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
@@ -1673,14 +1676,16 @@ public class LoanStepDef extends AbstractStepDef {
                 .map(t -> fetchValuesOfTransaction(data.get(0), t)).collect(Collectors.toList());
         boolean containsExpectedValues = actualValuesList.stream().anyMatch(actualValues -> actualValues.equals(expectedValues));
 
-        assertThat(containsExpectedValues).as(ErrorMessageHelper.wrongValueInLineInTransactionsTab(1, actualValuesList, expectedValues))
-                .isTrue();
+        assertThat(containsExpectedValues)
+                .as(ErrorMessageHelper.wrongValueInLineInTransactionsTab(resourceId, 1, actualValuesList, expectedValues)).isTrue();
     }
 
     @Then("Loan Transactions tab has the following data:")
     public void loanTransactionsTabCheck(DataTable table) throws IOException {
         Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanCreateResponse.body().getLoanId();
+        String resourceId = String.valueOf(loanId);
+
         Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
         ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
         List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.body().getTransactions();
@@ -1694,10 +1699,11 @@ public class LoanStepDef extends AbstractStepDef {
                     .collect(Collectors.toList());//
             boolean containsExpectedValues = actualValuesList.stream()//
                     .anyMatch(actualValues -> actualValues.equals(expectedValues));//
-            assertThat(containsExpectedValues).as(ErrorMessageHelper.wrongValueInLineInTransactionsTab(i, actualValuesList, expectedValues))
-                    .isTrue();
+            assertThat(containsExpectedValues)
+                    .as(ErrorMessageHelper.wrongValueInLineInTransactionsTab(resourceId, i, actualValuesList, expectedValues)).isTrue();
         }
-        assertThat(transactions.size()).as(ErrorMessageHelper.nrOfLinesWrongInTransactionsTab(transactions.size(), data.size() - 1))
+        assertThat(transactions.size())
+                .as(ErrorMessageHelper.nrOfLinesWrongInTransactionsTab(resourceId, transactions.size(), data.size() - 1))
                 .isEqualTo(data.size() - 1);
     }
 

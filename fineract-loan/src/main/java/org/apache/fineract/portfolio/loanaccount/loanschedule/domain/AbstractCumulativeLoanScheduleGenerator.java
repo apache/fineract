@@ -18,6 +18,10 @@
  */
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
+import static org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper.isAfterPeriod;
+import static org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper.isBeforePeriod;
+
+import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
@@ -2804,5 +2808,40 @@ public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanSch
                 .interest(totalInterest) //
                 .feeCharges(feeCharges) //
                 .penaltyCharges(penaltyCharges);
+    }
+
+    @Override
+    public Money getPeriodInterestTillDate(@NotNull LoanRepaymentScheduleInstallment installment, @NotNull LocalDate targetDate) {
+        if (installment.isAdditional() || installment.isDownPayment() || installment.isReAged()) {
+            return null;
+        }
+        if (isBeforePeriod(targetDate, installment, false)) {
+            return null;
+        }
+        Loan loan = installment.getLoan();
+        MonetaryCurrency currency = loan.getLoanProductRelatedDetail().getCurrency();
+        BigDecimal interest = installment.getInterestCharged();
+        Money zero = Money.zero(currency);
+        if (MathUtil.isEmpty(interest)) {
+            return zero;
+        }
+        if (isAfterPeriod(targetDate, installment) || DateUtils.isEqual(targetDate, installment.getDueDate())) {
+            return installment.getInterestCharged(currency);
+        }
+
+        BigDecimal interestPortion;
+        LocalDate startDate = installment.getFromDate();
+        LocalDate dueDate = installment.getDueDate();
+        if (DateUtils.isBefore(startDate, loan.getInterestChargedFromDate())) {
+            startDate = loan.getInterestChargedFromDate();
+        }
+        if (!DateUtils.isBefore(startDate, dueDate) || !DateUtils.isBefore(startDate, targetDate)) {
+            return zero;
+        }
+        int totalNumberOfDays = DateUtils.getExactDifferenceInDays(startDate, dueDate);
+        int daysToBeAccrued = DateUtils.getExactDifferenceInDays(startDate, targetDate);
+        double interestPerDay = interest.doubleValue() / totalNumberOfDays;
+        interestPortion = BigDecimal.valueOf(interestPerDay * daysToBeAccrued);
+        return Money.of(currency, interestPortion);
     }
 }

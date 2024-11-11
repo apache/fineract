@@ -597,15 +597,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (loan.getLoanProduct().isMultiDisburseLoan()) {
             final List<LoanTransaction> allNonContraTransactionsPostDisbursement = loan.retrieveListOfTransactionsForReprocessing();
             if (!allNonContraTransactionsPostDisbursement.isEmpty()) {
-                final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = transactionProcessorFactory
-                        .determineProcessor(loan.getTransactionProcessingStrategyCode());
-                changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(loan.getDisbursementDate(),
-                        allNonContraTransactionsPostDisbursement, loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
-                        loan.getActiveCharges());
-                for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
-                    mapEntry.getValue().updateLoan(loan);
-                }
-                loan.getLoanTransactions().addAll(changedTransactionDetail.getNewTransactionMappings().values());
+                changedTransactionDetail = loan.reprocessTransactions();
             }
             loan.updateLoanSummaryDerivedFields();
         }
@@ -1023,7 +1015,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             // FIXME - kw - update account balance to negative amount.
             handleLoanOverpayment(loan, transactionDate, loanLifecycleStateMachine);
             statusChanged = true;
-        } else if (loan.getSummary().isRepaidInFull(loan.loanCurrency())) {
+        } else if (loan.getSummary().isRepaidInFull(loan.getCurrency())) {
             handleLoanRepaymentInFull(loan, transactionDate, loanLifecycleStateMachine);
             statusChanged = true;
         } else {
@@ -1077,7 +1069,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final boolean isTransactionChronologicallyLatest = loan
                 .isChronologicallyLatestRepaymentOrWaiver(newInterestPaymentWaiverTransaction);
 
-        if (newInterestPaymentWaiverTransaction.isNotZero(loan.getLoanRepaymentScheduleDetail().getCurrency())) {
+        if (newInterestPaymentWaiverTransaction.isNotZero()) {
             loan.addLoanTransaction(newInterestPaymentWaiverTransaction);
         }
 
@@ -1133,19 +1125,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             loanAccrualsProcessingService.reprocessExistingAccruals(loan);
             loanAccrualsProcessingService.processIncomePostingAndAccruals(loan);
         }
-        final List<LoanTransaction> allNonContraTransactionsPostDisbursement = loan.retrieveListOfTransactionsForReprocessing();
-        ChangedTransactionDetail changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(
-                loan.getDisbursementDate(), allNonContraTransactionsPostDisbursement, loan.getCurrency(),
-                loan.getRepaymentScheduleInstallments(), loan.getActiveCharges());
-        for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
-            mapEntry.getValue().updateLoan(loan);
-        }
-        /***
-         * Commented since throwing exception if external id present for one of the transactions. for this need to save
-         * the reversed transactions first and then new transactions.
-         */
-        loan.getLoanTransactions().addAll(changedTransactionDetail.getNewTransactionMappings().values());
-        return changedTransactionDetail;
+        return loan.reprocessTransactions();
     }
 
     @Transactional
@@ -1503,7 +1483,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             loanAccrualsProcessingService.processIncomePostingAndAccruals(loan);
         }
 
-        boolean thereIsNewTransaction = newTransactionDetail.isGreaterThanZero(loan.getPrincipal().getCurrency());
+        boolean thereIsNewTransaction = newTransactionDetail.isGreaterThanZero();
         if (thereIsNewTransaction) {
             if (paymentDetail != null) {
                 this.paymentDetailWritePlatformService.persistPaymentDetail(paymentDetail);

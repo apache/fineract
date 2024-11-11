@@ -24,7 +24,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -122,8 +121,7 @@ public class LoanReAgingServiceImpl {
         }
         reverseReAgeTransaction(reAgeTransaction, command);
         loanTransactionRepository.saveAndFlush(reAgeTransaction);
-
-        reProcessLoanTransactions(reAgeTransaction.getLoan());
+        loan.reprocessTransactions();
         loan.updateLoanScheduleDependentDerivedFields();
         persistNote(loan, command, changes);
 
@@ -177,15 +175,6 @@ public class LoanReAgingServiceImpl {
         Integer numberOfInstallments = command.integerValueOfParameterNamed(LoanReAgingApiConstants.numberOfInstallments);
         Integer periodFrequencyNumber = command.integerValueOfParameterNamed(LoanReAgingApiConstants.frequencyNumber);
         return new LoanReAgeParameter(reAgeTransaction, periodFrequencyType, periodFrequencyNumber, startDate, numberOfInstallments);
-    }
-
-    private void reProcessLoanTransactions(Loan loan) {
-        final List<LoanTransaction> filteredTransactions = loan.retrieveListOfTransactionsForReprocessing();
-
-        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
-                .determineProcessor(loan.transactionProcessingStrategy());
-        loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(loan.getDisbursementDate(), filteredTransactions,
-                loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges());
     }
 
     private void persistNote(Loan loan, JsonCommand command, Map<String, Object> changes) {

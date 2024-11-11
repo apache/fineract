@@ -253,6 +253,15 @@ public class LoanRepaymentScheduleProcessingWrapper {
                 : DateUtils.isDateInRangeFromExclusiveToInclusive(targetDate, fromDate, toDate);
     }
 
+    public static boolean isBeforePeriod(LocalDate targetDate, LoanRepaymentScheduleInstallment installment, boolean isFirstPeriod) {
+        LocalDate fromDate = installment.getFromDate();
+        return isFirstPeriod ? DateUtils.isBefore(targetDate, fromDate) : !DateUtils.isAfter(targetDate, fromDate);
+    }
+
+    public static boolean isAfterPeriod(LocalDate targetDate, LoanRepaymentScheduleInstallment installment) {
+        return DateUtils.isAfter(targetDate, installment.getDueDate());
+    }
+
     public static Optional<LoanRepaymentScheduleInstallment> findInPeriod(LocalDate targetDate,
             List<LoanRepaymentScheduleInstallment> installments) {
         int firstNumber = fetchFirstNormalInstallmentNumber(installments);

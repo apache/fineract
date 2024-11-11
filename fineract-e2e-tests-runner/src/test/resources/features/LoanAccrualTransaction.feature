@@ -881,7 +881,8 @@ Feature: LoanAccrualTransaction
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 17 April 2024    | Disbursement       | 750.0  | 0.0       | 0.0      | 0.0  | 0.0       | 750.0        |
-      | 17 April 2024    | Waive loan charges | 20.0   | 0.0       | 0.0      | 0.0  | 0.0       | 750.0        |
+      | 17 April 2024    | Accrual            | 20.0   | 0.0       | 0.0      | 0.0  | 20.0      | 0.0          |
+      | 17 April 2024    | Waive loan charges | 20.0   | 0.0       | 0.0      | 0.0  | 20.0      | 750.0        |
       | 19 April 2024    | Accrual            | 55.0   | 0.0       | 0.0      | 0.0  | 55.0      | 0.0          |
       | 20 April 2024    | Repayment          | 55.0   | 55.0      | 0.0      | 0.0  | 0.0       | 695.0        |
       | 20 April 2024    | Repayment          | 810.0  | 695.0     | 0.0      | 0.0  | 115.0     | 0.0          |
@@ -921,8 +922,8 @@ Feature: LoanAccrualTransaction
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 05 April 2024    | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        |
+      | 20 April 2024    | Accrual          | 2.47   | 0.0       | 2.47     | 0.0  | 0.0       | 0.0          |
       | 24 April 2024    | Accrual          | 0.66   | 0.0       | 0.66     | 0.0  | 0.0       | 0.0          |
-      | 25 April 2024    | Accrual          | 2.47   | 0.0       | 2.47     | 0.0  | 0.0       | 0.0          |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 500.0         | 5.77     | 0.0  | 0.0       | 505.77 | 0.0  | 0.0        | 0.0  | 505.77      |
@@ -938,9 +939,9 @@ Feature: LoanAccrualTransaction
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 05 April 2024    | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        |
-      | 25 April 2024    | Accrual          | 2.47   | 0.0       | 2.47     | 0.0  | 0.0       | 0.0          |
+      | 20 April 2024    | Accrual          | 2.47   | 0.0       | 2.47     | 0.0  | 0.0       | 0.0          |
+      | 24 April 2024    | Accrual          | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          |
       | 26 April 2024    | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
-      | 26 April 2024    | Accrual          | 2.47   | 0.0       | 2.47     | 0.0  | 0.0       | 0.0          |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
       | 1000.0        | 8.06     | 0.0  | 0.0       | 1008.06 | 0.0  | 0.0        | 0.0  | 1008.06     |

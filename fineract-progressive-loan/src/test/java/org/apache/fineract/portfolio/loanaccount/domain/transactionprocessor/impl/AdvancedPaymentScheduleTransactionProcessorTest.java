@@ -60,6 +60,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidBy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCreditAllocationRule;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanPaymentAllocationRule;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
@@ -95,6 +96,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
     private static final MockedStatic<MoneyHelper> MONEY_HELPER = mockStatic(MoneyHelper.class);
     private AdvancedPaymentScheduleTransactionProcessor underTest;
     private static final EMICalculator emiCalculator = Mockito.mock(EMICalculator.class);
+    private static final LoanRepositoryWrapper loanRepositoryWrapper = Mockito.mock(LoanRepositoryWrapper.class);
 
     @BeforeAll
     public static void init() {
@@ -109,7 +111,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
 
     @BeforeEach
     public void setUp() {
-        underTest = new AdvancedPaymentScheduleTransactionProcessor(emiCalculator, null);
+        underTest = new AdvancedPaymentScheduleTransactionProcessor(emiCalculator, loanRepositoryWrapper, null);
 
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
@@ -235,7 +237,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(loanTransaction.getTransactionDate()).thenReturn(transactionDate);
         when(charge.getAmountOutstanding(currency)).thenReturn(chargeAmountMoney);
         when(loanTransaction.getLoan()).thenReturn(loan);
-        when(loan.loanCurrency()).thenReturn(currency);
+        when(loan.getCurrency()).thenReturn(currency);
         when(loanTransaction.getLoan().getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
         when(loanProductRelatedDetail.getLoanScheduleProcessingType()).thenReturn(LoanScheduleProcessingType.HORIZONTAL);
         when(loan.getDisbursementDate()).thenReturn(disbursementDate);
@@ -451,7 +453,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         when(loanProductRelatedDetail.isInterestRecalculationEnabled()).thenReturn(true);
 
         when(loanTransaction.getLoan()).thenReturn(loan);
-        when(loan.loanCurrency()).thenReturn(currency);
+        when(loan.getCurrency()).thenReturn(currency);
         when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
         when(loanProductRelatedDetail.getLoanScheduleProcessingType()).thenReturn(LoanScheduleProcessingType.HORIZONTAL);
         when(loan.getPaymentAllocationRules()).thenReturn(List.of(loanPaymentAllocationRule));

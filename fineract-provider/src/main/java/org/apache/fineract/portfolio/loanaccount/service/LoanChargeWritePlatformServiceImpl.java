@@ -838,14 +838,11 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                 LoanTransactionRelationTypeEnum.CHARGE_ADJUSTMENT);
         loanChargeAdjustmentTransaction.getLoanTransactionRelations().add(loanTransactionRelation);
 
-        defaultLoanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT_OR_WAIVER, loan);
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
                 .determineProcessor(loan.transactionProcessingStrategy());
         loan.addLoanTransaction(loanChargeAdjustmentTransaction);
         if (loan.isInterestBearing() && loan.getLoanProductRelatedDetail().isInterestRecalculationEnabled()) {
-            loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(loan.getDisbursementDate(),
-                    loan.retrieveListOfTransactionsForReprocessing(), loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
-                    loan.getActiveCharges());
+            loan.reprocessTransactions();
         } else {
             loanRepaymentScheduleTransactionProcessor.processLatestTransaction(loanChargeAdjustmentTransaction,
                     new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),

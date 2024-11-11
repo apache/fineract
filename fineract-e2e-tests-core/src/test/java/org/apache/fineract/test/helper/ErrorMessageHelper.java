@@ -447,13 +447,26 @@ public final class ErrorMessageHelper {
     }
 
     public static String wrongNumberOfLinesInRepaymentSchedule(int actual, int expected) {
+        return wrongNumberOfLinesInRepaymentSchedule(null, actual, expected);
+    }
+
+    public static String wrongNumberOfLinesInRepaymentSchedule(String resourceId, int actual, int expected) {
         String actualStr = String.valueOf(actual);
         String expectedStr = String.valueOf(expected);
-        return String.format("Number of lines in Repayment schedule is not correct. Actual value is: %s - Expected value is: %s", actualStr,
-                expectedStr);
+        String prefx = "Number of lines in Repayment schedule";
+        String postfx = "  is not correct. Actual value is: %s - Expected value is: %s";
+        if (resourceId != null) {
+            return String.format(prefx + " of resource %s" + postfx, resourceId, actualStr, expectedStr);
+        }
+        return String.format(prefx + postfx, actualStr, expectedStr);
     }
 
     public static String wrongValueInLineInRepaymentSchedule(int line, List<List<String>> actual, List<String> expected) {
+        return wrongValueInLineInRepaymentSchedule(null, line, actual, expected);
+    }
+
+    public static String wrongValueInLineInRepaymentSchedule(String resourceId, int line, List<List<String>> actual,
+            List<String> expected) {
         String lineStr = String.valueOf(line);
         String expectedStr = expected.toString();
         StringBuilder sb = new StringBuilder();
@@ -461,13 +474,19 @@ public final class ErrorMessageHelper {
             sb.append(innerList.toString());
             sb.append(System.lineSeparator());
         }
-
-        return String.format(
-                "%nWrong value in Repayment schedule tab line %s. %nActual values in line (with the same due date) are: %n%s %nExpected values in line: %n%s",
-                lineStr, sb.toString(), expectedStr);
+        String prefx = "%nWrong value in Repayment schedule";
+        String postfx = " tab line %s. %nActual values in line (with the same due date) are: %n%s %nExpected values in line: %n%s";
+        if (resourceId != null) {
+            return String.format(prefx + " of resource %s" + postfx, resourceId, lineStr, sb.toString(), expectedStr);
+        }
+        return String.format(prefx + postfx, lineStr, sb.toString(), expectedStr);
     }
 
     public static String wrongValueInLineInTransactionsTab(int line, List<List<String>> actual, List<String> expected) {
+        return wrongValueInLineInTransactionsTab(null, line, actual, expected);
+    }
+
+    public static String wrongValueInLineInTransactionsTab(String resourceId, int line, List<List<String>> actual, List<String> expected) {
         String lineStr = String.valueOf(line);
         String expectedStr = expected.toString();
         StringBuilder sb = new StringBuilder();
@@ -475,19 +494,28 @@ public final class ErrorMessageHelper {
             sb.append(innerList.toString());
             sb.append(System.lineSeparator());
         }
-
-        return String.format(
-                "%nWrong value in Transactions tab line %s. %nActual values in line (with the same date) are: %n%s %nExpected values in line: %n%s",
-                lineStr, sb.toString(), expectedStr);
+        String prefx = "%nWrong value in Transactions tab";
+        String postfx = " line %s. %nActual values in line (with the same date) are: %n%s %nExpected values in line: %n%s";
+        if (resourceId != null) {
+            return String.format(prefx + " of resource %s" + postfx, resourceId, lineStr, sb.toString(), expectedStr);
+        }
+        return String.format(prefx + postfx, lineStr, sb.toString(), expectedStr);
     }
 
     public static String nrOfLinesWrongInTransactionsTab(int actual, int expected) {
+        return nrOfLinesWrongInTransactionsTab(null, actual, expected);
+    }
+
+    public static String nrOfLinesWrongInTransactionsTab(String resourceId, int actual, int expected) {
         String actualStr = String.valueOf(actual);
         String expectedStr = String.valueOf(expected);
 
-        return String.format(
-                "%nNumber of lines does not match in Transactions tab and expected datatable. %nNumber of transaction tab lines: %s %nNumber of expected datatable lines: %s%n",
-                actualStr, expectedStr);
+        String prefx = "%nNumber of lines does not match in Transactions tab and expected datatable";
+        String postfx = ". %nNumber of transaction tab lines: %s %nNumber of expected datatable lines: %s%n";
+        if (resourceId != null) {
+            return String.format(prefx + " of resource %s" + postfx, resourceId, actualStr, expectedStr);
+        }
+        return String.format(prefx + postfx, actualStr, expectedStr);
     }
 
     public static String wrongValueInLineInChargesTab(int line, List<List<String>> actual, List<String> expected) {

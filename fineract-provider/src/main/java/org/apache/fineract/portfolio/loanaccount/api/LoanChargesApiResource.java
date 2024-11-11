@@ -42,6 +42,7 @@ import jakarta.ws.rs.core.UriInfo;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -442,7 +443,7 @@ public class LoanChargesApiResource {
         final LoanChargeData loanCharge = this.loanChargeReadPlatformService.retrieveLoanChargeDetails(resolvedLoanChargeId,
                 resolvedLoanId);
 
-        final Collection<LoanInstallmentChargeData> installmentChargeData = this.loanChargeReadPlatformService
+        final List<LoanInstallmentChargeData> installmentChargeData = this.loanChargeReadPlatformService
                 .retrieveInstallmentLoanCharges(resolvedLoanChargeId, true);
 
         final LoanChargeData loanChargeData = new LoanChargeData(loanCharge, installmentChargeData);
@@ -536,7 +537,7 @@ public class LoanChargesApiResource {
         ExternalId loanExternalId = ExternalIdFactory.produce(loanExternalIdStr);
         Long resolvedLoanId = getResolvedLoanId(loanId, loanExternalId);
 
-        final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanAccountApplicableCharges(resolvedLoanId,
+        final List<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanAccountApplicableCharges(resolvedLoanId,
                 new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT });
         final LoanChargeData loanChargeTemplate = LoanChargeData.template(chargeOptions);
 

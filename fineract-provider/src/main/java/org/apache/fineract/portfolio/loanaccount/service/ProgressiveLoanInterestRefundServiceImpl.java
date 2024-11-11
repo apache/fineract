@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
@@ -60,7 +61,7 @@ public class ProgressiveLoanInterestRefundServiceImpl implements InterestRefundS
             List<LoanTransaction> collect) {
         collect.add(new LoanTransaction(lt.getLoan(), lt.getLoan().getOffice(), lt.getTypeOf().getValue(), lt.getDateOf(), lt.getAmount(),
                 BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, false, null, null));
-        if (lt.getTypeOf().isDisbursement() && refundFinal.get().compareTo(BigDecimal.ZERO) > 0) {
+        if (lt.getTypeOf().isDisbursement() && MathUtil.isGreaterThanZero(refundFinal.get())) {
             if (lt.getAmount().compareTo(refundFinal.get()) <= 0) {
                 collect.add(
                         new LoanTransaction(lt.getLoan(), lt.getLoan().getOffice(), REPAYMENT.getValue(), lt.getDateOf(), lt.getAmount(),
@@ -97,7 +98,7 @@ public class ProgressiveLoanInterestRefundServiceImpl implements InterestRefundS
     }
 
     private boolean isTransactionNeededForInterestRefundCalculations(LoanTransaction lt) {
-        return lt.isNotReversed() && !lt.isAccrual() && !lt.isAccrualActivity() && !lt.isInterestRefund();
+        return lt.isNotReversed() && !lt.isAccrualRelated() && !lt.isInterestRefund();
     }
 
     @Override

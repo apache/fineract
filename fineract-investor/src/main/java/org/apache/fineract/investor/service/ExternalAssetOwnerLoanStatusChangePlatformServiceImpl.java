@@ -41,7 +41,7 @@ public class ExternalAssetOwnerLoanStatusChangePlatformServiceImpl implements Ex
         businessEventNotifierService.addPostBusinessEventListener(LoanStatusChangedBusinessEvent.class, event -> {
             final Loan loan = event.get();
             if (configurationReadPlatformService.retrieveGlobalConfiguration(ASSET_EXTERNALIZATION_OF_NON_ACTIVE_LOANS).isEnabled()
-                    && (loan.isClosed() || loan.getStatus().isOverpaid())) {
+                    && (event.getOldStatus().isActive() && (loan.isClosed() || loan.getStatus().isOverpaid()))) {
                 loanAccountOwnerTransferService.handleLoanClosedOrOverpaid(loan);
             }
         });

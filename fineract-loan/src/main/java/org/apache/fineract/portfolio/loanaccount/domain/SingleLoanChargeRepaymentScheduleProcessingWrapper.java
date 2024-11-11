@@ -45,14 +45,14 @@ public class SingleLoanChargeRepaymentScheduleProcessingWrapper {
             totalInterest = totalInterest.plus(installment.getInterestCharged(currency));
             totalPrincipal = totalPrincipal.plus(installment.getPrincipal(currency));
         }
-        LoanChargePaidBy accrualBy = null;
+        List<LoanChargePaidBy> accruals = null;
         if (loanCharge.isSpecifiedDueDate()) {
             LoanRepaymentScheduleInstallment addedPeriod = addChargeOnlyRepaymentInstallmentIfRequired(loanCharge, installments);
             if (addedPeriod != null) {
                 addedPeriod.updateObligationsMet(currency, disbursementDate);
             }
-            accrualBy = loanCharge.getLoanChargePaidBySet().stream().filter(e -> e.getLoanTransaction().isAccrual()).findFirst()
-                    .orElse(null);
+            accruals = loanCharge.getLoanChargePaidBySet().stream().filter(e -> !e.getLoanTransaction().isReversed()
+                    && (e.getLoanTransaction().isAccrual() || e.getLoanTransaction().isAccrualAdjustment())).toList();
         }
         LocalDate startDate = disbursementDate;
         int firstNormalInstallmentNumber = LoanRepaymentScheduleProcessingWrapper.fetchFirstNormalInstallmentNumber(installments);
@@ -61,7 +61,8 @@ public class SingleLoanChargeRepaymentScheduleProcessingWrapper {
                 continue;
             }
             boolean installmentChargeApplicable = !installment.isRecalculatedInterestComponent();
-            boolean isFirstPeriod = installment.getInstallmentNumber().equals(firstNormalInstallmentNumber);
+            Integer installmentNumber = installment.getInstallmentNumber();
+            boolean isFirstPeriod = installmentNumber.equals(firstNormalInstallmentNumber);
             Predicate<LoanCharge> feePredicate = e -> e.isFeeCharge() && !e.isDueAtDisbursement();
             LocalDate dueDate = installment.getDueDate();
             final Money feeChargesDue = calcChargeDue(startDate, dueDate, loanCharge, currency, installment, totalPrincipal, totalInterest,
@@ -82,13 +83,19 @@ public class SingleLoanChargeRepaymentScheduleProcessingWrapper {
             installment.addToChargePortion(feeChargesDue, feeChargesWaived, feeChargesWrittenOff, penaltyChargesDue, penaltyChargesWaived,
                     penaltyChargesWrittenOff);
 
-            if (accrualBy != null && installment.isAdditional() && loanCharge.isDueInPeriod(startDate, dueDate, isFirstPeriod)) {
-                Money amount = Money.of(currency, accrualBy.getAmount());
+            if (accruals != null && !accruals.isEmpty() && installment.isAdditional()
+                    && loanCharge.isDueInPeriod(startDate, dueDate, isFirstPeriod)) {
+                BigDecimal amount = null;
+                for (LoanChargePaidBy accrual : accruals) {
+                    accrual.setInstallmentNumber(installmentNumber);
+                    amount = accrual.getLoanTransaction().isAccrual() ? MathUtil.add(amount, accrual.getAmount())
+                            : MathUtil.subtract(amount, accrual.getAmount());
+                }
+                Money accruedAmount = Money.of(currency, MathUtil.negativeToZero(amount));
                 boolean isFee = loanCharge.isFeeCharge();
                 installment.updateAccrualPortion(installment.getInterestAccrued(currency),
-                        MathUtil.plus(installment.getFeeAccrued(currency), (isFee ? amount : null)),
-                        MathUtil.plus(installment.getPenaltyAccrued(currency), (isFee ? null : amount)));
-                accrualBy.setInstallmentNumber(installment.getInstallmentNumber());
+                        MathUtil.plus(installment.getFeeAccrued(currency), (isFee ? accruedAmount : null)),
+                        MathUtil.plus(installment.getPenaltyAccrued(currency), (isFee ? null : accruedAmount)));
             }
             startDate = dueDate;
         }

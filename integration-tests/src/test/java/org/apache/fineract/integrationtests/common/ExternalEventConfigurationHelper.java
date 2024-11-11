@@ -465,6 +465,11 @@ public class ExternalEventConfigurationHelper {
         loanAccrualTransactionCreatedBusinessEvent.put("enabled", false);
         defaults.add(loanAccrualTransactionCreatedBusinessEvent);
 
+        Map<String, Object> loanAccrualAdjustmentTransactionBusinessEvent = new HashMap<>();
+        loanAccrualAdjustmentTransactionBusinessEvent.put("type", "LoanAccrualAdjustmentTransactionBusinessEvent");
+        loanAccrualAdjustmentTransactionBusinessEvent.put("enabled", false);
+        defaults.add(loanAccrualAdjustmentTransactionBusinessEvent);
+
         Map<String, Object> loanRescheduledDueAdjustScheduleBusinessEvent = new HashMap<>();
         loanRescheduledDueAdjustScheduleBusinessEvent.put("type", "LoanRescheduledDueAdjustScheduleBusinessEvent");
         loanRescheduledDueAdjustScheduleBusinessEvent.put("enabled", false);
@@ -571,7 +576,6 @@ public class ExternalEventConfigurationHelper {
         defaults.add(loanTransactionInterestRefundPreBusinessEvent);
 
         return defaults;
-
     }
 
     public static String getExternalEventConfigurationsForUpdateJSON() {

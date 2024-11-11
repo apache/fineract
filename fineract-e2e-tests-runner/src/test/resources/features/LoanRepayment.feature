@@ -875,9 +875,9 @@ Feature: LoanRepayment
     Then Loan Repayment schedule has 3 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees  | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2023  |           | 1000.0          |               |          | 0.0   |           | 0.0    | 0.0   |            |      |             |
-      | 1  | 31   | 01 February 2023 |           | 666.67          | 333.33        | 10.0     | 103.0 | 10.0      | 456.33 | 400.0 | 400.0      | 0.0  | 56.33       |
-      | 2  | 28   | 01 March 2023    |           | 333.34          | 333.33        | 10.0     | 0.0   | 0.0       | 343.33 | 0.0   | 0.0        | 0.0  | 343.33      |
-      | 3  | 31   | 01 April 2023    |           | 0.0             | 333.34        | 10.0     | 0.0   | 0.0       | 343.34 | 0.0   | 0.0        | 0.0  | 343.34      |
+      | 1  | 31   | 01 February 2023 |           | 667.0           | 333.0         | 10.0     | 103.0 | 10.0      | 456.0  | 400.0 | 400.0      | 0.0  | 56.0        |
+      | 2  | 28   | 01 March 2023    |           | 334.0           | 333.0         | 10.0     | 0.0   | 0.0       | 343.0  | 0.0   | 0.0        | 0.0  | 343.0       |
+      | 3  | 31   | 01 April 2023    |           | 0.0             | 334.0         | 10.0     | 0.0   | 0.0       | 344.0  | 0.0   | 0.0        | 0.0  | 344.0       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 1000          | 30       | 103  | 10        | 1143 | 400  | 400        | 0    | 743         |
@@ -1281,6 +1281,7 @@ Feature: LoanRepayment
       | 01 January 2023  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
       | 10 January 2023  | Repayment        | 500.0  | 500.0     | 0.0      | 0.0  | 0.0       | 500.0        |
       | 17 January 2023  | Repayment        | 550.0  | 500.0     | 0.0      | 0.0  | 50.0      | 0.0          |
+      | 17 January 2023  | Accrual          | 50.0   | 0.0       | 0.0      | 0.0  | 50.0      | 0.0          |
     Then Loan Charges tab has the following data:
       | Name    | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
       | NSF fee | true      | Specified due date | 20 January 2023 | Flat             | 50.0 | 50.0 | 0.0    | 0.0         |
@@ -1887,15 +1888,15 @@ Feature: LoanRepayment
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 01 January 2023  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
       | 04 January 2023  | Repayment        | 200.0  | 200.0     | 0.0      | 0.0  | 0.0       | 800.0        |
-      | 12 January 2023  | Repayment        | 300.0  | 300.0     | 0.0      | 0.0  | 0.0       | 500.0        |
+      | 12 January 2023  | Repayment        | 300.0  | 290.0     | 0.0      | 10.0 | 0.0       | 510.0        |
     And Customer makes "AUTOPAY" repayment on "12 January 2023" with 510 EUR transaction amount
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 01 January 2023  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
       | 04 January 2023  | Repayment        | 200.0  | 200.0     | 0.0      | 0.0  | 0.0       | 800.0        |
-      | 12 January 2023  | Repayment        | 300.0  | 300.0     | 0.0      | 0.0  | 0.0       | 500.0        |
+      | 12 January 2023  | Repayment        | 300.0  | 290.0     | 0.0      | 10.0 | 0.0       | 510.0        |
       | 12 January 2023  | Accrual          | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
-      | 12 January 2023  | Repayment        | 510.0  | 500.0     | 0.0      | 10.0 | 0.0       | 0.0          |
+      | 12 January 2023  | Repayment        | 510.0  | 510.0     | 0.0      | 0.0  | 0.0       | 0.0          |
 
   @TestRailId:C2694 @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
   Scenario: Verify the due-penalty-interest-principal-fee-in-advance-penalty-interest-principal-fee-strategy payment strategy: UC1 - no fees or penalties, due payment
@@ -2358,8 +2359,8 @@ Feature: LoanRepayment
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 01 January 2023  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
-      | 10 January 2023  | Accrual          | 20.0   | 0.0       | 0.0      | 20.0 | 0.0       | 0.0          |
       | 10 January 2023  | Repayment        | 1020.0 | 1000.0    | 0.0      | 20.0 | 0.0       | 0.0          |
+      | 10 January 2023  | Accrual          | 20.0   | 0.0       | 0.0      | 20.0 | 0.0       | 0.0          |
     Then Loan Charges tab has the following data:
       | Name       | isPenalty | Payment due at     | Due as of        | Calculation type | Due  | Paid | Waived | Outstanding |
       | NSF fee    | true      | Specified due date | 01 February 2023 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
@@ -2472,8 +2473,8 @@ Feature: LoanRepayment
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 01 January 2023  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
-      | 10 January 2023  | Accrual          | 20.0   | 0.0       | 0.0      | 20.0 | 0.0       | 0.0          |
       | 10 January 2023  | Repayment        | 1020.0 | 1000.0    | 0.0      | 20.0 | 0.0       | 0.0          |
+      | 10 January 2023  | Accrual          | 20.0   | 0.0       | 0.0      | 20.0 | 0.0       | 0.0          |
     Then Loan Charges tab has the following data:
       | Name       | isPenalty | Payment due at     | Due as of        | Calculation type | Due  | Paid | Waived | Outstanding |
       | NSF fee    | true      | Specified due date | 28 January 2023  | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
@@ -2563,8 +2564,8 @@ Feature: LoanRepayment
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 01 January 2023  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
-      | 10 January 2023  | Accrual          | 20.0   | 0.0       | 0.0      | 20.0 | 0.0       | 0.0          |
       | 10 January 2023  | Repayment        | 1020.0 | 1000.0    | 0.0      | 20.0 | 0.0       | 0.0          |
+      | 10 January 2023  | Accrual          | 20.0   | 0.0       | 0.0      | 20.0 | 0.0       | 0.0          |
     Then Loan Charges tab has the following data:
       | Name       | isPenalty | Payment due at     | Due as of        | Calculation type | Due  | Paid | Waived | Outstanding |
       | NSF fee    | true      | Specified due date | 28 January 2023  | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
@@ -2601,10 +2602,10 @@ Feature: LoanRepayment
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 01 January 2023  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
-      | 10 January 2023  | Repayment        | 1020.0 | 1000.0    | 0.0      | 20.0 | 0.0       | 0.0          |
       | 10 January 2023  | Accrual          | 20.0   | 0.0       | 0.0      | 20.0 | 0.0       | 0.0          |
-      | 28 January 2023  | Repayment        | 1040.0 | 1000.0    | 0.0      | 20.0 | 20.0      | 0.0          |
+      | 10 January 2023  | Repayment        | 1020.0 | 1000.0    | 0.0      | 20.0 | 0.0       | 0.0          |
       | 28 January 2023  | Accrual          | 20.0   | 0.0       | 0.0      | 0.0  | 20.0      | 0.0          |
+      | 28 January 2023  | Repayment        | 1040.0 | 1000.0    | 0.0      | 20.0 | 20.0      | 0.0          |
     Then Loan Charges tab has the following data:
       | Name       | isPenalty | Payment due at     | Due as of        | Calculation type | Due  | Paid | Waived | Outstanding |
       | NSF fee    | true      | Specified due date | 01 February 2023 | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
@@ -2750,8 +2751,8 @@ Feature: LoanRepayment
       | 01 January 2023  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
       | 10 January 2023  | Repayment        | 20.0   | 0.0       | 0.0      | 0.0  | 20.0      | 1000.0       |
       | 15 January 2023  | Repayment        | 500.0  | 470.0     | 10.0     | 0.0  | 20.0      | 530.0        |
+      | 25 January 2023  | Accrual          | 50.0   |   0.0     | 10.0     | 20.0 | 20.0      | 0.0          |
       | 25 January 2023  | Repayment        | 530.0  | 500.0     | 10.0     | 0.0  | 20.0      | 500.0        |
-      | 25 January 2023  | Accrual          | 50.0   | 0.0       | 10.0     | 20.0 | 20.0      | 0.0          |
       | 01 February 2023 | Repayment        | 20.0   | 0.0       | 0.0      | 0.0  | 20.0      | 1000.0       |
     Then Loan Charges tab has the following data:
       | Name       | isPenalty | Payment due at     | Due as of        | Calculation type | Due  | Paid | Waived | Outstanding |
@@ -2770,8 +2771,8 @@ Feature: LoanRepayment
       | 01 January 2023  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
       | 10 January 2023  | Repayment        | 20.0   | 0.0       | 0.0      | 0.0  | 20.0      | 1000.0       |
       | 15 January 2023  | Repayment        | 500.0  | 470.0     | 10.0     | 0.0  | 20.0      | 530.0        |
-      | 25 January 2023  | Repayment        | 530.0  | 500.0     | 10.0     | 0.0  | 20.0      | 500.0        |
       | 25 January 2023  | Accrual          | 50.0   | 0.0       | 10.0     | 20.0 | 20.0      | 0.0          |
+      | 25 January 2023  | Repayment        | 530.0  | 500.0     | 10.0     | 0.0  | 20.0      | 500.0        |
       | 01 February 2023 | Repayment        | 20.0   | 0.0       | 0.0      | 0.0  | 20.0      | 1000.0       |
       | 01 February 2023 | Repayment        | 10.0   | 0.0       | 10.0     | 0.0  | 0.0       | 1000.0       |
     And Customer makes "AUTOPAY" repayment on "01 February 2023" with 1000 EUR transaction amount
@@ -2780,8 +2781,8 @@ Feature: LoanRepayment
       | 01 January 2023  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
       | 10 January 2023  | Repayment        | 20.0   | 0.0       | 0.0      | 0.0  | 20.0      | 1000.0       |
       | 15 January 2023  | Repayment        | 500.0  | 470.0     | 10.0     | 0.0  | 20.0      | 530.0        |
-      | 25 January 2023  | Repayment        | 530.0  | 500.0     | 10.0     | 0.0  | 20.0      | 500.0        |
       | 25 January 2023  | Accrual          | 50.0   | 0.0       | 10.0     | 20.0 | 20.0      | 0.0          |
+      | 25 January 2023  | Repayment        | 530.0  | 500.0     | 10.0     | 0.0  | 20.0      | 500.0        |
       | 01 February 2023 | Repayment        | 20.0   | 0.0       | 0.0      | 0.0  | 20.0      | 1000.0       |
       | 01 February 2023 | Repayment        | 10.0   | 0.0       | 10.0     | 0.0  | 0.0       | 1000.0       |
       | 01 February 2023 | Repayment        | 1000.0 | 1000.0    | 0.0      | 0.0  | 0.0       | 0.0          |
@@ -2791,8 +2792,8 @@ Feature: LoanRepayment
       | 01 January 2023  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
       | 10 January 2023  | Repayment        | 20.0   | 0.0       | 0.0      | 0.0  | 20.0      | 1000.0       |
       | 15 January 2023  | Repayment        | 500.0  | 470.0     | 10.0     | 0.0  | 20.0      | 530.0        |
-      | 25 January 2023  | Repayment        | 530.0  | 500.0     | 10.0     | 0.0  | 20.0      | 500.0        |
       | 25 January 2023  | Accrual          | 50.0   | 0.0       | 10.0     | 20.0 | 20.0      | 0.0          |
+      | 25 January 2023  | Repayment        | 530.0  | 500.0     | 10.0     | 0.0  | 20.0      | 500.0        |
       | 01 February 2023 | Repayment        | 20.0   | 0.0       | 0.0      | 0.0  | 20.0      | 1000.0       |
       | 01 February 2023 | Repayment        | 10.0   | 0.0       | 10.0     | 0.0  | 0.0       | 1000.0       |
       | 01 February 2023 | Repayment        | 1000.0 | 1000.0    | 0.0      | 0.0  | 0.0       | 0.0          |
@@ -2830,15 +2831,15 @@ Feature: LoanRepayment
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 01 January 2023  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
       | 04 January 2023  | Repayment        | 200.0  | 190.0     | 10.0     | 0.0  | 0.0       | 810.0        |
-      | 12 January 2023  | Repayment        | 300.0  | 300.0     | 0.0      | 0.0  | 0.0       | 510.0        |
+      | 12 January 2023  | Repayment        | 300.0  | 289.9     | 0.0      | 10.1 | 0.0       | 520.1        |
     And Customer makes "AUTOPAY" repayment on "12 January 2023" with 520.10 EUR transaction amount
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 01 January 2023  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
       | 04 January 2023  | Repayment        | 200.0  | 190.0     | 10.0     | 0.0  | 0.0       | 810.0        |
-      | 12 January 2023  | Repayment        | 300.0  | 300.0     | 0.0      | 0.0  | 0.0       | 510.0        |
+      | 12 January 2023  | Repayment        | 300.0  | 289.9     | 0.0      | 10.1 | 0.0       | 520.1        |
+      | 12 January 2023  | Repayment        | 520.1  | 520.1     | 0.0      | 0.0  | 0.0       | 0.0          |
       | 12 January 2023  | Accrual          | 20.1   | 0.0       | 10.0     | 10.1 | 0.0       | 0.0          |
-      | 12 January 2023  | Repayment        | 520.1  | 510.0     | 0.0      | 10.1 | 0.0       | 0.0          |
 
   @TestRailId:C2810
   Scenario: As a user I would like to adjust an existing repayment and validate the event

@@ -66,6 +66,7 @@ public enum LoanTransactionType {
     INTEREST_PAYMENT_WAIVER(31, "loanTransactionType.interestPaymentWaiver"), //
     ACCRUAL_ACTIVITY(32, "loanTransactionType.accrualActivity"), //
     INTEREST_REFUND(33, "loanTransactionType.interestRefund"), //
+    ACCRUAL_ADJUSTMENT(34, "loanTransactionType.accrualAdjustment"), //
     ;
 
     private final Integer value;
@@ -115,6 +116,7 @@ public enum LoanTransactionType {
             case 31 -> LoanTransactionType.INTEREST_PAYMENT_WAIVER;
             case 32 -> LoanTransactionType.ACCRUAL_ACTIVITY;
             case 33 -> LoanTransactionType.INTEREST_REFUND;
+            case 34 -> LoanTransactionType.ACCRUAL_ADJUSTMENT;
             default -> LoanTransactionType.INVALID;
         };
     }
@@ -228,4 +230,7 @@ public enum LoanTransactionType {
         return this.equals(LoanTransactionType.INTEREST_REFUND);
     }
 
+    public boolean isAccrualAdjustment() {
+        return this == LoanTransactionType.ACCRUAL_ADJUSTMENT;
+    }
 }

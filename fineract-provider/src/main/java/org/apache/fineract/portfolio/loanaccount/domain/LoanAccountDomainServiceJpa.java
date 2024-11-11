@@ -759,7 +759,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final ScheduleGeneratorDTO scheduleGeneratorDTO = null;
         final LoanRepaymentScheduleInstallment foreCloseDetail = loan.fetchLoanForeclosureDetail(foreClosureDate);
 
-        loanAccrualsProcessingService.processAccrualsForLoanForeClosure(loan, foreClosureDate, newTransactions);
+        loanAccrualsProcessingService.processAccrualsOnLoanForeClosure(loan, foreClosureDate, newTransactions);
 
         Money interestPayable = foreCloseDetail.getInterestCharged(currency);
         Money feePayable = foreCloseDetail.getFeeChargesCharged(currency);
@@ -922,15 +922,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             if (interestRefundTransaction != null) {
                 loan.addLoanTransaction(interestRefundTransaction);
             }
-            final List<LoanTransaction> allNonContraTransactionsPostDisbursement = loan.retrieveListOfTransactionsForReprocessing();
-            ChangedTransactionDetail changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(
-                    loan.getDisbursementDate(), allNonContraTransactionsPostDisbursement, loan.getCurrency(),
-                    loan.getRepaymentScheduleInstallments(), loan.getActiveCharges());
-            for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
-                mapEntry.getValue().updateLoan(loan);
-            }
-
-            loan.getLoanTransactions().addAll(changedTransactionDetail.getNewTransactionMappings().values());
+            ChangedTransactionDetail changedTransactionDetail = loan.reprocessTransactions();
 
             // Store and flush newly created transaction to generate PK
             saveLoanTransactionWithDataIntegrityViolationChecks(refundTransaction);

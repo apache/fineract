@@ -46,4 +46,5 @@
   <include relativeToChangelogFile="true" file="parts/1021_add_loan_status_change_history.xml"/>
   <include relativeToChangelogFile="true" file="parts/1022_add_interest_refund_support.xml"/>
   <include relativeToChangelogFile="true" file="parts/1023_add_charge_off_behaviour.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1024_accrual_adjustment_transaction_type.xml"/>
 </databaseChangeLog>

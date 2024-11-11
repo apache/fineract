@@ -166,7 +166,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 // pass through for new transactions
                 if (loanTransaction.getId() == null) {
                     processLatestTransaction(loanTransaction, new TransactionCtx(currency, installments, charges, overpaymentHolder, null));
-                    loanTransaction.adjustInterestComponent(currency);
+                    loanTransaction.adjustInterestComponent();
                 } else {
                     /**
                      * For existing transactions, check if the re-payment breakup (principal, interest, fees, penalties)
@@ -178,7 +178,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                     // re-process transaction
                     processLatestTransaction(newLoanTransaction,
                             new TransactionCtx(currency, installments, charges, overpaymentHolder, null));
-                    newLoanTransaction.adjustInterestComponent(currency);
+                    newLoanTransaction.adjustInterestComponent();
                     /**
                      * Check if the transaction amounts have changed. If so, reverse the original transaction and update
                      * changedTransactionDetail accordingly

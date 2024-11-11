@@ -635,7 +635,8 @@ public final class LoanApplicationValidator {
                                     "error.msg.loan.loanIdToClose.no.active.loan.associated.to.client.found",
                                     "loanIdToClose is invalid, No Active Loan associated with the given Client ID found.");
                         }
-                        if (loanToClose.isMultiDisburmentLoan() && !loanToClose.isInterestRecalculationEnabledForProduct()) {
+                        if (loanToClose.isMultiDisburmentLoan()
+                                && !loanToClose.getLoanProductRelatedDetail().isInterestRecalculationEnabled()) {
                             throw new GeneralPlatformDomainRuleException(
                                     "error.msg.loan.topup.on.multi.tranche.loan.without.interest.recalculation.not.supported",
                                     "Topup on loan with multi-tranche disbursal and without interest recalculation is not supported.");
@@ -1346,7 +1347,8 @@ public final class LoanApplicationValidator {
                                 "error.msg.loan.loanIdToClose.no.active.loan.associated.to.client.found",
                                 "loanIdToClose is invalid, No Active Loan associated with the given Client ID found.");
                     }
-                    if (loanToClose.isMultiDisburmentLoan() && !loanToClose.isInterestRecalculationEnabledForProduct()) {
+                    if (loanToClose.isMultiDisburmentLoan()
+                            && !loanToClose.getLoanProductRelatedDetail().isInterestRecalculationEnabled()) {
                         throw new GeneralPlatformDomainRuleException(
                                 "error.msg.loan.topup.on.multi.tranche.loan.without.interest.recalculation.not.supported",
                                 "Topup on loan with multi-tranche disbursal and without interest recalculation is not supported.");

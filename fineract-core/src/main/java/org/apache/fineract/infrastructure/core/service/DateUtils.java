@@ -193,11 +193,23 @@ public final class DateUtils {
     }
 
     public static int compare(OffsetDateTime first, OffsetDateTime second, ChronoUnit truncate) {
+        return compare(first, second, truncate, true);
+    }
+
+    public static int compareWithNullsLast(OffsetDateTime first, OffsetDateTime second) {
+        return compare(first, second, null, false);
+    }
+
+    public static int compareWithNullsLast(@NotNull Optional<OffsetDateTime> first, @NotNull Optional<OffsetDateTime> second) {
+        return compareWithNullsLast(first.orElse(null), second.orElse(null));
+    }
+
+    public static int compare(OffsetDateTime first, OffsetDateTime second, ChronoUnit truncate, boolean nullFirst) {
         if (first == null) {
-            return second == null ? 0 : -1;
+            return second == null ? 0 : (nullFirst ? -1 : 1);
         }
         if (second == null) {
-            return 1;
+            return nullFirst ? 1 : -1;
         }
         first = first.withOffsetSameInstant(ZoneOffset.UTC);
         second = second.withOffsetSameInstant(ZoneOffset.UTC);
@@ -291,7 +303,23 @@ public final class DateUtils {
     }
 
     public static int compare(LocalDate first, LocalDate second) {
-        return first == null ? (second == null ? 0 : -1) : (second == null ? 1 : first.compareTo(second));
+        return compare(first, second, true);
+    }
+
+    /**
+     * Comparing dates. Null will be considered as last elements
+     *
+     * @param first
+     * @param second
+     * @return
+     */
+    public static int compareWithNullsLast(LocalDate first, LocalDate second) {
+        return compare(first, second, false);
+    }
+
+    public static int compare(LocalDate first, LocalDate second, boolean nullFirst) {
+        return first == null ? (second == null ? 0 : (nullFirst ? -1 : 1))
+                : (second == null ? (nullFirst ? 1 : -1) : first.compareTo(second));
     }
 
     public static boolean isEqual(LocalDate first, LocalDate second) {
@@ -323,6 +351,10 @@ public final class DateUtils {
 
     public static int getExactDifferenceInDays(LocalDate first, LocalDate second) {
         return getExactDifference(first, second, DAYS);
+    }
+
+    public static LocalDate minusDays(LocalDate first, int days) {
+        return first == null ? null : first.minusDays(days);
     }
 
     // Parse, format
@@ -425,24 +457,5 @@ public final class DateUtils {
             formatter = locale == null ? DateTimeFormatter.ofPattern(format) : DateTimeFormatter.ofPattern(format, locale);
         }
         return formatter;
-    }
-
-    /**
-     * Comparing dates. Null will be considered as last elements
-     *
-     * @param first
-     * @param second
-     * @return
-     */
-    public static int compareWithNullsLast(LocalDate first, LocalDate second) {
-        return first == null ? (second == null ? 0 : 1) : (second == null ? -1 : first.compareTo(second));
-    }
-
-    public static int compareWithNullsLast(@NotNull Optional<OffsetDateTime> first, @NotNull Optional<OffsetDateTime> second) {
-        return DateUtils.compareWithNullsLast(first.orElse(null), second.orElse(null));
-    }
-
-    public static int compareWithNullsLast(OffsetDateTime first, OffsetDateTime second) {
-        return first == null ? (second == null ? 0 : 1) : (second == null ? -1 : first.compareTo(second));
     }
 }

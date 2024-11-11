@@ -25,6 +25,7 @@ import org.apache.fineract.infrastructure.event.business.BusinessEventListener;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanStatusChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -47,12 +48,15 @@ public class LoanStatusChangePlatformServiceImpl implements LoanStatusChangePlat
         public void onBusinessEvent(LoanStatusChangedBusinessEvent event) {
             final Loan loan = event.get();
             log.debug("Loan Status change for loan {}", loan.getId());
-            if (loan.getStatus().isClosedObligationsMet() || loan.getStatus().isOverpaid()) {
-                log.debug("Loan Status {} for loan {}", loan.getStatus().getCode(), loan.getId());
-                loanAccrualsProcessingService.processAccrualsForLoanClosure(loan);
-            }
-            if (loan.isOpen()) {
+            LoanStatus oldStatus = event.getOldStatus();
+            LoanStatus newStatus = loan.getStatus();
+            if (oldStatus.isActive() && (newStatus.isClosedObligationsMet() || newStatus.isOverpaid())) {
+                log.debug("Loan Status {} for loan {}", newStatus.getCode(), loan.getId());
+                loan.updateLoanSummaryDerivedFields();
+                loanAccrualsProcessingService.processAccrualsOnLoanClosure(loan);
+            } else if ((oldStatus.isClosed() || oldStatus.isOverpaid()) && newStatus.isActive()) {
                 loan.handleMaturityDateActivate();
+                loanAccrualsProcessingService.processAccrualsOnLoanReopen(loan);
             }
         }
     }
@@ -64,10 +68,11 @@ public class LoanStatusChangePlatformServiceImpl implements LoanStatusChangePlat
         public void onBusinessEvent(LoanStatusChangedBusinessEvent event) {
             final Loan loan = event.get();
             if (loan.getLoanProductRelatedDetail().isEnableAccrualActivityPosting()) {
-                if (loan.getStatus().isClosedObligationsMet() || loan.getStatus().isOverpaid()) {
+                LoanStatus oldStatus = event.getOldStatus();
+                LoanStatus newStatus = loan.getStatus();
+                if (oldStatus.isActive() && (newStatus.isClosedObligationsMet() || newStatus.isOverpaid())) {
                     loanAccrualActivityProcessingService.processAccrualActivityForLoanClosure(loan);
-                }
-                if (loan.isOpen()) {
+                } else if ((oldStatus.isClosed() || oldStatus.isOverpaid()) && newStatus.isActive()) {
                     loanAccrualActivityProcessingService.processAccrualActivityForLoanReopen(loan);
                 }
             }

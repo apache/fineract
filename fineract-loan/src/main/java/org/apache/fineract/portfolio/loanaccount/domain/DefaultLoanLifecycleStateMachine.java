@@ -55,7 +55,7 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
 
             if (isNotLoanCreation(loanEvent)) {
                 // in case of Loan creation, a LoanCreatedBusinessEvent is also raised, no need to send a status change
-                businessEventNotifierService.notifyPostBusinessEvent(new LoanStatusChangedBusinessEvent(loan));
+                businessEventNotifierService.notifyPostBusinessEvent(new LoanStatusChangedBusinessEvent(loan, oldStatus));
             }
 
             // set mandatory field states based on new status after the transition

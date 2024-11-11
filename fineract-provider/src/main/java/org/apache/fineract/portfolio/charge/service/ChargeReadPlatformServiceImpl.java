@@ -190,7 +190,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     }
 
     @Override
-    public Collection<ChargeData> retrieveLoanAccountApplicableCharges(final Long loanId, ChargeTimeType[] excludeChargeTimes) {
+    public List<ChargeData> retrieveLoanAccountApplicableCharges(final Long loanId, ChargeTimeType[] excludeChargeTimes) {
         final ChargeMapper rm = new ChargeMapper();
         StringBuilder excludeClause = new StringBuilder("");
         Map<String, Object> paramMap = new HashMap<>();

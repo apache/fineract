@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanproduct.calc;
 
+import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
@@ -34,11 +35,14 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail
 
 public interface EMICalculator {
 
-    ProgressiveLoanInterestScheduleModel generateInterestScheduleModel(List<LoanScheduleModelRepaymentPeriod> periods,
-            LoanProductRelatedDetail loanProductRelatedDetail, Integer installmentAmountInMultiplesOf, MathContext mc);
+    @NotNull
+    ProgressiveLoanInterestScheduleModel generatePeriodInterestScheduleModel(@NotNull List<LoanScheduleModelRepaymentPeriod> periods,
+            @NotNull LoanProductRelatedDetail loanProductRelatedDetail, Integer installmentAmountInMultiplesOf, MathContext mc);
 
-    ProgressiveLoanInterestScheduleModel generateModel(LoanProductRelatedDetail loanProductRelatedDetail,
-            Integer installmentAmountInMultiplesOf, List<LoanRepaymentScheduleInstallment> repaymentPeriods, MathContext mc);
+    @NotNull
+    ProgressiveLoanInterestScheduleModel generateInstallmentInterestScheduleModel(
+            @NotNull List<LoanRepaymentScheduleInstallment> installments, @NotNull LoanProductRelatedDetail loanProductRelatedDetail,
+            Integer installmentAmountInMultiplesOf, MathContext mc);
 
     Optional<RepaymentPeriod> findRepaymentPeriod(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate dueDate);
 
@@ -56,7 +60,13 @@ public interface EMICalculator {
     void payPrincipal(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate repaymentPeriodDueDate, LocalDate transactionDate,
             Money principalAmount);
 
-    PeriodDueDetails getDueAmounts(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate periodDueDate, LocalDate targetDate);
+    @NotNull
+    PeriodDueDetails getDueAmounts(@NotNull ProgressiveLoanInterestScheduleModel scheduleModel, @NotNull LocalDate periodDueDate,
+            @NotNull LocalDate targetDate);
+
+    @NotNull
+    Money getPeriodInterestTillDate(@NotNull ProgressiveLoanInterestScheduleModel scheduleModel, @NotNull LocalDate periodDueDate,
+            @NotNull LocalDate targetDate);
 
     Money getOutstandingLoanBalanceOfPeriod(ProgressiveLoanInterestScheduleModel interestScheduleModel, LocalDate repaymentPeriodDueDate,
             LocalDate targetDate);

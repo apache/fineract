@@ -323,6 +323,8 @@ public final class LoanEnumerations {
                     LoanTransactionType.ACCRUAL_ACTIVITY.getCode(), "Accrual Activity");
             case INTEREST_REFUND -> new LoanTransactionEnumData(LoanTransactionType.INTEREST_REFUND.getValue().longValue(),
                     LoanTransactionType.INTEREST_REFUND.getCode(), "Interest Refund");
+            case ACCRUAL_ADJUSTMENT -> new LoanTransactionEnumData(LoanTransactionType.ACCRUAL_ADJUSTMENT.getValue().longValue(),
+                    LoanTransactionType.ACCRUAL_ADJUSTMENT.getCode(), "Accrual Adjustment");
         };
     }
 

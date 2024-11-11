@@ -177,13 +177,20 @@ public class LoanTest {
 
         final LoanTransaction loanTransaction = Mockito.mock(LoanTransaction.class);
         when(loanTransaction.isNotReversed()).thenReturn(Boolean.TRUE);
-        when(loanTransaction.isAccrualTransaction()).thenReturn(Boolean.FALSE);
+        when(loanTransaction.isAccrual()).thenReturn(Boolean.FALSE);
+        when(loanTransaction.isAccrualAdjustment()).thenReturn(Boolean.FALSE);
         final LoanTransaction loanTransaction2 = Mockito.mock(LoanTransaction.class);
         when(loanTransaction2.isNotReversed()).thenReturn(Boolean.TRUE);
-        when(loanTransaction2.isAccrualTransaction()).thenReturn(Boolean.FALSE);
+        when(loanTransaction2.isAccrual()).thenReturn(Boolean.FALSE);
+        when(loanTransaction2.isAccrualAdjustment()).thenReturn(Boolean.FALSE);
         final LoanTransaction loanTransaction3 = Mockito.mock(LoanTransaction.class);
         when(loanTransaction3.isNotReversed()).thenReturn(Boolean.TRUE);
-        when(loanTransaction3.isAccrualTransaction()).thenReturn(Boolean.TRUE);
+        when(loanTransaction3.isAccrual()).thenReturn(Boolean.TRUE);
+        when(loanTransaction3.isAccrualAdjustment()).thenReturn(Boolean.FALSE);
+        final LoanTransaction loanTransaction4 = Mockito.mock(LoanTransaction.class);
+        when(loanTransaction4.isNotReversed()).thenReturn(Boolean.TRUE);
+        when(loanTransaction4.isAccrual()).thenReturn(Boolean.FALSE);
+        when(loanTransaction4.isAccrualAdjustment()).thenReturn(Boolean.TRUE);
         ReflectionTestUtils.setField(loan, "loanTransactions", List.of(loanTransaction, loanTransaction2, loanTransaction3));
         final LoanTransaction userTransaction = loan.getLastUserTransaction();
         assertNotNull(userTransaction);

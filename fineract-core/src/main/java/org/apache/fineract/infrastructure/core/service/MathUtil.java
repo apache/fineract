@@ -232,7 +232,7 @@ public final class MathUtil {
      *            if true then null parameter is omitted, otherwise returns null
      */
     public static BigDecimal min(BigDecimal first, BigDecimal second, boolean notNull) {
-        return notNull ? first == null ? second : second == null ? first : min(first, second, false)
+        return notNull ? (first == null ? second : (second == null ? first : min(first, second, false)))
                 : isLessThan(first, second) ? first : second;
     }
 
@@ -291,6 +291,11 @@ public final class MathUtil {
         return subtract(first, second, MoneyHelper.getMathContext());
     }
 
+    /** @return first minus the others considering null values, maybe negative */
+    public static BigDecimal subtract(BigDecimal first, BigDecimal second, BigDecimal third) {
+        return subtract(subtract(first, second), third);
+    }
+
     /** @return first minus second considering null values, maybe negative */
     public static BigDecimal subtract(BigDecimal first, BigDecimal second, MathContext mc) {
         return first == null ? null : second == null ? first : first.subtract(second, mc);
@@ -334,6 +339,10 @@ public final class MathUtil {
 
     public static String formatToSql(BigDecimal amount) {
         return amount == null ? null : amount.toPlainString();
+    }
+
+    public static Money toMoney(BigDecimal amount, @NotNull MonetaryCurrency currency) {
+        return amount == null ? null : Money.of(currency, amount);
     }
 
     // ----------------- Money -----------------
@@ -452,6 +461,16 @@ public final class MathUtil {
      */
     public static Money min(Money first, Money second, Money third, boolean notNull) {
         return min(min(first, second, notNull), third, notNull);
+    }
+
+    /** @return Money null safe negate */
+    public static Money negate(Money amount) {
+        return negate(amount, MoneyHelper.getMathContext());
+    }
+
+    /** @return Money null safe negate */
+    public static Money negate(Money amount, MathContext mc) {
+        return isEmpty(amount) ? amount : amount.negated(mc);
     }
 
     /**

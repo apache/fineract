@@ -16,27 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.business.domain.loan;
+package org.apache.fineract.portfolio.loanaccount.data;
 
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
+import org.apache.fineract.organisation.monetary.domain.Money;
 
-public class LoanStatusChangedBusinessEvent extends LoanBusinessEvent {
+@Data
+@Accessors(chain = true)
+@RequiredArgsConstructor
+public class AccrualChargeData {
 
-    private static final String TYPE = "LoanStatusChangedBusinessEvent";
-    private final LoanStatus oldStatus;
-
-    public LoanStatusChangedBusinessEvent(Loan value, LoanStatus oldStatus) {
-        super(value);
-        this.oldStatus = oldStatus;
-    }
-
-    @Override
-    public String getType() {
-        return TYPE;
-    }
-
-    public LoanStatus getOldStatus() {
-        return oldStatus;
-    }
+    private final Long loanChargeId;
+    private final Long loanInstallmentChargeId;
+    private final boolean isPenalty;
+    private Money chargeAmount;
+    private Money chargeAccruable;
+    private Money chargeAccrued;
 }

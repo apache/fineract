@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.starter;
 
 import java.util.List;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.CreocoreLoanRepaymentScheduleTransactionProcessor;
@@ -107,8 +108,8 @@ public class LoanAccountAutoStarter {
     @Bean
     @Conditional(AdvancedPaymentScheduleTransactionProcessorCondition.class)
     public AdvancedPaymentScheduleTransactionProcessor advancedPaymentScheduleTransactionProcessor(EMICalculator emiCalculator,
+            LoanRepositoryWrapper loanRepositoryWrapper,
             @Lazy ProgressiveLoanInterestRefundServiceImpl progressiveLoanInterestRefundService) {
-        return new AdvancedPaymentScheduleTransactionProcessor(emiCalculator, progressiveLoanInterestRefundService);
+        return new AdvancedPaymentScheduleTransactionProcessor(emiCalculator, loanRepositoryWrapper, progressiveLoanInterestRefundService);
     }
-
 }
