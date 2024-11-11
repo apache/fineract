@@ -108,7 +108,7 @@ public class ChangeOperation implements Comparable<ChangeOperation> {
         } else if (loanCharge.isPresent() && loanCharge.get().getCreatedDate().isPresent()) {
             return loanCharge.get().getCreatedDate().get();
         } else if (loanTransaction.isPresent()) {
-            return loanTransaction.get().getCreatedDateTime();
+            return loanTransaction.get().getCreatedDate().orElse(null);
         } else {
             throw new RuntimeException("Either charge with createdDate or transaction created datetime should be present");
         }
@@ -117,15 +117,15 @@ public class ChangeOperation implements Comparable<ChangeOperation> {
     @Override
     @SuppressFBWarnings(value = "EQ_COMPARETO_USE_OBJECT_EQUALS", justification = "TODO: fix this! See: https://stackoverflow.com/questions/2609037/findbugs-how-to-solve-eq-compareto-use-object-equals")
     public int compareTo(@NotNull ChangeOperation o) {
-        int datePortion = DateUtils.compare(this.getEffectiveDate(), o.getEffectiveDate());
+        int datePortion = DateUtils.compareWithNullsLast(this.getEffectiveDate(), o.getEffectiveDate());
         if (datePortion == 0) {
             final boolean isAccrual = isAccrualActivity();
             if (isAccrual != o.isAccrualActivity()) {
                 return isAccrual ? 1 : -1;
             }
-            int submittedDate = DateUtils.compare(getSubmittedOnDate(), o.getSubmittedOnDate());
+            int submittedDate = DateUtils.compareWithNullsLast(getSubmittedOnDate(), o.getSubmittedOnDate());
             if (submittedDate == 0) {
-                return DateUtils.compare(getCreatedDateTime(), o.getCreatedDateTime(), null);
+                return DateUtils.compareWithNullsLast(getCreatedDateTime(), o.getCreatedDateTime());
             }
             return submittedDate;
         }

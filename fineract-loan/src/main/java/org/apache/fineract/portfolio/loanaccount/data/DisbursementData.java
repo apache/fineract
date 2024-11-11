@@ -84,10 +84,7 @@ public final class DisbursementData implements Comparable<DisbursementData> {
 
     @Override
     public int compareTo(final DisbursementData obj) {
-        if (obj == null) {
-            return -1;
-        }
-        return DateUtils.compare(obj.expectedDisbursementDate, this.expectedDisbursementDate);
+        return DateUtils.compareWithNullsLast(obj.expectedDisbursementDate, this.expectedDisbursementDate);
     }
 
     public boolean isDueForDisbursement(LoanScheduleType loanScheduleType, final LocalDate fromDate, final LocalDate toDate) {

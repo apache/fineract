@@ -3942,8 +3942,6 @@ Feature: LoanRepayment
       | 24 June 2024      | Disbursement           | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        |
       | 10 September 2024 | Merchant Issued Refund | 200.0  | 200.0     | 0.0      | 0.0  | 0.0       | 300.0        |
 
-  # Needs to fix Merchant issued Refund - Interest refund order
-  @Skip
   Scenario: Verify the relationship for Interest Refund transaction after repayment by reverting related transaction
     When Admin sets the business date to "30 January 2024"
     When Admin creates a client with random data

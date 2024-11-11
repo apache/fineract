@@ -3355,8 +3355,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     && DateUtils.isEqual(transferDate, transaction.getSubmittedOnDate()))
                     || DateUtils.isBefore(transferDate, transaction.getTransactionDate())) {
                 throw new GeneralPlatformDomainRuleException(TransferApiConstants.transferClientLoanException,
-                        TransferApiConstants.transferClientLoanExceptionMessage, transaction.getCreatedDateTime().toLocalDate(),
-                        transferDate);
+                        TransferApiConstants.transferClientLoanExceptionMessage, transaction.getTransactionDate(), transferDate);
             }
         }
     }

@@ -32,7 +32,7 @@ public class SavingsAccountTransactionComparator implements Comparator<SavingsAc
         if (result != 0) {
             return result;
         }
-        result = DateUtils.compare(o1.getCreatedDateTime(), o2.getCreatedDateTime());
+        result = DateUtils.compareWithNullsLast(o1.getCreatedDate(), o2.getCreatedDate());
         if (result != 0) {
             return result;
         }

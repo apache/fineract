@@ -33,7 +33,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.springframework.data.domain.Auditable;
 import org.springframework.data.jpa.domain.AbstractAuditable;
 
@@ -81,11 +80,6 @@ public abstract class AbstractAuditableWithUTCDateTimeCustom<T extends Serializa
         return Optional.ofNullable(createdDate);
     }
 
-    @NotNull
-    public OffsetDateTime getCreatedDateTime() {
-        return getCreatedDate().orElseGet(DateUtils::getAuditOffsetDateTime);
-    }
-
     @Override
     @NotNull
     public Optional<Long> getLastModifiedBy() {
@@ -96,10 +90,5 @@ public abstract class AbstractAuditableWithUTCDateTimeCustom<T extends Serializa
     @NotNull
     public Optional<OffsetDateTime> getLastModifiedDate() {
         return Optional.ofNullable(lastModifiedDate);
-    }
-
-    @NotNull
-    public OffsetDateTime getLastModifiedDateTime() {
-        return getLastModifiedDate().orElseGet(DateUtils::getAuditOffsetDateTime);
     }
 }

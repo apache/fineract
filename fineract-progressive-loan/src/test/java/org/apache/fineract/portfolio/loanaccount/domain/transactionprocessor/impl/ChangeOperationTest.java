@@ -152,7 +152,7 @@ public class ChangeOperationTest {
         LoanTransaction transaction = Mockito.mock(LoanTransaction.class);
         Mockito.when(transaction.getSubmittedOnDate()).thenReturn(LocalDate.parse(submittedDate));
         Mockito.when(transaction.getTransactionDate()).thenReturn(LocalDate.parse(transactionDate));
-        Mockito.when(transaction.getCreatedDateTime()).thenReturn(OffsetDateTime.parse(creationDateTime));
+        Mockito.when(transaction.getCreatedDate()).thenReturn(Optional.of(OffsetDateTime.parse(creationDateTime)));
         return new ChangeOperation(transaction);
     }
 

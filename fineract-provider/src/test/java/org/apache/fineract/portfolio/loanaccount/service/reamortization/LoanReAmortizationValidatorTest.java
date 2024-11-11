@@ -32,6 +32,7 @@ import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -267,7 +268,7 @@ class LoanReAmortizationValidatorTest {
 
     private LoanTransaction loanTransaction(LoanTransactionType type, LocalDate txDate, OffsetDateTime creationTime) {
         LoanTransaction loanTransaction = loanTransaction(type, txDate);
-        given(loanTransaction.getCreatedDateTime()).willReturn(creationTime);
+        given(loanTransaction.getCreatedDate()).willReturn(Optional.of(creationTime));
         return loanTransaction;
     }
 

@@ -81,7 +81,7 @@ public class ClientCollateralManagementReadPlatformServiceImpl implements Client
                 LoanTransaction loanTransaction = this.loanTransactionRepository.findById(transactionId)
                         .orElseThrow(() -> new LoanTransactionNotFoundException(transactionId));
                 LoanTransactionData loanTransactionData = LoanTransactionData.instance(loanTransaction.getLoan().getId(),
-                        loanTransaction.getCreatedDateTime(), loanTransaction.getOutstandingLoanBalance(),
+                        loanTransaction.getCreatedDate().orElse(null), loanTransaction.getOutstandingLoanBalance(),
                         loanTransaction.getPrincipalPortion());
                 loanTransactionDataList.add(loanTransactionData);
             }

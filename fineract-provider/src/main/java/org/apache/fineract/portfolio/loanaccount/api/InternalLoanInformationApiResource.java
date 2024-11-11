@@ -98,8 +98,8 @@ public class InternalLoanInformationApiResource implements InitializingBean {
 
         final Loan loan = loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
         Map<String, Object> auditFields = new HashMap<>(
-                Map.of(CREATED_BY, loan.getCreatedBy().orElse(null), CREATED_DATE, loan.getCreatedDateTime(), LAST_MODIFIED_BY,
-                        loan.getLastModifiedBy().orElse(null), LAST_MODIFIED_DATE, loan.getLastModifiedDateTime()));
+                Map.of(CREATED_BY, loan.getCreatedBy().orElse(null), CREATED_DATE, loan.getCreatedDate().orElse(null), LAST_MODIFIED_BY,
+                        loan.getLastModifiedBy().orElse(null), LAST_MODIFIED_DATE, loan.getLastModifiedDate().orElse(null)));
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializerForMap.serialize(settings, auditFields);
     }
@@ -119,8 +119,8 @@ public class InternalLoanInformationApiResource implements InitializingBean {
 
         final LoanTransaction transaction = loanTransactionRepository.findById(transactionId).orElseThrow();
         Map<String, Object> auditFields = new HashMap<>(Map.of(CREATED_BY, transaction.getCreatedBy().orElse(null), CREATED_DATE,
-                transaction.getCreatedDateTime(), LAST_MODIFIED_BY, transaction.getLastModifiedBy().orElse(null), LAST_MODIFIED_DATE,
-                transaction.getLastModifiedDateTime()));
+                transaction.getCreatedDate().orElse(null), LAST_MODIFIED_BY, transaction.getLastModifiedBy().orElse(null),
+                LAST_MODIFIED_DATE, transaction.getLastModifiedDate().orElse(null)));
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializerForMap.serialize(settings, auditFields);
     }

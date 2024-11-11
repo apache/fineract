@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.delinquency.validator;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import lombok.Data;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyAction;
 
@@ -44,8 +45,8 @@ public class LoanDelinquencyActionData {
 
         loanDelinquencyAction.getCreatedBy().ifPresent(this::setCreatedById);
         loanDelinquencyAction.getLastModifiedBy().ifPresent(this::setUpdatedById);
-        this.createdOn = loanDelinquencyAction.getCreatedDateTime();
-        this.lastModifiedOn = loanDelinquencyAction.getLastModifiedDateTime();
+        this.createdOn = loanDelinquencyAction.getCreatedDate().orElse(DateUtils.getAuditOffsetDateTime());
+        this.lastModifiedOn = loanDelinquencyAction.getLastModifiedDate().orElse(DateUtils.getAuditOffsetDateTime());
     }
 
 }

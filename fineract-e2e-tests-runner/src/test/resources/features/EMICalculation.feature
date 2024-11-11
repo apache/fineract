@@ -3824,8 +3824,8 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
       | 01 February 2024 | Repayment        | 255.14 | 246.75    | 8.39     | 0.0  | 0.0       | 753.25       | false    | false    |
-      | 09 February 2024 | Payout Refund    | 1000.0 | 743.23    | 1.63     | 0.0  | 0.0       | 10.02        | false    | false    |
-      | 09 February 2024 | Interest Refund  | 10.02  | 10.02     | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 February 2024 | Payout Refund    | 1000.0 | 753.25    | 1.63     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 February 2024 | Interest Refund  | 10.02  | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
     When Admin sets the business date to "10 February 2024"
     When Admin makes Credit Balance Refund transaction on "10 February 2024" with 255.14 EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -3842,8 +3842,8 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | Transaction date | Transaction Type      | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement          | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
       | 01 February 2024 | Repayment             | 255.14 | 246.75    | 8.39     | 0.0  | 0.0       | 753.25       | false    | false    |
-      | 09 February 2024 | Payout Refund         | 1000.0 | 743.23    | 1.63     | 0.0  | 0.0       | 10.02        | false    | false    |
-      | 09 February 2024 | Interest Refund       | 10.02  | 10.02     | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 February 2024 | Payout Refund         | 1000.0 | 753.25    | 1.63     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 February 2024 | Interest Refund       | 10.02  | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 10 February 2024 | Credit Balance Refund | 255.14 | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 10 February 2024 | Accrual               | 10.02  | 0.0       | 10.02    | 0.0  | 0.0       | 0.0          | false    | false    |
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
@@ -3960,8 +3960,8 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 01 January 2024  | Disbursement           | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
       | 07 January 2024  | Disbursement           | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
       | 01 February 2024 | Repayment              | 255.14 | 247.57    | 7.57     | 0.0  | 0.0       | 752.43       | false    | false    |
-      | 09 February 2024 | Merchant Issued Refund | 1000.0 | 743.23    | 1.63     | 0.0  | 0.0       | 9.2          | false    | false    |
-      | 09 February 2024 | Interest Refund        | 9.2    | 9.2       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 February 2024 | Merchant Issued Refund | 1000.0 | 752.43    | 1.63     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 February 2024 | Interest Refund        | 9.2    | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
     When Admin sets the business date to "10 February 2024"
     When Admin makes Credit Balance Refund transaction on "10 February 2024" with 255.14 EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -3980,8 +3980,8 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 01 January 2024  | Disbursement           | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
       | 07 January 2024  | Disbursement           | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
       | 01 February 2024 | Repayment              | 255.14 | 247.57    | 7.57     | 0.0  | 0.0       | 752.43       | false    | false    |
-      | 09 February 2024 | Merchant Issued Refund | 1000.0 | 743.23    | 1.63     | 0.0  | 0.0       | 9.2          | false    | false    |
-      | 09 February 2024 | Interest Refund        | 9.2    | 9.2       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 February 2024 | Merchant Issued Refund | 1000.0 | 752.43    | 1.63     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 February 2024 | Interest Refund        | 9.2    | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 10 February 2024 | Credit Balance Refund  | 255.14 | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 10 February 2024 | Accrual                | 9.2    | 0.0       | 9.2      | 0.0  | 0.0       | 0.0          | false    | false    |
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"

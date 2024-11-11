@@ -31,6 +31,7 @@ import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
@@ -424,5 +425,24 @@ public final class DateUtils {
             formatter = locale == null ? DateTimeFormatter.ofPattern(format) : DateTimeFormatter.ofPattern(format, locale);
         }
         return formatter;
+    }
+
+    /**
+     * Comparing dates. Null will be considered as last elements
+     *
+     * @param first
+     * @param second
+     * @return
+     */
+    public static int compareWithNullsLast(LocalDate first, LocalDate second) {
+        return first == null ? (second == null ? 0 : 1) : (second == null ? -1 : first.compareTo(second));
+    }
+
+    public static int compareWithNullsLast(@NotNull Optional<OffsetDateTime> first, @NotNull Optional<OffsetDateTime> second) {
+        return DateUtils.compareWithNullsLast(first.orElse(null), second.orElse(null));
+    }
+
+    public static int compareWithNullsLast(OffsetDateTime first, OffsetDateTime second) {
+        return first == null ? (second == null ? 0 : 1) : (second == null ? -1 : first.compareTo(second));
     }
 }

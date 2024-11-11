@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.security.InvalidParameterException;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,6 +41,7 @@ import org.apache.fineract.infrastructure.campaigns.sms.domain.SmsCampaign;
 import org.apache.fineract.infrastructure.campaigns.sms.domain.SmsCampaignRepository;
 import org.apache.fineract.infrastructure.campaigns.sms.exception.SmsRuntimeException;
 import org.apache.fineract.infrastructure.campaigns.sms.serialization.SmsCampaignValidator;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.event.business.BusinessEventListener;
 import org.apache.fineract.infrastructure.event.business.domain.client.ClientActivateBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.client.ClientRejectBusinessEvent;
@@ -330,9 +332,10 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
             smsParams.put("loanOfficerId", -1);
         }
 
+        OffsetDateTime creationDate = loanTransaction.getCreatedDate().orElse(DateUtils.getAuditOffsetDateTime());
         smsParams.put("repaymentAmount", loanTransaction.getAmount(loan.getCurrency()));
-        smsParams.put("RepaymentDate", loanTransaction.getCreatedDateTime().toLocalDate().format(dateFormatter));
-        smsParams.put("RepaymentTime", loanTransaction.getCreatedDateTime().toLocalTime().format(timeFormatter));
+        smsParams.put("RepaymentDate", creationDate.toLocalDate().format(dateFormatter));
+        smsParams.put("RepaymentTime", creationDate.toLocalTime().format(timeFormatter));
 
         if (loanTransaction.getPaymentDetail() != null) {
             smsParams.put("receiptNumber", loanTransaction.getPaymentDetail().getReceiptNumber());
