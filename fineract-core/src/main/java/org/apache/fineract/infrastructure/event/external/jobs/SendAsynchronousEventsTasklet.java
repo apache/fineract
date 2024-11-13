@@ -29,12 +29,17 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.avro.MessageV1;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.event.external.config.TaskExecutorConstant;
 import org.apache.fineract.infrastructure.event.external.producer.ExternalEventProducer;
 import org.apache.fineract.infrastructure.event.external.repository.ExternalEventRepository;
 import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventStatus;
@@ -45,9 +50,12 @@ import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -60,6 +68,9 @@ public class SendAsynchronousEventsTasklet implements Tasklet {
     private final MessageFactory messageFactory;
     private final ByteBufferConverter byteBufferConverter;
     private final ConfigurationDomainService configurationDomainService;
+    private final TransactionTemplate transactionTemplate;
+    @Qualifier(TaskExecutorConstant.EVENT_MARKS_AS_SENT_EXECUTOR_BEAN_NAME)
+    private final ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
@@ -104,14 +115,31 @@ public class SendAsynchronousEventsTasklet implements Tasklet {
         // Partitioning dataset to avoid exception: PreparedStatement can have at most 65,535 parameters
         final int partitionSize = fineractProperties.getEvents().getExternal().getPartitionSize();
         List<List<Long>> partitions = Lists.partition(eventIds, partitionSize);
+        List<Future<?>> tasks = new ArrayList<>();
+        final FineractContext context = ThreadLocalContextUtil.getContext();
         partitions //
                 .forEach(partitionedEventIds -> {
-                    measure(() -> {
-                        repository.markEventsSent(partitionedEventIds, sentAt);
-                    }, timeTaken -> {
-                        log.debug("Took {}ms to update {} events", timeTaken.toMillis(), partitionedEventIds.size());
-                    });
+                    tasks.add(threadPoolTaskExecutor.submit(() -> {
+                        ThreadLocalContextUtil.init(context);
+                        transactionTemplate.execute((status) -> {
+                            measure(() -> {
+                                repository.markEventsSent(partitionedEventIds, sentAt);
+                            }, timeTaken -> {
+                                log.debug("Took {}ms to update {} events", timeTaken.toMillis(), partitionedEventIds.size());
+                            });
+                            return null;
+                        });
+                    }));
                 });
+        for (Future<?> task : tasks) {
+            try {
+                task.get();
+            } catch (InterruptedException e) {
+                log.error("Interrupted while marking events as sent", e);
+            } catch (ExecutionException e) {
+                log.error("Exception while marking events as sent", e);
+            }
+        }
     }
 
     private Map<Long, List<byte[]>> generatePartitions(List<ExternalEventView> queuedEvents) {

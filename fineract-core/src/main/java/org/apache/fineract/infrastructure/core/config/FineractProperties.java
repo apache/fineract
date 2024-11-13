@@ -288,6 +288,9 @@ public class FineractProperties {
         private boolean enabled;
         private FineractExternalEventsProducerProperties producer;
         private int partitionSize;
+        private int threadPoolCorePoolSize;
+        private int threadPoolMaxPoolSize;
+        private int threadPoolQueueCapacity;
     }
 
     @Getter
