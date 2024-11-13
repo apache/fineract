@@ -83,7 +83,7 @@ public class SendAsynchronousEventsTasklet implements Tasklet {
     private List<ExternalEventView> getQueuedEventsBatch() {
         int readBatchSize = getBatchSize();
         Pageable batchSize = PageRequest.ofSize(readBatchSize);
-        return measure(() -> repository.findByStatusOrderById(ExternalEventStatus.TO_BE_SENT, batchSize),
+        return measure(() -> repository.findByStatusOrderByBusinessDateAscIdAsc(ExternalEventStatus.TO_BE_SENT, batchSize),
                 (events, timeTaken) -> log.debug("Loaded {} events in {}ms", events.size(), timeTaken.toMillis()));
     }
 

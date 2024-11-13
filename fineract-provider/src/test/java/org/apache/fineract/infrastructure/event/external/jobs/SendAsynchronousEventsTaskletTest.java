@@ -128,7 +128,7 @@ class SendAsynchronousEventsTaskletTest {
         MessageV1 dummyMessage = new MessageV1(1, "aSource", "aType", "nocategory", "aCreateDate", "aBusinessDate", "aTenantId",
                 "anidempotencyKey", "aSchema", Mockito.mock(ByteBuffer.class));
 
-        when(repository.findByStatusOrderById(Mockito.any(), Mockito.any())).thenReturn(events);
+        when(repository.findByStatusOrderByBusinessDateAscIdAsc(Mockito.any(), Mockito.any())).thenReturn(events);
         when(messageFactory.createMessage(Mockito.any())).thenReturn(dummyMessage);
         when(byteBufferConverter.convert(Mockito.any(ByteBuffer.class))).thenReturn(new byte[0]);
         // when
@@ -147,7 +147,7 @@ class SendAsynchronousEventsTaskletTest {
                 createExternalEventView("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey", 1L));
         MessageV1 dummyMessage = new MessageV1(1, "aSource", "aType", "nocategory", "aCreateDate", "aBusinessDate", "aTenantId",
                 "anidempotencyKey", "aSchema", Mockito.mock(ByteBuffer.class));
-        when(repository.findByStatusOrderById(Mockito.any(), Mockito.any())).thenReturn(events);
+        when(repository.findByStatusOrderByBusinessDateAscIdAsc(Mockito.any(), Mockito.any())).thenReturn(events);
         when(messageFactory.createMessage(Mockito.any())).thenReturn(dummyMessage);
         when(byteBufferConverter.convert(Mockito.any(ByteBuffer.class))).thenReturn(new byte[0]);
         doThrow(new AcknowledgementTimeoutException("Event Send Exception", new RuntimeException())).when(eventProducer)
@@ -166,7 +166,7 @@ class SendAsynchronousEventsTaskletTest {
                 .asList(createExternalEventView("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey", 1L));
         MessageV1 dummyMessage = new MessageV1(1, "aSource", "aType", "nocategory", "aCreateDate", "aBusinessDate", "aTenantId",
                 "anidempotencyKey", "aSchema", Mockito.mock(ByteBuffer.class));
-        when(repository.findByStatusOrderById(Mockito.any(), Mockito.any())).thenReturn(events);
+        when(repository.findByStatusOrderByBusinessDateAscIdAsc(Mockito.any(), Mockito.any())).thenReturn(events);
         when(messageFactory.createMessage(Mockito.any())).thenReturn(dummyMessage);
         when(byteBufferConverter.convert(Mockito.any(ByteBuffer.class))).thenReturn(new byte[0]);
         // when
@@ -185,7 +185,7 @@ class SendAsynchronousEventsTaskletTest {
                 .asList(createExternalEventView("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey", null));
         MessageV1 dummyMessage = new MessageV1(1, "aSource", "aType", "nocategory", "aCreateDate", "aBusinessDate", "aTenantId",
                 "anidempotencyKey", "aSchema", Mockito.mock(ByteBuffer.class));
-        when(repository.findByStatusOrderById(Mockito.any(), Mockito.any())).thenReturn(events);
+        when(repository.findByStatusOrderByBusinessDateAscIdAsc(Mockito.any(), Mockito.any())).thenReturn(events);
         when(messageFactory.createMessage(Mockito.any())).thenReturn(dummyMessage);
         byte[] byteMsg = new byte[0];
         when(byteBufferConverter.convert(Mockito.any(ByteBuffer.class))).thenReturn(byteMsg);
@@ -202,11 +202,11 @@ class SendAsynchronousEventsTaskletTest {
     public void givenEventBatchSizeIsConfiguredAs10WhenTaskExecutionThenEventReadPageSizeIsCorrect() {
         ArgumentCaptor<Pageable> externalEventPageSizeArgumentCaptor = ArgumentCaptor.forClass(Pageable.class);
         List<ExternalEventView> events = new ArrayList<>();
-        when(repository.findByStatusOrderById(Mockito.any(), Mockito.any())).thenReturn(events);
+        when(repository.findByStatusOrderByBusinessDateAscIdAsc(Mockito.any(), Mockito.any())).thenReturn(events);
         // when
         resultStatus = underTest.execute(stepContribution, chunkContext);
         // then
-        verify(repository).findByStatusOrderById(Mockito.any(), externalEventPageSizeArgumentCaptor.capture());
+        verify(repository).findByStatusOrderByBusinessDateAscIdAsc(Mockito.any(), externalEventPageSizeArgumentCaptor.capture());
         assertThat(externalEventPageSizeArgumentCaptor.getValue().getPageSize()).isEqualTo(10);
     }
 
