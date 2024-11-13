@@ -1489,7 +1489,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         loanTransactionValidator.validateRepaymentDateIsOnNonWorkingDay(newTransactionDetail.getTransactionDate(),
                 holidayDetailDTO.getWorkingDays(), holidayDetailDTO.isAllowTransactionsOnNonWorkingDay());
 
-        final ChangedTransactionDetail changedTransactionDetail = loan.adjustExistingTransaction(newTransactionDetail,
+        final ChangedTransactionDetail changedTransactionDetail = adjustExistingTransaction(loan, newTransactionDetail,
                 loanLifecycleStateMachine, transactionToAdjust, existingTransactionIds, existingReversedTransactionIds,
                 scheduleGeneratorDTO, reversalTxnExternalId);
 
@@ -1581,6 +1581,62 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .withGroupId(loan.getGroupId()) //
                 .withLoanId(loanId) //
                 .with(changes).build();
+    }
+
+    public ChangedTransactionDetail adjustExistingTransaction(final Loan loan, final LoanTransaction newTransactionDetail,
+            final LoanLifecycleStateMachine loanLifecycleStateMachine, final LoanTransaction transactionForAdjustment,
+            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
+            final ScheduleGeneratorDTO scheduleGeneratorDTO, final ExternalId reversalExternalId) {
+
+        ChangedTransactionDetail changedTransactionDetail = null;
+
+        existingTransactionIds.addAll(loan.findExistingTransactionIds());
+        existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
+
+        loan.validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_REPAYMENT_OR_WAIVER,
+                transactionForAdjustment.getTransactionDate());
+
+        if (transactionForAdjustment.isNotRepaymentLikeType() && transactionForAdjustment.isNotWaiver()
+                && transactionForAdjustment.isNotCreditBalanceRefund()) {
+            final String errorMessage = "Only (non-reversed) transactions of type repayment, waiver or credit balance refund can be adjusted.";
+            throw new InvalidLoanTransactionTypeException("transaction",
+                    "adjustment.is.only.allowed.to.repayment.or.waiver.or.creditbalancerefund.transactions", errorMessage);
+        }
+
+        transactionForAdjustment.reverse(reversalExternalId);
+        transactionForAdjustment.manuallyAdjustedOrReversed();
+
+        if (transactionForAdjustment.getTypeOf().equals(LoanTransactionType.MERCHANT_ISSUED_REFUND)
+                || transactionForAdjustment.getTypeOf().equals(LoanTransactionType.PAYOUT_REFUND)) {
+            loan.getLoanTransactions().stream() //
+                    .filter(LoanTransaction::isNotReversed)
+                    .filter(loanTransaction -> loanTransaction.getLoanTransactionRelations().stream()
+                            .anyMatch(relation -> relation.getRelationType().equals(LoanTransactionRelationTypeEnum.RELATED)
+                                    && relation.getToTransaction().getId().equals(transactionForAdjustment.getId())))
+                    .forEach(loanTransaction -> {
+                        loanTransaction.reverse();
+                        loanTransaction.manuallyAdjustedOrReversed();
+                        LoanAdjustTransactionBusinessEvent.Data eventData = new LoanAdjustTransactionBusinessEvent.Data(loanTransaction);
+                        businessEventNotifierService.notifyPostBusinessEvent(new LoanAdjustTransactionBusinessEvent(eventData));
+                    });
+        }
+
+        if (loan.isClosedWrittenOff()) {
+            // find write off transaction and reverse it
+            final LoanTransaction writeOffTransaction = loan.findWriteOffTransaction();
+            writeOffTransaction.reverse();
+        }
+
+        if (loan.isClosedObligationsMet() || loan.isClosedWrittenOff() || loan.isClosedWithOutstandingAmountMarkedForReschedule()) {
+            loanLifecycleStateMachine.transition(LoanEvent.LOAN_ADJUST_TRANSACTION, loan);
+        }
+
+        if (newTransactionDetail.isRepaymentLikeType() || newTransactionDetail.isInterestWaiver()) {
+            changedTransactionDetail = loan.handleRepaymentOrRecoveryOrWaiverTransaction(newTransactionDetail, loanLifecycleStateMachine,
+                    transactionForAdjustment, scheduleGeneratorDTO);
+        }
+
+        return changedTransactionDetail;
     }
 
     @Transactional
