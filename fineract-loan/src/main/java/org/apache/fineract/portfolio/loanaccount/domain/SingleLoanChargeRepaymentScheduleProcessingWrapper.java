@@ -46,7 +46,7 @@ public class SingleLoanChargeRepaymentScheduleProcessingWrapper {
             totalPrincipal = totalPrincipal.plus(installment.getPrincipal(currency));
         }
         LoanChargePaidBy accrualBy = null;
-        if (!loan.isInterestBearing() && loanCharge.isSpecifiedDueDate()) { // TODO: why only if not interest bearing
+        if (loanCharge.isSpecifiedDueDate()) {
             LoanRepaymentScheduleInstallment addedPeriod = addChargeOnlyRepaymentInstallmentIfRequired(loanCharge, installments);
             if (addedPeriod != null) {
                 addedPeriod.updateObligationsMet(currency, disbursementDate);

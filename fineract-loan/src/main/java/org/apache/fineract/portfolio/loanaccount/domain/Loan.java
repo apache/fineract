@@ -2446,7 +2446,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
             }
         }
         if (reprocess) {
-            if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
+            if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()
+                    && !getLoanProductRelatedDetail().getLoanScheduleType().equals(LoanScheduleType.PROGRESSIVE)) {
                 regenerateRepaymentScheduleWithInterestRecalculation(scheduleGeneratorDTO);
             }
             final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retrieveListOfTransactionsForReprocessing();

@@ -38,8 +38,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.integrationtests.common.BusinessStepHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -653,6 +655,128 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
             validateFullyUnpaidRepaymentPeriod(loanDetails, 4, "01 May 2024", 16.72, 0.0, 0.0, 0.29);
             validateFullyUnpaidRepaymentPeriod(loanDetails, 5, "01 June 2024", 16.81, 0.0, 0.0, 0.20);
             validateFullyUnpaidRepaymentPeriod(loanDetails, 6, "01 July 2024", 16.94, 0.0, 0.0, 0.10);
+        });
+    }
+
+    @Test
+    public void verifyChargeCreationAfterMaturityDateOnInterestBearingProgressiveLoan() {
+        AtomicReference<Long> loanIdRef = new AtomicReference<>();
+        runAt("1 January 2024", () -> {
+            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(create4IProgressive() //
+                    .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
+                    .currencyCode("USD"));
+
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2024", 100.0, 7.0, 6,
+                    null);
+            loanIdRef.set(loanId);
+
+            disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            logLoanDetails(loanDetails);
+
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2024", 16.43, 0.0, 0.0, 0.58);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 2, "01 March 2024", 16.52, 0.0, 0.0, 0.49);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 3, "01 April 2024", 16.62, 0.0, 0.0, 0.39);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 4, "01 May 2024", 16.72, 0.0, 0.0, 0.29);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 5, "01 June 2024", 16.81, 0.0, 0.0, 0.20);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 6, "01 July 2024", 16.90, 0.0, 0.0, 0.10);
+
+        });
+        runAt("10 July 2024", () -> {
+            Long loanId = loanIdRef.get();
+
+            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+
+            // create charge
+            PostChargesResponse chargeResult = createCharge(10.0);
+            Assertions.assertNotNull(chargeResult);
+            Long chargeId = chargeResult.getResourceId();
+            Assertions.assertNotNull(chargeId);
+
+            // add charge after maturity
+            PostLoansLoanIdChargesResponse loanChargeResult = addLoanCharge(loanId, chargeId, "15 July 2024", 10.0);
+            Assertions.assertNotNull(loanChargeResult.getResourceId());
+
+            // verify N+1 installment in schedule
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            logLoanDetails(loanDetails);
+
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2024", 16.43, 0.0, 0.0, 0.58);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 2, "01 March 2024", 16.43, 0.0, 0.0, 0.58);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 3, "01 April 2024", 16.43, 0.0, 0.0, 0.58);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 4, "01 May 2024", 16.43, 0.0, 0.0, 0.58);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 5, "01 June 2024", 16.43, 0.0, 0.0, 0.58);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 6, "01 July 2024", 17.85, 0.0, 0.0, 0.58);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 7, "15 July 2024", 0.0, 10.0, 0.0, 0.0);
+
+            Assertions.assertNotNull(loanDetails.getStatus());
+            Assertions.assertEquals(300, loanDetails.getStatus().getId());
+        });
+        runAt("15 July 2024", () -> {
+            Long loanId = loanIdRef.get();
+
+            loanTransactionHelper.makeLoanRepayment("15 July 2024", 113.48F, loanId.intValue());
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            logLoanDetails(loanDetails);
+
+            validateFullyPaidRepaymentPeriod(loanDetails, 1, "01 February 2024", 16.43, 0.0, 0.0, 0.58, 17.01);
+            validateFullyPaidRepaymentPeriod(loanDetails, 2, "01 March 2024", 16.43, 0.0, 0.0, 0.58, 17.01);
+            validateFullyPaidRepaymentPeriod(loanDetails, 3, "01 April 2024", 16.43, 0.0, 0.0, 0.58, 17.01);
+            validateFullyPaidRepaymentPeriod(loanDetails, 4, "01 May 2024", 16.43, 0.0, 0.0, 0.58, 17.01);
+            validateFullyPaidRepaymentPeriod(loanDetails, 5, "01 June 2024", 16.43, 0.0, 0.0, 0.58, 17.01);
+            validateFullyPaidRepaymentPeriod(loanDetails, 6, "01 July 2024", 17.85, 0.0, 0.0, 0.58, 18.43);
+            validateFullyPaidRepaymentPeriod(loanDetails, 7, "15 July 2024", 0.0, 10.0, 0.0, 0.0);
+
+            Assertions.assertNotNull(loanDetails.getStatus());
+            Assertions.assertEquals(600, loanDetails.getStatus().getId());
+        });
+        runAt("16 July 2024", () -> {
+            Long loanId = loanIdRef.get();
+
+            // create charge
+            PostChargesResponse chargeResult = createCharge(10.0);
+            Assertions.assertNotNull(chargeResult);
+            Long chargeId = chargeResult.getResourceId();
+            Assertions.assertNotNull(chargeId);
+
+            // add charge after maturity
+            PostLoansLoanIdChargesResponse loanChargeResult = addLoanCharge(loanId, chargeId, "20 July 2024", 15.0);
+            Assertions.assertNotNull(loanChargeResult.getResourceId());
+
+            // verify N+1 installment in schedule
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            logLoanDetails(loanDetails);
+
+            validateFullyPaidRepaymentPeriod(loanDetails, 1, "01 February 2024", 16.43, 0.0, 0.0, 0.58, 17.01);
+            validateFullyPaidRepaymentPeriod(loanDetails, 2, "01 March 2024", 16.43, 0.0, 0.0, 0.58, 17.01);
+            validateFullyPaidRepaymentPeriod(loanDetails, 3, "01 April 2024", 16.43, 0.0, 0.0, 0.58, 17.01);
+            validateFullyPaidRepaymentPeriod(loanDetails, 4, "01 May 2024", 16.43, 0.0, 0.0, 0.58, 17.01);
+            validateFullyPaidRepaymentPeriod(loanDetails, 5, "01 June 2024", 16.43, 0.0, 0.0, 0.58, 17.01);
+            validateFullyPaidRepaymentPeriod(loanDetails, 6, "01 July 2024", 17.85, 0.0, 0.0, 0.58, 18.43);
+            validateRepaymentPeriod(loanDetails, 7, LocalDate.of(2024, 7, 20), 0.0, 0.0, 0.0, 25.0, 10.0, 15.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0);
+
+            Assertions.assertNotNull(loanDetails.getStatus());
+            Assertions.assertEquals(300, loanDetails.getStatus().getId());
+        });
+        runAt("20 July 2024", () -> {
+            Long loanId = loanIdRef.get();
+
+            loanTransactionHelper.makeLoanRepayment("20 July 2024", 15.0F, loanId.intValue());
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            logLoanDetails(loanDetails);
+
+            validateFullyPaidRepaymentPeriod(loanDetails, 1, "01 February 2024", 16.43, 0.0, 0.0, 0.58, 17.01);
+            validateFullyPaidRepaymentPeriod(loanDetails, 2, "01 March 2024", 16.43, 0.0, 0.0, 0.58, 17.01);
+            validateFullyPaidRepaymentPeriod(loanDetails, 3, "01 April 2024", 16.43, 0.0, 0.0, 0.58, 17.01);
+            validateFullyPaidRepaymentPeriod(loanDetails, 4, "01 May 2024", 16.43, 0.0, 0.0, 0.58, 17.01);
+            validateFullyPaidRepaymentPeriod(loanDetails, 5, "01 June 2024", 16.43, 0.0, 0.0, 0.58, 17.01);
+            validateFullyPaidRepaymentPeriod(loanDetails, 6, "01 July 2024", 17.85, 0.0, 0.0, 0.58, 18.43);
+            validateFullyPaidRepaymentPeriod(loanDetails, 7, "20 July 2024", 0.0, 25.0, 0.0, 0.0);
+
+            Assertions.assertNotNull(loanDetails.getStatus());
+            Assertions.assertEquals(600, loanDetails.getStatus().getId());
         });
     }
 
