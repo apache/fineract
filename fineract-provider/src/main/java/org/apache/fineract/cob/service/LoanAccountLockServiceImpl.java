@@ -50,6 +50,12 @@ public class LoanAccountLockServiceImpl implements LoanAccountLockService {
     }
 
     @Override
+    public boolean isLockOverrulable(Long loanId) {
+        return loanAccountLockRepository.existsByLoanIdAndLockOwnerAndErrorIsNotNull(loanId, LockOwner.LOAN_COB_CHUNK_PROCESSING) //
+                || loanAccountLockRepository.existsByLoanIdAndLockOwnerAndErrorIsNotNull(loanId, LockOwner.LOAN_INLINE_COB_PROCESSING);
+    }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void updateCobAndRemoveLocks() {
         loanAccountLockRepository.updateLoanFromAccountLocks();

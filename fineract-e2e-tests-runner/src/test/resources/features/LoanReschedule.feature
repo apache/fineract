@@ -659,7 +659,30 @@ Feature: LoanReschedule
     Then Admin checks that last closed business date of loan is "09 January 2024"
 
   @TestRailId:C3048 @AdvancedPaymentAllocation
-  Scenario: Verify that in case of Loan is hard locked for COB execution, BatchAPI request of Loan reschedule creation and approval will result a 409 error and a LOAN_LOCKED_BY_COB error message
+  Scenario: Verify that in case of Loan is hard locked for COB execution without error message, BatchAPI request of Loan reschedule creation and approval will result a 409 error and a LOAN_LOCKED_BY_COB error message
+    When Admin sets the business date to "01 January 2024"
+    When Admin creates a client with random data
+    When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2024   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "1000" amount and expected disbursement date on "01 January 2024"
+    When Admin successfully disburse the loan on "01 January 2024" with "1000" EUR transaction amount
+    When Admin sets the business date to "02 January 2024"
+    When Admin runs inline COB job for Loan
+    When Admin sets the business date to "10 January 2024"
+    When Admin places a lock on loan account WITHOUT an error message
+    When Admin creates new user with "NO_BYPASS_AUTOTEST" username, "NO_BYPASS_AUTOTEST_ROLE" role name and given permissions:
+      | APPROVE_RESCHEDULELOAN |
+      | CREATE_RESCHEDULELOAN  |
+      | READ_RESCHEDULELOAN    |
+      | REJECT_RESCHEDULELOAN  |
+    When Batch API call with created user and the following data results a 409 error and a "LOAN_LOCKED_BY_COB" error message:
+      | rescheduleFromDate | submittedOnDate | adjustedDueDate | approvedOnDate  | enclosingTransaction |
+      | 16 January 2024    | 10 January 2024 | 31 January 2024 | 10 January 2024 | true                 |
+
+  @TestRailId:C3049 @AdvancedPaymentAllocation
+  Scenario: Verify that in case of Loan is hard locked for COB execution with error message, BatchAPI request of Loan reschedule creation and approval will result a 200 statuscode without error message
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
@@ -677,6 +700,6 @@ Feature: LoanReschedule
       | CREATE_RESCHEDULELOAN  |
       | READ_RESCHEDULELOAN    |
       | REJECT_RESCHEDULELOAN  |
-    When Batch API call with created user and the following data results a 409 error and a "LOAN_LOCKED_BY_COB" error message:
+    When Batch API call with created user and the following data results a 200 statuscode WITHOUT error message:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate | approvedOnDate  | enclosingTransaction |
       | 16 January 2024    | 10 January 2024 | 31 January 2024 | 10 January 2024 | true                 |

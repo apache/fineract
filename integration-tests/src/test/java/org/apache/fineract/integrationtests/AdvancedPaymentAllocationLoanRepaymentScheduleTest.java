@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -80,6 +81,9 @@ import org.apache.fineract.integrationtests.common.accounting.PeriodicAccrualAcc
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
+import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
+import org.apache.fineract.integrationtests.useradministration.roles.RolesHelper;
+import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.EarlyPaymentLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.FineractStyleLoanRepaymentScheduleTransactionProcessor;
@@ -5707,6 +5711,73 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             assertTrue(loanDetails.getStatus().getClosedObligationsMet());
         });
 
+    }
+
+    @Test
+    public void uc152() {
+        AtomicLong createdLoanId = new AtomicLong();
+        runAt("01 January 2024", () -> {
+            Long clientId = client.getClientId();
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                    .interestRateFrequencyType(YEARS).numberOfRepayments(4)//
+                    .maxInterestRatePerPeriod((double) 0)//
+                    .repaymentEvery(1)//
+                    .repaymentFrequencyType(1L)//
+                    .allowPartialPeriodInterestCalcualtion(false)//
+                    .multiDisburseLoan(false)//
+                    .disallowExpectedDisbursements(null)//
+                    .allowApprovedDisbursedAmountsOverApplied(null)//
+                    .overAppliedCalculationType(null)//
+                    .overAppliedNumber(null)//
+                    .installmentAmountInMultiplesOf(null)//
+                    .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString()) //
+            ;//
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), "01 January 2024", 400.0,
+                    6);
+
+            applicationRequest = applicationRequest.interestCalculationPeriodType(DAYS).interestRatePerPeriod(BigDecimal.ZERO)
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY);
+
+            PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            createdLoanId.set(loanResponse.getLoanId());
+
+            loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(400.0)).dateFormat(DATETIME_PATTERN)
+                            .approvedOnDate("01 January 2024").locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("01 January 2024").dateFormat(DATETIME_PATTERN)
+                            .transactionAmount(BigDecimal.valueOf(400.0)).locale("en"));
+        });
+
+        runAt("02 January 2024", () -> {
+            executeInlineCOB(createdLoanId.get());
+
+            final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
+            assertEquals(LocalDate.of(2024, 1, 1), loanDetails.getLastClosedBusinessDate());
+            final String errorMessage = Utils.uniqueRandomStringGenerator("error.", 40);
+            placeHardLockOnLoan(createdLoanId.get(), errorMessage);
+        });
+
+        runAt("03 January 2024", () -> {
+            Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
+            Map<String, Boolean> permissionMap = Map.of("REPAYMENT_LOAN", true);
+            RolesHelper.addPermissionsToRole(requestSpec, responseSpec, roleId, permissionMap);
+            final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
+
+            final String operatorUser = Utils.uniqueRandomStringGenerator("user", 8);
+            UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, operatorUser, UserHelper.SIMPLE_USER_PASSWORD,
+                    "resourceId");
+
+            loanTransactionHelper.makeLoanRepayment(
+                    createdLoanId.get(), new PostLoansLoanIdTransactionsRequest().transactionDate("03 January 2024")
+                            .dateFormat("dd MMMM yyyy").locale("en").transactionAmount(200.0),
+                    operatorUser, UserHelper.SIMPLE_USER_PASSWORD);
+
+            final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
+            assertEquals(LocalDate.of(2024, 1, 2), loanDetails.getLastClosedBusinessDate());
+        });
     }
 
     private Long applyAndApproveLoanProgressiveAdvancedPaymentAllocationStrategyMonthlyRepayments(Long clientId, Long loanProductId,

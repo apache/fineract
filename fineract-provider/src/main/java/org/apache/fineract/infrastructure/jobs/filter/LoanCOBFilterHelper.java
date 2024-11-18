@@ -186,6 +186,14 @@ public class LoanCOBFilterHelper implements InitializingBean {
         return loanIds.stream().anyMatch(loanAccountLockService::isLoanHardLocked);
     }
 
+    private boolean isLockOverrulable(Long... loanIds) {
+        return isLockOverrulable(Arrays.asList(loanIds));
+    }
+
+    private boolean isLockOverrulable(List<Long> loanIds) {
+        return loanIds.stream().anyMatch(loanAccountLockService::isLockOverrulable);
+    }
+
     public boolean isLoanBehind(List<Long> loanIds) {
         List<LoanIdAndLastClosedBusinessDate> loanIdAndLastClosedBusinessDates = new ArrayList<>();
         List<List<Long>> partitions = Lists.partition(loanIds, fineractProperties.getQuery().getInClauseParameterSizeLimit());
@@ -217,7 +225,7 @@ public class LoanCOBFilterHelper implements InitializingBean {
             // check the body for Loan ID
             Long loanId = getTopLevelLoanIdFromBatchRequest(batchRequest);
             if (loanId != null) {
-                if (isLoanHardLocked(loanId)) {
+                if (isLoanHardLocked(loanId) && !isLockOverrulable(loanId)) {
                     throw new LoanIdsHardLockedException(loanId);
                 } else {
                     loanIds.add(loanId);
@@ -240,7 +248,7 @@ public class LoanCOBFilterHelper implements InitializingBean {
 
     private List<Long> getLoanIdsFromApi(String pathInfo) {
         List<Long> loanIds = getLoanIdList(pathInfo);
-        if (isLoanHardLocked(loanIds)) {
+        if (isLoanHardLocked(loanIds) && !isLockOverrulable(loanIds)) {
             throw new LoanIdsHardLockedException(loanIds.get(0));
         } else {
             return loanIds;

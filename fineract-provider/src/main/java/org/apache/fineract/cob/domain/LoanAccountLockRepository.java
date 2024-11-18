@@ -36,6 +36,8 @@ public interface LoanAccountLockRepository
 
     boolean existsByLoanIdAndLockOwner(Long loanId, LockOwner lockOwner);
 
+    boolean existsByLoanIdAndLockOwnerAndErrorIsNotNull(Long loanId, LockOwner lockOwner);
+
     @Query("""
             delete from LoanAccountLock lck where lck.lockPlacedOnCobBusinessDate is not null and lck.error is not null and
             lck.lockOwner in (org.apache.fineract.cob.domain.LockOwner.LOAN_COB_CHUNK_PROCESSING,org.apache.fineract.cob.domain.LockOwner.LOAN_INLINE_COB_PROCESSING)

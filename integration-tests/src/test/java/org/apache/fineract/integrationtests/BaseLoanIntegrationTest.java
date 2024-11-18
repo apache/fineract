@@ -600,6 +600,10 @@ public abstract class BaseLoanIntegrationTest {
         loanAccountLockHelper.placeSoftLockOnLoanAccount(loanId.intValue(), "LOAN_COB_CHUNK_PROCESSING");
     }
 
+    protected void placeHardLockOnLoan(Long loanId, String error) {
+        loanAccountLockHelper.placeSoftLockOnLoanAccount(loanId.intValue(), "LOAN_COB_CHUNK_PROCESSING", error);
+    }
+
     protected void executeInlineCOB(Long loanId) {
         inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
     }

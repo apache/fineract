@@ -555,6 +555,44 @@ public class BatchApiStepDef extends AbstractStepDef {
         log.debug("ERROR MESSAGE: {}", errorMessageActual);
     }
 
+    @When("Batch API call with created user and the following data results a {int} statuscode WITHOUT error message:")
+    public void runBatchApiCreateAndApproveLoanRescheduleWithGivenUserLockedByCobWithoutError(int httpCodeExpected, DataTable table)
+            throws IOException {
+        String idempotencyKey = UUID.randomUUID().toString();
+        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        Long loanId = loanResponse.body().getLoanId();
+
+        List<List<String>> data = table.asLists();
+        List<String> transferData = data.get(1);
+        String fromDateStr = transferData.get(0);
+        String submittedOnDate = transferData.get(1);
+        String toDateStr = transferData.get(2);
+        String approvedOnDate = transferData.get(3);
+        String enclosingTransaction = transferData.get(4);
+
+        Map<String, String> headerMap = new HashMap<>();
+
+        Response<PostUsersResponse> createUserResponse = testContext().get(TestContextKey.CREATED_SIMPLE_USER_RESPONSE);
+        Long createdUserId = createUserResponse.body().getResourceId();
+        Response<GetUsersUserIdResponse> user = usersApi.retrieveOne31(createdUserId).execute();
+        ErrorHelper.checkSuccessfulApiCall(user);
+        String authorizationString = user.body().getUsername() + ":" + PWD_USER_WITH_ROLE;
+        Base64 base64 = new Base64();
+        headerMap.put("Authorization",
+                "Basic " + new String(base64.encode(authorizationString.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
+        List<BatchRequest> requestList = new ArrayList<>();
+        requestList.add(createLoanReschedule(1L, loanId, fromDateStr, toDateStr, submittedOnDate, idempotencyKey, null));
+        requestList.add(approveLoanReschedule(2L, idempotencyKey, approvedOnDate, 1L));
+
+        Boolean isEnclosingTransaction = Boolean.valueOf(enclosingTransaction);
+        Response<List<BatchResponse>> batchResponseList = batchApiApi.handleBatchRequests(requestList, isEnclosingTransaction, headerMap)
+                .execute();
+        BatchResponse lastBatchResponse = batchResponseList.body().get(batchResponseList.body().size() - 1);
+        assertThat(httpCodeExpected).isEqualTo(lastBatchResponse.getStatusCode());
+        // No error
+        assertThat(batchResponseList.errorBody()).isEqualTo(null);
+    }
+
     @When("Batch API call with steps: queryDatatable, updateDatatable runs, with empty queryDatatable response")
     public void runBatchApiQueryDatatableUpdateDatatable() throws IOException {
         String idempotencyKey = UUID.randomUUID().toString();
