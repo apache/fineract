@@ -10,7 +10,7 @@ jobs:
 
     services:
         mariad:
-            image: mysql:8.4
+            image: mysql:9.1
             ports:
                 - 3306:3306
             env:
