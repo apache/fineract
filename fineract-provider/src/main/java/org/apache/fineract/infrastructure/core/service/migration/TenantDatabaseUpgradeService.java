@@ -64,6 +64,10 @@ public class TenantDatabaseUpgradeService implements InitializingBean {
     // DO NOT REMOVE! Required for liquibase custom task initialization
     private final List<CustomTaskChange> customTaskChangesForDependencyInjection;
 
+    static {
+        System.setProperty("liquibase.analytics.enabled", "false");
+    }
+
     @Override
     public void afterPropertiesSet() throws Exception {
         if (notLiquibaseOnlyMode()) {
@@ -110,6 +114,7 @@ public class TenantDatabaseUpgradeService implements InitializingBean {
         log.info("- fineract.tenant.description: {}", tenant.getDescription());
         log.info("- fineract.tenant.identifier: {}", tenant.getIdentifier());
         log.info("- fineract.tenant.name: {}", tenant.getName());
+        log.info("- liquibase.analytics.enabled: {}", System.getProperty("liquibase.analytics.enabled"));
 
         String readOnlyUsername = tenant.getReadOnlyUsername();
         if (isNotBlank(readOnlyUsername)) {
