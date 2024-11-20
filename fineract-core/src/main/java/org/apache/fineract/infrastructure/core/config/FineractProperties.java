@@ -279,6 +279,9 @@ public class FineractProperties {
 
         private int defaultTaskExecutorCorePoolSize;
         private int defaultTaskExecutorMaxPoolSize;
+        private int tenantUpgradeTaskExecutorCorePoolSize;
+        private int tenantUpgradeTaskExecutorMaxPoolSize;
+        private int tenantUpgradeTaskExecutorQueueCapacity;
     }
 
     @Getter

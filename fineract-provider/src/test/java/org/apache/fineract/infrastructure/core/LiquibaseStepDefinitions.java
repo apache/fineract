@@ -104,6 +104,8 @@ public class LiquibaseStepDefinitions implements En {
                 tenantDatabaseUpgradeService.afterPropertiesSet();
             } catch (SchemaUpgradeNeededException e) {
                 executionException = e;
+            } catch (RuntimeException e) {
+                executionException = (SchemaUpgradeNeededException) e.getCause().getCause();
             }
         });
 
