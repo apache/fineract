@@ -198,6 +198,14 @@ public class Money implements Comparable<Money> {
         return new Money(this.currencyCode, this.currencyDigitsAfterDecimal, this.amount.stripTrailingZeros(), this.inMultiplesOf, this.mc);
     }
 
+    public Money copy(final BigDecimal amount) {
+        return new Money(this.currencyCode, this.currencyDigitsAfterDecimal, amount.stripTrailingZeros(), this.inMultiplesOf, this.mc);
+    }
+
+    public Money copy(final double amount) {
+        return copy(BigDecimal.valueOf(amount));
+    }
+
     public Money plus(final Iterable<? extends Money> moniesToAdd) {
         BigDecimal total = this.amount;
         for (final Money moneyProvider : moniesToAdd) {
@@ -311,6 +319,14 @@ public class Money implements Comparable<Money> {
         }
         final BigDecimal newAmount = this.amount.divide(BigDecimal.valueOf(valueToDivideBy), mc);
         return Money.of(monetaryCurrency(), newAmount, mc);
+    }
+
+    public Money dividedBy(final long valueToDivideBy) {
+        if (valueToDivideBy == 1) {
+            return this;
+        }
+        final BigDecimal newAmount = this.amount.divide(BigDecimal.valueOf(valueToDivideBy), getMc());
+        return Money.of(monetaryCurrency(), newAmount, getMc());
     }
 
     public Money multipliedBy(final BigDecimal valueToMultiplyBy) {
