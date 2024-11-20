@@ -127,7 +127,6 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanCollateralManagementData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanSummaryData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.data.PaidInAdvanceData;
@@ -150,6 +149,8 @@ import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanTermV
 import org.apache.fineract.portfolio.loanaccount.service.GLIMAccountInfoReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanSummaryDataProvider;
+import org.apache.fineract.portfolio.loanaccount.service.LoanSummaryProviderDelegate;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrategyData;
@@ -289,6 +290,7 @@ public class LoansApiResource {
     private final LoanSummaryBalancesRepository loanSummaryBalancesRepository;
     private final ClientReadPlatformService clientReadPlatformService;
     private final LoanTermVariationsRepository loanTermVariationsRepository;
+    private final LoanSummaryProviderDelegate loanSummaryProviderDelegate;
 
     /*
      * This template API is used for loan approval, ideally this should be invoked on loan that are pending for
@@ -1115,9 +1117,12 @@ public class LoansApiResource {
 
         // updating summary with transaction amounts summary
         if (loanBasicDetails.getSummary() != null) {
-            loanBasicDetails.setSummary(LoanSummaryData.withTransactionAmountsSummary(loanBasicDetails.getSummary(), repaymentSchedule,
-                    loanSummaryBalancesRepository.retrieveLoanSummaryBalancesByTransactionType(loanBasicDetails.getId(),
-                            LoanApiConstants.LOAN_SUMMARY_TRANSACTION_TYPES)));
+            LoanSummaryDataProvider loanSummaryDataProvider = loanSummaryProviderDelegate
+                    .resolveLoanSummaryDataProvider(loanBasicDetails.getTransactionProcessingStrategyCode());
+            loanBasicDetails.setSummary(
+                    loanSummaryDataProvider.withTransactionAmountsSummary(loanBasicDetails.getId(), loanBasicDetails.getSummary(),
+                            repaymentSchedule, loanSummaryBalancesRepository.retrieveLoanSummaryBalancesByTransactionType(
+                                    loanBasicDetails.getId(), LoanApiConstants.LOAN_SUMMARY_TRANSACTION_TYPES)));
         }
 
         final LoanAccountData loanAccount = loanBasicDetails.associationsAndTemplate(repaymentSchedule, loanRepayments, charges,

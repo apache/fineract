@@ -35,11 +35,13 @@ import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanSummaryData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummaryBalancesRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanSummaryDataProvider;
+import org.apache.fineract.portfolio.loanaccount.service.LoanSummaryProviderDelegate;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -52,6 +54,8 @@ public class LoanBusinessEventSerializer implements BusinessEventSerializer {
     private final DelinquencyReadPlatformService delinquencyReadPlatformService;
     private final LoanInstallmentLevelDelinquencyEventProducer installmentLevelDelinquencyEventProducer;
     private final LoanSummaryBalancesRepository loanSummaryBalancesRepository;
+    @Lazy
+    private final LoanSummaryProviderDelegate loanSummaryProviderDelegate;
 
     @Override
     public <T> boolean canSerialize(BusinessEvent<T> event) {
@@ -74,12 +78,15 @@ public class LoanBusinessEventSerializer implements BusinessEventSerializer {
         CollectionData delinquentData = delinquencyReadPlatformService.calculateLoanCollectionData(loanId);
         data.setDelinquent(delinquentData);
 
+        LoanSummaryDataProvider loanSummaryDataProvider = loanSummaryProviderDelegate
+                .resolveLoanSummaryDataProvider(data.getTransactionProcessingStrategyCode());
+
         if (data.getSummary() != null) {
-            data.setSummary(LoanSummaryData.withTransactionAmountsSummary(data.getSummary(), data.getRepaymentSchedule(),
-                    loanSummaryBalancesRepository.retrieveLoanSummaryBalancesByTransactionType(loanId,
+            data.setSummary(loanSummaryDataProvider.withTransactionAmountsSummary(event.get(), data.getSummary(),
+                    data.getRepaymentSchedule(), loanSummaryBalancesRepository.retrieveLoanSummaryBalancesByTransactionType(loanId,
                             LoanApiConstants.LOAN_SUMMARY_TRANSACTION_TYPES)));
         } else {
-            data.setSummary(LoanSummaryData.withOnlyCurrencyData(data.getCurrency()));
+            data.setSummary(loanSummaryDataProvider.withOnlyCurrencyData(data.getCurrency()));
         }
 
         List<LoanInstallmentDelinquencyBucketDataV1> installmentsDelinquencyData = installmentLevelDelinquencyEventProducer
