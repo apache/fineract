@@ -152,11 +152,9 @@ public final class LoanTransactionValidator {
             validateLoanClientIsActive(loan);
             validateLoanGroupIsActive(loan);
 
-            if (loan.isChargedOff() && DateUtils.isBefore(actualDisbursementDate, loan.getChargedOffOnDate())) {
-                throw new GeneralPlatformDomainRuleException("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date", "Loan: "
-                        + loan.getId()
-                        + " backdated transaction is not allowed. Transaction date cannot be earlier than the charge-off date of the loan",
-                        loan.getId());
+            if (loan.isChargedOff()) {
+                throw new GeneralPlatformDomainRuleException("error.msg.loan.disbursal.not.allowed.on.charged.off",
+                        "Loan: " + loan.getId() + " disbursement is not allowed on charged-off loan.");
             }
 
             boolean isSingleDisburseLoan = !loan.getLoanProduct().isMultiDisburseLoan();
