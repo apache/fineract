@@ -29,11 +29,8 @@ import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.LoanRescheduleRequestHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanRescheduleRequestTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-@ExtendWith(LoanTestLifecycleExtension.class)
 public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
 
     public static final BigDecimal DOWN_PAYMENT_PERCENTAGE_20 = new BigDecimal(20);

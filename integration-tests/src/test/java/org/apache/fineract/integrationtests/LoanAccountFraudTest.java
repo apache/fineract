@@ -32,13 +32,10 @@ import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 @Slf4j
-@ExtendWith(LoanTestLifecycleExtension.class)
 public class LoanAccountFraudTest extends BaseLoanIntegrationTest {
 
     private static final double AMOUNT = 100.0;

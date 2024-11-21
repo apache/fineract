@@ -29,11 +29,8 @@ import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-@ExtendWith(LoanTestLifecycleExtension.class)
 public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanIntegrationTest {
 
     public static final BigDecimal DOWN_PAYMENT_PERCENTAGE = new BigDecimal(25);

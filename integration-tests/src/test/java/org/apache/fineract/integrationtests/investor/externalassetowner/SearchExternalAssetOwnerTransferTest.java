@@ -33,12 +33,9 @@ import org.apache.fineract.client.models.PagedRequestExternalAssetOwnerSearchReq
 import org.apache.fineract.client.models.PostInitiateTransferResponse;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 @Slf4j
-@ExtendWith(LoanTestLifecycleExtension.class)
 public class SearchExternalAssetOwnerTransferTest extends ExternalAssetOwnerTransferTest {
 
     @Test
