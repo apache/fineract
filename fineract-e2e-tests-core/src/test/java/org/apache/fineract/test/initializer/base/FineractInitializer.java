@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.test.helper.BusinessDateHelper;
-import org.apache.fineract.test.helper.WorkFlowJobHelper;
 import org.apache.fineract.test.initializer.global.FineractGlobalInitializerStep;
 import org.apache.fineract.test.initializer.scenario.FineractScenarioInitializerStep;
 import org.apache.fineract.test.initializer.suite.FineractSuiteInitializerStep;
@@ -39,7 +38,6 @@ public class FineractInitializer implements InitializingBean {
     private final List<FineractSuiteInitializerStep> suiteInitializerSteps;
     private final List<FineractScenarioInitializerStep> scenarioInitializerSteps;
     private final BusinessDateHelper businessDateHelper;
-    private final WorkFlowJobHelper workFlowJobHelper;
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -63,7 +61,6 @@ public class FineractInitializer implements InitializingBean {
         for (FineractGlobalInitializerStep initializerStep : globalInitializerSteps) {
             initializerStep.initialize();
         }
-
         businessDateHelper.setBusinessDateToday();
     }
 
@@ -71,16 +68,13 @@ public class FineractInitializer implements InitializingBean {
         for (FineractSuiteInitializerStep initializerStep : suiteInitializerSteps) {
             initializerStep.initializeForSuite();
         }
-
         businessDateHelper.setBusinessDateToday();
-        workFlowJobHelper.saveOriginalCOBWorkflowJobBusinessStepList();
     }
 
     public void setupDefaultsForScenario() throws Exception {
         for (FineractScenarioInitializerStep scenarioInitializerStep : scenarioInitializerSteps) {
             scenarioInitializerStep.initializeForScenario();
         }
-
         businessDateHelper.setBusinessDateToday();
     }
 
@@ -88,7 +82,6 @@ public class FineractInitializer implements InitializingBean {
         for (FineractSuiteInitializerStep initializerStep : suiteInitializerSteps) {
             initializerStep.resetAfterSuite();
         }
-
         businessDateHelper.setBusinessDateToday();
     }
 }

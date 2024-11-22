@@ -1871,7 +1871,6 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
 
   @TestRailId:C3226
   Scenario: Verify interest recalculation in case of overdue installments: UC1 - 1st installment overdue, interest recalculation: daily, till preclose
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -1914,11 +1913,9 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 01 February 2024 | Accrual          | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 February 2024 | Accrual          | 0.24   | 0.0       | 0.24     | 0.0  | 0.0       | 0.0          | false    | false    |
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
 
   @TestRailId:C3227
   Scenario: Verify interest recalculation in case of overdue installments: UC2 - 1st installment overdue, interest recalculation: daily, till rest frequency date
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -1961,11 +1958,9 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 01 February 2024 | Accrual          | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 February 2024 | Accrual          | 0.24   | 0.0       | 0.24     | 0.0  | 0.0       | 0.0          | false    | false    |
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
 
   @TestRailId:C3228
   Scenario: Verify interest recalculation in case of overdue installments: UC3 - 1st installment overdue, interest recalculation: same as repayment period, till preclose
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -2008,11 +2003,9 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 01 February 2024 | Accrual          | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 February 2024 | Accrual          | 0.26   | 0.0       | 0.26     | 0.0  | 0.0       | 0.0          | false    | false    |
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
 
   @TestRailId:C3229
   Scenario: Verify interest recalculation in case of overdue installments: UC4 - 1st installment overdue, interest recalculation: same as repayment period, till rest frequency date
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -2055,11 +2048,9 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 01 February 2024 | Accrual          | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 February 2024 | Accrual          | 0.26   | 0.0       | 0.26     | 0.0  | 0.0       | 0.0          | false    | false    |
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
 
   @TestRailId:C3230
   Scenario: Verify interest recalculation in case of overdue installments: UC5 - 1st and 2nd installment overdue, interest recalculation: daily, till preclose
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -2104,11 +2095,9 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 01 March 2024    | Accrual          | 0.49   | 0.0       | 0.49     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 March 2024    | Accrual          | 0.09   | 0.0       | 0.09     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 March 2024    | Accrual          | 0.12   | 0.0       | 0.12     | 0.0  | 0.0       | 0.0          | false    | false    |
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
 
   @TestRailId:C3231
   Scenario: Verify interest recalculation in case of overdue installments: UC6 - 1st and 2nd installment overdue, interest recalculation: daily, till rest frequency date
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -2153,11 +2142,9 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 01 March 2024    | Accrual          | 0.49   | 0.0       | 0.49     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 March 2024    | Accrual          | 0.09   | 0.0       | 0.09     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 March 2024    | Accrual          | 0.12   | 0.0       | 0.12     | 0.0  | 0.0       | 0.0          | false    | false    |
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
 
   @TestRailId:C3232
   Scenario: Verify interest recalculation in case of overdue installments: UC7 - 1st and 2nd installment overdue, interest recalculation: same as repayment period, till preclose
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -2202,11 +2189,9 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 01 March 2024    | Accrual          | 0.49   | 0.0       | 0.49     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 March 2024    | Accrual          | 0.09   | 0.0       | 0.09     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 March 2024    | Accrual          | 0.15   | 0.0       | 0.15     | 0.0  | 0.0       | 0.0          | false    | false    |
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
 
   @TestRailId:C3233
   Scenario: Verify interest recalculation in case of overdue installments: UC8 - 1st and 2nd installment overdue, interest recalculation: same as repayment period, till rest frequency date
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -2251,11 +2236,9 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 01 March 2024    | Accrual          | 0.49   | 0.0       | 0.49     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 March 2024    | Accrual          | 0.09   | 0.0       | 0.09     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 March 2024    | Accrual          | 0.15   | 0.0       | 0.15     | 0.0  | 0.0       | 0.0          | false    | false    |
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
 
   @TestRailId:C3234
   Scenario: Verify interest recalculation in case of overdue installments: UC9 - 1st installment paid on due date, 2nd installment overdue, interest recalculation: daily, till preclose
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -2319,11 +2302,9 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 01 February 2024 | Accrual          | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 March 2024    | Accrual          | 0.49   | 0.0       | 0.49     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 March 2024    | Accrual          | 0.11   | 0.0       | 0.11     | 0.0  | 0.0       | 0.0          | false    | false    |
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
 
   @TestRailId:C3235
   Scenario: Verify interest recalculation in case of overdue installments: UC10 - 1st installment paid on due date, 2nd installment overdue, interest recalculation: daily, till rest frequency date
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -2387,11 +2368,9 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 01 February 2024 | Accrual          | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 March 2024    | Accrual          | 0.49   | 0.0       | 0.49     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 March 2024    | Accrual          | 0.11   | 0.0       | 0.11     | 0.0  | 0.0       | 0.0          | false    | false    |
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
 
   @TestRailId:C3236
   Scenario: Verify interest recalculation in case of overdue installments: UC11 - 1st installment paid on due date, 2nd installment overdue, interest recalculation: same as repayment period, till preclose
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -2455,11 +2434,9 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 01 February 2024 | Accrual          | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 March 2024    | Accrual          | 0.49   | 0.0       | 0.49     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 March 2024    | Accrual          | 0.13   | 0.0       | 0.13     | 0.0  | 0.0       | 0.0          | false    | false    |
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
 
   @TestRailId:C3237
   Scenario: Verify interest recalculation in case of overdue installments: UC12 - 1st installment paid on due date, 2nd installment overdue, interest recalculation: same as repayment period, till rest frequency date
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -2523,11 +2500,9 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 01 February 2024 | Accrual          | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 March 2024    | Accrual          | 0.49   | 0.0       | 0.49     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 March 2024    | Accrual          | 0.13   | 0.0       | 0.13     | 0.0  | 0.0       | 0.0          | false    | false    |
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
 
   @TestRailId:C3238
   Scenario: Verify interest recalculation in case of overdue installments: UC13 - 1st installment paid on due date, 2nd installment overdue with partial late repayment, interest recalculation: daily, till preclose
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -2612,11 +2587,9 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 01 March 2024    | Accrual          | 0.49   | 0.0       | 0.49     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 05 March 2024    | Repayment        | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 73.57        | false    | false    |
       | 09 March 2024    | Accrual          | 0.11   | 0.0       | 0.11     | 0.0  | 0.0       | 0.0          | false    | false    |
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
 
   @TestRailId:C3239
   Scenario: Verify interest recalculation in case of overdue installments: UC14 - 1st installment paid on due date, 2nd installment overdue with partial late repayment, interest recalculation: daily, till rest frequency date
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -2701,11 +2674,9 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 01 March 2024    | Accrual          | 0.49   | 0.0       | 0.49     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 05 March 2024    | Repayment        | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 73.57        | false    | false    |
       | 09 March 2024    | Accrual          | 0.11   | 0.0       | 0.11     | 0.0  | 0.0       | 0.0          | false    | false    |
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
 
   @TestRailId:C3240
   Scenario: Verify interest recalculation in case of overdue installments: UC15 - 1st installment paid on due date, 2nd installment overdue, interest recalculation: same as repayment period, till preclose
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -2790,11 +2761,9 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 01 March 2024    | Accrual          | 0.49   | 0.0       | 0.49     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 05 March 2024    | Repayment        | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 73.57        | false    | false    |
       | 09 March 2024    | Accrual          | 0.13   | 0.0       | 0.13     | 0.0  | 0.0       | 0.0          | false    | false    |
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
 
   @TestRailId:C3241
   Scenario: Verify interest recalculation in case of overdue installments: UC16 - 1st installment paid on due date, 2nd installment overdue, interest recalculation: same as repayment period, till rest frequency date
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -2879,7 +2848,6 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 01 March 2024    | Accrual          | 0.49   | 0.0       | 0.49     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 05 March 2024    | Repayment        | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 73.57        | false    | false    |
       | 09 March 2024    | Accrual          | 0.13   | 0.0       | 0.13     | 0.0  | 0.0       | 0.0          | false    | false    |
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
 
   @TestRailId:C3244
   Scenario: Verify support of interest rate calculation with frequency Whole term  configured for progressive loan
@@ -3266,7 +3234,6 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
 # TODO unskip and check when PS-2076 and PS-2106 is done
   @Skip @TestRailId:C3251
   Scenario: Verify Interest recalculation - EARLY repayment, adjust NEXT installment - UC1: 360/30, early repayment with amount less then due interest
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin set "LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_TILL_PRECLOSE_PMT_ALLOC_1" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
@@ -3324,12 +3291,10 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 13 January 2024  | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 January 2024  | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 January 2024  | Repayment        | 0.2    | 0.0       | 0.2      | 0.0  | 0.0       | 100.0        | false    | false    |
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
 
 #  TODO unskip and check when PS-2076 and PS-2106 is done
   @Skip @TestRailId:C3252
   Scenario: Verify Interest recalculation - EARLY repayment, adjust NEXT installment - UC2: 360/30, early repayment with amount 1 cent more then due interest
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin set "LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_TILL_PRECLOSE_PMT_ALLOC_1" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
@@ -3387,12 +3352,10 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 13 January 2024  | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 January 2024  | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 January 2024  | Repayment        | 0.27   | 0.01      | 0.26     | 0.0  | 0.0       | 99.99        | false    | false    |
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
 
 #  TODO unskip and check when PS-2076 and PS-2106 is done
   @Skip @TestRailId:C3253
   Scenario: Verify Interest recalculation - EARLY repayment, adjust NEXT installment - UC3: 360/30, early repayment with less than EMI amount
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin set "LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_TILL_PRECLOSE_PMT_ALLOC_1" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
@@ -3450,12 +3413,10 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 13 January 2024  | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 January 2024  | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 January 2024  | Repayment        | 15.0   | 14.74     | 0.26     | 0.0  | 0.0       | 85.26        | false    | false    |
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
 
 #  TODO unskip and check when PS-2076 and PS-2106 is done
   @Skip @TestRailId:C3254
   Scenario: Verify Interest recalculation - EARLY repayment, adjust NEXT installment - UC4: 360/30, early repayment with only 1 cent less than EMI amount
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin set "LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_TILL_PRECLOSE_PMT_ALLOC_1" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
@@ -3511,12 +3472,10 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 13 January 2024  | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 January 2024  | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 January 2024  | Repayment        | 17.0   | 16.74     | 0.26     | 0.0  | 0.0       | 83.26        | false    | false    |
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
 
 #  TODO unskip and check when PS-2076 and PS-2106 is done
   @Skip @TestRailId:C3255
   Scenario: Verify Interest recalculation - EARLY repayment, adjust NEXT installment - UC5: 360/30, multiple early repayments for the same installment
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin set "LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_TILL_PRECLOSE_PMT_ALLOC_1" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
@@ -3578,12 +3537,10 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 13 January 2024  | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 January 2024  | Repayment        | 15.0   | 14.74     | 0.26     | 0.0  | 0.0       | 85.26        | false    | false    |
       | 20 January 2024  | Repayment        | 2.01   | 1.93      | 0.08     | 0.0  | 0.0       | 83.33        | false    | false    |
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
 
 #  TODO unskip and check when PS-2076 and PS-2106 is done
   @Skip @TestRailId:C3256
   Scenario: Verify Interest recalculation - EARLY repayment, adjust NEXT installment - UC6: 360/30, early repayment with exact EMI amount
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin set "LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_TILL_PRECLOSE_PMT_ALLOC_1" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
@@ -3639,12 +3596,10 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 13 January 2024  | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 January 2024  | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 January 2024  | Repayment        | 17.01  | 16.75     | 0.26     | 0.0  | 0.0       | 83.25        | false    | false    |
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
 
 #  TODO unskip and check when PS-2076 and PS-2106 is done
   @Skip @TestRailId:C3257
   Scenario: Verify Interest recalculation - EARLY repayment, adjust NEXT installment - UC7: 360/30, early repayment with twice than EMI amount
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin set "LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_TILL_PRECLOSE_PMT_ALLOC_1" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
@@ -3689,12 +3644,10 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 15 January 2024  | Repayment        | 34.02  | 33.76     | 0.26     | 0.0  | 0.0       | 66.24        | false    | false    |
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
 
 #  TODO unskip and check when PS-2076 and PS-2106 is done
   @Skip @TestRailId:C3258
   Scenario: Verify Interest recalculation - EARLY repayment, adjust NEXT installment - UC8: 360/30, preclose after early repayment
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin set "LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_TILL_PRECLOSE_PMT_ALLOC_1" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
@@ -3744,13 +3697,11 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 15 January 2024  | Repayment        | 17.01  | 16.75     | 0.26     | 0.0  | 0.0       | 83.25        | false    | false    |
       | 20 January 2024  | Repayment        | 83.33  | 83.25     | 0.08     | 0.0  | 0.0       | 0.0          | false    | false    |
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
 
 #  TODO unskip and check when PS-2076 and PS-2106 is done
 #  TODO is it till preclose or tillrestperiod?
   @Skip @TestRailId:C3259
   Scenario: Verify Interest recalculation - EARLY repayment, adjust NEXT installment - UC9: 360/30, interest modification after early repayment
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin set "LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_TILL_PRECLOSE_PMT_ALLOC_1" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
@@ -3800,7 +3751,6 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 15 January 2024  | Repayment        | 17.01  | 16.75     | 0.26     | 0.0  | 0.0       | 83.25        | false    | false    |
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
 
   @TestRailId:C3269
   Scenario: UC1 - Single disbursement, full refund within first installment period
@@ -4383,7 +4333,6 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
 
   @TestRailId:C3288
   Scenario: Verify the recalculated EMI after interest rate change on the repayment schedule
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin set "LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_TILL_PRECLOSE" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
@@ -4404,8 +4353,7 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
     When Admin runs inline COB job for Loan
     When Admin sets the business date to "02 February 2024"
     When Admin runs inline COB job for Loan
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
-    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+        Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
       | 1  | 31   | 01 February 2024 | 01 February 2024 | 83.57           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 17.01 | 0.0        | 0.0  | 0.0         |
@@ -4735,7 +4683,6 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
 
   @TestRailId:C3297
   Scenario: Verify the Loan reschedule - Interest modification - UC1: Interest modification after early payment with Adjustment to NEXT installment
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -4785,8 +4732,7 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
     When Admin runs inline COB job for Loan
     When Admin sets the business date to "20 January 2024"
     When Admin runs inline COB job for Loan
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
-    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+        Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
       | 1  | 31   | 01 February 2024 | 15 January 2024  | 83.25           | 16.75         | 0.26     | 0.0  | 0.0       | 17.01 | 17.01 | 17.01      | 0.0  | 0.0         |
@@ -4807,7 +4753,6 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
 
   @TestRailId:C3298
   Scenario: Verify the Loan reschedule - Interest modification - UC2: Interest modification after early partial payment with Adjustment to NEXT installment
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -4857,8 +4802,7 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
     When Admin runs inline COB job for Loan
     When Admin sets the business date to "20 January 2024"
     When Admin runs inline COB job for Loan
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
-    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+        Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date  | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |            | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
       | 1  | 31   | 01 February 2024 |            | 83.24           | 16.76         | 0.25     | 0.0  | 0.0       | 17.01 | 17.0  | 17.0       | 0.0  | 0.01       |
@@ -4879,7 +4823,6 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
 
   @TestRailId:C3311
   Scenario: Verify the Loan reschedule - Interest modification - UC2: Interest modification after early partial payment with Adjustment to LAST installment
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin set "LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_TILL_PRECLOSE" loan product "DEFAULT" transaction type to "LAST_INSTALLMENT" future installment allocation rule
@@ -4930,8 +4873,7 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
     When Admin runs inline COB job for Loan
     When Admin sets the business date to "20 January 2024"
     When Admin runs inline COB job for Loan
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
-    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+        Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
       | 1  | 31   | 01 February 2024 |                  | 83.64           | 16.36         | 0.44     | 0.0  | 0.0       | 16.8  | 0.0   | 0.0        | 0.0  | 16.8        |
@@ -4953,7 +4895,6 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
 
   @TestRailId:C3299
   Scenario: Verify the Loan reschedule - Interest modification - UC2: Interest modification after first installment with Adjustment to NEXT installment
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin set "LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_TILL_PRECLOSE" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
@@ -5004,7 +4945,6 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
     When Admin runs inline COB job for Loan
     When Admin sets the business date to "16 February 2024"
     When Admin runs inline COB job for Loan
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |

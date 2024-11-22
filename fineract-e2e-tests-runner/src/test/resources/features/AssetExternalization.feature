@@ -3,7 +3,6 @@ Feature: Asset Externalization
 
   @TestRailId:C2722
   Scenario: Verify that all fields and values are correct in case of a SALES request by loan id and user-generated transferExternalId
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -24,11 +23,9 @@ Feature: Asset Externalization
       | settlementDate | purchasePriceRatio | status  | effectiveFrom | effectiveTo | Transaction type |
       | 2023-05-21     | 1                  | PENDING | 2023-05-01    | 9999-12-31  | SALE             |
     Then Asset externalization details has the generated transferExternalId
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2723
   Scenario: Verify that all fields and values are correct in case of a SALES request by loan id system-generated transferExternalId
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -49,11 +46,9 @@ Feature: Asset Externalization
       | settlementDate | purchasePriceRatio | status  | effectiveFrom | effectiveTo | Transaction type |
       | 2023-05-21     | 1                  | PENDING | 2023-05-01    | 9999-12-31  | SALE             |
     Then Asset externalization details has the generated transferExternalId
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2724
   Scenario: Verify that all fields and values are correct in case of a SALES request by loan external id user-generated transferExternalId
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -74,11 +69,9 @@ Feature: Asset Externalization
       | settlementDate | purchasePriceRatio | status  | effectiveFrom | effectiveTo | Transaction type |
       | 2023-05-21     | 1                  | PENDING | 2023-05-01    | 9999-12-31  | SALE             |
     Then Asset externalization details has the generated transferExternalId
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2725
   Scenario: Verify that all fields and values are correct in case of a SALES request by loan external id system-generated transferExternalId
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -99,11 +92,9 @@ Feature: Asset Externalization
       | settlementDate | purchasePriceRatio | status  | effectiveFrom | effectiveTo | Transaction type |
       | 2023-05-21     | 1                  | PENDING | 2023-05-01    | 9999-12-31  | SALE             |
     Then Asset externalization details has the generated transferExternalId
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2727
   Scenario: Verify that Asset externalization details are correct after CoB in case of a SALES request by loan id
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -123,11 +114,9 @@ Feature: Asset Externalization
       | settlementDate | purchasePriceRatio | status  | effectiveFrom | effectiveTo | Transaction type |
       | 2023-05-21     | 1                  | PENDING | 2023-05-01    | 2023-05-21  | SALE             |
       | 2023-05-21     | 1                  | ACTIVE  | 2023-05-22    | 9999-12-31  | SALE             |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2729
   Scenario: Verify that Asset externalization details has the correct data in case of a BUYBACK request placed before the settlementDate with a same settlementDate as the sales one
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -159,11 +148,9 @@ Feature: Asset Externalization
       | 2023-05-21     | 1                  | BUYBACK   | 2023-05-10    | 2023-05-21  | BUYBACK          |
       | 2023-05-21     | 1                  | CANCELLED | 2023-05-21    | 2023-05-21  | SALE             |
       | 2023-05-21     | 1                  | CANCELLED | 2023-05-21    | 2023-05-21  | BUYBACK          |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2730
   Scenario: Verify that Asset externalization details has the correct data in case of a BUYBACK request placed on a business date before the settlementDate of sales request and with a settlementDate for buyback after the sales got active
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -200,11 +187,9 @@ Feature: Asset Externalization
       | 2023-05-21     | 1                  | PENDING | 2023-05-01    | 2023-05-21  | SALE             |
       | 2023-05-30     | 1                  | BUYBACK | 2023-05-10    | 2023-05-30  | BUYBACK          |
       | 2023-05-21     | 1                  | ACTIVE  | 2023-05-22    | 2023-05-30  | SALE             |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2731
   Scenario: Verify that Asset externalization details has the correct data in case of a BUYBACK request placed after the settlementDate
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -245,11 +230,9 @@ Feature: Asset Externalization
       | 2023-05-21     | 1                  | PENDING | 2023-05-01    | 2023-05-21  | SALE             |
       | 2023-05-21     | 1                  | ACTIVE  | 2023-05-22    | 2023-05-30  | SALE             |
       | 2023-05-30     | 1                  | BUYBACK | 2023-05-25    | 2023-05-30  | BUYBACK          |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2732
   Scenario: Verify that BUYBACK request on a loan with PENDING ownership where BUYBACK settlement date is earlier than SALE settlement date results an error
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -268,11 +251,9 @@ Feature: Asset Externalization
     Then BUYBACK transaction results a 403 error and proper error message when its settlementDate is earlier than the original settlementDate
       | Transaction type | settlementDate |
       | buyback          | 2023-05-15     |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2733
   Scenario: Verify that SALES request on a fully paid loan results an error
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -284,11 +265,9 @@ Feature: Asset Externalization
     Then Asset externalization transaction with the following data results a 403 error and "LOAN_NOT_ACTIVE" error message
       | Transaction type | settlementDate | purchasePriceRatio |
       | sale             | 2023-05-21     | 1                  |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2734
   Scenario: Verify that SALES request on an overpaid loan results an error
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -300,11 +279,9 @@ Feature: Asset Externalization
     Then Asset externalization transaction with the following data results a 403 error and "LOAN_NOT_ACTIVE" error message
       | Transaction type | settlementDate | purchasePriceRatio |
       | sale             | 2023-05-21     | 1                  |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2735
   Scenario: Verify that SALES request on a loan with ACTIVE ownership results an error
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -330,11 +307,9 @@ Feature: Asset Externalization
     Then Asset externalization transaction with the following data results a 403 error and "ASSET_OWNED_CANNOT_BE_SOLD" error message
       | Transaction type | settlementDate | purchasePriceRatio |
       | sale             | 2023-05-30     | 1                  |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2736
   Scenario: Verify that BUYBACK request on a fully paid loan can be done successfully
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -367,11 +342,9 @@ Feature: Asset Externalization
       | 2023-05-21     | 1                  | PENDING | 2023-05-01    | 2023-05-21  | SALE             |
       | 2023-05-21     | 1                  | ACTIVE  | 2023-05-22    | 9999-12-31  | SALE             |
       | 2023-05-30     | 1                  | BUYBACK | 2023-05-25    | 9999-12-31  | BUYBACK          |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2737
   Scenario: Verify that BUYBACK request on an overpaid loan can be done successfully
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -404,11 +377,9 @@ Feature: Asset Externalization
       | 2023-05-21     | 1                  | PENDING | 2023-05-01    | 2023-05-21  | SALE             |
       | 2023-05-21     | 1                  | ACTIVE  | 2023-05-22    | 9999-12-31  | SALE             |
       | 2023-05-30     | 1                  | BUYBACK | 2023-05-25    | 9999-12-31  | BUYBACK          |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2738
   Scenario: Verify that BUYBACK request on a loan with INACTIVE ownership results an error
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -418,11 +389,9 @@ Feature: Asset Externalization
     Then Asset externalization transaction with the following data results a 403 error and "ASSET_NOT_OWNED_CANNOT_BE_BOUGHT" error message
       | Transaction type | settlementDate | purchasePriceRatio |
       | buyback          | 2023-05-21     |                    |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2739
   Scenario: Verify that SALES request can NOT be placed on a loan which is not APPROVED yet
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -430,11 +399,9 @@ Feature: Asset Externalization
     Then Asset externalization transaction with the following data results a 403 error and "LOAN_NOT_ACTIVE" error message
       | Transaction type | settlementDate | purchasePriceRatio |
       | sale             | 2023-05-30     | 1                  |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2740
   Scenario: Verify that SALES request can NOT be placed on a loan which is not DISBURSED yet
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -443,11 +410,9 @@ Feature: Asset Externalization
     Then Asset externalization transaction with the following data results a 403 error and "LOAN_NOT_ACTIVE" error message
       | Transaction type | settlementDate | purchasePriceRatio |
       | sale             | 2023-05-30     | 1                  |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2741
   Scenario: Verify that SALES request on a loan with PENDING ownership results an error
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -466,11 +431,9 @@ Feature: Asset Externalization
     Then Asset externalization transaction with the following data results a 403 error and "ALREADY_PENDING" error message
       | Transaction type | settlementDate | purchasePriceRatio |
       | sale             | 2023-05-30     | 1                  |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2742
   Scenario: Verify that SALES with settlement date earlier than actual business date results an error
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -480,11 +443,9 @@ Feature: Asset Externalization
     Then Asset externalization transaction with the following data results a 403 error and "SETTLEMENT_DATE_IN_THE_PAST" error message
       | Transaction type | settlementDate | purchasePriceRatio |
       | sale             | 2023-04-21     | 1                  |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2743
   Scenario: Verify that SALES with null owner external id results an error
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -494,11 +455,9 @@ Feature: Asset Externalization
     Then Asset externalization SALES transaction with ownerExternalId = null and the following data results a 400 error and "INVALID_REQUEST" error message
       | settlementDate | purchasePriceRatio |
       | 2023-05-21     | 1                  |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2744
   Scenario: Verify that SALES with null purchase price ratio results an error
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -508,11 +467,9 @@ Feature: Asset Externalization
     Then Asset externalization transaction with the following data results a 400 error and "INVALID_REQUEST" error message
       | Transaction type | settlementDate | purchasePriceRatio |
       | sale             | 2023-05-21     |                    |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2745
   Scenario: Verify that SALES with null settlement date results an error
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -522,11 +479,9 @@ Feature: Asset Externalization
     Then Asset externalization transaction with the following data results a 400 error and "INVALID_REQUEST" error message
       | Transaction type | settlementDate | purchasePriceRatio |
       | sale             |                | 1                  |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2746
   Scenario: Verify that BUYBACK request on a loan with PENDING BUYBACK ownership result an error
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -563,11 +518,9 @@ Feature: Asset Externalization
     Then Asset externalization transaction with the following data results a 403 error and "BUYBACK_ALREADY_IN_PROGRESS_CANNOT_BE_BOUGHT" error message
       | Transaction type | settlementDate | purchasePriceRatio |
       | buyback          | 2023-05-30     |                    |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2747
   Scenario: Verify that BUYBACK with settlement date earlier than actual business date results an error
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -594,11 +547,9 @@ Feature: Asset Externalization
     Then Asset externalization transaction with the following data results a 403 error and "SETTLEMENT_DATE_IN_THE_PAST" error message
       | Transaction type | settlementDate | purchasePriceRatio |
       | buyback          | 2023-05-21     |                    |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2748
   Scenario: Verify that BUYBACK with ownerExternalId=NULL can be placed, and results a 200OK response
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -628,11 +579,9 @@ Feature: Asset Externalization
       | 2023-05-21     | 1                  | PENDING | 2023-05-01    | 2023-05-21  | SALE             |
       | 2023-05-21     | 1                  | ACTIVE  | 2023-05-22    | 9999-12-31  | SALE             |
       | 2023-05-30     | 1                  | BUYBACK | 2023-05-25    | 9999-12-31  | BUYBACK          |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2749
   Scenario: Verify that BUYBACK with purchasePriceRatio=NULL can be placed, and results a 200OK response
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -664,11 +613,9 @@ Feature: Asset Externalization
       | 2023-05-21     | 1                  | PENDING | 2023-05-01    | 2023-05-21  | SALE             |
       | 2023-05-21     | 1                  | ACTIVE  | 2023-05-22    | 9999-12-31  | SALE             |
       | 2023-05-30     | 1                  | BUYBACK | 2023-05-25    | 9999-12-31  | BUYBACK          |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2750
   Scenario: Verify that SALES with null settlement date results an error
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -695,11 +642,9 @@ Feature: Asset Externalization
     Then Asset externalization transaction with the following data results a 400 error and "INVALID_REQUEST" error message
       | Transaction type | settlementDate | purchasePriceRatio |
       | buyback          |                |                    |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2751 @AssetExternalizationJournalEntry
   Scenario: Verify that Asset externalization SALES and BUYBACK has the correct Journal entries: no other transactions
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -757,11 +702,9 @@ Feature: Asset Externalization
       | glAccountType | glAccountCode | glAccountName    | entryType | amount  |
       | ASSET         | 112601        | Loans Receivable | DEBIT     | 1000.00 |
       | ASSET         | 112601        | Loans Receivable | CREDIT    | 1000.00 |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2752 @AssetExternalizationJournalEntry
   Scenario: Verify that Asset externalization SALES and BUYBACK has the correct Journal entries: fee applied before sale, and penalty applied before buyback
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -834,11 +777,9 @@ Feature: Asset Externalization
       | INCOME        | 404007        | Fee Income              | CREDIT    | 20.00   |
       | ASSET         | 112601        | Loans Receivable        | CREDIT    | 1000.00 |
       | ASSET         | 112603        | Interest/Fee Receivable | CREDIT    | 30.00   |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2753 @AssetExternalizationJournalEntry
   Scenario: Verify that Asset externalization SALES and BUYBACK has the correct Journal entries: Repyment while status is ACTIVE
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -899,11 +840,9 @@ Feature: Asset Externalization
       | ASSET         | 112601        | Loans Receivable          | CREDIT    | 200.00  |
       | LIABILITY     | 145023        | Suspense/Clearing account | DEBIT     | 200.00  |
       | ASSET         | 112601        | Loans Receivable          | CREDIT    | 800.00  |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2754 @AssetExternalizationJournalEntry
   Scenario: Verify that Asset externalization SALES and BUYBACK has the correct Journal entries: GOODWILL_CREDIT transaction while status is ACTIVE
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -964,11 +903,9 @@ Feature: Asset Externalization
       | ASSET         | 112601        | Loans Receivable         | CREDIT    | 200.00  |
       | EXPENSE       | 744003        | Goodwill Expense Account | DEBIT     | 200.00  |
       | ASSET         | 112601        | Loans Receivable         | CREDIT    | 800.00  |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2755 @AssetExternalizationJournalEntry
   Scenario: Verify that Asset externalization SALES and BUYBACK has the correct Journal entries: MERCHANT_ISSUED_REFUND transaction while status is ACTIVE
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -1029,11 +966,9 @@ Feature: Asset Externalization
       | ASSET         | 112601        | Loans Receivable          | CREDIT    | 200.00  |
       | LIABILITY     | 145023        | Suspense/Clearing account | DEBIT     | 200.00  |
       | ASSET         | 112601        | Loans Receivable          | CREDIT    | 800.00  |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2756 @AssetExternalizationJournalEntry
   Scenario: Verify that Asset externalization SALES and BUYBACK has the correct Journal entries: PAYOUT_REFUND transaction while status is ACTIVE
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -1094,11 +1029,9 @@ Feature: Asset Externalization
       | ASSET         | 112601        | Loans Receivable          | CREDIT    | 200.00  |
       | LIABILITY     | 145023        | Suspense/Clearing account | DEBIT     | 200.00  |
       | ASSET         | 112601        | Loans Receivable          | CREDIT    | 800.00  |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2757 @AssetExternalizationJournalEntry
   Scenario: Verify that Asset externalization SALES and BUYBACK has the correct Journal entries: REPAYMENT_ADJUSTMENT_REFUND chargeback transaction while status is ACTIVE
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -1164,11 +1097,9 @@ Feature: Asset Externalization
       | ASSET         | 112601        | Loans Receivable          | DEBIT     | 800.00  |
       | LIABILITY     | 145023        | Suspense/Clearing account | CREDIT    | 800.00  |
       | ASSET         | 112601        | Loans Receivable          | CREDIT    | 800.00  |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2758 @AssetExternalizationJournalEntry
   Scenario: Verify that Asset externalization SALES and BUYBACK has the correct Journal entries: CHARGE ADJUSTMENT transaction while status is ACTIVE
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -1237,11 +1168,9 @@ Feature: Asset Externalization
       | INCOME        | 404007        | Fee Income              | DEBIT     | 100.00  |
       | ASSET         | 112601        | Loans Receivable        | CREDIT    | 1000.00 |
       | ASSET         | 112603        | Interest/Fee Receivable | CREDIT    | 200.00  |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2759
   Scenario: Verify that LoanOwnershipTransferBusinessEvent and LoanAccountSnapshotBusinessEvent is created with correct data
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -1277,11 +1206,9 @@ Feature: Asset Externalization
       | 2023-05-30     | 1                  | BUYBACK | 2023-05-25    | 2023-05-30  | BUYBACK          |
     Then LoanOwnershipTransferBusinessEvent is created
     Then LoanAccountSnapshotBusinessEvent is created
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2760
   Scenario: Verify that LoanOwnershipTransferBusinessEvent and LoanAccountSnapshotBusinessEvent is created with correct data for partial repayment, fee, penalty
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -1320,11 +1247,9 @@ Feature: Asset Externalization
       | 2023-05-30     | 1                  | BUYBACK | 2023-05-25    | 2023-05-30  | BUYBACK          |
     Then LoanOwnershipTransferBusinessEvent is created
     Then LoanAccountSnapshotBusinessEvent is created
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2771
   Scenario: Verify that SALE and BUYBACK can be cancelled in right order
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -1361,11 +1286,9 @@ Feature: Asset Externalization
       | 2023-05-21     | 1                  | BUYBACK   | 2023-05-10    | 2023-05-10  |
       | 2023-05-21     | 1                  | CANCELLED | 2023-05-10    | 2023-05-10  |
       | 2023-05-21     | 1                  | CANCELLED | 2023-05-01    | 2023-05-10  |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2772
   Scenario: Verify that SALE can be cancelled
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -1385,11 +1308,9 @@ Feature: Asset Externalization
       | settlementDate | purchasePriceRatio | status    | effectiveFrom | effectiveTo |
       | 2023-05-21     | 1                  | PENDING   | 2023-05-01    | 2023-05-10  |
       | 2023-05-21     | 1                  | CANCELLED | 2023-05-01    | 2023-05-10  |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2773
   Scenario: Verify that active SALE can not be cancelled
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -1410,11 +1331,9 @@ Feature: Asset Externalization
       | 2023-05-21     | 1                  | PENDING | 2023-05-01    | 2023-05-21  | SALE             |
       | 2023-05-21     | 1                  | ACTIVE  | 2023-05-22    | 9999-12-31  | SALE             |
     When Admin send "cancel" command on "SALE" transaction it will throw an error
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2774
   Scenario: Verify that Asset cannot be cancelled after SALE and BUYBACK is completed
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -1452,11 +1371,9 @@ Feature: Asset Externalization
       | 2023-05-30     | 1                  | BUYBACK | 2023-05-10    | 2023-05-30  | BUYBACK          |
       | 2023-05-21     | 1                  | ACTIVE  | 2023-05-22    | 2023-05-30  | SALE             |
     When Admin send "cancel" command on "SALE" transaction it will throw an error
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2775
   Scenario: Verify that SALE and BUYBACK can be cancelled in right order with double cancel test
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -1513,11 +1430,9 @@ Feature: Asset Externalization
       | 2023-05-21     | 1                  | BUYBACK   | 2023-05-10    | 2023-05-10  |
       | 2023-05-21     | 1                  | CANCELLED | 2023-05-10    | 2023-05-10  |
       | 2023-05-21     | 1                  | CANCELLED | 2023-05-01    | 2023-05-10  |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2785
   Scenario: Verify that when a loan with PENDING SALES is fully paid asset transfer status will be DECLINED
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -1539,11 +1454,9 @@ Feature: Asset Externalization
       | 2023-05-21     | 1                  | PENDING  | 2023-05-01    | 2023-05-15  | SALE             |
       | 2023-05-21     | 1                  | DECLINED | 2023-05-15    | 2023-05-15  | SALE             |
     Then LoanOwnershipTransferBusinessEvent with transfer status: "DECLINED" and transfer status reason "BALANCE_ZERO" is created
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2786
   Scenario: Verify that when a loan with PENDING SALES is overpaid asset transfer status will be DECLINED
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -1565,11 +1478,9 @@ Feature: Asset Externalization
       | 2023-05-21     | 1                  | PENDING  | 2023-05-01    | 2023-05-15  | SALE             |
       | 2023-05-21     | 1                  | DECLINED | 2023-05-15    | 2023-05-15  | SALE             |
     Then LoanOwnershipTransferBusinessEvent with transfer status: "DECLINED" and transfer status reason "BALANCE_NEGATIVE" is created
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2787
   Scenario: Verify that when a loan with PENDING BUYBACK is fully paid BUYBACK transaction can be done successfully
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -1607,11 +1518,9 @@ Feature: Asset Externalization
       | 2023-05-21     | 1                  | PENDING | 2023-05-01    | 2023-05-21  | SALE             |
       | 2023-05-21     | 1                  | ACTIVE  | 2023-05-22    | 2023-05-25  | SALE             |
       | 2023-05-30     | 1                  | BUYBACK | 2023-05-22    | 2023-05-25  | BUYBACK          |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2788
   Scenario: Verify that when a loan with PENDING BUYBACK is overpaid BUYBACK transaction can be done successfully
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -1649,11 +1558,9 @@ Feature: Asset Externalization
       | 2023-05-21     | 1                  | PENDING | 2023-05-01    | 2023-05-21  | SALE             |
       | 2023-05-21     | 1                  | ACTIVE  | 2023-05-22    | 2023-05-25  | SALE             |
       | 2023-05-30     | 1                  | BUYBACK | 2023-05-22    | 2023-05-25  | BUYBACK          |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
   @TestRailId:C2811
   Scenario: Verify that transaction and transaction adjustment events has the proper external owner
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
@@ -1676,12 +1583,10 @@ Feature: Asset Externalization
       | 2023-05-21     | 1                  | ACTIVE  | 2023-05-22    | 9999-12-31  | SALE             |
     And Customer makes "AUTOPAY" repayment on "22 May 2023" with 10 EUR transaction amount and check external owner
     When Customer adjust "1"th repayment on "22 May 2023" with amount "9" and check external owner
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow
 
 
   @TestRailId:C3193
   Scenario: Verify that Asset externalization SALES and BUYBACK has the correct Journal entries: no other transactions - interest bearing loan
-    Given Admin puts EXTERNAL_ASSET_OWNER_TRANSFER job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "1 May 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -1774,4 +1679,3 @@ Feature: Asset Externalization
       | INCOME        | 404000        | Interest Income         | CREDIT    | 0.33    |
       | ASSET         | 112603        | Interest/Fee Receivable | DEBIT     | 0.33    |
       | INCOME        | 404000        | Interest Income         | CREDIT    | 0.33    |
-    Then Admin removes EXTERNAL_ASSET_OWNER_TRANSFER job from LOAN_CLOSE_OF_BUSINESS workflow

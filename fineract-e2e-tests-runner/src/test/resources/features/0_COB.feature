@@ -216,7 +216,6 @@ Feature: COBFeature
 
   @TestRailId:C3044 @AdvancedPaymentAllocation
   Scenario: Verify that LoanAccountCustomSnapshotBusinessEvent is created with proper business date when installment is due date and COB runs
-    Given Admin puts CHECK_DUE_INSTALLMENTS job into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
@@ -228,6 +227,5 @@ Feature: COBFeature
     When Admin sets the business date to "17 January 2024"
     When Admin runs inline COB job for Loan
     Then LoanAccountCustomSnapshotBusinessEvent is created with business date "17 January 2024"
-    Then Admin removes CHECK_DUE_INSTALLMENTS job from LOAN_CLOSE_OF_BUSINESS workflow
 
 

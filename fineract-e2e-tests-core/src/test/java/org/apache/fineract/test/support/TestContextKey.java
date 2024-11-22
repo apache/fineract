@@ -24,7 +24,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public abstract class TestContextKey {
 
-    public static final String ORIGINAL_COB_WORKFLOW_JOB_BUSINESS_STEP_LIST = "originalCOBWorkflowJobBusinessStepList";
     public static final String CLIENT_CREATE_RESPONSE = "clientCreateResponse";
     public static final String CLIENT_CREATE_SECOND_CLIENT_RESPONSE = "clientCreateSecondClientResponse";
     public static final String LOAN_CREATE_RESPONSE = "loanCreateResponse";

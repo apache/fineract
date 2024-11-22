@@ -916,16 +916,16 @@ Feature: LoanAccrualTransaction
       | Nr | Days | Date          | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 05 April 2024 |           | 500.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
       | 1  | 15   | 20 April 2024 |           | 334.47          | 165.53        | 2.47     | 0.0  | 0.0       | 168.0  | 0.0  | 0.0        | 0.0  | 168.0       |
-      | 2  | 15   | 05 May 2024   |           | 168.12          | 166.35        | 1.65     | 0.0  | 0.0       | 168.0  | 0.0  | 0.0        | 0.0  | 168.0       |
-      | 3  | 15   | 20 May 2024   |           | 0.0             | 168.12        | 0.83     | 0.0  | 0.0       | 168.95 | 0.0  | 0.0        | 0.0  | 168.95      |
+      | 2  | 15   | 05 May 2024   |           | 168.94          | 165.53        | 2.47     | 0.0  | 0.0       | 168.0  | 0.0  | 0.0        | 0.0  | 168.0       |
+      | 3  | 15   | 20 May 2024   |           | 0.0             | 168.94        | 0.83     | 0.0  | 0.0       | 169.77 | 0.0  | 0.0        | 0.0  | 169.77      |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 05 April 2024    | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        |
-      | 24 April 2024    | Accrual          | 2.47   | 0.0       | 2.47     | 0.0  | 0.0       | 0.0          |
-      | 24 April 2024    | Accrual          | 0.44   | 0.0       | 0.44     | 0.0  | 0.0       | 0.0          |
+      | 24 April 2024    | Accrual          | 0.66   | 0.0       | 0.66     | 0.0  | 0.0       | 0.0          |
+      | 25 April 2024    | Accrual          | 2.47   | 0.0       | 2.47     | 0.0  | 0.0       | 0.0          |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
-      | 500.0         | 4.95     | 0.0  | 0.0       | 504.95 | 0.0  | 0.0        | 0.0  | 504.95      |
+      | 500.0         | 5.77     | 0.0  | 0.0       | 505.77 | 0.0  | 0.0        | 0.0  | 505.77      |
     When Admin sets the business date to "26 April 2024"
     And Admin successfully disburse the loan on "26 April 2024" with "500" EUR transaction amount
     Then Loan Repayment schedule has 3 periods, with the following data for periods:
@@ -938,7 +938,7 @@ Feature: LoanAccrualTransaction
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 05 April 2024    | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        |
-      | 24 April 2024    | Accrual          | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          |
+      | 25 April 2024    | Accrual          | 2.47   | 0.0       | 2.47     | 0.0  | 0.0       | 0.0          |
       | 26 April 2024    | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
       | 26 April 2024    | Accrual          | 2.47   | 0.0       | 2.47     | 0.0  | 0.0       | 0.0          |
     Then Loan Repayment schedule has the following data in Total row:

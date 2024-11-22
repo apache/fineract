@@ -18,42 +18,18 @@
  */
 package org.apache.fineract.test.initializer.global;
 
-import java.util.Comparator;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.client.models.BusinessStep;
-import org.apache.fineract.client.models.GetBusinessStepConfigResponse;
-import org.apache.fineract.client.models.UpdateBusinessStepConfigRequest;
-import org.apache.fineract.client.services.BusinessStepConfigurationApi;
-import org.apache.fineract.test.helper.ErrorHelper;
+import org.apache.fineract.test.helper.WorkFlowJobHelper;
 import org.springframework.stereotype.Component;
-import retrofit2.Response;
 
 @RequiredArgsConstructor
 @Component
 public class CobBusinessStepInitializerStep implements FineractGlobalInitializerStep {
 
-    private static final String WORKFLOW_NAME_LOAN_CLOSE_OF_BUSINESS = "LOAN_CLOSE_OF_BUSINESS";
-    private static final String BUSINESS_STEP_NAME_ACCRUAL_ACTIVITY_POSTING = "ACCRUAL_ACTIVITY_POSTING";
-    private final BusinessStepConfigurationApi businessStepConfigurationApi;
+    private final WorkFlowJobHelper workFlowJobHelper;
 
     @Override
     public void initialize() throws Exception {
-        // --- Adding ACCRUAL_ACTIVITY_POSTING to default COB steps ---
-        Response<GetBusinessStepConfigResponse> businessStepConfigResponse = businessStepConfigurationApi
-                .retrieveAllConfiguredBusinessStep(WORKFLOW_NAME_LOAN_CLOSE_OF_BUSINESS).execute();
-        ErrorHelper.checkSuccessfulApiCall(businessStepConfigResponse);
-        List<BusinessStep> businessSteps = businessStepConfigResponse.body().getBusinessSteps();
-        businessSteps.sort(Comparator.comparingLong(BusinessStep::getOrder));
-        Long lastOrder = businessSteps.get(businessSteps.size() - 1).getOrder();
-
-        BusinessStep accrualActivityPosting = new BusinessStep().stepName(BUSINESS_STEP_NAME_ACCRUAL_ACTIVITY_POSTING).order(lastOrder + 1);
-        businessSteps.add(accrualActivityPosting);
-
-        UpdateBusinessStepConfigRequest request = new UpdateBusinessStepConfigRequest().businessSteps(businessSteps);
-
-        Response<Void> response = businessStepConfigurationApi.updateJobBusinessStepConfig(WORKFLOW_NAME_LOAN_CLOSE_OF_BUSINESS, request)
-                .execute();
-        ErrorHelper.checkSuccessfulApiCall(response);
+        workFlowJobHelper.setWorkflowJobs();
     }
 }

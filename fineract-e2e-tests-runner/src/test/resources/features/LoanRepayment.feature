@@ -3501,7 +3501,6 @@ Feature: LoanRepayment
 
   @TestRailId:C3224
   Scenario: Verify that interest recalculation works properly when triggered by COB
-    Given Admin puts "LOAN_INTEREST_RECALCULATION" business step into LOAN_CLOSE_OF_BUSINESS workflow
     When Admin sets the business date to "01 April 2024"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -3549,7 +3548,6 @@ Feature: LoanRepayment
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 05 April 2024    | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        |
       | 20 April 2024    | Accrual          | 2.47   | 0.0       | 2.47     | 0.0  | 0.0       | 0.0          |
-    Then Admin sets back LOAN_CLOSE_OF_BUSINESS workflow to its initial state
 
   @TestRailId:C3225
   Scenario: Verify that payment allocation is correct in case of fee charged on an OVERPAID Loan and payment is backdated

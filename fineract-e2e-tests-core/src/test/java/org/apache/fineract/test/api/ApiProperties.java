@@ -36,4 +36,6 @@ public class ApiProperties {
     private String strongPassword;
     @Value("${fineract-test.api.tenant-id}")
     private String tenantId;
+    @Value("${fineract-test.client-read-timeout}")
+    private long readTimeout;
 }
