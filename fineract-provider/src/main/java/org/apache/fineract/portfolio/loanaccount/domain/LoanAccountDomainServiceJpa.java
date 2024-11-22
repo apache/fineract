@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+import jakarta.annotation.Nullable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -40,6 +41,7 @@ import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRu
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBalanceChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanChargePaymentPostBusinessEvent;
@@ -166,6 +168,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         this.loanCollateralManagementRepository.saveAll(loanCollateralManagementSet);
     }
 
+    @Nullable
     private LoanTransaction createInterestRefundLoanTransaction(Loan loan, LoanTransaction refundTransaction) {
 
         InterestRefundService interestRefundService = interestRefundServiceDelegate.lookupInterestRefundService(loan);
@@ -175,13 +178,17 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         Money totalInterest = interestRefundService.totalInterestByTransactions(null, loan.getId(), refundTransaction.getTransactionDate(),
                 List.of(), loan.getLoanTransactions().stream().map(AbstractPersistableCustom::getId).toList());
-        Money previouslyRefundedInterests = interestRefundService.getTotalInterestRefunded(loan.getLoanTransactions(), loan.getCurrency());
+        Money previouslyRefundedInterests = interestRefundService.getTotalInterestRefunded(loan.getLoanTransactions(), loan.getCurrency(),
+                totalInterest.getMc());
 
         Money newTotalInterest = interestRefundService.totalInterestByTransactions(null, loan.getId(),
                 refundTransaction.getTransactionDate(), List.of(refundTransaction),
                 loan.getLoanTransactions().stream().map(AbstractPersistableCustom::getId).toList());
         BigDecimal interestRefundAmount = totalInterest.minus(previouslyRefundedInterests).minus(newTotalInterest).getAmount();
 
+        if (MathUtil.isZero(interestRefundAmount)) {
+            return null;
+        }
         final ExternalId txnExternalId = externalIdFactory.create();
         businessEventNotifierService.notifyPreBusinessEvent(new LoanTransactionInterestRefundPreBusinessEvent(loan));
         return LoanTransaction.interestRefund(loan, interestRefundAmount, refundTransaction.getDateOf(), txnExternalId);

@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import static org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.REPAYMENT;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -135,9 +136,13 @@ public class ProgressiveLoanInterestRefundServiceImpl implements InterestRefundS
     }
 
     @Override
-    public Money getTotalInterestRefunded(List<LoanTransaction> loanTransactions, MonetaryCurrency currency) {
-        return Money.of(currency, loanTransactions.stream().filter(LoanTransaction::isNotReversed).filter(LoanTransaction::isInterestRefund)
-                .map(LoanTransaction::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add));
+    public Money getTotalInterestRefunded(List<LoanTransaction> loanTransactions, MonetaryCurrency currency, MathContext mc) {
+        final BigDecimal totalInterestRefunded = loanTransactions.stream() //
+                .filter(LoanTransaction::isNotReversed) //
+                .filter(LoanTransaction::isInterestRefund) //
+                .map(LoanTransaction::getAmount) //
+                .reduce(BigDecimal.ZERO, BigDecimal::add); //
+        return Money.of(currency, totalInterestRefunded, mc);
     }
 
 }

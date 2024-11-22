@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import java.math.MathContext;
 import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -36,5 +37,5 @@ public interface InterestRefundService {
     Money totalInterestByTransactions(LoanRepaymentScheduleTransactionProcessor processor, Long loanId,
             LocalDate relatedRefundTransactionDate, List<LoanTransaction> newTransactions, List<Long> oldTransactionIds);
 
-    Money getTotalInterestRefunded(List<LoanTransaction> loanTransactions, MonetaryCurrency currency);
+    Money getTotalInterestRefunded(List<LoanTransaction> loanTransactions, MonetaryCurrency currency, MathContext mc);
 }

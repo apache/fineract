@@ -1109,6 +1109,35 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
     }
 
     @Test
+    public void verifyNoEmptyInterestRefundTransaction() {
+        runAt("1 January 2021", () -> {
+            PostLoanProductsResponse loanProduct = loanProductHelper
+                    .createLoanProduct(create4IProgressive().daysInMonthType(DaysInMonthType.ACTUAL) //
+                            .daysInYearType(DaysInYearType.ACTUAL) //
+                            .multiDisburseLoan(true)//
+                            .disallowExpectedDisbursements(true)//
+                            .maxTrancheCount(2)//
+                            .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.PAYOUT_REFUND) //
+                            .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
+                            .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
+            );
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 9.9,
+                    12, null);
+            Assertions.assertNotNull(loanId);
+
+            disburseLoan(loanId, BigDecimal.valueOf(1000), "1 January 2021");
+            loanTransactionHelper.makeLoanRepayment("MerchantIssuedRefund", "1 January 2021", 1000F, loanId.intValue());
+            logLoanTransactions(loanId);
+
+            verifyTransactions(loanId, //
+                    transaction(1000.0, "Disbursement", "01 January 2021"), //
+                    transaction(1000.0, "Merchant Issued Refund", "01 January 2021") //
+            );
+            logLoanTransactions(loanId);
+        });
+    }
+
+    @Test
     public void verifyUC18S2() {
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
         AtomicReference<Long> repaymentIdRef = new AtomicReference<>();
