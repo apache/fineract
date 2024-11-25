@@ -96,7 +96,7 @@ plugins {
     id 'com.github.jk1.dependency-license-report' version '2.9' apply false
     id 'org.zeroturnaround.gradle.jrebel' version '1.2.0' apply false
     id 'org.springframework.boot' version '3.3.5' apply false
-    id 'net.ltgt.errorprone' version '3.1.0' apply false
+    id 'net.ltgt.errorprone' version '4.1.0' apply false
     id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.23' apply false
     id 'com.gorylenko.gradle-git-properties' version '2.4.2' apply false
     id 'org.asciidoctor.jvm.convert' version '3.3.2' apply false
