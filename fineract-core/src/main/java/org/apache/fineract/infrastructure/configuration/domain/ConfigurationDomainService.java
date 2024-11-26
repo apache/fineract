@@ -143,4 +143,6 @@ public interface ConfigurationDomainService {
 
     String getNextPaymentDateConfigForLoan();
 
+    boolean isImmediateChargeAccrualPostMaturityEnabled();
+
 }

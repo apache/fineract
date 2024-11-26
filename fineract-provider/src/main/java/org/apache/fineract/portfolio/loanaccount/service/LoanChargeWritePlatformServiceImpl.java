@@ -55,6 +55,7 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.charge.Loan
 import org.apache.fineract.infrastructure.event.business.domain.loan.charge.LoanUpdateChargeBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.charge.LoanWaiveChargeBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.charge.LoanWaiveChargeUndoBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualTransactionCreatedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanChargeAdjustmentPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanChargeAdjustmentPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanChargeRefundBusinessEvent;
@@ -1033,9 +1034,13 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         // we want to apply charge transactions only for those loans charges that are applied when a loan is active and
         // the loan product uses Upfront Accruals, or only when the loan are closed too,
         if ((loan.getStatus().isActive() && loan.isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct())
-                || loan.getStatus().isOverpaid() || loan.getStatus().isClosedObligationsMet()) {
+                || loan.getStatus().isOverpaid() || loan.getStatus().isClosedObligationsMet()
+                || (configurationDomainService.isImmediateChargeAccrualPostMaturityEnabled()
+                        && DateUtils.getBusinessLocalDate().isAfter(loan.getMaturityDate()))) {
             final LoanTransaction applyLoanChargeTransaction = loan.handleChargeAppliedTransaction(loanCharge, null);
             this.loanTransactionRepository.saveAndFlush(applyLoanChargeTransaction);
+            businessEventNotifierService
+                    .notifyPostBusinessEvent(new LoanAccrualTransactionCreatedBusinessEvent(applyLoanChargeTransaction));
         }
         return DateUtils.isBeforeBusinessDate(loanCharge.getDueLocalDate());
     }

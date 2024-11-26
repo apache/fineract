@@ -100,8 +100,8 @@ public class GlobalConfigurationHelper extends IntegrationTest {
         ArrayList<HashMap> expectedGlobalConfigurations = getAllDefaultGlobalConfigurations();
         GetGlobalConfigurationsResponse actualGlobalConfigurations = getAllGlobalConfigurations();
 
-        Assertions.assertEquals(55, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(55, actualGlobalConfigurations.getGlobalConfiguration().size());
+        Assertions.assertEquals(56, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(56, actualGlobalConfigurations.getGlobalConfiguration().size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
@@ -527,6 +527,13 @@ public class GlobalConfigurationHelper extends IntegrationTest {
         enablePaymentHubIntegrationConfig.put("trapDoor", false);
         enablePaymentHubIntegrationConfig.put("string_value", "enable payment hub integration");
         defaults.add(enablePaymentHubIntegrationConfig);
+
+        HashMap<String, Object> enableImmediateChargeAccrualPostMaturity = new HashMap<>();
+        enableImmediateChargeAccrualPostMaturity.put("name", GlobalConfigurationConstants.ENABLE_IMMEDIATE_CHARGE_ACCRUAL_POST_MATURITY);
+        enableImmediateChargeAccrualPostMaturity.put("value", 0L);
+        enableImmediateChargeAccrualPostMaturity.put("enabled", false);
+        enableImmediateChargeAccrualPostMaturity.put("trapDoor", false);
+        defaults.add(enableImmediateChargeAccrualPostMaturity);
 
         return defaults;
     }
