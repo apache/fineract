@@ -34,6 +34,7 @@ import org.apache.fineract.accounting.journalentry.data.ChargePaymentDTO;
 import org.apache.fineract.accounting.journalentry.data.GLAccountBalanceHolder;
 import org.apache.fineract.accounting.journalentry.data.LoanDTO;
 import org.apache.fineract.accounting.journalentry.data.LoanTransactionDTO;
+import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGLAccountMapping;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.springframework.stereotype.Component;
@@ -229,14 +230,26 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
         final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
         final boolean isReversal = loanTransactionDTO.isReversed();
         GLAccountBalanceHolder glAccountBalanceHolder = new GLAccountBalanceHolder();
-        // principal payment
-        if (principalAmount != null && principalAmount.compareTo(BigDecimal.ZERO) > 0) {
-            if (isMarkedFraud) {
-                populateCreditDebitMaps(loanProductId, principalAmount, paymentTypeId, AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue(),
-                        AccrualAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE.getValue(), glAccountBalanceHolder);
-            } else {
-                populateCreditDebitMaps(loanProductId, principalAmount, paymentTypeId, AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue(),
-                        AccrualAccountsForLoan.CHARGE_OFF_EXPENSE.getValue(), glAccountBalanceHolder);
+
+        // need to fetch if there are account mappings (always one)
+        Integer chargeOffReasonCodeValue = loanDTO.getChargeOffReasonCodeValue();
+
+        ProductToGLAccountMapping mapping = helper.getChargeOffMappingByCodeValue(chargeOffReasonCodeValue);
+        if (mapping != null) {
+            GLAccount accountCredit = this.helper.getLinkedGLAccountForLoanProduct(loanProductId,
+                    AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue(), paymentTypeId);
+            glAccountBalanceHolder.addToCredit(accountCredit, principalAmount);
+            glAccountBalanceHolder.addToDebit(mapping.getGlAccount(), principalAmount);
+        } else {
+            // principal payment
+            if (principalAmount != null && principalAmount.compareTo(BigDecimal.ZERO) > 0) {
+                if (isMarkedFraud) {
+                    populateCreditDebitMaps(loanProductId, principalAmount, paymentTypeId, AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue(),
+                            AccrualAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE.getValue(), glAccountBalanceHolder);
+                } else {
+                    populateCreditDebitMaps(loanProductId, principalAmount, paymentTypeId, AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue(),
+                            AccrualAccountsForLoan.CHARGE_OFF_EXPENSE.getValue(), glAccountBalanceHolder);
+                }
             }
         }
         // interest payment
