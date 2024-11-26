@@ -172,4 +172,5 @@
     <include file="parts/0151_interest_refund_business_events.xml" relativeToChangelogFile="true" />
     <include file="parts/0152_update_password_validation_policy.xml" relativeToChangelogFile="true" />
     <include file="parts/0153_add_charge_off_reason_id_to_acc_product_mapping.xml" relativeToChangelogFile="true" />
+    <include file="parts/0154_add_interest_refund_to_r_enum_value.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
