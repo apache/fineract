@@ -48,6 +48,7 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformService;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
+import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeOffReasonToGLAccountMapper;
 import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
 import org.apache.fineract.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
 import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToGLAccountMappingReadPlatformService;
@@ -336,7 +337,7 @@ public class LoanProductsApiResource {
         Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings;
         Collection<ChargeToGLAccountMapper> feeToGLAccountMappings;
         Collection<ChargeToGLAccountMapper> penaltyToGLAccountMappings;
-        List<ChargeToGLAccountMapper> chargeOffReasonsToExpenseMappings;
+        List<ChargeOffReasonToGLAccountMapper> chargeOffReasonToGLAccountMappings;
         if (loanProduct.hasAccountingEnabled()) {
             accountingMappings = this.accountMappingReadPlatformService.fetchAccountMappingDetailsForLoanProduct(productId,
                     loanProduct.getAccountingRule().getId().intValue());
@@ -345,8 +346,10 @@ public class LoanProductsApiResource {
             feeToGLAccountMappings = this.accountMappingReadPlatformService.fetchFeeToGLAccountMappingsForLoanProduct(productId);
             penaltyToGLAccountMappings = this.accountMappingReadPlatformService
                     .fetchPenaltyToIncomeAccountMappingsForLoanProduct(productId);
+            chargeOffReasonToGLAccountMappings = this.accountMappingReadPlatformService
+                    .fetchChargeOffReasonMappingsForLoanProduct(productId);
             loanProduct = LoanProductData.withAccountingDetails(loanProduct, accountingMappings, paymentChannelToFundSourceMappings,
-                    feeToGLAccountMappings, penaltyToGLAccountMappings);
+                    feeToGLAccountMappings, penaltyToGLAccountMappings, chargeOffReasonToGLAccountMappings);
         }
 
         if (settings.isTemplate()) {
