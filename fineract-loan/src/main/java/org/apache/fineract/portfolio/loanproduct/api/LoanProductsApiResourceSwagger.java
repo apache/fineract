@@ -198,6 +198,8 @@ final class LoanProductsApiResourceSwagger {
         public Boolean isCompoundingToBePostedAsTransaction;
         @Schema(example = "false")
         public Boolean allowCompoundingOnEod;
+        @Schema(example = "false")
+        public Boolean disallowInterestCalculationOnPastDue;
 
         // Accounting
         @Schema(example = "3")
@@ -520,6 +522,8 @@ final class LoanProductsApiResourceSwagger {
             public GetLoanProductsPreClosureInterestCalculationStrategy preClosureInterestCalculationStrategy;
             @Schema(example = "true")
             public Boolean isArrearsBasedOnOriginalSchedule;
+            @Schema(example = "false")
+            public Boolean disallowInterestCalculationOnPastDue;
             @Schema(example = "true")
             public Boolean isCompoundingToBePostedAsTransaction;
             @Schema(example = "true")

@@ -97,6 +97,7 @@ public interface LoanProductConstants {
     String recalculationCompoundingFrequencyNthDayParamName = "recalculationCompoundingFrequencyNthDayType";
     String recalculationCompoundingFrequencyOnDayParamName = "recalculationCompoundingFrequencyOnDayType";
     String isCompoundingToBePostedAsTransactionParamName = "isCompoundingToBePostedAsTransaction";
+    String disallowInterestCalculationOnPastDueParamName = "disallowInterestCalculationOnPastDue";
 
     // Guarantee related
     String holdGuaranteeFundsParamName = "holdGuaranteeFunds";

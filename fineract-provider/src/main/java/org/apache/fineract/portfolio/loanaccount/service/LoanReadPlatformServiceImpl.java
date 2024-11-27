@@ -694,6 +694,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                     + " lir.compounding_frequency_on_day as compoundingFrequencyOnDay, "
                     + " lir.is_compounding_to_be_posted_as_transaction as isCompoundingToBePostedAsTransaction, "
                     + " lir.allow_compounding_on_eod as allowCompoundingOnEod, "
+                    + " lir.disallow_interest_calc_on_past_due as disallowInterestCalculationOnPastDue, "
                     + " l.is_floating_interest_rate as isFloatingInterestRate, "
                     + " l.interest_rate_differential as interestRateDifferential, "
                     + " l.create_standing_instruction_at_disbursement as createStandingInstructionAtDisbursement, "
@@ -1037,11 +1038,12 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
 
                 final Boolean isCompoundingToBePostedAsTransaction = rs.getBoolean("isCompoundingToBePostedAsTransaction");
                 final Boolean allowCompoundingOnEod = rs.getBoolean("allowCompoundingOnEod");
+                final Boolean disallowInterestCalculationOnPastDue = rs.getBoolean("disallowInterestCalculationOnPastDue");
                 interestRecalculationData = new LoanInterestRecalculationData(lprId, productId, interestRecalculationCompoundingType,
                         rescheduleStrategyType, calendarData, restFrequencyType, restFrequencyInterval, restFrequencyNthDayEnum,
                         restFrequencyWeekDayEnum, restFrequencyOnDay, compoundingCalendarData, compoundingFrequencyType,
                         compoundingInterval, compoundingFrequencyNthDayEnum, compoundingFrequencyWeekDayEnum, compoundingFrequencyOnDay,
-                        isCompoundingToBePostedAsTransaction, allowCompoundingOnEod);
+                        isCompoundingToBePostedAsTransaction, allowCompoundingOnEod, disallowInterestCalculationOnPastDue);
             }
 
             final boolean canUseForTopup = rs.getBoolean("canUseForTopup");
@@ -2039,42 +2041,49 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
 
     @Override
     public Collection<Long> fetchLoansForInterestRecalculation() {
-        StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("SELECT ml.id FROM m_loan ml ");
-        sqlBuilder.append(" INNER JOIN m_loan_repayment_schedule mr on mr.loan_id = ml.id ");
-        sqlBuilder.append(" LEFT JOIN m_loan_disbursement_detail dd on dd.loan_id=ml.id and dd.disbursedon_date is null ");
-        // For Floating rate changes
-        sqlBuilder.append(
-                " left join m_product_loan_floating_rates pfr on ml.product_id = pfr.loan_product_id and ml.is_floating_interest_rate = true");
-        sqlBuilder.append(" left join m_floating_rates fr on  pfr.floating_rates_id = fr.id");
-        sqlBuilder.append(" left join m_floating_rates_periods frp on fr.id = frp.floating_rates_id ");
-        sqlBuilder.append(" left join m_loan_reschedule_request lrr on lrr.loan_id = ml.id");
-        // this is to identify the applicable rates when base rate is changed
-        sqlBuilder.append(" left join  m_floating_rates bfr on  bfr.is_base_lending_rate = true");
-        sqlBuilder.append(" left join  m_floating_rates_periods bfrp on  bfr.id = bfrp.floating_rates_id and bfrp.created_date >= ?");
-        sqlBuilder.append(" WHERE ml.loan_status_id = ? ");
-        sqlBuilder.append(" and ml.is_npa = false and ml.is_charged_off = false and dd.is_reversed = false ");
-        sqlBuilder.append(" and ((");
-        sqlBuilder.append("ml.interest_recalculation_enabled = true ");
-        sqlBuilder.append(" and (ml.interest_recalcualated_on is null or ml.interest_recalcualated_on <> ?)");
-        sqlBuilder.append(" and ((");
-        sqlBuilder.append(" mr.completed_derived is false ");
-        sqlBuilder.append(" and mr.duedate < ? )");
-        sqlBuilder.append(" or dd.expected_disburse_date < ? )) ");
-        sqlBuilder.append(" or (");
-        sqlBuilder.append(" fr.is_active = true and  frp.is_active = true");
-        sqlBuilder.append(" and (frp.created_date >= ?  or ");
-        sqlBuilder
-                .append("(bfrp.id is not null and frp.is_differential_to_base_lending_rate = true and frp.from_date >= bfrp.from_date)) ");
-        sqlBuilder.append("and lrr.loan_id is null");
-        sqlBuilder.append(" ))");
-        sqlBuilder.append(" group by ml.id");
+        final String sql = """
+                SELECT l.id
+                FROM m_loan l
+                INNER JOIN m_loan_repayment_schedule mr ON mr.loan_id = l.id
+                LEFT JOIN m_loan_disbursement_detail dd ON dd.loan_id=l.id AND dd.disbursedon_date IS NULL
+                -- for past due interest recalculation
+                LEFT JOIN m_loan_recalculation_details rcd ON rcd.loan_id = l.id
+                -- For Floating rate changes
+                LEFT JOIN m_product_loan_floating_rates pfr
+                    ON l.product_id = pfr.loan_product_id AND l.is_floating_interest_rate = TRUE
+                LEFT JOIN m_floating_rates fr ON pfr.floating_rates_id = fr.id
+                LEFT JOIN m_floating_rates_periods frp ON fr.id = frp.floating_rates_id
+                LEFT JOIN m_loan_reschedule_request lrr ON lrr.loan_id = l.id
+                -- this is to identify the applicable rates when base rate is changed
+                LEFT JOIN m_floating_rates bfr ON bfr.is_base_lending_rate = TRUE
+                LEFT JOIN m_floating_rates_periods bfrp ON bfr.id = bfrp.floating_rates_id AND bfrp.created_date >= ?
+                WHERE l.loan_status_id = ?
+                  AND l.is_npa = FALSE
+                  AND l.is_charged_off = FALSE
+                  AND dd.is_reversed = FALSE
+                  AND (
+                        (l.interest_recalculation_enabled = TRUE
+                            AND (l.interest_recalcualated_on IS NULL OR l.interest_recalcualated_on <> ?)
+                            AND ((mr.completed_derived IS FALSE AND mr.duedate < ?) OR dd.expected_disburse_date < ?)
+                            AND rcd.disallow_interest_calc_on_past_due = FALSE)
+                       OR
+                        -- float rate changes
+                        (fr.is_active = TRUE
+                            AND frp.is_active = TRUE
+                            AND (frp.created_date >= ?
+                                 OR (bfrp.id IS NOT NULL
+                                     AND frp.is_differential_to_base_lending_rate = TRUE
+                                     AND frp.from_date >= bfrp.from_date))
+                            AND lrr.loan_id IS NULL)
+                  )
+                GROUP BY l.id
+                """;
         try {
             LocalDate currentdate = DateUtils.getBusinessLocalDate();
             // will look only for yesterday modified rates
             LocalDate yesterday = DateUtils.getBusinessLocalDate().minusDays(1);
-            return this.jdbcTemplate.queryForList(sqlBuilder.toString(), Long.class, yesterday, LoanStatus.ACTIVE.getValue(), currentdate,
-                    currentdate, currentdate, yesterday);
+            return this.jdbcTemplate.queryForList(sql, Long.class, yesterday, LoanStatus.ACTIVE.getValue(), currentdate, currentdate,
+                    currentdate, yesterday);
         } catch (final EmptyResultDataAccessException e) {
             return null;
         }
@@ -2085,45 +2094,50 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         LocalDate currentdate = DateUtils.getBusinessLocalDate();
         // will look only for yesterday modified rates
         LocalDate yesterday = DateUtils.getBusinessLocalDate().minusDays(1);
-        StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("SELECT ml.id FROM m_loan ml ");
-        sqlBuilder.append(" left join m_client mc on mc.id = ml.client_id ");
-        sqlBuilder.append(" left join m_office o on mc.office_id = o.id  ");
-        sqlBuilder.append(" INNER JOIN m_loan_repayment_schedule mr on mr.loan_id = ml.id ");
-        sqlBuilder.append(
-                " LEFT JOIN m_loan_disbursement_detail dd on dd.loan_id=ml.id and dd.disbursedon_date is null and dd.is_reversed = false ");
-        // For Floating rate changes
-        sqlBuilder.append(
-                " left join m_product_loan_floating_rates pfr on ml.product_id = pfr.loan_product_id and ml.is_floating_interest_rate = true");
-        sqlBuilder.append(" left join m_floating_rates fr on  pfr.floating_rates_id = fr.id");
-        sqlBuilder.append(" left join m_floating_rates_periods frp on fr.id = frp.floating_rates_id ");
-        sqlBuilder.append(" left join m_loan_reschedule_request lrr on lrr.loan_id = ml.id");
-        // this is to identify the applicable rates when base rate is changed
-        sqlBuilder.append(" left join  m_floating_rates bfr on  bfr.is_base_lending_rate = true");
-        sqlBuilder.append(" left join  m_floating_rates_periods bfrp on  bfr.id = bfrp.floating_rates_id and bfrp.created_date >= ?");
-        sqlBuilder.append(" WHERE ml.loan_status_id = ? ");
-        sqlBuilder.append(" and ml.is_npa = false and ml.is_charged_off = false ");
-        sqlBuilder.append(" and ((");
-        sqlBuilder.append("ml.interest_recalculation_enabled = true ");
-        sqlBuilder.append(" and (ml.interest_recalcualated_on is null or ml.interest_recalcualated_on <> ? )");
-        sqlBuilder.append(" and ((");
-        sqlBuilder.append(" mr.completed_derived is false ");
-        sqlBuilder.append(" and mr.duedate < ? )");
-        sqlBuilder.append(" or dd.expected_disburse_date < ? )) ");
-        sqlBuilder.append(" or (");
-        sqlBuilder.append(" fr.is_active = true and  frp.is_active = true");
-        sqlBuilder.append(" and (frp.created_date >=  ?  or ");
-        sqlBuilder
-                .append("(bfrp.id is not null and frp.is_differential_to_base_lending_rate = true and frp.from_date >= bfrp.from_date)) ");
-        sqlBuilder.append("and lrr.loan_id is null");
-        sqlBuilder.append(" ))");
-        sqlBuilder.append(" and ml.id >= ?  and o.hierarchy like ? ");
-        sqlBuilder.append(" group by ml.id ");
-        sqlBuilder.append(" limit ? ");
+        final String sql = """
+                SELECT l.id
+                FROM m_loan l
+                LEFT JOIN m_client c ON c.id = l.client_id
+                LEFT JOIN m_office o ON c.office_id = o.id
+                INNER JOIN m_loan_repayment_schedule rps ON rps.loan_id = l.id
+                LEFT JOIN m_loan_disbursement_detail dd
+                    ON dd.loan_id=l.id AND dd.disbursedon_date IS NULL AND dd.is_reversed = FALSE
+                -- for past due interest recalculation
+                LEFT JOIN m_loan_recalculation_details rcd ON rcd.loan_id = l.id
+                -- For Floating rate changes
+                LEFT JOIN m_product_loan_floating_rates pfr
+                    ON l.product_id = pfr.loan_product_id AND l.is_floating_interest_rate = TRUE
+                LEFT JOIN m_floating_rates fr ON pfr.floating_rates_id = fr.id
+                LEFT JOIN m_floating_rates_periods frp ON fr.id = frp.floating_rates_id
+                LEFT JOIN m_loan_reschedule_request lrr ON lrr.loan_id = l.id
+                -- this is to identify the applicable rates when base rate is changed
+                LEFT JOIN m_floating_rates bfr ON bfr.is_base_lending_rate = TRUE
+                LEFT JOIN m_floating_rates_periods bfrp ON bfr.id = bfrp.floating_rates_id AND bfrp.created_date >= ?
+                WHERE l.loan_status_id = ?
+                    AND l.is_npa = FALSE
+                    AND l.is_charged_off = FALSE
+                    AND (
+                         (l.interest_recalculation_enabled = TRUE
+                             AND (l.interest_recalcualated_on IS NULL OR l.interest_recalcualated_on <> ?)
+                             AND ((rps.completed_derived IS FALSE AND rps.duedate < ?) OR dd.expected_disburse_date < ?)
+                             AND rcd.disallow_interest_calc_on_past_due = FALSE)
+                        OR
+                         (fr.is_active = TRUE
+                             AND frp.is_active = TRUE
+                             AND (frp.created_date >= ?
+                                  OR (bfrp.id IS NOT NULL
+                                      AND frp.is_differential_to_base_lending_rate = TRUE
+                                      AND frp.from_date >= bfrp.from_date))
+                             AND lrr.loan_id IS NULL)
+                    )
+                    AND l.id >= ?
+                    AND o.hierarchy like ?
+                GROUP BY l.id
+                LIMIT ?
+                """;
         try {
-            return Collections.synchronizedList(
-                    this.jdbcTemplate.queryForList(sqlBuilder.toString(), Long.class, yesterday, LoanStatus.ACTIVE.getValue(), currentdate,
-                            currentdate, currentdate, yesterday, maxLoanIdInList, officeHierarchy, pageSize));
+            return Collections.synchronizedList(this.jdbcTemplate.queryForList(sql, Long.class, yesterday, LoanStatus.ACTIVE.getValue(),
+                    currentdate, currentdate, currentdate, yesterday, maxLoanIdInList, officeHierarchy, pageSize));
         } catch (final EmptyResultDataAccessException e) {
             return null;
         }

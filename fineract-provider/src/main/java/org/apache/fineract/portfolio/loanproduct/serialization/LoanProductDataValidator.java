@@ -174,7 +174,8 @@ public final class LoanProductDataValidator {
             LoanProductConstants.recalculationRestFrequencyWeekdayParamName, LoanProductConstants.recalculationRestFrequencyNthDayParamName,
             LoanProductConstants.recalculationRestFrequencyOnDayParamName,
             LoanProductConstants.isCompoundingToBePostedAsTransactionParamName, LoanProductConstants.allowCompoundingOnEodParamName,
-            LoanProductConstants.CAN_USE_FOR_TOPUP, LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM, LoanProductConstants.RATES_PARAM_NAME,
+            LoanProductConstants.disallowInterestCalculationOnPastDueParamName, LoanProductConstants.CAN_USE_FOR_TOPUP,
+            LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM, LoanProductConstants.RATES_PARAM_NAME,
             LoanProductConstants.fixedPrincipalPercentagePerInstallmentParamName, LoanProductConstants.DISALLOW_EXPECTED_DISBURSEMENTS,
             LoanProductConstants.ALLOW_APPROVED_DISBURSED_AMOUNTS_OVER_APPLIED, LoanProductConstants.OVER_APPLIED_CALCULATION_TYPE,
             LoanProductConstants.OVER_APPLIED_NUMBER, LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME,
@@ -1069,6 +1070,12 @@ public final class LoanProductDataValidator {
             String loanScheduleType = LoanScheduleType.CUMULATIVE.toString();
             if (fromApiJsonHelper.parameterExists(LoanProductConstants.LOAN_SCHEDULE_TYPE, element)) {
                 loanScheduleType = fromApiJsonHelper.extractStringNamed(LoanProductConstants.LOAN_SCHEDULE_TYPE, element);
+            }
+            if (LoanScheduleType.CUMULATIVE.equals(LoanScheduleType.valueOf(loanScheduleType))
+                    && fromApiJsonHelper.parameterExists(LoanProductConstants.disallowInterestCalculationOnPastDueParamName, element)) {
+                baseDataValidator.reset().parameter(LoanProductConstants.disallowInterestCalculationOnPastDueParamName).failWithCode(
+                        "disallow.interest.calculation.on.past.due.not.supported.for.loan.schedule.type.cumulative",
+                        "Do not calculate interest on past due principal balances is only supported for Progressive loan schedule type");
             }
             if (LoanScheduleType.CUMULATIVE.equals(LoanScheduleType.valueOf(loanScheduleType))
                     && LoanRescheduleStrategyMethod.ADJUST_LAST_UNPAID_PERIOD.equals(loanRescheduleStrategyMethod)) {

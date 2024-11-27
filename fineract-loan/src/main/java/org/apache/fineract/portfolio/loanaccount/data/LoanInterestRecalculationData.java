@@ -47,6 +47,7 @@ public class LoanInterestRecalculationData {
     private Boolean isCompoundingToBePostedAsTransaction;
     private CalendarData compoundingCalendarData;
     private Boolean allowCompoundingOnEod;
+    private Boolean disallowInterestCalculationOnPastDue;
 
     public LoanInterestRecalculationData(final Long id, final Long loanId, final EnumOptionData interestRecalculationCompoundingType,
             final EnumOptionData rescheduleStrategyType, final CalendarData calendarData,
@@ -56,7 +57,7 @@ public class LoanInterestRecalculationData {
             final EnumOptionData recalculationCompoundingFrequencyType, final Integer recalculationCompoundingFrequencyInterval,
             final EnumOptionData recalculationCompoundingFrequencyNthDay, final EnumOptionData recalculationCompoundingFrequencyWeekday,
             final Integer recalculationCompoundingFrequencyOnDay, final Boolean isCompoundingToBePostedAsTransaction,
-            final Boolean allowCompoundingOnEod) {
+            final Boolean allowCompoundingOnEod, final Boolean disallowInterestCalculationOnPastDue) {
         this.id = id;
         this.loanId = loanId;
         this.interestRecalculationCompoundingType = interestRecalculationCompoundingType;
@@ -75,6 +76,7 @@ public class LoanInterestRecalculationData {
         this.compoundingCalendarData = compoundingCalendarData;
         this.isCompoundingToBePostedAsTransaction = isCompoundingToBePostedAsTransaction;
         this.allowCompoundingOnEod = allowCompoundingOnEod;
+        this.disallowInterestCalculationOnPastDue = disallowInterestCalculationOnPastDue;
     }
 
     public LoanInterestRecalculationData withCalendarData(final CalendarData calendarData, CalendarData compoundingCalendarData) {
