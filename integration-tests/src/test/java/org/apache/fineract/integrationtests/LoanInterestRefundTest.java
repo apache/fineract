@@ -19,6 +19,9 @@
 package org.apache.fineract.integrationtests;
 
 import static org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum.REPLAYED;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -29,13 +32,17 @@ import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
+import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.BusinessStepHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -1190,6 +1197,64 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                     transaction(5.70, "Accrual", "10 January 2021") //
             );
 
+        });
+    }
+
+    // UC19: Interest Refund reverse transaction only when the related transactions, Merchant Issued Refund or Payout
+    // Refund are reversed
+    // 1. Create a Loan Product that supports Interest Refund Types
+    // 2. Submit, Approve and Disburse the loan
+    // 3. Apply a Merchant Issued Refund Transaction
+    // 4. Try to reverse the Interest Refund Transaction expecting to have an Exception
+    // 5. Reverse the Merchant Issued Refund transaction and review the Interest Refund Transction is reversed too
+    @Test
+    public void verifyUC19() {
+        AtomicReference<Long> loanIdRef = new AtomicReference<>();
+        runAt("1 January 2021", () -> {
+            PostLoanProductsResponse loanProduct = loanProductHelper
+                    .createLoanProduct(create4IProgressive().daysInMonthType(DaysInMonthType.ACTUAL) //
+                            .daysInYearType(DaysInYearType.ACTUAL) //
+                            .multiDisburseLoan(true)//
+                            .disallowExpectedDisbursements(true)//
+                            .maxTrancheCount(2)//
+                            .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.PAYOUT_REFUND) //
+                            .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
+                            .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
+            );
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 9.9,
+                    12, null);
+            Assertions.assertNotNull(loanId);
+            loanIdRef.set(loanId);
+            disburseLoan(loanId, BigDecimal.valueOf(1000), "1 January 2021");
+        });
+        runAt("22 January 2021", () -> {
+            Long loanId = loanIdRef.get();
+            loanTransactionHelper.makeLoanRepayment("MerchantIssuedRefund", "22 January 2021", 1000F, loanId.intValue());
+            logLoanTransactions(loanId);
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId.intValue());
+            Optional<GetLoansLoanIdTransactions> optInterestRefundTransaction = loanDetails.getTransactions().stream()
+                    .filter(item -> Objects.equals(item.getType().getValue(), "Interest Refund")).findFirst();
+            final Long interestRefundTransactionId = optInterestRefundTransaction.get().getId();
+
+            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                    () -> loanTransactionHelper.reverseLoanTransaction(loanId, interestRefundTransactionId,
+                            new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATETIME_PATTERN)
+                                    .transactionDate("22 January 2021").transactionAmount(0.0).locale("en")));
+            assertEquals(503, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("error.msg.loan.transaction.update.not.allowed"));
+
+            Optional<GetLoansLoanIdTransactions> optMerchantIssuedTransaction = loanDetails.getTransactions().stream()
+                    .filter(item -> Objects.equals(item.getType().getValue(), "Merchant Issued Refund")).findFirst();
+            final Long merchantIssuedTransactionId = optMerchantIssuedTransaction.get().getId();
+
+            loanTransactionHelper.reverseLoanTransaction(loanId, merchantIssuedTransactionId,
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATETIME_PATTERN).transactionDate("22 January 2021")
+                            .transactionAmount(0.0).locale("en"));
+
+            loanDetails = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId.intValue());
+            optInterestRefundTransaction = loanDetails.getTransactions().stream()
+                    .filter(item -> Objects.equals(item.getType().getValue(), "Interest Refund")).findFirst();
+            assertEquals(Boolean.TRUE, optInterestRefundTransaction.get().getManuallyReversed());
         });
     }
 

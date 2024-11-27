@@ -1412,17 +1412,22 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 new LoanAdjustTransactionBusinessEvent(new LoanAdjustTransactionBusinessEvent.Data(transactionToAdjust)));
         if (this.accountTransfersReadPlatformService.isAccountTransfer(transactionId, PortfolioAccountType.LOAN)) {
             throw new PlatformServiceUnavailableException("error.msg.loan.transfer.transaction.update.not.allowed",
-                    "Loan transaction:" + transactionId + " update not allowed as it involves in account transfer", transactionId);
+                    "Loan transaction: " + transactionId + " update not allowed as it involves in account transfer", transactionId);
         }
         if (loan.isClosedWrittenOff()) {
             throw new PlatformServiceUnavailableException("error.msg.loan.written.off.update.not.allowed",
-                    "Loan transaction:" + transactionId + " update not allowed as loan status is written off", transactionId);
+                    "Loan transaction: " + transactionId + " update not allowed as loan status is written off", transactionId);
         }
 
         if (transactionToAdjust.hasChargebackLoanTransactionRelations()) {
             throw new PlatformServiceUnavailableException("error.msg.loan.transaction.update.not.allowed",
-                    "Loan transaction:" + transactionId + " update not allowed as loan transaction is linked to other transactions",
+                    "Loan transaction: " + transactionId + " update not allowed as loan transaction is linked to other transactions",
                     transactionId);
+        }
+
+        if (transactionToAdjust.isInterestRefund()) {
+            throw new PlatformServiceUnavailableException("error.msg.loan.transaction.update.not.allowed",
+                    "Interest refund transaction: " + transactionId + " cannot be reversed or adjusted directly", transactionId);
         }
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
