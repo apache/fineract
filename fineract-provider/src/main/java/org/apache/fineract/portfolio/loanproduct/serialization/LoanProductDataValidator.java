@@ -49,6 +49,7 @@ import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeOffBehaviour;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
@@ -182,7 +183,8 @@ public final class LoanProductDataValidator {
             LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT, LoanProductConstants.REPAYMENT_START_DATE_TYPE,
             LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY, LoanProductConstants.LOAN_SCHEDULE_TYPE,
             LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE, LoanProductConstants.FIXED_LENGTH,
-            LoanProductConstants.ENABLE_ACCRUAL_ACTIVITY_POSTING, LoanProductConstants.SUPPORTED_INTEREST_REFUND_TYPES));
+            LoanProductConstants.ENABLE_ACCRUAL_ACTIVITY_POSTING, LoanProductConstants.SUPPORTED_INTEREST_REFUND_TYPES,
+            LoanProductConstants.CHARGE_OFF_BEHAVIOUR));
 
     private static final String[] SUPPORTED_LOAN_CONFIGURABLE_ATTRIBUTES = { LoanProductConstants.amortizationTypeParamName,
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyCodeParamName,
@@ -860,6 +862,17 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter(LoanProductConstants.SUPPORTED_INTEREST_REFUND_TYPES).failWithCode(
                     "supported.only.for.progressive.loan.schedule.handling",
                     "Automatic interest refund functionality is only supported for Progressive loans");
+        }
+
+        if (AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY.equals(transactionProcessingStrategyCode)
+                && this.fromApiJsonHelper.parameterExists(LoanProductConstants.CHARGE_OFF_BEHAVIOUR, element)) {
+            String chargeOffBehaviour = this.fromApiJsonHelper.extractStringNamed(LoanProductConstants.CHARGE_OFF_BEHAVIOUR, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.CHARGE_OFF_BEHAVIOUR).value(chargeOffBehaviour)
+                    .isOneOfEnumValues(LoanChargeOffBehaviour.class);
+        } else if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.CHARGE_OFF_BEHAVIOUR, element)) {
+            baseDataValidator.reset().parameter(LoanProductConstants.CHARGE_OFF_BEHAVIOUR).failWithCode(
+                    "supported.only.for.progressive.loan.charge.off.behaviour",
+                    "Charge off behaviour is only supported for Progressive loans");
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

@@ -321,6 +321,8 @@ final class LoanProductsApiResourceSwagger {
         }
 
         public List<String> supportedInterestRefundTypes;
+        @Schema(example = "REGULAR")
+        public String chargeOffBehaviour;
     }
 
     @Schema(description = "PostLoanProductsResponse")
@@ -604,6 +606,7 @@ final class LoanProductsApiResourceSwagger {
         public Integer principalThresholdForLastInstalment;
         public GetLoanProductsResponse.GetLoanProductsRepaymentStartDateType repaymentStartDateType;
         public List<StringEnumOptionData> supportedInterestRefundTypes;
+        public StringEnumOptionData chargeOffBehaviour;
     }
 
     @Schema(description = "GetLoanProductsTemplateResponse")
@@ -1088,6 +1091,8 @@ final class LoanProductsApiResourceSwagger {
         public List<StringEnumOptionData> supportedInterestRefundTypes;
         public List<StringEnumOptionData> supportedInterestRefundTypesOptions;
         public List<GetLoanProductsChargeOffReasonOptions> chargeOffReasonOptions;
+        public StringEnumOptionData chargeOffBehaviour;
+        public List<StringEnumOptionData> chargeOffBehaviourOptions;
     }
 
     @Schema(description = "GetLoanProductsProductIdResponse")
@@ -1374,6 +1379,7 @@ final class LoanProductsApiResourceSwagger {
         public Boolean enableAccrualActivityPosting;
         public List<StringEnumOptionData> supportedInterestRefundTypes;
         public List<GetLoanProductsTemplateResponse.GetLoanProductsChargeOffReasonOptions> chargeOffReasonOptions;
+        public StringEnumOptionData chargeOffBehaviour;
     }
 
     @Schema(description = "PutLoanProductsProductIdRequest")
@@ -1667,6 +1673,8 @@ final class LoanProductsApiResourceSwagger {
         }
 
         public List<String> supportedInterestRefundTypes;
+        @Schema(example = "REGULAR")
+        public String chargeOffBehaviour;
     }
 
     public static final class AdvancedPaymentData {

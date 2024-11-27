@@ -45,6 +45,7 @@ import org.apache.fineract.integrationtests.common.accounting.FinancialActivityA
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeOffBehaviour;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
@@ -406,6 +407,50 @@ public class LoanProductWithAdvancedPaymentAllocationIntegrationTests {
         List<Map<String, String>> loanProductError = validationErrorHelper.getLoanProductError(loanProduct, "errors");
         Assertions.assertEquals("The parameter  interestRatePerPeriod  is mandatory.",
                 loanProductError.get(0).get("defaultUserMessage").replace('`', ' '));
+    }
+
+    @Test
+    public void testCreateAndReadProgressiveLoanProductWithChargeOffBehaviour() {
+        // given
+        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation();
+        AdvancedPaymentData repaymentPaymentAllocation = createRepaymentPaymentAllocation();
+
+        // when
+        String loanProductRequest = loanProductTestBuilder(
+                customization -> customization.addAdvancedPaymentAllocation(defaultAllocation, repaymentPaymentAllocation)
+                        .withChargeOffBehaviour(LoanChargeOffBehaviour.ZERO_INTEREST));
+
+        Integer loanProductId = LOAN_TRANSACTION_HELPER.getLoanProductId(loanProductRequest);
+        Assertions.assertNotNull(loanProductId);
+        GetLoanProductsProductIdResponse loanProduct = LOAN_TRANSACTION_HELPER.getLoanProduct(loanProductId);
+
+        // then
+        Assertions.assertNotNull(loanProduct.getChargeOffBehaviour());
+        Assertions.assertEquals(LoanChargeOffBehaviour.ZERO_INTEREST.name(), loanProduct.getChargeOffBehaviour().getId());
+
+        // when a new interest refund transaction was added
+        LOAN_TRANSACTION_HELPER.updateLoanProduct(loanProductId.longValue(),
+                new PutLoanProductsProductIdRequest().chargeOffBehaviour(LoanChargeOffBehaviour.REGULAR.name()));
+
+        loanProduct = LOAN_TRANSACTION_HELPER.getLoanProduct(loanProductId);
+
+        // then
+        Assertions.assertNotNull(loanProduct.getChargeOffBehaviour());
+        Assertions.assertEquals(LoanChargeOffBehaviour.REGULAR.name(), loanProduct.getChargeOffBehaviour().getId());
+    }
+
+    @Test
+    public void testCreateCumulativeLoanProductWithChargeOff() {
+        // given
+        // when
+        String loanProductRequest = loanProductTestBuilder(
+                customization -> customization.withChargeOffBehaviour(LoanChargeOffBehaviour.ZERO_INTEREST)
+                        .withLoanScheduleType(LoanScheduleType.CUMULATIVE).withRepaymentStrategy("mifos-standard-strategy"));
+        LoanTransactionHelper loanTransactionHelperBadRequest = new LoanTransactionHelper(REQUEST_SPEC,
+                new ResponseSpecBuilder().expectStatusCode(400).build());
+        List<Map<String, String>> loanProductError = loanTransactionHelperBadRequest.getLoanProductError(loanProductRequest, "errors");
+        Assertions.assertEquals("validation.msg.loanproduct.chargeOffBehaviour.supported.only.for.progressive.loan.charge.off.behaviour",
+                loanProductError.get(0).get("userMessageGlobalisationCode"));
     }
 
     private String loanProductTestBuilder(Consumer<LoanProductTestBuilder> customization) {

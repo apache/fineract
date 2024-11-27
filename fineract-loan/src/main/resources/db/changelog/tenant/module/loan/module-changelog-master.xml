@@ -45,4 +45,5 @@
   <include relativeToChangelogFile="true" file="parts/1020_add_re_aged_flag_to_loan_installment.xml"/>
   <include relativeToChangelogFile="true" file="parts/1021_add_loan_status_change_history.xml"/>
   <include relativeToChangelogFile="true" file="parts/1022_add_interest_refund_support.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1023_add_charge_off_behaviour.xml"/>
 </databaseChangeLog>

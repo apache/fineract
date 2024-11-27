@@ -31,6 +31,7 @@ import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.CreditAllocationData;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeOffBehaviour;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 
@@ -162,6 +163,7 @@ public class LoanProductTestBuilder {
     private String loanScheduleProcessingType = LoanScheduleProcessingType.HORIZONTAL.name();
     private FullAccountingConfig fullAccountingConfig;
     private List<String> supportedInterestRefundTypes = null;
+    private String chargeOffBehaviour;
 
     public String build() {
         final HashMap<String, Object> map = build(null, null);
@@ -328,6 +330,10 @@ public class LoanProductTestBuilder {
 
         if (this.supportedInterestRefundTypes != null) {
             map.put("supportedInterestRefundTypes", supportedInterestRefundTypes);
+        }
+
+        if (this.chargeOffBehaviour != null) {
+            map.put("chargeOffBehaviour", chargeOffBehaviour);
         }
 
         return map;
@@ -798,6 +804,11 @@ public class LoanProductTestBuilder {
 
     public LoanProductTestBuilder withSupportedInterestRefundTypes(String... refundTypes) {
         this.supportedInterestRefundTypes = List.of(refundTypes);
+        return this;
+    }
+
+    public LoanProductTestBuilder withChargeOffBehaviour(LoanChargeOffBehaviour chargeOffBehaviour) {
+        this.chargeOffBehaviour = chargeOffBehaviour.name();
         return this;
     }
 

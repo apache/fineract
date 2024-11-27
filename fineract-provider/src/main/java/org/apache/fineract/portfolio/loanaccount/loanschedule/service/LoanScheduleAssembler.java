@@ -528,7 +528,8 @@ public class LoanScheduleAssembler {
                 disbursedAmountPercentageForDownPayment, isAutoRepaymentForDownPaymentEnabled, repaymentStartDateType, submittedOnDate,
                 loanScheduleType, loanScheduleProcessingType, fixedLength,
                 loanProduct.getLoanProductRelatedDetail().isEnableAccrualActivityPosting(),
-                loanProduct.getLoanProductRelatedDetail().getSupportedInterestRefundTypes());
+                loanProduct.getLoanProductRelatedDetail().getSupportedInterestRefundTypes(),
+                loanProduct.getLoanProductRelatedDetail().getChargeOffBehaviour());
     }
 
     private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,
