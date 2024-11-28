@@ -104,7 +104,11 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
     @Override
     public LoanProduct retrieveLoanProductByExternalId(final ExternalId externalId) {
-        return loanProductRepository.findByExternalId(externalId);
+        final LoanProduct loanProduct = loanProductRepository.findByExternalId(externalId);
+        if (loanProduct == null) {
+            throw new LoanProductNotFoundException(externalId);
+        }
+        return loanProduct;
     }
 
     @Override

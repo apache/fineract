@@ -32,7 +32,8 @@ public class LoanProductNotFoundException extends AbstractPlatformResourceNotFou
     }
 
     public LoanProductNotFoundException(final ExternalId externalId) {
-        super("error.msg.loanproduct.id.invalid", "Loan product with identifier " + externalId + " does not exist", externalId);
+        super("error.msg.loanproduct.id.invalid", "Loan product with identifier " + externalId.getValue() + " does not exist",
+                externalId.getValue());
     }
 
     public LoanProductNotFoundException(Long id, EmptyResultDataAccessException e) {
