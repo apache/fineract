@@ -88,7 +88,7 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
     private boolean isArrearsBasedOnOriginalSchedule;
 
     @Column(name = "pre_close_interest_calculation_strategy")
-    private Integer preClosureInterestCalculationStrategy;
+    private Integer preCloseInterestCalculationStrategy;
 
     @Column(name = "is_compounding_to_be_posted_as_transaction")
     private Boolean isCompoundingToBePostedAsTransaction;
@@ -159,7 +159,7 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
         Integer preCloseInterestCalculationStrategy = command
                 .integerValueOfParameterNamed(LoanProductConstants.preClosureInterestCalculationStrategyParamName);
         if (preCloseInterestCalculationStrategy == null) {
-            preCloseInterestCalculationStrategy = LoanPreClosureInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE.getValue();
+            preCloseInterestCalculationStrategy = LoanPreCloseInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE.getValue();
         }
 
         final boolean isCompoundingToBePostedAsTransaction = command
@@ -196,7 +196,7 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
         this.compoundingFrequencyOnDay = compoundingFrequencyOnDay;
         this.compoundingFrequencyWeekday = compoundingFrequencyWeekday;
         this.isArrearsBasedOnOriginalSchedule = isArrearsBasedOnOriginalSchedule;
-        this.preClosureInterestCalculationStrategy = preCloseInterestCalculationStrategy;
+        this.preCloseInterestCalculationStrategy = preCloseInterestCalculationStrategy;
         this.isCompoundingToBePostedAsTransaction = isCompoundingToBePostedAsTransaction;
         this.allowCompoundingOnEod = allowCompoundingOnEod;
         this.disallowInterestCalculationOnPastDue = disallowInterestCalculationOnPastDue;
@@ -397,13 +397,13 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
         }
 
         if (command.isChangeInIntegerParameterNamed(LoanProductConstants.preClosureInterestCalculationStrategyParamName,
-                this.preClosureInterestCalculationStrategy)) {
+                this.preCloseInterestCalculationStrategy)) {
             Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.preClosureInterestCalculationStrategyParamName);
             if (newValue == null) {
-                newValue = LoanPreClosureInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE.getValue();
+                newValue = LoanPreCloseInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE.getValue();
             }
             actualChanges.put(LoanProductConstants.preClosureInterestCalculationStrategyParamName, newValue);
-            this.preClosureInterestCalculationStrategy = newValue;
+            this.preCloseInterestCalculationStrategy = newValue;
         }
 
         if (command.isChangeInBooleanParameterNamed(LoanProductConstants.isCompoundingToBePostedAsTransactionParamName,
@@ -443,8 +443,8 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
         return this.isArrearsBasedOnOriginalSchedule;
     }
 
-    public LoanPreClosureInterestCalculationStrategy preCloseInterestCalculationStrategy() {
-        return LoanPreClosureInterestCalculationStrategy.fromInt(this.preClosureInterestCalculationStrategy);
+    public LoanPreCloseInterestCalculationStrategy getPreCloseInterestCalculationStrategy() {
+        return LoanPreCloseInterestCalculationStrategy.fromInt(this.preCloseInterestCalculationStrategy);
     }
 
     public Integer getRestFrequencyNthDay() {

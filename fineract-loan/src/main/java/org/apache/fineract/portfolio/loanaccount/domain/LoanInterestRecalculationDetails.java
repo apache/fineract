@@ -20,11 +20,14 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestRecalculationCompoundingMethod;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanPreCloseInterestCalculationStrategy;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductInterestRecalculationDetails;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
@@ -88,6 +91,10 @@ public class LoanInterestRecalculationDetails extends AbstractPersistableCustom<
     @Column(name = "allow_compounding_on_eod")
     private Boolean allowCompoundingOnEod;
 
+    @Column(name = "pre_close_interest_calculation_strategy")
+    @Enumerated(EnumType.ORDINAL)
+    private LoanPreCloseInterestCalculationStrategy preCloseInterestCalculationStrategy;
+
     @Column(name = "disallow_interest_calc_on_past_due")
     private Boolean disallowInterestCalculationOnPastDue;
 
@@ -99,7 +106,8 @@ public class LoanInterestRecalculationDetails extends AbstractPersistableCustom<
             final Integer restFrequencyType, final Integer restInterval, final Integer restFrequencyNthDay, Integer restFrequencyWeekday,
             Integer restFrequencyOnDay, Integer compoundingFrequencyType, Integer compoundingInterval, Integer compoundingFrequencyNthDay,
             Integer compoundingFrequencyWeekday, Integer compoundingFrequencyOnDay, final boolean isCompoundingToBePostedAsTransaction,
-            final boolean allowCompoundingOnEod, final boolean disallowInterestCalculationOnPastDue) {
+            final boolean allowCompoundingOnEod, final boolean disallowInterestCalculationOnPastDue,
+            final LoanPreCloseInterestCalculationStrategy preCloseInterestCalculationStrategy) {
         this.interestRecalculationCompoundingMethod = interestRecalculationCompoundingMethod;
         this.rescheduleStrategyMethod = rescheduleStrategyMethod;
         this.restFrequencyNthDay = restFrequencyNthDay;
@@ -115,6 +123,7 @@ public class LoanInterestRecalculationDetails extends AbstractPersistableCustom<
         this.isCompoundingToBePostedAsTransaction = isCompoundingToBePostedAsTransaction;
         this.allowCompoundingOnEod = allowCompoundingOnEod;
         this.disallowInterestCalculationOnPastDue = disallowInterestCalculationOnPastDue;
+        this.preCloseInterestCalculationStrategy = preCloseInterestCalculationStrategy;
     }
 
     public static LoanInterestRecalculationDetails createFrom(
@@ -132,7 +141,8 @@ public class LoanInterestRecalculationDetails extends AbstractPersistableCustom<
                 loanProductInterestRecalculationDetails.getCompoundingFrequencyOnDay(),
                 loanProductInterestRecalculationDetails.getIsCompoundingToBePostedAsTransaction(),
                 loanProductInterestRecalculationDetails.allowCompoundingOnEod(),
-                loanProductInterestRecalculationDetails.disallowInterestCalculationOnPastDue());
+                loanProductInterestRecalculationDetails.disallowInterestCalculationOnPastDue(),
+                loanProductInterestRecalculationDetails.getPreCloseInterestCalculationStrategy());
     }
 
     public void updateLoan(final Loan loan) {
@@ -197,5 +207,9 @@ public class LoanInterestRecalculationDetails extends AbstractPersistableCustom<
 
     public Boolean disallowInterestCalculationOnPastDue() {
         return disallowInterestCalculationOnPastDue;
+    }
+
+    public LoanPreCloseInterestCalculationStrategy getPreCloseInterestCalculationStrategy() {
+        return preCloseInterestCalculationStrategy;
     }
 }

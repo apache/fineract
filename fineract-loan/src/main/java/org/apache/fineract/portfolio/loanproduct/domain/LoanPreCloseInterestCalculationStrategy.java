@@ -21,7 +21,7 @@ package org.apache.fineract.portfolio.loanproduct.domain;
 import java.util.HashMap;
 import java.util.Map;
 
-public enum LoanPreClosureInterestCalculationStrategy {
+public enum LoanPreCloseInterestCalculationStrategy {
 
     NONE(0, "loanPreClosureInterestCalculationStrategy.none"), //
     TILL_PRE_CLOSURE_DATE(1, "loanPreClosureInterestCalculationStrategy.tillPreClosureDate"), //
@@ -33,13 +33,13 @@ public enum LoanPreClosureInterestCalculationStrategy {
     private final Integer value;
     private final String code;
 
-    private static final Map<Integer, LoanPreClosureInterestCalculationStrategy> intToEnumMap = new HashMap<>();
+    private static final Map<Integer, LoanPreCloseInterestCalculationStrategy> intToEnumMap = new HashMap<>();
     private static int minValue;
     private static int maxValue;
 
     static {
         int i = 0;
-        for (final LoanPreClosureInterestCalculationStrategy type : LoanPreClosureInterestCalculationStrategy.values()) {
+        for (final LoanPreCloseInterestCalculationStrategy type : LoanPreCloseInterestCalculationStrategy.values()) {
             if (i == 0) {
                 minValue = type.value;
             }
@@ -54,11 +54,11 @@ public enum LoanPreClosureInterestCalculationStrategy {
         }
     }
 
-    public static LoanPreClosureInterestCalculationStrategy fromInt(final Integer ruleTypeValue) {
+    public static LoanPreCloseInterestCalculationStrategy fromInt(final Integer ruleTypeValue) {
         return intToEnumMap.get(ruleTypeValue);
     }
 
-    LoanPreClosureInterestCalculationStrategy(final Integer value, final String code) {
+    LoanPreCloseInterestCalculationStrategy(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }
@@ -80,10 +80,10 @@ public enum LoanPreClosureInterestCalculationStrategy {
     }
 
     public boolean calculateTillRestFrequencyEnabled() {
-        return this.getValue().equals(LoanPreClosureInterestCalculationStrategy.TILL_REST_FREQUENCY_DATE.getValue());
+        return this.getValue().equals(LoanPreCloseInterestCalculationStrategy.TILL_REST_FREQUENCY_DATE.getValue());
     }
 
     public boolean calculateTillPreClosureDateEnabled() {
-        return this.getValue().equals(LoanPreClosureInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE.getValue());
+        return this.getValue().equals(LoanPreCloseInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE.getValue());
     }
 }

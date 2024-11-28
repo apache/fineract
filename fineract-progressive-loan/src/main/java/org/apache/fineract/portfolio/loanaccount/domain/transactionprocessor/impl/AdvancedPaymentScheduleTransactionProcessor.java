@@ -93,7 +93,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.AllocationType;
 import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationTransactionType;
 import org.apache.fineract.portfolio.loanproduct.domain.DueType;
 import org.apache.fineract.portfolio.loanproduct.domain.FutureInstallmentAllocationRule;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanPreClosureInterestCalculationStrategy;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanPreCloseInterestCalculationStrategy;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.springframework.transaction.annotation.Propagation;
@@ -1657,10 +1657,10 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
     private LocalDate calculateNewPayDateInCaseOfInAdvancePayment(LoanTransaction loanTransaction,
             LoanRepaymentScheduleInstallment inAdvanceInstallment) {
-        LoanPreClosureInterestCalculationStrategy strategy = loanTransaction.getLoan().getLoanProduct()
-                .preCloseInterestCalculationStrategy();
+        LoanPreCloseInterestCalculationStrategy strategy = loanTransaction.getLoan().getLoanInterestRecalculationDetails()
+                .getPreCloseInterestCalculationStrategy();
 
-        LocalDate payDate = switch (strategy) {
+        return switch (strategy) {
             case TILL_PRE_CLOSURE_DATE -> loanTransaction.getTransactionDate();
             // TODO use isInPeriod
             case TILL_REST_FREQUENCY_DATE -> loanTransaction.getTransactionDate().isAfter(inAdvanceInstallment.getFromDate()) //
@@ -1669,7 +1669,6 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                             : loanTransaction.getTransactionDate(); //
             case NONE -> throw new IllegalStateException("Unexpected PreClosureInterestCalculationStrategy: NONE");
         };
-        return payDate;
     }
 
     @NotNull

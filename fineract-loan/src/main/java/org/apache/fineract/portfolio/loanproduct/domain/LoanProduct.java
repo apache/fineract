@@ -1594,10 +1594,10 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
         return isBasedOnOriginalSchedule;
     }
 
-    public LoanPreClosureInterestCalculationStrategy preCloseInterestCalculationStrategy() {
-        LoanPreClosureInterestCalculationStrategy preCloseInterestCalculationStrategy = LoanPreClosureInterestCalculationStrategy.NONE;
+    public LoanPreCloseInterestCalculationStrategy preCloseInterestCalculationStrategy() {
+        LoanPreCloseInterestCalculationStrategy preCloseInterestCalculationStrategy = LoanPreCloseInterestCalculationStrategy.NONE;
         if (this.isInterestRecalculationEnabled()) {
-            preCloseInterestCalculationStrategy = getProductInterestRecalculationDetails().preCloseInterestCalculationStrategy();
+            preCloseInterestCalculationStrategy = getProductInterestRecalculationDetails().getPreCloseInterestCalculationStrategy();
         }
         return preCloseInterestCalculationStrategy;
     }

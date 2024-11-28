@@ -29,7 +29,7 @@ import static org.apache.fineract.portfolio.loanaccount.loanschedule.domain.Loan
 import static org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod.EQUAL_PRINCIPAL;
 import static org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD;
 import static org.apache.fineract.portfolio.loanproduct.domain.InterestMethod.FLAT;
-import static org.apache.fineract.portfolio.loanproduct.domain.LoanPreClosureInterestCalculationStrategy.NONE;
+import static org.apache.fineract.portfolio.loanproduct.domain.LoanPreCloseInterestCalculationStrategy.NONE;
 import static org.apache.fineract.portfolio.loanproduct.domain.RepaymentStartDateType.DISBURSEMENT_DATE;
 import static org.apache.fineract.util.TimeZoneConstants.ASIA_MANILA_ID;
 import static org.apache.fineract.util.TimeZoneConstants.EUROPE_BERLIN_ID;
