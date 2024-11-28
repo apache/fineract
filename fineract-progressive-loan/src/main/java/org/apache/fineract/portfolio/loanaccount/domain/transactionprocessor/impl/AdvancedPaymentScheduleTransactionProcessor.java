@@ -971,8 +971,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     private void recalculateInterestForDate(LocalDate targetDate, ProgressiveTransactionCtx ctx) {
         if (ctx.getInstallments() != null && !ctx.getInstallments().isEmpty()) {
             Loan loan = ctx.getInstallments().get(0).getLoan();
-            if (loan.isInterestRecalculationEnabled() && !loan.isNpa()
-                    && (!loan.isChargedOff() || !DateUtils.isAfter(targetDate, loan.getChargedOffOnDate()))) {
+            if (loan.isInterestRecalculationEnabled() && !loan.isNpa() && !ctx.isChargedOff()) {
 
                 List<LoanRepaymentScheduleInstallment> overdueInstallmentsSortedByInstallmentNumber = findOverdueInstallmentsBeforeDateSortedByInstallmentNumber(
                         targetDate, ctx);
@@ -1175,6 +1174,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             if (LoanChargeOffBehaviour.ZERO_INTEREST.equals(loanTransaction.getLoan().getLoanProductRelatedDetail().getChargeOffBehaviour())
                     && !loanTransaction.isReversed()) {
                 handleZeroInterestChargeOff(loanTransaction, transactionCtx);
+            } else if (LoanChargeOffBehaviour.ACCELERATE_MATURITY
+                    .equals(loanTransaction.getLoan().getLoanProductRelatedDetail().getChargeOffBehaviour())) {
+                handleAccelerateMaturityChargeOff(loanTransaction, transactionCtx);
             }
         }
 
@@ -1195,6 +1197,45 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         }
 
         loanTransaction.updateComponentsAndTotal(principalPortion, interestPortion, feeChargesPortion, penaltychargesPortion);
+        if (transactionCtx instanceof ProgressiveTransactionCtx progressiveTransactionCtx) {
+            progressiveTransactionCtx.setChargedOff(true);
+        }
+    }
+
+    private void handleAccelerateMaturityChargeOff(LoanTransaction loanTransaction, TransactionCtx transactionCtx) {
+        final LocalDate transactionDate = loanTransaction.getTransactionDate();
+        final List<LoanRepaymentScheduleInstallment> installments = transactionCtx.getInstallments();
+        Loan loan = loanTransaction.getLoan();
+        LoanRepaymentScheduleInstallment currentInstallment = loan.getRelatedRepaymentScheduleInstallment(transactionDate);
+
+        if (!installments.isEmpty() && transactionDate.isBefore(loan.getMaturityDate())) {
+            if (transactionCtx instanceof ProgressiveTransactionCtx progressiveTransactionCtx
+                    && loanTransaction.getLoan().isInterestRecalculationEnabled()) {
+                final BigDecimal newInterest = emiCalculator
+                        .getPeriodInterestTillDate(progressiveTransactionCtx.getModel(), currentInstallment.getDueDate(), transactionDate)
+                        .getAmount();
+                currentInstallment.updateInterestCharged(newInterest);
+            } else {
+                final BigDecimal totalInterest = currentInstallment.getInterestOutstanding(transactionCtx.getCurrency()).getAmount();
+                final long totalDaysInPeriod = ChronoUnit.DAYS.between(currentInstallment.getFromDate(), currentInstallment.getDueDate());
+                final long daysTillChargeOff = ChronoUnit.DAYS.between(currentInstallment.getFromDate(), transactionDate);
+
+                final BigDecimal interestTillChargeOff = totalInterest
+                        .divide(BigDecimal.valueOf(totalDaysInPeriod), MoneyHelper.getMathContext())
+                        .multiply(BigDecimal.valueOf(daysTillChargeOff));
+
+                currentInstallment.updateInterestCharged(interestTillChargeOff);
+            }
+
+            currentInstallment.updateDueDate(transactionDate);
+            BigDecimal futurePrincipal = installments.stream().filter(installment -> transactionDate.isBefore(installment.getDueDate()))
+                    .map(LoanRepaymentScheduleInstallment::getPrincipal).reduce(BigDecimal.ZERO, BigDecimal::add);
+            currentInstallment.updatePrincipal(MathUtil.nullToZero(currentInstallment.getPrincipal()).add(futurePrincipal));
+            List<LoanRepaymentScheduleInstallment> installmentsUpToTransactionDate = installments.stream()
+                    .filter(installment -> transactionDate.isAfter(installment.getFromDate())).toList();
+            loan.updateLoanSchedule(installmentsUpToTransactionDate);
+            loan.updateLoanScheduleDependentDerivedFields();
+        }
     }
 
     private void handleZeroInterestChargeOff(final LoanTransaction loanTransaction, final TransactionCtx transactionCtx) {

@@ -3290,6 +3290,18 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         loan.liftChargeOff();
         loanTransactionRepository.saveAndFlush(chargedOffTransaction);
+        if (loan.isProgressiveSchedule()) {
+            final ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, null, null);
+            loanScheduleService.regenerateRepaymentScheduleWithInterestRecalculation(loan, scheduleGeneratorDTO);
+            ChangedTransactionDetail changedTransactionDetail = loan.reprocessTransactions();
+            if (changedTransactionDetail != null) {
+                for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
+                    loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(mapEntry.getValue());
+                    accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
+                }
+                replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
+            }
+        }
         saveLoanWithDataIntegrityViolationChecks(loan);
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
         businessEventNotifierService.notifyPostBusinessEvent(new LoanUndoChargeOffBusinessEvent(chargedOffTransaction));

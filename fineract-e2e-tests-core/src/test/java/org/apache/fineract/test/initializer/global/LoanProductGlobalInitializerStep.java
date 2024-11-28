@@ -1144,6 +1144,24 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .createLoanProduct(loanProductsRequestAdvZeroInterestChargeOffBehaviourProgressiveLoanSchedule).execute();
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_ZERO_INTEREST_CHARGE_OFF_BEHAVIOUR,
                 responseLoanProductsRequestAdvZeroInterestChargeOffBehaviourProgressiveLoanSchedule);
+
+        // LP2 with progressive loan schedule + horizontal + interest EMI + 360/30 + multidisbursement +
+        // accelerate-maturity chargeOff behaviour
+        // (LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALCULATION_ACCELERATE_MATURITY_CHARGE_OFF_BEHAVIOUR)
+        final String name53 = DefaultLoanProduct.LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALCULATION_ACCELERATE_MATURITY_CHARGE_OFF_BEHAVIOUR
+                .getName();
+
+        final PostLoanProductsRequest loanProductsRequestAdvCustomAccelerateMaturityChargeOffBehaviourProgressiveLoanSchedule = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2InterestDailyRecalculation()//
+                .name(name53)//
+                .paymentAllocation(List.of(//
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT")))
+                .chargeOffBehaviour("ACCELERATE_MATURITY");//
+        final Response<PostLoanProductsResponse> responseLoanProductsRequestAdvCustomAccelerateMaturityChargeOffBehaviourProgressiveLoanSchedule = loanProductsApi
+                .createLoanProduct(loanProductsRequestAdvCustomAccelerateMaturityChargeOffBehaviourProgressiveLoanSchedule).execute();
+        TestContext.INSTANCE.set(
+                TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALCULATION_ZERO_INTEREST_CHARGE_OFF_BEHAVIOUR,
+                responseLoanProductsRequestAdvCustomAccelerateMaturityChargeOffBehaviourProgressiveLoanSchedule);
     }
 
     public static AdvancedPaymentData createPaymentAllocation(String transactionType, String futureInstallmentAllocationRule,
