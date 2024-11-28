@@ -1426,7 +1426,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         if (transactionToAdjust.isInterestRefund()) {
-            throw new PlatformServiceUnavailableException("error.msg.loan.transaction.update.not.allowed",
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.transaction.update.not.allowed",
                     "Interest refund transaction: " + transactionId + " cannot be reversed or adjusted directly", transactionId);
         }
 

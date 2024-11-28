@@ -1240,7 +1240,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                     () -> loanTransactionHelper.reverseLoanTransaction(loanId, interestRefundTransactionId,
                             new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATETIME_PATTERN)
                                     .transactionDate("22 January 2021").transactionAmount(0.0).locale("en")));
-            assertEquals(503, exception.getResponse().code());
+            assertEquals(403, exception.getResponse().code());
             assertTrue(exception.getMessage().contains("error.msg.loan.transaction.update.not.allowed"));
 
             Optional<GetLoansLoanIdTransactions> optMerchantIssuedTransaction = loanDetails.getTransactions().stream()
