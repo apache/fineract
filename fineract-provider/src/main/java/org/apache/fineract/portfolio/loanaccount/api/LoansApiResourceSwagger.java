@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.apache.fineract.portfolio.delinquency.api.DelinquencyApiResourceSwagger.GetDelinquencyRangesResponse;
 
 /**
@@ -1202,6 +1203,7 @@ final class LoansApiResourceSwagger {
         public List<GetLoansLoanIdLoanTermVariations> emiAmountVariations;
         @Schema(description = "List of GetLoansLoanIdLoanTermVariations")
         public List<GetLoansLoanIdLoanTermVariations> loanTermVariations;
+        public StringEnumOptionData chargeOffBehaviour;
     }
 
     @Schema(description = "GetLoansResponse")

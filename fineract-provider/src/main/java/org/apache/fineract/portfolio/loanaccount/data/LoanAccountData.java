@@ -33,6 +33,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -269,6 +270,8 @@ public class LoanAccountData {
     private EnumOptionData loanScheduleType;
     private EnumOptionData loanScheduleProcessingType;
 
+    private StringEnumOptionData chargeOffBehaviour;
+
     public static LoanAccountData importInstanceIndividual(EnumOptionData loanTypeEnumOption, Long clientId, Long productId,
             Long loanOfficerId, LocalDate submittedOnDate, Long fundId, BigDecimal principal, Integer numberOfRepayments,
             Integer repaymentEvery, EnumOptionData repaidEveryFrequencyEnums, Integer loanTermFrequency,
@@ -453,7 +456,7 @@ public class LoanAccountData {
             LocalDate lastClosedBusinessDate, LocalDate overpaidOnDate, final boolean chargedOff, final boolean enableDownPayment,
             final BigDecimal disbursedAmountPercentageForDownPayment, final boolean enableAutoRepaymentForDownPayment,
             final boolean enableInstallmentLevelDelinquency, final EnumOptionData loanScheduleType,
-            final EnumOptionData loanScheduleProcessingType, final Integer fixedLength) {
+            final EnumOptionData loanScheduleProcessingType, final Integer fixedLength, final StringEnumOptionData chargeOffBehaviour) {
 
         final CollectionData delinquent = CollectionData.template();
 
@@ -497,7 +500,8 @@ public class LoanAccountData {
                 .setEnableDownPayment(enableDownPayment).setDisbursedAmountPercentageForDownPayment(disbursedAmountPercentageForDownPayment)
                 .setEnableAutoRepaymentForDownPayment(enableAutoRepaymentForDownPayment)
                 .setEnableInstallmentLevelDelinquency(enableInstallmentLevelDelinquency).setLoanScheduleType(loanScheduleType)
-                .setLoanScheduleProcessingType(loanScheduleProcessingType).setFixedLength(fixedLength);
+                .setLoanScheduleProcessingType(loanScheduleProcessingType).setFixedLength(fixedLength)
+                .setChargeOffBehaviour(chargeOffBehaviour);
     }
 
     /*
