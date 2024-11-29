@@ -1276,6 +1276,7 @@ public abstract class BaseLoanIntegrationTest {
         public static final Long MONTHS_L = 2L;
         public static final String MONTHS_STRING = "MONTHS";
         public static final Integer DAYS = 0;
+        public static final Long DAYS_L = 0L;
         public static final String DAYS_STRING = "DAYS";
     }
 
