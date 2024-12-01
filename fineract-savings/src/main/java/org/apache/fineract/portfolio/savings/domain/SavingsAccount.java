@@ -1593,12 +1593,17 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
 
     public void validateAccountBalanceDoesNotViolateOverdraft(final List<SavingsAccountTransaction> savingsAccountTransaction,
             final BigDecimal amountPaid) {
-        if (savingsAccountTransaction != null) {
+        if (savingsAccountTransaction != null && savingsAccountTransaction.size() > 0) {
             SavingsAccountTransaction savingsAccountTransactionFirst = savingsAccountTransaction.get(0);
             if (!this.allowOverdraft) {
                 if (savingsAccountTransactionFirst.getRunningBalance(this.currency).minus(amountPaid).isLessThanZero()) {
                     throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), null, amountPaid);
                 }
+            }
+
+        } else {
+            if (!this.allowOverdraft) {
+                throw new InsufficientAccountBalanceException("transactionAmount", BigDecimal.ZERO, null, amountPaid);
             }
         }
     }
