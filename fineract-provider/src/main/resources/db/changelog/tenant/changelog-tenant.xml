@@ -175,4 +175,5 @@
     <include file="parts/0154_add_interest_refund_to_r_enum_value.xml" relativeToChangelogFile="true" />
     <include file="parts/0155_add_configuration_enable_immediate_charge_accrual_post_maturity.xml" relativeToChangelogFile="true" />
     <include file="parts/0156_add_disallow_interest_calc_on_past_due_field.xml" relativeToChangelogFile="true" />
+    <include file="parts/0157_create_index_m_loan_transaction_relation.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

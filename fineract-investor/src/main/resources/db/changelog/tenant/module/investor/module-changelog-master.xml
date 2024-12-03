@@ -34,4 +34,5 @@
   <include relativeToChangelogFile="true" file="parts/0010_external_transafer_status_external_transfer_id_constraints.xml"/>
   <include relativeToChangelogFile="true" file="parts/0011_set_datetime_precision.xml"/>
   <include relativeToChangelogFile="true" file="parts/0012_add_external_asset_owner_transfer_index.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0013_add_additional_asset_owner_indices.xml"/>
 </databaseChangeLog>
