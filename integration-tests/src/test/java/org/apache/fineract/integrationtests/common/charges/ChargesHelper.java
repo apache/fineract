@@ -223,14 +223,25 @@ public final class ChargesHelper extends IntegrationTest {
         return getLoanSpecifiedDueDateJSON(chargeCalculationType, amount, penalty, ChargesHelper.CHARGE_PAYMENT_MODE_REGULAR);
     }
 
+    public static String getLoanSpecifiedDueDateJSON(final Integer chargeCalculationType, final String amount, boolean penalty,
+            String currencyCode) {
+        return getLoanSpecifiedDueDateJSON(chargeCalculationType, amount, penalty, ChargesHelper.CHARGE_PAYMENT_MODE_REGULAR, currencyCode);
+    }
+
     public static String getLoanSpecifiedDueDateJSON(final Integer chargeCalculationType, final String amount, final boolean penalty,
             final Integer paymentMode) {
+        return getLoanSpecifiedDueDateJSON(chargeCalculationType, amount, penalty, paymentMode, ChargesHelper.CURRENCY_CODE);
+    }
+
+    public static String getLoanSpecifiedDueDateJSON(final Integer chargeCalculationType, final String amount, final boolean penalty,
+            final Integer paymentMode, final String currencyCode) {
         final HashMap<String, Object> map = populateDefaultsForLoan();
         map.put("chargeTimeType", CHARGE_SPECIFIED_DUE_DATE);
         map.put("chargePaymentMode", paymentMode);
         map.put("penalty", penalty);
         map.put("amount", amount);
         map.put("chargeCalculationType", chargeCalculationType);
+        map.put("currencyCode", currencyCode);
 
         String chargesCreateJson = new Gson().toJson(map);
         LOG.info("{}", chargesCreateJson);

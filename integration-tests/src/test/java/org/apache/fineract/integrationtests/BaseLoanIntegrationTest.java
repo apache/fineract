@@ -1004,6 +1004,12 @@ public abstract class BaseLoanIntegrationTest {
         return ChargesHelper.createLoanCharge(requestSpec, responseSpec, payload);
     }
 
+    protected PostChargesResponse createCharge(Double amount, String currencyCode) {
+        String payload = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, amount.toString(), false,
+                currencyCode);
+        return ChargesHelper.createLoanCharge(requestSpec, responseSpec, payload);
+    }
+
     protected PostLoansLoanIdChargesResponse addLoanCharge(Long loanId, Long chargeId, String date, Double amount) {
         String payload = LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(chargeId.toString(), date, amount.toString());
         return loanTransactionHelper.addChargeForLoan(loanId.intValue(), payload, responseSpec);
