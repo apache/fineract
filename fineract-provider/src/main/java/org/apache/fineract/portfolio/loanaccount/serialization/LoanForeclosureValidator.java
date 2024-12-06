@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 public final class LoanForeclosureValidator {
 
     public void validateForForeclosure(final Loan loan, final LocalDate transactionDate) {
-        if (loan.isInterestRecalculationEnabledForProduct()) {
+        if (loan.isInterestRecalculationEnabled()) {
             final String defaultUserMessage = "The loan with interest recalculation enabled cannot be foreclosed.";
             throw new LoanForeclosureException("loan.with.interest.recalculation.enabled.cannot.be.foreclosured", defaultUserMessage,
                     loan.getId());

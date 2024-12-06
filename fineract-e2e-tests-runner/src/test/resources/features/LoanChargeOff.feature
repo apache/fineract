@@ -1578,3 +1578,36 @@ Feature: Charge-off
       | ASSET   | 112601       | Loans Receivable           | 650.0 |        |
       | EXPENSE | 744037       | Credit Loss/Bad Debt-Fraud |       | 650.0  |
 
+  @TestRailId:C3326 @AdvancedPaymentAllocation
+  Scenario: Verify the repayment schedule is updated before the Charge-off in case of interest recalculation = true
+    When Admin sets the business date to "01 January 2024"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                     | submitted on date | with Principal | ANNUAL interest rate % | interest type           | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_TILL_PRECLOSE_PMT_ALLOC_1  | 01 January 2024   | 1000           | 7                      | DECLINING_BALANCE       | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "1000" amount and expected disbursement date on "01 January 2024"
+    When Admin successfully disburse the loan on "01 January 2024" with "1000" EUR transaction amount
+    When Admin runs inline COB job for Loan
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
+      |    |      | 01 January 2024  |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0   |            |       |             |
+      | 1  | 31   | 01 February 2024 |                 | 668.6           | 331.4         | 5.83     | 0.0  | 0.0       | 337.23 | 0.0   | 0.0        | 0.0   | 337.23      |
+      | 2  | 29   | 01 March 2024    |                 | 335.27          | 333.33        | 3.9      | 0.0  | 0.0       | 337.23 | 0.0   | 0.0        | 0.0   | 337.23      |
+      | 3  | 31   | 01 April 2024    |                 | 0.0             | 335.27        | 1.96     | 0.0  | 0.0       | 337.23 | 0.0   | 0.0        | 0.0   | 337.23      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      | 1000          | 11.69    | 0    | 0         | 1011.69 | 0    | 0          | 0    | 1011.69     |
+    When Admin sets the business date to "15 February 2024"
+    When Admin runs inline COB job for Loan
+    # Move the current date into the middle of the 2nd period, so 1st period is past due
+    When Admin sets the business date to "15 August 2024"
+    And Admin does charge-off the loan on "09 February 2024"
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
+      |    |      | 01 January 2024  |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0   |            |       |             |
+      | 1  | 31   | 01 February 2024 |                 | 668.6           | 331.4         | 5.83     | 0.0  | 0.0       | 337.23 | 0.0   | 0.0        | 0.0   | 337.23      |
+      | 2  | 29   | 01 March 2024    |                 | 335.8           | 332.8         | 4.43     | 0.0  | 0.0       | 337.23 | 0.0   | 0.0        | 0.0   | 337.23      |
+      | 3  | 31   | 01 April 2024    |                 | 0.0             | 335.8         | 1.96     | 0.0  | 0.0       | 337.76 | 0.0   | 0.0        | 0.0   | 337.76      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      | 1000          | 12.22    | 0    | 0         | 1012.22 | 0    | 0          | 0    | 1012.22     |

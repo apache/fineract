@@ -281,6 +281,10 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
     @Override
     public void processLatestTransaction(LoanTransaction loanTransaction, TransactionCtx ctx) {
+        // If we are behind, we might need to first recalculate interest
+        if (ctx instanceof ProgressiveTransactionCtx progressiveTransactionCtx) {
+            recalculateInterestForDate(loanTransaction.getTransactionDate(), progressiveTransactionCtx);
+        }
         switch (loanTransaction.getTypeOf()) {
             case DISBURSEMENT -> handleDisbursement(loanTransaction, ctx);
             case WRITEOFF -> handleWriteOff(loanTransaction, ctx);
@@ -963,40 +967,44 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     }
 
     private void recalculateInterestForDate(LocalDate targetDate, ProgressiveTransactionCtx ctx) {
-        if (ctx.getInstallments() != null && !ctx.getInstallments().isEmpty()
-                && ctx.getInstallments().get(0).getLoan().getLoanProductRelatedDetail().isInterestRecalculationEnabled()
-                && !ctx.getInstallments().get(0).getLoan().isNpa() && !ctx.getInstallments().get(0).getLoan().isChargedOff()) {
-            List<LoanRepaymentScheduleInstallment> overdueInstallmentsSortedByInstallmentNumber = findOverdueInstallmentsBeforeDateSortedByInstallmentNumber(
-                    targetDate, ctx);
-            if (!overdueInstallmentsSortedByInstallmentNumber.isEmpty()) {
-                List<LoanRepaymentScheduleInstallment> normalInstallments = ctx.getInstallments().stream() //
-                        .filter(installment -> !installment.isAdditional() && !installment.isDownPayment()).toList();
+        if (ctx.getInstallments() != null && !ctx.getInstallments().isEmpty()) {
+            Loan loan = ctx.getInstallments().get(0).getLoan();
+            if (loan.isInterestRecalculationEnabled() && !loan.isNpa()
+                    && (!loan.isChargedOff() || !DateUtils.isAfter(targetDate, loan.getChargedOffOnDate()))) {
 
-                Optional<LoanRepaymentScheduleInstallment> currentInstallmentOptional = normalInstallments.stream().filter(
-                        installment -> installment.getFromDate().isBefore(targetDate) && !installment.getDueDate().isBefore(targetDate))
-                        .findAny();
+                List<LoanRepaymentScheduleInstallment> overdueInstallmentsSortedByInstallmentNumber = findOverdueInstallmentsBeforeDateSortedByInstallmentNumber(
+                        targetDate, ctx);
+                if (!overdueInstallmentsSortedByInstallmentNumber.isEmpty()) {
+                    List<LoanRepaymentScheduleInstallment> normalInstallments = ctx.getInstallments().stream() //
+                            .filter(installment -> !installment.isAdditional() && !installment.isDownPayment()).toList();
 
-                // get DUE installment or last installment
-                LoanRepaymentScheduleInstallment lastInstallment = normalInstallments.stream()
-                        .max(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).get();
-                LoanRepaymentScheduleInstallment currentInstallment = currentInstallmentOptional.orElse(lastInstallment);
+                    Optional<LoanRepaymentScheduleInstallment> currentInstallmentOptional = normalInstallments.stream().filter(
+                            installment -> installment.getFromDate().isBefore(targetDate) && !installment.getDueDate().isBefore(targetDate))
+                            .findAny();
 
-                Money overDuePrincipal = Money.zero(ctx.getCurrency());
-                Money aggregatedOverDuePrincipal = Money.zero(ctx.getCurrency());
-                for (LoanRepaymentScheduleInstallment processingInstallment : overdueInstallmentsSortedByInstallmentNumber) {
-                    // add and subtract outstanding principal
-                    if (!overDuePrincipal.isZero()) {
-                        adjustOverduePrincipalForInstallment(targetDate, processingInstallment, overDuePrincipal,
-                                aggregatedOverDuePrincipal, ctx);
+                    // get DUE installment or last installment
+                    LoanRepaymentScheduleInstallment lastInstallment = normalInstallments.stream()
+                            .max(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).get();
+                    LoanRepaymentScheduleInstallment currentInstallment = currentInstallmentOptional.orElse(lastInstallment);
+
+                    Money overDuePrincipal = Money.zero(ctx.getCurrency());
+                    Money aggregatedOverDuePrincipal = Money.zero(ctx.getCurrency());
+                    for (LoanRepaymentScheduleInstallment processingInstallment : overdueInstallmentsSortedByInstallmentNumber) {
+                        // add and subtract outstanding principal
+                        if (!overDuePrincipal.isZero()) {
+                            adjustOverduePrincipalForInstallment(targetDate, processingInstallment, overDuePrincipal,
+                                    aggregatedOverDuePrincipal, ctx);
+                        }
+
+                        overDuePrincipal = processingInstallment.getPrincipalOutstanding(ctx.getCurrency());
+                        aggregatedOverDuePrincipal = aggregatedOverDuePrincipal.add(overDuePrincipal);
                     }
 
-                    overDuePrincipal = processingInstallment.getPrincipalOutstanding(ctx.getCurrency());
-                    aggregatedOverDuePrincipal = aggregatedOverDuePrincipal.add(overDuePrincipal);
-                }
-
-                boolean adjustNeeded = !currentInstallment.equals(lastInstallment) || !lastInstallment.isOverdueOn(targetDate);
-                if (adjustNeeded) {
-                    adjustOverduePrincipalForInstallment(targetDate, currentInstallment, overDuePrincipal, aggregatedOverDuePrincipal, ctx);
+                    boolean adjustNeeded = !currentInstallment.equals(lastInstallment) || !lastInstallment.isOverdueOn(targetDate);
+                    if (adjustNeeded) {
+                        adjustOverduePrincipalForInstallment(targetDate, currentInstallment, overDuePrincipal, aggregatedOverDuePrincipal,
+                                ctx);
+                    }
                 }
             }
         }
@@ -1071,9 +1079,6 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     }
 
     private void handleRepayment(LoanTransaction loanTransaction, TransactionCtx transactionCtx) {
-        if (transactionCtx instanceof ProgressiveTransactionCtx) {
-            recalculateInterestForDate(loanTransaction.getTransactionDate(), (ProgressiveTransactionCtx) transactionCtx);
-        }
         if (loanTransaction.isRepaymentLikeType() || loanTransaction.isInterestWaiver() || loanTransaction.isRecoveryRepayment()) {
             loanTransaction.resetDerivedComponents();
         }

@@ -3261,8 +3261,26 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final List<Long> existingReversedTransactionIds = loan.findExistingReversedTransactionIds();
 
         LoanTransaction chargeOffTransaction = LoanTransaction.chargeOff(loan, transactionDate, txnExternalId);
+
+        if (loan.isInterestBearing() && loan.isInterestRecalculationEnabled()
+                && DateUtils.isBefore(loan.getInterestRecalculatedOn(), DateUtils.getBusinessLocalDate())) {
+            final ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, null, null);
+            loanScheduleService.regenerateRepaymentScheduleWithInterestRecalculation(loan, scheduleGeneratorDTO);
+            loan.addLoanTransaction(chargeOffTransaction);
+            ChangedTransactionDetail changedTransactionDetail = loan.reprocessTransactions();
+            if (changedTransactionDetail != null) {
+                for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
+                    loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(mapEntry.getValue());
+                    accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
+                }
+                // Trigger transaction replayed event
+                replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
+            }
+        } else {
+            loan.addLoanTransaction(chargeOffTransaction);
+        }
         loanTransactionRepository.saveAndFlush(chargeOffTransaction);
-        loan.addLoanTransaction(chargeOffTransaction);
+
         saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         String noteText = command.stringValueOfParameterNamed(LoanApiConstants.noteParameterName);

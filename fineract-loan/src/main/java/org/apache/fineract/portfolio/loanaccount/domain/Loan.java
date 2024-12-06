@@ -1187,7 +1187,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         doPostLoanTransactionChecks(getLastUserTransactionDate(), loanLifecycleStateMachine);
     }
 
-    public boolean isInterestRecalculationEnabledForProduct() {
+    private boolean isInterestRecalculationEnabledForProduct() {
         return this.loanProduct.isInterestRecalculationEnabled();
     }
 
@@ -2645,6 +2645,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     public boolean isInterestBearing() {
         return BigDecimal.ZERO.compareTo(getLoanRepaymentScheduleDetail().getAnnualNominalInterestRate()) < 0;
+    }
+
+    public boolean isInterestRecalculationEnabled() {
+        return this.loanRepaymentScheduleDetail.isInterestRecalculationEnabled();
     }
 
     public LocalDate getMaturityDate() {

@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanSummaryData;
@@ -42,6 +43,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @AllArgsConstructor
+@Slf4j
 public class ProgressiveLoanSummaryDataProvider extends CommonLoanSummaryDataProvider {
 
     private final AdvancedPaymentScheduleTransactionProcessor advancedPaymentScheduleTransactionProcessor;
@@ -89,7 +91,10 @@ public class ProgressiveLoanSummaryDataProvider extends CommonLoanSummaryDataPro
             ProgressiveLoanInterestScheduleModel model = changedTransactionDetailProgressiveLoanInterestScheduleModelPair.getRight();
             if (!changedTransactionDetailProgressiveLoanInterestScheduleModelPair.getLeft().getCurrentTransactionToOldId().isEmpty()
                     || !changedTransactionDetailProgressiveLoanInterestScheduleModelPair.getLeft().getNewTransactionMappings().isEmpty()) {
-                throw new RuntimeException("Transactions should not be reverse replayed!");
+                List<Long> replayedTransactions = changedTransactionDetailProgressiveLoanInterestScheduleModelPair.getLeft()
+                        .getNewTransactionMappings().keySet().stream().toList();
+                log.warn("Reprocessed transactions show differences: There are unsaved changes of the following transactions: {}",
+                        replayedTransactions);
             }
             if (model != null) {
                 PeriodDueDetails dueAmounts = emiCalculator.getDueAmounts(model, loanRepaymentScheduleInstallment.getDueDate(),
