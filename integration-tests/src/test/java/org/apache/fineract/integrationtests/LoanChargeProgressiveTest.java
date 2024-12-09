@@ -25,7 +25,9 @@ import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansResponse;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -63,6 +65,28 @@ public class LoanChargeProgressiveTest extends BaseLoanIntegrationTest {
 
             final GetLoansLoanIdResponse loanDetails2 = loanTransactionHelper.getLoanDetails(loanId);
             validateRepaymentPeriod(loanDetails2, 5, LocalDate.of(2024, 10, 2), 0, 20, 0, 0);
+        });
+    }
+
+    @Test
+    public void immediateChargeAccrualPostMaturityTest() {
+        runAt("03 October 2024", () -> {
+            executeInlineCOB(loanId);
+            globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_IMMEDIATE_CHARGE_ACCRUAL_POST_MATURITY,
+                    true);
+            final PostChargesResponse chargeResponse = createCharge(20.0d, "EUR");
+            addLoanCharge(loanId, chargeResponse.getResourceId(), "03 October 2024", 20.0d);
+            final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            Assertions.assertTrue(
+                    loanDetails.getTransactions().stream().anyMatch(t -> t.getType().getAccrual() && t.getAmount().equals(20.0d)));
+        });
+        runAt("04 October 2024", () -> {
+            globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_IMMEDIATE_CHARGE_ACCRUAL_POST_MATURITY,
+                    false);
+            executeInlineCOB(loanId);
+            final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            Assertions.assertTrue(
+                    loanDetails.getTransactions().stream().anyMatch(t -> t.getType().getAccrual() && t.getAmount().equals(20.0d)));
         });
     }
 }

@@ -769,6 +769,13 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
                 transactionDate, feeCharges, penaltyCharges, externalId);
 
         Integer installmentNumber = null;
+        final LoanRepaymentScheduleInstallment installmentForCharge = this.getRelatedRepaymentScheduleInstallment(loanCharge.getDueDate());
+        if (installmentForCharge != null) {
+            installmentForCharge.updateAccrualPortion(installmentForCharge.getInterestAccrued(this.getCurrency()),
+                    installmentForCharge.getFeeAccrued(this.getCurrency()).add(feeCharges),
+                    installmentForCharge.getPenaltyAccrued(this.getCurrency()).add(penaltyCharges));
+            installmentNumber = installmentForCharge.getInstallmentNumber();
+        }
         final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(applyLoanChargeTransaction, loanCharge,
                 loanCharge.getAmount(getCurrency()).getAmount(), installmentNumber);
         applyLoanChargeTransaction.getLoanChargesPaid().add(loanChargePaidBy);
