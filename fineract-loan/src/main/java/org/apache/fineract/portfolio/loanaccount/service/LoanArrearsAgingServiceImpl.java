@@ -341,7 +341,8 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
 
         OriginalScheduleExtractor(final String loanIdsAsString, DatabaseSpecificSQLGenerator sqlGenerator) {
             final StringBuilder scheduleDetail = new StringBuilder();
-            scheduleDetail.append("select ml.id as loanId, mr.duedate as dueDate, mr.principal_amount as principalAmount, ");
+            scheduleDetail.append(
+                    "select ml.id as loanId, mr.installment as installmentNumber, mr.fromdate as fromDate, mr.duedate as dueDate, mr.principal_amount as principalAmount, ");
             scheduleDetail.append(
                     "mr.interest_amount as interestAmount, mr.fee_charges_amount as feeAmount, mr.penalty_charges_amount as penaltyAmount  ");
             scheduleDetail.append("from m_loan ml  INNER JOIN m_loan_repayment_schedule_history mr on mr.loan_id = ml.id ");
@@ -369,19 +370,16 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
         }
 
         private LoanSchedulePeriodData fetchLoanSchedulePeriodData(ResultSet rs) throws SQLException {
+            final Integer installmentNumber = JdbcSupport.getInteger(rs, "installmentNumber");
+            final LocalDate fromDate = JdbcSupport.getLocalDate(rs, "fromDate");
             final LocalDate dueDate = JdbcSupport.getLocalDate(rs, "dueDate");
             final BigDecimal principalDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalAmount");
             final BigDecimal interestDueOnPrincipalOutstanding = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestAmount");
-            final BigDecimal totalInstallmentAmount = principalDue.add(interestDueOnPrincipalOutstanding);
             final BigDecimal feeChargesDueForPeriod = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeAmount");
             final BigDecimal penaltyChargesDueForPeriod = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyAmount");
-            final Integer periodNumber = null;
-            final LocalDate fromDate = null;
-            final BigDecimal principalOutstanding = null;
-            final BigDecimal totalDueForPeriod = null;
-            return LoanSchedulePeriodData.repaymentOnlyPeriod(periodNumber, fromDate, dueDate, principalDue, principalOutstanding,
-                    interestDueOnPrincipalOutstanding, feeChargesDueForPeriod, penaltyChargesDueForPeriod, totalDueForPeriod,
-                    totalInstallmentAmount);
+
+            return LoanSchedulePeriodData.repaymentOnlyPeriod(installmentNumber, fromDate, dueDate, principalDue, null,
+                    interestDueOnPrincipalOutstanding, feeChargesDueForPeriod, penaltyChargesDueForPeriod);
 
         }
     }

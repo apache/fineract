@@ -31,7 +31,7 @@ public final class LoanScheduleModelDownPaymentPeriod implements LoanScheduleMod
 
     private final int periodNumber;
     private final LocalDate periodDate;
-    private Money principalDue;
+    private final Money principalDue;
     private final Money outstandingLoanBalance;
 
     public static LoanScheduleModelDownPaymentPeriod downPayment(final int periodNumber, final LocalDate periodDate,

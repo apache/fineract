@@ -20,14 +20,17 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.Builder;
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 
 /**
  * Immutable data object that represents a period of a loan schedule.
  *
  */
 @Getter
+@Builder
 public final class LoanSchedulePeriodData {
 
     private final Integer period;
@@ -72,434 +75,275 @@ public final class LoanSchedulePeriodData {
     private final BigDecimal totalInstallmentAmountForPeriod;
     private final BigDecimal totalCredits;
     private final BigDecimal totalAccruedInterest;
-    private final Boolean downPaymentPeriod;
+    private final boolean downPaymentPeriod;
 
     public static LoanSchedulePeriodData disbursementOnlyPeriod(final LocalDate disbursementDate, final BigDecimal principalDisbursed,
             final BigDecimal feeChargesDueAtTimeOfDisbursement, final boolean isDisbursed) {
-        final Integer periodNumber = null;
-        final LocalDate from = null;
-        return new LoanSchedulePeriodData(periodNumber, from, disbursementDate, principalDisbursed, feeChargesDueAtTimeOfDisbursement,
-                isDisbursed);
+        return builder().dueDate(disbursementDate) //
+                .principalDisbursed(principalDisbursed) //
+                .principalLoanBalanceOutstanding(principalDisbursed) //
+                .feeChargesDue(feeChargesDueAtTimeOfDisbursement) //
+                .feeChargesPaid(isDisbursed ? feeChargesDueAtTimeOfDisbursement : null) //
+                .feeChargesOutstanding(isDisbursed ? null : feeChargesDueAtTimeOfDisbursement) //
+                .totalOriginalDueForPeriod(feeChargesDueAtTimeOfDisbursement) //
+                .totalDueForPeriod(feeChargesDueAtTimeOfDisbursement) //
+                .totalPaidForPeriod(isDisbursed ? feeChargesDueAtTimeOfDisbursement : null) //
+                .totalOutstandingForPeriod(isDisbursed ? null : feeChargesDueAtTimeOfDisbursement) //
+                .totalActualCostOfLoanForPeriod(feeChargesDueAtTimeOfDisbursement) //
+                .totalOverdue(DateUtils.isBeforeBusinessDate(disbursementDate) && !isDisbursed ? feeChargesDueAtTimeOfDisbursement : null) //
+                .build();
     }
 
     public static LoanSchedulePeriodData repaymentOnlyPeriod(final Integer periodNumber, final LocalDate fromDate, final LocalDate dueDate,
-            final BigDecimal principalDue, final BigDecimal principalOutstanding, final BigDecimal interestDueOnPrincipalOutstanding,
-            final BigDecimal feeChargesDueForPeriod, final BigDecimal penaltyChargesDueForPeriod, final BigDecimal totalDueForPeriod,
-            final BigDecimal totalInstallmentAmountForPeriod) {
+            final BigDecimal principalDue, final BigDecimal outstandingLoanBalance, final BigDecimal interestDue, final BigDecimal feeDue,
+            final BigDecimal penaltyDue) {
 
-        return new LoanSchedulePeriodData(periodNumber, fromDate, dueDate, principalDue, principalOutstanding,
-                interestDueOnPrincipalOutstanding, feeChargesDueForPeriod, penaltyChargesDueForPeriod, totalDueForPeriod,
-                totalInstallmentAmountForPeriod);
+        BigDecimal totalDue = MathUtil.add(principalDue, interestDue, feeDue, penaltyDue);
+        BigDecimal totalActualCostOfLoanForPeriod = MathUtil.add(interestDue, feeDue, penaltyDue);
+        BigDecimal totalInstallmentAmount = MathUtil.add(principalDue, interestDue);
+
+        return builder().period(periodNumber) //
+                .fromDate(fromDate) //
+                .dueDate(dueDate) //
+                .daysInPeriod(DateUtils.getExactDifferenceInDays(fromDate, dueDate)) //
+                .principalDue(principalDue) //
+                .principalOriginalDue(principalDue) //
+                .principalOutstanding(principalDue) //
+                .principalLoanBalanceOutstanding(outstandingLoanBalance) //
+                .interestDue(interestDue) //
+                .interestOriginalDue(interestDue) //
+                .interestOutstanding(interestDue) //
+                .feeChargesDue(feeDue) //
+                .feeChargesOutstanding(feeDue) //
+                .penaltyChargesDue(penaltyDue) //
+                .penaltyChargesOutstanding(penaltyDue) //
+                .totalOriginalDueForPeriod(totalDue) //
+                .totalDueForPeriod(totalDue) //
+                .totalOutstandingForPeriod(totalDue) //
+                .totalActualCostOfLoanForPeriod(totalActualCostOfLoanForPeriod) //
+                .totalInstallmentAmountForPeriod(totalInstallmentAmount) //
+                .totalOverdue(DateUtils.isBeforeBusinessDate(dueDate) ? totalDue : null) //
+                .build();
     }
 
     public static LoanSchedulePeriodData downPaymentOnlyPeriod(final Integer periodNumber, final LocalDate periodDate,
-            final BigDecimal principalDue, final BigDecimal principalOutstanding) {
-        return new LoanSchedulePeriodData(periodNumber, periodDate, periodDate, principalDue, principalOutstanding);
+            final BigDecimal principalDue, final BigDecimal outstandingLoanBalance) {
+        return builder().period(periodNumber) //
+                .fromDate(periodDate) //
+                .dueDate(periodDate) //
+                .principalOriginalDue(principalDue) //
+                .principalDue(principalDue) //
+                .principalOutstanding(principalDue) //
+                .principalLoanBalanceOutstanding(outstandingLoanBalance) //
+                .totalOriginalDueForPeriod(principalDue) //
+                .totalDueForPeriod(principalDue) //
+                .totalOutstandingForPeriod(principalDue) //
+                .totalInstallmentAmountForPeriod(principalDue) //
+                .downPaymentPeriod(true) //
+                .totalOverdue(DateUtils.isBeforeBusinessDate(periodDate) ? principalDue : null) //
+                .build();
     }
 
-    public static LoanSchedulePeriodData periodWithPayments(@SuppressWarnings("unused") final Long loanId, final Integer periodNumber,
-            final LocalDate fromDate, final LocalDate dueDate, final LocalDate obligationsMetOnDate, final boolean complete,
-            final BigDecimal principalOriginalDue, final BigDecimal principalPaid, final BigDecimal principalWrittenOff,
-            final BigDecimal principalOutstanding, final BigDecimal outstandingPrincipalBalanceOfLoan,
-            final BigDecimal interestDueOnPrincipalOutstanding, final BigDecimal interestPaid, final BigDecimal interestWaived,
-            final BigDecimal interestWrittenOff, final BigDecimal interestOutstanding, final BigDecimal feeChargesDue,
-            final BigDecimal feeChargesPaid, final BigDecimal feeChargesWaived, final BigDecimal feeChargesWrittenOff,
-            final BigDecimal feeChargesOutstanding, final BigDecimal penaltyChargesDue, final BigDecimal penaltyChargesPaid,
-            final BigDecimal penaltyChargesWaived, final BigDecimal penaltyChargesWrittenOff, final BigDecimal penaltyChargesOutstanding,
-            final BigDecimal totalDueForPeriod, final BigDecimal totalPaid, final BigDecimal totalPaidInAdvanceForPeriod,
+    public static LoanSchedulePeriodData periodWithPayments(final Integer periodNumber, final LocalDate fromDate, final LocalDate dueDate,
+            final LocalDate obligationsMetOnDate, final boolean complete, final BigDecimal principalOriginalDue,
+            final BigDecimal principalPaid, final BigDecimal principalWrittenOff, final BigDecimal principalOutstanding,
+            final BigDecimal outstandingPrincipalBalanceOfLoan, final BigDecimal interestDue, final BigDecimal interestPaid,
+            final BigDecimal interestWaived, final BigDecimal interestWrittenOff, final BigDecimal interestOutstanding,
+            final BigDecimal feeChargesDue, final BigDecimal feeChargesPaid, final BigDecimal feeChargesWaived,
+            final BigDecimal feeChargesWrittenOff, final BigDecimal feeChargesOutstanding, final BigDecimal penaltyChargesDue,
+            final BigDecimal penaltyChargesPaid, final BigDecimal penaltyChargesWaived, final BigDecimal penaltyChargesWrittenOff,
+            final BigDecimal penaltyChargesOutstanding, final BigDecimal totalPaid, final BigDecimal totalPaidInAdvanceForPeriod,
             final BigDecimal totalPaidLateForPeriod, final BigDecimal totalWaived, final BigDecimal totalWrittenOff,
-            final BigDecimal totalOutstanding, final BigDecimal totalActualCostOfLoanForPeriod,
-            final BigDecimal totalInstallmentAmountForPeriod, final BigDecimal totalCredits, final boolean isDownPayment,
-            final BigDecimal totalAccruedInterest) {
+            final BigDecimal totalCredits, final boolean isDownPayment, final BigDecimal totalAccruedInterest) {
 
-        return new LoanSchedulePeriodData(periodNumber, fromDate, dueDate, obligationsMetOnDate, complete, principalOriginalDue,
-                principalPaid, principalWrittenOff, principalOutstanding, outstandingPrincipalBalanceOfLoan,
-                interestDueOnPrincipalOutstanding, interestPaid, interestWaived, interestWrittenOff, interestOutstanding, feeChargesDue,
-                feeChargesPaid, feeChargesWaived, feeChargesWrittenOff, feeChargesOutstanding, penaltyChargesDue, penaltyChargesPaid,
-                penaltyChargesWaived, penaltyChargesWrittenOff, penaltyChargesOutstanding, totalDueForPeriod, totalPaid,
-                totalPaidInAdvanceForPeriod, totalPaidLateForPeriod, totalWaived, totalWrittenOff, totalOutstanding,
-                totalActualCostOfLoanForPeriod, totalInstallmentAmountForPeriod, totalCredits, isDownPayment, totalAccruedInterest);
+        BigDecimal totalDue = MathUtil.add(principalOriginalDue, interestDue, feeChargesDue, penaltyChargesDue);
+        BigDecimal totalOutstanding = MathUtil.add(principalOutstanding, interestOutstanding, feeChargesOutstanding,
+                penaltyChargesOutstanding);
+        BigDecimal totalActualCostOfLoanForPeriod = MathUtil.add(interestDue, feeChargesDue, penaltyChargesDue);
+        BigDecimal totalInstallmentAmount = MathUtil.add(principalOriginalDue, interestDue);
+
+        return builder().period(periodNumber) //
+                .fromDate(fromDate) //
+                .dueDate(dueDate) //
+                .obligationsMetOnDate(obligationsMetOnDate) //
+                .complete(complete) //
+                .daysInPeriod(DateUtils.getExactDifferenceInDays(fromDate, dueDate)) //
+                .principalDue(principalOriginalDue) //
+                .principalOriginalDue(principalOriginalDue) //
+                .principalPaid(principalPaid) //
+                .principalWrittenOff(principalWrittenOff) //
+                .principalOutstanding(principalOutstanding) //
+                .principalLoanBalanceOutstanding(outstandingPrincipalBalanceOfLoan) //
+                .interestDue(interestDue) //
+                .interestOriginalDue(interestDue) //
+                .interestPaid(interestPaid) //
+                .interestWaived(interestWaived) //
+                .interestWrittenOff(interestWrittenOff) //
+                .interestOutstanding(interestOutstanding) //
+                .feeChargesDue(feeChargesDue) //
+                .feeChargesPaid(feeChargesPaid) //
+                .feeChargesWaived(feeChargesWaived) //
+                .feeChargesWrittenOff(feeChargesWrittenOff) //
+                .feeChargesOutstanding(feeChargesOutstanding) //
+                .penaltyChargesDue(penaltyChargesDue) //
+                .penaltyChargesPaid(penaltyChargesPaid) //
+                .penaltyChargesWaived(penaltyChargesWaived) //
+                .penaltyChargesWrittenOff(penaltyChargesWrittenOff) //
+                .penaltyChargesOutstanding(penaltyChargesOutstanding) //
+                .totalOriginalDueForPeriod(totalDue) //
+                .totalDueForPeriod(totalDue) //
+                .totalPaidForPeriod(totalPaid) //
+                .totalPaidInAdvanceForPeriod(totalPaidInAdvanceForPeriod) //
+                .totalPaidLateForPeriod(totalPaidLateForPeriod) //
+                .totalWaivedForPeriod(totalWaived) //
+                .totalWrittenOffForPeriod(totalWrittenOff) //
+                .totalOutstandingForPeriod(totalOutstanding) //
+                .totalActualCostOfLoanForPeriod(totalActualCostOfLoanForPeriod) //
+                .totalInstallmentAmountForPeriod(totalInstallmentAmount) //
+                .totalOverdue(DateUtils.isBeforeBusinessDate(dueDate) ? totalOutstanding : null) //
+                .totalCredits(totalCredits) //
+                .downPaymentPeriod(isDownPayment) //
+                .totalAccruedInterest(totalAccruedInterest) //
+                .build();
     }
 
     public static LoanSchedulePeriodData withPaidDetail(final LoanSchedulePeriodData loanSchedulePeriodData, final boolean complete,
             final BigDecimal principalPaid, final BigDecimal interestPaid, final BigDecimal feeChargesPaid,
             final BigDecimal penaltyChargesPaid) {
+        BigDecimal totalOutstanding = MathUtil.subtract(loanSchedulePeriodData.totalDueForPeriod, principalPaid, interestPaid,
+                feeChargesPaid, penaltyChargesPaid);
 
-        return new LoanSchedulePeriodData(loanSchedulePeriodData.period, loanSchedulePeriodData.fromDate, loanSchedulePeriodData.dueDate,
-                loanSchedulePeriodData.obligationsMetOnDate, complete, loanSchedulePeriodData.principalOriginalDue, principalPaid,
-                loanSchedulePeriodData.principalWrittenOff, loanSchedulePeriodData.principalOutstanding,
-                loanSchedulePeriodData.principalLoanBalanceOutstanding, loanSchedulePeriodData.interestDue, interestPaid,
-                loanSchedulePeriodData.interestWaived, loanSchedulePeriodData.interestWrittenOff,
-                loanSchedulePeriodData.interestOutstanding, loanSchedulePeriodData.feeChargesDue, feeChargesPaid,
-                loanSchedulePeriodData.feeChargesWaived, loanSchedulePeriodData.feeChargesWrittenOff,
-                loanSchedulePeriodData.feeChargesOutstanding, loanSchedulePeriodData.penaltyChargesDue, penaltyChargesPaid,
-                loanSchedulePeriodData.penaltyChargesWaived, loanSchedulePeriodData.penaltyChargesWrittenOff,
-                loanSchedulePeriodData.penaltyChargesOutstanding, loanSchedulePeriodData.totalDueForPeriod,
-                loanSchedulePeriodData.totalPaidForPeriod, loanSchedulePeriodData.totalPaidInAdvanceForPeriod,
-                loanSchedulePeriodData.totalPaidLateForPeriod, loanSchedulePeriodData.totalWaivedForPeriod,
-                loanSchedulePeriodData.totalWrittenOffForPeriod, loanSchedulePeriodData.totalOutstandingForPeriod,
-                loanSchedulePeriodData.totalActualCostOfLoanForPeriod, loanSchedulePeriodData.totalInstallmentAmountForPeriod,
-                loanSchedulePeriodData.totalCredits, loanSchedulePeriodData.getDownPaymentPeriod(),
-                loanSchedulePeriodData.totalAccruedInterest);
-    }
-
-    /*
-     * constructor used for creating period on loan schedule that is only a disbursement (typically first period)
-     */
-    private LoanSchedulePeriodData(final Integer periodNumber, final LocalDate fromDate, final LocalDate dueDate,
-            final BigDecimal principalDisbursed, final BigDecimal chargesDueAtTimeOfDisbursement, final boolean isDisbursed) {
-        this.period = periodNumber;
-        this.fromDate = fromDate;
-        this.dueDate = dueDate;
-        this.obligationsMetOnDate = null;
-        this.complete = null;
-        if (fromDate != null) {
-            this.daysInPeriod = DateUtils.getExactDifferenceInDays(this.fromDate, this.dueDate);
-        } else {
-            this.daysInPeriod = null;
-        }
-        this.principalDisbursed = principalDisbursed;
-        this.principalOriginalDue = null;
-        this.principalDue = null;
-        this.principalPaid = null;
-        this.principalWrittenOff = null;
-        this.principalOutstanding = null;
-        this.principalLoanBalanceOutstanding = principalDisbursed;
-
-        this.interestOriginalDue = null;
-        this.interestDue = null;
-        this.interestPaid = null;
-        this.interestWaived = null;
-        this.interestWrittenOff = null;
-        this.interestOutstanding = null;
-
-        this.feeChargesDue = chargesDueAtTimeOfDisbursement;
-        if (isDisbursed) {
-            this.feeChargesPaid = chargesDueAtTimeOfDisbursement;
-            this.feeChargesWaived = null;
-            this.feeChargesWrittenOff = null;
-            this.feeChargesOutstanding = null;
-        } else {
-            this.feeChargesPaid = null;
-            this.feeChargesWaived = null;
-            this.feeChargesWrittenOff = null;
-            this.feeChargesOutstanding = chargesDueAtTimeOfDisbursement;
-        }
-
-        this.penaltyChargesDue = null;
-        this.penaltyChargesPaid = null;
-        this.penaltyChargesWaived = null;
-        this.penaltyChargesWrittenOff = null;
-        this.penaltyChargesOutstanding = null;
-
-        this.totalOriginalDueForPeriod = chargesDueAtTimeOfDisbursement;
-        this.totalDueForPeriod = chargesDueAtTimeOfDisbursement;
-        this.totalPaidForPeriod = this.feeChargesPaid;
-        this.totalPaidInAdvanceForPeriod = null;
-        this.totalPaidLateForPeriod = null;
-        this.totalWaivedForPeriod = null;
-        this.totalWrittenOffForPeriod = null;
-        this.totalOutstandingForPeriod = this.feeChargesOutstanding;
-        this.totalActualCostOfLoanForPeriod = this.feeChargesDue;
-        this.totalInstallmentAmountForPeriod = null;
-        this.totalOverdue = DateUtils.isBeforeBusinessDate(dueDate) ? this.totalOutstandingForPeriod : null;
-        this.totalCredits = BigDecimal.ZERO;
-        this.totalAccruedInterest = BigDecimal.ZERO;
-        this.downPaymentPeriod = false;
-    }
-
-    /*
-     * used for repayment only period when creating an empty loan schedule for preview etc
-     */
-    private LoanSchedulePeriodData(final Integer periodNumber, final LocalDate fromDate, final LocalDate dueDate,
-            final BigDecimal principalOriginalDue, final BigDecimal principalOutstanding,
-            final BigDecimal interestDueOnPrincipalOutstanding, final BigDecimal feeChargesDueForPeriod,
-            final BigDecimal penaltyChargesDueForPeriod, final BigDecimal totalDueForPeriod, BigDecimal totalInstallmentAmountForPeriod) {
-        this.period = periodNumber;
-        this.fromDate = fromDate;
-        this.dueDate = dueDate;
-        this.obligationsMetOnDate = null;
-        this.complete = null;
-        if (fromDate != null) {
-            this.daysInPeriod = DateUtils.getExactDifferenceInDays(this.fromDate, this.dueDate);
-        } else {
-            this.daysInPeriod = null;
-        }
-        this.principalDisbursed = null;
-        this.principalOriginalDue = principalOriginalDue;
-        this.principalDue = principalOriginalDue;
-        this.principalPaid = null;
-        this.principalWrittenOff = null;
-        this.principalOutstanding = principalOriginalDue;
-        this.principalLoanBalanceOutstanding = principalOutstanding;
-
-        this.interestOriginalDue = interestDueOnPrincipalOutstanding;
-        this.interestDue = interestDueOnPrincipalOutstanding;
-        this.interestPaid = null;
-        this.interestWaived = null;
-        this.interestWrittenOff = null;
-        this.interestOutstanding = interestDueOnPrincipalOutstanding;
-
-        this.feeChargesDue = feeChargesDueForPeriod;
-        this.feeChargesPaid = null;
-        this.feeChargesWaived = null;
-        this.feeChargesWrittenOff = null;
-        this.feeChargesOutstanding = null;
-
-        this.penaltyChargesDue = penaltyChargesDueForPeriod;
-        this.penaltyChargesPaid = null;
-        this.penaltyChargesWaived = null;
-        this.penaltyChargesWrittenOff = null;
-        this.penaltyChargesOutstanding = null;
-
-        this.totalOriginalDueForPeriod = totalDueForPeriod;
-        this.totalDueForPeriod = totalDueForPeriod;
-        this.totalPaidForPeriod = BigDecimal.ZERO;
-        this.totalPaidInAdvanceForPeriod = null;
-        this.totalPaidLateForPeriod = null;
-        this.totalWaivedForPeriod = null;
-        this.totalWrittenOffForPeriod = null;
-        this.totalOutstandingForPeriod = totalDueForPeriod;
-        this.totalActualCostOfLoanForPeriod = interestDueOnPrincipalOutstanding.add(feeChargesDueForPeriod);
-        this.totalInstallmentAmountForPeriod = totalInstallmentAmountForPeriod;
-        this.totalOverdue = DateUtils.isBeforeBusinessDate(dueDate) ? this.totalOutstandingForPeriod : null;
-        this.totalCredits = BigDecimal.ZERO;
-        this.totalAccruedInterest = BigDecimal.ZERO;
-        this.downPaymentPeriod = false;
-    }
-
-    // TODO refactor the class to builder pattern
-    /*
-     * used for down payment only period when creating an empty loan schedule for preview etc
-     */
-    private LoanSchedulePeriodData(Integer periodNumber, LocalDate fromDate, LocalDate dueDate, BigDecimal principalDue,
-            BigDecimal principalOutstanding) {
-        this.period = periodNumber;
-        this.fromDate = fromDate;
-        this.dueDate = dueDate;
-        this.obligationsMetOnDate = null;
-        this.complete = null;
-        this.daysInPeriod = 1; // TODO: check this may should be 0 or somewhere else should be 1?
-        this.principalDisbursed = null;
-        this.principalOriginalDue = principalDue;
-        this.principalDue = principalOriginalDue;
-        this.principalPaid = null;
-        this.principalWrittenOff = null;
-        this.principalOutstanding = principalOriginalDue;
-        this.principalLoanBalanceOutstanding = principalOutstanding;
-
-        this.interestOriginalDue = null;
-        this.interestDue = null;
-        this.interestPaid = null;
-        this.interestWaived = null;
-        this.interestWrittenOff = null;
-        this.interestOutstanding = null;
-
-        this.feeChargesDue = null;
-        this.feeChargesPaid = null;
-        this.feeChargesWaived = null;
-        this.feeChargesWrittenOff = null;
-        this.feeChargesOutstanding = null;
-
-        this.penaltyChargesDue = null;
-        this.penaltyChargesPaid = null;
-        this.penaltyChargesWaived = null;
-        this.penaltyChargesWrittenOff = null;
-        this.penaltyChargesOutstanding = null;
-
-        this.totalOriginalDueForPeriod = principalDue;
-        this.totalDueForPeriod = principalDue;
-        this.totalPaidForPeriod = BigDecimal.ZERO;
-        this.totalPaidInAdvanceForPeriod = null;
-        this.totalPaidLateForPeriod = null;
-        this.totalWaivedForPeriod = null;
-        this.totalWrittenOffForPeriod = null;
-        this.totalOutstandingForPeriod = totalDueForPeriod;
-        this.totalActualCostOfLoanForPeriod = null;
-        this.totalInstallmentAmountForPeriod = totalDueForPeriod;
-        this.totalOverdue = DateUtils.isBeforeBusinessDate(dueDate) ? this.totalOutstandingForPeriod : null;
-        this.totalCredits = BigDecimal.ZERO;
-        this.downPaymentPeriod = true;
-        this.totalAccruedInterest = BigDecimal.ZERO;
-    }
-
-    /*
-     * Used for creating loan schedule periods with full information on expected principal, interest & charges along
-     * with what portion of each is paid.
-     */
-    private LoanSchedulePeriodData(final Integer periodNumber, final LocalDate fromDate, final LocalDate dueDate,
-            final LocalDate obligationsMetOnDate, final boolean complete, final BigDecimal principalOriginalDue,
-            final BigDecimal principalPaid, final BigDecimal principalWrittenOff, final BigDecimal principalOutstanding,
-            final BigDecimal principalLoanBalanceOutstanding, final BigDecimal interestDueOnPrincipalOutstanding,
-            final BigDecimal interestPaid, final BigDecimal interestWaived, final BigDecimal interestWrittenOff,
-            final BigDecimal interestOutstanding, final BigDecimal feeChargesDue, final BigDecimal feeChargesPaid,
-            final BigDecimal feeChargesWaived, final BigDecimal feeChargesWrittenOff, final BigDecimal feeChargesOutstanding,
-            final BigDecimal penaltyChargesDue, final BigDecimal penaltyChargesPaid, final BigDecimal penaltyChargesWaived,
-            final BigDecimal penaltyChargesWrittenOff, final BigDecimal penaltyChargesOutstanding, final BigDecimal totalDueForPeriod,
-            final BigDecimal totalPaid, final BigDecimal totalPaidInAdvanceForPeriod, final BigDecimal totalPaidLateForPeriod,
-            final BigDecimal totalWaived, final BigDecimal totalWrittenOff, final BigDecimal totalOutstanding,
-            final BigDecimal totalActualCostOfLoanForPeriod, final BigDecimal totalInstallmentAmountForPeriod,
-            final BigDecimal totalCredits, final boolean isDownPayment, final BigDecimal totalAccruedInterest) {
-        this.period = periodNumber;
-        this.fromDate = fromDate;
-        this.dueDate = dueDate;
-        this.obligationsMetOnDate = obligationsMetOnDate;
-        this.complete = complete;
-        if (fromDate != null) {
-            this.daysInPeriod = DateUtils.getExactDifferenceInDays(this.fromDate, this.dueDate);
-        } else {
-            this.daysInPeriod = null;
-        }
-        this.principalDisbursed = null;
-        this.principalOriginalDue = principalOriginalDue;
-        this.principalDue = principalOriginalDue;
-        this.principalPaid = principalPaid;
-        this.principalWrittenOff = principalWrittenOff;
-        this.principalOutstanding = principalOutstanding;
-        this.principalLoanBalanceOutstanding = principalLoanBalanceOutstanding;
-
-        this.interestOriginalDue = interestDueOnPrincipalOutstanding;
-        this.interestDue = interestDueOnPrincipalOutstanding;
-        this.interestPaid = interestPaid;
-        this.interestWaived = interestWaived;
-        this.interestWrittenOff = interestWrittenOff;
-        this.interestOutstanding = interestOutstanding;
-
-        this.feeChargesDue = feeChargesDue;
-        this.feeChargesPaid = feeChargesPaid;
-        this.feeChargesWaived = feeChargesWaived;
-        this.feeChargesWrittenOff = feeChargesWrittenOff;
-        this.feeChargesOutstanding = feeChargesOutstanding;
-
-        this.penaltyChargesDue = penaltyChargesDue;
-        this.penaltyChargesPaid = penaltyChargesPaid;
-        this.penaltyChargesWaived = penaltyChargesWaived;
-        this.penaltyChargesWrittenOff = penaltyChargesWrittenOff;
-        this.penaltyChargesOutstanding = penaltyChargesOutstanding;
-
-        this.totalOriginalDueForPeriod = totalDueForPeriod;
-        this.totalDueForPeriod = totalDueForPeriod;
-        this.totalPaidForPeriod = totalPaid;
-        this.totalPaidInAdvanceForPeriod = totalPaidInAdvanceForPeriod;
-        this.totalPaidLateForPeriod = totalPaidLateForPeriod;
-        this.totalWaivedForPeriod = totalWaived;
-        this.totalWrittenOffForPeriod = totalWrittenOff;
-        this.totalOutstandingForPeriod = totalOutstanding;
-        this.totalActualCostOfLoanForPeriod = totalActualCostOfLoanForPeriod;
-        this.totalInstallmentAmountForPeriod = totalInstallmentAmountForPeriod;
-        this.totalOverdue = DateUtils.isBeforeBusinessDate(dueDate) ? this.totalOutstandingForPeriod : null;
-        this.totalCredits = totalCredits;
-        this.downPaymentPeriod = isDownPayment;
-        this.totalAccruedInterest = totalAccruedInterest;
-    }
-
-    private BigDecimal defaultToZeroIfNull(final BigDecimal possibleNullValue) {
-        BigDecimal value = BigDecimal.ZERO;
-        if (possibleNullValue != null) {
-            value = possibleNullValue;
-        }
-        return value;
-    }
-
-    public boolean isActualPeriodForNotDuePayableCalculation(final LocalDate businessDate) {
-        boolean actualPeriod = false;
-        if (getPeriod() != null) {
-            if (getPeriod() == 1) {
-                actualPeriod = ((businessDate.compareTo(getFromDate()) >= 0) && businessDate.compareTo(getDueDate()) < 0);
-            } else {
-                actualPeriod = ((businessDate.compareTo(getFromDate()) >= 0) && businessDate.compareTo(getDueDate()) < 0);
-            }
-        }
-
-        return actualPeriod;
+        return builder().period(loanSchedulePeriodData.period) //
+                .fromDate(loanSchedulePeriodData.fromDate) //
+                .dueDate(loanSchedulePeriodData.dueDate) //
+                .obligationsMetOnDate(loanSchedulePeriodData.obligationsMetOnDate) //
+                .complete(complete) //
+                .daysInPeriod(DateUtils.getExactDifferenceInDays(loanSchedulePeriodData.fromDate, loanSchedulePeriodData.dueDate)) //
+                .principalDue(loanSchedulePeriodData.principalOriginalDue) //
+                .principalOriginalDue(loanSchedulePeriodData.principalOriginalDue) //
+                .principalPaid(principalPaid) //
+                .principalWrittenOff(loanSchedulePeriodData.principalWrittenOff) //
+                .principalOutstanding(MathUtil.subtract(loanSchedulePeriodData.principalOriginalDue, principalPaid)) //
+                .principalLoanBalanceOutstanding(loanSchedulePeriodData.principalLoanBalanceOutstanding) //
+                .interestDue(loanSchedulePeriodData.interestDue) //
+                .interestOriginalDue(loanSchedulePeriodData.interestDue) //
+                .interestPaid(interestPaid) //
+                .interestWaived(loanSchedulePeriodData.interestWaived) //
+                .interestWrittenOff(loanSchedulePeriodData.interestWrittenOff) //
+                .interestOutstanding(MathUtil.subtract(loanSchedulePeriodData.interestDue, interestPaid)) //
+                .feeChargesDue(loanSchedulePeriodData.feeChargesDue) //
+                .feeChargesPaid(feeChargesPaid) //
+                .feeChargesWaived(loanSchedulePeriodData.feeChargesWaived) //
+                .feeChargesWrittenOff(loanSchedulePeriodData.feeChargesWrittenOff) //
+                .feeChargesOutstanding(MathUtil.subtract(loanSchedulePeriodData.feeChargesDue, feeChargesPaid)) //
+                .penaltyChargesDue(loanSchedulePeriodData.penaltyChargesDue) //
+                .penaltyChargesPaid(penaltyChargesPaid) //
+                .penaltyChargesWaived(loanSchedulePeriodData.penaltyChargesWaived) //
+                .penaltyChargesWrittenOff(loanSchedulePeriodData.penaltyChargesWrittenOff) //
+                .penaltyChargesOutstanding(MathUtil.subtract(loanSchedulePeriodData.penaltyChargesDue, penaltyChargesPaid)) //
+                .totalOriginalDueForPeriod(loanSchedulePeriodData.totalDueForPeriod) //
+                .totalDueForPeriod(loanSchedulePeriodData.totalDueForPeriod) //
+                .totalPaidForPeriod(MathUtil.add(principalPaid, interestPaid, feeChargesPaid, penaltyChargesPaid)) //
+                .totalPaidInAdvanceForPeriod(loanSchedulePeriodData.totalPaidInAdvanceForPeriod) //
+                .totalPaidLateForPeriod(loanSchedulePeriodData.totalPaidLateForPeriod) //
+                .totalWaivedForPeriod(loanSchedulePeriodData.totalWaivedForPeriod) //
+                .totalWrittenOffForPeriod(loanSchedulePeriodData.totalWrittenOffForPeriod) //
+                .totalOutstandingForPeriod(totalOutstanding) //
+                .totalActualCostOfLoanForPeriod(loanSchedulePeriodData.totalActualCostOfLoanForPeriod) //
+                .totalInstallmentAmountForPeriod(loanSchedulePeriodData.totalInstallmentAmountForPeriod) //
+                .totalOverdue(DateUtils.isBeforeBusinessDate(loanSchedulePeriodData.dueDate) ? totalOutstanding : null) //
+                .totalCredits(loanSchedulePeriodData.totalCredits) //
+                .downPaymentPeriod(loanSchedulePeriodData.isDownPaymentPeriod()) //
+                .totalAccruedInterest(loanSchedulePeriodData.totalAccruedInterest) //
+                .build();
     }
 
     public BigDecimal getPrincipalDisbursed() {
-        return defaultToZeroIfNull(this.principalDisbursed);
+        return MathUtil.nullToDefault(this.principalDisbursed, BigDecimal.ZERO);
     }
 
     public BigDecimal getPrincipalDue() {
-        return defaultToZeroIfNull(this.principalDue);
+        return MathUtil.nullToDefault(this.principalDue, BigDecimal.ZERO);
     }
 
     public BigDecimal getPrincipalPaid() {
-        return defaultToZeroIfNull(this.principalPaid);
+        return MathUtil.nullToDefault(this.principalPaid, BigDecimal.ZERO);
     }
 
     public BigDecimal getPrincipalWrittenOff() {
-        return defaultToZeroIfNull(this.principalWrittenOff);
+        return MathUtil.nullToDefault(this.principalWrittenOff, BigDecimal.ZERO);
     }
 
     public BigDecimal getPrincipalOutstanding() {
-        return defaultToZeroIfNull(this.principalOutstanding);
+        return MathUtil.nullToDefault(this.principalOutstanding, BigDecimal.ZERO);
     }
 
     public BigDecimal getInterestDue() {
-        return defaultToZeroIfNull(this.interestDue);
+        return MathUtil.nullToDefault(this.interestDue, BigDecimal.ZERO);
     }
 
     public BigDecimal getInterestPaid() {
-        return defaultToZeroIfNull(this.interestPaid);
+        return MathUtil.nullToDefault(this.interestPaid, BigDecimal.ZERO);
     }
 
     public BigDecimal getInterestWaived() {
-        return defaultToZeroIfNull(this.interestWaived);
+        return MathUtil.nullToDefault(this.interestWaived, BigDecimal.ZERO);
     }
 
     public BigDecimal getInterestWrittenOff() {
-        return defaultToZeroIfNull(this.interestWrittenOff);
+        return MathUtil.nullToDefault(this.interestWrittenOff, BigDecimal.ZERO);
     }
 
     public BigDecimal getInterestOutstanding() {
-        return defaultToZeroIfNull(this.interestOutstanding);
+        return MathUtil.nullToDefault(this.interestOutstanding, BigDecimal.ZERO);
     }
 
     public BigDecimal getFeeChargesDue() {
-        return defaultToZeroIfNull(this.feeChargesDue);
+        return MathUtil.nullToDefault(this.feeChargesDue, BigDecimal.ZERO);
     }
 
     public BigDecimal getFeeChargesWaived() {
-        return defaultToZeroIfNull(this.feeChargesWaived);
+        return MathUtil.nullToDefault(this.feeChargesWaived, BigDecimal.ZERO);
     }
 
     public BigDecimal getFeeChargesWrittenOff() {
-        return defaultToZeroIfNull(this.feeChargesWrittenOff);
+        return MathUtil.nullToDefault(this.feeChargesWrittenOff, BigDecimal.ZERO);
     }
 
     public BigDecimal getFeeChargesPaid() {
-        return defaultToZeroIfNull(this.feeChargesPaid);
+        return MathUtil.nullToDefault(this.feeChargesPaid, BigDecimal.ZERO);
     }
 
     public BigDecimal getFeeChargesOutstanding() {
-        return defaultToZeroIfNull(this.feeChargesOutstanding);
+        return MathUtil.nullToDefault(this.feeChargesOutstanding, BigDecimal.ZERO);
     }
 
     public BigDecimal getPenaltyChargesDue() {
-        return defaultToZeroIfNull(this.penaltyChargesDue);
+        return MathUtil.nullToDefault(this.penaltyChargesDue, BigDecimal.ZERO);
     }
 
     public BigDecimal getPenaltyChargesWaived() {
-        return defaultToZeroIfNull(this.penaltyChargesWaived);
+        return MathUtil.nullToDefault(this.penaltyChargesWaived, BigDecimal.ZERO);
     }
 
     public BigDecimal getPenaltyChargesWrittenOff() {
-        return defaultToZeroIfNull(this.penaltyChargesWrittenOff);
+        return MathUtil.nullToDefault(this.penaltyChargesWrittenOff, BigDecimal.ZERO);
     }
 
     public BigDecimal getPenaltyChargesPaid() {
-        return defaultToZeroIfNull(this.penaltyChargesPaid);
+        return MathUtil.nullToDefault(this.penaltyChargesPaid, BigDecimal.ZERO);
     }
 
     public BigDecimal getPenaltyChargesOutstanding() {
-        return defaultToZeroIfNull(this.penaltyChargesOutstanding);
+        return MathUtil.nullToDefault(this.penaltyChargesOutstanding, BigDecimal.ZERO);
     }
 
     public BigDecimal getTotalOverdue() {
-        return defaultToZeroIfNull(this.totalOverdue);
+        return MathUtil.nullToDefault(this.totalOverdue, BigDecimal.ZERO);
     }
 
     public BigDecimal totalOutstandingForPeriod() {
-        return defaultToZeroIfNull(this.totalOutstandingForPeriod);
+        return MathUtil.nullToDefault(this.totalOutstandingForPeriod, BigDecimal.ZERO);
     }
 
 }

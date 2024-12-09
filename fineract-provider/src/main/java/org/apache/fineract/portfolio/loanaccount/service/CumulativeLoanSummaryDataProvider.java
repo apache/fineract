@@ -46,8 +46,10 @@ public class CumulativeLoanSummaryDataProvider extends CommonLoanSummaryDataProv
     public BigDecimal computeTotalUnpaidPayableNotDueInterestAmountOnActualPeriod(final Loan loan,
             final Collection<LoanSchedulePeriodData> periods, final LocalDate businessDate, final CurrencyData currency) {
         // Find the current Period (If exists one) based on the Business date
-        final Optional<LoanSchedulePeriodData> optCurrentPeriod = periods.stream()
-                .filter(period -> !period.getDownPaymentPeriod() && period.isActualPeriodForNotDuePayableCalculation(businessDate))
+        final Optional<LoanSchedulePeriodData> optCurrentPeriod = periods.stream().filter(period -> !period.isDownPaymentPeriod() //
+                && period.getPeriod() != null //
+                && !businessDate.isBefore(period.getFromDate()) //
+                && businessDate.isBefore(period.getDueDate())) //
                 .findFirst();
 
         if (optCurrentPeriod.isPresent()) {

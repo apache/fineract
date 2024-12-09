@@ -159,15 +159,12 @@ public abstract class CommonLoanSummaryDataProvider implements LoanSummaryDataPr
 
     @Override
     public BigDecimal computeTotalUnpaidPayableDueInterestAmount(Collection<LoanSchedulePeriodData> periods, final LocalDate businessDate) {
-        return periods.stream().filter(period -> !period.getDownPaymentPeriod() && businessDate.compareTo(period.getDueDate()) >= 0)
+        return periods.stream().filter(period -> !period.isDownPaymentPeriod() && !businessDate.isBefore(period.getDueDate()))
                 .map(LoanSchedulePeriodData::getInterestOutstanding).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     @Override
     public LoanSummaryData withOnlyCurrencyData(CurrencyData currencyData) {
-        {
-            return LoanSummaryData.builder().currency(currencyData).build();
-        }
+        return LoanSummaryData.builder().currency(currencyData).build();
     }
-
 }

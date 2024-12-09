@@ -1263,8 +1263,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 final BigDecimal interestPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestPaid");
                 final BigDecimal interestWaived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestWaived");
                 final BigDecimal interestWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestWrittenOff");
-                final BigDecimal totalInstallmentAmount = totalPrincipalPaid.zero().plus(principalDue).plus(interestExpectedDue)
-                        .getAmount();
                 final BigDecimal accrualInterest = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "accrualInterest");
 
                 final BigDecimal interestActualDue = interestExpectedDue.subtract(interestWaived).subtract(interestWrittenOff);
@@ -1330,14 +1328,13 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
 
                 LoanSchedulePeriodData periodData;
 
-                periodData = LoanSchedulePeriodData.periodWithPayments(loanId, period, fromDate, dueDate, obligationsMetOnDate, complete,
+                periodData = LoanSchedulePeriodData.periodWithPayments(period, fromDate, dueDate, obligationsMetOnDate, complete,
                         principalDue, principalPaid, principalWrittenOff, principalOutstanding, outstandingPrincipalBalanceOfLoan,
                         interestExpectedDue, interestPaid, interestWaived, interestWrittenOff, interestOutstanding, feeChargesExpectedDue,
                         feeChargesPaid, feeChargesWaived, feeChargesWrittenOff, feeChargesOutstanding, penaltyChargesExpectedDue,
-                        penaltyChargesPaid, penaltyChargesWaived, penaltyChargesWrittenOff, penaltyChargesOutstanding, totalDueForPeriod,
-                        totalPaidForPeriod, totalPaidInAdvanceForPeriod, totalPaidLateForPeriod, totalWaivedForPeriod,
-                        totalWrittenOffForPeriod, totalOutstandingForPeriod, totalActualCostOfLoanForPeriod, totalInstallmentAmount,
-                        credits, isDownPayment, accrualInterest);
+                        penaltyChargesPaid, penaltyChargesWaived, penaltyChargesWrittenOff, penaltyChargesOutstanding, totalPaidForPeriod,
+                        totalPaidInAdvanceForPeriod, totalPaidLateForPeriod, totalWaivedForPeriod, totalWrittenOffForPeriod, credits,
+                        isDownPayment, accrualInterest);
 
                 periods.add(periodData);
             }
