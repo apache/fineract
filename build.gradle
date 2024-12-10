@@ -46,7 +46,8 @@ buildscript {
                 'fineract-avro-schemas',
                 'fineract-e2e-tests-core',
                 'fineract-e2e-tests-runner',
-                'fineract-progressive-loan'
+                'fineract-progressive-loan',
+                'fineract-progressive-loan-embeddable-schedule-generator'
             ].contains(it.name)
         }
         fineractPublishProjects = subprojects.findAll{
@@ -66,7 +67,8 @@ buildscript {
                 'fineract-report',
                 'fineract-branch',
                 'fineract-document',
-                'fineract-progressive-loan'
+                'fineract-progressive-loan',
+                'fineract-progressive-loan-embeddable-schedule-generator'
             ].contains(it.name)
         }
         npmRepository = 'https://npm.pkg.github.com'
@@ -109,6 +111,7 @@ plugins {
     id 'se.thinkcode.cucumber-runner' version '0.0.11' apply false
     id "com.github.davidmc24.gradle.plugin.avro-base" version "1.9.1" apply false
     id 'org.openapi.generator' version '7.8.0' apply false
+    id 'com.gradleup.shadow' version '8.3.5' apply false
 }
 
 apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.release.gradle"
@@ -169,7 +172,7 @@ allprojects  {
 
         groovyGradle {
             target '*.gradle', '**/*.gradle'
-            targetExclude '**/build/**'
+            targetExclude '**/build/**', '/**/build.gradle' // TODO: temporary disabled on build.gradle until someone fix this issue: https://github.com/diffplug/spotless/issues/1807
             greclipse()
             indentWithSpaces(4)
             endWithNewline()

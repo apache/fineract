@@ -91,7 +91,7 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
                         .multipliedBy(getRateFactorTillPeriodDueDate(), mc).getAmount() //
                         .divide(BigDecimal.valueOf(lengthTillPeriodDueDate), mc) //
                         .multiply(BigDecimal.valueOf(getLength()), mc); //
-        return Money.of(outstandingLoanBalance.getCurrency(), interestDueTillRepaymentDueDate, mc);
+        return Money.of(outstandingLoanBalance.getCurrencyData(), interestDueTillRepaymentDueDate, mc);
     }
 
     public long getLength() {

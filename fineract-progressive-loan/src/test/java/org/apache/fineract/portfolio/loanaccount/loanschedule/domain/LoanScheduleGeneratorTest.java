@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
@@ -38,6 +39,7 @@ class LoanScheduleGeneratorTest {
 
     private static final ProgressiveEMICalculator emiCalculator = new ProgressiveEMICalculator();
     private static final ApplicationCurrency APPLICATION_CURRENCY = new ApplicationCurrency("USD", "USD", 2, 1, "USD", "$");
+    private static final CurrencyData CURRENCY = APPLICATION_CURRENCY.toData();
     private static final BigDecimal DISBURSEMENT_AMOUNT = BigDecimal.valueOf(192.22);
     private static final BigDecimal DISBURSEMENT_AMOUNT_100 = BigDecimal.valueOf(100);
     private static final BigDecimal NOMINAL_INTEREST_RATE = BigDecimal.valueOf(9.99);
@@ -50,7 +52,7 @@ class LoanScheduleGeneratorTest {
 
     @Test
     void testGenerateLoanSchedule() {
-        LoanRepaymentScheduleModelData modelData = new LoanRepaymentScheduleModelData(LocalDate.of(2024, 1, 1), APPLICATION_CURRENCY,
+        LoanRepaymentScheduleModelData modelData = new LoanRepaymentScheduleModelData(LocalDate.of(2024, 1, 1), CURRENCY,
                 DISBURSEMENT_AMOUNT, DISBURSEMENT_DATE, NUMBER_OF_REPAYMENTS, REPAYMENT_FREQUENCY, REPAYMENT_FREQUENCY_TYPE,
                 NOMINAL_INTEREST_RATE, false, DaysInMonthType.DAYS_30, DaysInYearType.DAYS_360, null, null, null);
 
@@ -85,7 +87,7 @@ class LoanScheduleGeneratorTest {
 
     @Test
     void testGenerateLoanScheduleWithDownPayment() {
-        LoanRepaymentScheduleModelData modelData = new LoanRepaymentScheduleModelData(LocalDate.of(2024, 1, 1), APPLICATION_CURRENCY,
+        LoanRepaymentScheduleModelData modelData = new LoanRepaymentScheduleModelData(LocalDate.of(2024, 1, 1), CURRENCY,
                 DISBURSEMENT_AMOUNT_100, LocalDate.of(2024, 1, 1), NUMBER_OF_REPAYMENTS, REPAYMENT_FREQUENCY, REPAYMENT_FREQUENCY_TYPE,
                 NOMINAL_INTEREST_RATE, true, DaysInMonthType.DAYS_30, DaysInYearType.DAYS_360, DOWN_PAYMENT_PORTION, null, null);
 

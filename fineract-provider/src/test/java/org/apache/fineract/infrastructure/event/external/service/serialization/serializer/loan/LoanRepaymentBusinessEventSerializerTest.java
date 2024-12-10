@@ -106,7 +106,7 @@ public class LoanRepaymentBusinessEventSerializerTest {
 
         Loan loanForProcessing = Mockito.mock(Loan.class);
         LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
-        MonetaryCurrency loanCurrency = Mockito.mock(MonetaryCurrency.class);
+        MonetaryCurrency loanCurrency = new MonetaryCurrency("CODE", 1, 1);
 
         LoanRepaymentScheduleInstallment repaymentInstallment = new LoanRepaymentScheduleInstallment(loanForProcessing, 1,
                 LocalDate.now(ZoneId.systemDefault()), loanInstallmentRepaymentDueDate, BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0),
@@ -122,9 +122,6 @@ public class LoanRepaymentBusinessEventSerializerTest {
         when(loanForProcessing.getSummary()).thenReturn(loanSummary);
         when(loanSummary.getTotalOutstanding()).thenReturn(BigDecimal.valueOf(0.0));
         when(loanForProcessing.getCurrency()).thenReturn(loanCurrency);
-        when(loanCurrency.getCode()).thenReturn("CODE");
-        when(loanCurrency.getCurrencyInMultiplesOf()).thenReturn(1);
-        when(loanCurrency.getDigitsAfterDecimal()).thenReturn(1);
         when(mapper.mapLocalDate(any())).thenReturn(loanInstallmentRepaymentDueDate.format(DateTimeFormatter.ISO_DATE));
         when(pastDueDataMapper.map(any())).thenReturn(pastDueAmount);
         when(pastDueService.retrieveLoanRepaymentPastDueAmountTillDate(loanForProcessing)).thenReturn(null);
@@ -156,7 +153,7 @@ public class LoanRepaymentBusinessEventSerializerTest {
 
         Loan loanForProcessing = Mockito.mock(Loan.class);
         LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
-        MonetaryCurrency loanCurrency = Mockito.mock(MonetaryCurrency.class);
+        MonetaryCurrency loanCurrency = new MonetaryCurrency("CODE", 1, 1);
 
         LoanRepaymentScheduleInstallment repaymentInstallment = new LoanRepaymentScheduleInstallment(loanForProcessing, 1,
                 LocalDate.now(ZoneId.systemDefault()), loanInstallmentRepaymentDueDate, BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0),
@@ -173,9 +170,6 @@ public class LoanRepaymentBusinessEventSerializerTest {
         when(loanForProcessing.getSummary()).thenReturn(loanSummary);
         when(loanSummary.getTotalOutstanding()).thenReturn(BigDecimal.valueOf(0.0));
         when(loanForProcessing.getCurrency()).thenReturn(loanCurrency);
-        when(loanCurrency.getCode()).thenReturn("CODE");
-        when(loanCurrency.getCurrencyInMultiplesOf()).thenReturn(1);
-        when(loanCurrency.getDigitsAfterDecimal()).thenReturn(1);
         when(mapper.mapLocalDate(any())).thenReturn(loanInstallmentRepaymentDueDate.format(DateTimeFormatter.ISO_DATE));
         when(pastDueDataMapper.map(any())).thenReturn(pastDueAmount);
         when(pastDueService.retrieveLoanRepaymentPastDueAmountTillDate(loanForProcessing)).thenReturn(null);

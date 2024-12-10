@@ -19,7 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.time.LocalDate;
-import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
+import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.calendar.data.CalendarHistoryDataWrapper;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
@@ -29,7 +29,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanSchedul
 public class ScheduleGeneratorDTO {
 
     final LoanScheduleGeneratorFactory loanScheduleFactory;
-    final ApplicationCurrency applicationCurrency;
+    final CurrencyData currency;
     final LocalDate calculatedRepaymentsStartingFromDate;
     final HolidayDetailDTO holidayDetailDTO;
     final CalendarInstance calendarInstanceForInterestRecalculation;
@@ -47,7 +47,7 @@ public class ScheduleGeneratorDTO {
     final boolean isInterestToBeRecoveredFirstWhenGreaterThanEMI;
     final boolean isPrincipalCompoundingDisabledForOverdueLoans;
 
-    public ScheduleGeneratorDTO(final LoanScheduleGeneratorFactory loanScheduleFactory, final ApplicationCurrency applicationCurrency,
+    public ScheduleGeneratorDTO(final LoanScheduleGeneratorFactory loanScheduleFactory, final CurrencyData currency,
             final LocalDate calculatedRepaymentsStartingFromDate, final HolidayDetailDTO holidayDetailDTO,
             final CalendarInstance calendarInstanceForInterestRecalculation, final CalendarInstance compoundingCalendarInstance,
             final LocalDate recalculateFrom, final Long overdurPenaltyWaitPeriod, final FloatingRateDTO floatingRateDTO,
@@ -58,7 +58,7 @@ public class ScheduleGeneratorDTO {
             final boolean isPrincipalCompoundingDisabledForOverdueLoans) {
 
         this.loanScheduleFactory = loanScheduleFactory;
-        this.applicationCurrency = applicationCurrency;
+        this.currency = currency;
         this.calculatedRepaymentsStartingFromDate = calculatedRepaymentsStartingFromDate;
         this.calendarInstanceForInterestRecalculation = calendarInstanceForInterestRecalculation;
         this.compoundingCalendarInstance = compoundingCalendarInstance;
@@ -81,8 +81,8 @@ public class ScheduleGeneratorDTO {
         return this.loanScheduleFactory;
     }
 
-    public ApplicationCurrency getApplicationCurrency() {
-        return this.applicationCurrency;
+    public CurrencyData getCurrency() {
+        return this.currency;
     }
 
     public LocalDate getCalculatedRepaymentsStartingFromDate() {

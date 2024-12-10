@@ -75,7 +75,7 @@ public class LoanSchedulePlan {
         });
 
         return new LoanSchedulePlan(periods, //
-                model.getApplicationCurrency().toData(), //
+                model.getCurrency(), //
                 model.getLoanTermInDays(), //
                 model.getTotalPrincipalDisbursed().getAmount(), //
                 model.getTotalPrincipalExpected(), //

@@ -365,12 +365,12 @@ public final class MathUtil {
 
     /** @return parameter value or ZERO if it is negative */
     public static Money negativeToZero(Money value) {
-        return value == null || isGreaterThanZero(value) ? value : Money.zero(value.getCurrency());
+        return value == null || isGreaterThanZero(value) ? value : Money.zero(value.getCurrencyData());
     }
 
     /** @return parameter value or ZERO if it is negative */
     public static Money negativeToZero(Money value, MathContext mc) {
-        return value == null || isGreaterThanZero(value, mc) ? value : Money.zero(value.getCurrency(), mc);
+        return value == null || isGreaterThanZero(value, mc) ? value : Money.zero(value.getCurrencyData(), mc);
     }
 
     public static boolean isEmpty(Money value) {

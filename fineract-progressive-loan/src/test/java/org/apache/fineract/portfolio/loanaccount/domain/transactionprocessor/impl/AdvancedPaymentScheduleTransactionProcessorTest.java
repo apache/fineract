@@ -561,7 +561,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
     @Test
     public void calculateChargebackAllocationMap() {
         Map<AllocationType, Money> result;
-        MonetaryCurrency currency = mock(MonetaryCurrency.class);
+        MonetaryCurrency currency = new MonetaryCurrency("usd", 2, null);
 
         result = underTest.calculateChargebackAllocationMap(allocationMap(50.0, 100.0, 200.0, 12.0, currency), BigDecimal.valueOf(50.0),
                 List.of(PRINCIPAL, INTEREST, FEE, PENALTY), currency);

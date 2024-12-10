@@ -34,6 +34,8 @@ public class MonetaryCurrency {
     @Column(name = "currency_multiplesof")
     private Integer inMultiplesOf;
 
+    private transient CurrencyData currencyData;
+
     protected MonetaryCurrency() {
         this.code = null;
         this.digitsAfterDecimal = 0;
@@ -46,6 +48,13 @@ public class MonetaryCurrency {
         this.inMultiplesOf = inMultiplesOf;
     }
 
+    public MonetaryCurrency(final CurrencyData currencyData) {
+        this.currencyData = currencyData;
+        this.code = currencyData.getCode();
+        this.digitsAfterDecimal = currencyData.getDecimalPlaces();
+        this.inMultiplesOf = currencyData.getInMultiplesOf();
+    }
+
     public MonetaryCurrency copy() {
         return new MonetaryCurrency(this.code, this.digitsAfterDecimal, this.inMultiplesOf);
     }
@@ -56,7 +65,14 @@ public class MonetaryCurrency {
     }
 
     public static MonetaryCurrency fromCurrencyData(final CurrencyData currencyData) {
-        return new MonetaryCurrency(currencyData.getCode(), currencyData.getDecimalPlaces(), currencyData.getInMultiplesOf());
+        return new MonetaryCurrency(currencyData);
+    }
+
+    public CurrencyData toData() {
+        if (currencyData == null) {
+            currencyData = new CurrencyData(code, digitsAfterDecimal, inMultiplesOf);
+        }
+        return currencyData;
     }
 
     public String getCode() {

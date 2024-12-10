@@ -34,7 +34,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.Money;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProductMinimumRepaymentScheduleRelatedDetail;
 
 @Data
 @Accessors(fluent = true)
@@ -42,26 +42,31 @@ public class ProgressiveLoanInterestScheduleModel {
 
     private final List<RepaymentPeriod> repaymentPeriods;
     private final TreeSet<InterestRate> interestRates;
-    private final LoanProductRelatedDetail loanProductRelatedDetail;
+    private final LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail;
     private final Integer installmentAmountInMultiplesOf;
-    private MathContext mc;
+    private final MathContext mc;
+    private final Money zero;
 
-    public ProgressiveLoanInterestScheduleModel(List<RepaymentPeriod> repaymentPeriods, LoanProductRelatedDetail loanProductRelatedDetail,
-            Integer installmentAmountInMultiplesOf, MathContext mc) {
+    public ProgressiveLoanInterestScheduleModel(final List<RepaymentPeriod> repaymentPeriods,
+            final LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail, final Integer installmentAmountInMultiplesOf,
+            final MathContext mc) {
         this.repaymentPeriods = repaymentPeriods;
         this.interestRates = new TreeSet<>(Collections.reverseOrder());
         this.loanProductRelatedDetail = loanProductRelatedDetail;
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
         this.mc = mc;
+        this.zero = Money.zero(loanProductRelatedDetail.getCurrencyData(), mc);
     }
 
-    private ProgressiveLoanInterestScheduleModel(List<RepaymentPeriod> repaymentPeriods, final TreeSet<InterestRate> interestRates,
-            LoanProductRelatedDetail loanProductRelatedDetail, Integer installmentAmountInMultiplesOf, MathContext mc) {
+    private ProgressiveLoanInterestScheduleModel(final List<RepaymentPeriod> repaymentPeriods, final TreeSet<InterestRate> interestRates,
+            final LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail, final Integer installmentAmountInMultiplesOf,
+            final MathContext mc) {
         this.mc = mc;
         this.repaymentPeriods = copyRepaymentPeriods(repaymentPeriods);
         this.interestRates = new TreeSet<>(interestRates);
         this.loanProductRelatedDetail = loanProductRelatedDetail;
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
+        this.zero = Money.zero(loanProductRelatedDetail.getCurrencyData(), mc);
     }
 
     public ProgressiveLoanInterestScheduleModel deepCopy(MathContext mc) {
@@ -197,30 +202,26 @@ public class ProgressiveLoanInterestScheduleModel {
         previousInterestPeriod.addDisbursementAmount(disbursedAmount);
         previousInterestPeriod.addBalanceCorrectionAmount(correctionAmount);
         final InterestPeriod interestPeriod = new InterestPeriod(repaymentPeriod, previousInterestPeriod.getDueDate(), originalDueDate,
-                BigDecimal.ZERO, BigDecimal.ZERO, getZero(), getZero(), getZero(), mc);
+                BigDecimal.ZERO, BigDecimal.ZERO, zero, zero, zero, mc);
         repaymentPeriod.getInterestPeriods().add(interestPeriod);
-    }
-
-    public Money getZero() {
-        return Money.zero(loanProductRelatedDetail.getCurrency(), mc);
     }
 
     public Money getTotalDueInterest() {
         return repaymentPeriods().stream().flatMap(rp -> rp.getInterestPeriods().stream().map(InterestPeriod::getCalculatedDueInterest))
-                .reduce(getZero(), Money::plus);
+                .reduce(zero(), Money::plus);
     }
 
     public Money getTotalDuePrincipal() {
         return repaymentPeriods.stream().flatMap(rp -> rp.getInterestPeriods().stream().map(InterestPeriod::getDisbursementAmount))
-                .reduce(getZero(), Money::plus);
+                .reduce(zero(), Money::plus);
     }
 
     public Money getTotalPaidInterest() {
-        return repaymentPeriods().stream().map(RepaymentPeriod::getPaidInterest).reduce(getZero(), Money::plus);
+        return repaymentPeriods().stream().map(RepaymentPeriod::getPaidInterest).reduce(zero, Money::plus);
     }
 
     public Money getTotalPaidPrincipal() {
-        return repaymentPeriods().stream().map(RepaymentPeriod::getPaidPrincipal).reduce(getZero(), Money::plus);
+        return repaymentPeriods().stream().map(RepaymentPeriod::getPaidPrincipal).reduce(zero, Money::plus);
     }
 
     public Optional<RepaymentPeriod> findRepaymentPeriod(@NotNull LocalDate transactionDate) {

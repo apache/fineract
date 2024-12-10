@@ -48,7 +48,7 @@ public class ProgressiveTransactionCtx extends TransactionCtx {
             Set<LoanCharge> charges, MoneyHolder overpaymentHolder, ChangedTransactionDetail changedTransactionDetail,
             ProgressiveLoanInterestScheduleModel model) {
         super(currency, installments, charges, overpaymentHolder, changedTransactionDetail);
-        sumOfInterestRefundAmount = model.getZero();
+        sumOfInterestRefundAmount = model.zero();
         this.model = model;
     }
 }

@@ -80,7 +80,7 @@ public class LoanCalculateRepaymentPastDueServiceTest {
         // given
         LocalDate businessDate = DateUtils.getBusinessLocalDate();
         Loan loanForProcessing = Mockito.mock(Loan.class);
-        MonetaryCurrency loanCurrency = Mockito.mock(MonetaryCurrency.class);
+        MonetaryCurrency loanCurrency = new MonetaryCurrency("CODE", 1, 1);
         // repayments
 
         // closed repayment
@@ -111,9 +111,6 @@ public class LoanCalculateRepaymentPastDueServiceTest {
                 repaymentInstallment_2, repaymentInstallment_upcoming);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(loanRepayments);
         when(loanForProcessing.getCurrency()).thenReturn(loanCurrency);
-        when(loanCurrency.getCode()).thenReturn("CODE");
-        when(loanCurrency.getCurrencyInMultiplesOf()).thenReturn(1);
-        when(loanCurrency.getDigitsAfterDecimal()).thenReturn(1);
 
         // when
         LoanRepaymentPastDueData pastDueAmount = underTest.retrieveLoanRepaymentPastDueAmountTillDate(loanForProcessing);

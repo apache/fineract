@@ -98,10 +98,6 @@ public class ApplicationCurrency extends AbstractPersistableCustom<Long> {
         return new CurrencyData(this.code, this.name, this.decimalPlaces, this.inMultiplesOf, this.displaySymbol, this.nameCode);
     }
 
-    public CurrencyData toData(final int digitsAfterDecimalSupported, final Integer inMultiplesOf) {
-        return new CurrencyData(this.code, this.name, digitsAfterDecimalSupported, inMultiplesOf, this.displaySymbol, this.nameCode);
-    }
-
     public OrganisationCurrency toOrganisationCurrency() {
         return new OrganisationCurrency(this.code, this.name, this.decimalPlaces, this.inMultiplesOf, this.nameCode, this.displaySymbol);
     }

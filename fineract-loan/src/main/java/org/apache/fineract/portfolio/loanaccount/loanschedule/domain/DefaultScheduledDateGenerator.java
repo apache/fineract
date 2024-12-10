@@ -20,10 +20,12 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
 import java.math.MathContext;
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.extern.slf4j.Slf4j;
 import net.fortuna.ical4j.model.Recur;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
@@ -42,7 +44,6 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.springframework.stereotype.Component;
 
 @Component
-@Slf4j
 public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
 
     @Override
@@ -121,7 +122,7 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             Calendar currentCalendar = loanApplicationTerms.getLoanCalendar();
             dueRepaymentPeriodDate = getRepaymentPeriodDate(loanApplicationTerms.getRepaymentPeriodFrequencyType(),
                     loanApplicationTerms.getRepaymentEvery(), lastRepaymentDate);
-            dueRepaymentPeriodDate = (LocalDate) CalendarUtils.adjustDate(dueRepaymentPeriodDate, loanApplicationTerms.getSeedDate(),
+            dueRepaymentPeriodDate = (LocalDate) adjustDate(dueRepaymentPeriodDate, loanApplicationTerms.getSeedDate(),
                     loanApplicationTerms.getRepaymentPeriodFrequencyType());
             if (currentCalendar != null) {
                 // If we have currentCalendar object, this means there is a
@@ -152,6 +153,21 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
         }
 
         return dueRepaymentPeriodDate;
+    }
+
+    /*
+     * NOTE: This method a copy of CalendarUtils.adjustDate() method. Purpose of this method copy here is to eliminate
+     * the whole "ical4j" dependency for the small stateless embeddable progressive loan jar. Registered exception
+     * brings the whole ical4j deps.
+     */
+    private Temporal adjustDate(final Temporal date, final Temporal seedDate, final PeriodFrequencyType frequencyType) {
+        if (frequencyType.isMonthly() && seedDate.get(ChronoField.DAY_OF_MONTH) > 28 && date.get(ChronoField.DAY_OF_MONTH) >= 28) {
+            int noOfDaysInCurrentMonth = YearMonth.from(date).lengthOfMonth();
+            int seedDay = seedDate.get(ChronoField.DAY_OF_MONTH);
+            int adjustedDay = Math.min(noOfDaysInCurrentMonth, seedDay);
+            return date.with(ChronoField.DAY_OF_MONTH, adjustedDay);
+        }
+        return date;
     }
 
     @Override
@@ -305,7 +321,7 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             case INVALID:
             break;
             case WHOLE_TERM:
-                log.error("TODO Implement getRepaymentPeriodDate for WHOLE_TERM");
+            // TODO: Implement getRepaymentPeriodDate for WHOLE_TERM
             break;
         }
         return dueRepaymentPeriodDate;
@@ -347,7 +363,7 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             case INVALID:
             break;
             case WHOLE_TERM:
-                log.error("TODO Implement isDateFallsInSchedule for WHOLE_TERM");
+            // TODO: Implement getRepaymentPeriodDate for WHOLE_TERM
             break;
         }
         return isScheduledDate;
@@ -384,7 +400,7 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             case INVALID:
             break;
             case WHOLE_TERM:
-                log.error("TODO Implement repaymentPeriodFrequencyType for WHOLE_TERM");
+            // TODO: Implement getRepaymentPeriodDate for WHOLE_TERM
             break;
         }
 

@@ -22,6 +22,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 /**
  * Represents currencies allowed for this MFI/organisation.
@@ -73,5 +74,9 @@ public class OrganisationCurrency extends AbstractPersistableCustom<Long> {
 
     public final MonetaryCurrency toMonetaryCurrency() {
         return new MonetaryCurrency(this.code, this.decimalPlaces, this.inMultiplesOf);
+    }
+
+    public final CurrencyData toData() {
+        return new CurrencyData(this.code, this.decimalPlaces, this.inMultiplesOf);
     }
 }

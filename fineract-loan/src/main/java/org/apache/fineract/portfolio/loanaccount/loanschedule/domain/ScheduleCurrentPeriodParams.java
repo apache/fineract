@@ -19,7 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
 import java.math.BigDecimal;
-import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.Money;
 
 public class ScheduleCurrentPeriodParams {
@@ -36,11 +36,11 @@ public class ScheduleCurrentPeriodParams {
     boolean isEmiAmountChanged;
     BigDecimal interestCalculationGraceOnRepaymentPeriodFraction;
 
-    ScheduleCurrentPeriodParams(final MonetaryCurrency currency) {
+    ScheduleCurrentPeriodParams(final CurrencyData currency) {
         this(currency, BigDecimal.ZERO);
     }
 
-    ScheduleCurrentPeriodParams(final MonetaryCurrency currency, BigDecimal interestCalculationGraceOnRepaymentPeriodFraction) {
+    ScheduleCurrentPeriodParams(final CurrencyData currency, BigDecimal interestCalculationGraceOnRepaymentPeriodFraction) {
         this.earlyPaidAmount = Money.zero(currency);
         this.lastInstallment = null;
         this.skipCurrentLoop = false;

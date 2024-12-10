@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
@@ -97,7 +97,7 @@ public final class LoanScheduleParams {
     private final LocalDate scheduleTillDate;
     private final boolean partialUpdate;
     private int loanTermInDays;
-    private final MonetaryCurrency currency;
+    private final CurrencyData currency;
     private final boolean applyInterestRecalculation;
     private final MathContext mc;
 
@@ -110,7 +110,7 @@ public final class LoanScheduleParams {
             final Money outstandingBalanceAsPerRest, final List<LoanRepaymentScheduleInstallment> installments,
             final Collection<RecalculationDetail> recalculationDetails,
             final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor, final LocalDate scheduleTillDate,
-            final boolean partialUpdate, final MonetaryCurrency currency, final boolean applyInterestRecalculation, final MathContext mc) {
+            final boolean partialUpdate, final CurrencyData currency, final boolean applyInterestRecalculation, final MathContext mc) {
         this.periodNumber = periodNumber;
         this.instalmentNumber = instalmentNumber;
         this.loanTermInDays = loanTermInDays;
@@ -153,7 +153,7 @@ public final class LoanScheduleParams {
             final Money principalToBeScheduled, final Money outstandingBalance, final Money outstandingBalanceAsPerRest,
             final List<LoanRepaymentScheduleInstallment> installments, final Collection<RecalculationDetail> recalculationDetails,
             final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor, final LocalDate scheduleTillDate,
-            final MonetaryCurrency currency, final boolean applyInterestRecalculation, final MathContext mc) {
+            final CurrencyData currency, final boolean applyInterestRecalculation, final MathContext mc) {
         final boolean partialUpdate = true;
         return new LoanScheduleParams(periodNumber, instalmentNumber, loanTermInDays, periodStartDate, actualRepaymentDate,
                 totalCumulativePrincipal, totalCumulativeInterest, totalFeeChargesCharged, totalPenaltyChargesCharged,
@@ -187,7 +187,7 @@ public final class LoanScheduleParams {
         final boolean partialUpdate = false;
         final int loanTermInDays = 0;
         final Money totalOutstandingInterestPaymentDueToGrace = null;
-        final MonetaryCurrency currency = null;
+        final CurrencyData currency = null;
         final Money unCompoundedAmount = null;
         return new LoanScheduleParams(periodNumber, instalmentNumber, loanTermInDays, periodStartDate, actualRepaymentDate,
                 totalCumulativePrincipal, totalCumulativeInterest, totalFeeChargesCharged, totalPenaltyChargesCharged,
@@ -197,7 +197,7 @@ public final class LoanScheduleParams {
                 scheduleTillDate, partialUpdate, currency, applyInterestRecalculation, mc);
     }
 
-    public static LoanScheduleParams createLoanScheduleParams(final MonetaryCurrency currency, final Money chargesDueAtTimeOfDisbursement,
+    public static LoanScheduleParams createLoanScheduleParams(final CurrencyData currency, final Money chargesDueAtTimeOfDisbursement,
             final LocalDate periodStartDate, final Money principalToBeScheduled, final MathContext mc) {
         final int loanTermInDays = 0;
         final int periodNumber = 1;
@@ -231,7 +231,7 @@ public final class LoanScheduleParams {
                 scheduleTillDate, partialUpdate, currency, applyInterestRecalculation, mc);
     }
 
-    public static LoanScheduleParams createLoanScheduleParams(final MonetaryCurrency currency, final Money chargesDueAtTimeOfDisbursement,
+    public static LoanScheduleParams createLoanScheduleParams(final CurrencyData currency, final Money chargesDueAtTimeOfDisbursement,
             final LocalDate periodStartDate, final Money principalToBeScheduled, final LoanScheduleParams loanScheduleParams,
             MathContext mc) {
         final int loanTermInDays = 0;
@@ -500,7 +500,7 @@ public final class LoanScheduleParams {
         return this.compoundingDateVariations;
     }
 
-    public MonetaryCurrency getCurrency() {
+    public CurrencyData getCurrency() {
         return this.currency;
     }
 

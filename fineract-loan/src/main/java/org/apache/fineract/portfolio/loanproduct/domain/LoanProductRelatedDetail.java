@@ -31,6 +31,7 @@ import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
@@ -164,7 +165,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     @Enumerated(EnumType.STRING)
     private LoanChargeOffBehaviour chargeOffBehaviour;
 
-    public static LoanProductRelatedDetail createFrom(final MonetaryCurrency currency, final BigDecimal principal,
+    public static LoanProductRelatedDetail createFrom(final CurrencyData currencyData, final BigDecimal principal,
             final BigDecimal nominalInterestRatePerPeriod, final PeriodFrequencyType interestRatePeriodFrequencyType,
             final BigDecimal nominalAnnualInterestRate, final InterestMethod interestMethod,
             final InterestCalculationPeriodMethod interestCalculationPeriodMethod, final boolean allowPartialPeriodInterestCalcualtion,
@@ -179,6 +180,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final boolean enableAccrualActivityPosting, final List<LoanSupportedInterestRefundTypes> supportedInterestRefundTypes,
             final LoanChargeOffBehaviour chargeOffBehaviour) {
 
+        final MonetaryCurrency currency = MonetaryCurrency.fromCurrencyData(currencyData);
         return new LoanProductRelatedDetail(currency, principal, nominalInterestRatePerPeriod, interestRatePeriodFrequencyType,
                 nominalAnnualInterestRate, interestMethod, interestCalculationPeriodMethod, allowPartialPeriodInterestCalcualtion,
                 repaymentEvery, repaymentPeriodFrequencyType, numberOfRepayments, graceOnPrincipalPayment,
@@ -252,19 +254,23 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         return defaultTo;
     }
 
-    @Override
     public MonetaryCurrency getCurrency() {
         return this.currency.copy();
     }
 
     @Override
+    public CurrencyData getCurrencyData() {
+        return currency.toData();
+    }
+
+    @Override
     public Money getPrincipal() {
-        return Money.of(this.currency, this.principal);
+        return Money.of(getCurrencyData(), this.principal);
     }
 
     @Override
     public Money getInArrearsTolerance() {
-        return Money.of(this.currency, this.inArrearsTolerance);
+        return Money.of(getCurrencyData(), this.inArrearsTolerance);
     }
 
     // TODO: REVIEW

@@ -22,11 +22,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
+import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 
-public record LoanRepaymentScheduleModelData(@NotNull LocalDate scheduleGenerationStartDate, @NotNull ApplicationCurrency currency,
+public record LoanRepaymentScheduleModelData(@NotNull LocalDate scheduleGenerationStartDate, @NotNull CurrencyData currency,
         @NotNull BigDecimal disbursementAmount, @NotNull LocalDate disbursementDate, @NotNull int numberOfRepayments,
         @NotNull int repaymentFrequency, @NotBlank String repaymentFrequencyType, @NotNull BigDecimal annualNominalInterestRate,
         @NotNull boolean downPaymentEnabled, @NotNull DaysInMonthType daysInMonth, @NotNull DaysInYearType daysInYear,
