@@ -29,6 +29,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
@@ -63,13 +64,14 @@ public class ProductToGLAccountMapping extends AbstractPersistableCustom<Long> {
     @Column(name = "financial_account_type", nullable = true)
     private int financialAccountType;
 
-    @Column(name = "charge_off_reason_id", nullable = true)
-    private Long chargeOffReasonId;
+    @ManyToOne
+    @JoinColumn(name = "charge_off_reason_id", nullable = true)
+    private CodeValue chargeOffReason;
 
     public static ProductToGLAccountMapping createNew(final GLAccount glAccount, final Long productId, final int productType,
-            final int financialAccountType, final Long chargeOffReasonId) {
+            final int financialAccountType, final CodeValue chargeOffReasonId) {
 
         return new ProductToGLAccountMapping().setGlAccount(glAccount).setProductId(productId).setProductType(productType)
-                .setFinancialAccountType(financialAccountType).setChargeOffReasonId(chargeOffReasonId);
+                .setFinancialAccountType(financialAccountType).setChargeOffReason(chargeOffReasonId);
     }
 }
