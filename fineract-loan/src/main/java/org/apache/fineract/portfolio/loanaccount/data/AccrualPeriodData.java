@@ -68,8 +68,18 @@ public class AccrualPeriodData {
         return charges.stream().filter(charge -> !charge.isPenalty()).map(AccrualChargeData::getChargeAccrued).reduce(null, MathUtil::plus);
     }
 
+    public Money getFeeTransactionAccrued() {
+        return charges.stream().filter(charge -> !charge.isPenalty()).map(AccrualChargeData::getTransactionAccrued).reduce(null,
+                MathUtil::plus);
+    }
+
     public Money getPenaltyAccrued() {
         return charges.stream().filter(AccrualChargeData::isPenalty).map(AccrualChargeData::getChargeAccrued).reduce(null, MathUtil::plus);
+    }
+
+    public Money getPenaltyTransactionAccrued() {
+        return charges.stream().filter(AccrualChargeData::isPenalty).map(AccrualChargeData::getTransactionAccrued).reduce(null,
+                MathUtil::plus);
     }
 
     public Money getChargeAccruable() {

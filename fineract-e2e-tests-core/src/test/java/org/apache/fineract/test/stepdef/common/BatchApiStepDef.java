@@ -865,7 +865,9 @@ public class BatchApiStepDef extends AbstractStepDef {
         Integer statusIdActual = status.getId();
         Integer statusIdExpected = LoanStatus.APPROVED.value;
 
-        assertThat(statusIdActual).as(ErrorMessageHelper.wrongLoanStatus(statusIdActual, statusIdExpected)).isEqualTo(statusIdExpected);
+        String resourceId = String.valueOf(response.body().getId());
+        assertThat(statusIdActual).as(ErrorMessageHelper.wrongLoanStatus(resourceId, statusIdActual, statusIdExpected))
+                .isEqualTo(statusIdExpected);
     }
 
     @Then("Nr. {int} Client creation was rolled back")

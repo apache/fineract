@@ -2473,8 +2473,8 @@ Feature: LoanRepayment
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 01 January 2023  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
-      | 10 January 2023  | Repayment        | 1020.0 | 1000.0    | 0.0      | 20.0 | 0.0       | 0.0          |
       | 10 January 2023  | Accrual          | 20.0   | 0.0       | 0.0      | 20.0 | 0.0       | 0.0          |
+      | 10 January 2023  | Repayment        | 1020.0 | 1000.0    | 0.0      | 20.0 | 0.0       | 0.0          |
     Then Loan Charges tab has the following data:
       | Name       | isPenalty | Payment due at     | Due as of        | Calculation type | Due  | Paid | Waived | Outstanding |
       | NSF fee    | true      | Specified due date | 28 January 2023  | Flat             | 20.0 | 0.0  | 0.0    | 20.0        |
@@ -2486,8 +2486,8 @@ Feature: LoanRepayment
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 01 January 2023  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
-      | 10 January 2023  | Repayment        | 1020.0 | 1000.0    | 0.0      | 20.0 | 0.0       | 0.0          |
       | 10 January 2023  | Accrual          | 20.0   | 0.0       | 0.0      | 20.0 | 0.0       | 0.0          |
+      | 10 January 2023  | Repayment        | 1020.0 | 1000.0    | 0.0      | 20.0 | 0.0       | 0.0          |
       | 28 January 2023  | Repayment        | 520.0  | 500.0     | 0.0      | 0.0  | 20.0      | 500.0        |
     Then Loan Charges tab has the following data:
       | Name       | isPenalty | Payment due at     | Due as of        | Calculation type | Due  | Paid | Waived | Outstanding |
@@ -2507,8 +2507,8 @@ Feature: LoanRepayment
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 01 January 2023  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
-      | 10 January 2023  | Repayment        | 1020.0 | 1000.0    | 0.0      | 20.0 | 0.0       | 0.0          |
       | 10 January 2023  | Accrual          | 20.0   | 0.0       | 0.0      | 20.0 | 0.0       | 0.0          |
+      | 10 January 2023  | Repayment        | 1020.0 | 1000.0    | 0.0      | 20.0 | 0.0       | 0.0          |
       | 28 January 2023  | Repayment        | 520.0  | 500.0     | 0.0      | 0.0  | 20.0      | 500.0        |
       | 30 January 2023  | Repayment        | 520.0  | 500.0     | 0.0      | 20.0 | 0.0       | 0.0          |
       | 30 January 2023  | Accrual          | 20.0   | 0.0       | 0.0      | 0.0  | 20.0      | 0.0          |
@@ -3656,9 +3656,9 @@ Feature: LoanRepayment
       | 13 August 2024   | Repayment              | 35.44  | 35.44     | 0.0      | 0.0  | 0.0       | 0.0          | true     |
       | 22 August 2024   | Repayment              | 35.44  | 35.44     | 0.0      | 0.0  | 0.0       | 0.0          | true     |
       | 22 August 2024   | Repayment              | 38.24  | 35.44     | 0.0      | 0.0  | 2.8       | 0.0          | false    |
-      | 22 August 2024   | Accrual                | 5.0    | 0.0       | 0.0      | 0.0  | 5.0       | 0.0          | false    |
       | 23 August 2024   | Repayment              | 10.0   | 0.0       | 0.0      | 0.0  | 5.0       | 0.0          | false    |
       | 24 August 2024   | Accrual                | 2.8    | 0.0       | 0.0      | 0.0  | 2.8       | 0.0          | false    |
+      | 24 August 2024   | Accrual                | 5.0    | 0.0       | 0.0      | 0.0  | 5.0       | 0.0          | false    |
     Then Loan Repayment schedule has 2 periods, with the following data for periods:
       | Nr | Days | Date           | Paid date      | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       |    |      | 23 July 2024   |                | 111.92          |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
@@ -3676,9 +3676,9 @@ Feature: LoanRepayment
       | 13 August 2024   | Repayment              | 35.44  | 35.44     | 0.0      | 0.0  | 0.0       | 0.0          | true     |
       | 22 August 2024   | Repayment              | 35.44  | 35.44     | 0.0      | 0.0  | 0.0       | 0.0          | true     |
       | 22 August 2024   | Repayment              | 38.24  | 35.44     | 0.0      | 0.0  | 2.8       | 0.0          | false    |
-      | 22 August 2024   | Accrual                | 5.0    | 0.0       | 0.0      | 0.0  | 5.0       | 0.0          | false    |
       | 23 August 2024   | Repayment              | 10.0   | 0.0       | 0.0      | 0.0  | 10.0      | 0.0          | false    |
       | 24 August 2024   | Accrual                | 2.8    | 0.0       | 0.0      | 0.0  | 2.8       | 0.0          | false    |
+      | 24 August 2024   | Accrual                | 5.0    | 0.0       | 0.0      | 0.0  | 5.0       | 0.0          | false    |
       | 25 August 2024   | Accrual                | 5.0    | 0.0       | 0.0      | 0.0  | 5.0       | 0.0          | false    |
     Then Loan Repayment schedule has 2 periods, with the following data for periods:
       | Nr | Days | Date           | Paid date      | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |

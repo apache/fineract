@@ -1298,6 +1298,8 @@ public class LoanStepDef extends AbstractStepDef {
     public void disburseLoan(String actualDisbursementDate, String transactionAmount) throws IOException {
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.body().getLoanId();
+        String resourceId = String.valueOf(loanId);
+
         PostLoansLoanIdRequest disburseRequest = LoanRequestFactory.defaultLoanDisburseRequest()
                 .actualDisbursementDate(actualDisbursementDate).transactionAmount(new BigDecimal(transactionAmount));
 
@@ -1310,7 +1312,7 @@ public class LoanStepDef extends AbstractStepDef {
         Long statusExpected = Long.valueOf(loanDetails.body().getStatus().getId());
 
         assertThat(statusActual)//
-                .as(ErrorMessageHelper.wrongLoanStatus(Math.toIntExact(statusActual), Math.toIntExact(statusExpected)))//
+                .as(ErrorMessageHelper.wrongLoanStatus(resourceId, Math.toIntExact(statusActual), Math.toIntExact(statusExpected)))//
                 .isEqualTo(statusExpected);//
         eventCheckHelper.disburseLoanEventCheck(loanId);
         eventCheckHelper.loanDisbursalTransactionEventCheck(loanDisburseResponse);
@@ -1320,6 +1322,8 @@ public class LoanStepDef extends AbstractStepDef {
     public void disburseLoanWithoutAutoDownpayment(String actualDisbursementDate, String transactionAmount) throws IOException {
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.body().getLoanId();
+        String resourceId = String.valueOf(loanId);
+
         PostLoansLoanIdRequest disburseRequest = LoanRequestFactory.defaultLoanDisburseRequest()
                 .actualDisbursementDate(actualDisbursementDate).transactionAmount(new BigDecimal(transactionAmount));
 
@@ -1333,7 +1337,7 @@ public class LoanStepDef extends AbstractStepDef {
         Long statusExpected = Long.valueOf(loanDetails.body().getStatus().getId());
 
         assertThat(statusActual)//
-                .as(ErrorMessageHelper.wrongLoanStatus(Math.toIntExact(statusActual), Math.toIntExact(statusExpected)))//
+                .as(ErrorMessageHelper.wrongLoanStatus(resourceId, Math.toIntExact(statusActual), Math.toIntExact(statusExpected)))//
                 .isEqualTo(statusExpected);//
         eventCheckHelper.disburseLoanEventCheck(loanId);
         eventCheckHelper.loanDisbursalTransactionEventCheck(loanDisburseResponse);
@@ -1773,6 +1777,7 @@ public class LoanStepDef extends AbstractStepDef {
     public void loanChargesGivenChargeDataCheck(DataTable table) throws IOException {
         Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanCreateResponse.body().getLoanId();
+        String resourceId = String.valueOf(loanId);
 
         Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "charges", "", "").execute();
         ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
@@ -1786,14 +1791,15 @@ public class LoanStepDef extends AbstractStepDef {
 
         boolean containsExpectedValues = actualValuesList.stream().anyMatch(actualValues -> actualValues.equals(expectedValues));
 
-        assertThat(containsExpectedValues).as(ErrorMessageHelper.wrongValueInLineInChargesTab(1, actualValuesList, expectedValues))
-                .isTrue();
+        assertThat(containsExpectedValues)
+                .as(ErrorMessageHelper.wrongValueInLineInChargesTab(resourceId, 1, actualValuesList, expectedValues)).isTrue();
     }
 
     @Then("Loan Charges tab has the following data:")
     public void loanChargesTabCheck(DataTable table) throws IOException {
         Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanCreateResponse.body().getLoanId();
+        String resourceId = String.valueOf(loanId);
 
         Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "charges", "", "").execute();
         ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
@@ -1808,8 +1814,8 @@ public class LoanStepDef extends AbstractStepDef {
 
             boolean containsExpectedValues = actualValuesList.stream().anyMatch(actualValues -> actualValues.equals(expectedValues));
 
-            assertThat(containsExpectedValues).as(ErrorMessageHelper.wrongValueInLineInChargesTab(i, actualValuesList, expectedValues))
-                    .isTrue();
+            assertThat(containsExpectedValues)
+                    .as(ErrorMessageHelper.wrongValueInLineInChargesTab(resourceId, i, actualValuesList, expectedValues)).isTrue();
         }
     }
 
@@ -1846,6 +1852,7 @@ public class LoanStepDef extends AbstractStepDef {
     public void loanStatus(String statusExpected) throws IOException {
         Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanCreateResponse.body().getLoanId();
+        String resourceId = String.valueOf(loanId);
 
         Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "", "", "").execute();
         ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
@@ -1855,7 +1862,7 @@ public class LoanStepDef extends AbstractStepDef {
         LoanStatus loanStatusExpected = LoanStatus.valueOf(statusExpected);
         Integer loanStatusExpectedValue = loanStatusExpected.getValue();
 
-        assertThat(loanStatusActualValue).as(ErrorMessageHelper.wrongLoanStatus(loanStatusActualValue, loanStatusExpectedValue))
+        assertThat(loanStatusActualValue).as(ErrorMessageHelper.wrongLoanStatus(resourceId, loanStatusActualValue, loanStatusExpectedValue))
                 .isEqualTo(loanStatusExpectedValue);
     }
 
@@ -2776,7 +2783,9 @@ public class LoanStepDef extends AbstractStepDef {
         assertNotNull(loanDetails.body().getStatus());
         final Long statusExpected = Long.valueOf(loanDetails.body().getStatus().getId());
 
-        assertThat(statusActual).as(ErrorMessageHelper.wrongLoanStatus(Math.toIntExact(statusActual), Math.toIntExact(statusExpected)))
+        String resourceId = String.valueOf(loanId);
+        assertThat(statusActual)
+                .as(ErrorMessageHelper.wrongLoanStatus(resourceId, Math.toIntExact(statusActual), Math.toIntExact(statusExpected)))
                 .isEqualTo(statusExpected);
         eventCheckHelper.disburseLoanEventCheck(loanId);
         eventCheckHelper.loanDisbursalTransactionEventCheck(loanDisburseResponse);

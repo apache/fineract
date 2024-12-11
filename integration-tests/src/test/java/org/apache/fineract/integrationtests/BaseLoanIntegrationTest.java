@@ -553,7 +553,7 @@ public abstract class BaseLoanIntegrationTest {
     protected void verifyTransactions(Long loanId, Transaction... transactions) {
         GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId.intValue());
         if (transactions == null || transactions.length == 0) {
-            Assertions.assertTrue(loanDetails.getTransactions().isEmpty(), "No transaction is expected");
+            Assertions.assertTrue(loanDetails.getTransactions().isEmpty(), "No transaction is expected on loan " + loanId);
         } else {
             Assertions.assertEquals(transactions.length, loanDetails.getTransactions().size());
             Arrays.stream(transactions).forEach(tr -> {
@@ -562,12 +562,13 @@ public abstract class BaseLoanIntegrationTest {
                                 && Objects.equals(item.getType().getValue(), tr.type) //
                                 && Objects.equals(item.getDate(), LocalDate.parse(tr.date, dateTimeFormatter)))
                         .findFirst();
-                Assertions.assertTrue(optTx.isPresent(), "Required transaction  not found: " + tr);
+                Assertions.assertTrue(optTx.isPresent(), "Required transaction  not found: " + tr + " on loan " + loanId);
 
                 GetLoansLoanIdTransactions tx = optTx.get();
 
                 if (tr.reversed != null) {
-                    Assertions.assertEquals(tr.reversed, tx.getManuallyReversed(), "Transaction is not reversed: " + tr);
+                    Assertions.assertEquals(tr.reversed, tx.getManuallyReversed(),
+                            "Transaction is not reversed: " + tr + " on loan " + loanId);
                 }
             });
         }
@@ -576,9 +577,9 @@ public abstract class BaseLoanIntegrationTest {
     protected void verifyTransactions(Long loanId, TransactionExt... transactions) {
         GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId.intValue());
         if (transactions == null || transactions.length == 0) {
-            assertNull(loanDetails.getTransactions(), "No transaction is expected");
+            assertNull(loanDetails.getTransactions(), "No transaction is expected on loan " + loanId);
         } else {
-            Assertions.assertEquals(transactions.length, loanDetails.getTransactions().size());
+            Assertions.assertEquals(transactions.length, loanDetails.getTransactions().size(), "Number of transactions on loan " + loanId);
             Arrays.stream(transactions).forEach(tr -> {
                 boolean found = loanDetails.getTransactions().stream().anyMatch(item -> Objects.equals(item.getAmount(), tr.amount) //
                         && Objects.equals(item.getType().getValue(), tr.type) //
@@ -591,7 +592,7 @@ public abstract class BaseLoanIntegrationTest {
                         && Objects.equals(item.getOverpaymentPortion(), tr.overpaymentPortion) //
                         && Objects.equals(item.getUnrecognizedIncomePortion(), tr.unrecognizedPortion) //
                 );
-                Assertions.assertTrue(found, "Required transaction not found: " + tr);
+                Assertions.assertTrue(found, "Required transaction not found: " + tr + " on loan " + loanId);
             });
         }
     }

@@ -301,17 +301,18 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
             loan = loanAccountDomainService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
         }
 
-        postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
-
         if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled() && isAppliedOnBackDate
                 && loan.isFeeCompoundingEnabledForInterestRecalculation()) {
-            loanAccrualsProcessingService.processAccrualsForInterestRecalculation(loan,
-                    loan.repaymentScheduleDetail().isInterestRecalculationEnabled());
+            loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan, true, false);
         }
         this.loanAccountDomainService.setLoanDelinquencyTag(loan, DateUtils.getBusinessLocalDate());
 
         businessEventNotifierService.notifyPostBusinessEvent(new LoanAddChargeBusinessEvent(loanCharge));
         businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
+
+        postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+        loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
+
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()) //
                 .withEntityId(loanCharge.getId()) //
                 .withEntityExternalId(loanCharge.getExternalId()) //
@@ -825,14 +826,14 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                 loan = loanAccountDomainService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
             }
 
-            postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
-
             if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled() && runInterestRecalculation
                     && loan.isFeeCompoundingEnabledForInterestRecalculation()) {
-                loanAccrualsProcessingService.processAccrualsForInterestRecalculation(loan,
-                        loan.repaymentScheduleDetail().isInterestRecalculationEnabled());
+                loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan, true, false);
             }
             this.loanAccountDomainService.setLoanDelinquencyTag(loan, DateUtils.getBusinessLocalDate());
+
+            postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+            loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
         }
     }
 
@@ -1050,9 +1051,11 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                 || (configurationDomainService.isImmediateChargeAccrualPostMaturityEnabled()
                         && DateUtils.getBusinessLocalDate().isAfter(loan.getMaturityDate()))) {
             final LoanTransaction applyLoanChargeTransaction = loan.handleChargeAppliedTransaction(loanCharge, null);
-            this.loanTransactionRepository.saveAndFlush(applyLoanChargeTransaction);
-            businessEventNotifierService
-                    .notifyPostBusinessEvent(new LoanAccrualTransactionCreatedBusinessEvent(applyLoanChargeTransaction));
+            if (applyLoanChargeTransaction != null) {
+                this.loanTransactionRepository.saveAndFlush(applyLoanChargeTransaction);
+                businessEventNotifierService
+                        .notifyPostBusinessEvent(new LoanAccrualTransactionCreatedBusinessEvent(applyLoanChargeTransaction));
+            }
         }
         return DateUtils.isBeforeBusinessDate(loanCharge.getDueLocalDate());
     }

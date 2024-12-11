@@ -240,8 +240,6 @@ class LoanWritePlatformServiceJpaRepositoryImplTest {
         when(loan.findExistingReversedTransactionIds()).thenReturn(Collections.emptyList());
         doNothing().when(loanTransactionValidator).validateActivityNotBeforeClientOrGroupTransferDate(any(), any(), any());
         when(loan.isClosedWrittenOff()).thenReturn(false);
-        when(loan.isClosedObligationsMet()).thenReturn(false);
-        when(loan.isClosedWithOutstandingAmountMarkedForReschedule()).thenReturn(false);
         when(newTransactionDetail.isRepaymentLikeType()).thenReturn(true);
 
         // Act
@@ -287,8 +285,6 @@ class LoanWritePlatformServiceJpaRepositoryImplTest {
         when(loan.findExistingReversedTransactionIds()).thenReturn(Collections.emptyList());
         doNothing().when(loanTransactionValidator).validateActivityNotBeforeClientOrGroupTransferDate(any(), any(), any());
         when(loan.isClosedWrittenOff()).thenReturn(false);
-        when(loan.isClosedObligationsMet()).thenReturn(false);
-        when(loan.isClosedWithOutstandingAmountMarkedForReschedule()).thenReturn(false);
         when(newTransactionDetail.isRepaymentLikeType()).thenReturn(true);
 
         // Act

@@ -5231,6 +5231,7 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 22 January 2021  | Accrual                | 5.7     | 0.0       | 5.7      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 22 January 2021  | Merchant Issued Refund | 1000.0  | 914.37    | 5.42     | 0.0  | 0.0       | 0.0          | false    | true     |
       | 22 January 2021  | Interest Refund        | 5.42    | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | true     |
+      | 22 January 2021  | Accrual Adjustment     | 0.28    | 0.0       | 0.28     | 0.0  | 0.0       | 0.0          | false    | false    |
 
   @TestRailId:C3302
   Scenario: UC18-2 - In case of repayment reversal the Interest Refund transaction needs to be recalculated
@@ -5288,6 +5289,7 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 22 January 2021  | Merchant Issued Refund | 1000.0  | 1000.0    | 0.0      | 0.0  | 0.0       | 0.0          | false    | true     |
       | 22 January 2021  | Interest Refund        | 5.7     | 0.0       | 5.7      | 0.0  | 0.0       | 0.0          | false    | true     |
       | 23 January 2021  | Credit Balance Refund  | 85.63   | 85.63     | 0.0      | 0.0  | 0.0       | 85.63        | false    | true     |
+      | 22 January 2021  | Accrual                | 5.42    | 0.0       | 5.42     | 0.0  | 0.0       | 0.0          | false    | false    |
     And In Loan Transactions the "2"th Transaction has Transaction type="Repayment" and is reverted
 
   @TestRailId:C3303

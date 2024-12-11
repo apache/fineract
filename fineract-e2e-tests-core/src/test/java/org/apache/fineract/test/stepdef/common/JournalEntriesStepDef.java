@@ -59,6 +59,7 @@ public class JournalEntriesStepDef extends AbstractStepDef {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.body().getLoanId();
+        String resourceId = String.valueOf(loanId);
 
         Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
         ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
@@ -132,7 +133,8 @@ public class JournalEntriesStepDef extends AbstractStepDef {
                 }
             }
             assertThat(containsAnyExpected)
-                    .as(ErrorMessageHelper.wrongValueInLineInJournalEntries(i, possibleActualValuesList, expectedValues)).isTrue();
+                    .as(ErrorMessageHelper.wrongValueInLineInJournalEntries(resourceId, i, possibleActualValuesList, expectedValues))
+                    .isTrue();
         }
     }
 
@@ -141,6 +143,7 @@ public class JournalEntriesStepDef extends AbstractStepDef {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.body().getLoanId();
+        String resourceId = String.valueOf(loanId);
 
         Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
         ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
@@ -218,7 +221,8 @@ public class JournalEntriesStepDef extends AbstractStepDef {
                 }
             }
             assertThat(containsAnyExpected)
-                    .as(ErrorMessageHelper.wrongValueInLineInJournalEntries(i, possibleActualValuesList, expectedValues)).isTrue();
+                    .as(ErrorMessageHelper.wrongValueInLineInJournalEntries(resourceId, i, possibleActualValuesList, expectedValues))
+                    .isTrue();
         }
     }
 }

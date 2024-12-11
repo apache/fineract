@@ -100,6 +100,7 @@ import org.apache.fineract.portfolio.loanaccount.service.GLIMAccountInfoReadPlat
 import org.apache.fineract.portfolio.loanaccount.service.GLIMAccountInfoWritePlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.GLIMAccountInfoWritePlatformServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualActivityProcessingService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualEventService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualTransactionBusinessEventService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualTransactionBusinessEventServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualsProcessingService;
@@ -332,9 +333,16 @@ public class LoanAccountConfiguration {
     @Bean
     @ConditionalOnMissingBean(LoanStatusChangePlatformService.class)
     public LoanStatusChangePlatformService loanStatusChangePlatformService(BusinessEventNotifierService businessEventNotifierService,
+            LoanAccrualActivityProcessingService loanAccrualActivityProcessingService) {
+        return new LoanStatusChangePlatformServiceImpl(businessEventNotifierService, loanAccrualActivityProcessingService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(LoanAccrualEventService.class)
+    public LoanAccrualEventService loanAccrualEventService(BusinessEventNotifierService businessEventNotifierService,
             LoanAccrualsProcessingService loanAccrualsProcessingService,
             LoanAccrualActivityProcessingService loanAccrualActivityProcessingService) {
-        return new LoanStatusChangePlatformServiceImpl(businessEventNotifierService, loanAccrualsProcessingService,
+        return new LoanAccrualEventService(businessEventNotifierService, loanAccrualsProcessingService,
                 loanAccrualActivityProcessingService);
     }
 
@@ -351,8 +359,8 @@ public class LoanAccountConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(LoanWritePlatformService.class)
-    public LoanWritePlatformService loanWritePlatformService(LoanRepaymentScheduleTransactionProcessorFactory transactionProcessorFactory,
-            PlatformSecurityContext context, LoanTransactionValidator loanTransactionValidator,
+    public LoanWritePlatformService loanWritePlatformService(PlatformSecurityContext context,
+            LoanTransactionValidator loanTransactionValidator,
             LoanUpdateCommandFromApiJsonDeserializer loanUpdateCommandFromApiJsonDeserializer, LoanRepositoryWrapper loanRepositoryWrapper,
             LoanAccountDomainService loanAccountDomainService, NoteRepository noteRepository,
             LoanTransactionRepository loanTransactionRepository, LoanTransactionRelationRepository loanTransactionRelationRepository,
@@ -381,18 +389,17 @@ public class LoanAccountConfiguration {
             LoanOfficerValidator loanOfficerValidator, LoanDownPaymentTransactionValidator loanDownPaymentTransactionValidator,
             LoanDisbursementService loanDisbursementService, LoanScheduleService loanScheduleService,
             LoanChargeValidator loanChargeValidator, LoanOfficerService loanOfficerService) {
-        return new LoanWritePlatformServiceJpaRepositoryImpl(transactionProcessorFactory, context, loanTransactionValidator,
-                loanUpdateCommandFromApiJsonDeserializer, loanRepositoryWrapper, loanAccountDomainService, noteRepository,
-                loanTransactionRepository, loanTransactionRelationRepository, loanAssembler, journalEntryWritePlatformService,
-                calendarInstanceRepository, paymentDetailWritePlatformService, holidayRepository, configurationDomainService,
-                workingDaysRepository, accountTransfersWritePlatformService, accountTransfersReadPlatformService,
-                accountAssociationsReadPlatformService, loanReadPlatformService, fromApiJsonHelper, calendarRepository,
-                loanScheduleHistoryWritePlatformService, loanApplicationValidator, accountAssociationRepository,
-                accountTransferDetailRepository, businessEventNotifierService, guarantorDomainService, loanUtilService, loanSummaryWrapper,
-                entityDatatableChecksWritePlatformService, transactionProcessingStrategy, codeValueRepository,
-                cashierTransactionDataValidator, glimRepository, loanRepository, repaymentWithPostDatedChecksAssembler,
-                postDatedChecksRepository, loanRepaymentScheduleInstallmentRepository, defaultLoanLifecycleStateMachine,
-                loanAccountLockService, externalIdFactory, replayedTransactionBusinessEventService,
+        return new LoanWritePlatformServiceJpaRepositoryImpl(context, loanTransactionValidator, loanUpdateCommandFromApiJsonDeserializer,
+                loanRepositoryWrapper, loanAccountDomainService, noteRepository, loanTransactionRepository,
+                loanTransactionRelationRepository, loanAssembler, journalEntryWritePlatformService, calendarInstanceRepository,
+                paymentDetailWritePlatformService, holidayRepository, configurationDomainService, workingDaysRepository,
+                accountTransfersWritePlatformService, accountTransfersReadPlatformService, accountAssociationsReadPlatformService,
+                loanReadPlatformService, fromApiJsonHelper, calendarRepository, loanScheduleHistoryWritePlatformService,
+                loanApplicationValidator, accountAssociationRepository, accountTransferDetailRepository, businessEventNotifierService,
+                guarantorDomainService, loanUtilService, loanSummaryWrapper, entityDatatableChecksWritePlatformService,
+                transactionProcessingStrategy, codeValueRepository, cashierTransactionDataValidator, glimRepository, loanRepository,
+                repaymentWithPostDatedChecksAssembler, postDatedChecksRepository, loanRepaymentScheduleInstallmentRepository,
+                defaultLoanLifecycleStateMachine, loanAccountLockService, externalIdFactory, replayedTransactionBusinessEventService,
                 loanAccrualTransactionBusinessEventService, errorHandler, loanDownPaymentHandlerService, accountTransferRepository,
                 loanTransactionAssembler, loanAccrualsProcessingService, loanOfficerValidator, loanDownPaymentTransactionValidator,
                 loanDisbursementService, loanScheduleService, loanChargeValidator, loanOfficerService);

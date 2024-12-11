@@ -46,7 +46,7 @@ public class AddPeriodicAccrualEntriesForLoansTasklet implements Tasklet {
             List<Throwable> errors = new ArrayList<>();
             for (Long loanId : loanIds) {
                 try {
-                    loanAccrualsProcessingService.addIncomeAndAccrualTransactions(loanId);
+                    loanAccrualsProcessingService.addIncomePostingAndAccruals(loanId);
                 } catch (Exception e) {
                     log.error("Failed to add income and accrual transaction for loan {}", loanId, e);
                     errors.add(e);

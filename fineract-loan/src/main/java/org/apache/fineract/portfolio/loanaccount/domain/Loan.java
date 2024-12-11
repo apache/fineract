@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+import static org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType.PROGRESSIVE;
+
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
@@ -740,6 +742,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
      * is lesser than todays date. If not, the transaction date is set to todays date
      */
     public LoanTransaction handleChargeAppliedTransaction(final LoanCharge loanCharge, final LocalDate suppliedTransactionDate) {
+        if (isProgressiveSchedule()) {
+            return null;
+        }
         final Money chargeAmount = loanCharge.getAmount(getCurrency());
         Money feeCharges = chargeAmount;
         Money penaltyCharges = Money.zero(getCurrency());
@@ -1053,7 +1058,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
             LoanCharge charge = loanCharge;
             // add new charges
             if (loanCharge.getId() == null) {
-                LoanTrancheDisbursementCharge loanTrancheDisbursementCharge = null;
+                LoanTrancheDisbursementCharge loanTrancheDisbursementCharge;
                 loanCharge.update(this);
                 if (this.loanProduct.isMultiDisburseLoan() && loanCharge.isTrancheDisbursementCharge()) {
                     loanCharge.getTrancheDisbursementCharge().getloanDisbursementDetails().updateLoan(this);
@@ -3562,5 +3567,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     public LoanRepaymentScheduleTransactionProcessor getTransactionProcessor() {
         return transactionProcessorFactory.determineProcessor(transactionProcessingStrategyCode);
+    }
+
+    public boolean isProgressiveSchedule() {
+        return getLoanProductRelatedDetail().getLoanScheduleType() == PROGRESSIVE;
     }
 }

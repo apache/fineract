@@ -128,6 +128,9 @@ class LoanChargeWritePlatformServiceImplTest {
     @Mock
     private LoanChargeValidator loanChargeValidator;
 
+    @Mock
+    private LoanAccrualTransactionBusinessEventService loanAccrualTransactionBusinessEventService;
+
     @BeforeEach
     void setUp() {
         when(loanAssembler.assembleFrom(LOAN_ID)).thenReturn(loan);

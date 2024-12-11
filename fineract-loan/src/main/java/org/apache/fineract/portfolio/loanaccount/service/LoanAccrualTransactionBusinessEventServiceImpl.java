@@ -20,7 +20,9 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualAdjustmentTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualTransactionCreatedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
@@ -33,8 +35,12 @@ public class LoanAccrualTransactionBusinessEventServiceImpl implements LoanAccru
     @Override
     public void raiseBusinessEventForAccrualTransactions(Loan loan, List<Long> existingTransactionIds) {
         for (final LoanTransaction transaction : loan.getLoanTransactions()) {
-            if (transaction.isNotReversed() && transaction.isAccrual() && !existingTransactionIds.contains(transaction.getId())) {
-                businessEventNotifierService.notifyPostBusinessEvent(new LoanAccrualTransactionCreatedBusinessEvent(transaction));
+            if (transaction.isNotReversed() && (transaction.isAccrual() || transaction.isAccrualAdjustment())
+                    && !existingTransactionIds.contains(transaction.getId())) {
+                LoanTransactionBusinessEvent businessEvent = transaction.isAccrual()
+                        ? new LoanAccrualTransactionCreatedBusinessEvent(transaction)
+                        : new LoanAccrualAdjustmentTransactionBusinessEvent(transaction);
+                businessEventNotifierService.notifyPostBusinessEvent(businessEvent);
             }
         }
     }

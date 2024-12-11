@@ -466,12 +466,12 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
             }
             loan = saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
-            // update the loan object
+
+            loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan, true, false);
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanRescheduledDueAdjustScheduleBusinessEvent(loan));
+
             postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
             loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
-
-            loanAccrualsProcessingService.processAccrualsForInterestRecalculation(loan, true);
-            businessEventNotifierService.notifyPostBusinessEvent(new LoanRescheduledDueAdjustScheduleBusinessEvent(loan));
 
             return new CommandProcessingResultBuilder().withCommandId(jsonCommand.commandId()).withEntityId(loanRescheduleRequestId)
                     .withLoanId(loanRescheduleRequest.getLoan().getId()).with(changes).withClientId(loan.getClientId())

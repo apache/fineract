@@ -2959,6 +2959,7 @@ Feature: LoanChargeback
       | 01 January 2024  | Disbursement           | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | 0.0         |
       | 19 January 2024  | Merchant Issued Refund | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 90.0         | 0.0         |
       | 01 February 2024 | Repayment              | 105.0  | 90.0      | 0.0      | 0.0  | 5.0       | 0.0          | 10.0        |
+      | 01 February 2024 | Accrual                | 5.0    | 0.0       | 0.0      | 0.0  | 5.0       | 0.0          | 0.0         |
       | 15 April 2024    | Chargeback             | 7.0    | 2.0       | 0.0      | 0.0  | 5.0       | 0.0          | 7.0         |
       | 16 April 2024    | Chargeback             | 7.0    | 7.0       | 0.0      | 0.0  | 0.0       | 4.0          | 3.0         |
     Then Loan Transactions tab has a "CHARGEBACK" transaction with date "16 April 2024" which has the following Journal entries:
@@ -3032,6 +3033,7 @@ Feature: LoanChargeback
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Overpayment |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | 0.0         |
       | 01 February 2024 | Repayment        | 105.0  | 100.0     | 0.0      | 0.0  | 5.0       | 0.0          | 0.0         |
+      | 01 February 2024 | Accrual          | 5.0    | 0.0       | 0.0      | 0.0  | 5.0       | 0.0          | 0.0         |
       | 01 March 2024    | Chargeback       | 3.0    | 0.0       | 0.0      | 0.0  | 3.0       | 0.0          | 0.0         |
     Then Loan Transactions tab has a "DISBURSEMENT" transaction with date "01 January 2024" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit | Credit |
@@ -3065,6 +3067,7 @@ Feature: LoanChargeback
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Overpayment |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | 0.0         |
       | 01 February 2024 | Repayment        | 105.0  | 100.0     | 0.0      | 0.0  | 5.0       | 0.0          | 0.0         |
+      | 01 February 2024 | Accrual          | 5.0    | 0.0       | 0.0      | 0.0  | 5.0       | 0.0          | 0.0         |
       | 01 March 2024    | Chargeback       | 3.0    | 0.0       | 0.0      | 0.0  | 3.0       | 0.0          | 0.0         |
       | 05 March 2024    | Chargeback       | 10.0   | 8.0       | 0.0      | 0.0  | 2.0       | 8.0          | 0.0         |
     Then Loan Transactions tab has a "DISBURSEMENT" transaction with date "01 January 2024" which has the following Journal entries:
@@ -3154,8 +3157,8 @@ Feature: LoanChargeback
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Overpayment |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | 0.0         |
       | 01 February 2024 | Repayment        | 105.0  | 100.0     | 0.0      | 0.0  | 5.0       | 0.0          | 0.0         |
+      | 01 February 2024 | Accrual          | 5.0    | 0.0       | 0.0      | 0.0  | 5.0       | 0.0          | 0.0         |
       | 15 April 2024    | Chargeback       | 3.0    | 0.0       | 0.0      | 0.0  | 3.0       | 0.0          | 0.0         |
-      | 15 April 2024    | Accrual          | 5.0    | 0.0       | 0.0      | 0.0  | 5.0       | 0.0          | 0.0         |
     Then Loan Transactions tab has a "DISBURSEMENT" transaction with date "01 January 2024" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable          | 100.0 |        |
@@ -3165,7 +3168,7 @@ Feature: LoanChargeback
       | ASSET     | 112601       | Loans Receivable          |       | 100.0  |
       | ASSET     | 112603       | Interest/Fee Receivable   |       | 5.0    |
       | LIABILITY | 145023       | Suspense/Clearing account | 105.0 |        |
-    Then Loan Transactions tab has a "ACCRUAL" transaction with date "15 April 2024" which has the following Journal entries:
+    Then Loan Transactions tab has a "ACCRUAL" transaction with date "01 February 2024" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
       | ASSET  | 112603       | Interest/Fee Receivable | 5.0   |        |
       | INCOME | 404007       | Fee Income              |       | 5.0    |
@@ -3193,8 +3196,8 @@ Feature: LoanChargeback
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Overpayment |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | 0.0         |
       | 01 February 2024 | Repayment        | 105.0  | 100.0     | 0.0      | 0.0  | 5.0       | 0.0          | 0.0         |
+      | 01 February 2024 | Accrual          | 5.0    | 0.0       | 0.0      | 0.0  | 5.0       | 0.0          | 0.0         |
       | 15 April 2024    | Chargeback       | 3.0    | 0.0       | 0.0      | 0.0  | 3.0       | 0.0          | 0.0         |
-      | 15 April 2024    | Accrual          | 5.0    | 0.0       | 0.0      | 0.0  | 5.0       | 0.0          | 0.0         |
       | 20 April 2024    | Chargeback       | 10.0   | 8.0       | 0.0      | 0.0  | 2.0       | 8.0          | 0.0         |
     Then Loan Transactions tab has a "DISBURSEMENT" transaction with date "01 January 2024" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit | Credit |
@@ -3205,7 +3208,7 @@ Feature: LoanChargeback
       | ASSET     | 112601       | Loans Receivable          |       | 100.0  |
       | ASSET     | 112603       | Interest/Fee Receivable   |       | 5.0    |
       | LIABILITY | 145023       | Suspense/Clearing account | 105.0 |        |
-    Then Loan Transactions tab has a "ACCRUAL" transaction with date "15 April 2024" which has the following Journal entries:
+    Then Loan Transactions tab has a "ACCRUAL" transaction with date "01 February 2024" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
       | ASSET  | 112603       | Interest/Fee Receivable | 5.0   |        |
       | INCOME | 404007       | Fee Income              |       | 5.0    |
@@ -3354,6 +3357,7 @@ Feature: LoanChargeback
       | 01 January 2024  | Disbursement           | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | 0.0         |
       | 19 January 2024  | Merchant Issued Refund | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 90.0         | 0.0         |
       | 01 February 2024 | Repayment              | 105.0  | 90.0      | 0.0      | 0.0  | 5.0       | 0.0          | 10.0        |
+      | 01 February 2024 | Accrual                | 5.0    | 0.0       | 0.0      | 0.0  | 5.0       | 0.0          | 0.0         |
       | 15 April 2024    | Chargeback             | 3.0    | 0.0       | 0.0      | 0.0  | 3.0       | 0.0          | 3.0         |
       | 20 April 2024    | Chargeback             | 10.0   | 8.0       | 0.0      | 0.0  | 2.0       | 3.0          | 7.0         |
     Then Loan Transactions tab has a "DISBURSEMENT" transaction with date "01 January 2024" which has the following Journal entries:
