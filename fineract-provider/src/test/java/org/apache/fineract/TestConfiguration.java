@@ -24,7 +24,6 @@ import static org.mockito.Mockito.mock;
 
 import com.zaxxer.hikari.HikariDataSource;
 import java.util.List;
-import javax.sql.DataSource;
 import liquibase.change.custom.CustomTaskChange;
 import okhttp3.OkHttpClient;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
@@ -33,6 +32,7 @@ import org.apache.fineract.infrastructure.core.service.database.DatabaseIndepend
 import org.apache.fineract.infrastructure.core.service.database.DatabasePasswordEncryptor;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseType;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
+import org.apache.fineract.infrastructure.core.service.database.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.migration.ExtendedSpringLiquibaseFactory;
 import org.apache.fineract.infrastructure.core.service.migration.TenantDataSourceFactory;
 import org.apache.fineract.infrastructure.core.service.migration.TenantDatabaseStateVerifier;
@@ -94,8 +94,8 @@ public class TestConfiguration {
         return new TenantDataSourceFactory(null, databasePasswordEncryptor) {
 
             @Override
-            public DataSource create(FineractPlatformTenant tenant) {
-                return mock(DataSource.class);
+            public HikariDataSource create(FineractPlatformTenant tenant) {
+                return mock(HikariDataSource.class);
             }
         };
     }
@@ -111,8 +111,8 @@ public class TestConfiguration {
      * DataSource with Mockito RETURNS_MOCKS black magic.
      */
     @Bean
-    public DataSource hikariTenantDataSource() {
-        HikariDataSource mockDataSource = mock(HikariDataSource.class, Mockito.RETURNS_MOCKS);
+    public RoutingDataSource hikariTenantDataSource() {
+        RoutingDataSource mockDataSource = mock(RoutingDataSource.class, Mockito.RETURNS_MOCKS);
         return mockDataSource;
     }
 

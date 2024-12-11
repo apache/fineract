@@ -31,6 +31,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import com.zaxxer.hikari.HikariDataSource;
 import io.cucumber.java8.En;
 import java.util.Arrays;
 import java.util.List;
@@ -66,7 +67,7 @@ public class LiquibaseStepDefinitions implements En {
     private TenantDatabaseUpgradeService tenantDatabaseUpgradeService;
     private List<FineractPlatformTenant> allTenants;
     private SchemaUpgradeNeededException executionException;
-    private DataSource defaultTenantDataSource;
+    private HikariDataSource defaultTenantDataSource;
     private Environment environment;
 
     public LiquibaseStepDefinitions() {
@@ -174,7 +175,7 @@ public class LiquibaseStepDefinitions implements En {
         initialTenantStoreLiquibase = mock(ExtendedSpringLiquibase.class);
         tenantStoreLiquibase = mock(ExtendedSpringLiquibase.class);
 
-        defaultTenantDataSource = mock(DataSource.class);
+        defaultTenantDataSource = mock(HikariDataSource.class);
 
         TenantPasswordEncryptionTask tenantPasswordEncryptor = mock(TenantPasswordEncryptionTask.class);
 

@@ -59,11 +59,11 @@ public class StuckJobListener implements ApplicationListener<ContextRefreshedEve
         if (!jobRegistry.getJobNames().isEmpty()) {
             List<FineractPlatformTenant> allTenants = tenantDetailsService.findAllTenants();
             allTenants.forEach(tenant -> {
+                ThreadLocalContextUtil.setTenant(tenant);
                 NamedParameterJdbcTemplate namedParameterJdbcTemplate = jdbcTemplateFactory.createNamedParameterJdbcTemplate(tenant);
                 List<String> stuckJobNames = jobExecutionRepository.getStuckJobNames(namedParameterJdbcTemplate);
                 if (!stuckJobNames.isEmpty()) {
                     try {
-                        ThreadLocalContextUtil.setTenant(tenant);
                         HashMap<BusinessDateType, LocalDate> businessDates = businessDateReadPlatformService.getBusinessDates();
                         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
                         ThreadLocalContextUtil.setBusinessDates(businessDates);

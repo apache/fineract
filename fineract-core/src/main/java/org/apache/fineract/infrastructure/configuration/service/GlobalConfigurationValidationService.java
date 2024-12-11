@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.configuration.exception.GlobalConfigurationException;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.JdbcTemplateFactory;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.core.service.tenant.TenantDetailsService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -50,6 +51,7 @@ public class GlobalConfigurationValidationService implements InitializingBean {
 
         if (isNotEmpty(tenants)) {
             for (FineractPlatformTenant tenant : tenants) {
+                ThreadLocalContextUtil.setTenant(tenant);
                 validateGlobalConfigurationForIndividualTenant(tenant);
             }
         }

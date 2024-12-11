@@ -22,7 +22,6 @@ import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTen
 import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection.toProtocol;
 
 import com.zaxxer.hikari.HikariDataSource;
-import javax.sql.DataSource;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
 import org.apache.fineract.infrastructure.core.service.database.DatabasePasswordEncryptor;
@@ -48,7 +47,7 @@ public class TenantDataSourceFactory {
         this.databasePasswordEncryptor = databasePasswordEncryptor;
     }
 
-    public DataSource create(FineractPlatformTenant tenant) {
+    public HikariDataSource create(FineractPlatformTenant tenant) {
         HikariDataSource dataSource = new HikariDataSource();
         dataSource.setDriverClassName(tenantDataSource.getDriverClassName());
         dataSource.setDataSourceProperties(tenantDataSource.getDataSourceProperties());

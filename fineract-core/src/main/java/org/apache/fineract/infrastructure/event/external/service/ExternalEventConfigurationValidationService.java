@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.JdbcTemplateFactory;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.core.service.tenant.TenantDetailsService;
 import org.apache.fineract.infrastructure.event.business.domain.BulkBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
@@ -62,6 +63,7 @@ public class ExternalEventConfigurationValidationService implements Initializing
 
         if (isNotEmpty(tenants)) {
             for (FineractPlatformTenant tenant : tenants) {
+                ThreadLocalContextUtil.setTenant(tenant);
                 validateEventConfigurationForIndividualTenant(tenant, eventClasses);
             }
         }

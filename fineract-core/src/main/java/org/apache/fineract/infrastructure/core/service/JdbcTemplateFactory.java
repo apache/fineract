@@ -18,10 +18,9 @@
  */
 package org.apache.fineract.infrastructure.core.service;
 
-import javax.sql.DataSource;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
-import org.apache.fineract.infrastructure.core.service.migration.TenantDataSourceFactory;
+import org.apache.fineract.infrastructure.core.service.database.RoutingDataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -30,15 +29,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class JdbcTemplateFactory {
 
-    private final TenantDataSourceFactory tenantDataSourceFactory;
+    private final RoutingDataSource routingDataSource;
 
     public JdbcTemplate create(FineractPlatformTenant tenant) {
-        DataSource tenantDataSource = tenantDataSourceFactory.create(tenant);
-        return new JdbcTemplate(tenantDataSource);
+        return new JdbcTemplate(routingDataSource);
     }
 
     public NamedParameterJdbcTemplate createNamedParameterJdbcTemplate(FineractPlatformTenant tenant) {
-        DataSource tenantDataSource = tenantDataSourceFactory.create(tenant);
-        return new NamedParameterJdbcTemplate(tenantDataSource);
+        return new NamedParameterJdbcTemplate(routingDataSource);
     }
 }
