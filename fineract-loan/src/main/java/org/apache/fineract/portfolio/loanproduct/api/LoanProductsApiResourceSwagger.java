@@ -248,7 +248,7 @@ final class LoanProductsApiResourceSwagger {
         public Long incomeFromGoodwillCreditPenaltyAccountId;
         public List<GetLoanProductsProductIdResponse.GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings;
         public List<GetLoanProductsProductIdResponse.GetLoanFeeToIncomeAccountMappings> feeToIncomeAccountMappings;
-        public List<GetLoanProductsProductIdResponse.GetChargeOffReasonsToExpenseMappings> chargeOffReasonsToExpenseMappings;
+        public List<PostChargeOffReasonsToExpenseMappings> chargeOffReasonsToExpenseMappings;
         public List<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings;
 
         // Multi Disburse
@@ -325,6 +325,16 @@ final class LoanProductsApiResourceSwagger {
         public List<String> supportedInterestRefundTypes;
         @Schema(example = "REGULAR")
         public String chargeOffBehaviour;
+
+        static final class PostChargeOffReasonsToExpenseMappings {
+
+            private PostChargeOffReasonsToExpenseMappings() {}
+
+            @Schema(example = "1")
+            public Long chargeOffReasonCodeValueId;
+            @Schema(example = "1")
+            public Long expenseGLAccountId;
+        }
     }
 
     @Schema(description = "PostLoanProductsResponse")
@@ -1223,10 +1233,37 @@ final class LoanProductsApiResourceSwagger {
 
             private GetChargeOffReasonsToExpenseMappings() {}
 
-            @Schema(example = "1")
-            public Long chargeOffReasonCodeValueId;
-            @Schema(example = "12")
-            public Long expenseGLAccountId;
+            public GetCodeValueData chargeOffReasonCodeValue;
+            public GetGLAccountData chargeOffExpenseAccount;
+
+            static final class GetCodeValueData {
+
+                private GetCodeValueData() {}
+
+                @Schema(example = "1")
+                public Long id;
+                @Schema(example = "ChargeOffReasons")
+                public String name;
+                @Schema(example = "1")
+                public Integer position;
+                public String description;
+                @Schema(example = "true")
+                public Boolean active;
+                @Schema(example = "false")
+                public Boolean mandatory;
+            }
+
+            static final class GetGLAccountData {
+
+                private GetGLAccountData() {}
+
+                @Schema(example = "1")
+                public Long id;
+                @Schema(example = "Written off")
+                public String name;
+                @Schema(example = "e4")
+                public String glCode;
+            }
         }
 
         static final class GetLoanFeeToIncomeAccountMappings {
@@ -1339,7 +1376,7 @@ final class LoanProductsApiResourceSwagger {
         public GetLoanAccountingMappings accountingMappings;
         public Set<GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings;
         public Set<GetLoanFeeToIncomeAccountMappings> feeToIncomeAccountMappings;
-        public Set<GetChargeOffReasonsToExpenseMappings> chargeOffReasonsToExpenseMappings;
+        public Set<GetChargeOffReasonsToExpenseMappings> chargeOffReasonToGLAccountMappings;
         @Schema(example = "false")
         public Boolean isRatesEnabled;
         @Schema(example = "true")
@@ -1599,7 +1636,7 @@ final class LoanProductsApiResourceSwagger {
         public Long incomeFromChargeOffPenaltyAccountId;
         public List<GetLoanProductsProductIdResponse.GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings;
         public List<GetLoanProductsProductIdResponse.GetLoanFeeToIncomeAccountMappings> feeToIncomeAccountMappings;
-        public List<GetLoanProductsProductIdResponse.GetChargeOffReasonsToExpenseMappings> chargeOffReasonsToExpenseMappings;
+        public List<PostLoanProductsRequest.PostChargeOffReasonsToExpenseMappings> chargeOffReasonsToExpenseMappings;
         public List<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings;
         @Schema(example = "false")
         public Boolean enableAccrualActivityPosting;

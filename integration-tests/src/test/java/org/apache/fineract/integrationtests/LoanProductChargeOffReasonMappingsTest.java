@@ -31,24 +31,22 @@ import java.util.List;
 import org.apache.fineract.client.models.AllowAttributeOverrides;
 import org.apache.fineract.client.models.ChargeData;
 import org.apache.fineract.client.models.ChargeToGLAccountMapper;
-import org.apache.fineract.client.models.GetChargeOffReasonsToExpenseMappings;
 import org.apache.fineract.client.models.GetLoanFeeToIncomeAccountMappings;
 import org.apache.fineract.client.models.GetLoanPaymentChannelToFundSourceMappings;
+import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
+import org.apache.fineract.client.models.PostChargeOffReasonsToExpenseMappings;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.BusinessStepHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-@ExtendWith(LoanTestLifecycleExtension.class)
 public class LoanProductChargeOffReasonMappingsTest extends BaseLoanIntegrationTest {
 
     private static final String CODE_VALUE_NAME = "ChargeOffReasons";
@@ -77,10 +75,14 @@ public class LoanProductChargeOffReasonMappingsTest extends BaseLoanIntegrationT
         final String creationBusinessDay = "15 January 2023";
         runAt(creationBusinessDay, () -> {
             Integer chargeOffReasons = createChargeOffReason();
-            Long localLoanProductId = loanTransactionHelper.createLoanProduct(loanProductsRequest(Long.valueOf(chargeOffReasons), 15L))
+            Long localLoanProductId = loanTransactionHelper.createLoanProduct(loanProductsRequest(Long.valueOf(chargeOffReasons), 16L))
                     .getResourceId();
 
             Assertions.assertNotNull(localLoanProductId);
+
+            final GetLoanProductsProductIdResponse loanProduct = loanTransactionHelper.getLoanProduct(localLoanProductId.intValue());
+            Assertions.assertNotNull(loanProduct.getChargeOffReasonToGLAccountMappings());
+            Assertions.assertFalse(loanProduct.getChargeOffReasonToGLAccountMappings().isEmpty());
         });
     }
 
@@ -89,8 +91,8 @@ public class LoanProductChargeOffReasonMappingsTest extends BaseLoanIntegrationT
         final String creationBusinessDay = "15 January 2023";
         runAt(creationBusinessDay, () -> {
             Integer chargeOffReasons = createChargeOffReason();
-            List<GetChargeOffReasonsToExpenseMappings> chargeOffReasonsToExpenseMappings = new ArrayList<>();
-            GetChargeOffReasonsToExpenseMappings getChargeOffReasonsToExpenseMappings = new GetChargeOffReasonsToExpenseMappings();
+            List<PostChargeOffReasonsToExpenseMappings> chargeOffReasonsToExpenseMappings = new ArrayList<>();
+            PostChargeOffReasonsToExpenseMappings getChargeOffReasonsToExpenseMappings = new PostChargeOffReasonsToExpenseMappings();
             getChargeOffReasonsToExpenseMappings.setChargeOffReasonCodeValueId(Long.valueOf(chargeOffReasons));
             getChargeOffReasonsToExpenseMappings.setExpenseGLAccountId(15L);
             chargeOffReasonsToExpenseMappings.add(getChargeOffReasonsToExpenseMappings);
@@ -139,8 +141,8 @@ public class LoanProductChargeOffReasonMappingsTest extends BaseLoanIntegrationT
         List<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
         List<GetLoanFeeToIncomeAccountMappings> feeToIncomeAccountMappings = new ArrayList<>();
 
-        List<GetChargeOffReasonsToExpenseMappings> chargeOffReasonsToExpenseMappings = new ArrayList<>();
-        GetChargeOffReasonsToExpenseMappings getChargeOffReasonsToExpenseMappings = new GetChargeOffReasonsToExpenseMappings();
+        List<PostChargeOffReasonsToExpenseMappings> chargeOffReasonsToExpenseMappings = new ArrayList<>();
+        PostChargeOffReasonsToExpenseMappings getChargeOffReasonsToExpenseMappings = new PostChargeOffReasonsToExpenseMappings();
         getChargeOffReasonsToExpenseMappings.setChargeOffReasonCodeValueId(chargeOffReasonId);
         getChargeOffReasonsToExpenseMappings.setExpenseGLAccountId(glAccountId);
         chargeOffReasonsToExpenseMappings.add(getChargeOffReasonsToExpenseMappings);

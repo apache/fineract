@@ -414,7 +414,7 @@ public class ProductToGLAccountMappingHelper {
                 this.accountMappingRepository.deleteAllInBatch(existingChargeOffReasonToGLAccountMappings);
             } else {
                 for (final ProductToGLAccountMapping existingChargeOffReasonToGLAccountMapping : existingChargeOffReasonToGLAccountMappings) {
-                    final Long currentChargeOffReasonId = existingChargeOffReasonToGLAccountMapping.getChargeOffReasonId();
+                    final Long currentChargeOffReasonId = existingChargeOffReasonToGLAccountMapping.getChargeOffReason().getId();
                     if (currentChargeOffReasonId != null) {
                         existingChargeOffReasons.add(currentChargeOffReasonId);
                         // update existing mappings (if required)
@@ -496,12 +496,14 @@ public class ProductToGLAccountMappingHelper {
 
         final boolean reasonMappingExists = this.accountMappingRepository
                 .findAllChargesOffReasonsMappings(productId, portfolioProductType.getValue()).stream()
-                .anyMatch(mapping -> mapping.getChargeOffReasonId().equals(reasonId));
+                .anyMatch(mapping -> mapping.getChargeOffReason().getId().equals(reasonId));
 
-        if (glAccount.isPresent() && !reasonMappingExists) {
+        final Optional<CodeValue> codeValueOptional = codeValueRepository.findById(reasonId);
+
+        if (glAccount.isPresent() && !reasonMappingExists && codeValueOptional.isPresent()) {
             final ProductToGLAccountMapping accountMapping = new ProductToGLAccountMapping().setGlAccount(glAccount.get())
                     .setProductId(productId).setProductType(portfolioProductType.getValue())
-                    .setFinancialAccountType(CashAccountsForLoan.CHARGE_OFF_EXPENSE.getValue()).setChargeOffReasonId(reasonId);
+                    .setFinancialAccountType(CashAccountsForLoan.CHARGE_OFF_EXPENSE.getValue()).setChargeOffReason(codeValueOptional.get());
 
             this.accountMappingRepository.saveAndFlush(accountMapping);
         }
