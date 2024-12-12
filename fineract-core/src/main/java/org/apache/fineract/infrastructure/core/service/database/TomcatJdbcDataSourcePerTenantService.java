@@ -70,10 +70,8 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
             Long tenantConnectionKey = tenantConnection.getConnectionId();
             // if tenantConnection information available switch to the
             // appropriate datasource for that tenant.
-            actualDataSource = TENANT_TO_DATA_SOURCE_MAP.computeIfAbsent(tenantConnectionKey, (key) -> {
-                DataSource tenantSpecificDataSource = dataSourcePerTenantServiceFactory.createNewDataSourceFor(tenantConnection);
-                return tenantSpecificDataSource;
-            });
+            actualDataSource = TENANT_TO_DATA_SOURCE_MAP.computeIfAbsent(tenantConnectionKey,
+                    (key) -> dataSourcePerTenantServiceFactory.createNewDataSourceFor(tenantConnection));
 
         }
 
