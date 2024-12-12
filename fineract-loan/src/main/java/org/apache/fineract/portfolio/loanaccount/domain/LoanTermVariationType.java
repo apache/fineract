@@ -30,7 +30,8 @@ public enum LoanTermVariationType {
     GRACE_ON_INTEREST(7, "loanTermType.graceOnInterest"), //
     GRACE_ON_PRINCIPAL(8, "loanTermType.graceOnPrincipal"), //
     EXTEND_REPAYMENT_PERIOD(9, "loanTermType.extendRepaymentPeriod"), //
-    INTEREST_RATE_FROM_INSTALLMENT(10, "loanTermType.interestRateFromInstallment"); //
+    INTEREST_RATE_FROM_INSTALLMENT(10, "loanTermType.interestRateFromInstallment"), //
+    INTEREST_PAUSE(11, "loanTermType.interestPause"); //
 
     private final Integer value;
     private final String code;
@@ -81,6 +82,9 @@ public enum LoanTermVariationType {
             break;
             case 10:
                 enumeration = LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT;
+            break;
+            case 11:
+                enumeration = LoanTermVariationType.INTEREST_PAUSE;
             break;
         }
         return enumeration;

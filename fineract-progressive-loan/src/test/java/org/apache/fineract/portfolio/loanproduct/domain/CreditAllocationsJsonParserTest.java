@@ -118,7 +118,7 @@ public class CreditAllocationsJsonParserTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonMap);
         JsonCommand command = JsonCommand.from(json, JsonParser.parseString(json), fromJsonHelper, null, 1L, 2L, 3L, 4L, null, null, null,
-                null, null, null, null, null);
+                null, null, null, null, null, null);
         return command;
     }
 

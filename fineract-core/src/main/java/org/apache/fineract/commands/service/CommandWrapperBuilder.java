@@ -21,6 +21,7 @@ package org.apache.fineract.commands.service;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.infrastructure.accountnumberformat.service.AccountNumberFormatConstants;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.paymenttype.api.PaymentTypeApiResourceConstants;
 import org.apache.fineract.portfolio.savings.DepositsApiConstants;
@@ -47,18 +48,19 @@ public class CommandWrapperBuilder {
     private Long organisationCreditBureauId;
     private String jobName;
     private String idempotencyKey;
+    private ExternalId loanExternalId;
 
     @SuppressFBWarnings(value = "UWF_UNWRITTEN_FIELD", justification = "TODO: fix this!")
     public CommandWrapper build() {
         return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName, this.entityName,
                 this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, this.templateId,
-                this.creditBureauId, this.organisationCreditBureauId, this.jobName, this.idempotencyKey);
+                this.creditBureauId, this.organisationCreditBureauId, this.jobName, this.idempotencyKey, this.loanExternalId);
     }
 
     public CommandWrapper build(String idempotencyKey) {
         return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName, this.entityName,
                 this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, this.templateId,
-                this.creditBureauId, this.organisationCreditBureauId, this.jobName, idempotencyKey);
+                this.creditBureauId, this.organisationCreditBureauId, this.jobName, idempotencyKey, this.loanExternalId);
     }
 
     public CommandWrapperBuilder updateCreditBureau() {
@@ -3712,6 +3714,22 @@ public class CommandWrapperBuilder {
         this.entityId = null;
         this.loanId = loanId;
         this.href = "/loans/" + loanId + "/delinquency-action";
+        return this;
+    }
+
+    public CommandWrapperBuilder createInterestPause(final long loanId) {
+        this.actionName = "CREATE";
+        this.entityName = "INTEREST_PAUSE";
+        this.loanId = loanId;
+        this.href = "/v1/loans/" + loanId + "/interest-pauses";
+        return this;
+    }
+
+    public CommandWrapperBuilder createInterestPauseByExternalId(final String loanExternalId) {
+        this.actionName = "CREATE";
+        this.entityName = "INTEREST_PAUSE";
+        this.loanExternalId = new ExternalId(loanExternalId);
+        this.href = "/v1/loans/external-id/" + loanExternalId + "/interest-pauses";
         return this;
     }
 }

@@ -249,6 +249,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
+        } else if (wrapper.isInterestPauseResource() || wrapper.isInterestPauseExternalIdResource()) {
+            handler = applicationContext.getBean("interestPauseCommandHandler", NewCommandSourceHandler.class);
         } else {
             handler = commandHandlerProvider.getHandler(wrapper.entityName(), wrapper.actionName());
         }

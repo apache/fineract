@@ -113,6 +113,8 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
             + "and (:futureCharges = true or ls.fromDate < :tillDate or (ls.installmentNumber = (select min(lsi.installmentNumber) from LoanRepaymentScheduleInstallment lsi where lsi.loan.id = l.id and lsi.isDownPayment = false) and ls.fromDate = :tillDate))))";
     String FIND_LOANS_FOR_ADD_ACCRUAL = LOANS_FOR_ACCRUAL + "and (:futureCharges = true or ls.dueDate <= :tillDate)))";
 
+    String FIND_LOAN_BY_EXTERNAL_ID = "SELECT loan FROM Loan loan WHERE loan.externalId = :externalId";
+
     @Query(FIND_GROUP_LOANS_DISBURSED_AFTER)
     List<Loan> getGroupLoansDisbursedAfter(@Param("disbursementDate") LocalDate disbursementDate, @Param("groupId") Long groupId,
             @Param("loanType") Integer loanType);
@@ -247,4 +249,7 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     @Query(FIND_LOANS_FOR_ADD_ACCRUAL)
     List<Loan> findLoansForAddAccrual(@Param("accountingType") Integer accountingType, @Param("tillDate") LocalDate tillDate,
             @Param("futureCharges") boolean futureCharges);
+
+    @Query(FIND_LOAN_BY_EXTERNAL_ID)
+    Optional<Loan> findByExternalId(@Param("externalId") ExternalId externalId);
 }

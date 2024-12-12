@@ -64,6 +64,10 @@ import org.apache.fineract.portfolio.fund.domain.FundRepository;
 import org.apache.fineract.portfolio.fund.service.FundReadPlatformService;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
 import org.apache.fineract.portfolio.group.service.GroupReadPlatformService;
+import org.apache.fineract.portfolio.interestpauses.service.InterestPauseReadPlatformService;
+import org.apache.fineract.portfolio.interestpauses.service.InterestPauseReadPlatformServiceImpl;
+import org.apache.fineract.portfolio.interestpauses.service.InterestPauseWritePlatformService;
+import org.apache.fineract.portfolio.interestpauses.service.InterestPauseWritePlatformServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeRepository;
@@ -81,6 +85,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanSchedu
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleHistoryWritePlatformService;
 import org.apache.fineract.portfolio.loanaccount.mapper.LoanChargeMapper;
 import org.apache.fineract.portfolio.loanaccount.mapper.LoanCollateralManagementMapper;
+import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanTermVariationsRepository;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationTransitionValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeApiJsonValidator;
@@ -455,5 +460,18 @@ public class LoanAccountConfiguration {
     @ConditionalOnMissingBean(LoanRefundService.class)
     public LoanRefundService loanRefundService(LoanRefundValidator loanRefundValidator) {
         return new LoanRefundService(loanRefundValidator);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(InterestPauseReadPlatformService.class)
+    public InterestPauseReadPlatformService interestPauseReadPlatformService(LoanTermVariationsRepository loanTermVariationsRepository) {
+        return new InterestPauseReadPlatformServiceImpl(loanTermVariationsRepository);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(InterestPauseWritePlatformService.class)
+    public InterestPauseWritePlatformService interestPauseWritePlatformService(LoanTermVariationsRepository loanTermVariationsRepository,
+            LoanRepositoryWrapper loanRepositoryWrapper) {
+        return new InterestPauseWritePlatformServiceImpl(loanTermVariationsRepository, loanRepositoryWrapper);
     }
 }

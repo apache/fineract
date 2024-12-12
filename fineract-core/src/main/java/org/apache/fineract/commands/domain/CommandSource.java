@@ -133,6 +133,9 @@ public class CommandSource extends AbstractPersistableCustom<Long> {
     @Column(name = "result_status_code")
     private Integer resultStatusCode;
 
+    @Column(name = "loan_external_id", length = 100)
+    private ExternalId loanExternalId;
+
     public static CommandSource fullEntryFrom(final CommandWrapper wrapper, final JsonCommand command, final AppUser maker,
             String idempotencyKey, Integer status) {
 
@@ -156,6 +159,7 @@ public class CommandSource extends AbstractPersistableCustom<Long> {
                 .transactionId(command.getTransactionId()) //
                 .creditBureauId(command.getCreditBureauId()) //
                 .organisationCreditBureauId(command.getOrganisationCreditBureauId()) //
+                .loanExternalId(command.getLoanExternalId()) //
                 .build(); //
     }
 
@@ -195,5 +199,6 @@ public class CommandSource extends AbstractPersistableCustom<Long> {
         this.resourceExternalId = result.getResourceExternalId();
         this.subResourceId = result.getSubResourceId();
         this.subResourceExternalId = result.getSubResourceExternalId();
+        this.loanExternalId = result.getLoanExternalId();
     }
 }

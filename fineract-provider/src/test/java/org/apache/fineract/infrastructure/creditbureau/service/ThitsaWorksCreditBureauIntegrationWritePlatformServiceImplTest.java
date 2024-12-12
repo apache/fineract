@@ -421,7 +421,7 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImplTest {
         command.put("creditBureauID", "1"); // Must match to the mocked config
         String json = mapper.writeValueAsString(command);
         return JsonCommand.from(json, JsonParser.parseString(json), fromJsonHelper, null, 1L, 2L, 3L, 4L, null, null, null, null, null,
-                null, null, null);
+                null, null, null, null);
     }
 
     private void mockTokenGeneration() {

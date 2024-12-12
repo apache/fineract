@@ -50,6 +50,20 @@ public class LoanRepositoryWrapper {
     }
 
     @Transactional(readOnly = true)
+    public Loan findOneWithNotFoundDetection(final ExternalId externalId) {
+        return this.findOneWithNotFoundDetection(externalId, false);
+    }
+
+    @Transactional(readOnly = true)
+    public Loan findOneWithNotFoundDetection(final ExternalId externalId, boolean loadLazyCollections) {
+        final Loan loan = this.repository.findByExternalId(externalId).orElseThrow(() -> new LoanNotFoundException(externalId));
+        if (loadLazyCollections) {
+            loan.initializeLazyCollections();
+        }
+        return loan;
+    }
+
+    @Transactional(readOnly = true)
     public Loan findOneWithNotFoundDetection(final Long id, boolean loadLazyCollections) {
         final Loan loan = this.repository.findById(id).orElseThrow(() -> new LoanNotFoundException(id));
         if (loadLazyCollections) {

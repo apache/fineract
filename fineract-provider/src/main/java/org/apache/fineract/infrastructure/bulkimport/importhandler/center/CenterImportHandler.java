@@ -268,7 +268,7 @@ public class CenterImportHandler implements ImportHandler {
         String payload = gsonBuilder.create().toJson(calendarData);
         CommandWrapper commandWrapper = new CommandWrapper(result.getOfficeId(), result.getGroupId(), result.getClientId(),
                 result.getLoanId(), result.getSavingsId(), null, null, null, null, null, payload, result.getTransactionId(),
-                result.getProductId(), null, null, null, null, idempotencyKeyGenerator.create());
+                result.getProductId(), null, null, null, null, idempotencyKeyGenerator.create(), null);
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .createCalendar(commandWrapper, TemplatePopulateImportConstants.CENTER_ENTITY_TYPE, result.getGroupId()) //
                 .withJson(payload) //

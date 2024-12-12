@@ -46,10 +46,13 @@ public class CommandProcessingResultBuilder {
 
     private ExternalId subEntityExternalId = ExternalId.empty();
 
+    private ExternalId loanExternalId = ExternalId.empty();
+
     public CommandProcessingResult build() {
         return CommandProcessingResult.fromDetails(this.commandId, this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId,
                 this.resourceIdentifier, this.entityId, this.gsimId, this.glimId, this.creditBureauReportData, this.transactionId,
-                this.changes, this.productId, this.rollbackTransaction, this.subEntityId, this.entityExternalId, this.subEntityExternalId);
+                this.changes, this.productId, this.rollbackTransaction, this.subEntityId, this.entityExternalId, this.subEntityExternalId,
+                this.loanExternalId);
     }
 
     public CommandProcessingResultBuilder withCommandId(final Long withCommandId) {
@@ -142,4 +145,8 @@ public class CommandProcessingResultBuilder {
         return this;
     }
 
+    public CommandProcessingResultBuilder withLoanExternalId(final ExternalId loanExternalId) {
+        this.loanExternalId = loanExternalId;
+        return this;
+    }
 }

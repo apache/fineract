@@ -116,6 +116,7 @@ public class LoanTransactionHelper extends IntegrationTest {
     private static final String WRITE_OFF_LOAN_COMMAND = "writeoff";
     private static final String WAIVE_INTEREST_COMMAND = "waiveinterest";
     private static final String MAKE_REPAYMENT_COMMAND = "repayment";
+    private static final String INTEREST_PAUSE_COMMAND = "interestpause";
     private static final String UNDO = "undo";
     private static final String LOANCHARGE_REFUND_REPAYMENT_COMMAND = "chargeRefund";
     private static final String CREDIT_BALANCE_REFUND_COMMAND = "creditBalanceRefund";
@@ -605,6 +606,34 @@ public class LoanTransactionHelper extends IntegrationTest {
     public PostLoansLoanIdTransactionsResponse makeLoanRepayment(final Long loanId, final PostLoansLoanIdTransactionsRequest request,
             final String user, final String pass) {
         return ok(newFineract(user, pass).loanTransactions.executeLoanTransaction(loanId, request, "repayment"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse createInterestPauseByLoanId(final String startDate, final String endDate,
+            final String dateFormat, final String locale, final Long loanID) {
+        log.info("Creating interest pause for Loan {} from {} to {} with dateFormat {} and locale {}", loanID, startDate, endDate,
+                dateFormat, locale);
+        String body = getInterestPauseBodyAsJSON(startDate, endDate, dateFormat, locale);
+        return postLoanTransaction(createInterestPause(INTEREST_PAUSE_COMMAND, loanID), body);
+    }
+
+    public PostLoansLoanIdTransactionsResponse createInterestPauseByExternalId(final String startDate, final String endDate,
+            final String dateFormat, final String locale, final String externalId) {
+        log.info("Creating interest pause for Loan {} from {} to {} with dateFormat {} and locale {}", externalId, startDate, endDate,
+                dateFormat, locale);
+        String body = getInterestPauseBodyAsJSON(startDate, endDate, dateFormat, locale);
+        return postLoanTransaction(createInterestPause(INTEREST_PAUSE_COMMAND, externalId), body);
+    }
+
+    public String retrieveInterestPauseByLoanId(final Long loanID) {
+        log.info("Retrieving interest pauses for Loan ID {}", loanID);
+        String url = retrieveInterestPause(loanID);
+        return Utils.performServerGet(requestSpec, responseSpec, url);
+    }
+
+    public String retrieveInterestPauseByExternalId(final String externalId) {
+        log.info("Retrieving interest pauses for External ID {}", externalId);
+        String url = retrieveInterestPause(externalId);
+        return Utils.performServerGet(requestSpec, responseSpec, url);
     }
 
     public PostLoansLoanIdTransactionsResponse makeInterestPaymentWaiver(final Long loanId,
@@ -1218,6 +1247,16 @@ public class LoanTransactionHelper extends IntegrationTest {
         return new Gson().toJson(map);
     }
 
+    private String getInterestPauseBodyAsJSON(final String startDate, final String endDate, final String dateFormat, final String locale) {
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("startDate", startDate);
+        map.put("endDate", endDate);
+        map.put("dateFormat", dateFormat);
+        map.put("locale", locale);
+
+        return new Gson().toJson(map);
+    }
+
     private String getAdjustTransactionJsonBody(String date, String amount) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("transactionDate", date);
@@ -1409,6 +1448,23 @@ public class LoanTransactionHelper extends IntegrationTest {
 
     private String createLoanTransactionURL(final String command, final Integer loanID) {
         return "/fineract-provider/api/v1/loans/" + loanID + "/transactions?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
+    }
+
+    private String createInterestPause(final String command, final Long loanID) {
+        return "/fineract-provider/api/v1/loans/" + loanID + "/interest-pauses?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
+    }
+
+    private String createInterestPause(final String command, final String externalId) {
+        return "/fineract-provider/api/v1/loans/external-id/" + externalId + "/interest-pauses?command=" + command + "&"
+                + Utils.TENANT_IDENTIFIER;
+    }
+
+    private String retrieveInterestPause(final Long loanID) {
+        return "/fineract-provider/api/v1/loans/" + loanID + "/interest-pauses?" + Utils.TENANT_IDENTIFIER;
+    }
+
+    private String retrieveInterestPause(final String externalId) {
+        return "/fineract-provider/api/v1/loans/external-id/" + externalId + "/interest-pauses?" + Utils.TENANT_IDENTIFIER;
     }
 
     private String createInteroperationLoanTransactionURL(final String accountNo) {

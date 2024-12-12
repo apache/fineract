@@ -77,7 +77,7 @@ public class IdempotencyKeyResolverTest {
     public void testIPKResolveFromWrapper() {
         String idk = "idk";
         CommandWrapper wrapper = new CommandWrapper(null, null, null, null, null, null, null, null, null, null, null, null, null, null,
-                null, null, null, idk);
+                null, null, null, idk, null);
         String resolvedIdk = underTest.resolve(wrapper);
         Assertions.assertEquals(idk, resolvedIdk);
     }

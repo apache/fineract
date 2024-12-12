@@ -179,4 +179,5 @@
     <include file="parts/0158_create_acc_gl_journal_entry_annual_summary.xml" relativeToChangelogFile="true" />
     <include file="parts/0159_trial_balance_summary_with_asset_owner_year_end_summary.xml" relativeToChangelogFile="true" />
     <include file="parts/0160_add_acc_product_mapping_product_id_index.xml" relativeToChangelogFile="true" />
+    <include file="parts/0161_add_loan_external_id_to_commands.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

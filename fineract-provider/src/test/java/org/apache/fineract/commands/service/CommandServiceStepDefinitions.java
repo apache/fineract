@@ -101,7 +101,7 @@ public class CommandServiceStepDefinitions implements En {
 
         public DummyCommand() {
             super(null, null, null, null, null, null, null, null, null, null, "{}", null, null, null, null, null, null,
-                    UUID.randomUUID().toString());
+                    UUID.randomUUID().toString(), null);
         }
 
         @Override
@@ -124,7 +124,7 @@ public class CommandServiceStepDefinitions implements En {
             JsonCommand command = JsonCommand.from(json, null, null, wrapper.getEntityName(), wrapper.getEntityId(),
                     wrapper.getSubentityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(), wrapper.getSavingsId(),
                     wrapper.getTransactionId(), wrapper.getHref(), wrapper.getProductId(), wrapper.getCreditBureauId(),
-                    wrapper.getOrganisationCreditBureauId(), wrapper.getJobName());
+                    wrapper.getOrganisationCreditBureauId(), wrapper.getJobName(), wrapper.getLoanExternalId());
 
             return this.processAndLogCommandService.executeCommand(wrapper, command, true);
         }

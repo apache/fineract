@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain;
 
 import java.util.List;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -49,4 +50,14 @@ public interface LoanTermVariationsRepository
             """)
     List<LoanTermVariationsData> findLoanTermVariationsByLoanIdAndTermType(@Param("loanId") long loanId, @Param("termType") int termType);
 
+    @Query("""
+            select new org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData(
+                ltv.id, ltv.termType, ltv.termApplicableFrom, ltv.decimalValue, ltv.dateValue, ltv.isSpecificToInstallment
+            )
+            from LoanTermVariations ltv
+            where ltv.loan.externalId = :loanExternalId and ltv.termType = :termType
+            order by ltv.termApplicableFrom
+            """)
+    List<LoanTermVariationsData> findLoanTermVariationsByExternalLoanIdAndTermType(@Param("loanExternalId") ExternalId loanExternalId,
+            @Param("termType") int termType);
 }

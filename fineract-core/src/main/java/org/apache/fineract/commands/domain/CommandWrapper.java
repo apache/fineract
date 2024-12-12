@@ -19,6 +19,7 @@
 package org.apache.fineract.commands.domain;
 
 import lombok.Getter;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.useradministration.api.PasswordPreferencesApiConstants;
 
 @Getter
@@ -43,6 +44,7 @@ public class CommandWrapper {
     private final Long creditBureauId;
     private final Long organisationCreditBureauId;
     private final String jobName;
+    private final ExternalId loanExternalId;
 
     private final String idempotencyKey;
 
@@ -61,9 +63,11 @@ public class CommandWrapper {
     public static CommandWrapper fromExistingCommand(final Long commandId, final String actionName, final String entityName,
             final Long resourceId, final Long subresourceId, final String resourceGetUrl, final Long productId, final Long officeId,
             final Long groupId, final Long clientId, final Long loanId, final Long savingsId, final String transactionId,
-            final Long creditBureauId, final Long organisationCreditBureauId, final String idempotencyKey) {
+            final Long creditBureauId, final Long organisationCreditBureauId, final String idempotencyKey,
+            final ExternalId loanExternalId) {
         return new CommandWrapper(commandId, actionName, entityName, resourceId, subresourceId, resourceGetUrl, productId, officeId,
-                groupId, clientId, loanId, savingsId, transactionId, creditBureauId, organisationCreditBureauId, idempotencyKey);
+                groupId, clientId, loanId, savingsId, transactionId, creditBureauId, organisationCreditBureauId, idempotencyKey,
+                loanExternalId);
     }
 
     private CommandWrapper(final Long commandId, final String actionName, final String entityName, final Long resourceId,
@@ -87,12 +91,13 @@ public class CommandWrapper {
         this.organisationCreditBureauId = null;
         this.jobName = null;
         this.idempotencyKey = null;
+        this.loanExternalId = null;
     }
 
     public CommandWrapper(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final Long savingsId,
             final String actionName, final String entityName, final Long entityId, final Long subentityId, final String href,
             final String json, final String transactionId, final Long productId, final Long templateId, final Long creditBureauId,
-            final Long organisationCreditBureauId, final String jobName, final String idempotencyKey) {
+            final Long organisationCreditBureauId, final String jobName, final String idempotencyKey, final ExternalId loanExternalId) {
 
         this.commandId = null;
         this.officeId = officeId;
@@ -114,12 +119,13 @@ public class CommandWrapper {
         this.organisationCreditBureauId = organisationCreditBureauId;
         this.jobName = jobName;
         this.idempotencyKey = idempotencyKey;
+        this.loanExternalId = loanExternalId;
     }
 
     private CommandWrapper(final Long commandId, final String actionName, final String entityName, final Long resourceId,
             final Long subresourceId, final String resourceGetUrl, final Long productId, final Long officeId, final Long groupId,
             final Long clientId, final Long loanId, final Long savingsId, final String transactionId, final Long creditBureauId,
-            final Long organisationCreditBureauId, final String idempotencyKey) {
+            final Long organisationCreditBureauId, final String idempotencyKey, final ExternalId loanExternalId) {
 
         this.commandId = commandId;
         this.officeId = officeId;
@@ -140,6 +146,7 @@ public class CommandWrapper {
         this.organisationCreditBureauId = organisationCreditBureauId;
         this.jobName = null;
         this.idempotencyKey = idempotencyKey;
+        this.loanExternalId = loanExternalId;
     }
 
     public boolean isCreate() {
@@ -238,6 +245,14 @@ public class CommandWrapper {
 
     public boolean isPasswordPreferencesResource() {
         return this.entityName.equalsIgnoreCase(PasswordPreferencesApiConstants.ENTITY_NAME);
+    }
+
+    public boolean isInterestPauseResource() {
+        return this.entityName.equalsIgnoreCase("INTEREST_PAUSE");
+    }
+
+    public boolean isInterestPauseExternalIdResource() {
+        return this.entityName.equalsIgnoreCase("INTEREST_PAUSE") && this.href.contains("/external-id/");
     }
 
     public Long commandId() {

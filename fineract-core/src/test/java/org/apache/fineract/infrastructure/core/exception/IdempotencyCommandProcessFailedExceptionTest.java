@@ -58,7 +58,7 @@ public class IdempotencyCommandProcessFailedExceptionTest {
     public void testInconsistentStatus() {
         IdempotentCommandExceptionMapper mapper = new IdempotentCommandExceptionMapper();
         CommandWrapper command = new CommandWrapper(null, null, null, null, null, null, null, null, null, null, null, null, null, null,
-                null, null, null, null);
+                null, null, null, null, null);
         CommandSource source = CommandSource.fullEntryFrom(command, JsonCommand.from("{}"), null, "dummy-key", null);
         IdempotentCommandProcessFailedException exception = new IdempotentCommandProcessFailedException(command, null, source);
         Response result = mapper.toResponse(exception);

@@ -41,8 +41,8 @@ public class CommandHandlerProviderStepDefinitions implements En {
         });
 
         When("The user processes the command with ID {long}", (Long id) -> {
-            this.result = commandHandler
-                    .processCommand(JsonCommand.fromExistingCommand(id, null, null, null, null, null, null, null, null, null, null, null));
+            this.result = commandHandler.processCommand(
+                    JsonCommand.fromExistingCommand(id, null, null, null, null, null, null, null, null, null, null, null, null));
         });
 
         Then("The command ID matches {long}", (Long id) -> {
