@@ -88,8 +88,8 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
             final String codeValue = rs.getString("codeValueName");
             final String codeDescription = rs.getString("codeDescription");
             final Integer orderPosition = rs.getInt("orderPosition");
-            final Integer isActive = rs.getInt("isActive");
-            final Integer isMandatory = rs.getInt("isMandatory");
+            final Boolean isActive = rs.getBoolean("isActive");
+            final Boolean isMandatory = rs.getBoolean("isMandatory");
 
             final Map<String, Object> loanProductToGLAccountMap = new LinkedHashMap<>(5);
             loanProductToGLAccountMap.put("id", id);
@@ -377,10 +377,8 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
             final String codeValue = (String) chargeOffReasonMap.get("codeValue");
             final String codeDescription = (String) chargeOffReasonMap.get("codeDescription");
             final Integer orderPosition = (Integer) chargeOffReasonMap.get("orderPosition");
-            final Integer isActive = (Integer) chargeOffReasonMap.get("isActive");
-            final Integer isMandatory = (Integer) chargeOffReasonMap.get("isMandatory");
-            final boolean active = isActive != null && isActive == 1;
-            final boolean mandatory = isMandatory != null && isMandatory == 1;
+            final Boolean active = (Boolean) chargeOffReasonMap.get("isActive");
+            final Boolean mandatory = (Boolean) chargeOffReasonMap.get("isMandatory");
             final CodeValueData chargeOffReasonsCodeValue = CodeValueData.builder().id(Long.valueOf(chargeOffReasonId)).name(codeValue)
                     .description(codeDescription).position(orderPosition).active(active).mandatory(mandatory).build();
 
