@@ -39,7 +39,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachin
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanSummaryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
@@ -64,7 +63,6 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
     private final LoanUtilService loanUtilService;
     private final LoanRepositoryWrapper loanRepository;
     private final LoanLifecycleStateMachine defaultLoanLifecycleStateMachine;
-    private final LoanSummaryWrapper loanSummaryWrapper;
 
     @Override
     public LoanScheduleModel calculateLoanSchedule(final JsonQuery query, Boolean validateParams) {
@@ -212,8 +210,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
 
     private Loan fetchLoan(final Long accountId) {
         final Loan loanAccount = this.loanRepository.findOneWithNotFoundDetection(accountId, true);
-        loanAccount.setHelpers(defaultLoanLifecycleStateMachine, this.loanSummaryWrapper,
-                this.loanRepaymentScheduleTransactionProcessorFactory);
+        loanAccount.setHelpers(defaultLoanLifecycleStateMachine, this.loanRepaymentScheduleTransactionProcessorFactory);
 
         return loanAccount;
     }

@@ -30,7 +30,6 @@ import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRescheduleRequestToTermVariationMapping;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanSummaryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
@@ -53,19 +52,17 @@ public class LoanReschedulePreviewPlatformServiceImpl implements LoanRescheduleP
     private final LoanUtilService loanUtilService;
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
     private final LoanScheduleGeneratorFactory loanScheduleFactory;
-    private final LoanSummaryWrapper loanSummaryWrapper;
     private static final DefaultScheduledDateGenerator DEFAULT_SCHEDULED_DATE_GENERATOR = new DefaultScheduledDateGenerator();
 
     @Autowired
     public LoanReschedulePreviewPlatformServiceImpl(final LoanRescheduleRequestRepositoryWrapper loanRescheduleRequestRepository,
             final LoanUtilService loanUtilService,
             final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
-            final LoanScheduleGeneratorFactory loanScheduleFactory, final LoanSummaryWrapper loanSummaryWrapper) {
+            final LoanScheduleGeneratorFactory loanScheduleFactory) {
         this.loanRescheduleRequestRepository = loanRescheduleRequestRepository;
         this.loanUtilService = loanUtilService;
         this.loanRepaymentScheduleTransactionProcessorFactory = loanRepaymentScheduleTransactionProcessorFactory;
         this.loanScheduleFactory = loanScheduleFactory;
-        this.loanSummaryWrapper = loanSummaryWrapper;
     }
 
     @Override
@@ -132,7 +129,7 @@ public class LoanReschedulePreviewPlatformServiceImpl implements LoanRescheduleP
                 .determineProcessor(loan.transactionProcessingStrategy());
         final LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getLoanScheduleType(),
                 loanApplicationTerms.getInterestMethod());
-        loan.setHelpers(null, this.loanSummaryWrapper, this.loanRepaymentScheduleTransactionProcessorFactory);
+        loan.setHelpers(null, this.loanRepaymentScheduleTransactionProcessorFactory);
         final LoanScheduleDTO loanSchedule = loanScheduleGenerator.rescheduleNextInstallments(mathContext, loanApplicationTerms, loan,
                 loanApplicationTerms.getHolidayDetailDTO(), loanRepaymentScheduleTransactionProcessor, rescheduleFromDate);
         final LoanScheduleModel loanScheduleModel = loanSchedule.getLoanScheduleModel();

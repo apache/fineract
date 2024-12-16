@@ -66,7 +66,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleIns
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanSummaryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationRepository;
@@ -154,8 +153,6 @@ class LoanWritePlatformServiceJpaRepositoryImplTest {
     private GuarantorDomainService guarantorDomainService;
     @Mock
     private LoanUtilService loanUtilService;
-    @Mock
-    private LoanSummaryWrapper loanSummaryWrapper;
     @Mock
     private EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
     @Mock

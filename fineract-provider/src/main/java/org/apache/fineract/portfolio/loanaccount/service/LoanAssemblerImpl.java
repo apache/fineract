@@ -80,7 +80,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanPaymentAllocationRul
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanSummaryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTopupDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
@@ -117,7 +116,6 @@ public class LoanAssemblerImpl implements LoanAssembler {
     private final LoanScheduleAssembler loanScheduleAssembler;
     private final LoanChargeAssembler loanChargeAssembler;
     private final LoanCollateralAssembler collateralAssembler;
-    private final LoanSummaryWrapper loanSummaryWrapper;
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
     private final HolidayRepository holidayRepository;
     private final ConfigurationDomainService configurationDomainService;
@@ -142,16 +140,14 @@ public class LoanAssemblerImpl implements LoanAssembler {
     @Override
     public Loan assembleFrom(final Long accountId) {
         final Loan loanAccount = this.loanRepository.findOneWithNotFoundDetection(accountId, true);
-        loanAccount.setHelpers(defaultLoanLifecycleStateMachine, this.loanSummaryWrapper,
-                this.loanRepaymentScheduleTransactionProcessorFactory);
+        loanAccount.setHelpers(defaultLoanLifecycleStateMachine, this.loanRepaymentScheduleTransactionProcessorFactory);
 
         return loanAccount;
     }
 
     @Override
     public void setHelpers(final Loan loanAccount) {
-        loanAccount.setHelpers(defaultLoanLifecycleStateMachine, this.loanSummaryWrapper,
-                this.loanRepaymentScheduleTransactionProcessorFactory);
+        loanAccount.setHelpers(defaultLoanLifecycleStateMachine, this.loanRepaymentScheduleTransactionProcessorFactory);
     }
 
     @Override
@@ -276,8 +272,7 @@ public class LoanAssemblerImpl implements LoanAssembler {
         }
 
         copyAdvancedPaymentRulesIfApplicable(transactionProcessingStrategyCode, loanProduct, loanApplication);
-        loanApplication.setHelpers(defaultLoanLifecycleStateMachine, this.loanSummaryWrapper,
-                this.loanRepaymentScheduleTransactionProcessorFactory);
+        loanApplication.setHelpers(defaultLoanLifecycleStateMachine, this.loanRepaymentScheduleTransactionProcessorFactory);
         // TODO: review
         loanChargeService.recalculateAllCharges(loanApplication);
         topUpLoanConfiguration(element, loanApplication);

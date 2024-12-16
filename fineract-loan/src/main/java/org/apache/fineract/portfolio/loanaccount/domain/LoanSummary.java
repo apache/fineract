@@ -176,60 +176,51 @@ public class LoanSummary {
     }
 
     public void updateSummary(final MonetaryCurrency currency, final Money principal,
-            final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, final LoanSummaryWrapper summaryWrapper,
-            Set<LoanCharge> charges) {
+            final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, Set<LoanCharge> charges) {
 
         this.totalPrincipalDisbursed = principal.getAmount();
-        this.totalPrincipalAdjustments = summaryWrapper.calculateTotalPrincipalAdjusted(repaymentScheduleInstallments, currency)
-                .getAmount();
-        this.totalFeeAdjustments = summaryWrapper.calculateTotalFeeAdjusted(repaymentScheduleInstallments, currency).getAmount();
-        this.totalPenaltyAdjustments = summaryWrapper.calculateTotalPenaltyAdjusted(repaymentScheduleInstallments, currency).getAmount();
-        this.totalPrincipalRepaid = summaryWrapper.calculateTotalPrincipalRepaid(repaymentScheduleInstallments, currency).getAmount();
-        this.totalPrincipalWrittenOff = summaryWrapper.calculateTotalPrincipalWrittenOff(repaymentScheduleInstallments, currency)
-                .getAmount();
+        this.totalPrincipalAdjustments = calculateTotalPrincipalAdjusted(repaymentScheduleInstallments, currency).getAmount();
+        this.totalFeeAdjustments = calculateTotalFeeAdjusted(repaymentScheduleInstallments, currency).getAmount();
+        this.totalPenaltyAdjustments = calculateTotalPenaltyAdjusted(repaymentScheduleInstallments, currency).getAmount();
+        this.totalPrincipalRepaid = calculateTotalPrincipalRepaid(repaymentScheduleInstallments, currency).getAmount();
+        this.totalPrincipalWrittenOff = calculateTotalPrincipalWrittenOff(repaymentScheduleInstallments, currency).getAmount();
 
         this.totalPrincipalOutstanding = principal.plus(this.totalPrincipalAdjustments).minus(this.totalPrincipalRepaid)
                 .minus(this.totalPrincipalWrittenOff).getAmount();
 
-        final Money totalInterestCharged = summaryWrapper.calculateTotalInterestCharged(repaymentScheduleInstallments, currency);
+        final Money totalInterestCharged = calculateTotalInterestCharged(repaymentScheduleInstallments, currency);
         this.totalInterestCharged = totalInterestCharged.getAmount();
-        this.totalInterestRepaid = summaryWrapper.calculateTotalInterestRepaid(repaymentScheduleInstallments, currency).getAmount();
-        this.totalInterestWaived = summaryWrapper.calculateTotalInterestWaived(repaymentScheduleInstallments, currency).getAmount();
-        this.totalInterestWrittenOff = summaryWrapper.calculateTotalInterestWrittenOff(repaymentScheduleInstallments, currency).getAmount();
+        this.totalInterestRepaid = calculateTotalInterestRepaid(repaymentScheduleInstallments, currency).getAmount();
+        this.totalInterestWaived = calculateTotalInterestWaived(repaymentScheduleInstallments, currency).getAmount();
+        this.totalInterestWrittenOff = calculateTotalInterestWrittenOff(repaymentScheduleInstallments, currency).getAmount();
 
         this.totalInterestOutstanding = totalInterestCharged.minus(this.totalInterestRepaid).minus(this.totalInterestWaived)
                 .minus(this.totalInterestWrittenOff).getAmount();
 
-        final Money totalFeeChargesCharged = summaryWrapper.calculateTotalFeeChargesCharged(repaymentScheduleInstallments, currency)
+        final Money totalFeeChargesCharged = calculateTotalFeeChargesCharged(repaymentScheduleInstallments, currency)
                 .plus(this.totalFeeChargesDueAtDisbursement);
         this.totalFeeChargesCharged = totalFeeChargesCharged.getAmount();
 
-        Money totalFeeChargesRepaidAtDisbursement = summaryWrapper.calculateTotalChargesRepaidAtDisbursement(charges, currency);
-        Money totalFeeChargesRepaidAfterDisbursement = summaryWrapper.calculateTotalFeeChargesRepaid(repaymentScheduleInstallments,
-                currency);
+        Money totalFeeChargesRepaidAtDisbursement = calculateTotalChargesRepaidAtDisbursement(charges, currency);
+        Money totalFeeChargesRepaidAfterDisbursement = calculateTotalFeeChargesRepaid(repaymentScheduleInstallments, currency);
         this.totalFeeChargesRepaid = totalFeeChargesRepaidAfterDisbursement.plus(totalFeeChargesRepaidAtDisbursement).getAmount();
 
         if (charges != null) {
-            this.totalFeeChargesWaived = summaryWrapper.calculateTotalFeeChargesWaived(charges, currency).getAmount();
+            this.totalFeeChargesWaived = calculateTotalFeeChargesWaived(charges, currency).getAmount();
         } else {
             this.totalFeeChargesWaived = BigDecimal.ZERO;
         }
 
-        this.totalFeeChargesWrittenOff = summaryWrapper.calculateTotalFeeChargesWrittenOff(repaymentScheduleInstallments, currency)
-                .getAmount();
+        this.totalFeeChargesWrittenOff = calculateTotalFeeChargesWrittenOff(repaymentScheduleInstallments, currency).getAmount();
 
         this.totalFeeChargesOutstanding = totalFeeChargesCharged.minus(this.totalFeeChargesRepaid).minus(this.totalFeeChargesWaived)
                 .minus(this.totalFeeChargesWrittenOff).getAmount();
 
-        final Money totalPenaltyChargesCharged = summaryWrapper.calculateTotalPenaltyChargesCharged(repaymentScheduleInstallments,
-                currency);
+        final Money totalPenaltyChargesCharged = calculateTotalPenaltyChargesCharged(repaymentScheduleInstallments, currency);
         this.totalPenaltyChargesCharged = totalPenaltyChargesCharged.getAmount();
-        this.totalPenaltyChargesRepaid = summaryWrapper.calculateTotalPenaltyChargesRepaid(repaymentScheduleInstallments, currency)
-                .getAmount();
-        this.totalPenaltyChargesWaived = summaryWrapper.calculateTotalPenaltyChargesWaived(repaymentScheduleInstallments, currency)
-                .getAmount();
-        this.totalPenaltyChargesWrittenOff = summaryWrapper.calculateTotalPenaltyChargesWrittenOff(repaymentScheduleInstallments, currency)
-                .getAmount();
+        this.totalPenaltyChargesRepaid = calculateTotalPenaltyChargesRepaid(repaymentScheduleInstallments, currency).getAmount();
+        this.totalPenaltyChargesWaived = calculateTotalPenaltyChargesWaived(repaymentScheduleInstallments, currency).getAmount();
+        this.totalPenaltyChargesWrittenOff = calculateTotalPenaltyChargesWrittenOff(repaymentScheduleInstallments, currency).getAmount();
 
         this.totalPenaltyChargesOutstanding = totalPenaltyChargesCharged.minus(this.totalPenaltyChargesRepaid)
                 .minus(this.totalPenaltyChargesWaived).minus(this.totalPenaltyChargesWrittenOff).getAmount();
@@ -301,5 +292,174 @@ public class LoanSummary {
 
     public void updateTotalWaived(final BigDecimal totalWaived) {
         this.totalWaived = totalWaived;
+    }
+
+    protected Money calculateTotalPrincipalRepaid(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
+            final MonetaryCurrency currency) {
+        Money total = Money.zero(currency);
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+            total = total.plus(installment.getPrincipalCompleted(currency));
+        }
+        return total;
+    }
+
+    protected Money calculateTotalPrincipalAdjusted(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
+            final MonetaryCurrency currency) {
+        Money total = Money.zero(currency);
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+            total = total.plus(installment.getCreditedPrincipal(currency));
+        }
+        return total;
+    }
+
+    protected Money calculateTotalFeeAdjusted(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
+            final MonetaryCurrency currency) {
+        Money total = Money.zero(currency);
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+            total = total.plus(installment.getCreditedFee(currency));
+        }
+        return total;
+    }
+
+    protected Money calculateTotalPenaltyAdjusted(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
+            final MonetaryCurrency currency) {
+        Money total = Money.zero(currency);
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+            total = total.plus(installment.getCreditedPenalty(currency));
+        }
+        return total;
+    }
+
+    protected Money calculateTotalPrincipalWrittenOff(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
+            final MonetaryCurrency currency) {
+        Money total = Money.zero(currency);
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+            total = total.plus(installment.getPrincipalWrittenOff(currency));
+        }
+        return total;
+    }
+
+    protected Money calculateTotalInterestCharged(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
+            final MonetaryCurrency currency) {
+        Money total = Money.zero(currency);
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+            total = total.plus(installment.getInterestCharged(currency));
+        }
+        return total;
+    }
+
+    protected Money calculateTotalInterestRepaid(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
+            final MonetaryCurrency currency) {
+        Money total = Money.zero(currency);
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+            total = total.plus(installment.getInterestPaid(currency));
+        }
+        return total;
+    }
+
+    protected Money calculateTotalInterestWaived(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
+            final MonetaryCurrency currency) {
+        Money total = Money.zero(currency);
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+            total = total.plus(installment.getInterestWaived(currency));
+        }
+        return total;
+    }
+
+    protected Money calculateTotalInterestWrittenOff(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
+            final MonetaryCurrency currency) {
+        Money total = Money.zero(currency);
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+            total = total.plus(installment.getInterestWrittenOff(currency));
+        }
+        return total;
+    }
+
+    protected Money calculateTotalFeeChargesCharged(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
+            final MonetaryCurrency currency) {
+        Money total = Money.zero(currency);
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+            total = total.plus(installment.getFeeChargesCharged(currency));
+        }
+        return total;
+    }
+
+    protected Money calculateTotalFeeChargesRepaid(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
+            final MonetaryCurrency currency) {
+        Money total = Money.zero(currency);
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+            total = total.plus(installment.getFeeChargesPaid(currency));
+        }
+        return total;
+    }
+
+    protected Money calculateTotalFeeChargesWaived(Set<LoanCharge> charges, final MonetaryCurrency currency) {
+        Money total = Money.zero(currency);
+        for (final LoanCharge charge : charges) {
+            if (charge.isActive() && !charge.isPenaltyCharge()) {
+                total = total.plus(charge.getAmountWaived(currency));
+            }
+        }
+        return total;
+    }
+
+    protected Money calculateTotalFeeChargesWrittenOff(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
+            final MonetaryCurrency currency) {
+        Money total = Money.zero(currency);
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+            total = total.plus(installment.getFeeChargesWrittenOff(currency));
+        }
+        return total;
+    }
+
+    protected Money calculateTotalPenaltyChargesCharged(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
+            final MonetaryCurrency currency) {
+        Money total = Money.zero(currency);
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+            total = total.plus(installment.getPenaltyChargesCharged(currency));
+        }
+        return total;
+    }
+
+    protected Money calculateTotalPenaltyChargesRepaid(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
+            final MonetaryCurrency currency) {
+        Money total = Money.zero(currency);
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+            total = total.plus(installment.getPenaltyChargesPaid(currency));
+        }
+        return total;
+    }
+
+    protected Money calculateTotalPenaltyChargesWaived(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
+            final MonetaryCurrency currency) {
+        Money total = Money.zero(currency);
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+            total = total.plus(installment.getPenaltyChargesWaived(currency));
+        }
+        return total;
+    }
+
+    protected Money calculateTotalPenaltyChargesWrittenOff(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
+            final MonetaryCurrency currency) {
+        Money total = Money.zero(currency);
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+            total = total.plus(installment.getPenaltyChargesWrittenOff(currency));
+        }
+        return total;
+    }
+
+    protected Money calculateTotalChargesRepaidAtDisbursement(Set<LoanCharge> charges, MonetaryCurrency currency) {
+        Money total = Money.zero(currency);
+        if (charges == null) {
+            return total;
+        }
+        for (final LoanCharge loanCharge : charges) {
+            if (!loanCharge.isPenaltyCharge() && loanCharge.getAmountPaid(currency).isGreaterThanZero()
+                    && loanCharge.isDisbursementCharge()) {
+                total = total.plus(loanCharge.getAmountPaid(currency));
+            }
+        }
+        return total;
+
     }
 }

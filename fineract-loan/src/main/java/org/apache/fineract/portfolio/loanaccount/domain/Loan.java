@@ -363,8 +363,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @Transient
     private LoanLifecycleStateMachine loanLifecycleStateMachine;
-    @Transient
-    private LoanSummaryWrapper loanSummaryWrapper;
 
     @Setter()
     @Column(name = "principal_amount_proposed", scale = 6, precision = 19, nullable = false)
@@ -971,7 +969,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     }
 
     public BigDecimal getTotalInterest() {
-        return this.loanSummaryWrapper.calculateTotalInterestCharged(getRepaymentScheduleInstallments(), getCurrency()).getAmount();
+        return this.summary.calculateTotalInterestCharged(getRepaymentScheduleInstallments(), getCurrency()).getAmount();
     }
 
     public BigDecimal calculatePerInstallmentChargeAmount(final LoanCharge loanCharge) {
@@ -1189,7 +1187,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
             this.totalRecovered = recoveredAmount.getAmountDefaultedToNullIfZero();
 
             final Money principal = this.loanRepaymentScheduleDetail.getPrincipal();
-            this.summary.updateSummary(getCurrency(), principal, getRepaymentScheduleInstallments(), this.loanSummaryWrapper, this.charges);
+            this.summary.updateSummary(getCurrency(), principal, getRepaymentScheduleInstallments(), this.charges);
             updateLoanOutstandingBalances();
         }
     }
@@ -2316,10 +2314,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return receivableInterest;
     }
 
-    public void setHelpers(final LoanLifecycleStateMachine loanLifecycleStateMachine, final LoanSummaryWrapper loanSummaryWrapper,
+    public void setHelpers(final LoanLifecycleStateMachine loanLifecycleStateMachine,
             final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessorFactory) {
         this.loanLifecycleStateMachine = loanLifecycleStateMachine;
-        this.loanSummaryWrapper = loanSummaryWrapper;
         this.transactionProcessorFactory = transactionProcessorFactory;
     }
 

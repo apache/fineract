@@ -95,7 +95,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachin
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanSummaryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.exception.ExceedingTrancheCountException;
@@ -195,7 +194,6 @@ public final class LoanApplicationValidator {
     private final HolidayRepository holidayRepository;
     private final SavingsAccountRepositoryWrapper savingsAccountRepository;
     private final LoanLifecycleStateMachine defaultLoanLifecycleStateMachine;
-    private final LoanSummaryWrapper loanSummaryWrapper;
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final LoanUtilService loanUtilService;
     private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
@@ -1987,8 +1985,7 @@ public final class LoanApplicationValidator {
             baseDataValidator.reset().parameter(LoanApiConstants.noteParameterName).value(note).notExceedingLengthOf(1000);
 
             final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
-            loan.setHelpers(defaultLoanLifecycleStateMachine, this.loanSummaryWrapper,
-                    this.loanRepaymentScheduleTransactionProcessorFactory);
+            loan.setHelpers(defaultLoanLifecycleStateMachine, this.loanRepaymentScheduleTransactionProcessorFactory);
 
             final Client client = loan.client();
             if (client != null && client.isNotActive()) {

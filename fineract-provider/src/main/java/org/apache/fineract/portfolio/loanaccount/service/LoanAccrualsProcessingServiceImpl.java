@@ -1208,6 +1208,6 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
     }
 
     private void setSetHelpers(Loan loan) {
-        loan.setHelpers(null, null, transactionProcessorFactory);
+        loan.setHelpers(null, transactionProcessorFactory);
     }
 }
