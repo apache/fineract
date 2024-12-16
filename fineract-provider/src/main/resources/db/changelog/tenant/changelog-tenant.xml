@@ -176,4 +176,6 @@
     <include file="parts/0155_add_configuration_enable_immediate_charge_accrual_post_maturity.xml" relativeToChangelogFile="true" />
     <include file="parts/0156_add_disallow_interest_calc_on_past_due_field.xml" relativeToChangelogFile="true" />
     <include file="parts/0157_create_index_m_loan_transaction_relation.xml" relativeToChangelogFile="true" />
+    <include file="parts/0158_create_acc_gl_journal_entry_annual_summary.xml" relativeToChangelogFile="true" />
+    <include file="parts/0159_trial_balance_summary_with_asset_owner_year_end_summary.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
