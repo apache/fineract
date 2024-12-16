@@ -64,7 +64,7 @@ public class ExtendedJpaTransactionManager extends JpaTransactionManager {
         invokeLifecycleCallbacks(TransactionLifecycleCallback::afterCommit);
     }
 
-    private boolean isReadOnlyConnection() {
+    public boolean isReadOnlyConnection() {
         try (Connection connection = getDataSource().getConnection()) {
             return connection.isReadOnly();
         } catch (SQLException e) {

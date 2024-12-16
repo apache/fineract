@@ -56,6 +56,7 @@ import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.filters.BatchCallHandler;
 import org.apache.fineract.infrastructure.core.filters.BatchFilter;
 import org.apache.fineract.infrastructure.core.filters.BatchRequestPreprocessor;
+import org.apache.fineract.infrastructure.core.persistence.ExtendedJpaTransactionManager;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.NonTransientDataAccessException;
@@ -141,6 +142,9 @@ public class BatchApiServiceImpl implements BatchApiService {
         List<BatchResponse> responseList = new ArrayList<>();
         try {
             TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+            if (transactionManager instanceof ExtendedJpaTransactionManager extendedJpaTransactionManager) {
+                transactionTemplate.setReadOnly(extendedJpaTransactionManager.isReadOnlyConnection());
+            }
             transactionConfigurator.accept(transactionTemplate);
             return transactionTemplate.execute(status -> {
                 BatchRequestContextHolder.setEnclosingTransaction(status);
@@ -240,7 +244,8 @@ public class BatchApiServiceImpl implements BatchApiService {
             BatchRequestContextHolder.setRequestAttributes(new HashMap<>(Optional.ofNullable(request.getHeaders())
                     .map(list -> list.stream().collect(Collectors.toMap(Header::getName, Header::getValue)))
                     .orElse(Collections.emptyMap())));
-            if (BatchRequestContextHolder.isEnclosingTransaction()) {
+            if (BatchRequestContextHolder.isEnclosingTransaction()
+                    && BatchRequestContextHolder.getEnclosingTransaction().stream().anyMatch(ts -> !ts.isReadOnly())) {
                 entityManager.flush();
             }
             BatchCallHandler callHandler = new BatchCallHandler(this.batchFilters, commandStrategy::execute);
