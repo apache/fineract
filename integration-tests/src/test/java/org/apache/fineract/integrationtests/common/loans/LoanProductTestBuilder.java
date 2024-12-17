@@ -108,7 +108,7 @@ public class LoanProductTestBuilder {
 
     private List<Map<String, Long>> feeToIncomeAccountMappings = null;
     private List<Map<String, Long>> penaltyToIncomeAccountMappings = null;
-    private List<Map<String, Long>> chargeOffReasonsToExpenseMappings = null;
+    private List<Map<String, Long>> chargeOffReasonToExpenseAccountMappings = null;
     private Account feeAndPenaltyAssetAccount;
 
     private Boolean multiDisburseLoan = false;
@@ -306,8 +306,8 @@ public class LoanProductTestBuilder {
             map.put("penaltyToIncomeAccountMappings", this.penaltyToIncomeAccountMappings);
         }
 
-        if (this.chargeOffReasonsToExpenseMappings != null) {
-            map.put("chargeOffReasonsToExpenseMappings", this.chargeOffReasonsToExpenseMappings);
+        if (this.chargeOffReasonToExpenseAccountMappings != null) {
+            map.put("chargeOffReasonToExpenseAccountMappings", this.chargeOffReasonToExpenseAccountMappings);
         }
 
         if (this.dueDaysForRepaymentEvent != null) {
@@ -812,14 +812,14 @@ public class LoanProductTestBuilder {
         return this;
     }
 
-    public LoanProductTestBuilder withChargeOffReasonsToExpenseMappings(final Long reasonId, final Long accountId) {
-        if (this.chargeOffReasonsToExpenseMappings == null) {
-            this.chargeOffReasonsToExpenseMappings = new ArrayList<>();
+    public LoanProductTestBuilder withchargeOffReasonToExpenseAccountMappings(final Long reasonId, final Long accountId) {
+        if (this.chargeOffReasonToExpenseAccountMappings == null) {
+            this.chargeOffReasonToExpenseAccountMappings = new ArrayList<>();
         }
         Map<String, Long> newMap = new HashMap<>();
         newMap.put("chargeOffReasonCodeValueId", reasonId);
         newMap.put("expenseGLAccountId", accountId);
-        this.chargeOffReasonsToExpenseMappings.add(newMap);
+        this.chargeOffReasonToExpenseAccountMappings.add(newMap);
         return this;
     }
 

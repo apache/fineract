@@ -63,19 +63,22 @@ public interface ProductToGLAccountMappingRepository
     List<ProductToGLAccountMapping> findByProductIdAndProductType(Long productId, int productType);
 
     @Query("select mapping from ProductToGLAccountMapping mapping where mapping.productId =:productId and mapping.productType =:productType and mapping.chargeOffReason is not NULL")
-    List<ProductToGLAccountMapping> findAllChargesOffReasonsMappings(@Param("productId") Long productId,
+    List<ProductToGLAccountMapping> findAllChargeOffReasonsMappings(@Param("productId") Long productId,
             @Param("productType") int productType);
 
     @Query("select mapping from ProductToGLAccountMapping mapping where mapping.chargeOffReason.id =:chargeOffReasonId")
-    ProductToGLAccountMapping findChargesOffReasonMappingById(@Param("chargeOffReasonId") Integer chargeOffReasonId);
+    ProductToGLAccountMapping findChargeOffReasonMappingById(@Param("chargeOffReasonId") Integer chargeOffReasonId);
 
-    List<ProductToGLAccountMapping> findAllByProductIdAndProductTypeAndPaymentTypeIsNullAndChargeIsNull(Long productId,
-            Integer productType);
+    @Query("select mapping from ProductToGLAccountMapping mapping where mapping.productId =:productId AND mapping.productType =:productType AND mapping.charge IS NULL AND mapping.paymentType IS NULL AND mapping.chargeOffReason IS NULL")
+    List<ProductToGLAccountMapping> findAllRegularMappings(@Param("productId") Long productId, @Param("productType") Integer productType);
 
-    List<ProductToGLAccountMapping> findAllByProductIdAndProductTypeAndChargeOffReasonIdIsNotNull(Long productId, Integer productType);
+    @Query("select mapping from ProductToGLAccountMapping mapping where mapping.productId =:productId and mapping.productType =:productType and mapping.paymentType is not NULL")
+    List<ProductToGLAccountMapping> findAllPaymentTypeMappings(@Param("productId") Long productId,
+            @Param("productType") Integer productType);
 
-    List<ProductToGLAccountMapping> findAllByProductIdAndProductTypeAndPaymentTypeIsNotNull(Long productId, Integer productType);
+    @Query("select mapping from ProductToGLAccountMapping mapping where mapping.productId =:productId AND mapping.productType =:productType AND mapping.charge.penalty = TRUE")
+    List<ProductToGLAccountMapping> findAllPenaltyMappings(@Param("productId") Long productId, @Param("productType") Integer productType);
 
-    List<ProductToGLAccountMapping> findAllByProductIdAndProductTypeAndCharge_PenaltyAndCharge_IdIsNotNull(Long productId,
-            Integer productType, boolean isPenalty);
+    @Query("select mapping from ProductToGLAccountMapping mapping where mapping.productId =:productId AND mapping.productType =:productType AND mapping.charge.penalty = FALSE")
+    List<ProductToGLAccountMapping> findAllFeeMappings(@Param("productId") Long productId, @Param("productType") Integer productType);
 }

@@ -69,9 +69,9 @@ public class ProductToGLAccountMapping extends AbstractPersistableCustom<Long> {
     private CodeValue chargeOffReason;
 
     public static ProductToGLAccountMapping createNew(final GLAccount glAccount, final Long productId, final int productType,
-            final int financialAccountType, final CodeValue chargeOffReasonId) {
+            final int financialAccountType, final CodeValue chargeOffReason) {
 
         return new ProductToGLAccountMapping().setGlAccount(glAccount).setProductId(productId).setProductType(productType)
-                .setFinancialAccountType(financialAccountType).setChargeOffReason(chargeOffReasonId);
+                .setFinancialAccountType(financialAccountType).setChargeOffReason(chargeOffReason);
     }
 }

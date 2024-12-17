@@ -31,6 +31,6 @@ import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 public class ChargeOffReasonToGLAccountMapper implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private CodeValueData chargeOffReasonsCodeValue;
+    private CodeValueData chargeOffReasonCodeValue;
     private GLAccountData chargeOffExpenseAccount;
 }

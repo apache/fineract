@@ -144,7 +144,7 @@ public final class LoanProductDataValidator {
             LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_INTEREST.getValue(),
             LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_FEES.getValue(),
             LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_PENALTY.getValue(),
-            LoanProductAccountingParams.CHARGE_OFF_REASONS_TO_EXPENSE.getValue(),
+            LoanProductAccountingParams.CHARGE_OFF_REASON_TO_EXPENSE_ACCOUNT_MAPPINGS.getValue(),
             LoanProductAccountingParams.EXPENSE_GL_ACCOUNT_ID.getValue(),
             LoanProductAccountingParams.CHARGE_OFF_REASON_CODE_VALUE_ID.getValue(), LoanProductConstants.USE_BORROWER_CYCLE_PARAMETER_NAME,
             LoanProductConstants.PRINCIPAL_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME,
@@ -1992,7 +1992,7 @@ public final class LoanProductDataValidator {
     }
 
     private void validateChargeOffToExpenseMappings(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
-        String parameterName = LoanProductAccountingParams.CHARGE_OFF_REASONS_TO_EXPENSE.getValue();
+        String parameterName = LoanProductAccountingParams.CHARGE_OFF_REASON_TO_EXPENSE_ACCOUNT_MAPPINGS.getValue();
 
         if (this.fromApiJsonHelper.parameterExists(parameterName, element)) {
             final JsonArray chargeOffToExpenseMappingArray = this.fromApiJsonHelper.extractJsonArrayNamed(parameterName, element);

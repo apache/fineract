@@ -204,7 +204,7 @@ public class ProductToGLAccountMappingHelper {
     public void saveChargeOffReasonToGLAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,
             final Map<String, Object> changes, final PortfolioProductType portfolioProductType) {
 
-        final String arrayName = LoanProductAccountingParams.CHARGE_OFF_REASONS_TO_EXPENSE.getValue();
+        final String arrayName = LoanProductAccountingParams.CHARGE_OFF_REASON_TO_EXPENSE_ACCOUNT_MAPPINGS.getValue();
         final JsonArray chargeOffReasonToExpenseAccountMappingArray = this.fromApiJsonHelper.extractJsonArrayNamed(arrayName, element);
 
         if (chargeOffReasonToExpenseAccountMappingArray != null) {
@@ -388,17 +388,17 @@ public class ProductToGLAccountMappingHelper {
             final Map<String, Object> changes, final PortfolioProductType portfolioProductType) {
 
         final List<ProductToGLAccountMapping> existingChargeOffReasonToGLAccountMappings = this.accountMappingRepository
-                .findAllChargesOffReasonsMappings(productId, portfolioProductType.getValue());
+                .findAllChargeOffReasonsMappings(productId, portfolioProductType.getValue());
         final JsonArray chargeOffReasonToGLAccountMappingArray = this.fromApiJsonHelper
-                .extractJsonArrayNamed(LoanProductAccountingParams.CHARGE_OFF_REASONS_TO_EXPENSE.getValue(), element);
+                .extractJsonArrayNamed(LoanProductAccountingParams.CHARGE_OFF_REASON_TO_EXPENSE_ACCOUNT_MAPPINGS.getValue(), element);
 
         final Map<Long, Long> inputChargeOffReasonToGLAccountMap = new HashMap<>();
 
         final Set<Long> existingChargeOffReasons = new HashSet<>();
         if (chargeOffReasonToGLAccountMappingArray != null) {
             if (changes != null) {
-                changes.put(LoanProductAccountingParams.CHARGE_OFF_REASONS_TO_EXPENSE.getValue(),
-                        command.jsonFragment(LoanProductAccountingParams.CHARGE_OFF_REASONS_TO_EXPENSE.getValue()));
+                changes.put(LoanProductAccountingParams.CHARGE_OFF_REASON_TO_EXPENSE_ACCOUNT_MAPPINGS.getValue(),
+                        command.jsonFragment(LoanProductAccountingParams.CHARGE_OFF_REASON_TO_EXPENSE_ACCOUNT_MAPPINGS.getValue()));
             }
 
             for (int i = 0; i < chargeOffReasonToGLAccountMappingArray.size(); i++) {
@@ -495,7 +495,7 @@ public class ProductToGLAccountMappingHelper {
         final Optional<GLAccount> glAccount = accountRepository.findById(expenseAccountId);
 
         final boolean reasonMappingExists = this.accountMappingRepository
-                .findAllChargesOffReasonsMappings(productId, portfolioProductType.getValue()).stream()
+                .findAllChargeOffReasonsMappings(productId, portfolioProductType.getValue()).stream()
                 .anyMatch(mapping -> mapping.getChargeOffReason().getId().equals(reasonId));
 
         final Optional<CodeValue> codeValueOptional = codeValueRepository.findById(reasonId);
@@ -577,7 +577,7 @@ public class ProductToGLAccountMappingHelper {
             if (codeValue == null) {
                 validationErrors.add(ApiParameterError.parameterError("validation.msg.chargeoffreason.invalid",
                         "Charge-off reason with ID " + chargeOffReasonCodeValueId + " does not exist",
-                        LoanProductAccountingParams.CHARGE_OFF_REASONS_TO_EXPENSE.getValue()));
+                        LoanProductAccountingParams.CHARGE_OFF_REASON_TO_EXPENSE_ACCOUNT_MAPPINGS.getValue()));
             }
 
             // Validation: expenseGLAccountId must exist as a valid Expense GL account

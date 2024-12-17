@@ -154,7 +154,7 @@ public class LoanProductData implements Serializable {
     private Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings;
     private Collection<ChargeToGLAccountMapper> feeToIncomeAccountMappings;
     private Collection<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings;
-    private List<ChargeOffReasonToGLAccountMapper> chargeOffReasonToGLAccountMappings;
+    private List<ChargeOffReasonToGLAccountMapper> chargeOffReasonToExpenseAccountMappings;
     private final boolean enableAccrualActivityPosting;
 
     // rates
@@ -747,7 +747,7 @@ public class LoanProductData implements Serializable {
         productData.paymentChannelToFundSourceMappings = paymentChannelToFundSourceMappings;
         productData.feeToIncomeAccountMappings = feeToGLAccountMappings;
         productData.penaltyToIncomeAccountMappings = penaltyToGLAccountMappings;
-        productData.chargeOffReasonToGLAccountMappings = chargeOffReasonToGLAccountMappings;
+        productData.chargeOffReasonToExpenseAccountMappings = chargeOffReasonToGLAccountMappings;
         return productData;
     }
 
@@ -865,7 +865,7 @@ public class LoanProductData implements Serializable {
         this.paymentChannelToFundSourceMappings = null;
         this.feeToIncomeAccountMappings = null;
         this.penaltyToIncomeAccountMappings = null;
-        this.chargeOffReasonToGLAccountMappings = null;
+        this.chargeOffReasonToExpenseAccountMappings = null;
         this.valueConditionTypeOptions = null;
         this.principalVariationsForBorrowerCycle = principalVariations;
         this.interestRateVariationsForBorrowerCycle = interestRateVariations;
@@ -1008,7 +1008,7 @@ public class LoanProductData implements Serializable {
         this.paymentChannelToFundSourceMappings = productData.paymentChannelToFundSourceMappings;
         this.feeToIncomeAccountMappings = productData.feeToIncomeAccountMappings;
         this.penaltyToIncomeAccountMappings = productData.penaltyToIncomeAccountMappings;
-        this.chargeOffReasonToGLAccountMappings = productData.chargeOffReasonToGLAccountMappings;
+        this.chargeOffReasonToExpenseAccountMappings = productData.chargeOffReasonToExpenseAccountMappings;
 
         this.chargeOptions = chargeOptions;
         this.penaltyOptions = penaltyOptions;

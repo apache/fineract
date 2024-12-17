@@ -178,7 +178,7 @@ public class AccountingProcessorHelper {
     }
 
     public ProductToGLAccountMapping getChargeOffMappingByCodeValue(Integer chargeOffReasonCodeValue) {
-        return accountMappingRepository.findChargesOffReasonMappingById(chargeOffReasonCodeValue);
+        return accountMappingRepository.findChargeOffReasonMappingById(chargeOffReasonCodeValue);
     }
 
     public SavingsDTO populateSavingsDtoFromMap(final Map<String, Object> accountingBridgeData, final boolean cashBasedAccountingEnabled,

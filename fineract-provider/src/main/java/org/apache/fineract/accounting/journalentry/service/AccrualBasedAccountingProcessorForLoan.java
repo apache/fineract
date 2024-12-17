@@ -232,7 +232,9 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
         // need to fetch if there are account mappings (always one)
         Integer chargeOffReasonCodeValue = loanDTO.getChargeOffReasonCodeValue();
 
-        ProductToGLAccountMapping mapping = helper.getChargeOffMappingByCodeValue(chargeOffReasonCodeValue);
+        ProductToGLAccountMapping mapping = chargeOffReasonCodeValue != null
+                ? helper.getChargeOffMappingByCodeValue(chargeOffReasonCodeValue)
+                : null;
         if (mapping != null) {
             GLAccount accountCredit = this.helper.getLinkedGLAccountForLoanProduct(loanProductId,
                     AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue(), paymentTypeId);
