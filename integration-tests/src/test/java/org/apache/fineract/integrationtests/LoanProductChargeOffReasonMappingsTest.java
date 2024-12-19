@@ -59,7 +59,7 @@ public class LoanProductChargeOffReasonMappingsTest extends BaseLoanIntegrationT
 
             GetLoanProductsProductIdResponse loanProductDetails = loanTransactionHelper.getLoanProduct(localLoanProductId.intValue());
             Assertions.assertEquals(expenseAccount.getAccountID().longValue(),
-                    loanProductDetails.getChargeOffReasonToExpenseAccountMappings().get(0).getChargeOffExpenseAccount().getId());
+                    loanProductDetails.getChargeOffReasonToExpenseAccountMappings().get(0).getExpenseAccount().getId());
             Assertions.assertEquals(Long.valueOf(chargeOffReasons),
                     loanProductDetails.getChargeOffReasonToExpenseAccountMappings().get(0).getChargeOffReasonCodeValue().getId());
 
@@ -71,7 +71,7 @@ public class LoanProductChargeOffReasonMappingsTest extends BaseLoanIntegrationT
 
             loanProductDetails = loanTransactionHelper.getLoanProduct(localLoanProductId.intValue());
             Assertions.assertEquals(otherExpenseAccount.getAccountID().longValue(),
-                    loanProductDetails.getChargeOffReasonToExpenseAccountMappings().get(0).getChargeOffExpenseAccount().getId());
+                    loanProductDetails.getChargeOffReasonToExpenseAccountMappings().get(0).getExpenseAccount().getId());
             Assertions.assertEquals(Long.valueOf(chargeOffReasons),
                     loanProductDetails.getChargeOffReasonToExpenseAccountMappings().get(0).getChargeOffReasonCodeValue().getId());
         });
@@ -232,7 +232,7 @@ public class LoanProductChargeOffReasonMappingsTest extends BaseLoanIntegrationT
         List<PostChargeOffReasonToExpenseAccountMappings> chargeOffReasonToExpenseAccountMappings = new ArrayList<>();
         PostChargeOffReasonToExpenseAccountMappings chargeOffReasonToExpenseAccountMapping = new PostChargeOffReasonToExpenseAccountMappings();
         chargeOffReasonToExpenseAccountMapping.setChargeOffReasonCodeValueId(chargeOffReasonId);
-        chargeOffReasonToExpenseAccountMapping.setExpenseGLAccountId(glAccountId);
+        chargeOffReasonToExpenseAccountMapping.setExpenseAccountId(glAccountId);
         chargeOffReasonToExpenseAccountMappings.add(chargeOffReasonToExpenseAccountMapping);
         return chargeOffReasonToExpenseAccountMappings;
     }

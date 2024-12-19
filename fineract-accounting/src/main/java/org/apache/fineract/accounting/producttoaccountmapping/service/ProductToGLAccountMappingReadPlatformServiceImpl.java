@@ -285,7 +285,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
                     .description(codeDescription).position(orderPosition).active(isActive).mandatory(isMandatory).build();
 
             final ChargeOffReasonToGLAccountMapper chargeOffReasonToGLAccountMapper = new ChargeOffReasonToGLAccountMapper()
-                    .setChargeOffReasonCodeValue(chargeOffReasonsCodeValue).setChargeOffExpenseAccount(chargeOffExpenseAccount);
+                    .setChargeOffReasonCodeValue(chargeOffReasonsCodeValue).setExpenseAccount(chargeOffExpenseAccount);
             chargeOffReasonToGLAccountMappers.add(chargeOffReasonToGLAccountMapper);
         }
         return chargeOffReasonToGLAccountMappers;

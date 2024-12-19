@@ -174,7 +174,7 @@ public final class AccountingConstants {
         INCOME_FROM_GOODWILL_CREDIT_FEES("incomeFromGoodwillCreditFeesAccountId"), //
         INCOME_FROM_GOODWILL_CREDIT_PENALTY("incomeFromGoodwillCreditPenaltyAccountId"), //
         CHARGE_OFF_REASON_TO_EXPENSE_ACCOUNT_MAPPINGS("chargeOffReasonToExpenseAccountMappings"), //
-        EXPENSE_GL_ACCOUNT_ID("expenseGLAccountId"), //
+        EXPENSE_GL_ACCOUNT_ID("expenseAccountId"), //
         CHARGE_OFF_REASON_CODE_VALUE_ID("chargeOffReasonCodeValueId"); //
 
         private final String value;

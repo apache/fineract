@@ -333,7 +333,7 @@ final class LoanProductsApiResourceSwagger {
             @Schema(example = "1")
             public Long chargeOffReasonCodeValueId;
             @Schema(example = "1")
-            public Long expenseGLAccountId;
+            public Long expenseAccountId;
         }
     }
 
@@ -1234,7 +1234,7 @@ final class LoanProductsApiResourceSwagger {
             private GetChargeOffReasonToExpenseAccountMappings() {}
 
             public GetCodeValueData chargeOffReasonCodeValue;
-            public GetGLAccountData chargeOffExpenseAccount;
+            public GetGLAccountData expenseAccount;
 
             static final class GetCodeValueData {
 
