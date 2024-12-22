@@ -1920,6 +1920,11 @@ public class LoanTransactionHelper extends IntegrationTest {
         return chargebackPayload;
     }
 
+    public GetLoansLoanIdTransactionsTemplateResponse retrieveTransactionTemplate(Long loanId, String command, String dateFormat,
+            String transactionDate, String locale) {
+        return ok(fineract().loanTransactions.retrieveTransactionTemplate(loanId, command, dateFormat, transactionDate, locale));
+    }
+
     public GetLoansLoanIdTransactionsTemplateResponse retrieveTransactionTemplate(String loanExternalIdStr, String command,
             String dateFormat, String transactionDate, String locale) {
         return ok(

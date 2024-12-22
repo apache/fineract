@@ -79,6 +79,14 @@ final class LoanTransactionsApiResourceSwagger {
 
         @Schema(example = "200.000000")
         public Double amount;
+        @Schema(example = "100.000000")
+        public Double principalPortion;
+        @Schema(example = "80.000000")
+        public Double interestPortion;
+        @Schema(example = "20.000000")
+        public Double feeChargesPortion;
+        @Schema(example = "20.000000")
+        public Double penaltyChargesPortion;
 
         public GetLoanCurrency currency;
     }

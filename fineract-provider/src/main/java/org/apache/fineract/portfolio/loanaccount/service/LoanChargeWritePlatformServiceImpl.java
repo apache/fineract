@@ -1154,7 +1154,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
     }
 
     public Loan runScheduleRecalculation(Loan loan, final LocalDate recalculateFrom) {
-        if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
+        if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled() && !loan.isChargedOff()) {
             final List<Long> existingTransactionIds = loan.findExistingTransactionIds();
             ScheduleGeneratorDTO generatorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
             ChangedTransactionDetail changedTransactionDetail = loanScheduleService

@@ -54,7 +54,7 @@ public class LoanScheduleService {
     }
 
     public void recalculateScheduleFromLastTransaction(final Loan loan, final ScheduleGeneratorDTO generatorDTO) {
-        if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
+        if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled() && !loan.isChargedOff()) {
             regenerateRepaymentScheduleWithInterestRecalculation(loan, generatorDTO);
         } else {
             regenerateRepaymentSchedule(loan, generatorDTO);
@@ -73,7 +73,7 @@ public class LoanScheduleService {
          * loanTransaction.getTransactionDate().isAfter(recalculateFrom)) { recalculateFrom =
          * loanTransaction.getTransactionDate(); } } generatorDTO.setRecalculateFrom(recalculateFrom);
          */
-        if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
+        if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled() && !loan.isChargedOff()) {
             regenerateRepaymentScheduleWithInterestRecalculation(loan, generatorDTO);
         } else {
             regenerateRepaymentSchedule(loan, generatorDTO);

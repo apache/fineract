@@ -2722,7 +2722,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     public OutstandingAmountsDTO fetchPrepaymentDetail(final ScheduleGeneratorDTO scheduleGeneratorDTO, final LocalDate onDate) {
         OutstandingAmountsDTO outstandingAmounts;
 
-        if (this.loanRepaymentScheduleDetail.isInterestRecalculationEnabled()) {
+        if (this.loanRepaymentScheduleDetail.isInterestRecalculationEnabled() && !isChargeOffOnDate(onDate)) {
             final MathContext mc = MoneyHelper.getMathContext();
 
             final InterestMethod interestMethod = this.loanRepaymentScheduleDetail.getInterestMethod();
@@ -3571,4 +3571,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     public boolean isProgressiveSchedule() {
         return getLoanProductRelatedDetail().getLoanScheduleType() == PROGRESSIVE;
     }
+
+    public boolean isChargeOffOnDate(final LocalDate onDate) {
+        final LoanTransaction chargeOffTransaction = findChargedOffTransaction();
+        return (chargeOffTransaction == null) ? false : (chargeOffTransaction.getDateOf().compareTo(onDate) <= 0);
+    }
+
 }
