@@ -3732,4 +3732,22 @@ public class CommandWrapperBuilder {
         this.href = "/v1/loans/external-id/" + loanExternalId + "/interest-pauses";
         return this;
     }
+
+    public CommandWrapperBuilder deleteInterestPause(final long loanId, final long variationId) {
+        this.actionName = "DELETE";
+        this.entityName = "INTEREST_PAUSE";
+        this.loanId = loanId;
+        this.entityId = variationId;
+        this.href = "/v1/loans/" + loanId + "/interest-pauses/" + variationId;
+        return this;
+    }
+
+    public CommandWrapperBuilder updateInterestPause(final long loanId, final long variationId) {
+        this.actionName = "UPDATE";
+        this.entityName = "INTEREST_PAUSE";
+        this.loanId = loanId;
+        this.entityId = variationId;
+        this.href = "/v1/loans/" + loanId + "/interest-pauses/" + variationId;
+        return this;
+    }
 }

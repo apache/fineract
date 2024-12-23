@@ -609,7 +609,7 @@ public class LoanTransactionHelper extends IntegrationTest {
     }
 
     public PostLoansLoanIdTransactionsResponse createInterestPauseByLoanId(final String startDate, final String endDate,
-            final String dateFormat, final String locale, final Long loanID) {
+            final String dateFormat, final String locale, final Integer loanID) {
         log.info("Creating interest pause for Loan {} from {} to {} with dateFormat {} and locale {}", loanID, startDate, endDate,
                 dateFormat, locale);
         String body = getInterestPauseBodyAsJSON(startDate, endDate, dateFormat, locale);
@@ -624,7 +624,20 @@ public class LoanTransactionHelper extends IntegrationTest {
         return postLoanTransaction(createInterestPause(INTEREST_PAUSE_COMMAND, externalId), body);
     }
 
-    public String retrieveInterestPauseByLoanId(final Long loanID) {
+    public PostLoansLoanIdTransactionsResponse updateInterestPauseByLoanId(final Long termVariationId, final String startDate,
+            final String endDate, final String dateFormat, final String locale, final Integer loanID) {
+        log.info("Updating interest pause for Loan {} with Term Variation ID {}: startDate={} endDate={} dateFormat={} locale={}", loanID,
+                termVariationId, startDate, endDate, dateFormat, locale);
+        String body = getInterestPauseBodyAsJSON(startDate, endDate, dateFormat, locale);
+        return putLoanTransaction(updateInterestPause(termVariationId, loanID), body);
+    }
+
+    public void deleteInterestPauseByLoanId(final Long termVariationId, final Integer loanID) {
+        log.info("Deleting interest pause for Loan ID {} with Term Variation ID {}", loanID, termVariationId);
+        deleteLoanTransaction(deleteInterestPause(termVariationId, loanID));
+    }
+
+    public String retrieveInterestPauseByLoanId(final Integer loanID) {
         log.info("Retrieving interest pauses for Loan ID {}", loanID);
         String url = retrieveInterestPause(loanID);
         return Utils.performServerGet(requestSpec, responseSpec, url);
@@ -1450,7 +1463,7 @@ public class LoanTransactionHelper extends IntegrationTest {
         return "/fineract-provider/api/v1/loans/" + loanID + "/transactions?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
     }
 
-    private String createInterestPause(final String command, final Long loanID) {
+    private String createInterestPause(final String command, final Integer loanID) {
         return "/fineract-provider/api/v1/loans/" + loanID + "/interest-pauses?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
     }
 
@@ -1459,12 +1472,20 @@ public class LoanTransactionHelper extends IntegrationTest {
                 + Utils.TENANT_IDENTIFIER;
     }
 
-    private String retrieveInterestPause(final Long loanID) {
+    private String retrieveInterestPause(final Integer loanID) {
         return "/fineract-provider/api/v1/loans/" + loanID + "/interest-pauses?" + Utils.TENANT_IDENTIFIER;
     }
 
     private String retrieveInterestPause(final String externalId) {
         return "/fineract-provider/api/v1/loans/external-id/" + externalId + "/interest-pauses?" + Utils.TENANT_IDENTIFIER;
+    }
+
+    private String updateInterestPause(final Long termVariationId, final Integer loanID) {
+        return "/fineract-provider/api/v1/loans/" + loanID + "/interest-pauses/" + termVariationId + "?" + Utils.TENANT_IDENTIFIER;
+    }
+
+    private String deleteInterestPause(final Long termVariationId, final Integer loanID) {
+        return "/fineract-provider/api/v1/loans/" + loanID + "/interest-pauses/" + termVariationId + "?" + Utils.TENANT_IDENTIFIER;
     }
 
     private String createInteroperationLoanTransactionURL(final String accountNo) {
@@ -1511,6 +1532,15 @@ public class LoanTransactionHelper extends IntegrationTest {
             ResponseSpecification responseSpec) {
         final String response = Utils.performServerPost(this.requestSpec, responseSpec, postURLForLoanTransaction, jsonToBeSent);
         return GSON.fromJson(response, PostLoansLoanIdTransactionsResponse.class);
+    }
+
+    private PostLoansLoanIdTransactionsResponse putLoanTransaction(final String putURLForLoanTransaction, final String jsonToBeSent) {
+        final String response = Utils.performServerPut(this.requestSpec, this.responseSpec, putURLForLoanTransaction, jsonToBeSent);
+        return GSON.fromJson(response, PostLoansLoanIdTransactionsResponse.class);
+    }
+
+    private void deleteLoanTransaction(final String deleteURLForLoanTransaction) {
+        Utils.performServerDelete(this.requestSpec, this.responseSpec, deleteURLForLoanTransaction, null);
     }
 
     private Object performLoanTransaction(final String postURLForLoanTransaction, final String jsonToBeSent,

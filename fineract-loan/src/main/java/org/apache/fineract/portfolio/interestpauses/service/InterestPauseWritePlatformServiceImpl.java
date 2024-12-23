@@ -18,12 +18,19 @@
  */
 package org.apache.fineract.portfolio.interestpauses.service;
 
+import static org.apache.fineract.portfolio.loanaccount.domain.LoanStatus.ACTIVE;
+import static org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType.INTEREST_PAUSE;
+import static org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType.PROGRESSIVE;
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import lombok.AllArgsConstructor;
@@ -34,11 +41,13 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanTermVariationsRepository;
+import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.transaction.annotation.Transactional;
 
 @AllArgsConstructor
@@ -47,6 +56,7 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
 
     private final LoanTermVariationsRepository loanTermVariationsRepository;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
+    private final PlatformSecurityContext context;
 
     @Override
     public CommandProcessingResult createInterestPause(ExternalId loanExternalId, String startDateString, String endDateString,
@@ -68,14 +78,59 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
                 locale);
     }
 
+    @Override
+    public CommandProcessingResult deleteInterestPause(Long loanId, Long variationId) {
+        LoanTermVariations variation = loanTermVariationsRepository
+                .findByIdAndLoanIdAndTermType(variationId, loanId, INTEREST_PAUSE.getValue())
+                .orElseThrow(() -> new GeneralPlatformDomainRuleException("error.msg.variation.not.found",
+                        "Variation not found for the given loan ID"));
+
+        loanTermVariationsRepository.delete(variation);
+
+        return new CommandProcessingResultBuilder().withEntityId(variationId).build();
+    }
+
+    @Override
+    public CommandProcessingResult updateInterestPause(Long loanId, Long variationId, String startDateString, String endDateString,
+            String dateFormat, String locale) {
+        Loan loan = loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
+
+        LocalDate startDate = parseDate(startDateString, dateFormat, locale);
+        LocalDate endDate = parseDate(endDateString, dateFormat, locale);
+
+        validateInterestPauseDates(loan, startDate, endDate, dateFormat, locale);
+
+        LoanTermVariations variation = loanTermVariationsRepository
+                .findByIdAndLoanIdAndTermType(variationId, loanId, INTEREST_PAUSE.getValue())
+                .orElseThrow(() -> new GeneralPlatformDomainRuleException("error.msg.variation.not.found",
+                        "Variation not found for the given loan ID"));
+
+        validateVariations(loan, variation);
+
+        variation.setTermApplicableFrom(startDate);
+        variation.setDateValue(endDate);
+
+        AppUser currentUser = context.authenticatedUser();
+        variation.setUpdatedBy(currentUser != null ? currentUser.getId() : null);
+        variation.setUpdatedOnDate(LocalDateTime.now(DateUtils.getDateTimeZoneOfTenant()));
+
+        LoanTermVariations updatedVariation = loanTermVariationsRepository.save(variation);
+
+        return new CommandProcessingResultBuilder().withEntityId(updatedVariation.getId())
+                .with(Map.of("startDate", startDate.toString(), "endDate", endDate.toString())).build();
+    }
+
     private CommandProcessingResult processInterestPause(Supplier<Loan> loanSupplier, LocalDate startDate, LocalDate endDate,
             String dateFormat, String locale) {
         final Loan loan = loanSupplier.get();
 
         validateInterestPauseDates(loan, startDate, endDate, dateFormat, locale);
 
-        LoanTermVariations variation = new LoanTermVariations(LoanTermVariationType.INTEREST_PAUSE.getValue(), startDate, null, endDate,
-                false, loan);
+        LoanTermVariations variation = new LoanTermVariations(INTEREST_PAUSE.getValue(), startDate, null, endDate, false, loan);
+
+        AppUser currentUser = context.authenticatedUser();
+        variation.setCreatedBy(currentUser != null ? currentUser.getId() : null);
+        variation.setCreatedOnDate(LocalDateTime.now(DateUtils.getDateTimeZoneOfTenant()));
 
         LoanTermVariations savedVariation = loanTermVariationsRepository.saveAndFlush(variation);
 
@@ -108,6 +163,36 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
             throw new GeneralPlatformDomainRuleException("interest.pause.end.date.before.start.date", String
                     .format("Interest pause end date (%s) must not be before the interest pause start date (%s).", endDate, startDate),
                     endDate, startDate);
+        }
+
+        if (!Objects.equals(loan.getLoanStatus(), ACTIVE.getValue())) {
+            throw new GeneralPlatformDomainRuleException("loan.must.be.active",
+                    "Operations on interest pauses are restricted to active loans.");
+        }
+
+        if (!PROGRESSIVE.equals(loan.getLoanRepaymentScheduleDetail().getLoanScheduleType())) {
+            throw new GeneralPlatformDomainRuleException("loan.must.be.progressive",
+                    "Interest pause is only supported for progressive loans.");
+        }
+
+        if (!loan.getLoanRepaymentScheduleDetail().isInterestRecalculationEnabled()) {
+            throw new GeneralPlatformDomainRuleException("loan.must.have.recalculate.interest.enabled",
+                    "Interest pause is only supported for loans with recalculate interest enabled.");
+        }
+    }
+
+    private void validateVariations(Loan loan, LoanTermVariations variation) {
+        if (variation == null) {
+            throw new GeneralPlatformDomainRuleException("interest.pause.not.found",
+                    "The specified interest pause does not exist for the given loan.");
+        }
+
+        List<LoanTermVariations> existingVariations = loan.getLoanTermVariations();
+        for (LoanTermVariations existingVariation : existingVariations) {
+            if (!existingVariation.equals(variation) && variation.getTermApplicableFrom().isBefore(existingVariation.getDateValue())
+                    && variation.getDateValue().isAfter(existingVariation.getTermApplicableFrom())) {
+                throw new GeneralPlatformDomainRuleException("interest.pause.overlapping", "Overlapping interest pauses are not allowed.");
+            }
         }
     }
 

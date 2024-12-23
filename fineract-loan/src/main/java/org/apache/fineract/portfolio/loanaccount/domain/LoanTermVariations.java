@@ -27,6 +27,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
@@ -60,6 +61,18 @@ public class LoanTermVariations extends AbstractPersistableCustom<Long> {
 
     @Column(name = "is_active", nullable = false)
     private Boolean isActive;
+
+    @Column(name = "created_by")
+    private Long createdBy;
+
+    @Column(name = "created_on_date")
+    private LocalDateTime createdOnDate;
+
+    @Column(name = "updated_by")
+    private Long updatedBy;
+
+    @Column(name = "updated_on_date")
+    private LocalDateTime updatedOnDate;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
@@ -139,6 +152,10 @@ public class LoanTermVariations extends AbstractPersistableCustom<Long> {
         return this.dateValue;
     }
 
+    public void setDateValue(LocalDate dateValue) {
+        this.dateValue = dateValue;
+    }
+
     public void setTermApplicableFrom(LocalDate termApplicableFrom) {
         this.termApplicableFrom = termApplicableFrom;
     }
@@ -167,4 +184,35 @@ public class LoanTermVariations extends AbstractPersistableCustom<Long> {
         this.isActive = false;
     }
 
+    public Long getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(Long createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public LocalDateTime getCreatedOnDate() {
+        return createdOnDate;
+    }
+
+    public void setCreatedOnDate(LocalDateTime createdOnDate) {
+        this.createdOnDate = createdOnDate;
+    }
+
+    public Long getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(Long updatedBy) {
+        this.updatedBy = updatedBy;
+    }
+
+    public LocalDateTime getUpdatedOnDate() {
+        return updatedOnDate;
+    }
+
+    public void setUpdatedOnDate(LocalDateTime updatedOnDate) {
+        this.updatedOnDate = updatedOnDate;
+    }
 }

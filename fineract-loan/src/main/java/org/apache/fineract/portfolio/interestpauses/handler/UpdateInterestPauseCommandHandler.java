@@ -22,37 +22,24 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.domain.ExternalId;
-import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.portfolio.interestpauses.service.InterestPauseWritePlatformService;
 import org.springframework.stereotype.Component;
 
-@Component("interestPauseCommandHandler")
+@Component("updateInterestPauseCommandHandler")
 @RequiredArgsConstructor
-public class InterestPauseCommandHandler implements NewCommandSourceHandler {
+public class UpdateInterestPauseCommandHandler implements NewCommandSourceHandler {
 
     private final InterestPauseWritePlatformService interestPauseService;
 
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        CommandProcessingResult result;
-
+        final Long loanId = command.getLoanId();
+        final Long termVariationId = command.getResourceId();
         final String startDate = command.stringValueOfParameterNamed("startDate");
         final String endDate = command.stringValueOfParameterNamed("endDate");
         final String dateFormat = command.stringValueOfParameterNamed("dateFormat");
         final String locale = command.stringValueOfParameterNamed("locale");
 
-        if (command.getLoanId() != null) {
-            final Long loanId = command.getLoanId();
-            result = interestPauseService.createInterestPause(loanId, startDate, endDate, dateFormat, locale);
-        } else if (command.getLoanExternalId() != null) {
-            final ExternalId loanExternalId = command.getLoanExternalId();
-            result = interestPauseService.createInterestPause(loanExternalId, startDate, endDate, dateFormat, locale);
-        } else {
-            throw new PlatformApiDataValidationException("validation.msg.missing.loan.id.or.external.id",
-                    "Either loanId or loanExternalId must be provided.", "loanId");
-        }
-
-        return result;
+        return interestPauseService.updateInterestPause(loanId, termVariationId, startDate, endDate, dateFormat, locale);
     }
 }

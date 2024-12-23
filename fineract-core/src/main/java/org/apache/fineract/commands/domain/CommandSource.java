@@ -159,8 +159,7 @@ public class CommandSource extends AbstractPersistableCustom<Long> {
                 .transactionId(command.getTransactionId()) //
                 .creditBureauId(command.getCreditBureauId()) //
                 .organisationCreditBureauId(command.getOrganisationCreditBureauId()) //
-                .loanExternalId(command.getLoanExternalId()) //
-                .build(); //
+                .loanExternalId(command.getLoanExternalId()).build(); //
     }
 
     public String getPermissionCode() {
