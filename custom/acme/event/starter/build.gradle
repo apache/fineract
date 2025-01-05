@@ -16,10 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-description = 'ACME Corp.: Fineract Event Starter'
+description = 'ACME Fineract Event Starter'
 
-group = 'com.acme.fineract.event'
+group = 'com.acme.fineract'
 
-archivesBaseName = 'acme-fineract-event-starter'
+base {
+    archivesName = 'acme-fineract-event-starter'
+}
 
 apply from: 'dependencies.gradle'

@@ -31,7 +31,7 @@ compileJava.doLast {
     javaexec {
         description = 'Performs EclipseLink static weaving of entity classes'
         def target = source
-        main 'org.eclipse.persistence.tools.weaving.jpa.StaticWeave'
+        mainClass = 'org.eclipse.persistence.tools.weaving.jpa.StaticWeave'
         args '-persistenceinfo', source, source, target
         classpath sourceSets.main.runtimeClasspath
     }

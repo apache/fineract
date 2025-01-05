@@ -26,16 +26,37 @@ apply plugin: 'com.github.davidmc24.gradle.plugin.avro-base'
 
 apply from: 'dependencies.gradle'
 
-task preprocessAvroSchemas() {
-    doLast {
-        copy {
-            from "$projectDir/src/main/avro"
-            into "$buildDir/generated/avro/src/main/avro"
-            filter { line ->
-                line.replaceAll("\"bigdecimal\"", new File("$projectDir/src/main/resources/avro-templates/bigdecimal.avsc").getText("UTF-8"))
+abstract class PreprocessAvroSchemasTask extends DefaultTask {
+    @InputDirectory
+    abstract DirectoryProperty getInputDir()
+
+    @InputFile
+    abstract RegularFileProperty getBigDecimalTemplate()
+
+    @OutputDirectory
+    abstract DirectoryProperty getOutputDir()
+
+    @TaskAction
+    def preprocess() {
+        def template = getBigDecimalTemplate().get().asFile.getText("UTF-8")
+        def input = getInputDir().get().asFile
+        def output = getOutputDir().get().asFile
+        
+        input.eachFileRecurse { file ->
+            if (file.isFile()) {
+                def relativePath = input.toPath().relativize(file.toPath())
+                def targetFile = output.toPath().resolve(relativePath).toFile()
+                targetFile.parentFile.mkdirs()
+                targetFile.text = file.text.replaceAll("\"bigdecimal\"", template)
             }
         }
     }
+}
+
+tasks.register('preprocessAvroSchemas', PreprocessAvroSchemasTask) {
+    inputDir = file("$projectDir/src/main/avro")
+    bigDecimalTemplate = file("$projectDir/src/main/resources/avro-templates/bigdecimal.avsc")
+    outputDir = file("$buildDir/generated/avro/src/main/avro")
 }
 
 task buildJavaSdk(type: GenerateAvroJavaTask) {
@@ -53,7 +74,33 @@ spotless {
 }
 
 buildJavaSdk.dependsOn(preprocessAvroSchemas, spotlessJsonApply)
-compileJava.dependsOn(buildJavaSdk, licenseFormatMain)
+
+sourceSets {
+    main {
+        java {
+            srcDir file("$buildDir/generated/java/src/main/java")
+        }
+        resources {
+            srcDir file("$projectDir/src/main/resources")
+            srcDir file("$projectDir/src/main/avro")
+        }
+        output.dir(file("$buildDir/generated/java/src/main/java"), builtBy: 'buildJavaSdk')
+    }
+}
+
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from sourceSets.main.output
+    from("$buildDir/generated/java/src/main/java") {
+        include "**/*.java"
+    }
+}
+
+compileJava {
+    dependsOn buildJavaSdk
+    source = sourceSets.main.java.srcDirs
+    options.compilerArgs += ['-parameters']
+}
 
 java {
     // keep this at Java 8, not 17
@@ -61,7 +108,10 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
+    options.errorprone {
+        enabled = false  // Disable ErrorProne for this module since it contains generated code
+    }
     options.compilerArgs -= ["-Werror"]
 }
 
@@ -74,7 +124,10 @@ test {
     useJUnitPlatform()
 }
 
-sourceSets.main.java.srcDir new File(buildDir, "generated/java/src/main/java")
-
 licenseFormatMain.dependsOn buildJavaSdk
 licenseMain.dependsOn licenseFormatMain
+
+tasks.named('sourcesJar') {
+    dependsOn tasks.named('buildJavaSdk')
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}

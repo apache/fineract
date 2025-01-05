@@ -42,7 +42,6 @@ import org.apache.fineract.infrastructure.dataqueries.service.GenericDataService
 import org.apache.fineract.infrastructure.jobs.ScheduledJobRunnerConfig;
 import org.apache.fineract.infrastructure.jobs.service.JobRegisterService;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -103,7 +102,7 @@ public class TestConfiguration {
     @Primary
     @Bean
     public HikariDataSource tenantDataSource() {
-        HikariDataSource mockDataSource = mock(HikariDataSource.class, Mockito.RETURNS_MOCKS);
+        HikariDataSource mockDataSource = mock(HikariDataSource.class, RETURNS_MOCKS);
         return mockDataSource;
     }
 
@@ -112,7 +111,7 @@ public class TestConfiguration {
      */
     @Bean
     public RoutingDataSource hikariTenantDataSource() {
-        RoutingDataSource mockDataSource = mock(RoutingDataSource.class, Mockito.RETURNS_MOCKS);
+        RoutingDataSource mockDataSource = mock(RoutingDataSource.class, RETURNS_MOCKS);
         return mockDataSource;
     }
 
@@ -128,17 +127,17 @@ public class TestConfiguration {
     @Primary
     @Bean
     public TenantDetailsService tenantDetailsService() {
-        return mock(TenantDetailsService.class, Mockito.RETURNS_MOCKS);
+        return mock(TenantDetailsService.class, RETURNS_MOCKS);
     }
 
     @Bean
     public ExtendedSpringLiquibaseFactory liquibaseFactory() {
-        return mock(ExtendedSpringLiquibaseFactory.class, Mockito.RETURNS_MOCKS);
+        return mock(ExtendedSpringLiquibaseFactory.class, RETURNS_MOCKS);
     }
 
     @Bean
     public DatabaseIndependentQueryService databaseIndependentQueryService() {
-        return mock(DatabaseIndependentQueryService.class, Mockito.RETURNS_MOCKS);
+        return mock(DatabaseIndependentQueryService.class, RETURNS_MOCKS);
     }
 
     @Bean

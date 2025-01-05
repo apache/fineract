@@ -26,17 +26,15 @@ jobs:
         run: ./gradlew --no-daemon --console=plain :fineract-provider:clean :fineract-provider:build :fineract-provider:jibDockerBuild -x test -x cucumber
       - name: Start the ActiveMQ Stack
         run: docker compose -f docker-compose-postgresql-activemq.yml up --scale fineract-worker=1 -d
-      - name: Wait for stack to come up
-        run: sleep 500
       - name: Check the stack
         run: docker ps
       - name: Check health Manager
-        run: curl -f -k --retry 10 --retry-connrefused --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/health
+        run: curl -f -k --retry 60 --retry-all-errors --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/health
       - name: Check health Worker1
-        run: curl -f -k --retry 10 --retry-connrefused --connect-timeout 30 --retry-delay 30 https://localhost:8444/fineract-provider/actuator/health
+        run: curl -f -k --retry 60 --retry-all-errors --connect-timeout 30 --retry-delay 30 https://localhost:8444/fineract-provider/actuator/health
       - name: Check info Manager
-        run: (( $(curl -f -k --retry 5 --retry-connrefused --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/info | wc --chars) > 100 ))
+        run: (( $(curl -f -k --retry 5 --retry-all-errors --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/info | wc --chars) > 100 ))
       - name: Check info Worker1
-        run: (( $(curl -f -k --retry 5 --retry-connrefused --connect-timeout 30 --retry-delay 30 https://localhost:8444/fineract-provider/actuator/info | wc --chars) > 100 ))
+        run: (( $(curl -f -k --retry 5 --retry-all-errors --connect-timeout 30 --retry-delay 30 https://localhost:8444/fineract-provider/actuator/info | wc --chars) > 100 ))
       - name: Run Smoke Test with Remote COB
         run: ./gradlew --no-daemon --console=plain :integration-tests:cleanTest :integration-tests:test --tests "org.apache.fineract.integrationtests.investor.externalassetowner.InitiateExternalAssetOwnerTransferTest.saleActiveLoanToExternalAssetOwnerAndBuybackADayLater" -PcargoDisabled

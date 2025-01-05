@@ -33,9 +33,7 @@ dependencies {
             project(path: ':fineract-provider', configuration: 'runtimeElements'),
             project(path: ':fineract-avro-schemas', configuration: 'runtimeElements'),
             project(path: ':fineract-client', configuration: 'runtimeElements'),
-            project(path: ':fineract-progressive-loan', configuration: 'runtimeElements'),
-            'com.intuit.karate:karate-junit5',
-            // 'com.google.code.gson:gson',
+            project(path: ':fineract-progressive-loan', configuration: 'runtimeElements')
             )
     testImplementation ('org.mock-server:mockserver-junit-jupiter') {
         exclude group: 'com.sun.mail', module: 'mailapi'
@@ -59,4 +57,5 @@ dependencies {
     testAnnotationProcessor 'org.mapstruct:mapstruct-processor'
 
     testImplementation 'com.github.tomakehurst:wiremock-standalone'
+    testImplementation 'com.google.guava:guava:32.1.3-jre'
 }

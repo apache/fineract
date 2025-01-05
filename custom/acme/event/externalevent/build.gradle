@@ -16,10 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-description = 'ACME Corp.: Fineract external events'
+description = 'ACME Fineract Event External Event'
 
-group = 'com.acme.fineract.event'
+group = 'com.acme.fineract'
 
-archivesBaseName = 'acme-fineract-event-externalevent'
+base {
+    archivesName = 'acme-fineract-event-externalevent'
+}
 
 apply from: 'dependencies.gradle'

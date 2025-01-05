@@ -23,15 +23,13 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@0bdd871935719febd78681f197cd39af5b6e16a6 # v4.2.2
       - name: Build the image
-        run: ./gradlew --no-daemon --console=plain :fineract-provider:clean :fineract-provider:build :fineract-provider:jibDockerBuild -x test -x cucumber
+        run: ./gradlew --no-daemon --console=plain :fineract-provider:clean :fineract-provider:build :fineract-provider:jibDockerBuild -x test -x cucumber -x :integration-tests:test
       - name: Start the Fineract stack
         run: docker compose -f docker-compose-postgresql-test-activemq.yml up -d
-      - name: Wait for stack to come up
-        run: sleep 400
       - name: Check the stack
         run: docker ps
       - name: Check health Manager
-        run: curl -f -k --retry 10 --retry-connrefused --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/health
+        run: curl -f -k --retry 60 --retry-all-errors --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/health
       - name: Execute tests
         env:
           BASE_URL: https://localhost:8443
@@ -43,4 +41,4 @@ jobs:
           EVENT_VERIFICATION_ENABLED: true
           ACTIVEMQ_BROKER_URL: tcp://localhost:61616
           ACTIVEMQ_TOPIC_NAME: events
-        run: ./gradlew --no-daemon --console=plain fineract-e2e-tests-runner:cucumber --tags 'not @Skip' allureReport
+        run: ./gradlew --no-daemon --console=plain -x test -x :integration-tests:test fineract-e2e-tests-runner:cucumber --tags 'not @Skip' allureReport

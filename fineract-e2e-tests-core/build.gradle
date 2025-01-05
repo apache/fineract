@@ -21,8 +21,39 @@ plugins {
     id 'java'
 }
 
+// Configure source sets with proper output directories
+sourceSets {
+    test {
+        java {
+            destinationDirectory = layout.buildDirectory.dir('classes/java/test').get().asFile
+        }
+        resources {
+            destinationDirectory = layout.buildDirectory.dir('resources/test').get().asFile
+        }
+    }
+}
+
 repositories {
     mavenCentral()
+}
+
+// Configure test compilation
+tasks.named('compileTestJava') {
+    description = 'Compiles test Java source files'
+    
+    // Enable caching
+    outputs.cacheIf { true }
+    
+    // Configure compiler options
+    options.compilerArgs.add("-parameters")
+    
+    // Ensure proper output tracking
+    outputs.dir(sourceSets.test.java.destinationDirectory)
+        .withPropertyName("testClassesDir")
+    
+    // Track annotation processor outputs
+    options.annotationProcessorGeneratedSourcesDirectory = 
+        layout.buildDirectory.dir('generated/sources/annotationProcessor/java/test').get().asFile
 }
 
 dependencies {

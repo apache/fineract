@@ -97,6 +97,18 @@ if (!project.hasProperty('cargoDisabled')) {
     }
 }
 
+// Configure proper test output directories
+sourceSets {
+    test {
+        output.resourcesDir = layout.buildDirectory.dir('resources/test').get().asFile
+        java.destinationDirectory = layout.buildDirectory.dir('classes/java/test').get().asFile
+    }
+}
+
+tasks.named('compileTestJava') {
+    outputs.cacheIf { true }
+}
+
 // NOTE: Gradle suggested these dependencies
 compileTestJava.dependsOn(':fineract-provider:generateGitProperties', ':fineract-provider:processResources', ':fineract-provider:resolve')
 spotbugsTest.dependsOn(':fineract-provider:generateGitProperties', ':fineract-provider:processResources', ':fineract-provider:resolve')

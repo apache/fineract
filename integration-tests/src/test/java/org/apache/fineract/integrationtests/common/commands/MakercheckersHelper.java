@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.integrationtests.common.commands;
 
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.linecorp.armeria.internal.shaded.guava.reflect.TypeToken;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.lang.reflect.Type;

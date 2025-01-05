@@ -107,29 +107,83 @@ task buildAsciidoc(type: org.openapitools.generator.gradle.plugin.tasks.Generate
     dependsOn(':fineract-provider:resolve')
 }
 
+// Configure source sets with proper output directories
+sourceSets {
+    main {
+        java {
+            srcDir new File(buildDir, "generated/java/src/main/java")
+            destinationDirectory = layout.buildDirectory.dir('classes/java/main').get().asFile
+        }
+        output.resourcesDir = layout.buildDirectory.dir('resources/main').get().asFile
+    }
+    test {
+        java {
+            destinationDirectory = layout.buildDirectory.dir('classes/java/test').get().asFile
+        }
+        output.resourcesDir = layout.buildDirectory.dir('resources/test').get().asFile
+    }
+}
+
+// Configure jar tasks to handle duplicates
+tasks.withType(Jar).configureEach {
+    // Handle duplicates by using the first occurrence
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+// Improve the cleanup task to track inputs and outputs
 task cleanupGeneratedJavaFiles() {
+    def tempDir = file("$buildDir/generated/temp-java")
+    def targetDir = file("$buildDir/generated/java")
+    
+    inputs.dir(tempDir)
+    outputs.dir(targetDir)
+    
     doLast {
         copy {
-            from "$buildDir/generated/temp-java".toString()
-            into "$buildDir/generated/java".toString()
+            from tempDir
+            into targetDir
             filter { line ->
                 line
-                        // This is a temporary step to get rid of joda imports in the generated code
-                        // At this point it's unknown why it's even generated, probably it's a bug in the generator
-                        .replaceAll("import org\\.joda\\.time\\.\\*;", "")
-                        // The 3 lines below handles the cases when a request body is not required
-                        .replaceAll(", \\)", ")")
-                        .replaceAll(", , @HeaderMap", ", @HeaderMap")
-                        .replaceAll("\\(, ", "(")
+                    .replaceAll("import org\\.joda\\.time\\.\\*;", "")
+                    .replaceAll(", \\)", ")")
+                    .replaceAll(", , @HeaderMap", ", @HeaderMap")
+                    .replaceAll("\\(, ", "(")
             }
+            // Also set duplicates strategy for the copy task
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         }
     }
-
     dependsOn("buildJavaSdk")
 }
 
-// TODO: @vidakovic we could provide even more client libs in different languages (Go, Ruby, Swift etc.)
-compileJava.dependsOn(buildJavaSdk, buildTypescriptAngularSdk, buildAsciidoc, cleanupGeneratedJavaFiles, licenseFormatMain, spotlessMiscApply)
+// Configure Java compilation
+tasks.named('compileJava') {
+    outputs.cacheIf { true }
+    dependsOn(buildJavaSdk, buildTypescriptAngularSdk, buildAsciidoc, cleanupGeneratedJavaFiles, licenseFormatMain, spotlessMiscApply)
+    mustRunAfter(licenseFormatMain, cleanupGeneratedJavaFiles)
+}
+
+// Configure sources jar task
+tasks.named('sourcesJar') {
+    dependsOn(cleanupGeneratedJavaFiles)
+    mustRunAfter(cleanupGeneratedJavaFiles)
+    
+    from(sourceSets.main.java.srcDirs) {
+        include "**/*.java"
+    }
+}
+
+// Configure license formatting
+tasks.named('licenseFormatMain') {
+    dependsOn(cleanupGeneratedJavaFiles)
+    mustRunAfter(cleanupGeneratedJavaFiles)
+    source = sourceSets.main.java.srcDirs
+}
+
+tasks.named('licenseMain') {
+    dependsOn(licenseFormatMain)
+    mustRunAfter(licenseFormatMain)
+}
 
 java {
     // keep this at Java 8, not 17; see https://issues.apache.org/jira/browse/FINERACT-1214
@@ -137,26 +191,17 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-tasks.withType(JavaCompile) {
-    // the generated code in build/generated/java/src/main/java/org/apache/fineract/client/auth/OAuthOkHttpClient.java#L71 currently uses deprecated RequestBody.create(MediaType,String)
-    // TODO FINERACT-1247 why does this not work:
-    //   options.compilerArgs -= ["-Xlint:deprecation"]
-    //   options.compilerArgs += ["-Xlint:-deprecation"]
-    // So we just have to use:
-    options.compilerArgs -= ["-Werror"]
-}
-
-configurations {
-    generatedCompileClasspath.extendsFrom implementation
-    generatedRuntimeClasspath.extendsFrom runtimeClasspath
+tasks.withType(JavaCompile).configureEach {
+    options.errorprone {
+        excludedPaths = '.*/build/generated/java/src/main/java/.*'
+    }
 }
 
 test {
     useJUnitPlatform()
 }
 
-sourceSets.main.java.srcDir new File(buildDir, "generated/java/src/main/java")
-
-// NOTE: Gradle suggested these dependencies
-licenseFormatMain.dependsOn buildJavaSdk
-licenseMain.dependsOn licenseFormatMain
+configurations {
+    generatedCompileClasspath.extendsFrom implementation
+    generatedRuntimeClasspath.extendsFrom runtimeClasspath
+}

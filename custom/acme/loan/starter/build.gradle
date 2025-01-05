@@ -16,10 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-description = 'ACME Corp.: Fineract COB Starter'
+description = 'ACME Fineract Loan Starter'
 
 group = 'com.acme.fineract'
 
-archivesBaseName = 'acme-fineract-loan-starter'
+base {
+    archivesName = 'acme-fineract-loan-starter'
+}
 
 apply from: 'dependencies.gradle'

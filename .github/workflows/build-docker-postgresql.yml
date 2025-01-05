@@ -26,11 +26,9 @@ jobs:
         run: ./gradlew --no-daemon --console=plain :fineract-provider:clean :fineract-provider:build :fineract-provider:jibDockerBuild -x test -x cucumber
       - name: Start the Standalone Stack
         run: docker compose -f docker-compose-postgresql.yml up -d
-      - name: Wait for stack to come up
-        run: sleep 500
       - name: Check the stack
         run: docker ps
       - name: Check health
-        run: curl -f -k --retry 10 --retry-connrefused --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/health
+        run: curl -f -k --retry 60 --retry-all-errors --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/health
       - name: Check info
-        run: (( $(curl -f -k --retry 5 --retry-connrefused --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/info | wc --chars) > 100 ))
+        run: (( $(curl -f -k --retry 5 --retry-all-errors --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/info | wc --chars) > 100 ))

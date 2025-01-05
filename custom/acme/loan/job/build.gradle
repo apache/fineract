@@ -16,10 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-description = 'ACME Corp.: Fineract Loan Job'
+description = 'ACME Fineract Loan Job'
 
 group = 'com.acme.fineract'
 
-archivesBaseName = 'acme-fineract-loan-job'
+base {
+    archivesName = 'acme-fineract-loan-job'
+}
 
 apply from: 'dependencies.gradle'

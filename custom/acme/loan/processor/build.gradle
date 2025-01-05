@@ -16,10 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-description = 'ACME Corp.: Fineract Loan Transaction Processors'
+description = 'ACME Fineract Loan Processor'
 
 group = 'com.acme.fineract'
 
-archivesBaseName = 'acme-fineract-loan-processor'
+base {
+    archivesName = 'acme-fineract-loan-processor'
+}
 
 apply from: 'dependencies.gradle'

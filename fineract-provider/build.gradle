@@ -82,6 +82,11 @@ resolve {
 configurations {
     providedRuntime // needed for Spring Boot executable WAR
     providedCompile
+    implementation
+    testImplementation
+    cucumberRuntime {
+        extendsFrom testImplementation
+    }
     compile() {
         exclude module: 'hibernate-entitymanager'
         exclude module: 'hibernate-validator'
@@ -98,6 +103,16 @@ configurations {
         exclude module: 'classworlds'
     }
     runtime
+}
+
+dependencies {
+    implementation project(':fineract-core')
+    implementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.mockito:mockito-core'
+    implementation 'org.mockito:mockito-junit-jupiter'
+    implementation 'org.junit.jupiter:junit-jupiter-api'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.liquibase:liquibase-core'
 }
 
 apply from: 'dependencies.gradle'
@@ -352,3 +367,41 @@ spotbugsTest.dependsOn resolve
 compileTestJava.dependsOn ':fineract-client:processResources', ':fineract-avro-schemas:processResources'
 resolveMainClassName.dependsOn resolve
 processResources.dependsOn compileJava
+
+javadoc {
+    dependsOn resolve
+}
+
+task devRun(type: org.springframework.boot.gradle.tasks.run.BootRun) {
+    description = 'Runs the application quickly for development by skipping quality checks'
+    group = 'Application'
+
+    // Configure the build to skip quality checks
+    gradle.taskGraph.whenReady { graph ->
+        if (graph.hasTask(devRun)) {
+            tasks.matching { task -> 
+                task.name in ['checkstyle', 'checkstyleMain', 'checkstyleTest',
+                            'spotlessCheck', 'spotlessApply',
+                            'spotbugsMain', 'spotbugsTest',
+                            'javadoc', 'javadocJar',
+                            'modernizer',
+                            'testClasses']
+            }.configureEach {
+                enabled = false
+            }
+            // Also disable error prone compilation flags
+            tasks.withType(JavaCompile).configureEach {
+                options.errorprone.enabled = false
+            }
+        }
+    }
+
+    // Inherit all bootRun settings
+    classpath = bootRun.classpath
+    mainClass = bootRun.mainClass
+    jvmArgs = bootRun.jvmArgs
+    
+    doFirst {
+        println "Running in development mode - quality checks are disabled"
+    }
+}
