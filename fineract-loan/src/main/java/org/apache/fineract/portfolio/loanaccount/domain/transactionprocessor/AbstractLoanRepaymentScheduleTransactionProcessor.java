@@ -218,24 +218,22 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
     protected void calculateAccrualActivity(LoanTransaction loanTransaction, MonetaryCurrency currency,
             List<LoanRepaymentScheduleInstallment> installments) {
-        loanTransaction.resetDerivedComponents();
-        // determine how much is outstanding total and breakdown for principal, interest and charges
-        final Money principalPortion = Money.zero(currency);
-        Money interestPortion = Money.zero(currency);
-        Money feeChargesPortion = Money.zero(currency);
-        Money penaltychargesPortion = Money.zero(currency);
+
         final int firstNormalInstallmentNumber = LoanRepaymentScheduleProcessingWrapper.fetchFirstNormalInstallmentNumber(installments);
 
         final LoanRepaymentScheduleInstallment currentInstallment = installments.stream()
                 .filter(installment -> LoanRepaymentScheduleProcessingWrapper.isInPeriod(loanTransaction.getTransactionDate(), installment,
                         installment.getInstallmentNumber().equals(firstNormalInstallmentNumber)))
                 .findFirst().orElseThrow();
-
-        interestPortion = interestPortion.plus(currentInstallment.getInterestCharged(currency));
-        feeChargesPortion = feeChargesPortion.plus(currentInstallment.getFeeChargesCharged(currency));
-        penaltychargesPortion = penaltychargesPortion.plus(currentInstallment.getPenaltyChargesCharged(currency));
-
-        loanTransaction.updateComponentsAndTotal(principalPortion, interestPortion, feeChargesPortion, penaltychargesPortion);
+        if (loanTransaction.getDateOf().isEqual(currentInstallment.getDueDate()) || installments.stream()
+                .filter(i -> !i.isAdditional() && !i.isDownPayment()).noneMatch(LoanRepaymentScheduleInstallment::isNotFullyPaidOff)) {
+            loanTransaction.resetDerivedComponents();
+            final Money principalPortion = Money.zero(currency);
+            Money interestPortion = currentInstallment.getInterestCharged(currency);
+            Money feeChargesPortion = currentInstallment.getFeeChargesCharged(currency);
+            Money penaltyChargesPortion = currentInstallment.getPenaltyChargesCharged(currency);
+            loanTransaction.updateComponentsAndTotal(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
+        }
     }
 
     private void recalculateAccrualActivityTransaction(ChangedTransactionDetail changedTransactionDetail, LoanTransaction loanTransaction,
