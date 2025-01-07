@@ -230,7 +230,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
         GLAccountBalanceHolder glAccountBalanceHolder = new GLAccountBalanceHolder();
 
         // need to fetch if there are account mappings (always one)
-        Integer chargeOffReasonCodeValue = loanDTO.getChargeOffReasonCodeValue();
+        Long chargeOffReasonCodeValue = loanDTO.getChargeOffReasonCodeValue();
 
         ProductToGLAccountMapping mapping = chargeOffReasonCodeValue != null
                 ? helper.getChargeOffMappingByCodeValue(chargeOffReasonCodeValue)

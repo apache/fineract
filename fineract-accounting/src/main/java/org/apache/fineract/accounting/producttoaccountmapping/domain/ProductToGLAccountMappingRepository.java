@@ -67,7 +67,7 @@ public interface ProductToGLAccountMappingRepository
             @Param("productType") int productType);
 
     @Query("select mapping from ProductToGLAccountMapping mapping where mapping.chargeOffReason.id =:chargeOffReasonId")
-    ProductToGLAccountMapping findChargeOffReasonMappingById(@Param("chargeOffReasonId") Integer chargeOffReasonId);
+    ProductToGLAccountMapping findChargeOffReasonMappingById(@Param("chargeOffReasonId") Long chargeOffReasonId);
 
     @Query("select mapping from ProductToGLAccountMapping mapping where mapping.productId =:productId AND mapping.productType =:productType AND mapping.charge IS NULL AND mapping.paymentType IS NULL AND mapping.chargeOffReason IS NULL")
     List<ProductToGLAccountMapping> findAllRegularMappings(@Param("productId") Long productId, @Param("productType") Integer productType);

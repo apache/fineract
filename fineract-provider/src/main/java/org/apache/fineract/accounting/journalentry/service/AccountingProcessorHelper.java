@@ -112,7 +112,7 @@ public class AccountingProcessorHelper {
         boolean isAccountTransfer = (Boolean) accountingBridgeData.get("isAccountTransfer");
         boolean isLoanMarkedAsChargeOff = (Boolean) accountingBridgeData.get("isChargeOff");
         boolean isLoanMarkedAsFraud = (Boolean) accountingBridgeData.get("isFraud");
-        final Integer chargeOffReasonCodeValue = (Integer) accountingBridgeData.get("chargeOffReasonCodeValue");
+        final Long chargeOffReasonCodeValue = (Long) accountingBridgeData.get("chargeOffReasonCodeValue");
 
         @SuppressWarnings("unchecked")
         final List<Map<String, Object>> newTransactionsMap = (List<Map<String, Object>>) accountingBridgeData.get("newLoanTransactions");
@@ -177,7 +177,7 @@ public class AccountingProcessorHelper {
                 chargeOffReasonCodeValue);
     }
 
-    public ProductToGLAccountMapping getChargeOffMappingByCodeValue(Integer chargeOffReasonCodeValue) {
+    public ProductToGLAccountMapping getChargeOffMappingByCodeValue(Long chargeOffReasonCodeValue) {
         return accountMappingRepository.findChargeOffReasonMappingById(chargeOffReasonCodeValue);
     }
 

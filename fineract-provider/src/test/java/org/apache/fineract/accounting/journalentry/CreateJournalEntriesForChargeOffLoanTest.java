@@ -48,7 +48,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class CreateJournalEntriesForChargeOffLoanTest {
 
-    private static final Integer chargeOffReasons = 15;
+    private static final Long chargeOffReasons = 15L;
 
     @Mock
     private AccountingProcessorHelper helper;

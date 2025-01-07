@@ -27,18 +27,18 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import org.apache.fineract.client.models.GetCodesResponse;
+import org.apache.fineract.client.models.PostCodeValueDataResponse;
+import org.apache.fineract.client.models.PostCodeValuesDataRequest;
+import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.Utils;
 
-public final class CodeHelper {
+public final class CodeHelper extends IntegrationTest {
 
     private static final String COUNTRY_CODE_NAME = "COUNTRY";
     private static final String STATE_CODE_NAME = "STATE";
     private static final String ADDRESS_TYPE_CODE_NAME = "ADDRESS_TYPE";
     private static final String CHARGE_OFF_REASONS_CODE_NAME = "ChargeOffReasons";
-
-    private CodeHelper() {
-
-    }
 
     public static final String CODE_ID_ATTRIBUTE_NAME = "id";
     public static final String RESPONSE_ID_ATTRIBUTE_NAME = "resourceId";
@@ -280,4 +280,11 @@ public final class CodeHelper {
                 getTestCodeValueAsJSON(codeValueName, description, position), jsonAttributeToGetback);
     }
 
+    public PostCodeValueDataResponse createCodeValue(Long codeId, PostCodeValuesDataRequest request) {
+        return ok(fineract().codeValues.createCodeValue(codeId, request));
+    }
+
+    public List<GetCodesResponse> retrieveCodes() {
+        return ok(fineract().codes.retrieveCodes());
+    }
 }

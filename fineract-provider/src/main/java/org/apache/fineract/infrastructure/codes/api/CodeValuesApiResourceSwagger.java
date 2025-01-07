@@ -72,6 +72,8 @@ final class CodeValuesApiResourceSwagger {
 
         @Schema(example = "4")
         public Long resourceId;
+        @Schema(example = "4")
+        public Long subResourceId;
     }
 
     @Schema(description = "PutCodeValuesDataRequest")

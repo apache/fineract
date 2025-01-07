@@ -159,6 +159,7 @@ public abstract class BaseLoanIntegrationTest {
     protected BusinessDateHelper businessDateHelper = new BusinessDateHelper();
     protected DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATETIME_PATTERN);
     protected GlobalConfigurationHelper globalConfigurationHelper = new GlobalConfigurationHelper();
+    protected final CodeHelper codeHelper = new CodeHelper();
 
     protected static void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, LocalDate dueDate, double principalDue,
             double principalPaid, double principalOutstanding, double paidInAdvance, double paidLate) {
