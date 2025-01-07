@@ -720,6 +720,13 @@ public abstract class BaseLoanIntegrationTest {
         return chargeId.longValue();
     }
 
+    protected Long createDisbursementFlatCharge(double amount) {
+        Integer chargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
+                ChargesHelper.getLoanDisbursementJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(amount)));
+        assertNotNull(chargeId);
+        return chargeId.longValue();
+    }
+
     protected void verifyRepaymentSchedule(GetLoansLoanIdResponse savedLoanResponse, GetLoansLoanIdResponse actualLoanResponse,
             int totalPeriods, int identicalPeriods) {
         List<GetLoansLoanIdRepaymentPeriod> savedPeriods = savedLoanResponse.getRepaymentSchedule().getPeriods();
@@ -749,14 +756,24 @@ public abstract class BaseLoanIntegrationTest {
         }
     }
 
+    protected void verifyRepaymentSchedulePartially(Long loanId, Installment... installments) {
+        verifyRepaymentSchedule(true, loanId, installments);
+    }
+
     protected void verifyRepaymentSchedule(Long loanId, Installment... installments) {
+        verifyRepaymentSchedule(false, loanId, installments);
+    }
+
+    protected void verifyRepaymentSchedule(boolean partialMatchingOnly, Long loanId, Installment... installments) {
         GetLoansLoanIdResponse loanResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId.intValue());
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATETIME_PATTERN);
 
         assertNotNull(loanResponse.getRepaymentSchedule());
         assertNotNull(loanResponse.getRepaymentSchedule().getPeriods());
-        Assertions.assertEquals(installments.length, loanResponse.getRepaymentSchedule().getPeriods().size(),
-                "Expected installments are not matching with the installments configured on the loan");
+        if (!partialMatchingOnly) {
+            Assertions.assertEquals(installments.length, loanResponse.getRepaymentSchedule().getPeriods().size(),
+                    "Expected installments are not matching with the installments configured on the loan");
+        }
 
         int installmentNumber = 0;
         for (int i = 0; i < installments.length; i++) {

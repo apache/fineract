@@ -1027,6 +1027,9 @@ public final class LoanApplicationTerms {
                 int daysLeftAfterMonths = DateUtils.getExactDifferenceInDays(startDateAfterConsideringMonths, endDate) + diffDays;
                 int daysInPeriodAfterMonths = DateUtils.getExactDifferenceInDays(startDateAfterConsideringMonths,
                         endDateAfterConsideringMonths);
+                if (loanCalendar == null && daysInMonthType.isDaysInMonth_30()) {
+                    daysInPeriodAfterMonths = 30;
+                }
                 numberOfPeriods = numberOfPeriods.add(BigDecimal.valueOf(numberOfMonths))
                         .add(BigDecimal.valueOf((double) daysLeftAfterMonths / daysInPeriodAfterMonths));
             break;

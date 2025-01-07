@@ -21,7 +21,6 @@ package org.apache.fineract.integrationtests;
 import static org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.stream.Stream;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
@@ -60,7 +59,7 @@ public class LoanDueCalculationTest extends BaseLoanIntegrationTest {
                     (postLoansRequest) -> {
                         postLoansRequest.transactionProcessingStrategyCode(repaymentProcessor).repaymentEvery(1).repaymentFrequencyType(2)
                                 .loanTermFrequency(4).loanTermFrequencyType(2).dateFormat("yyyy-MM-dd")
-                                .repaymentsStartingFromDate(LocalDate.of(2024, 2, 29));
+                                .repaymentsStartingFromDate("2024-02-29");
                     });
             PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(loanRequest);
             verifyRepaymentSchedule(postLoansResponse.getLoanId(), installment(1000.0, null, "31 January 2024"), //

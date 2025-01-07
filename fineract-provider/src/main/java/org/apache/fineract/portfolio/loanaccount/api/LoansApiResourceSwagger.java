@@ -1281,14 +1281,16 @@ final class LoansApiResourceSwagger {
         public List<PostLoansDisbursementData> disbursementData;
         @Schema(description = "Maximum allowed outstanding balance")
         public BigDecimal maxOutstandingLoanBalance;
-        @Schema(example = "[2011, 10, 20]")
-        public LocalDate repaymentsStartingFromDate;
+        @Schema(example = "20 September 2011")
+        public String repaymentsStartingFromDate;
         @Schema(example = "1")
         public Integer graceOnInterestCharged;
         @Schema(example = "1")
         public Integer graceOnPrincipalPayment;
         @Schema(example = "1")
         public Integer graceOnInterestPayment;
+        @Schema(example = "20 September 2011")
+        public String interestChargedFromDate;
         @Schema(example = "1")
         public Integer graceOnArrearsAgeing;
         @Schema(example = "HORIZONTAL")
