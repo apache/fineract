@@ -204,7 +204,7 @@ public class LoanAccrualActivityProcessingServiceImpl implements LoanAccrualActi
 
     private void reverseAccrualActivityTransaction(LoanTransaction loanTransaction) {
         loanTransaction.reverse();
-        loanTransaction.updateExternalId(null);
+
         LoanAdjustTransactionBusinessEvent.Data data = new LoanAdjustTransactionBusinessEvent.Data(loanTransaction);
         businessEventNotifierService.notifyPostBusinessEvent(new LoanAdjustTransactionBusinessEvent(data));
     }
