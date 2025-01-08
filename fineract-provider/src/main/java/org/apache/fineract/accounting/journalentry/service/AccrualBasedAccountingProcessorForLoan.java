@@ -37,6 +37,7 @@ import org.apache.fineract.accounting.journalentry.data.LoanTransactionDTO;
 import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGLAccountMapping;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.office.domain.Office;
+import org.apache.fineract.portfolio.PortfolioProductType;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.springframework.stereotype.Component;
 
@@ -233,7 +234,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
         Long chargeOffReasonCodeValue = loanDTO.getChargeOffReasonCodeValue();
 
         ProductToGLAccountMapping mapping = chargeOffReasonCodeValue != null
-                ? helper.getChargeOffMappingByCodeValue(chargeOffReasonCodeValue)
+                ? helper.getChargeOffMappingByCodeValue(loanProductId, PortfolioProductType.LOAN, chargeOffReasonCodeValue)
                 : null;
         if (mapping != null) {
             GLAccount accountCredit = this.helper.getLinkedGLAccountForLoanProduct(loanProductId,
