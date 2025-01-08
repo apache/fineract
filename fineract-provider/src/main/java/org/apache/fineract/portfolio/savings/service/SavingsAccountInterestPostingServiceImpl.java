@@ -34,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
@@ -123,7 +124,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                     }
                     if (correctionRequired) {
                         boolean applyWithHoldTaxForOldTransaction = false;
-                        postingTransaction.reverse();
+                        //postingTransaction.reverse();
 
                         final SavingsAccountTransactionData withholdTransaction = findTransactionFor(interestPostingTransactionDate,
                                 withholdTransactions);
@@ -287,7 +288,46 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
             }
             List<SavingsAccountTransactionData> listOfTransactions = retreiveOrderedNonInterestPostingTransactions(savingsAccountData);
             log.debug("  listOfTransactions: {} {}", savingsAccountData.getAccountNo(), listOfTransactions.size());
-            if (listOfTransactions.size() > 0) {
+
+            List<SavingsAccountTransactionData> listOfTransactionsNegative = new ArrayList<>();
+            List<SavingsAccountTransactionData> listOfTransactionsPositive = new ArrayList<>();
+
+            for (SavingsAccountTransactionData lists : listOfTransactions){
+                if(MathUtil.isLessThanZero(lists.getRunningBalance())){
+                    listOfTransactionsNegative.add(lists);
+                }else{
+                    listOfTransactionsPositive.add(lists);
+                }
+            }
+
+          if (!listOfTransactionsNegative.isEmpty()){
+
+                final PostingPeriod postingPeriod = PostingPeriod.createFromDTO(periodInterval, periodStartingBalance, listOfTransactionsNegative,
+                        monetaryCurrency, compoundingPeriodType, interestCalculationType, interestRateAsFraction, daysInYearType.getValue(),
+                        upToInterestCalculationDate, interestPostTransactions, isInterestTransfer, minBalanceForInterestCalculation,
+                        isSavingsInterestPostingAtCurrentPeriodEnd, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation,
+                        isUserPosting, financialYearBeginningMonth, savingsAccountData.isAllowOverdraft());
+
+                periodStartingBalance = postingPeriod.closingBalance();
+                log.debug("  postingPeriod {} {}", postingPeriod.dateOfPostingTransaction(), postingPeriod.getInterestEarned().getAmount());
+                allPostingPeriods.add(postingPeriod);
+
+            }
+            if(!listOfTransactionsPositive.isEmpty()){
+
+                final PostingPeriod postingPeriod = PostingPeriod.createFromDTO(periodInterval, periodStartingBalance, listOfTransactionsPositive,
+                        monetaryCurrency, compoundingPeriodType, interestCalculationType, interestRateAsFraction, daysInYearType.getValue(),
+                        upToInterestCalculationDate, interestPostTransactions, isInterestTransfer, minBalanceForInterestCalculation,
+                        isSavingsInterestPostingAtCurrentPeriodEnd, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation,
+                        isUserPosting, financialYearBeginningMonth, savingsAccountData.isAllowOverdraft());
+
+                periodStartingBalance = postingPeriod.closingBalance();
+                log.debug("  postingPeriod {} {}", postingPeriod.dateOfPostingTransaction(), postingPeriod.getInterestEarned().getAmount());
+                allPostingPeriods.add(postingPeriod);
+
+            }
+
+           /*   if (listOfTransactions.size() > 0) {
                 final PostingPeriod postingPeriod = PostingPeriod.createFromDTO(periodInterval, periodStartingBalance, listOfTransactions,
                         monetaryCurrency, compoundingPeriodType, interestCalculationType, interestRateAsFraction, daysInYearType.getValue(),
                         upToInterestCalculationDate, interestPostTransactions, isInterestTransfer, minBalanceForInterestCalculation,
@@ -297,7 +337,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                 periodStartingBalance = postingPeriod.closingBalance();
                 log.debug("  postingPeriod {} {}", postingPeriod.dateOfPostingTransaction(), postingPeriod.getInterestEarned().getAmount());
                 allPostingPeriods.add(postingPeriod);
-            }
+            }*/
         }
 
         this.savingsHelper.calculateInterestForAllPostingPeriods(monetaryCurrency, allPostingPeriods,
@@ -448,7 +488,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                 }
                 if (transaction.getId() == null && overdraftAmount.isGreaterThanZero()) {
                     transaction.updateOverdraftAmount(overdraftAmount.getAmount());
-                } else if (overdraftAmount.isNotEqualTo(Money.of(savingsAccountData.getCurrency(), transaction.getOverdraftAmount()))) {
+                } else if (overdraftAmount.isNotEqualTo(Money.of(savingsAccountData.getCurrency(), transaction.getOverdraftAmount())) && MathUtil.isGreaterThanZero(transaction.getRunningBalance())) {
                     SavingsAccountTransactionData accountTransaction = SavingsAccountTransactionData.copyTransaction(transaction);
                     if (transaction.isChargeTransaction()) {
                         Set<SavingsAccountChargesPaidByData> chargesPaidBy = transaction.getSavingsAccountChargesPaid();
@@ -463,6 +503,25 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                     }
                     accountTransaction.updateRunningBalance(runningBalance);
                     addTransactionToExisting(accountTransaction, savingsAccountData);
+
+                    isTransactionsModified = true;
+                }else if (overdraftAmount.isNotEqualTo(Money.of(savingsAccountData.getCurrency(), transaction.getOverdraftAmount())) && MathUtil.isLessThanZero(transaction.getRunningBalance())) {
+                    SavingsAccountTransactionData accountTransaction = transaction;
+                    if (transaction.isChargeTransaction()) {
+                        Set<SavingsAccountChargesPaidByData> chargesPaidBy = transaction.getSavingsAccountChargesPaid();
+                        final Set<SavingsAccountChargesPaidByData> newChargePaidBy = new HashSet<>();
+                        chargesPaidBy.forEach(
+                                x -> newChargePaidBy.add(SavingsAccountChargesPaidByData.instance(x.getChargeId(), x.getAmount())));
+                        transaction.getSavingsAccountChargesPaid().addAll(newChargePaidBy);
+                    }
+                    //if (MathUtil.isGreaterThanZero(savingsAccountData.getSummary().getAccountBalance())){
+                    //    transaction.reverse();
+                   // }
+                    if (overdraftAmount.isGreaterThanZero()) {
+                        transaction.updateOverdraftAmount(overdraftAmount.getAmount());
+                    }
+                    transaction.updateRunningBalance(runningBalance);
+                    //addTransactionToExisting(accountTransaction, savingsAccountData);
 
                     isTransactionsModified = true;
                 }

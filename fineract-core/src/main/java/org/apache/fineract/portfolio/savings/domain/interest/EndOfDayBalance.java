@@ -75,7 +75,7 @@ public class EndOfDayBalance {
                 interest = realBalanceForInterestCalculation.multiply(periodicInterestRate, MathContext.DECIMAL64).setScale(9,
                         MoneyHelper.getRoundingMode());
             }
-        } else {
+        } else {//entro en el acrrual
             if (realBalanceForInterestCalculation.compareTo(minOverdraftForInterestCalculation.negate()) < 0) {
                 final BigDecimal multiplicand = BigDecimal.ONE.divide(BigDecimal.valueOf(daysInYear), MathContext.DECIMAL64);
                 final BigDecimal dailyInterestRate = overdraftInterestRateAsFraction.multiply(multiplicand, MathContext.DECIMAL64);
@@ -83,6 +83,38 @@ public class EndOfDayBalance {
                         MathContext.DECIMAL64);
                 interest = realBalanceForInterestCalculation.multiply(periodicInterestRate, MathContext.DECIMAL64).setScale(9,
                         MoneyHelper.getRoundingMode());
+            }
+        }
+        return interest;
+    }
+
+    public BigDecimal calculateInterestOnBalanceNegative(final BigDecimal interestToCompound, final BigDecimal interestRateAsFraction,
+                                                 final long daysInYear, final BigDecimal minBalanceForInterestCalculation, final BigDecimal overdraftInterestRateAsFraction,
+                                                 final BigDecimal minOverdraftForInterestCalculation) {
+
+        BigDecimal interest = BigDecimal.ZERO.setScale(9, MoneyHelper.getRoundingMode());
+        final BigDecimal realBalanceForInterestCalculation = this.endOfDayBalance.getAmount().add(interestToCompound);
+        if (realBalanceForInterestCalculation.compareTo(BigDecimal.ZERO) >= 0) {
+            if (realBalanceForInterestCalculation.compareTo(minBalanceForInterestCalculation) >= 0) {
+                final BigDecimal multiplicand = BigDecimal.ONE.divide(BigDecimal.valueOf(daysInYear), MathContext.DECIMAL64);
+                final BigDecimal dailyInterestRate = interestRateAsFraction.multiply(multiplicand, MathContext.DECIMAL64);
+                final BigDecimal periodicInterestRate = dailyInterestRate.multiply(BigDecimal.valueOf(this.numberOfDays),
+                        MathContext.DECIMAL64);
+                interest = realBalanceForInterestCalculation.multiply(periodicInterestRate, MathContext.DECIMAL64).setScale(9,
+                        MoneyHelper.getRoundingMode());
+            }
+        } else {//entro en el acrrual de validacion
+            //
+            if (realBalanceForInterestCalculation.compareTo(minOverdraftForInterestCalculation.negate()) < 0) {
+                final BigDecimal balanceConvertPositive = realBalanceForInterestCalculation.abs();
+                final BigDecimal porcentaje = overdraftInterestRateAsFraction.divide(BigDecimal.valueOf(100));
+                final BigDecimal forDaysInYear = porcentaje.divide(BigDecimal.valueOf(daysInYear), MathContext.DECIMAL64);
+                final BigDecimal fordays = forDaysInYear.multiply(BigDecimal.valueOf(this.numberOfDays==0? 1 : this.numberOfDays));
+
+                final BigDecimal calculationInteresNegative = fordays.multiply(balanceConvertPositive);
+
+                interest = calculationInteresNegative.setScale(9, MoneyHelper.getRoundingMode());
+
             }
         }
         return interest;
