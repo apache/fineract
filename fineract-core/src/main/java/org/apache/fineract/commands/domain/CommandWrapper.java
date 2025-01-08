@@ -251,16 +251,8 @@ public class CommandWrapper {
         return this.entityName.equalsIgnoreCase("INTEREST_PAUSE");
     }
 
-    public boolean isInterestPauseCreateResource() {
-        return this.entityName.equalsIgnoreCase("INTEREST_PAUSE") && "CREATE".equalsIgnoreCase(this.actionName);
-    }
-
-    public boolean isInterestPauseUpdateResource() {
-        return this.entityName.equalsIgnoreCase("INTEREST_PAUSE") && "UPDATE".equalsIgnoreCase(this.actionName);
-    }
-
-    public boolean isInterestPauseDeleteResource() {
-        return this.entityName.equalsIgnoreCase("INTEREST_PAUSE") && "DELETE".equalsIgnoreCase(this.actionName);
+    public boolean isInterestPauseExternalIdResource() {
+        return this.entityName.equalsIgnoreCase("INTEREST_PAUSE") && this.href.contains("/external-id/");
     }
 
     public Long commandId() {
