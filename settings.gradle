@@ -18,7 +18,7 @@
  */
 
 plugins {
-    id 'com.gradle.develocity' version '3.17.6'
+    id 'com.gradle.develocity' version '3.18.2'
     id 'com.gradle.common-custom-user-data-gradle-plugin' version '2.0.2'
 }
 
@@ -26,7 +26,7 @@ def isCI = System.getenv('JENKINS_URL') != null
 
 develocity {
     projectId = "fineract"
-    server = "https://ge.apache.org"
+    server = "https://develocity.apache.org"
     buildScan {
         uploadInBackground = !isCI
         publishing.onlyIf { it.authenticated }
