@@ -48,4 +48,37 @@
             </column>
         </addColumn>
     </changeSet>
+    <!-- Columns were created with wrong data type, this below fix them! -->
+    <changeSet id="2" author="fineract" failOnError="false">
+        <dropColumn tableName="m_loan_term_variations" columnName="created_by"/>
+        <dropColumn tableName="m_loan_term_variations" columnName="created_on_date"/>
+        <dropColumn tableName="m_loan_term_variations" columnName="updated_by"/>
+        <dropColumn tableName="m_loan_term_variations" columnName="updated_on_date"/>
+    </changeSet>
+    <changeSet author="fineract" id="3" context="mysql">
+        <addColumn tableName="m_loan_term_variations">
+            <column name="created_on_utc" type="DATETIME"/>
+            <column name="created_by" type="BIGINT"/>
+            <column name="last_modified_by" type="BIGINT"/>
+            <column name="last_modified_on_utc" type="DATETIME"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="fineract" id="4" context="postgresql">
+        <addColumn tableName="m_loan_term_variations">
+            <column name="created_on_utc" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="created_by" type="BIGINT"/>
+            <column name="last_modified_by" type="BIGINT"/>
+            <column name="last_modified_on_utc" type="TIMESTAMP WITH TIME ZONE"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="fineract" id="5">
+        <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_loan_term_variations"
+                                 constraintName="FK_loan_term_variations_created_by" deferrable="false" initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="m_appuser" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_loan_term_variations"
+                                 constraintName="FK_loan_term_variations_last_modified_by" deferrable="false" initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="m_appuser" validate="true"/>
+    </changeSet>
 </databaseChangeLog>

@@ -23,7 +23,6 @@ import static org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariation
 import static org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType.PROGRESSIVE;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -41,13 +40,11 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanTermVariationsRepository;
-import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.transaction.annotation.Transactional;
 
 @AllArgsConstructor
@@ -110,10 +107,6 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
         variation.setTermApplicableFrom(startDate);
         variation.setDateValue(endDate);
 
-        AppUser currentUser = context.authenticatedUser();
-        variation.setUpdatedBy(currentUser != null ? currentUser.getId() : null);
-        variation.setUpdatedOnDate(LocalDateTime.now(DateUtils.getDateTimeZoneOfTenant()));
-
         LoanTermVariations updatedVariation = loanTermVariationsRepository.save(variation);
 
         return new CommandProcessingResultBuilder().withEntityId(updatedVariation.getId())
@@ -127,10 +120,6 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
         validateInterestPauseDates(loan, startDate, endDate, dateFormat, locale);
 
         LoanTermVariations variation = new LoanTermVariations(INTEREST_PAUSE.getValue(), startDate, null, endDate, false, loan);
-
-        AppUser currentUser = context.authenticatedUser();
-        variation.setCreatedBy(currentUser != null ? currentUser.getId() : null);
-        variation.setCreatedOnDate(LocalDateTime.now(DateUtils.getDateTimeZoneOfTenant()));
 
         LoanTermVariations savedVariation = loanTermVariationsRepository.saveAndFlush(variation);
 
