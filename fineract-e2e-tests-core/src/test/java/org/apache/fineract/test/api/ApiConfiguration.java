@@ -29,6 +29,7 @@ import org.apache.fineract.client.services.CurrencyApi;
 import org.apache.fineract.client.services.DataTablesApi;
 import org.apache.fineract.client.services.DefaultApi;
 import org.apache.fineract.client.services.DelinquencyRangeAndBucketsManagementApi;
+import org.apache.fineract.client.services.ExternalAssetOwnerLoanProductAttributesApi;
 import org.apache.fineract.client.services.ExternalAssetOwnersApi;
 import org.apache.fineract.client.services.ExternalEventConfigurationApi;
 import org.apache.fineract.client.services.FundsApi;
@@ -212,6 +213,11 @@ public class ApiConfiguration {
     @Bean
     public ExternalAssetOwnersApi externalAssetOwnersApi() {
         return fineractClient.createService(ExternalAssetOwnersApi.class);
+    }
+
+    @Bean
+    public ExternalAssetOwnerLoanProductAttributesApi externalAssetOwnerLoanProductAttributesApi() {
+        return fineractClient.createService(ExternalAssetOwnerLoanProductAttributesApi.class);
     }
 
     @Bean

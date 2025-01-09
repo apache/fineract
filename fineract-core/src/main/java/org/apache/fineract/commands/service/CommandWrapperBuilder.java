@@ -3644,6 +3644,23 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder createExternalAssetOwnerLoanProductAttribute(final Long loanProductId) {
+        this.actionName = "CREATE";
+        this.entityName = "EXTERNAL_ASSET_OWNER_LOAN_PRODUCT_ATTRIBUTE";
+        this.productId = loanProductId;
+        this.href = "/external-asset-owners/loan-product/" + loanProductId + "/attributes";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateExternalAssetOwnerLoanProductAttribute(final Long loanProductId, final Long attributeId) {
+        this.actionName = "UPDATE";
+        this.entityName = "EXTERNAL_ASSET_OWNER_LOAN_PRODUCT_ATTRIBUTE";
+        this.productId = loanProductId;
+        this.entityId = attributeId;
+        this.href = "/external-asset-owners/loan-product/" + loanProductId + "/attributes/" + attributeId;
+        return this;
+    }
+
     public CommandWrapperBuilder saleLoanToExternalAssetOwner(final Long loanId) {
         this.actionName = "SALE";
         this.entityName = "LOAN";

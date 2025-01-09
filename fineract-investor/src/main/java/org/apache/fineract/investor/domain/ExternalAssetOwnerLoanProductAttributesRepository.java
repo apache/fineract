@@ -16,29 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanproduct.domain;
+package org.apache.fineract.investor.domain;
 
-import java.util.List;
-import org.apache.fineract.infrastructure.core.domain.ExternalId;
-import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface LoanProductRepository extends JpaRepository<LoanProduct, Long>, JpaSpecificationExecutor<LoanProduct> {
+public interface ExternalAssetOwnerLoanProductAttributesRepository extends JpaRepository<ExternalAssetOwnerLoanProductAttributes, Long>,
+        JpaSpecificationExecutor<ExternalAssetOwnerLoanProductAttributes> {
 
-    @Query("select loanProduct from LoanProduct loanProduct, IN(loanProduct.charges) charge where charge.id = :chargeId")
-    List<LoanProduct> retrieveLoanProductsByChargeId(@Param("chargeId") Long chargeId);
-
-    Long countByDelinquencyBucket(DelinquencyBucket delinquencyBucket);
-
-    List<LoanProduct> findByDelinquencyBucketNotNull();
-
-    LoanProduct findByExternalId(ExternalId externalId);
-
-    @Override
-    @Query("SELECT CASE WHEN COUNT(loanProduct)>0 THEN TRUE ELSE FALSE END FROM LoanProduct loanProduct WHERE loanProduct.id = :loanProductId")
-    boolean existsById(@NotNull @Param("loanProductId") Long loanProductId);
+    @Query("SELECT CASE WHEN COUNT(attribute)>0 THEN TRUE ELSE FALSE END FROM ExternalAssetOwnerLoanProductAttributes attribute WHERE attribute.loanProductId =:loanProductId AND attribute.attributeKey =:attributeKey")
+    boolean existsByLoanProductIdAndKey(@Param("loanProductId") Long loanProductId, @Param("attributeKey") String attributeKey);
 }

@@ -610,6 +610,9 @@ configure(project.fineractJavaProjects) {
                 'com.google.truth:truth',
                 'com.google.truth.extensions:truth-java8-extension'
                 )
+
+        testCompileOnly 'org.projectlombok:lombok'
+        testAnnotationProcessor 'org.projectlombok:lombok'
     }
 
     test {
