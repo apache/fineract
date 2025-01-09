@@ -22,6 +22,7 @@ import com.google.common.base.Splitter;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.ReadContext;
 import java.util.ArrayList;
@@ -133,7 +134,7 @@ public class ResolutionHelper {
             // parameter
             for (Map.Entry<String, JsonElement> element : jsonRequestBody.entrySet()) {
                 final String key = element.getKey();
-                final JsonElement value = resolveDependentVariables(element, responseCtx);
+                final JsonElement value = resolveDependentVariables(element.getValue(), responseCtx);
                 jsonResultBody.add(key, value);
             }
             // Set the body after dependency resolution
@@ -162,20 +163,19 @@ public class ResolutionHelper {
         return request;
     }
 
-    private JsonElement resolveDependentVariables(final Map.Entry<String, JsonElement> entryElement, final ReadContext responseCtx) {
+    private JsonElement resolveDependentVariables(final JsonElement jsonElement, final ReadContext responseCtx) {
         JsonElement value;
-        final JsonElement element = entryElement.getValue();
-        if (element.isJsonObject()) {
-            final JsonObject jsObject = element.getAsJsonObject();
+        if (jsonElement.isJsonObject()) {
+            final JsonObject jsObject = jsonElement.getAsJsonObject();
             value = processJsonObject(jsObject, responseCtx);
-        } else if (element.isJsonArray()) {
-            final JsonArray jsElementArray = element.getAsJsonArray();
+        } else if (jsonElement.isJsonArray()) {
+            final JsonArray jsElementArray = jsonElement.getAsJsonArray();
             value = processJsonArray(jsElementArray, responseCtx);
-        } else if (element.isJsonNull()) {
+        } else if (jsonElement.isJsonNull()) {
             // No further processing of null values
-            value = element;
+            value = jsonElement;
         } else {
-            value = resolveDependentVariable(element, responseCtx);
+            value = processJsonPrimitive(jsonElement, responseCtx);
         }
         return value;
     }
@@ -183,9 +183,7 @@ public class ResolutionHelper {
     private JsonElement processJsonObject(final JsonObject jsObject, final ReadContext responseCtx) {
         JsonObject valueObj = new JsonObject();
         for (Map.Entry<String, JsonElement> element : jsObject.entrySet()) {
-            final String key = element.getKey();
-            final JsonElement value = resolveDependentVariable(element.getValue(), responseCtx);
-            valueObj.add(key, value);
+            valueObj.add(element.getKey(), resolveDependentVariables(element.getValue(), responseCtx));
         }
         return valueObj;
     }
@@ -193,21 +191,20 @@ public class ResolutionHelper {
     private JsonArray processJsonArray(final JsonArray elementArray, final ReadContext responseCtx) {
         JsonArray valueArr = new JsonArray();
         for (JsonElement element : elementArray) {
-            if (element.isJsonObject()) {
-                final JsonObject jsObject = element.getAsJsonObject();
-                valueArr.add(processJsonObject(jsObject, responseCtx));
-            }
+            valueArr.add(resolveDependentVariables(element, responseCtx));
         }
         return valueArr;
     }
 
-    private JsonElement resolveDependentVariable(final JsonElement element, final ReadContext responseCtx) {
+    private JsonElement processJsonPrimitive(final JsonElement element, final ReadContext responseCtx) {
         JsonElement value = element;
-        String paramVal = element.getAsString();
-        if (paramVal.contains("$.")) {
-            // Get the value of the parameter from parent response
-            final String resParamValue = responseCtx.read(paramVal).toString();
-            value = this.fromJsonHelper.parse(resParamValue);
+        if (element instanceof JsonPrimitive) {
+            String paramVal = element.getAsString();
+            if (paramVal.contains("$.")) {
+                // Get the value of the parameter from parent response
+                final String resParamValue = responseCtx.read(paramVal).toString();
+                value = this.fromJsonHelper.parse(resParamValue);
+            }
         }
         return value;
     }
