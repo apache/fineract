@@ -307,7 +307,13 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         Money diff = totalDisbursedAmount.plus(totalDueInterest, mc).minus(totalEMI, mc);
         Optional<RepaymentPeriod> findLastUnpaidRepaymentPeriod = scheduleModel.repaymentPeriods().stream().filter(rp -> !rp.isFullyPaid())
                 .reduce((first, second) -> second);
-        findLastUnpaidRepaymentPeriod.ifPresent(repaymentPeriod -> repaymentPeriod.setEmi(repaymentPeriod.getEmi().add(diff, mc)));
+        findLastUnpaidRepaymentPeriod.ifPresent(repaymentPeriod -> {
+            repaymentPeriod.setEmi(repaymentPeriod.getEmi().add(diff, mc));
+            if (repaymentPeriod.getEmi().isLessThanZero()) {
+                repaymentPeriod.setEmi(repaymentPeriod.getEmi().zero());
+                calculateLastUnpaidRepaymentPeriodEMI(scheduleModel);
+            }
+        });
     }
 
     private void calculateOutstandingBalance(ProgressiveLoanInterestScheduleModel scheduleModel) {
