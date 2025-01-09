@@ -20,7 +20,7 @@ version: "3.8"
 services:
   # Frontend service
   community-app:
-    image: openmf/web-app:latest
+    image: openmf/web-app:master
     container_name: mifos-web-app
     restart: always
     ports:

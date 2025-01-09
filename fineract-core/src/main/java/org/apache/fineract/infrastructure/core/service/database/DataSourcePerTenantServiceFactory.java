@@ -23,46 +23,40 @@ import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTen
 
 import com.zaxxer.hikari.HikariConfig;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.micrometer.core.instrument.MeterRegistry;
 import javax.sql.DataSource;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
+import org.apache.fineract.infrastructure.core.service.database.metrics.TenantConnectionPoolMetricsTrackerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 /**
- *
  * Factory class to get data source service based on the details stored in {@link FineractPlatformTenantConnection}
  * variable
- *
  */
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class DataSourcePerTenantServiceFactory {
 
     private final HikariConfig hikariConfig;
     private final FineractProperties fineractProperties;
     private final ApplicationContext context;
+    @Qualifier("hikariTenantDataSource")
     private final DataSource tenantDataSource;
     private final HikariDataSourceFactory hikariDataSourceFactory;
 
     private final DatabasePasswordEncryptor databasePasswordEncryptor;
-
-    public DataSourcePerTenantServiceFactory(@Qualifier("hikariTenantDataSource") DataSource tenantDataSource, HikariConfig hikariConfig,
-            FineractProperties fineractProperties, ApplicationContext context, HikariDataSourceFactory hikariDataSourceFactory,
-            DatabasePasswordEncryptor databasePasswordEncryptor) {
-        this.hikariConfig = hikariConfig;
-        this.fineractProperties = fineractProperties;
-        this.context = context;
-        this.tenantDataSource = tenantDataSource;
-        this.hikariDataSourceFactory = hikariDataSourceFactory;
-        this.databasePasswordEncryptor = databasePasswordEncryptor;
-    }
+    private final MeterRegistry meterRegistry;
 
     @SuppressFBWarnings(value = "SLF4J_SIGN_ONLY_FORMAT")
-    public DataSource createNewDataSourceFor(final FineractPlatformTenantConnection tenantConnection) {
+    public DataSource createNewDataSourceFor(FineractPlatformTenant tenant, FineractPlatformTenantConnection tenantConnection) {
         if (!databasePasswordEncryptor.isMasterPasswordHashValid(tenantConnection.getMasterPasswordHash())) {
             throw new IllegalArgumentException(
                     "Invalid master password on tenant connection %d.".formatted(tenantConnection.getConnectionId()));
@@ -103,6 +97,7 @@ public class DataSourcePerTenantServiceFactory {
 
         // https://github.com/brettwooldridge/HikariCP/wiki/MBean-(JMX)-Monitoring-and-Management
         config.setRegisterMbeans(true);
+        config.setMetricsTrackerFactory(new TenantConnectionPoolMetricsTrackerFactory(tenant.getTenantIdentifier(), meterRegistry));
 
         // https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
         // These are the properties for each Tenant DB; the same configuration
