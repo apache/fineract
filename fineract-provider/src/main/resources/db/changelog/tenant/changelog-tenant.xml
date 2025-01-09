@@ -181,4 +181,5 @@
     <include file="parts/0160_add_acc_product_mapping_product_id_index.xml" relativeToChangelogFile="true" />
     <include file="parts/0161_add_loan_external_id_to_commands.xml" relativeToChangelogFile="true" />
     <include file="parts/0162_add_additional_audit_fields_to_term_variations.xml" relativeToChangelogFile="true" />
+    <include file="parts/0163_transaction_summary_with_asset_owner_report_accrual_adj_merged_with_accrual.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
