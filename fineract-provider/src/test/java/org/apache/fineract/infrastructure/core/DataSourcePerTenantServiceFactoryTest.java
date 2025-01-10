@@ -29,9 +29,11 @@ import static org.mockito.Mockito.verify;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.Properties;
 import javax.sql.DataSource;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
@@ -112,6 +114,9 @@ public class DataSourcePerTenantServiceFactoryTest {
 
     @Mock
     private DatabasePasswordEncryptor databasePasswordEncryptor;
+
+    @Mock
+    private Optional<MeterRegistry> meterRegistry;
 
     @InjectMocks
     private DataSourcePerTenantServiceFactory underTest;
