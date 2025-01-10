@@ -24,6 +24,7 @@ import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTen
 import com.zaxxer.hikari.HikariConfig;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.micrometer.core.instrument.MeterRegistry;
+import java.util.Optional;
 import javax.sql.DataSource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +54,7 @@ public class DataSourcePerTenantServiceFactory {
     private final HikariDataSourceFactory hikariDataSourceFactory;
 
     private final DatabasePasswordEncryptor databasePasswordEncryptor;
-    private final MeterRegistry meterRegistry;
+    private final Optional<MeterRegistry> meterRegistry;
 
     @SuppressFBWarnings(value = "SLF4J_SIGN_ONLY_FORMAT")
     public DataSource createNewDataSourceFor(FineractPlatformTenant tenant, FineractPlatformTenantConnection tenantConnection) {
@@ -97,7 +98,9 @@ public class DataSourcePerTenantServiceFactory {
 
         // https://github.com/brettwooldridge/HikariCP/wiki/MBean-(JMX)-Monitoring-and-Management
         config.setRegisterMbeans(true);
-        config.setMetricsTrackerFactory(new TenantConnectionPoolMetricsTrackerFactory(tenant.getTenantIdentifier(), meterRegistry));
+        meterRegistry.ifPresent(registry -> {
+            config.setMetricsTrackerFactory(new TenantConnectionPoolMetricsTrackerFactory(tenant.getTenantIdentifier(), registry));
+        });
 
         // https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
         // These are the properties for each Tenant DB; the same configuration
