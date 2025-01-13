@@ -399,7 +399,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
                             if (MathUtil.isGreaterThanZero(interestEarnedToBePostedForPeriod)) {
                                 SavingsAccountTransaction accrualTransaction = SavingsAccountTransaction.accrual(account, account.office(),
                                         interestPostingTransactionDate, interestEarnedToBePostedForPeriod,
-                                        interestPostingPeriod.isUserPosting());
+                                        interestPostingPeriod.isUserPosting(), false);
                                 if (backdatedTxnsAllowedTill) {
                                     account.addTransactionToExisting(accrualTransaction);
                                 } else {
@@ -462,7 +462,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
                             log.info("TX2: {}", interestEarnedToBePostedForPeriod.getAmount());
                             SavingsAccountTransaction accrualTransaction = SavingsAccountTransaction.accrual(account, account.office(),
                                     interestPostingTransactionDate, interestEarnedToBePostedForPeriod,
-                                    interestPostingPeriod.isUserPosting());
+                                    interestPostingPeriod.isUserPosting(), false);
                             if (backdatedTxnsAllowedTill) {
                                 account.addTransactionToExisting(accrualTransaction);
                             } else {

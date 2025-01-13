@@ -88,6 +88,9 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
         for (final PostingPeriod interestPostingPeriod : postingPeriods) {
             final LocalDate interestPostingTransactionDate = interestPostingPeriod.dateOfPostingTransaction();
             final Money interestEarnedToBePostedForPeriod = interestPostingPeriod.getInterestEarned();
+            final Boolean isNegativeBalance2 = MathUtil.isLessThanZero(interestPostingPeriod.getClosingBalance());
+            final Boolean isNegativeBalance = MathUtil.isLessThanZero(interestPostingPeriod.getInterestEarned());
+
 
             if (!DateUtils.isAfter(interestPostingTransactionDate, interestPostingUpToDate)) {
                 interestPostedToDate = interestPostedToDate.plus(interestEarnedToBePostedForPeriod);
@@ -102,7 +105,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                     } else {
                         newPostingTransaction = SavingsAccountTransactionData.overdraftInterest(savingsAccountData,
                                 interestPostingTransactionDate, interestEarnedToBePostedForPeriod.negated(),
-                                interestPostingPeriod.isUserPosting());
+                                interestPostingPeriod.isUserPosting(), isNegativeBalance);
                     }
 
                     savingsAccountData.updateTransactions(newPostingTransaction);
@@ -141,7 +144,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                         } else {
                             newPostingTransaction = SavingsAccountTransactionData.overdraftInterest(savingsAccountData,
                                     interestPostingTransactionDate, interestEarnedToBePostedForPeriod.negated(),
-                                    interestPostingPeriod.isUserPosting());
+                                    interestPostingPeriod.isUserPosting(), isNegativeBalance);
                         }
 
                         savingsAccountData.updateTransactions(newPostingTransaction);

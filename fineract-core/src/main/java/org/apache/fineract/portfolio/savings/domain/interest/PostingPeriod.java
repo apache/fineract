@@ -562,4 +562,7 @@ public final class PostingPeriod {
         return compoundingPeriods;
     }
 
+    public Money getClosingBalance() {
+        return closingBalance;
+    }
 }

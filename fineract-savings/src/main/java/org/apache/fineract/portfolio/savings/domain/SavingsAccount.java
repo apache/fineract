@@ -3250,7 +3250,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         if (isPeriodicAccrualAccounting()) {
             if (isChargeToBeRecognizedAsAccrual(savingsAccountCharge)) {
                 savingsAccountAccrualTransaction = SavingsAccountTransaction.accrual(this, office(), transactionDate,
-                        savingsAccountCharge.getAmount(getCurrency()), false);
+                        savingsAccountCharge.getAmount(getCurrency()), false, false);
             }
         }
         return savingsAccountAccrualTransaction;

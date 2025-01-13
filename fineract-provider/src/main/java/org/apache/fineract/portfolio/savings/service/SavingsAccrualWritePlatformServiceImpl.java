@@ -146,7 +146,7 @@ public class SavingsAccrualWritePlatformServiceImpl implements SavingsAccrualWri
         final MonetaryCurrency currency = savingsAccount.getCurrency();
         final Money chargeAmount = savingsAccountCharge.getAmount(currency);
         SavingsAccountTransaction savingsAccountTransaction = SavingsAccountTransaction.accrual(savingsAccount, savingsAccount.office(),
-                transactionDate, chargeAmount, false);
+                transactionDate, chargeAmount, false, false);
         final SavingsAccountChargePaidBy chargePaidBy = SavingsAccountChargePaidBy.instance(savingsAccountTransaction, savingsAccountCharge,
                 savingsAccountTransaction.getAmount(currency).getAmount());
         savingsAccountTransaction.getSavingsAccountChargesPaid().add(chargePaidBy);
@@ -222,7 +222,7 @@ public class SavingsAccrualWritePlatformServiceImpl implements SavingsAccrualWri
                         period.getInterestEarned());
                 if (!accrualTransactionDates.contains(period.getPeriodInterval().endDate())) {
                     SavingsAccountTransaction savingsAccountTransaction = SavingsAccountTransaction.accrual(savingsAccount,
-                            savingsAccount.office(), period.getPeriodInterval().endDate(), period.getInterestEarned(), false);
+                            savingsAccount.office(), period.getPeriodInterval().endDate(), period.getInterestEarned(), false, false);
                     savingsAccount.addTransaction(savingsAccountTransaction);
                 }
             }else {
@@ -235,7 +235,7 @@ public class SavingsAccrualWritePlatformServiceImpl implements SavingsAccrualWri
                         period.getInterestEarned());
                 if (!accrualTransactionDates.contains(period.getPeriodInterval().endDate())) {
                     SavingsAccountTransaction savingsAccountTransaction = SavingsAccountTransaction.accrual(savingsAccount,
-                            savingsAccount.office(), period.getPeriodInterval().endDate(), period.getInterestEarned(), false);
+                            savingsAccount.office(), period.getPeriodInterval().endDate(), period.getInterestEarned(), false, true);
                     savingsAccount.addTransaction(savingsAccountTransaction);
                 }
             }
