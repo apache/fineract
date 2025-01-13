@@ -40,7 +40,7 @@ public interface SavingsAccountDomainService {
             boolean backdatedTxnsAllowedTill);
 
     void postJournalEntries(SavingsAccount savingsAccount, Set<Long> existingTransactionIds, Set<Long> existingReversedTransactionIds,
-            boolean backdatedTxnsAllowedTill);
+            boolean backdatedTxnsAllowedTill,  boolean isNegativeBalance);
 
     SavingsAccountTransaction handleDividendPayout(SavingsAccount account, LocalDate transactionDate, BigDecimal transactionAmount,
             boolean backdatedTxnsAllowedTill);

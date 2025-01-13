@@ -258,20 +258,21 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
     }
 
     private void postJournalEntries(final SavingsAccount savingsAccount, final Set<Long> existingTransactionIds,
-            final Set<Long> existingReversedTransactionIds, boolean isAccountTransfer, final boolean backdatedTxnsAllowedTill) {
+            final Set<Long> existingReversedTransactionIds, boolean isAccountTransfer, final boolean backdatedTxnsAllowedTill, final boolean isNegativeBalance) {
 
         final Map<String, Object> accountingBridgeData = savingsAccount.deriveAccountingBridgeData(savingsAccount.getCurrency().getCode(),
                 existingTransactionIds, existingReversedTransactionIds, isAccountTransfer, backdatedTxnsAllowedTill);
+        accountingBridgeData.put("isNegativeBalance", isNegativeBalance);
         this.journalEntryWritePlatformService.createJournalEntriesForSavings(accountingBridgeData);
     }
 
     @Transactional
     @Override
     public void postJournalEntries(final SavingsAccount account, final Set<Long> existingTransactionIds,
-            final Set<Long> existingReversedTransactionIds, final boolean backdatedTxnsAllowedTill) {
+                                   final Set<Long> existingReversedTransactionIds, final boolean backdatedTxnsAllowedTill, boolean isNegativeBalance) {
 
         final boolean isAccountTransfer = false;
-        postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer, backdatedTxnsAllowedTill);
+        postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer, backdatedTxnsAllowedTill, isNegativeBalance);
     }
 
     @Override
@@ -398,7 +399,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
                             if (MathUtil.isGreaterThanZero(interestEarnedToBePostedForPeriod)) {
                                 SavingsAccountTransaction accrualTransaction = SavingsAccountTransaction.accrual(account, account.office(),
                                         interestPostingTransactionDate, interestEarnedToBePostedForPeriod,
-                                        interestPostingPeriod.isUserPosting());
+                                        interestPostingPeriod.isUserPosting(), false);
                                 if (backdatedTxnsAllowedTill) {
                                     account.addTransactionToExisting(accrualTransaction);
                                 } else {
@@ -461,7 +462,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
                             log.info("TX2: {}", interestEarnedToBePostedForPeriod.getAmount());
                             SavingsAccountTransaction accrualTransaction = SavingsAccountTransaction.accrual(account, account.office(),
                                     interestPostingTransactionDate, interestEarnedToBePostedForPeriod,
-                                    interestPostingPeriod.isUserPosting());
+                                    interestPostingPeriod.isUserPosting(), false);
                             if (backdatedTxnsAllowedTill) {
                                 account.addTransactionToExisting(accrualTransaction);
                             } else {
@@ -574,7 +575,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         account.activateAccountBasedOnBalance();
         savingsAccountRepository.saveAndFlush(account);
 
-        postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, false);
+        postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, false, false);
     }
 
     private void throwValidationExceptionForActiveStatus(final String actionName) {

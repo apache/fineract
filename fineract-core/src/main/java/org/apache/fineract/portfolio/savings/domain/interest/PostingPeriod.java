@@ -66,13 +66,23 @@ public final class PostingPeriod {
 
     private Integer financialYearBeginningMonth;
 
+    private Boolean isAcrual = false;
+
+    public void setAcrual(Boolean acrual) {
+        isAcrual = acrual;
+    }
+
+    public void setOverdraftInterestRateAsFraction(BigDecimal overdraftInterestRateAsFraction) {
+        this.overdraftInterestRateAsFraction = overdraftInterestRateAsFraction;
+    }
+
     public static PostingPeriod createFrom(final LocalDateInterval periodInterval, final Money periodStartingBalance,
-            final List<SavingsAccountTransactionDetailsForPostingPeriod> orderedListOfTransactions, final MonetaryCurrency currency,
-            final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
-            final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear,
-            final LocalDate upToInterestCalculationDate, Collection<Long> interestPostTransactions, boolean isInterestTransfer,
-            final Money minBalanceForInterestCalculation, final boolean isSavingsInterestPostingAtCurrentPeriodEnd,
-            final boolean isUserPosting, Integer financialYearBeginningMonth) {
+                                           final List<SavingsAccountTransactionDetailsForPostingPeriod> orderedListOfTransactions, final MonetaryCurrency currency,
+                                           final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
+                                           final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear,
+                                           final LocalDate upToInterestCalculationDate, Collection<Long> interestPostTransactions, boolean isInterestTransfer,
+                                           final Money minBalanceForInterestCalculation, final boolean isSavingsInterestPostingAtCurrentPeriodEnd,
+                                           final boolean isUserPosting, Integer financialYearBeginningMonth) {
 
         final BigDecimal overdraftInterestRateAsFraction = BigDecimal.ZERO;
         final Money minOverdraftForInterestCalculation = Money.zero(currency);
@@ -176,7 +186,7 @@ public final class PostingPeriod {
 
             if (transaction.fallsWithin(periodInterval)) {
                 // the balance of the transaction falls entirely within this
-                // period so no need to do any cropping/bounding
+                // period so no need to do any cropping/bounding //ENTRA CUANDO SON POSITIVOS AQUI
                 final EndOfDayBalance endOfDayBalance = transaction.toEndOfDayBalance(openingDayBalance);
                 accountEndOfDayBalances.add(endOfDayBalance);
 
@@ -284,10 +294,11 @@ public final class PostingPeriod {
         // to be applied to the balanced for interest calculation
         for (final CompoundingPeriod compoundingPeriod : this.compoundingPeriods) {
 
+            boolean isAcrual = this.isAcrual;
             final BigDecimal interestUnrounded = compoundingPeriod.calculateInterest(this.interestCompoundingType,
                     this.interestCalculationType, compoundInterestValues.getcompoundedInterest(), this.interestRateAsFraction,
                     this.daysInYear, this.minBalanceForInterestCalculation.getAmount(), this.overdraftInterestRateAsFraction,
-                    this.minOverdraftForInterestCalculation.getAmount());
+                    this.minOverdraftForInterestCalculation.getAmount(), isAcrual);
             BigDecimal unCompoundedInterest = compoundInterestValues.getuncompoundedInterest().add(interestUnrounded);
             compoundInterestValues.setuncompoundedInterest(unCompoundedInterest);
             LocalDate compoundingPeriodEndDate = compoundingPeriod.getPeriodInterval().endDate();
@@ -551,4 +562,7 @@ public final class PostingPeriod {
         return compoundingPeriods;
     }
 
+    public Money getClosingBalance() {
+        return closingBalance;
+    }
 }

@@ -108,13 +108,14 @@ public class SavingsSchedularInterestPoster {
             for (SavingsAccountTransactionData savingsAccountTransactionData : savingsAccountTransactionDataList) {
                 if (savingsAccountTransactionData.getId() == null) {
                     final String key = savingsAccountTransactionData.getRefNo();
+                    final Boolean isNegativeBalance = savingsAccountTransactionData.getIsNegativeBalance();
                     if (savingsAccountTransactionDataHashMap.containsKey(key)) {
                         final SavingsAccountTransactionData dataFromFetch = savingsAccountTransactionDataHashMap.get(key);
                         savingsAccountTransactionData.setId(dataFromFetch.getId());
                         if (savingsAccountData.getGlAccountIdForSavingsControl() != 0
                                 && savingsAccountData.getGlAccountIdForInterestOnSavings() != 0) {
                             OffsetDateTime auditDatetime = DateUtils.getAuditOffsetDateTime();
-                            paramsForGLInsertion.add(new Object[] { savingsAccountData.getGlAccountIdForSavingsControl(),
+                            paramsForGLInsertion.add(new Object[] { isNegativeBalance ? 5 :savingsAccountData.getGlAccountIdForSavingsControl(),
                                     savingsAccountData.getOfficeId(), null, currencyCode,
                                     SAVINGS_TRANSACTION_IDENTIFIER + savingsAccountTransactionData.getId().toString(),
                                     savingsAccountTransactionData.getId(), null, false, null, false,
@@ -124,7 +125,7 @@ public class SavingsSchedularInterestPoster {
                                     savingsAccountTransactionData.getTransactionDate(), null, userId, userId,
                                     DateUtils.getBusinessLocalDate() });
 
-                            paramsForGLInsertion.add(new Object[] { savingsAccountData.getGlAccountIdForInterestOnSavings(),
+                            paramsForGLInsertion.add(new Object[] { isNegativeBalance ? 2 : savingsAccountData.getGlAccountIdForInterestOnSavings(),
                                     savingsAccountData.getOfficeId(), null, currencyCode,
                                     SAVINGS_TRANSACTION_IDENTIFIER + savingsAccountTransactionData.getId().toString(),
                                     savingsAccountTransactionData.getId(), null, false, null, false,

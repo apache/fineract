@@ -46,6 +46,7 @@ public class SavingsTransactionDTO {
     private final BigDecimal overdraftAmount;
     private final boolean isAccountTransfer;
     private final List<TaxPaymentDTO> taxPayments;
+    private final Boolean isNegativeBalance;
 
     public boolean isOverdraftTransaction() {
         return this.overdraftAmount != null && this.overdraftAmount.doubleValue() > 0;
