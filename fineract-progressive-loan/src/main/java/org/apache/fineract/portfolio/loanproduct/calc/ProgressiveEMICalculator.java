@@ -309,8 +309,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 .reduce((first, second) -> second);
         findLastUnpaidRepaymentPeriod.ifPresent(repaymentPeriod -> {
             repaymentPeriod.setEmi(repaymentPeriod.getEmi().add(diff, mc));
-            if (repaymentPeriod.getEmi().isLessThanZero()) {
-                repaymentPeriod.setEmi(repaymentPeriod.getEmi().zero());
+            if (repaymentPeriod.getEmi().isLessThan(repaymentPeriod.getTotalPaidAmount())) {
+                repaymentPeriod.setEmi(repaymentPeriod.getTotalPaidAmount());
                 calculateLastUnpaidRepaymentPeriodEMI(scheduleModel);
             }
         });

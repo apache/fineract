@@ -30,6 +30,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
@@ -125,6 +126,120 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
             logLoanTransactions(loanId);
             verifyTransactions(loanId, transaction(1000.0, "Disbursement", "01 January 2021"),
                     transaction(1000.0, "Merchant Issued Refund", "22 January 2021"));
+        });
+    }
+
+    @Test
+    public void verifyFullMerchantIssuedRefundWithReAmortizationOnDay0HighInterest6month() {
+        runAt("1 January 2021", () -> {
+            PostLoanProductsResponse loanProduct = loanProductHelper
+                    .createLoanProduct(create4IProgressive().daysInMonthType(DaysInMonthType.ACTUAL) //
+                            .daysInYearType(DaysInYearType.ACTUAL) //
+                            .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
+                            .paymentAllocation(List.of(createDefaultPaymentAllocation("REAMORTIZATION")))//
+                            .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
+            );
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 600.0, 60.0,
+                    6, null);
+            Assertions.assertNotNull(loanId);
+            disburseLoan(loanId, BigDecimal.valueOf(600), "1 January 2021");
+            PostLoansLoanIdTransactionsResponse postLoansLoanIdTransactionsResponse = loanTransactionHelper
+                    .makeLoanRepayment("MerchantIssuedRefund", "1 January 2021", 600F, loanId.intValue());
+            Assertions.assertNotNull(postLoansLoanIdTransactionsResponse);
+            Assertions.assertNotNull(postLoansLoanIdTransactionsResponse.getResourceId());
+
+            verifyTransactions(loanId, transaction(600.0, "Disbursement", "01 January 2021"), //
+                    transaction(600.0, "Merchant Issued Refund", "01 January 2021") //
+            );
+            verifyRepaymentSchedule(loanId, installment(600.0, null, "01 January 2021"), //
+                    fullyRepaidInstallment(100.0, 0.0, "01 February 2021"), //
+                    fullyRepaidInstallment(100.0, 0.0, "01 March 2021"), //
+                    fullyRepaidInstallment(100.0, 0.0, "01 April 2021"), //
+                    fullyRepaidInstallment(100.0, 0.0, "01 May 2021"), //
+                    fullyRepaidInstallment(100.0, 0.0, "01 June 2021"), //
+                    fullyRepaidInstallment(100.0, 0.0, "01 July 2021") //
+            );
+        });
+    }
+
+    @Test
+    public void verifyAlmostFullMerchantIssuedRefundWithReAmortizationOnDay0HighInterest12month() {
+        runAt("1 January 2021", () -> {
+            PostLoanProductsResponse loanProduct = loanProductHelper
+                    .createLoanProduct(create4IProgressive().daysInMonthType(DaysInMonthType.ACTUAL) //
+                            .daysInYearType(DaysInYearType.ACTUAL) //
+                            .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
+                            .paymentAllocation(List.of(createDefaultPaymentAllocation("REAMORTIZATION")))//
+                            .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
+            );
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 26.0,
+                    12, null);
+            Assertions.assertNotNull(loanId);
+            disburseLoan(loanId, BigDecimal.valueOf(1000), "1 January 2021");
+
+            PostLoansLoanIdTransactionsResponse postLoansLoanIdTransactionsResponse = loanTransactionHelper
+                    .makeLoanRepayment("MerchantIssuedRefund", "1 January 2021", 980F, loanId.intValue());
+            Assertions.assertNotNull(postLoansLoanIdTransactionsResponse);
+            Assertions.assertNotNull(postLoansLoanIdTransactionsResponse.getResourceId());
+
+            verifyTransactions(loanId, transaction(1000.0, "Disbursement", "01 January 2021"), //
+                    transaction(980.0, "Merchant Issued Refund", "01 January 2021") //
+            );
+
+            verifyRepaymentSchedule(loanId, installment(1000.0, null, "01 January 2021"), //
+                    installment(95.04, 0.44, 13.81, false, "01 February 2021"), //
+                    installment(88.30, 0.13, 6.76, false, "01 March 2021"), //
+                    fullyRepaidInstallment(81.67, 0.0, "01 April 2021"), //
+                    fullyRepaidInstallment(81.67, 0.0, "01 May 2021"), //
+                    fullyRepaidInstallment(81.67, 0.0, "01 June 2021"), //
+                    fullyRepaidInstallment(81.67, 0.0, "01 July 2021"), //
+                    fullyRepaidInstallment(81.67, 0.0, "01 August 2021"), //
+                    fullyRepaidInstallment(81.67, 0.0, "01 September 2021"), //
+                    fullyRepaidInstallment(81.67, 0.0, "01 October 2021"), //
+                    fullyRepaidInstallment(81.67, 0.0, "01 November 2021"), //
+                    fullyRepaidInstallment(81.67, 0.0, "01 December 2021"), //
+                    fullyRepaidInstallment(81.63, 0.0, "01 January 2022") //
+            );
+        });
+    }
+
+    @Test
+    public void verifyFullMerchantIssuedRefundWithReAmortizationOnDay0HighInterest12month() {
+        runAt("1 January 2021", () -> {
+            PostLoanProductsResponse loanProduct = loanProductHelper
+                    .createLoanProduct(create4IProgressive().daysInMonthType(DaysInMonthType.ACTUAL) //
+                            .daysInYearType(DaysInYearType.ACTUAL) //
+                            .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
+                            .paymentAllocation(List.of(createDefaultPaymentAllocation("REAMORTIZATION")))//
+                            .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
+            );
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 26.0,
+                    12, null);
+            Assertions.assertNotNull(loanId);
+            disburseLoan(loanId, BigDecimal.valueOf(1000), "1 January 2021");
+
+            PostLoansLoanIdTransactionsResponse postLoansLoanIdTransactionsResponse = loanTransactionHelper
+                    .makeLoanRepayment("MerchantIssuedRefund", "1 January 2021", 1000F, loanId.intValue());
+            Assertions.assertNotNull(postLoansLoanIdTransactionsResponse);
+            Assertions.assertNotNull(postLoansLoanIdTransactionsResponse.getResourceId());
+
+            verifyTransactions(loanId, transaction(1000.0, "Disbursement", "01 January 2021"), //
+                    transaction(1000.0, "Merchant Issued Refund", "01 January 2021") //
+            );
+            verifyRepaymentSchedule(loanId, installment(1000.0, null, "01 January 2021"), //
+                    fullyRepaidInstallment(83.33, 0.0, "01 February 2021"), //
+                    fullyRepaidInstallment(83.33, 0.0, "01 March 2021"), //
+                    fullyRepaidInstallment(83.33, 0.0, "01 April 2021"), //
+                    fullyRepaidInstallment(83.33, 0.0, "01 May 2021"), //
+                    fullyRepaidInstallment(83.33, 0.0, "01 June 2021"), //
+                    fullyRepaidInstallment(83.33, 0.0, "01 July 2021"), //
+                    fullyRepaidInstallment(83.33, 0.0, "01 August 2021"), //
+                    fullyRepaidInstallment(83.33, 0.0, "01 September 2021"), //
+                    fullyRepaidInstallment(83.33, 0.0, "01 October 2021"), //
+                    fullyRepaidInstallment(83.33, 0.0, "01 November 2021"), //
+                    fullyRepaidInstallment(83.33, 0.0, "01 December 2021"), //
+                    fullyRepaidInstallment(83.37, 0.0, "01 January 2022") //
+            );
         });
     }
 
