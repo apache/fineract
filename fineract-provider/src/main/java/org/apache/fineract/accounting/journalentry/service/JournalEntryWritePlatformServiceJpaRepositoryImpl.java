@@ -479,7 +479,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
         final boolean cashBasedAccountingEnabled = (Boolean) accountingBridgeData.get("cashBasedAccountingEnabled");
         final boolean accrualBasedAccountingEnabled = (Boolean) accountingBridgeData.get("accrualBasedAccountingEnabled");
-        final boolean isNegativeBalance = (Boolean) accountingBridgeData.get("isNegativeBalance");
+        final boolean isNegativeBalance = (accountingBridgeData.get("isNegativeBalance") != null) ? (Boolean) accountingBridgeData.get("isNegativeBalance") : false;
 
         if (cashBasedAccountingEnabled || accrualBasedAccountingEnabled) {
             final SavingsDTO savingsDTO = this.helper.populateSavingsDtoFromMap(accountingBridgeData, cashBasedAccountingEnabled,
