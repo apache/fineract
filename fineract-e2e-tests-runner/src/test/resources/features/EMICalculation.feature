@@ -4115,10 +4115,10 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                 | 250.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
       |    |      | 04 January 2024  |                 | 750.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
-      | 1  | 31   | 01 February 2024 | 22 January 2024 | 750.09          | 249.91        | 5.07     | 0.0  | 0.0       | 254.98 | 254.98 | 254.98     | 0.0  | 0.0         |
-      | 2  | 29   | 01 March 2024    | 22 January 2024 | 495.11          | 254.98        | 0.0      | 0.0  | 0.0       | 254.98 | 254.98 | 254.98     | 0.0  | 0.0         |
-      | 3  | 31   | 01 April 2024    | 22 January 2024 | 240.13          | 254.98        | 0.0      | 0.0  | 0.0       | 254.98 | 254.98 | 254.98     | 0.0  | 0.0         |
-      | 4  | 30   | 01 May 2024      | 22 January 2024 | 0.0             | 240.13        | 0.0      | 0.0  | 0.0       | 240.13 | 240.13 | 240.13     | 0.0  | 0.0         |
+      | 1  | 31   | 01 February 2024 | 22 January 2024 | 750.08          | 249.92        | 5.07     | 0.0  | 0.0       | 254.99 | 254.99 | 254.99     | 0.0  | 0.0         |
+      | 2  | 29   | 01 March 2024    | 22 January 2024 | 495.09          | 254.99        | 0.0      | 0.0  | 0.0       | 254.99 | 254.99 | 254.99     | 0.0  | 0.0         |
+      | 3  | 31   | 01 April 2024    | 22 January 2024 | 240.1           | 254.99        | 0.0      | 0.0  | 0.0       | 254.99 | 254.99 | 254.99     | 0.0  | 0.0         |
+      | 4  | 30   | 01 May 2024      | 22 January 2024 | 0.0             | 240.1         | 0.0      | 0.0  | 0.0       | 240.1  | 240.1  | 240.1      | 0.0  | 0.0         |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid    | In advance | Late | Outstanding |
       | 1000.0        | 5.07     | 0.0  | 0.0       | 1005.07 | 1005.07 | 1005.07    | 0.0  | 0.0         |
