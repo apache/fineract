@@ -92,9 +92,9 @@ public class LoanAccrualActivityProcessingServiceImpl implements LoanAccrualActi
         if (!loan.getLoanProductRelatedDetail().isEnableAccrualActivityPosting()) {
             return;
         }
-        LocalDate date = loan.isOverPaid() ? loan.getOverpaidOnDate() : loan.getClosedOnDate();
+        LocalDate transactionDate = loan.isOverPaid() ? loan.getOverpaidOnDate() : loan.getClosedOnDate();
         // reverse after closure activities
-        loan.getLoanTransactions(t -> t.isAccrualActivity() && !t.isReversed() && t.getDateOf().isAfter(date))
+        loan.getLoanTransactions(t -> t.isAccrualActivity() && !t.isReversed() && t.getDateOf().isAfter(transactionDate))
                 .forEach(this::reverseAccrualActivityTransaction);
 
         // calculate activity amounts
@@ -107,25 +107,25 @@ public class LoanAccrualActivityProcessingServiceImpl implements LoanAccrualActi
             penaltyChargesPortion = MathUtil.add(penaltyChargesPortion, installment.getPenaltyCharges());
             interestPortion = MathUtil.add(interestPortion, installment.getInterestCharged());
         }
-        List<LoanTransaction> accrualActivities = loan.getLoanTransactions().stream().filter(LoanTransaction::isAccrualActivity)
-                .filter(LoanTransaction::isNotReversed).toList();
+        List<LoanTransaction> accrualActivities = loan.getLoanTransactions(t -> t.isAccrualActivity() && !t.isReversed());
         // subtract already posted activities
         for (LoanTransaction accrualActivity : accrualActivities) {
-            feeChargesPortion = MathUtil.subtract(feeChargesPortion, accrualActivity.getFeeChargesPortion());
-            penaltyChargesPortion = MathUtil.subtract(penaltyChargesPortion, accrualActivity.getPenaltyChargesPortion());
-            interestPortion = MathUtil.subtract(interestPortion, accrualActivity.getInterestPortion());
+            if (MathUtil.isLessThan(feeChargesPortion, accrualActivity.getFeeChargesPortion())
+                    || MathUtil.isLessThan(penaltyChargesPortion, accrualActivity.getPenaltyChargesPortion())
+                    || MathUtil.isLessThan(interestPortion, accrualActivity.getInterestPortion())) {
+                reverseAccrualActivityTransaction(accrualActivity);
+            } else {
+                feeChargesPortion = MathUtil.subtract(feeChargesPortion, accrualActivity.getFeeChargesPortion());
+                penaltyChargesPortion = MathUtil.subtract(penaltyChargesPortion, accrualActivity.getPenaltyChargesPortion());
+                interestPortion = MathUtil.subtract(interestPortion, accrualActivity.getInterestPortion());
+            }
         }
         BigDecimal transactionAmount = MathUtil.add(feeChargesPortion, penaltyChargesPortion, interestPortion);
         if (!MathUtil.isGreaterThanZero(transactionAmount)) {
             return;
         }
-        if (MathUtil.isLessThanZero(feeChargesPortion) || MathUtil.isLessThanZero(penaltyChargesPortion)
-                || MathUtil.isLessThanZero(interestPortion)) {
-            // TODO reverse latest accrual activity if any amount is negative
-            return;
-        }
-        LoanTransaction newActivity = new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.ACCRUAL_ACTIVITY.getValue(), date,
-                transactionAmount, null, interestPortion, feeChargesPortion, penaltyChargesPortion, null, false, null,
+        LoanTransaction newActivity = new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.ACCRUAL_ACTIVITY.getValue(),
+                transactionDate, transactionAmount, null, interestPortion, feeChargesPortion, penaltyChargesPortion, null, false, null,
                 externalIdFactory.create());
         makeAccrualActivityTransaction(loan, newActivity);
     }
