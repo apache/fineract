@@ -84,7 +84,7 @@ public class ExternalEventService {
         List<BusinessEvent<?>> events = bulkBusinessEvent.get();
         for (int i = 0; i < events.size(); i++) {
             BusinessEvent<?> event = events.get(i);
-            int id = i + 1;
+            long id = (long) i + 1;
             BulkMessageItemV1 message = bulkMessageItemFactory.createBulkMessageItem(id, event);
             messages.add(message);
         }

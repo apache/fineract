@@ -144,7 +144,7 @@ class SendAsynchronousEventsTaskletTest {
                 createExternalEventView("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey", 1L),
                 createExternalEventView("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey", 1L));
         // Dummy Message
-        MessageV1 dummyMessage = new MessageV1(1, "aSource", "aType", "nocategory", "aCreateDate", "aBusinessDate", "aTenantId",
+        MessageV1 dummyMessage = new MessageV1(1L, "aSource", "aType", "nocategory", "aCreateDate", "aBusinessDate", "aTenantId",
                 "anidempotencyKey", "aSchema", Mockito.mock(ByteBuffer.class));
 
         when(repository.findByStatusOrderByBusinessDateAscIdAsc(Mockito.any(), Mockito.any())).thenReturn(events);
@@ -166,7 +166,7 @@ class SendAsynchronousEventsTaskletTest {
         List<ExternalEventView> events = Arrays.asList(
                 createExternalEventView("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey", 1L),
                 createExternalEventView("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey", 1L));
-        MessageV1 dummyMessage = new MessageV1(1, "aSource", "aType", "nocategory", "aCreateDate", "aBusinessDate", "aTenantId",
+        MessageV1 dummyMessage = new MessageV1(1L, "aSource", "aType", "nocategory", "aCreateDate", "aBusinessDate", "aTenantId",
                 "anidempotencyKey", "aSchema", Mockito.mock(ByteBuffer.class));
         when(repository.findByStatusOrderByBusinessDateAscIdAsc(Mockito.any(), Mockito.any())).thenReturn(events);
         when(messageFactory.createMessage(Mockito.any())).thenReturn(dummyMessage);
@@ -185,7 +185,7 @@ class SendAsynchronousEventsTaskletTest {
         // given
         List<ExternalEventView> events = Arrays
                 .asList(createExternalEventView("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey", 1L));
-        MessageV1 dummyMessage = new MessageV1(1, "aSource", "aType", "nocategory", "aCreateDate", "aBusinessDate", "aTenantId",
+        MessageV1 dummyMessage = new MessageV1(1L, "aSource", "aType", "nocategory", "aCreateDate", "aBusinessDate", "aTenantId",
                 "anidempotencyKey", "aSchema", Mockito.mock(ByteBuffer.class));
         when(repository.findByStatusOrderByBusinessDateAscIdAsc(Mockito.any(), Mockito.any())).thenReturn(events);
         when(messageFactory.createMessage(Mockito.any())).thenReturn(dummyMessage);
@@ -206,7 +206,7 @@ class SendAsynchronousEventsTaskletTest {
         // given
         List<ExternalEventView> events = Arrays
                 .asList(createExternalEventView("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey", null));
-        MessageV1 dummyMessage = new MessageV1(1, "aSource", "aType", "nocategory", "aCreateDate", "aBusinessDate", "aTenantId",
+        MessageV1 dummyMessage = new MessageV1(1L, "aSource", "aType", "nocategory", "aCreateDate", "aBusinessDate", "aTenantId",
                 "anidempotencyKey", "aSchema", Mockito.mock(ByteBuffer.class));
         when(repository.findByStatusOrderByBusinessDateAscIdAsc(Mockito.any(), Mockito.any())).thenReturn(events);
         when(messageFactory.createMessage(Mockito.any())).thenReturn(dummyMessage);

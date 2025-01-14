@@ -6,7 +6,7 @@
         {
             "name": "id",
             "doc": "The ID of the message to be sent",
-            "type": "int"
+            "type": "long"
         },
         {
             "name": "source",

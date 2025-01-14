@@ -180,7 +180,7 @@ class ExternalEventServiceTest {
 
         String idempotencyKey = "key";
         BusinessEvent event = mock(BusinessEvent.class);
-        BulkMessageItemV1 messageItem = new BulkMessageItemV1(1, "", "", "", ByteBuffer.wrap(new byte[0]));
+        BulkMessageItemV1 messageItem = new BulkMessageItemV1(1L, "", "", "", ByteBuffer.wrap(new byte[0]));
         BulkBusinessEvent bulkEvent = new BulkBusinessEvent(List.of(event));
         byte[] data = new byte[0];
 
