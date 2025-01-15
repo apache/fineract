@@ -889,7 +889,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                     transaction(171.29, "Repayment", "01 May 2021"), //
                     transaction(171.29, "Repayment", "01 June 2021"), //
                     transaction(171.32, "Repayment", "01 July 2021"), //
-                    transaction(27.77, "Accrual", "01 July 2021") //
+                    transaction(27.76, "Accrual", "01 July 2021") //
             ); //
         });
         runAt("11 July 2021", () -> {
@@ -909,8 +909,8 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                     transaction(171.29, "Repayment", "01 June 2021"), //
                     transaction(171.32, "Repayment", "01 July 2021"), //
                     transaction(500.0, "Payout Refund", "11 July 2021"), //
-                    transaction(20.41, "Interest Refund", "11 July 2021"), //
-                    transaction(27.77, "Accrual", "01 July 2021") //
+                    transaction(20.40, "Interest Refund", "11 July 2021"), //
+                    transaction(27.76, "Accrual", "01 July 2021") //
             ); //
         });
     }

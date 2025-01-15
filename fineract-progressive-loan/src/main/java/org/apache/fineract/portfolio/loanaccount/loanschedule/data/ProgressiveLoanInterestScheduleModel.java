@@ -26,9 +26,12 @@ import java.math.MathContext;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.TreeSet;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -62,7 +65,8 @@ public class ProgressiveLoanInterestScheduleModel {
             final LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail, final Integer installmentAmountInMultiplesOf,
             final MathContext mc) {
         this.mc = mc;
-        this.repaymentPeriods = copyRepaymentPeriods(repaymentPeriods);
+        this.repaymentPeriods = copyRepaymentPeriods(repaymentPeriods,
+                (previousPeriod, repaymentPeriod) -> new RepaymentPeriod(previousPeriod, repaymentPeriod, mc));
         this.interestRates = new TreeSet<>(interestRates);
         this.loanProductRelatedDetail = loanProductRelatedDetail;
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
@@ -74,11 +78,20 @@ public class ProgressiveLoanInterestScheduleModel {
                 installmentAmountInMultiplesOf, mc);
     }
 
-    private List<RepaymentPeriod> copyRepaymentPeriods(final List<RepaymentPeriod> repaymentPeriods) {
+    public ProgressiveLoanInterestScheduleModel emptyCopy() {
+        final List<RepaymentPeriod> repaymentPeriodCopies = copyRepaymentPeriods(repaymentPeriods,
+                (previousPeriod, repaymentPeriod) -> new RepaymentPeriod(previousPeriod, repaymentPeriod.getFromDate(),
+                        repaymentPeriod.getDueDate(), repaymentPeriod.getEmi().zero(), mc));
+        return new ProgressiveLoanInterestScheduleModel(repaymentPeriodCopies, interestRates, loanProductRelatedDetail,
+                installmentAmountInMultiplesOf, mc);
+    }
+
+    private List<RepaymentPeriod> copyRepaymentPeriods(final List<RepaymentPeriod> repaymentPeriods,
+            final BiFunction<RepaymentPeriod, RepaymentPeriod, RepaymentPeriod> repaymentCopyFunction) {
         final List<RepaymentPeriod> repaymentCopies = new ArrayList<>(repaymentPeriods.size());
         RepaymentPeriod previousPeriod = null;
         for (RepaymentPeriod repaymentPeriod : repaymentPeriods) {
-            RepaymentPeriod currentPeriod = new RepaymentPeriod(previousPeriod, repaymentPeriod, mc);
+            RepaymentPeriod currentPeriod = repaymentCopyFunction.apply(previousPeriod, repaymentPeriod);
             previousPeriod = currentPeriod;
             repaymentCopies.add(currentPeriod);
         }
@@ -228,5 +241,41 @@ public class ProgressiveLoanInterestScheduleModel {
         return repaymentPeriods.stream() //
                 .filter(period -> isInPeriod(transactionDate, period.getFromDate(), period.getDueDate(), period.isFirstRepaymentPeriod()))//
                 .findFirst();
+    }
+
+    public boolean isEmpty() {
+        return repaymentPeriods.stream() //
+                .filter(rp -> !rp.getEmi().isZero()) //
+                .findFirst() //
+                .isEmpty(); //
+    }
+
+    /**
+     * This method gives you repayment pairs to copy attributes.
+     *
+     * @param periodFromDueDate
+     *            Copy from this due periods.
+     * @param copyFromPeriods
+     *            Copy source
+     * @param copyConsumer
+     *            Consumer to copy attributes. Params: (from, to)
+     */
+    public void copyPeriodsFrom(final LocalDate periodFromDueDate, List<RepaymentPeriod> copyFromPeriods,
+            BiConsumer<RepaymentPeriod, RepaymentPeriod> copyConsumer) {
+        if (copyFromPeriods.isEmpty()) {
+            return;
+        }
+        final Iterator<RepaymentPeriod> actualIterator = repaymentPeriods.iterator();
+        final Iterator<RepaymentPeriod> copyFromIterator = copyFromPeriods.iterator();
+        while (actualIterator.hasNext()) {
+            final RepaymentPeriod copyFromPeriod = copyFromIterator.next();
+            RepaymentPeriod actualPeriod = actualIterator.next();
+            while (actualIterator.hasNext() && !copyFromPeriod.getDueDate().isEqual(actualPeriod.getDueDate())) {
+                actualPeriod = actualIterator.next();
+            }
+            if (!actualPeriod.getDueDate().isBefore(periodFromDueDate)) {
+                copyConsumer.accept(copyFromPeriod, actualPeriod);
+            }
+        }
     }
 }
