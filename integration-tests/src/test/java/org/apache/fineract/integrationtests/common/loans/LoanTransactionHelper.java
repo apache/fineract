@@ -632,9 +632,22 @@ public class LoanTransactionHelper extends IntegrationTest {
         return putLoanTransaction(updateInterestPause(termVariationId, loanID), body);
     }
 
+    public PostLoansLoanIdTransactionsResponse updateInterestPauseByExternalId(final Long termVariationId, final String startDate,
+            final String endDate, final String dateFormat, final String locale, final String externalID) {
+        log.info("Updating interest pause for Loan {} with Term Variation ID {}: startDate={} endDate={} dateFormat={} locale={}",
+                externalID, termVariationId, startDate, endDate, dateFormat, locale);
+        String body = getInterestPauseBodyAsJSON(startDate, endDate, dateFormat, locale);
+        return putLoanTransaction(updateInterestPause(termVariationId, externalID), body);
+    }
+
     public void deleteInterestPauseByLoanId(final Long termVariationId, final Integer loanID) {
         log.info("Deleting interest pause for Loan ID {} with Term Variation ID {}", loanID, termVariationId);
         deleteLoanTransaction(deleteInterestPause(termVariationId, loanID));
+    }
+
+    public void deleteInterestPauseByExternalId(final Long termVariationId, final String externalID) {
+        log.info("Deleting interest pause for Loan ID {} with Term Variation ID {}", externalID, termVariationId);
+        deleteLoanTransaction(deleteInterestPause(termVariationId, externalID));
     }
 
     public String retrieveInterestPauseByLoanId(final Integer loanID) {
@@ -1484,8 +1497,18 @@ public class LoanTransactionHelper extends IntegrationTest {
         return "/fineract-provider/api/v1/loans/" + loanID + "/interest-pauses/" + termVariationId + "?" + Utils.TENANT_IDENTIFIER;
     }
 
+    private String updateInterestPause(final Long termVariationId, final String externalID) {
+        return "/fineract-provider/api/v1/loans/external-id/" + externalID + "/interest-pauses/" + termVariationId + "?"
+                + Utils.TENANT_IDENTIFIER;
+    }
+
     private String deleteInterestPause(final Long termVariationId, final Integer loanID) {
         return "/fineract-provider/api/v1/loans/" + loanID + "/interest-pauses/" + termVariationId + "?" + Utils.TENANT_IDENTIFIER;
+    }
+
+    private String deleteInterestPause(final Long termVariationId, final String externalID) {
+        return "/fineract-provider/api/v1/loans/external-id/" + externalID + "/interest-pauses/" + termVariationId + "?"
+                + Utils.TENANT_IDENTIFIER;
     }
 
     private String createInteroperationLoanTransactionURL(final String accountNo) {

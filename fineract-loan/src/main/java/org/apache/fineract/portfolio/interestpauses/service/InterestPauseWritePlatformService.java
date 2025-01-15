@@ -70,6 +70,17 @@ public interface InterestPauseWritePlatformService {
     CommandProcessingResult deleteInterestPause(Long loanId, Long variationId);
 
     /**
+     * Delete an existing interest pause period for a loan.
+     *
+     * @param loanExternalId
+     *            the external ID of the loan
+     * @param variationId
+     *            the ID of the loan term variation representing the interest pause
+     * @return the result of the delete operation
+     */
+    CommandProcessingResult deleteInterestPause(ExternalId loanExternalId, Long variationId);
+
+    /**
      * Update an existing interest pause period for a loan identified by its internal ID.
      *
      * @param loanId
@@ -87,5 +98,25 @@ public interface InterestPauseWritePlatformService {
      * @return the updated loan term variation ID along with the updated fields
      */
     CommandProcessingResult updateInterestPause(Long loanId, Long variationId, String startDateString, String endDateString,
+            String dateFormat, String locale);
+
+    /**
+     * Update an existing interest pause period for a loan identified by its internal ID.
+     *
+     * @param loanExternalId
+     *            the external ID of the loan
+     * @param variationId
+     *            the ID of the loan term variation representing the interest pause to be updated
+     * @param startDateString
+     *            the new start date of the interest pause period (inclusive) as a string
+     * @param endDateString
+     *            the new end date of the interest pause period (inclusive) as a string
+     * @param dateFormat
+     *            the format of the provided dates (e.g., "yyyy-MM-dd")
+     * @param locale
+     *            the locale used for parsing the provided dates
+     * @return the updated loan term variation ID along with the updated fields
+     */
+    CommandProcessingResult updateInterestPause(ExternalId loanExternalId, Long variationId, String startDateString, String endDateString,
             String dateFormat, String locale);
 }
