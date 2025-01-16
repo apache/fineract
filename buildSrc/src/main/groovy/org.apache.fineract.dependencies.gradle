@@ -37,6 +37,7 @@ dependencyManagement {
         mavenBom 'org.mockito:mockito-bom:5.14.2'
         mavenBom 'software.amazon.awssdk:bom:2.29.9'
         mavenBom 'io.github.resilience4j:resilience4j-bom:2.2.0'
+        mavenBom 'org.testcontainers:testcontainers-bom:1.20.4'
     }
 
     dependencies {
@@ -235,6 +236,8 @@ dependencyManagement {
         //v42.7.5: performance issue: https://github.com/pgjdbc/pgjdbc/issues/3511#issuecomment-2637277977
         dependency 'org.postgresql:postgresql:42.7.4'
 
+        dependency 'com.mysql:mysql-connector-j:9.2.0'
+
         dependency 'org.assertj:assertj-core:3.26.3'
 
         dependency 'org.apache.commons:commons-math3:3.6.1'
@@ -249,5 +252,18 @@ dependencyManagement {
         dependency 'io.cucumber:cucumber-spring:7.20.1'
 
         dependency 'org.reflections:reflections:0.10.2'
+
+        dependency 'org.openjdk.jmh:jmh-core:1.37'
+        dependency 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
+
+        dependency 'org.springframework.restdocs:spring-restdocs-asciidoctor:3.0.3'
+        dependency 'org.springframework.restdocs:spring-restdocs-mockmvc:3.0.3'
+        dependency 'org.springframework.restdocs:spring-restdocs-webtestclient:3.0.3'
+        dependency 'org.springframework.restdocs:spring-restdocs-restassured:3.0.3'
+
+        dependency 'com.lmax:disruptor:3.4.4'
+
+        dependency 'com.ibm.icu:icu4j:76.1'
+        dependency 'org.yakworks:spring-icu4j:0.4.2'
     }
 }

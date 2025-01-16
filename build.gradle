@@ -28,6 +28,7 @@ buildscript {
             [
                 'fineract-api',
                 'fineract-core',
+                'fineract-command',
                 'fineract-accounting',
                 'fineract-provider',
                 'fineract-branch',
@@ -103,7 +104,7 @@ plugins {
     id 'com.gorylenko.gradle-git-properties' version '2.4.2' apply false
     id 'org.asciidoctor.jvm.convert' version '3.3.2' apply false
     id 'org.asciidoctor.jvm.pdf' version '3.3.2' apply false
-    id 'com.google.cloud.tools.jib' version '3.4.4' apply false
+    id 'com.google.cloud.tools.jib' version '3.4.5' apply false
     id 'org.sonarqube' version '6.0.1.5171'
     id 'com.github.andygoossens.modernizer' version '1.10.0' apply false
     // TODO: upgrade to 6.0.4
@@ -112,6 +113,7 @@ plugins {
     id "com.github.davidmc24.gradle.plugin.avro-base" version "1.9.1" apply false
     id 'org.openapi.generator' version '7.8.0' apply false
     id 'com.gradleup.shadow' version '8.3.5' apply false
+    id 'me.champeau.jmh' version '0.7.1' apply false
 }
 
 apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.release.gradle"

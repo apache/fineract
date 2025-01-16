@@ -20,23 +20,17 @@ package org.apache.fineract.infrastructure.core.domain;
 
 import java.util.Map;
 import java.util.Optional;
-import org.springframework.core.NamedThreadLocal;
 import org.springframework.transaction.TransactionStatus;
 
 public final class BatchRequestContextHolder {
 
     private BatchRequestContextHolder() {}
 
-    private static final ThreadLocal<Map<String, Object>> batchAttributes = new NamedThreadLocal<>("batchAttributes");
+    private static final ThreadLocal<Map<String, Object>> batchAttributes = new ThreadLocal<>();
 
-    private static final ThreadLocal<Optional<TransactionStatus>> batchTransaction = new NamedThreadLocal<>("batchTransaction") {
+    private static final ThreadLocal<Optional<TransactionStatus>> batchTransaction = ThreadLocal.withInitial(Optional::empty);
 
-        @Override
-        protected Optional<TransactionStatus> initialValue() {
-            return Optional.empty();
-        }
-    };
-    private static final ThreadLocal<Boolean> isEnclosingTransaction = new NamedThreadLocal<>("isEnclosingTransaction");
+    private static final ThreadLocal<Boolean> isEnclosingTransaction = new ThreadLocal<>();
 
     /**
      * True if the batch attributes are set
