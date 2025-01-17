@@ -47,6 +47,8 @@ import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
 import org.apache.fineract.client.models.PostCreateRescheduleLoansResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
+import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
@@ -58,7 +60,6 @@ import org.apache.fineract.integrationtests.common.LoanRescheduleRequestHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.externalevents.ExternalEventHelper;
 import org.apache.fineract.integrationtests.common.externalevents.ExternalEventsExtension;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
@@ -67,7 +68,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @Slf4j
-@ExtendWith({ LoanTestLifecycleExtension.class, ExternalEventsExtension.class })
+@ExtendWith({ ExternalEventsExtension.class })
 public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
 
     private static final String DATETIME_PATTERN = "dd MMMM yyyy";
@@ -77,6 +78,7 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
     private static Long loanProductId;
     private static ResponseSpecification responseSpec;
     private static RequestSpecification requestSpec;
+    Long chargeId = createCharge(111.0, "USD").getResourceId();
 
     @BeforeAll
     public static void beforeAll() {
@@ -155,6 +157,558 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
         });
     }
 
+    /**
+     * interest bearing progressive loan with interest recalculation enabled Verify that
+     * LoanChargeAdjustmentPostBusinessEvent has loanChargePaidByList populated when Charge Adjustment posted for whole
+     * charge amount
+     */
+    @Test
+    public void verifyLoanChargeAdjustmentPostBusinessEvent01() {
+        runAt("1 January 2021", () -> {
+            enableBusinessEvent("LoanChargeAdjustmentPostBusinessEvent");
+            enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
+            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(create4IProgressive().currencyCode("USD"));
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 600.0, 9.99,
+                    4, null);
+            Assertions.assertNotNull(loanId);
+            disburseLoan(loanId, BigDecimal.valueOf(600), "1 January 2021");
+
+            PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = addLoanCharge(loanId, chargeId, "01 February 2021", 111.0);
+            Long chargeId = postLoansLoanIdChargesResponse.getResourceId();
+
+            deleteAllExternalEvents();
+            // resourceId is chargeId
+            Long transactionId = loanTransactionHelper
+                    .chargeAdjustment(loanId, chargeId, new PostLoansLoanIdChargesChargeIdRequest().amount(111.0).locale("en"))
+                    .getSubResourceId();
+
+            List<ExternalEventDTO> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+            List<ExternalEventDTO> list = allExternalEvents.stream()
+                    .filter(x -> "LoanChargeAdjustmentPostBusinessEvent".equals(x.getType())).toList();
+            Assertions.assertEquals(1, list.size());
+            ExternalEventDTO event = list.get(0);
+            Object loanChargePaidByList = event.getPayLoad().get("loanChargePaidByList");
+            Assertions.assertInstanceOf(List.class, loanChargePaidByList);
+            Assertions.assertEquals(1, ((List<?>) loanChargePaidByList).size());
+            Map<?, ?> chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
+            Assertions.assertInstanceOf(Map.class, chargePaidBy);
+            Assertions.assertEquals(111.0D, chargePaidBy.get("amount"));
+            Assertions.assertEquals(chargeId.doubleValue(), chargePaidBy.get("chargeId"));
+            Assertions.assertEquals(transactionId.doubleValue(), chargePaidBy.get("transactionId"));
+        });
+    }
+
+    /**
+     * interest bearing progressive loan with interest recalculation enabled Verify that
+     * LoanChargeAdjustmentPostBusinessEvent has loanChargePaidByList populated when Charge Adjustment posted for
+     * partial charge amount Verify cant post more than charge amount
+     */
+    @Test
+    public void verifyLoanChargeAdjustmentPostBusinessEvent02() {
+        runAt("1 January 2021", () -> {
+            enableBusinessEvent("LoanChargeAdjustmentPostBusinessEvent");
+            enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
+            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(create4IProgressive().currencyCode("USD"));
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 600.0, 9.99,
+                    4, null);
+            Assertions.assertNotNull(loanId);
+            disburseLoan(loanId, BigDecimal.valueOf(600), "1 January 2021");
+
+            PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = addLoanCharge(loanId, chargeId, "01 February 2021", 111.0);
+            Long chargeId = postLoansLoanIdChargesResponse.getResourceId();
+
+            // check first part
+            deleteAllExternalEvents();
+            // resourceId is chargeId
+            Long transactionId = loanTransactionHelper
+                    .chargeAdjustment(loanId, chargeId, new PostLoansLoanIdChargesChargeIdRequest().amount(69.0).locale("en"))
+                    .getSubResourceId();
+
+            List<ExternalEventDTO> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+            List<ExternalEventDTO> list = allExternalEvents.stream()
+                    .filter(x -> "LoanChargeAdjustmentPostBusinessEvent".equals(x.getType())).toList();
+            Assertions.assertEquals(1, list.size());
+            ExternalEventDTO event = list.get(0);
+            Object loanChargePaidByList = event.getPayLoad().get("loanChargePaidByList");
+            Assertions.assertInstanceOf(List.class, loanChargePaidByList);
+            Assertions.assertEquals(1, ((List<?>) loanChargePaidByList).size());
+            Map<?, ?> chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
+            Assertions.assertInstanceOf(Map.class, chargePaidBy);
+            Assertions.assertEquals(69.0D, chargePaidBy.get("amount"));
+            Assertions.assertEquals(chargeId.doubleValue(), chargePaidBy.get("chargeId"));
+            Assertions.assertEquals(transactionId.doubleValue(), chargePaidBy.get("transactionId"));
+
+            // check second part
+            deleteAllExternalEvents();
+            // resourceId is chargeId
+            transactionId = loanTransactionHelper
+                    .chargeAdjustment(loanId, chargeId, new PostLoansLoanIdChargesChargeIdRequest().amount(42.0).locale("en"))
+                    .getSubResourceId();
+
+            allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+            list = allExternalEvents.stream().filter(x -> "LoanChargeAdjustmentPostBusinessEvent".equals(x.getType())).toList();
+            Assertions.assertEquals(1, list.size());
+            event = list.get(0);
+            loanChargePaidByList = event.getPayLoad().get("loanChargePaidByList");
+            Assertions.assertInstanceOf(List.class, loanChargePaidByList);
+            Assertions.assertEquals(1, ((List<?>) loanChargePaidByList).size());
+            chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
+            Assertions.assertInstanceOf(Map.class, chargePaidBy);
+            Assertions.assertEquals(42.0D, chargePaidBy.get("amount"));
+            Assertions.assertEquals(chargeId.doubleValue(), chargePaidBy.get("chargeId"));
+            Assertions.assertEquals(transactionId.doubleValue(), chargePaidBy.get("transactionId"));
+
+            // check that third part cannot post for that charge, because it already fully adjusted
+            Assertions.assertThrows(RuntimeException.class, () -> loanTransactionHelper.chargeAdjustment(loanId, chargeId,
+                    new PostLoansLoanIdChargesChargeIdRequest().amount(1.0).locale("en")));
+        });
+    }
+
+    /**
+     * interest bearing progressive loan with interest recalculation enabled Verify Repayment pays charge and
+     * repayment's event has loanChargePaidByList populated Verify that LoanChargeAdjustmentPostBusinessEvent has
+     * loanChargePaidByList not populated when Charge Adjustment posted for partial charge amount Verify cant post more
+     * than charge amount
+     */
+    @Test
+    public void verifyLoanChargeAdjustmentPostBusinessEvent03() {
+        runAt("1 January 2021", () -> {
+            enableBusinessEvent("LoanChargeAdjustmentPostBusinessEvent");
+            enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
+            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(create4IProgressive().currencyCode("USD"));
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 600.0, 9.99,
+                    4, null);
+            Assertions.assertNotNull(loanId);
+            disburseLoan(loanId, BigDecimal.valueOf(600), "1 January 2021");
+
+            PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = addLoanCharge(loanId, chargeId, "01 February 2021", 111.0);
+            Long chargeId = postLoansLoanIdChargesResponse.getResourceId();
+
+            // check repayment
+            deleteAllExternalEvents();
+            Long transactionId = loanTransactionHelper.makeLoanRepayment("01 January 2021", 300.0F, loanId.intValue()).getResourceId();
+
+            List<ExternalEventDTO> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+            List<ExternalEventDTO> list = allExternalEvents.stream()
+                    .filter(x -> "LoanTransactionMakeRepaymentPostBusinessEvent".equals(x.getType())).toList();
+            Assertions.assertEquals(1, list.size());
+            ExternalEventDTO event = list.get(0);
+            log.info(event.toString());
+            Object loanChargePaidByList = event.getPayLoad().get("loanChargePaidByList");
+            Assertions.assertEquals(111.0D, event.getPayLoad().get("feeChargesPortion"));
+            Assertions.assertInstanceOf(List.class, loanChargePaidByList);
+            Assertions.assertEquals(1, ((List<?>) loanChargePaidByList).size());
+            Map<?, ?> chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
+            Assertions.assertInstanceOf(Map.class, chargePaidBy);
+            Assertions.assertEquals(111.0D, chargePaidBy.get("amount"));
+            Assertions.assertEquals(chargeId.doubleValue(), chargePaidBy.get("chargeId"));
+            Assertions.assertEquals(transactionId.doubleValue(), chargePaidBy.get("transactionId"));
+
+            // check first part
+            deleteAllExternalEvents();
+            // resourceId is chargeId
+            transactionId = loanTransactionHelper
+                    .chargeAdjustment(loanId, chargeId, new PostLoansLoanIdChargesChargeIdRequest().amount(69.0).locale("en"))
+                    .getSubResourceId();
+
+            allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+            list = allExternalEvents.stream().filter(x -> "LoanChargeAdjustmentPostBusinessEvent".equals(x.getType())).toList();
+            Assertions.assertEquals(1, list.size());
+            event = list.get(0);
+            loanChargePaidByList = event.getPayLoad().get("loanChargePaidByList");
+            Assertions.assertInstanceOf(List.class, loanChargePaidByList);
+            Assertions.assertEquals(0, ((List<?>) loanChargePaidByList).size());
+
+            // check second part
+            deleteAllExternalEvents();
+            // resourceId is chargeId
+            transactionId = loanTransactionHelper
+                    .chargeAdjustment(loanId, chargeId, new PostLoansLoanIdChargesChargeIdRequest().amount(42.0).locale("en"))
+                    .getSubResourceId();
+
+            allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+            list = allExternalEvents.stream().filter(x -> "LoanChargeAdjustmentPostBusinessEvent".equals(x.getType())).toList();
+            Assertions.assertEquals(1, list.size());
+            event = list.get(0);
+            loanChargePaidByList = event.getPayLoad().get("loanChargePaidByList");
+            Assertions.assertInstanceOf(List.class, loanChargePaidByList);
+            Assertions.assertEquals(0, ((List<?>) loanChargePaidByList).size());
+
+            // check that third part cannot post for that charge, because it already fully adjusted
+            Assertions.assertThrows(RuntimeException.class, () -> loanTransactionHelper.chargeAdjustment(loanId, chargeId,
+                    new PostLoansLoanIdChargesChargeIdRequest().amount(1.0).locale("en")));
+        });
+    }
+
+    /**
+     * interest bearing progressive loan without interest recalculation Verify that
+     * LoanChargeAdjustmentPostBusinessEvent has loanChargePaidByList populated when Charge Adjustment posted for whole
+     * charge amount
+     */
+    @Test
+    public void verifyLoanChargeAdjustmentPostBusinessEvent04() {
+        runAt("1 January 2021", () -> {
+            enableBusinessEvent("LoanChargeAdjustmentPostBusinessEvent");
+            enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
+            PostLoanProductsResponse loanProduct = loanProductHelper
+                    .createLoanProduct(create4IProgressive().isInterestRecalculationEnabled(false).currencyCode("USD"));
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 600.0, 9.99,
+                    4, null);
+            Assertions.assertNotNull(loanId);
+            disburseLoan(loanId, BigDecimal.valueOf(600), "1 January 2021");
+
+            PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = addLoanCharge(loanId, chargeId, "01 February 2021", 111.0);
+            Long chargeId = postLoansLoanIdChargesResponse.getResourceId();
+
+            deleteAllExternalEvents();
+            // resourceId is chargeId
+            Long transactionId = loanTransactionHelper
+                    .chargeAdjustment(loanId, chargeId, new PostLoansLoanIdChargesChargeIdRequest().amount(111.0).locale("en"))
+                    .getSubResourceId();
+
+            List<ExternalEventDTO> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+            List<ExternalEventDTO> list = allExternalEvents.stream()
+                    .filter(x -> "LoanChargeAdjustmentPostBusinessEvent".equals(x.getType())).toList();
+            Assertions.assertEquals(1, list.size());
+            ExternalEventDTO event = list.get(0);
+            Object loanChargePaidByList = event.getPayLoad().get("loanChargePaidByList");
+            Assertions.assertInstanceOf(List.class, loanChargePaidByList);
+            Assertions.assertEquals(1, ((List<?>) loanChargePaidByList).size());
+            Map<?, ?> chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
+            Assertions.assertInstanceOf(Map.class, chargePaidBy);
+            Assertions.assertEquals(111.0D, chargePaidBy.get("amount"));
+            Assertions.assertEquals(chargeId.doubleValue(), chargePaidBy.get("chargeId"));
+            Assertions.assertEquals(transactionId.doubleValue(), chargePaidBy.get("transactionId"));
+        });
+    }
+
+    /**
+     * interest bearing progressive loan without interest recalculation Verify that
+     * LoanChargeAdjustmentPostBusinessEvent has loanChargePaidByList populated when Charge Adjustment posted for
+     * partial charge amount Verify cant post more than charge amount
+     */
+    @Test
+    public void verifyLoanChargeAdjustmentPostBusinessEvent05() {
+        runAt("1 January 2021", () -> {
+            enableBusinessEvent("LoanChargeAdjustmentPostBusinessEvent");
+            enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
+            PostLoanProductsResponse loanProduct = loanProductHelper
+                    .createLoanProduct(create4IProgressive().isInterestRecalculationEnabled(false).currencyCode("USD"));
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 600.0, 9.99,
+                    4, null);
+            Assertions.assertNotNull(loanId);
+            disburseLoan(loanId, BigDecimal.valueOf(600), "1 January 2021");
+
+            PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = addLoanCharge(loanId, chargeId, "01 February 2021", 111.0);
+            Long chargeId = postLoansLoanIdChargesResponse.getResourceId();
+
+            // check first part
+            deleteAllExternalEvents();
+            // resourceId is chargeId
+            Long transactionId = loanTransactionHelper
+                    .chargeAdjustment(loanId, chargeId, new PostLoansLoanIdChargesChargeIdRequest().amount(69.0).locale("en"))
+                    .getSubResourceId();
+
+            List<ExternalEventDTO> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+            List<ExternalEventDTO> list = allExternalEvents.stream()
+                    .filter(x -> "LoanChargeAdjustmentPostBusinessEvent".equals(x.getType())).toList();
+            Assertions.assertEquals(1, list.size());
+            ExternalEventDTO event = list.get(0);
+            Object loanChargePaidByList = event.getPayLoad().get("loanChargePaidByList");
+            Assertions.assertInstanceOf(List.class, loanChargePaidByList);
+            Assertions.assertEquals(1, ((List<?>) loanChargePaidByList).size());
+            Map<?, ?> chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
+            Assertions.assertInstanceOf(Map.class, chargePaidBy);
+            Assertions.assertEquals(69.0D, chargePaidBy.get("amount"));
+            Assertions.assertEquals(chargeId.doubleValue(), chargePaidBy.get("chargeId"));
+            Assertions.assertEquals(transactionId.doubleValue(), chargePaidBy.get("transactionId"));
+
+            // check second part
+            deleteAllExternalEvents();
+            // resourceId is chargeId
+            transactionId = loanTransactionHelper
+                    .chargeAdjustment(loanId, chargeId, new PostLoansLoanIdChargesChargeIdRequest().amount(42.0).locale("en"))
+                    .getSubResourceId();
+
+            allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+            list = allExternalEvents.stream().filter(x -> "LoanChargeAdjustmentPostBusinessEvent".equals(x.getType())).toList();
+            Assertions.assertEquals(1, list.size());
+            event = list.get(0);
+            loanChargePaidByList = event.getPayLoad().get("loanChargePaidByList");
+            Assertions.assertInstanceOf(List.class, loanChargePaidByList);
+            Assertions.assertEquals(1, ((List<?>) loanChargePaidByList).size());
+            chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
+            Assertions.assertInstanceOf(Map.class, chargePaidBy);
+            Assertions.assertEquals(42.0D, chargePaidBy.get("amount"));
+            Assertions.assertEquals(chargeId.doubleValue(), chargePaidBy.get("chargeId"));
+            Assertions.assertEquals(transactionId.doubleValue(), chargePaidBy.get("transactionId"));
+
+            // check that third part cannot post for that charge, because it already fully adjusted
+            Assertions.assertThrows(RuntimeException.class, () -> loanTransactionHelper.chargeAdjustment(loanId, chargeId,
+                    new PostLoansLoanIdChargesChargeIdRequest().amount(1.0).locale("en")));
+        });
+    }
+
+    /**
+     * interest bearing progressive loan without interest recalculation Verify Repayment pays charge and repayment's
+     * event has loanChargePaidByList populated Verify that LoanChargeAdjustmentPostBusinessEvent has
+     * loanChargePaidByList not populated when Charge Adjustment posted for partial charge amount Verify cant post more
+     * than charge amount
+     */
+    @Test
+    public void verifyLoanChargeAdjustmentPostBusinessEvent06() {
+        runAt("1 January 2021", () -> {
+            enableBusinessEvent("LoanChargeAdjustmentPostBusinessEvent");
+            enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
+            PostLoanProductsResponse loanProduct = loanProductHelper
+                    .createLoanProduct(create4IProgressive().isInterestRecalculationEnabled(false).currencyCode("USD"));
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 600.0, 9.99,
+                    4, null);
+            Assertions.assertNotNull(loanId);
+            disburseLoan(loanId, BigDecimal.valueOf(600), "1 January 2021");
+
+            PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = addLoanCharge(loanId, chargeId, "01 February 2021", 111.0);
+            Long chargeId = postLoansLoanIdChargesResponse.getResourceId();
+
+            // check repayment
+            deleteAllExternalEvents();
+            Long transactionId = loanTransactionHelper.makeLoanRepayment("01 January 2021", 300.0F, loanId.intValue()).getResourceId();
+
+            List<ExternalEventDTO> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+            List<ExternalEventDTO> list = allExternalEvents.stream()
+                    .filter(x -> "LoanTransactionMakeRepaymentPostBusinessEvent".equals(x.getType())).toList();
+            Assertions.assertEquals(1, list.size());
+            ExternalEventDTO event = list.get(0);
+            log.info(event.toString());
+            Object loanChargePaidByList = event.getPayLoad().get("loanChargePaidByList");
+            Assertions.assertEquals(111.0D, event.getPayLoad().get("feeChargesPortion"));
+            Assertions.assertInstanceOf(List.class, loanChargePaidByList);
+            Assertions.assertEquals(1, ((List<?>) loanChargePaidByList).size());
+            Map<?, ?> chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
+            Assertions.assertInstanceOf(Map.class, chargePaidBy);
+            Assertions.assertEquals(111.0D, chargePaidBy.get("amount"));
+            Assertions.assertEquals(chargeId.doubleValue(), chargePaidBy.get("chargeId"));
+            Assertions.assertEquals(transactionId.doubleValue(), chargePaidBy.get("transactionId"));
+
+            // check first part
+            deleteAllExternalEvents();
+            // resourceId is chargeId
+            transactionId = loanTransactionHelper
+                    .chargeAdjustment(loanId, chargeId, new PostLoansLoanIdChargesChargeIdRequest().amount(69.0).locale("en"))
+                    .getSubResourceId();
+
+            allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+            list = allExternalEvents.stream().filter(x -> "LoanChargeAdjustmentPostBusinessEvent".equals(x.getType())).toList();
+            Assertions.assertEquals(1, list.size());
+            event = list.get(0);
+            loanChargePaidByList = event.getPayLoad().get("loanChargePaidByList");
+            Assertions.assertInstanceOf(List.class, loanChargePaidByList);
+            Assertions.assertEquals(0, ((List<?>) loanChargePaidByList).size());
+
+            // check second part
+            deleteAllExternalEvents();
+            // resourceId is chargeId
+            transactionId = loanTransactionHelper
+                    .chargeAdjustment(loanId, chargeId, new PostLoansLoanIdChargesChargeIdRequest().amount(42.0).locale("en"))
+                    .getSubResourceId();
+
+            allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+            list = allExternalEvents.stream().filter(x -> "LoanChargeAdjustmentPostBusinessEvent".equals(x.getType())).toList();
+            Assertions.assertEquals(1, list.size());
+            event = list.get(0);
+            loanChargePaidByList = event.getPayLoad().get("loanChargePaidByList");
+            Assertions.assertInstanceOf(List.class, loanChargePaidByList);
+            Assertions.assertEquals(0, ((List<?>) loanChargePaidByList).size());
+
+            // check that third part cannot post for that charge, because it already fully adjusted
+            Assertions.assertThrows(RuntimeException.class, () -> loanTransactionHelper.chargeAdjustment(loanId, chargeId,
+                    new PostLoansLoanIdChargesChargeIdRequest().amount(1.0).locale("en")));
+        });
+    }
+
+    /**
+     * progressive loan without interest Verify that LoanChargeAdjustmentPostBusinessEvent has loanChargePaidByList
+     * populated when Charge Adjustment posted for whole charge amount
+     */
+    @Test
+    public void verifyLoanChargeAdjustmentPostBusinessEvent07() {
+        runAt("1 January 2021", () -> {
+            enableBusinessEvent("LoanChargeAdjustmentPostBusinessEvent");
+            enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
+            PostLoanProductsResponse loanProduct = loanProductHelper
+                    .createLoanProduct(create4IProgressive().isInterestRecalculationEnabled(false).currencyCode("USD"));
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 600.0, 0.0, 4,
+                    null);
+            Assertions.assertNotNull(loanId);
+            disburseLoan(loanId, BigDecimal.valueOf(600), "1 January 2021");
+
+            PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = addLoanCharge(loanId, chargeId, "01 February 2021", 111.0);
+            Long chargeId = postLoansLoanIdChargesResponse.getResourceId();
+
+            deleteAllExternalEvents();
+            // resourceId is chargeId
+            Long transactionId = loanTransactionHelper
+                    .chargeAdjustment(loanId, chargeId, new PostLoansLoanIdChargesChargeIdRequest().amount(111.0).locale("en"))
+                    .getSubResourceId();
+
+            List<ExternalEventDTO> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+            List<ExternalEventDTO> list = allExternalEvents.stream()
+                    .filter(x -> "LoanChargeAdjustmentPostBusinessEvent".equals(x.getType())).toList();
+            Assertions.assertEquals(1, list.size());
+            ExternalEventDTO event = list.get(0);
+            Object loanChargePaidByList = event.getPayLoad().get("loanChargePaidByList");
+            Assertions.assertInstanceOf(List.class, loanChargePaidByList);
+            Assertions.assertEquals(1, ((List<?>) loanChargePaidByList).size());
+            Map<?, ?> chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
+            Assertions.assertInstanceOf(Map.class, chargePaidBy);
+            Assertions.assertEquals(111.0D, chargePaidBy.get("amount"));
+            Assertions.assertEquals(chargeId.doubleValue(), chargePaidBy.get("chargeId"));
+            Assertions.assertEquals(transactionId.doubleValue(), chargePaidBy.get("transactionId"));
+        });
+    }
+
+    /**
+     * progressive loan without interest Verify that LoanChargeAdjustmentPostBusinessEvent has loanChargePaidByList
+     * populated when Charge Adjustment posted for partial charge amount Verify cant post more than charge amount
+     */
+    @Test
+    public void verifyLoanChargeAdjustmentPostBusinessEvent08() {
+        runAt("1 January 2021", () -> {
+            enableBusinessEvent("LoanChargeAdjustmentPostBusinessEvent");
+            enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
+            PostLoanProductsResponse loanProduct = loanProductHelper
+                    .createLoanProduct(create4IProgressive().isInterestRecalculationEnabled(false).currencyCode("USD"));
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 600.0, 0.0, 4,
+                    null);
+            Assertions.assertNotNull(loanId);
+            disburseLoan(loanId, BigDecimal.valueOf(600), "1 January 2021");
+
+            PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = addLoanCharge(loanId, chargeId, "01 February 2021", 111.0);
+            Long chargeId = postLoansLoanIdChargesResponse.getResourceId();
+
+            // check first part
+            deleteAllExternalEvents();
+            // resourceId is chargeId
+            Long transactionId = loanTransactionHelper
+                    .chargeAdjustment(loanId, chargeId, new PostLoansLoanIdChargesChargeIdRequest().amount(69.0).locale("en"))
+                    .getSubResourceId();
+
+            List<ExternalEventDTO> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+            List<ExternalEventDTO> list = allExternalEvents.stream()
+                    .filter(x -> "LoanChargeAdjustmentPostBusinessEvent".equals(x.getType())).toList();
+            Assertions.assertEquals(1, list.size());
+            ExternalEventDTO event = list.get(0);
+            Object loanChargePaidByList = event.getPayLoad().get("loanChargePaidByList");
+            Assertions.assertInstanceOf(List.class, loanChargePaidByList);
+            Assertions.assertEquals(1, ((List<?>) loanChargePaidByList).size());
+            Map<?, ?> chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
+            Assertions.assertInstanceOf(Map.class, chargePaidBy);
+            Assertions.assertEquals(69.0D, chargePaidBy.get("amount"));
+            Assertions.assertEquals(chargeId.doubleValue(), chargePaidBy.get("chargeId"));
+            Assertions.assertEquals(transactionId.doubleValue(), chargePaidBy.get("transactionId"));
+
+            // check second part
+            deleteAllExternalEvents();
+            // resourceId is chargeId
+            transactionId = loanTransactionHelper
+                    .chargeAdjustment(loanId, chargeId, new PostLoansLoanIdChargesChargeIdRequest().amount(42.0).locale("en"))
+                    .getSubResourceId();
+
+            allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+            list = allExternalEvents.stream().filter(x -> "LoanChargeAdjustmentPostBusinessEvent".equals(x.getType())).toList();
+            Assertions.assertEquals(1, list.size());
+            event = list.get(0);
+            loanChargePaidByList = event.getPayLoad().get("loanChargePaidByList");
+            Assertions.assertInstanceOf(List.class, loanChargePaidByList);
+            Assertions.assertEquals(1, ((List<?>) loanChargePaidByList).size());
+            chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
+            Assertions.assertInstanceOf(Map.class, chargePaidBy);
+            Assertions.assertEquals(42.0D, chargePaidBy.get("amount"));
+            Assertions.assertEquals(chargeId.doubleValue(), chargePaidBy.get("chargeId"));
+            Assertions.assertEquals(transactionId.doubleValue(), chargePaidBy.get("transactionId"));
+
+            // check that third part cannot post for that charge, because it already fully adjusted
+            Assertions.assertThrows(RuntimeException.class, () -> loanTransactionHelper.chargeAdjustment(loanId, chargeId,
+                    new PostLoansLoanIdChargesChargeIdRequest().amount(1.0).locale("en")));
+        });
+    }
+
+    /**
+     * progressive loan without interest Verify Repayment pays charge and repayment's event has loanChargePaidByList
+     * populated Verify that LoanChargeAdjustmentPostBusinessEvent has loanChargePaidByList not populated when Charge
+     * Adjustment posted for partial charge amount Verify cant post more than charge amount
+     */
+    @Test
+    public void verifyLoanChargeAdjustmentPostBusinessEvent09() {
+        runAt("1 January 2021", () -> {
+            enableBusinessEvent("LoanChargeAdjustmentPostBusinessEvent");
+            enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
+            PostLoanProductsResponse loanProduct = loanProductHelper
+                    .createLoanProduct(create4IProgressive().isInterestRecalculationEnabled(false).currencyCode("USD"));
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 600.0, 0.0, 4,
+                    null);
+            Assertions.assertNotNull(loanId);
+            disburseLoan(loanId, BigDecimal.valueOf(600), "1 January 2021");
+
+            PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = addLoanCharge(loanId, chargeId, "01 February 2021", 111.0);
+            Long chargeId = postLoansLoanIdChargesResponse.getResourceId();
+
+            // check repayment
+            deleteAllExternalEvents();
+            Long transactionId = loanTransactionHelper.makeLoanRepayment("01 January 2021", 300.0F, loanId.intValue()).getResourceId();
+
+            List<ExternalEventDTO> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+            List<ExternalEventDTO> list = allExternalEvents.stream()
+                    .filter(x -> "LoanTransactionMakeRepaymentPostBusinessEvent".equals(x.getType())).toList();
+            Assertions.assertEquals(1, list.size());
+            ExternalEventDTO event = list.get(0);
+            log.info(event.toString());
+            Object loanChargePaidByList = event.getPayLoad().get("loanChargePaidByList");
+            Assertions.assertEquals(111.0D, event.getPayLoad().get("feeChargesPortion"));
+            Assertions.assertInstanceOf(List.class, loanChargePaidByList);
+            Assertions.assertEquals(1, ((List<?>) loanChargePaidByList).size());
+            Map<?, ?> chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
+            Assertions.assertInstanceOf(Map.class, chargePaidBy);
+            Assertions.assertEquals(111.0D, chargePaidBy.get("amount"));
+            Assertions.assertEquals(chargeId.doubleValue(), chargePaidBy.get("chargeId"));
+            Assertions.assertEquals(transactionId.doubleValue(), chargePaidBy.get("transactionId"));
+
+            // check first part
+            deleteAllExternalEvents();
+            // resourceId is chargeId
+            transactionId = loanTransactionHelper
+                    .chargeAdjustment(loanId, chargeId, new PostLoansLoanIdChargesChargeIdRequest().amount(69.0).locale("en"))
+                    .getSubResourceId();
+
+            allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+            list = allExternalEvents.stream().filter(x -> "LoanChargeAdjustmentPostBusinessEvent".equals(x.getType())).toList();
+            Assertions.assertEquals(1, list.size());
+            event = list.get(0);
+            loanChargePaidByList = event.getPayLoad().get("loanChargePaidByList");
+            Assertions.assertInstanceOf(List.class, loanChargePaidByList);
+            Assertions.assertEquals(0, ((List<?>) loanChargePaidByList).size());
+
+            // check second part
+            deleteAllExternalEvents();
+            // resourceId is chargeId
+            transactionId = loanTransactionHelper
+                    .chargeAdjustment(loanId, chargeId, new PostLoansLoanIdChargesChargeIdRequest().amount(42.0).locale("en"))
+                    .getSubResourceId();
+
+            allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+            list = allExternalEvents.stream().filter(x -> "LoanChargeAdjustmentPostBusinessEvent".equals(x.getType())).toList();
+            Assertions.assertEquals(1, list.size());
+            event = list.get(0);
+            loanChargePaidByList = event.getPayLoad().get("loanChargePaidByList");
+            Assertions.assertInstanceOf(List.class, loanChargePaidByList);
+            Assertions.assertEquals(0, ((List<?>) loanChargePaidByList).size());
+
+            // check that third part cannot post for that charge, because it already fully adjusted
+            Assertions.assertThrows(RuntimeException.class, () -> loanTransactionHelper.chargeAdjustment(loanId, chargeId,
+                    new PostLoansLoanIdChargesChargeIdRequest().amount(1.0).locale("en")));
+        });
+    }
+
     @Test
     public void verifyInterestRefundPostBusinessEventCreatedForMerchantIssuedRefundWithInterestRefund() {
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
@@ -216,27 +770,32 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
     }
 
     private static void enableLoanBalanceChangedBusinessEvent() {
+        enableBusinessEvent("LoanBalanceChangedBusinessEvent");
+    }
+
+    private static void configureBusinessEvent(String eventName, boolean enabled) {
+        String value = enabled ? "true" : "false";
         final Map<String, Boolean> updatedConfigurations = ExternalEventConfigurationHelper.updateExternalEventConfigurations(requestSpec,
-                responseSpec, "{\"externalEventConfigurations\":{\"LoanBalanceChangedBusinessEvent\":true}}\n");
-        Assertions.assertEquals(updatedConfigurations.size(), 1);
-        Assertions.assertTrue(updatedConfigurations.containsKey("LoanBalanceChangedBusinessEvent"));
-        Assertions.assertTrue(updatedConfigurations.get("LoanBalanceChangedBusinessEvent"));
+                responseSpec, "{\"externalEventConfigurations\":{\"" + eventName + "\":" + value + "}}\n");
+        Assertions.assertEquals(1, updatedConfigurations.size());
+        Assertions.assertTrue(updatedConfigurations.containsKey(eventName));
+        Assertions.assertEquals(enabled, updatedConfigurations.get(eventName));
+    }
+
+    private static void enableBusinessEvent(String eventName) {
+        configureBusinessEvent(eventName, true);
+    }
+
+    private static void disableBusinessEvent(String eventName) {
+        configureBusinessEvent(eventName, false);
     }
 
     private static void enableLoanRescheduledDueAdjustScheduleBusinessEvent() {
-        final Map<String, Boolean> updatedConfigurations = ExternalEventConfigurationHelper.updateExternalEventConfigurations(requestSpec,
-                responseSpec, "{\"externalEventConfigurations\":{\"LoanRescheduledDueAdjustScheduleBusinessEvent\":true}}\n");
-        Assertions.assertEquals(updatedConfigurations.size(), 1);
-        Assertions.assertTrue(updatedConfigurations.containsKey("LoanRescheduledDueAdjustScheduleBusinessEvent"));
-        Assertions.assertTrue(updatedConfigurations.get("LoanRescheduledDueAdjustScheduleBusinessEvent"));
+        enableBusinessEvent("LoanRescheduledDueAdjustScheduleBusinessEvent");
     }
 
     private static void disableLoanBalanceChangedBusinessEvent() {
-        final Map<String, Boolean> updatedConfigurations = ExternalEventConfigurationHelper.updateExternalEventConfigurations(requestSpec,
-                responseSpec, "{\"externalEventConfigurations\":{\"LoanBalanceChangedBusinessEvent\":false}}\n");
-        Assertions.assertEquals(updatedConfigurations.size(), 1);
-        Assertions.assertTrue(updatedConfigurations.containsKey("LoanBalanceChangedBusinessEvent"));
-        Assertions.assertFalse(updatedConfigurations.get("LoanBalanceChangedBusinessEvent"));
+        disableBusinessEvent("LoanBalanceChangedBusinessEvent");
     }
 
     private void deleteAllExternalEvents() {
@@ -313,12 +872,7 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
     }
 
     private static void enableLoanInterestRefundPstBusinessEvent(boolean enabled) {
-        final Map<String, Boolean> updatedConfigurations = ExternalEventConfigurationHelper.updateExternalEventConfigurations(requestSpec,
-                responseSpec, "{\"externalEventConfigurations\":{\"LoanTransactionInterestRefundPostBusinessEvent\":"
-                        + (enabled ? "true" : "false") + "}}\n");
-        Assertions.assertEquals(updatedConfigurations.size(), 1);
-        Assertions.assertTrue(updatedConfigurations.containsKey("LoanTransactionInterestRefundPostBusinessEvent"));
-        Assertions.assertEquals(enabled, updatedConfigurations.get("LoanTransactionInterestRefundPostBusinessEvent"));
+        configureBusinessEvent("LoanTransactionInterestRefundPostBusinessEvent", enabled);
     }
 
     public void verifyBusinessEvents(BusinessEvent... businessEvents) {
