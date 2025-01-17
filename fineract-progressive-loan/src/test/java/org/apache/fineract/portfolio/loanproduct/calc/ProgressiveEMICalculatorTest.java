@@ -1366,6 +1366,41 @@ class ProgressiveEMICalculatorTest {
         checkDailyInterest(interestModel, dueDate, startDay, 31, 0.38, 9.03);
     }
 
+    @Test
+    public void test() {
+        final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
+                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 31)),
+                repayment(2, LocalDate.of(2024, 1, 31), LocalDate.of(2024, 2, 29)),
+                repayment(3, LocalDate.of(2024, 2, 29), LocalDate.of(2024, 3, 31)),
+                repayment(4, LocalDate.of(2024, 3, 31), LocalDate.of(2024, 4, 30)),
+                repayment(5, LocalDate.of(2024, 4, 30), LocalDate.of(2024, 5, 31)),
+                repayment(6, LocalDate.of(2024, 5, 31), LocalDate.of(2024, 6, 30)));
+
+        final BigDecimal interestRate = BigDecimal.valueOf(7);
+        final Integer installmentAmountInMultiplesOf = null;
+
+        Mockito.when(loanProductRelatedDetail.getAnnualNominalInterestRate()).thenReturn(interestRate);
+        Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
+        Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.DAYS_30.getValue());
+        Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.MONTHS);
+        Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
+        Mockito.when(loanProductRelatedDetail.getCurrencyData()).thenReturn(currency);
+
+        final ProgressiveLoanInterestScheduleModel interestSchedule = emiCalculator.generatePeriodInterestScheduleModel(
+                expectedRepaymentPeriods, loanProductRelatedDetail, installmentAmountInMultiplesOf, mc);
+
+        final Money disbursedAmount = toMoney(100.0);
+        emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
+
+        checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 1.17, 15.80, 84.16);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.011666667, 1.17, 15.80, 84.16);
+        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.49, 16.57, 67.64);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.39, 16.64, 51.02);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.30, 16.70, 34.31);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.20, 16.77, 17.50);
+        checkPeriod(interestSchedule, 5, 0, 17.01, 0.005833333333, 0.10, 16.82, 0.0);
+    }
+
     private static LoanScheduleModelRepaymentPeriod repayment(int periodNumber, LocalDate fromDate, LocalDate dueDate) {
         final Money zeroAmount = Money.zero(currency);
         return LoanScheduleModelRepaymentPeriod.repayment(periodNumber, fromDate, dueDate, zeroAmount, zeroAmount, zeroAmount, zeroAmount,
