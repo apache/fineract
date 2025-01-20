@@ -876,17 +876,16 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
             chargeFee(loanId.get(), 40.0, repaymentPeriod1DueDate);
             addRepaymentForLoan(loanId.get(), 650.0, repaymentDate1);
             verifyTransactions(loanId.get(),
-                    transaction(650.0, "Repayment", repaymentDate1, 0.0, 500.0, 39.45, 40.0, 30.0, 0.0, 40.55, false), //
-                    transaction(109.45, "Accrual Activity", repaymentDate1, 0.0, 0.0, 39.45, 40.0, 30.0, 0.0, 0.0, false), //
-                    transaction(109.45, "Accrual", repaymentDate1, 0.0, 0.0, 39.45, 40.0, 30.0, 0.0, 0.0, false), //
-                    transaction(500.0, "Disbursement", disbursementDay, 500.0, 0, 0, 0, 0, 0, 0, false) //
-            );
+                    transaction(650.0, "Repayment", repaymentDate1, 0.0, 500.0, 39.45, 40.0, 30.0, 0.0, 40.55, false),
+                    transaction(109.45, "Accrual Activity", repaymentDate1, 0.0, 0.0, 39.45, 40.0, 30.0, 0.0, 0.0, false),
+                    transaction(109.45, "Accrual", repaymentDate1, 0.0, 0.0, 39.45, 40.0, 30.0, 0.0, 0.0, false),
+                    transaction(500.0, "Disbursement", disbursementDay, 500.0, 0, 0, 0, 0, 0, 0, false));
         });
         runAt(repaymentPeriod1CloseDate, () -> {
             inlineLoanCOBHelper.executeInlineCOB(List.of(loanId.get()));
             verifyTransactions(loanId.get(),
                     transaction(650.0, "Repayment", repaymentDate1, 0.0, 500.0, 39.45, 40.0, 30.0, 0.0, 40.55, false), //
-                    transaction(109.45, "Accrual Activity", repaymentDate1, 0.0, 0.0, 39.45, 40.0, 30.0, 0.0, 0.0, false), //
+                    transaction(109.45, "Accrual Activity", repaymentDate1, 0.0, 0.0, 39.45, 40.0, 30.0, 0.0, 0.0, false),
                     transaction(109.45, "Accrual", repaymentDate1, 0.0, 0.0, 39.45, 40.0, 30.0, 0.0, 0.0, false), //
                     transaction(500.0, "Disbursement", disbursementDay, 500.0, 0, 0, 0, 0, 0, 0, false) //
             );
