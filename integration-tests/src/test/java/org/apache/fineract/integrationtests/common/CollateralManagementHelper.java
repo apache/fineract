@@ -34,11 +34,19 @@ public class CollateralManagementHelper {
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public CollateralManagementHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer createClientCollateral(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String clientId, final Integer collateralId) {
         LOG.info("---------------------------------CREATING A CLIENT_COLLATERAL---------------------------------------------");
@@ -48,6 +56,10 @@ public class CollateralManagementHelper {
                 clientCollateralAsJson(collateralId, BigDecimal.valueOf(100)), "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Object getClientCollateralData(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer collateralId, final String clientId) {
         final String CLIENT_COLLATERAL_URL = "/fineract-provider/api/v1/clients" + clientId + "/collaterals/" + collateralId + "?"
@@ -55,6 +67,10 @@ public class CollateralManagementHelper {
         return Utils.performServerGet(requestSpec, responseSpec, CLIENT_COLLATERAL_URL, "quantity");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String clientCollateralAsJson(final Integer collateralId, final BigDecimal quantity) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("collateralId", collateralId.toString());
@@ -64,6 +80,10 @@ public class CollateralManagementHelper {
         return new Gson().toJson(map);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer createCollateralProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         LOG.info("---------------------------------CREATING A COLLATERAL_PRODUCT---------------------------------------------");
         final String COLLATERAL_PRODUCT_URL = "/fineract-provider/api/v1/collateral-management" + "?" + Utils.TENANT_IDENTIFIER;
@@ -73,6 +93,10 @@ public class CollateralManagementHelper {
                 "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String collateralProductAsJson(final String name, final String currency, final String unitType, final String quality,
             final BigDecimal pctToBase, final BigDecimal baseAmount, final String locale) {
         final HashMap<String, String> map = new HashMap<>();
@@ -87,6 +111,10 @@ public class CollateralManagementHelper {
         return new Gson().toJson(map);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer updateCollateralProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer collateralId) {
         LOG.info("---------------------------------UPDATING A COLLATERAL_PRODUCT---------------------------------------------");
@@ -98,6 +126,10 @@ public class CollateralManagementHelper {
                 "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String updateCollateralProductAsString(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer collateralId) {
 
@@ -111,6 +143,10 @@ public class CollateralManagementHelper {
         return value;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String updateCollateralProductAsJson(final String name, final String currency, final String unitType,
             final String quality, final BigDecimal pctToBase, final BigDecimal baseAmount, final String locale) {
         final HashMap<String, String> map = new HashMap<>();
@@ -124,6 +160,10 @@ public class CollateralManagementHelper {
         return new Gson().toJson(map);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static HashMap updateClientCollateral(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer collateralId) {
         final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
@@ -135,6 +175,10 @@ public class CollateralManagementHelper {
                 "changes");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String updateClientCollateralAsString(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer collateralId) {
 
@@ -148,6 +192,10 @@ public class CollateralManagementHelper {
         return value;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String updateClientCollateralAsJson(final BigDecimal quantity) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("quantity", quantity.toString());

@@ -36,16 +36,28 @@ public final class SurveyHelper {
     private static final Logger LOG = LoggerFactory.getLogger(SurveyHelper.class);
     private static final String FULFIL_SURVEY_URL = "/fineract-provider/api/v1/survey/ppi_kenya_2009/clientId?" + Utils.TENANT_IDENTIFIER;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer fulfilSurvey(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         return fulfilSurvey(requestSpec, responseSpec, "04 March 2011");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer fulfilSurvey(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String activationDate) {
         LOG.info("---------------------------------FULFIL PPI ---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, FULFIL_SURVEY_URL, getTestPPIAsJSON(), "clientId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String getTestPPIAsJSON() {
         final HashMap<String, String> map = new HashMap<>();
 
@@ -68,6 +80,10 @@ public final class SurveyHelper {
         return new Gson().toJson(map);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static void verifySurveyCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedClientID) {
         LOG.info("------------------------------CHECK CLIENT DETAILS------------------------------------\n");

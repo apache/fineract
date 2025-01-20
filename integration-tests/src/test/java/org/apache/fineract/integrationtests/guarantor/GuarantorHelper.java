@@ -33,36 +33,64 @@ public class GuarantorHelper {
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public GuarantorHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer createGuarantor(final Integer loanId, final String guarantorJSON) {
         return Utils.performServerPost(this.requestSpec, this.responseSpec, LOAN_URL + loanId + GUARANTOR_API_URL + TENANT, guarantorJSON,
                 CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public HashMap updateGuarantor(final Integer guarantorId, final Integer loanId, final String guarantorJSON) {
         return Utils.performServerPut(this.requestSpec, this.responseSpec, LOAN_URL + loanId + GUARANTOR_API_URL + guarantorId + TENANT,
                 guarantorJSON, CommonConstants.RESPONSE_CHANGES);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public HashMap deleteGuarantor(final Integer guarantorId, final Integer fundId, final Integer loanId) {
         return Utils.performServerDelete(this.requestSpec, this.responseSpec,
                 LOAN_URL + loanId + GUARANTOR_API_URL + guarantorId + TENANT + "&guarantorFundingId=" + fundId, "");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public HashMap deleteGuarantor(final Integer guarantorId, final Integer loanId) {
         return Utils.performServerDelete(this.requestSpec, this.responseSpec, LOAN_URL + loanId + GUARANTOR_API_URL + guarantorId + TENANT,
                 "");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Object getGuarantor(final Integer guarantorId, final Integer loanId, final String jsonToGetBack) {
         return Utils.performServerGet(this.requestSpec, this.responseSpec, LOAN_URL + loanId + GUARANTOR_API_URL + guarantorId + TENANT,
                 jsonToGetBack);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public List getAllGuarantor(final Integer loanId) {
         return Utils.performServerGet(this.requestSpec, this.responseSpec, LOAN_URL + loanId + GUARANTOR_API_URL + TENANT, "");
     }

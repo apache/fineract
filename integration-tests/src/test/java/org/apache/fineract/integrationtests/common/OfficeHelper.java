@@ -50,35 +50,59 @@ public class OfficeHelper extends IntegrationTest {
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public OfficeHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public OfficeDomain retrieveOfficeByID(int id) {
         Object get = Utils.performServerGet(requestSpec, responseSpec, OFFICE_URL + "/" + id + "?" + Utils.TENANT_IDENTIFIER, "");
         final String json = new Gson().toJson(get);
         return new Gson().fromJson(json, new TypeToken<OfficeDomain>() {}.getType());
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static GetOfficesResponse getHeadOffice(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         String response = Utils.performServerGet(requestSpec, responseSpec,
                 OFFICE_URL + "/" + HEAD_OFFICE_ID + "?" + Utils.TENANT_IDENTIFIER);
         return GSON.fromJson(response, GetOfficesResponse.class);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer createOffice(final String openingDate) {
         String json = getAsJSON(openingDate);
         return Utils.performServerPost(this.requestSpec, this.responseSpec, OFFICE_URL + "?" + Utils.TENANT_IDENTIFIER, json,
                 CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer createOfficeWithExternalId(String externalId, final String openingDate) {
         String json = getAsJSON(externalId, openingDate);
         return Utils.performServerPost(this.requestSpec, this.responseSpec, OFFICE_URL + "?" + Utils.TENANT_IDENTIFIER, json,
                 CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer updateOffice(int id, String name, String openingDate) {
         final HashMap<String, String> map = new HashMap<String, String>();
         map.put("name", name);
@@ -104,10 +128,18 @@ public class OfficeHelper extends IntegrationTest {
                 .execute();
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String getAsJSON(final String openingDate) {
         return getAsJSON(null, openingDate);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String getAsJSON(String externalId, final String openingDate) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("parentId", "1");
@@ -122,6 +154,10 @@ public class OfficeHelper extends IntegrationTest {
         return new Gson().toJson(map);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public String importOfficeTemplate(File file) {
         String locale = "en";
         String dateFormat = "dd MMMM yyyy";
@@ -131,12 +167,20 @@ public class OfficeHelper extends IntegrationTest {
 
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public String getOutputTemplateLocation(final String importDocumentId) {
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN);
         return Utils.performServerOutputTemplateLocationGet(requestSpec, responseSpec,
                 "/fineract-provider/api/v1/imports/getOutputTemplateLocation" + "?" + Utils.TENANT_IDENTIFIER, importDocumentId);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Workbook getOfficeWorkBook(final String dateFormat) throws IOException {
         requestSpec.header(HttpHeaders.CONTENT_TYPE, "application/vnd.ms-excel");
         byte[] byteArray = Utils.performGetBinaryResponse(requestSpec, responseSpec,

@@ -38,17 +38,29 @@ public class AccountRuleHelper {
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public AccountRuleHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public ArrayList<GetAccountRulesResponse> getAccountingRules() {
         final String response = Utils.performServerGet(this.requestSpec, this.responseSpec, ACCOUNTINGRULES_URL);
         Type accountRuleListType = new TypeToken<ArrayList<GetAccountRulesResponse>>() {}.getType();
         return GSON.fromJson(response, accountRuleListType);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public PostAccountingRulesResponse createAccountRule(final Long officeId, final Account accountToCredit, final Account accountToDebit) {
         final String assetAccountJSON = new AccountingRuleBuilder()
                 .withGLAccounts(accountToCredit.getAccountID(), accountToDebit.getAccountID()).withOffice(officeId).build();

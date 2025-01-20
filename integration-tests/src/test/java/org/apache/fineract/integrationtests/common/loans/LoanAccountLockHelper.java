@@ -32,15 +32,27 @@ public class LoanAccountLockHelper extends IntegrationTest {
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public LoanAccountLockHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public String placeSoftLockOnLoanAccount(Integer loanId, String lockOwner) {
         return placeSoftLockOnLoanAccount(loanId, lockOwner, null);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public String placeSoftLockOnLoanAccount(Integer loanId, String lockOwner, String error) {
         return Utils.performServerPost(requestSpec, responseSpec,
                 INTERNAL_PLACE_LOCK_ON_LOAN_ACCOUNT_URL + loanId + "/place-lock/" + lockOwner + "?" + Utils.TENANT_IDENTIFIER, error);

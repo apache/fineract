@@ -30,6 +30,10 @@ public final class CobHelper {
 
     private CobHelper() {}
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static List<Map<String, Object>> getCobPartitions(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, int partitionSize, final String jsonReturn) {
         final String url = "/fineract-provider/api/v1/internal/cob/partitions/" + partitionSize + "?" + Utils.TENANT_IDENTIFIER;
@@ -37,6 +41,10 @@ public final class CobHelper {
         return Utils.performServerGet(requestSpec, responseSpec, url, jsonReturn);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static void fastForwardLoansLastCOBDate(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer loanId, final String cobDate) {
         final String url = "/fineract-provider/api/v1/internal/cob/fast-forward-cob-date-of-loan/" + loanId + "?" + Utils.TENANT_IDENTIFIER;

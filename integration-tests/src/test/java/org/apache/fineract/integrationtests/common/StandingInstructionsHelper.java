@@ -57,11 +57,19 @@ public class StandingInstructionsHelper {
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public StandingInstructionsHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public String build(final String clientId, final String fromAccountId, final String toAccountId, final String fromAccountType,
             final String toAccountType, final String validFrom, final String validTo, final String monthDay) {
 
@@ -94,6 +102,10 @@ public class StandingInstructionsHelper {
         return savingsApplicationJSON;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer createStandingInstruction(final String clientId, final String fromAccountId, final String toAccountId,
             final String fromAccountType, final String toAccountType, final String validFrom, final String validTo, final String monthDay) {
         log.info("-------------------------------- CREATE STANDING INSTRUCTIONS --------------------------------");
@@ -103,6 +115,10 @@ public class StandingInstructionsHelper {
                 standingInstructionAsJSON, "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public HashMap getStandingInstructionById(final String standingInstructionId) {
 
         log.info("----------------------------- RETRIEVING STANDING INSTRUCTION BY ID---------------------------");
@@ -111,6 +127,10 @@ public class StandingInstructionsHelper {
         return Utils.performServerGet(this.requestSpec, this.responseSpec, GET_STANDING_INSTRUCTION_BY_ID_URL, "");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public List<HashMap> getStandingInstructionHistory(Integer fromSavingsId, Integer fromAccountType, Integer fromClientId,
             Integer transferType) {
         final String STANDING_INSTRUCTIONS_HISTORY_URL = STANDING_INSTRUCTIONS_RUN_HISTORY_URL + "?" + Utils.TENANT_IDENTIFIER

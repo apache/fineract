@@ -37,6 +37,10 @@ public final class CurrenciesHelper {
     private static final Logger LOG = LoggerFactory.getLogger(CurrenciesHelper.class);
     private static final String CURRENCIES_URL = "/fineract-provider/api/v1/currencies";
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static ArrayList<CurrencyDomain> getAllCurrencies(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
         final String GET_ALL_CURRENCIES_URL = CURRENCIES_URL + "?" + Utils.TENANT_IDENTIFIER;
@@ -49,6 +53,10 @@ public final class CurrenciesHelper {
         return new Gson().fromJson(jsonData, new TypeToken<ArrayList<CurrencyDomain>>() {}.getType());
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static ArrayList<CurrencyDomain> getSelectedCurrencies(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
         final String GET_ALL_SELECTED_CURRENCIES_URL = CURRENCIES_URL + "?fields=selectedCurrencyOptions" + "&" + Utils.TENANT_IDENTIFIER;
@@ -58,6 +66,10 @@ public final class CurrenciesHelper {
         return new Gson().fromJson(jsonData, new TypeToken<ArrayList<CurrencyDomain>>() {}.getType());
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static CurrencyDomain getCurrencybyCode(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String code) {
         ArrayList<CurrencyDomain> currenciesList = getAllCurrencies(requestSpec, responseSpec);
@@ -69,6 +81,10 @@ public final class CurrenciesHelper {
         return null;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static ArrayList<String> updateSelectedCurrencies(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final ArrayList<String> currencies) {
         final String CURRENCIES_UPDATE_URL = CURRENCIES_URL + "?" + Utils.TENANT_IDENTIFIER;
@@ -77,6 +93,10 @@ public final class CurrenciesHelper {
         return (ArrayList<String>) hash.get("currencies");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private static String currenciesToJSON(final ArrayList<String> currencies) {
         HashMap map = new HashMap<>();
         map.put("currencies", currencies);

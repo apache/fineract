@@ -38,17 +38,29 @@ public class EntityDatatableChecksHelper {
 
     private static final Gson GSON = new JSON().getGson();
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public EntityDatatableChecksHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer createEntityDatatableCheck(final String apptableName, final String datatableName, final int status,
             final Integer productId) {
         return Utils.performServerPost(this.requestSpec, this.responseSpec, DATATABLE_CHECK_URL + "?" + Utils.TENANT_IDENTIFIER,
                 getTestEdcAsJSON(apptableName, datatableName, status, productId), "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public PostEntityDatatableChecksTemplateResponse addEntityDatatableCheck(final String apptableName, final String datatableName,
             final int status, final Integer productId) {
         final String response = Utils.performServerPost(this.requestSpec, this.responseSpec,
@@ -57,15 +69,27 @@ public class EntityDatatableChecksHelper {
         return GSON.fromJson(response, PostEntityDatatableChecksTemplateResponse.class);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer deleteEntityDatatableCheck(final Integer entityDatatableCheckId) {
         return Utils.performServerDelete(requestSpec, responseSpec,
                 DATATABLE_CHECK_URL + "/" + entityDatatableCheckId + "?" + Utils.TENANT_IDENTIFIER, "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public String retrieveEntityDatatableCheck() {
         return Utils.performServerGet(requestSpec, responseSpec, DATATABLE_CHECK_URL + "?" + Utils.TENANT_IDENTIFIER, null);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String getTestEdcAsJSON(final String apptableName, final String datatableName, final int status,
             final Integer productId) {
         final HashMap<String, Object> map = new HashMap<>();

@@ -37,17 +37,29 @@ public class HookHelper {
 
     private static final String CREATE_HOOK_URL = "/fineract-provider/api/v1/hooks?" + Utils.TENANT_IDENTIFIER;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public HookHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer createHook(final String payloadURL) {
         LOG.info("---------------------------------CREATING A HOOK---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_HOOK_URL, getTestHookAsJson(payloadURL), "resourceId");
     }
 
-    public String getTestHookAsJson(final String payloadURL) {
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
+    private String getTestHookAsJson(final String payloadURL) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("name", "Web");
         map.put("displayName", Utils.randomStringGenerator("Hook_DisplayName_", 5));
@@ -66,18 +78,30 @@ public class HookHelper {
         return new Gson().toJson(map);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer updateHook(final String payloadURL, final Long hookId) {
         LOG.info("---------------------------------UPDATING HOOK---------------------------------------------");
         final String UPDATE_HOOK_URL = "/fineract-provider/api/v1/hooks/" + hookId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPut(this.requestSpec, this.responseSpec, UPDATE_HOOK_URL, getTestHookAsJson(payloadURL), "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer deleteHook(final Long hookId) {
         LOG.info("---------------------------------DELETING HOOK---------------------------------------------");
         final String DELETE_HOOK_URL = "/fineract-provider/api/v1/hooks/" + hookId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerDelete(this.requestSpec, this.responseSpec, DELETE_HOOK_URL, "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public void verifyHookCreatedOnServer(final Long hookId) {
         LOG.info("------------------------------CHECK CREATE HOOK DETAILS------------------------------------\n");
         final String GET_URL = "/fineract-provider/api/v1/hooks/" + hookId + "?" + Utils.TENANT_IDENTIFIER;
@@ -85,6 +109,10 @@ public class HookHelper {
         assertEquals(hookId.toString(), responseHookId.toString());
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public void verifyUpdateHook(final String updateURL, final Long hookId) {
         LOG.info("------------------------------CHECK UPDATE HOOK DETAILS------------------------------------\n");
         final String GET_URL = "/fineract-provider/api/v1/hooks/" + hookId + "?" + Utils.TENANT_IDENTIFIER;
@@ -94,6 +122,10 @@ public class HookHelper {
         assertEquals(updateURL, hash.get("fieldValue"));
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public void verifyDeleteHook(final Long hookId) {
         LOG.info("------------------------------CHECK DELETE HOOK DETAILS------------------------------------\n");
         final String GET_URL = "/fineract-provider/api/v1/hooks/" + hookId + "?" + Utils.TENANT_IDENTIFIER;

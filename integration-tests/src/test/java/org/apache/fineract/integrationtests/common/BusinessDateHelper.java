@@ -38,6 +38,10 @@ public final class BusinessDateHelper extends IntegrationTest {
 
     public BusinessDateHelper() {}
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static HashMap updateBusinessDate(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final BusinessDateType type, final LocalDate date) {
         final String BUSINESS_DATE_API = "/fineract-provider/api/v1/businessdate?" + Utils.TENANT_IDENTIFIER;
@@ -52,6 +56,10 @@ public final class BusinessDateHelper extends IntegrationTest {
         return ok(fineract().businessDateManagement.updateBusinessDate(request));
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public BusinessDateResponse getBusinessDateByType(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final BusinessDateType type) {
         final String BUSINESS_DATE_API = "/fineract-provider/api/v1/businessdate/" + type.name() + "?" + Utils.TENANT_IDENTIFIER;
@@ -68,6 +76,10 @@ public final class BusinessDateHelper extends IntegrationTest {
         return ok(fineract().businessDateManagement.getBusinessDates());
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private static String buildBusinessDateRequest(BusinessDateType type, LocalDate date) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("type", type.name());

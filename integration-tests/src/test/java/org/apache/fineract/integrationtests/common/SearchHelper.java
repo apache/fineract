@@ -39,6 +39,10 @@ public final class SearchHelper {
 
     private static final String SEARCH_URL = "/fineract-provider/api/v1/search?" + Utils.TENANT_IDENTIFIER;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static ArrayList<GetSearchResponse> getSearch(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String query, final Boolean exactMatch, final String resources) {
         final String urlSearch = SEARCH_URL + "&exactMatch=" + exactMatch.toString() + "&query=" + query + "&resource=" + resources;

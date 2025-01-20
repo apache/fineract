@@ -43,34 +43,58 @@ public class GroupHelper {
     public static final String DATE_FORMAT = "dd MMMM yyyy";
     public static final String DATE_TIME_FORMAT = "dd MMMM yyyy HH:mm";
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public GroupHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer createGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             @SuppressWarnings("unused") final boolean active) {
         LOG.info("---------------------------------CREATING A GROUP---------------------------------------------");
         return createGroup(requestSpec, responseSpec, "04 March 2011");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer createGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String activationDate) {
         LOG.info("---------------------------------CREATING A GROUP---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_GROUP_URL, getTestGroupAsJSON(true, activationDate), "groupId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer createGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         LOG.info("---------------------------------CREATING A GROUP---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_GROUP_URL, getTestGroupAsJSON(false, ""), "groupId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Object createGroupWithError(final String jsonAttributeToGetBack) {
         LOG.info("---------------------------------CREATING A GROUP WITH ERROR---------------------------------------------");
         return Utils.performServerPost(this.requestSpec, this.responseSpec, CREATE_GROUP_URL, getTestGroupAsJSON(false, ""),
                 jsonAttributeToGetBack);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer createGroupPendingWithDatatable(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String registeredTableName) {
         LOG.info("-------------------------- CREATING A GROUP WITH DATATABLES --------------------------------");
@@ -78,6 +102,10 @@ public class GroupHelper {
                 "groupId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer associateClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String groupId, final String clientMember) {
         final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "?command=associateClients&"
@@ -86,6 +114,10 @@ public class GroupHelper {
         return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, associateClientAsJSON(clientMember), "groupId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer disAssociateClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String groupId, final String clientMember) {
         final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "?command=disassociateClients&"
@@ -94,6 +126,10 @@ public class GroupHelper {
         return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, associateClientAsJSON(clientMember), "groupId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer activateGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String groupId) {
         final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "?command=activate&" + Utils.TENANT_IDENTIFIER;
@@ -101,6 +137,10 @@ public class GroupHelper {
         return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, activateGroupAsJSON(""), "groupId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer updateGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String name,
             final String groupId) {
         final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER;
@@ -108,6 +148,10 @@ public class GroupHelper {
         return Utils.performServerPut(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, updateGroupAsJSON(name), "groupId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer deleteGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String groupId) {
         final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER;
@@ -115,6 +159,10 @@ public class GroupHelper {
         return Utils.performServerDelete(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, "groupId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Object assignStaff(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String groupId,
             final Long staffId) {
         final String GROUP_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER
@@ -123,6 +171,10 @@ public class GroupHelper {
         return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSIGN_STAFF_URL, assignStaffAsJSON(staffId), "changes");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Object assignStaffInheritStaffForClientAccounts(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String groupId, final String staffId) {
         final String GROUP_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER
@@ -132,6 +184,10 @@ public class GroupHelper {
                 assignStaffAndInheritStaffForClientAccountsAsJSON(staffId), "changes");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String getTestGroupAsJSON(final boolean active, final String activationDate) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("officeId", "1");
@@ -151,6 +207,10 @@ public class GroupHelper {
         return new Gson().toJson(map);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String associateClientAsJSON(final String clientMember) {
         final HashMap<String, List<String>> map = new HashMap<>();
         final List<String> list = new ArrayList<>();
@@ -160,6 +220,10 @@ public class GroupHelper {
         return new Gson().toJson(map);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String activateGroupAsJSON(final String activationDate) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("dateFormat", "dd MMMM yyyy");
@@ -174,6 +238,10 @@ public class GroupHelper {
         return new Gson().toJson(map);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String updateGroupAsJSON(final String name) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("name", name);
@@ -181,6 +249,10 @@ public class GroupHelper {
         return new Gson().toJson(map);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String assignStaffAsJSON(final Long staffId) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("staffId", staffId);
@@ -188,6 +260,10 @@ public class GroupHelper {
         return new Gson().toJson(map);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String assignStaffAndInheritStaffForClientAccountsAsJSON(final String staffId) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("staffId", staffId);
@@ -196,6 +272,10 @@ public class GroupHelper {
         return new Gson().toJson(map);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static void verifyGroupCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupID) {
         LOG.info("------------------------------CHECK GROUP DETAILS------------------------------------\n");
@@ -204,6 +284,10 @@ public class GroupHelper {
         assertEquals(generatedGroupID, responseGroupID, "ERROR IN CREATING THE GROUP");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static void verifyGroupDetails(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupID, final String field, final String expectedValue) {
         LOG.info("------------------------------CHECK GROUP DETAILS------------------------------------\n");
@@ -212,6 +296,10 @@ public class GroupHelper {
         assertEquals(expectedValue, responseValue, "ERROR IN CREATING THE GROUP");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static void verifyGroupActivatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupID, final boolean generatedGroupStatus) {
         LOG.info("------------------------------CHECK GROUP STATUS------------------------------------\n");
@@ -220,6 +308,10 @@ public class GroupHelper {
         assertEquals(generatedGroupStatus, responseGroupStatus, "ERROR IN ACTIVATING THE GROUP");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static void verifyGroupMembers(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupID, final Integer groupMember) {
         List<String> list = new ArrayList<>();
@@ -231,6 +323,10 @@ public class GroupHelper {
         assertTrue(list.toString().contains("id=" + groupMember.toString()), "ERROR IN GROUP MEMBER");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static void verifyOrphanGroupDetails(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             int officeId) {
         LOG.info("------------------------------CHECK ORPHAN GROUP DETAILS------------------------------------\n");
@@ -240,6 +336,10 @@ public class GroupHelper {
         assertEquals("[]", responseValue); // Since, all groups got center as Parent, OrphanGroups is null.
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static void verifyEmptyGroupMembers(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupID) {
         List<String> list = new ArrayList<>();
@@ -251,6 +351,10 @@ public class GroupHelper {
         assertEquals(list, null, "GROUP MEMBER LIST NOT EMPTY");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static void verifyGroupDeleted(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupID) {
         List<String> list = new ArrayList<>();
@@ -260,6 +364,10 @@ public class GroupHelper {
         assertFalse(list.toString().contains("id=" + generatedGroupID.toString()), "GROUP NOT DELETED");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     // Glim_Gsim_testing
     public static List<String> verifyRetrieveGlimAccountsByGroupId(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final Integer groupID) {
@@ -271,6 +379,10 @@ public class GroupHelper {
         return list;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static List<String> verifyRetrieveGlimAccountsByGlimId(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final Integer glimId) {
         List<String> list = new ArrayList<>();
@@ -281,6 +393,10 @@ public class GroupHelper {
         return list;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static List<String> verifyRetrieveGsimAccounts(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer groupID) {
         List<String> list = new ArrayList<>();
@@ -295,6 +411,10 @@ public class GroupHelper {
         return Utils.uniqueRandomStringGenerator(prefix, lenOfRandomSuffix);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String getTestGroupWithDatatableAsJson(final String registeredTableName) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("officeId", "1");
@@ -309,6 +429,10 @@ public class GroupHelper {
         return requestJson;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String getTestDatatableAsJson(HashMap<String, Object> map, final String registeredTableName) {
         List<HashMap<String, Object>> datatablesListMap = new ArrayList<>();
         HashMap<String, Object> datatableMap = new HashMap<>();

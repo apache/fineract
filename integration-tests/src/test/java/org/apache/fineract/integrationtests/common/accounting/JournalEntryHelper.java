@@ -39,6 +39,10 @@ public class JournalEntryHelper {
     private final ResponseSpecification responseSpec;
     private static final Gson GSON = new JSON().getGson();
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public JournalEntryHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
@@ -80,6 +84,10 @@ public class JournalEntryHelper {
         return getJournalEntryTransactionId(account, date, accountEntries);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private void checkJournalEntry(final Integer officeId, final Account account, final String date, final JournalEntry... accountEntries) {
         final String url = createURLForGettingAccountEntries(account, date, officeId);
         final ArrayList<HashMap> response = Utils.performServerGet(this.requestSpec, this.responseSpec, url, "pageItems");
@@ -99,6 +107,10 @@ public class JournalEntryHelper {
         }
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private String getJournalEntryTransactionId(final Account account, final String date, final JournalEntry... accountEntries) {
         final String url = createURLForGettingAccountEntries(account, date, null);
         final ArrayList<HashMap> response = Utils.performServerGet(this.requestSpec, this.responseSpec, url, "pageItems");
@@ -115,6 +127,10 @@ public class JournalEntryHelper {
         return "";
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private String createURLForGettingAccountEntries(final Account account, final String date, final Integer officeId) {
         String url = new String("/fineract-provider/api/v1/journalentries?glAccountId=" + account.getAccountID() + "&type="
                 + account.getAccountType() + "&fromDate=" + date + "&toDate=" + date + "&tenantIdentifier=default"
@@ -125,17 +141,29 @@ public class JournalEntryHelper {
         return url;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public ArrayList<HashMap> getJournalEntriesByTransactionId(final String transactionId) {
         final String url = createURLForGettingAccountEntriesByTransactionId(transactionId);
         final ArrayList<HashMap> response = Utils.performServerGet(this.requestSpec, this.responseSpec, url, "pageItems");
         return response;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private String createURLForGettingAccountEntriesByTransactionId(final String transactionId) {
         return new String("/fineract-provider/api/v1/journalentries?transactionId=" + transactionId + "&tenantIdentifier=default"
                 + "&orderBy=id&sortOrder=desc&locale=en&dateFormat=dd MMMM yyyy");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public GetJournalEntriesTransactionIdResponse getJournalEntries(final String transactionId) {
         log.info("Getting GL Journal entries for transaction id {}", transactionId);
         final String url = createURLForGettingAccountEntriesByTransactionId(transactionId);
@@ -144,6 +172,10 @@ public class JournalEntryHelper {
         return GSON.fromJson(response, GetJournalEntriesTransactionIdResponse.class);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public GetJournalEntriesTransactionIdResponse getJournalEntriesForLoan(final Long loanId) {
         log.info("Getting GL Journal entries for loan id {}", loanId);
         final String url = "/fineract-provider/api/v1/journalentries?loanId=" + loanId + "&tenantIdentifier=default"

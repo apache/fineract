@@ -34,21 +34,37 @@ public class VariableIntallmentsTransactionHelper {
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public VariableIntallmentsTransactionHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Map retrieveSchedule(Integer loanId) {
         String url = URL + loanId + "?associations=repaymentSchedule&exclude=guarantors&" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, url, "");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public HashMap validateVariations(final String exceptions, Integer loanId) {
         String url = URL + loanId + "/schedule?command=calculateLoanSchedule&" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(this.requestSpec, this.responseSpec, url, exceptions, "");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public HashMap submitVariations(final String exceptions, Integer loanId) {
         String url = URL + loanId + "/schedule?command=addVariations&" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(this.requestSpec, this.responseSpec, url, exceptions, "");

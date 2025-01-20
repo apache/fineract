@@ -70,6 +70,10 @@ public final class ExternalEventHelper {
         }
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static List<ExternalEventDTO> getAllExternalEvents(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
         final String url = "/fineract-provider/api/v1/internal/externalevents?" + Utils.TENANT_IDENTIFIER;
@@ -78,6 +82,10 @@ public final class ExternalEventHelper {
         return GSON.fromJson(response, new TypeToken<List<ExternalEventDTO>>() {}.getType());
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static List<ExternalEventDTO> getAllExternalEvents(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, Filter filter) {
         final String url = "/fineract-provider/api/v1/internal/externalevents?" + filter.toQueryParams() + Utils.TENANT_IDENTIFIER;
@@ -86,12 +94,20 @@ public final class ExternalEventHelper {
         return GSON.fromJson(response, new TypeToken<List<ExternalEventDTO>>() {}.getType());
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static void deleteAllExternalEvents(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         final String url = "/fineract-provider/api/v1/internal/externalevents?" + Utils.TENANT_IDENTIFIER;
         log.info("-----------------------------DELETE ALL EXTERNAL EVENTS PARTITIONS----------------------------------------");
         Utils.performServerDelete(requestSpec, responseSpec, url, null);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static void changeEventState(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, String eventName,
             boolean status) {
         final Map<String, Boolean> updatedConfigurations = ExternalEventConfigurationHelper.updateExternalEventConfigurations(requestSpec,

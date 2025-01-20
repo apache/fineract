@@ -102,6 +102,10 @@ public class SavingsProductHelper {
     private Integer gsimID = null;
     private String nominalAnnualInterestRateOverdraft = null;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public String build() {
         final HashMap<String, String> map = new HashMap<>();
 
@@ -289,6 +293,10 @@ public class SavingsProductHelper {
         return this;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private Map<String, String> getAccountMappingForCashBased() {
         final Map<String, String> map = new HashMap<>();
         if (accountList != null) {
@@ -319,6 +327,10 @@ public class SavingsProductHelper {
         return map;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private Map<String, String> getAccountMappingForAccrualBased() {
         final Map<String, String> map = new HashMap<>();
         if (accountList != null) {
@@ -352,11 +364,19 @@ public class SavingsProductHelper {
         return map;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer createSavingsProduct(final String savingsProductJSON, final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_SAVINGS_PRODUCT_URL, savingsProductJSON, "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static void verifySavingsProductCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedProductID) {
         LOG.info("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
@@ -373,6 +393,10 @@ public class SavingsProductHelper {
         return this;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static GetSavingsProductsProductIdResponse getSavingsProductById(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final Integer productId) {
         LOG.info("-------------------- RETRIEVING SAVINGS DEPOSIT PRODUCT BY ID --------------------------");

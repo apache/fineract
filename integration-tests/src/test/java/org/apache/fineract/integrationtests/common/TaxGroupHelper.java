@@ -37,6 +37,10 @@ public final class TaxGroupHelper {
     private static final Logger LOG = LoggerFactory.getLogger(TaxGroupHelper.class);
     private static final String CREATE_TAX_COMPONENT_URL = "/fineract-provider/api/v1/taxes/group?" + Utils.TENANT_IDENTIFIER;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer createTaxGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Collection<Integer> taxComponentIds) {
         LOG.info("---------------------------------CREATING A TAX GROUP---------------------------------------------");
@@ -44,6 +48,10 @@ public final class TaxGroupHelper {
                 "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String getTaxGroupAsJSON(final Collection<Integer> taxComponentIds) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("name", randomNameGenerator("Tax_component_Name_", 5));
@@ -53,6 +61,10 @@ public final class TaxGroupHelper {
         return new Gson().toJson(map);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static List<HashMap<String, String>> getTaxGroupComponents(final Collection<Integer> taxComponentIds) {
         List<HashMap<String, String>> taxGroupComponents = new ArrayList<>();
         for (Integer taxComponentId : taxComponentIds) {
@@ -61,6 +73,10 @@ public final class TaxGroupHelper {
         return taxGroupComponents;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static HashMap<String, String> getTaxComponentMap(final Integer taxComponentId) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("taxComponentId", String.valueOf(taxComponentId));

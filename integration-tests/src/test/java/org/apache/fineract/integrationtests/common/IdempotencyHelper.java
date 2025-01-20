@@ -40,18 +40,34 @@ public final class IdempotencyHelper {
 
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String toJsonString(final List<BusinessStep> batchRequests) {
         return new Gson().toJson(new BusinessStepWrapper(batchRequests));
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static JobBusinessStepConfigData configuredBusinessStepFromJsonString(final String json) {
         return new Gson().fromJson(json, new TypeToken<JobBusinessStepConfigData>() {}.getType());
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private static JobBusinessStepDetail availableBusinessStepFromJsonString(final String json) {
         return new Gson().fromJson(json, new TypeToken<JobBusinessStepDetail>() {}.getType());
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static JobBusinessStepConfigData getConfiguredBusinessStepsByJobName(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, String jobName) {
         final String response = Utils.performServerGet(requestSpec, responseSpec,
@@ -60,6 +76,10 @@ public final class IdempotencyHelper {
         return configuredBusinessStepFromJsonString(response);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static JobBusinessStepDetail getAvailableBusinessStepsByJobName(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, String jobName) {
         final String response = Utils.performServerGet(requestSpec, responseSpec,
@@ -68,6 +88,10 @@ public final class IdempotencyHelper {
         return availableBusinessStepFromJsonString(response);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Response updateBusinessStepOrder(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             String jobName, String jsonBodyToSend, String idempotencyKey) {
         Response response = Utils.performServerPutRaw(requestSpec, responseSpec,
@@ -77,6 +101,10 @@ public final class IdempotencyHelper {
         return response;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Response updateBusinessStepOrderWithError(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, String jobName, String jsonBodyToSend, String idempotencyKey) {
         String url = BUSINESS_STEPS_API_URL_START + jobName + BUSINESS_STEPS_API_URL_END;

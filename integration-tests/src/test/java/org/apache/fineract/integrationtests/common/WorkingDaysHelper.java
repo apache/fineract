@@ -37,12 +37,20 @@ public final class WorkingDaysHelper {
     private static final String WORKINGDAYS_URL = "/fineract-provider/api/v1/workingdays";
     private static final SecureRandom random = new SecureRandom();
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Object updateWorkingDays(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         final String UPDATE_WORKINGDAYS_URL = WORKINGDAYS_URL + "?" + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------UPDATE WORKINGDAY---------------------------------------------");
         return Utils.performServerPut(requestSpec, responseSpec, UPDATE_WORKINGDAYS_URL, updateWorkingDaysAsJson(), "");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Object updateWorkingDaysWithWrongRecurrence(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, String jsonAttributeToGetback) {
         final String UPDATE_WORKINGDAYS_URL = WORKINGDAYS_URL + "?" + Utils.TENANT_IDENTIFIER;
@@ -51,12 +59,20 @@ public final class WorkingDaysHelper {
                 jsonAttributeToGetback);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Object updateWorkingDaysWeekDays(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         final String UPDATE_WORKINGDAYS_URL = WORKINGDAYS_URL + "?" + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------UPDATE WORKINGDAY---------------------------------------------");
         return Utils.performServerPut(requestSpec, responseSpec, UPDATE_WORKINGDAYS_URL, updateWorkingWeekDaysDaysAsJson(), "");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     @SuppressFBWarnings(value = {
             "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public static String updateWorkingWeekDaysDaysAsJson() {
@@ -69,6 +85,10 @@ public final class WorkingDaysHelper {
         return new Gson().toJson(map);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     @SuppressFBWarnings(value = {
             "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public static String updateWorkingDaysAsJson() {
@@ -81,6 +101,10 @@ public final class WorkingDaysHelper {
         return new Gson().toJson(map);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     @SuppressFBWarnings(value = {
             "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public static String updateWorkingDayWithWrongRecur() {
@@ -93,11 +117,19 @@ public final class WorkingDaysHelper {
         return new Gson().toJson(map);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static int workingDaysId(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         HashMap<String, Object> workingDays = getAllWorkingDays(requestSpec, responseSpec);
         return (int) workingDays.get("id");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static HashMap<String, Object> getAllWorkingDays(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
 

@@ -35,55 +35,99 @@ public class ProvisioningTransactionHelper {
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public ProvisioningTransactionHelper(RequestSpecification requestSpec, ResponseSpecification responeSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responeSpec;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public ArrayList retrieveAllProvisioningCategories() {
         return Utils.performServerGet(requestSpec, responseSpec, PROVISIONING_CATEGORY_URL, "");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer createProvisioningCriteria(final String provsioningCriteriaJson) {
         return Utils.performServerPost(this.requestSpec, this.responseSpec, CREATE_PROVISIONING_CRITERIA_URL, provsioningCriteriaJson,
                 "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Map retrieveProvisioningCriteria(final Integer criteriaId) {
         String url = "/fineract-provider/api/v1/provisioningcriteria/" + criteriaId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, url, "");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer updateProvisioningCriteria(final Integer criteriaId, final String provsioningCriteriaJson) {
         String url = "/fineract-provider/api/v1/provisioningcriteria/" + criteriaId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPut(this.requestSpec, this.responseSpec, url, provsioningCriteriaJson, "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer deleteProvisioningCriteria(final Integer criteriaId) {
         String url = "/fineract-provider/api/v1/provisioningcriteria/" + criteriaId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerDelete(this.requestSpec, this.responseSpec, url, "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer createProvisioningEntries(final String provsioningCriteriaJson) {
         return Utils.performServerPost(this.requestSpec, this.responseSpec, CREATE_PROVISIONING_ENTRY_URL, provsioningCriteriaJson,
                 "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer updateProvisioningEntry(final String command, final Integer entryId, String jsonBody) {
         String url = "/fineract-provider/api/v1/provisioningentries/" + entryId + "?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(requestSpec, responseSpec, url, jsonBody, "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Map retrieveProvisioningEntry(final Integer provisioningEntry) {
         String url = "/fineract-provider/api/v1/provisioningentries/" + provisioningEntry + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, url, "");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Map retrieveProvisioningEntries(final Integer provisioningEntry) {
         String url = "/fineract-provider/api/v1/provisioningentries/entries?entryId=" + provisioningEntry + "&" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, url, "");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Map retrieveAllProvisioningEntries() {
         String url = "/fineract-provider/api/v1/provisioningentries?dateFormat=dd MMMM yyyy" + "&" + "locale=en" + "&"
                 + Utils.TENANT_IDENTIFIER;

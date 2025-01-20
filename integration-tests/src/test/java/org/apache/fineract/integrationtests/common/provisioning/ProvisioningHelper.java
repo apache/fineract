@@ -39,6 +39,10 @@ public final class ProvisioningHelper {
 
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     @SuppressFBWarnings(value = {
             "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public static Map createProvisioingCriteriaJson(ArrayList<Integer> loanProducts, ArrayList categories, Account liability,
@@ -55,6 +59,10 @@ public final class ProvisioningHelper {
         return map;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String createProvisioningEntryJson() {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("createjournalentries", Boolean.FALSE);
@@ -66,6 +74,10 @@ public final class ProvisioningHelper {
         return provisioningEntryCreateJson;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String createProvisioningEntryJsonWithJournalsEnabled() {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("createjournalentries", Boolean.TRUE);
@@ -77,6 +89,10 @@ public final class ProvisioningHelper {
         return provisioningEntryCreateJson;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private static ArrayList<HashMap<String, Integer>> addLoanProducts(ArrayList<Integer> loanProducts) {
         ArrayList<HashMap<String, Integer>> list = new ArrayList<>();
         for (int i = 0; i < loanProducts.size(); i++) {
@@ -87,6 +103,10 @@ public final class ProvisioningHelper {
         return list;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static ArrayList<HashMap<String, Object>> addProvisioningCategories(ArrayList categories, Account liability, Account expense) {
         ArrayList<HashMap<String, Object>> list = new ArrayList<>();
         int minStart = 0;

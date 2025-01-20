@@ -45,11 +45,19 @@ public class AccountTransferHelper {
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public AccountTransferHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public String build(final String fromAccountId, final String fromClientId, final String toAccountId, final String toClientId,
             final String fromAccountType, final String toAccountType, final String transferAmount) {
 
@@ -77,6 +85,10 @@ public class AccountTransferHelper {
         return this;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer accountTransfer(final Integer fromClientId, final Integer fromAccountId, final Integer toClientId,
             final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
         LOG.info("--------------------------------ACCOUNT TRANSFER--------------------------------");
@@ -88,6 +100,10 @@ public class AccountTransferHelper {
                 accountTransferJSON, "savingsId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Object nonExistentAccountTransfer(final Integer fromClientId, final Integer fromAccountId, final Integer toClientId,
             final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
         LOG.info("--------------------------------ACCOUNT TRANSFER--------------------------------");
@@ -101,6 +117,10 @@ public class AccountTransferHelper {
                 accountTransferJSON, "savingsId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Object insufficientBalanceAccountTransfer(final Integer fromClientId, final Integer fromAccountId, final Integer toClientId,
             final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
         LOG.info("--------------------------------ACCOUNT TRANSFER--------------------------------");
@@ -114,6 +134,10 @@ public class AccountTransferHelper {
                 accountTransferJSON, "savingsId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Object invalidAccountTransfer(final Integer fromClientId, final Integer fromAccountId, final Integer toClientId,
             final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
         LOG.info("--------------------------------ACCOUNT TRANSFER--------------------------------");
@@ -127,6 +151,10 @@ public class AccountTransferHelper {
                 accountTransferJSON, "savingsId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Object accountTransferWithInvalidDate(final Integer fromClientId, final Integer fromAccountId, final Integer toClientId,
             final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
         LOG.info("--------------------------------ACCOUNT TRANSFER--------------------------------");
@@ -138,6 +166,10 @@ public class AccountTransferHelper {
                 accountTransferJSON, "savingsId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer refundLoanByTransfer(final String date, final Integer fromClientId, final Integer fromAccountId,
             final Integer toClientId, final Integer toAccountId, final String fromAccountType, final String toAccountType,
             final String transferAmount) {

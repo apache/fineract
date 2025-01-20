@@ -38,11 +38,19 @@ public class MakercheckersHelper {
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public MakercheckersHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public List<Map<String, Object>> getMakerCheckerList(Map<String, String> queryParams) {
         StringBuilder url = new StringBuilder(MAKERCHECKER_URL).append("?").append(Utils.TENANT_IDENTIFIER);
         if (queryParams != null) {
@@ -55,10 +63,18 @@ public class MakercheckersHelper {
         return GSON.fromJson(response, makerCheckerList);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public void approveMakerCheckerEntry(Long auditId) {
         approveMakerCheckerEntry(this.requestSpec, this.responseSpec, auditId);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static HashMap<?, ?> approveMakerCheckerEntry(RequestSpecification requestSpec, ResponseSpecification responseSpec,
             Long auditId) {
         String url = MAKERCHECKER_URL + "/" + auditId + "?command=approve&" + Utils.TENANT_IDENTIFIER;

@@ -38,11 +38,19 @@ public class CreditBureauConfigurationHelper {
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public CreditBureauConfigurationHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static List<Map<String, Object>> getCreditBureauConfiguration(RequestSpecification requestSpec,
             ResponseSpecification responseSpec, String creditBureauId) {
         LOG.info("---------------------------------GET A CREDIT_BUREAU_CONFIGURATION---------------------------------------------");
@@ -51,11 +59,19 @@ public class CreditBureauConfigurationHelper {
         return JsonPath.from(Utils.performServerGet(requestSpec, responseSpec, CREDITBUREAU_CONFIGURATION_URL)).getList("");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer createCreditBureauConfiguration(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             String configKey) {
         return createCreditBureauConfiguration(requestSpec, responseSpec, "1", configKey);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer createCreditBureauConfiguration(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String creditBureauId, String configKey, String value, String description) {
         LOG.info("---------------------------------CREATING A CREDIT_BUREAU_CONFIGURATION---------------------------------------------");
@@ -65,6 +81,10 @@ public class CreditBureauConfigurationHelper {
                 creditBureauConfigurationAsJson(configKey, value, description), "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer createCreditBureauConfiguration(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String creditBureauId, String configKey) {
         LOG.info("---------------------------------CREATING A CREDIT_BUREAU_CONFIGURATION---------------------------------------------");
@@ -76,7 +96,10 @@ public class CreditBureauConfigurationHelper {
      * ResponseSpecification responseSpec, final Integer ConfigurationId) { return
      * updateCreditBureauConfiguration(requestSpec, responseSpec, ConfigurationId); }
      */
-
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String updateCreditBureauConfiguration(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer ConfigurationId) {
 
@@ -91,6 +114,10 @@ public class CreditBureauConfigurationHelper {
         return value;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Object updateCreditBureauConfiguration(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer ConfigurationId, String configKey, final String updateConfigKeyValue) {
         LOG.info("---------------------------------UPDATING A CREDIT_BUREAU_CONFIGURATION---------------------------------------------");
@@ -100,6 +127,10 @@ public class CreditBureauConfigurationHelper {
                 updateCreditBureauConfigurationAsJson(configKey, updateConfigKeyValue), "changes");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Object getOrganizationCreditBureauConfiguration(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
         LOG.info("---------------------------------GETTING A CREDIT_BUREAU_CONFIGURATION---------------------------------------------");
@@ -108,6 +139,10 @@ public class CreditBureauConfigurationHelper {
         return Utils.performServerGet(requestSpec, responseSpec, CREDITBUREAU_CONFIGURATION_URL, null);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Object addOrganisationCreditBureau(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String creditBureauId, String alias, boolean isActive) {
         LOG.info("---------------------------------CREATING A CREDIT_BUREAU_CONFIGURATION---------------------------------------------");
@@ -116,6 +151,10 @@ public class CreditBureauConfigurationHelper {
         return Utils.performServerPost(requestSpec, responseSpec, URL, addOrganizationCreditBureauCreateAsJson(alias, isActive), null);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Object updateOrganisationCreditBureau(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String creditBureauId, boolean isActive) {
         LOG.info("---------------------------------CREATING A CREDIT_BUREAU_CONFIGURATION---------------------------------------------");
@@ -124,6 +163,10 @@ public class CreditBureauConfigurationHelper {
                 null);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String addOrganizationCreditBureauCreateAsJson(final String alias, final boolean isActive) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("alias", alias);
@@ -132,6 +175,10 @@ public class CreditBureauConfigurationHelper {
         return new Gson().toJson(map);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String updateOrganizationCreditBureauCreateAsJson(final String creditBureauId, final boolean isActive) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("creditBureauId", creditBureauId);
@@ -140,6 +187,10 @@ public class CreditBureauConfigurationHelper {
         return new Gson().toJson(map);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String creditBureauConfigurationAsJson(final String configkey, final String value, final String description) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("configkey", configkey);
@@ -149,6 +200,10 @@ public class CreditBureauConfigurationHelper {
         return new Gson().toJson(map);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String updateCreditBureauConfigurationAsJson(final String configKey, final String value) {
         final HashMap<String, String> map = new HashMap<>();
         if (configKey != null) {

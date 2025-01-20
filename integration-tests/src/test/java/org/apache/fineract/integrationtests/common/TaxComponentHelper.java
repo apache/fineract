@@ -35,6 +35,10 @@ public final class TaxComponentHelper {
     private static final Logger LOG = LoggerFactory.getLogger(TaxComponentHelper.class);
     private static final String CREATE_TAX_COMPONENT_URL = "/fineract-provider/api/v1/taxes/component?" + Utils.TENANT_IDENTIFIER;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer createTaxComponent(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String percentage, final Integer liabilityAccountId) {
         LOG.info("---------------------------------CREATING A TAX COMPONENT---------------------------------------------");
@@ -42,6 +46,10 @@ public final class TaxComponentHelper {
                 getTaxComponentAsJSON(percentage, liabilityAccountId), "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String getTaxComponentAsJSON(final String percentage, final Integer creditAccountId) {
         final HashMap<String, String> map = getBasicTaxComponentMap(percentage);
         if (creditAccountId != null) {
@@ -52,6 +60,10 @@ public final class TaxComponentHelper {
         return new Gson().toJson(map);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static HashMap<String, String> getBasicTaxComponentMap(final String percentage) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("name", randomNameGenerator("Tax_component_Name_", 5));

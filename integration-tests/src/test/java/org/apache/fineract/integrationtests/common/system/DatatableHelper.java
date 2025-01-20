@@ -62,21 +62,37 @@ public class DatatableHelper extends IntegrationTest {
         this(initializeDefaultRequestSpecification(), initializeDefaultResponseSpecification());
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public DatatableHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public <T> T createDatatable(final String json, final String jsonAttributeToGetBack) {
         return Utils.performServerPost(this.requestSpec, this.responseSpec, DATATABLE_URL + "?" + Utils.TENANT_IDENTIFIER, json,
                 jsonAttributeToGetBack);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public String createDatatable(final String apptableName, final boolean multiRow) {
         return Utils.performServerPost(this.requestSpec, this.responseSpec, DATATABLE_URL + "?" + Utils.TENANT_IDENTIFIER,
                 getTestDatatableAsJSON(apptableName, multiRow), "resourceIdentifier");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public PostDataTablesResponse createDatatable(final String json) {
         final String response = Utils.performServerPost(this.requestSpec, this.responseSpec, DATATABLE_URL + "?" + Utils.TENANT_IDENTIFIER,
                 json);
@@ -87,6 +103,10 @@ public class DatatableHelper extends IntegrationTest {
         return ok(fineract().dataTables.createDatatable(request));
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static void verifyDatatableCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String generatedDatatableName) {
         LOG.info("------------------------------CHECK DATATABLE DETAILS------------------------------------\n");
@@ -99,12 +119,20 @@ public class DatatableHelper extends IntegrationTest {
         return ok(fineract().dataTables.getDatatable(dataTableName));
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public String runDatatableQuery(final String datatableName, final String columnFilter, final String valueFilter,
             final String resultColumns) {
         return Utils.performServerGet(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/query" + "?columnFilter="
                 + columnFilter + "&valueFilter=" + valueFilter + "&resultColumns=" + resultColumns + "&" + Utils.TENANT_IDENTIFIER);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Map<String, Object> queryDatatable(String dataTableName, PagedLocalRequestAdvancedQueryData request) {
         String response = ok(fineract().dataTables.advancedQuery(dataTableName, request));
         return JsonPath.from(response).get("");
@@ -114,23 +142,39 @@ public class DatatableHelper extends IntegrationTest {
         return ok(fineract().dataTables.updateDatatable(dataTableName, request));
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public PutDataTablesResponse updateDatatable(String dataTableName, final String json) {
         final String response = Utils.performServerPut(this.requestSpec, this.responseSpec,
                 DATATABLE_URL + "/" + dataTableName + "?" + Utils.TENANT_IDENTIFIER, json);
         return GSON.fromJson(response, PutDataTablesResponse.class);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public String deleteDatatable(final String datatableName) {
         return Utils.performServerDelete(this.requestSpec, this.responseSpec,
                 DATATABLE_URL + "/" + datatableName + "?" + Utils.TENANT_IDENTIFIER, "resourceIdentifier");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public <T> T createDatatableEntry(final String datatableName, final Integer apptableId, final boolean genericResultSet,
             final String json) {
         return Utils.performServerPost(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/" + apptableId
                 + "?genericResultSet=" + genericResultSet + "&" + Utils.TENANT_IDENTIFIER, json, "");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer createDatatableEntry(final String apptableName, final String datatableName, final Integer apptableId,
             final boolean genericResultSet, final String dateFormat, final String jsonAttributeToGetBack) {
         return Utils.performServerPost(
@@ -139,6 +183,10 @@ public class DatatableHelper extends IntegrationTest {
                 getTestDatatableEntryAsJSON(dateFormat), jsonAttributeToGetBack);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public PostDataTablesAppTableIdResponse addDatatableEntry(final String datatableName, final Integer apptableId,
             final boolean genericResultSet, final String json) {
         final String response = Utils.performServerPost(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/"
@@ -146,11 +194,19 @@ public class DatatableHelper extends IntegrationTest {
         return GSON.fromJson(response, PostDataTablesAppTableIdResponse.class);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public String readDatatableEntry(final String datatableName, final Integer resourceId, final boolean genericResultset) {
         return Utils.performServerGet(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/" + resourceId
                 + "?genericResultSet=" + String.valueOf(genericResultset) + "&" + Utils.TENANT_IDENTIFIER);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public <T> T readDatatableEntry(final String datatableName, final Integer resourceId, final boolean genericResultset,
             final Integer datatableResourceId, final String jsonAttributeToGetBack) {
         if (datatableResourceId == null) {
@@ -164,6 +220,10 @@ public class DatatableHelper extends IntegrationTest {
         }
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Date readDatatableEntry(final String datatableName, final Integer resourceId, final boolean genericResultset, final int position,
             final String jsonAttributeToGetBack) {
         final JsonElement jsonElement = Utils.performServerGetArray(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName
@@ -172,18 +232,30 @@ public class DatatableHelper extends IntegrationTest {
         return Utils.convertJsonElementAsDate(jsonElement);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public <T> T updateDatatableEntry(final String datatableName, final Integer apptableId, final boolean genericResultSet,
             final String json) {
         return Utils.performServerPut(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/" + apptableId
                 + "?genericResultSet=" + genericResultSet + "&" + Utils.TENANT_IDENTIFIER, json, "");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public <T> T updateDatatableEntry(final String datatableName, final Integer apptableId, final Integer entryId,
             final boolean genericResultSet, final String json) {
         return Utils.performServerPut(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/" + apptableId + "/"
                 + entryId + "?genericResultSet=" + genericResultSet + "&" + Utils.TENANT_IDENTIFIER, json, "");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public PutDataTablesAppTableIdDatatableIdResponse updateDatatableEntry(final String datatableName, final Integer apptableId,
             final Integer entryId, final String json) {
         final String response = Utils.performServerPut(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/"
@@ -191,6 +263,10 @@ public class DatatableHelper extends IntegrationTest {
         return GSON.fromJson(response, PutDataTablesAppTableIdDatatableIdResponse.class);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public PutDataTablesAppTableIdDatatableIdResponse updateDatatableEntry(final String datatableName, final Integer apptableId,
             final String json) {
         final String response = Utils.performServerPut(this.requestSpec, this.responseSpec,
@@ -198,12 +274,20 @@ public class DatatableHelper extends IntegrationTest {
         return GSON.fromJson(response, PutDataTablesAppTableIdDatatableIdResponse.class);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Object deleteDatatableEntries(final String datatableName, final Integer apptableId, String jsonAttributeToGetBack) {
         final String deleteEntryUrl = DATATABLE_URL + "/" + datatableName + "/" + apptableId + "?genericResultSet=true" + "&"
                 + Utils.TENANT_IDENTIFIER;
         return Utils.performServerDelete(this.requestSpec, this.responseSpec, deleteEntryUrl, jsonAttributeToGetBack);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String getTestDatatableAsJSON(final String apptableName, final String datatableName, final String codeName,
             final boolean multiRow) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -231,6 +315,10 @@ public class DatatableHelper extends IntegrationTest {
         return requestJsonString;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String getTestDatatableAsJSON(final String apptableName, final boolean multiRow) {
         final HashMap<String, Object> map = new HashMap<>();
         final List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
@@ -248,6 +336,10 @@ public class DatatableHelper extends IntegrationTest {
         return requestJsonString;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String getTestDatatableEntryAsJSON(final String dateFormat) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("Spouse Name", Utils.randomStringGenerator("Spouse_Name_", 5));
@@ -261,6 +353,10 @@ public class DatatableHelper extends IntegrationTest {
         return requestJsonString;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static HashMap<String, Object> addDatatableColumn(List<HashMap<String, Object>> datatableColumnsList, String columnName,
             String columnType, boolean isMandatory, Integer length, String codeName) {
         final HashMap<String, Object> datatableColumnMap = new HashMap<>();
@@ -281,6 +377,10 @@ public class DatatableHelper extends IntegrationTest {
         return datatableColumnMap;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static List<HashMap<String, Object>> addDatatableColumnWithUniqueAndIndex(List<HashMap<String, Object>> datatableColumnsList,
             String columnName, String columnType, boolean isMandatory, Integer length, String codeName, boolean isUnique,
             boolean isIndexed) {

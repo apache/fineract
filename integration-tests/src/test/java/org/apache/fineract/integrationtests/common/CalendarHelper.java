@@ -41,6 +41,10 @@ public final class CalendarHelper {
 
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer createMeetingCalendarForGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer groupId, final String startDate, final String frequency, final String interval, final String repeatsOnDay) {
 
@@ -54,6 +58,10 @@ public final class CalendarHelper {
                 getTestCalendarAsJSON(frequency, interval, repeatsOnDay, startDate), "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer updateMeetingCalendarForGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer groupId, String calendarID, final String startDate, final String frequency, final String interval,
             final String repeatsOnDay) {
@@ -68,6 +76,10 @@ public final class CalendarHelper {
                 getTestCalendarAsJSON(frequency, interval, repeatsOnDay, startDate), "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String getTestCalendarAsJSON(final String frequency, final String interval, final String repeatsOnDay,
             final String startDate) {
 
@@ -85,6 +97,10 @@ public final class CalendarHelper {
         return new Gson().toJson(map);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static void verifyCalendarCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupId, final Integer generatedCalendarId) {
         LOG.info("------------------------------CHECK CALENDAR DETAILS------------------------------------\n");
@@ -95,6 +111,10 @@ public final class CalendarHelper {
         assertEquals(generatedCalendarId, responseCalendarId, "ERROR IN CREATING THE CALENDAR");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer createMeetingForGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer groupId, final String startDate, final String frequency, final String interval, final String repeatsOnDay) {
 
@@ -108,6 +128,10 @@ public final class CalendarHelper {
                 getTestCalendarAsJSON(frequency, interval, repeatsOnDay, startDate), "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer updateMeetingCalendarForCenter(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             Integer centerId, String calendarID, String oldDate, String startDate) {
 
@@ -123,6 +147,10 @@ public final class CalendarHelper {
 
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private static String getTestCalendarMeetingAsJSON(String oldDate, String startDate) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("dateFormat", "dd MMMM yyyy");

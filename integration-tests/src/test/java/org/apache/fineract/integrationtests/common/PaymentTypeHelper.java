@@ -68,6 +68,10 @@ public final class PaymentTypeHelper extends IntegrationTest {
         return ok(fineract().paymentTypes.retrieveOnePaymentType(paymentTypeId));
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public PaymentTypeDomain retrieveById(RequestSpecification requestSpec, ResponseSpecification responseSpec, final Long paymentTypeId) {
         final String GET_PAYMENTTYPE_URL = PAYMENTTYPE_URL + "/" + paymentTypeId + "?" + Utils.TENANT_IDENTIFIER;
         log.info("-------------------------------GETTING PAYMENT TYPE-------------------------------------------");

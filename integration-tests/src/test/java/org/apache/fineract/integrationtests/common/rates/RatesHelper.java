@@ -39,30 +39,54 @@ public final class RatesHelper {
     private static final Integer PRODUCT_APPLY_LOAN = 1;
     private static final Boolean ACTIVE = true;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static ArrayList<HashMap> getRates(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         return (ArrayList) Utils.performServerGet(requestSpec, responseSpec, RATES_URL + "?" + Utils.TENANT_IDENTIFIER, "");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer createRates(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String request) {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_RATES_URL, request, "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static HashMap getRateById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer rateId) {
         return Utils.performServerGet(requestSpec, responseSpec, RATES_URL + "/" + rateId + "?" + Utils.TENANT_IDENTIFIER, "");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static HashMap updateRates(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer rateId, final String request) {
         return Utils.performServerPut(requestSpec, responseSpec, RATES_URL + "/" + rateId + "?" + Utils.TENANT_IDENTIFIER, request,
                 CommonConstants.RESPONSE_CHANGES);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String getLoanRateJSON() {
         return getLoanRateJSON(RatesHelper.PRODUCT_APPLY_LOAN, RatesHelper.PERCENTAGE);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String getLoanRateJSON(final Integer productApply, final String percentage) {
         final HashMap<String, Object> map = populateDefaultsForLoan();
         map.put("percentage", percentage);
@@ -71,6 +95,10 @@ public final class RatesHelper {
         return crateRateJSON;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static HashMap<String, Object> populateDefaultsForLoan() {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("active", RatesHelper.ACTIVE);
@@ -81,6 +109,10 @@ public final class RatesHelper {
         return map;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String getModifyRateJSON() {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("percentage", "15.0");

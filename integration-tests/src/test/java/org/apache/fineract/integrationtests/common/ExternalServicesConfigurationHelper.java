@@ -29,11 +29,19 @@ public class ExternalServicesConfigurationHelper {
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public ExternalServicesConfigurationHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static ArrayList<HashMap> getExternalServicesConfigurationByServiceName(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String serviceName) {
         final String GET_EXTERNAL_SERVICES_CONFIG_BY_SERVICE_NAME_URL = "/fineract-provider/api/v1/externalservice/" + serviceName + "?"
@@ -44,6 +52,10 @@ public class ExternalServicesConfigurationHelper {
         return Utils.performServerGet(requestSpec, responseSpec, GET_EXTERNAL_SERVICES_CONFIG_BY_SERVICE_NAME_URL, "");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static HashMap updateValueForExternaServicesConfiguration(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String serviceName, final String name, final String value) {
         final String EXTERNAL_SERVICES_CONFIG_UPDATE_URL = "/fineract-provider/api/v1/externalservice/" + serviceName + "?"
@@ -57,6 +69,10 @@ public class ExternalServicesConfigurationHelper {
         return (HashMap) map.get("changes");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String updateExternalServicesConfigUpdateValueAsJSON(final String name, final String value) {
         final HashMap<String, String> map = new HashMap<>();
         map.put(name, value);

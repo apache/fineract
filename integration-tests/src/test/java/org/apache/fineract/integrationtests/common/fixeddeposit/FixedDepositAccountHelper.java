@@ -37,6 +37,10 @@ public class FixedDepositAccountHelper {
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public FixedDepositAccountHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
@@ -100,6 +104,10 @@ public class FixedDepositAccountHelper {
     private Integer maturityInstructionId;
     private List<HashMap<String, String>> charges;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public String build(final String clientId, final String productId, final String penalInterestType) {
         final HashMap<String, Object> map = new HashMap<>();
 
@@ -138,6 +146,10 @@ public class FixedDepositAccountHelper {
         return fixedDepositAccountJson;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer applyFixedDepositApplicationGetId(final String fixedDepositAccountAsJson, final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
         LOG.info("--------------------- APPLYING FOR FIXED DEPOSIT ACCOUNT ------------------------");
@@ -145,12 +157,20 @@ public class FixedDepositAccountHelper {
                 CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String applyFixedDepositApplication(final String fixedDepositAccountAsJson, final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
         LOG.info("--------------------- APPLYING FOR FIXED DEPOSIT ACCOUNT ------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, APPLY_FIXED_DEPOSIT_ACCOUNT_URL, fixedDepositAccountAsJson);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static HashMap getFixedDepositAccountById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer accountID) {
         final String GET_FIXED_DEPOSIT_BY_ID_URL = FIXED_DEPOSIT_ACCOUNT_URL + "/" + accountID + "?" + Utils.TENANT_IDENTIFIER;
@@ -158,20 +178,36 @@ public class FixedDepositAccountHelper {
         return Utils.performServerGet(requestSpec, responseSpec, GET_FIXED_DEPOSIT_BY_ID_URL, "");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public HashMap getFixedDepositSummary(final Integer accountID) {
         return getFixedDepositDetails(accountID, "summary");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public HashMap getFixedDepositDetails(final Integer accountID) {
         return getFixedDepositDetails(accountID, "");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private HashMap getFixedDepositDetails(final Integer accountID, final String jsonAttributeToGetBack) {
         final String URL = FIXED_DEPOSIT_ACCOUNT_URL + "/" + accountID + "?" + Utils.TENANT_IDENTIFIER;
         final HashMap response = Utils.performServerGet(requestSpec, responseSpec, URL, jsonAttributeToGetBack);
         return response;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Float getInterestRate(ArrayList<ArrayList<HashMap>> interestSlabData, Integer depositPeriod) {
 
         Float annualInterestRate = 0.0f;
@@ -187,6 +223,10 @@ public class FixedDepositAccountHelper {
         return annualInterestRate;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Float getPrincipalAfterCompoundingInterest(Calendar currentDate, Float principal, Integer depositPeriod,
             double interestPerDay, Integer compoundingInterval, Integer postingInterval) {
 
@@ -217,6 +257,10 @@ public class FixedDepositAccountHelper {
         return principal;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public HashMap updateFixedDepositAccount(final String clientID, final String productID, final String accountID, final String validFrom,
             final String validTo, final String penalInterestType, final String submittedOnDate) {
 
@@ -229,6 +273,10 @@ public class FixedDepositAccountHelper {
                 CommonConstants.RESPONSE_CHANGES);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public HashMap updateInterestCalculationConfigForFixedDeposit(final String clientID, final String productID, final String accountID,
             final String submittedOnDate, final String validFrom, final String validTo, final String numberOfDaysPerYear,
             final String penalInterestType, final String interestCalculationType, final String interestCompoundingPeriodType,
@@ -247,12 +295,20 @@ public class FixedDepositAccountHelper {
                 CommonConstants.RESPONSE_CHANGES);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public HashMap approveFixedDeposit(final Integer fixedDepositAccountID, final String approvedOnDate) {
         LOG.info("--------------------------------- APPROVING FIXED DEPOSIT APPLICATION ------------------------------------");
         return performFixedDepositApplicationActions(createFixedDepositOperationURL(APPROVE_FIXED_DEPOSIT_COMMAND, fixedDepositAccountID),
                 getApproveFixedDepositAccountAsJSON(approvedOnDate));
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public HashMap undoApproval(final Integer fixedDepositAccountID) {
         LOG.info("--------------------------------- UNDO APPROVING FIXED DEPOSIT APPLICATION -------------------------------");
         final String undoBodyJson = "{'note':'UNDO APPROVAL'}";
@@ -260,12 +316,20 @@ public class FixedDepositAccountHelper {
                 createFixedDepositOperationURL(UNDO_APPROVAL_FIXED_DEPOSIT_COMMAND, fixedDepositAccountID), undoBodyJson);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public HashMap rejectApplication(final Integer fixedDepositAccountID, final String rejectedOnDate) {
         LOG.info("--------------------------------- REJECT FIXED DEPOSIT APPLICATION -------------------------------");
         return performFixedDepositApplicationActions(createFixedDepositOperationURL(REJECT_FIXED_DEPOSIT_COMMAND, fixedDepositAccountID),
                 getRejectedFixedDepositAsJSON(rejectedOnDate));
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public HashMap withdrawApplication(final Integer fixedDepositAccountID, final String withdrawApplicationOnDate) {
         LOG.info("--------------------------------- Withdraw FIXED DEPOSIT APPLICATION -------------------------------");
         return performFixedDepositApplicationActions(
@@ -273,12 +337,20 @@ public class FixedDepositAccountHelper {
                 getWithdrawnFixedDepositAccountAsJSON(withdrawApplicationOnDate));
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public HashMap activateFixedDeposit(final Integer fixedDepositAccountID, final String activationDate) {
         LOG.info("---------------------------------- ACTIVATING FIXED DEPOSIT APPLICATION ----------------------------------");
         return performFixedDepositApplicationActions(createFixedDepositOperationURL(ACTIVATE_FIXED_DEPOSIT_COMMAND, fixedDepositAccountID),
                 getActivatedFixedDepositAccountAsJSON(activationDate));
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Object deleteFixedDepositApplication(final Integer fixedDepositAccountID, final String jsonAttributeToGetBack) {
         LOG.info("---------------------------------- DELETE FIXED DEPOSIT APPLICATION ----------------------------------");
         return Utils.performServerDelete(this.requestSpec, this.responseSpec,
@@ -286,6 +358,10 @@ public class FixedDepositAccountHelper {
 
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer calculateInterestForFixedDeposit(final Integer fixedDepositAccountId) {
         LOG.info("--------------------------------- CALCULATING INTEREST FOR FIXED DEPOSIT --------------------------------");
         return (Integer) performFixedDepositActions(
@@ -293,6 +369,10 @@ public class FixedDepositAccountHelper {
                 getCalculatedInterestForFixedDepositApplicationAsJSON(), CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer postInterestForFixedDeposit(final Integer fixedDepositAccountId) {
         LOG.info("--------------------------------- POST INTEREST FOR FIXED DEPOSIT --------------------------------");
         return (Integer) performFixedDepositActions(
@@ -300,6 +380,10 @@ public class FixedDepositAccountHelper {
                 getCalculatedInterestForFixedDepositApplicationAsJSON(), CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public HashMap calculatePrematureAmountForFixedDeposit(final Integer fixedDepositAccountId, final String closedOnDate) {
         LOG.info("--------------------- CALCULATING PREMATURE AMOUNT FOR FIXED DEPOSIT ----------------------------");
         return (HashMap) performFixedDepositActions(
@@ -307,6 +391,10 @@ public class FixedDepositAccountHelper {
                 getCalculatedPrematureAmountForFixedDepositAccountAsJSON(closedOnDate), "");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Object prematureCloseForFixedDeposit(final Integer fixedDepositAccountId, final String closedOnDate, final String closureType,
             final Integer toSavingsId, final String jsonAttributeToGetBack) {
         LOG.info("--------------------- PREMATURE CLOSE FOR FIXED DEPOSIT ----------------------------");
@@ -314,6 +402,10 @@ public class FixedDepositAccountHelper {
                 getPrematureCloseForFixedDepositAccountAsJSON(closedOnDate, closureType, toSavingsId), jsonAttributeToGetBack);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private String getApproveFixedDepositAccountAsJSON(final String approvedOnDate) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("locale", CommonConstants.LOCALE);
@@ -325,6 +417,10 @@ public class FixedDepositAccountHelper {
         return fixedDepositAccountApproveJson;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private String getRejectedFixedDepositAsJSON(final String rejectedOnDate) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("locale", CommonConstants.LOCALE);
@@ -336,6 +432,10 @@ public class FixedDepositAccountHelper {
         return fixedDepositAccountJson;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private String getWithdrawnFixedDepositAccountAsJSON(final String withdrawnApplicationOnDate) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("locale", CommonConstants.LOCALE);
@@ -347,6 +447,10 @@ public class FixedDepositAccountHelper {
         return fixedDepositAccountJson;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private String getActivatedFixedDepositAccountAsJSON(final String activationDate) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("locale", CommonConstants.LOCALE);
@@ -357,6 +461,10 @@ public class FixedDepositAccountHelper {
         return fixedDepositAccountActivateJson;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private String getCalculatedInterestForFixedDepositApplicationAsJSON() {
         final HashMap<String, String> map = new HashMap<>();
         String fixedDepositAccountCalculatedInterestJson = new Gson().toJson(map);
@@ -364,6 +472,10 @@ public class FixedDepositAccountHelper {
         return fixedDepositAccountCalculatedInterestJson;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private String getCalculatedPrematureAmountForFixedDepositAccountAsJSON(final String closedOnDate) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("locale", CommonConstants.LOCALE);
@@ -374,6 +486,10 @@ public class FixedDepositAccountHelper {
         return fixedDepositAccountPrematureClosureJson;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private String getPrematureCloseForFixedDepositAccountAsJSON(final String closedOnDate, final String closureType,
             final Integer toSavingsId) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -390,15 +506,27 @@ public class FixedDepositAccountHelper {
         return fixedDepositAccountPrematureCloseJson;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private String createFixedDepositOperationURL(final String command, final Integer fixedDepositAccountID) {
         return FIXED_DEPOSIT_ACCOUNT_URL + "/" + fixedDepositAccountID + "?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private Object performFixedDepositActions(final String postURLForFixedDeposit, final String jsonToBeSent,
             final String jsonAttributeToGetBack) {
         return Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForFixedDeposit, jsonToBeSent, jsonAttributeToGetBack);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private HashMap performFixedDepositApplicationActions(final String postURLForFixedDepositAction, final String jsonToBeSent) {
         HashMap status = null;
         final HashMap response = Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForFixedDepositAction, jsonToBeSent,
@@ -409,10 +537,18 @@ public class FixedDepositAccountHelper {
         return status;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private String createFixedDepositCalculateInterestURL(final String command, final Integer fixedDepositAccountID) {
         return FIXED_DEPOSIT_ACCOUNT_URL + "/" + fixedDepositAccountID + "?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static ArrayList retrieveAllFixedDepositAccounts(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
         LOG.info("-------------------- RETRIEVING ALL FIXED DEPOSIT ACCOUNTS ---------------------");

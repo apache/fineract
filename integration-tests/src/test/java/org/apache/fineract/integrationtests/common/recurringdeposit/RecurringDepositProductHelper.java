@@ -40,6 +40,10 @@ public class RecurringDepositProductHelper {
     private final ResponseSpecification responseSpec;
     private static final Gson GSON = new JSON().getGson();
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public RecurringDepositProductHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
@@ -104,6 +108,10 @@ public class RecurringDepositProductHelper {
     private Boolean withHoldTax = false;
     private String taxGroupId = null;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public String build(final String validFrom, final String validTo) {
         final HashMap<String, Object> map = new HashMap<>();
 
@@ -202,6 +210,10 @@ public class RecurringDepositProductHelper {
         return this;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private Map<String, String> getAccountMappingForCashBased() {
         final Map<String, String> map = new HashMap<>();
         if (accountList != null) {
@@ -229,6 +241,10 @@ public class RecurringDepositProductHelper {
         return map;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer createRecurringDepositProduct(final String recurrungDepositProductCreateJson,
             final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         LOG.info("------------------ CREATING RECURRING DEPOSIT PRODUCT--------------------");
@@ -236,6 +252,10 @@ public class RecurringDepositProductHelper {
                 "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static ArrayList retrieveAllRecurringDepositProducts(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
         LOG.info("----------------- RETRIEVING ALL RECURRING DEPOSIT PRODUCTS---------------------------");
@@ -244,6 +264,10 @@ public class RecurringDepositProductHelper {
         return response;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static GetRecurringDepositProductsProductIdResponse getRecurringDepositProductById(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final Integer productId) {
         LOG.info("-------------------- RETRIEVING RECURRING DEPOSIT PRODUCT BY ID --------------------------");
@@ -252,6 +276,10 @@ public class RecurringDepositProductHelper {
         return GSON.fromJson(response, GetRecurringDepositProductsProductIdResponse.class);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static HashMap retrieveRecurringDepositProductById(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String productId) {
         LOG.info("-------------------- RETRIEVING RECURRING DEPOSIT PRODUCT BY ID --------------------------");
@@ -260,6 +288,10 @@ public class RecurringDepositProductHelper {
         return response;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static ArrayList getInterestRateChartSlabsByProductId(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final Integer productId) {
         LOG.info("-------------------- RETRIEVE INTEREST CHART BY PRODUCT ID ---------------------");
@@ -268,6 +300,10 @@ public class RecurringDepositProductHelper {
         return response;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public List<HashMap<String, String>> constructChartSlabWithPeriodRange() {
         List<HashMap<String, String>> chartSlabs = new ArrayList<HashMap<String, String>>();
         HashMap<String, String> chartSlabsMap1 = new HashMap<>();
@@ -307,6 +343,10 @@ public class RecurringDepositProductHelper {
         return chartSlabs;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public List<HashMap<String, String>> constructChartSlabWithPeriodAndAmountRange() {
         List<HashMap<String, String>> chartSlabs = new ArrayList<HashMap<String, String>>();
         HashMap<String, String> chartSlabsMap1 = new HashMap<>();
@@ -394,6 +434,10 @@ public class RecurringDepositProductHelper {
         return chartSlabs;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public List<HashMap<String, String>> constructChartSlabWithAmountAndPeriodRange() {
         this.isPrimaryGroupingByAmount = true;
         List<HashMap<String, String>> chartSlabs = new ArrayList<HashMap<String, String>>();
@@ -440,6 +484,10 @@ public class RecurringDepositProductHelper {
         return chartSlabs;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public List<HashMap<String, String>> constructChartSlabWithAmountRange() {
         this.isPrimaryGroupingByAmount = true;
         List<HashMap<String, String>> chartSlabs = new ArrayList<HashMap<String, String>>();

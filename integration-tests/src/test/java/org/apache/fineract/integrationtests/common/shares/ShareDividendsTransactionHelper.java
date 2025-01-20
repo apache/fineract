@@ -32,12 +32,20 @@ public final class ShareDividendsTransactionHelper {
     private static final String SHARE_PRODUCT_URL = "/fineract-provider/api/v1/shareproduct";
     private static final String DIVIDEND = "dividend";
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer createShareProductDividends(final Integer productId, final String dividendJson,
             final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         String url = SHARE_PRODUCT_URL + "/" + productId + "/" + DIVIDEND + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(requestSpec, responseSpec, url, dividendJson, "subResourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer postCommand(final String command, final Integer productId, final Integer dividendId, String jsonBody,
             final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         String url = SHARE_PRODUCT_URL + "/" + productId + "/" + DIVIDEND + "/" + dividendId + "?command=" + command + "&"
@@ -45,12 +53,20 @@ public final class ShareDividendsTransactionHelper {
         return Utils.performServerPut(requestSpec, responseSpec, url, jsonBody, "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Map<String, Object> retrieveDividendDetails(final Integer productId, final Integer dividendId,
             final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         String url = SHARE_PRODUCT_URL + "/" + productId + "/" + DIVIDEND + "/" + dividendId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, url, "");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Map<String, Object> retrieveAllDividends(final Integer productId, final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
         String url = SHARE_PRODUCT_URL + "/" + productId + "/" + DIVIDEND + "?" + Utils.TENANT_IDENTIFIER;
