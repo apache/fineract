@@ -37,6 +37,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsDataWrapper;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductMinimumRepaymentScheduleRelatedDetail;
 
 @Data
@@ -46,35 +47,38 @@ public class ProgressiveLoanInterestScheduleModel {
     private final List<RepaymentPeriod> repaymentPeriods;
     private final TreeSet<InterestRate> interestRates;
     private final LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail;
+    private final LoanTermVariationsDataWrapper loanTermVariations;
     private final Integer installmentAmountInMultiplesOf;
     private final MathContext mc;
     private final Money zero;
 
     public ProgressiveLoanInterestScheduleModel(final List<RepaymentPeriod> repaymentPeriods,
-            final LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail, final Integer installmentAmountInMultiplesOf,
-            final MathContext mc) {
+            final LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail,
+            final LoanTermVariationsDataWrapper loanTermVariations, final Integer installmentAmountInMultiplesOf, final MathContext mc) {
         this.repaymentPeriods = repaymentPeriods;
         this.interestRates = new TreeSet<>(Collections.reverseOrder());
         this.loanProductRelatedDetail = loanProductRelatedDetail;
+        this.loanTermVariations = loanTermVariations;
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
         this.mc = mc;
         this.zero = Money.zero(loanProductRelatedDetail.getCurrencyData(), mc);
     }
 
     private ProgressiveLoanInterestScheduleModel(final List<RepaymentPeriod> repaymentPeriods, final TreeSet<InterestRate> interestRates,
-            final LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail, final Integer installmentAmountInMultiplesOf,
-            final MathContext mc) {
+            final LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail,
+            final LoanTermVariationsDataWrapper loanTermVariations, final Integer installmentAmountInMultiplesOf, final MathContext mc) {
         this.mc = mc;
         this.repaymentPeriods = copyRepaymentPeriods(repaymentPeriods,
                 (previousPeriod, repaymentPeriod) -> new RepaymentPeriod(previousPeriod, repaymentPeriod, mc));
         this.interestRates = new TreeSet<>(interestRates);
         this.loanProductRelatedDetail = loanProductRelatedDetail;
+        this.loanTermVariations = loanTermVariations;
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
         this.zero = Money.zero(loanProductRelatedDetail.getCurrencyData(), mc);
     }
 
     public ProgressiveLoanInterestScheduleModel deepCopy(MathContext mc) {
-        return new ProgressiveLoanInterestScheduleModel(repaymentPeriods, interestRates, loanProductRelatedDetail,
+        return new ProgressiveLoanInterestScheduleModel(repaymentPeriods, interestRates, loanProductRelatedDetail, loanTermVariations,
                 installmentAmountInMultiplesOf, mc);
     }
 
@@ -82,7 +86,7 @@ public class ProgressiveLoanInterestScheduleModel {
         final List<RepaymentPeriod> repaymentPeriodCopies = copyRepaymentPeriods(repaymentPeriods,
                 (previousPeriod, repaymentPeriod) -> new RepaymentPeriod(previousPeriod, repaymentPeriod.getFromDate(),
                         repaymentPeriod.getDueDate(), repaymentPeriod.getEmi().zero(), mc));
-        return new ProgressiveLoanInterestScheduleModel(repaymentPeriodCopies, interestRates, loanProductRelatedDetail,
+        return new ProgressiveLoanInterestScheduleModel(repaymentPeriodCopies, interestRates, loanProductRelatedDetail, loanTermVariations,
                 installmentAmountInMultiplesOf, mc);
     }
 

@@ -183,17 +183,17 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
         MoneyHolder overpaymentHolder = new MoneyHolder(Money.zero(currency));
         final Loan loan = loanTransactions.get(0).getLoan();
-        final Integer installmentAmountInMultiplesOf = loan.getLoanProduct().getInstallmentAmountInMultiplesOf();
-        final LoanProductRelatedDetail loanProductRelatedDetail = loan.getLoanRepaymentScheduleDetail();
-        ProgressiveLoanInterestScheduleModel scheduleModel = emiCalculator.generateInstallmentInterestScheduleModel(installments,
-                loanProductRelatedDetail, installmentAmountInMultiplesOf, overpaymentHolder.getMoneyObject().getMc());
-        ProgressiveTransactionCtx ctx = new ProgressiveTransactionCtx(currency, installments, charges, overpaymentHolder,
-                changedTransactionDetail, scheduleModel);
-
         LoanTermVariationsDataWrapper loanTermVariations = Optional
                 .ofNullable(loan.getActiveLoanTermVariations()).map(loanTermVariationsSet -> loanTermVariationsSet.stream()
                         .map(LoanTermVariations::toData).collect(Collectors.toCollection(ArrayList::new)))
                 .map(LoanTermVariationsDataWrapper::new).orElse(null);
+        final Integer installmentAmountInMultiplesOf = loan.getLoanProduct().getInstallmentAmountInMultiplesOf();
+        final LoanProductRelatedDetail loanProductRelatedDetail = loan.getLoanRepaymentScheduleDetail();
+        ProgressiveLoanInterestScheduleModel scheduleModel = emiCalculator.generateInstallmentInterestScheduleModel(installments,
+                loanProductRelatedDetail, loanTermVariations, installmentAmountInMultiplesOf, overpaymentHolder.getMoneyObject().getMc());
+        ProgressiveTransactionCtx ctx = new ProgressiveTransactionCtx(currency, installments, charges, overpaymentHolder,
+                changedTransactionDetail, scheduleModel);
+
         List<ChangeOperation> changeOperations = createSortedChangeList(loanTermVariations, loanTransactions, charges);
 
         List<LoanTransaction> overpaidTransactions = new ArrayList<>();

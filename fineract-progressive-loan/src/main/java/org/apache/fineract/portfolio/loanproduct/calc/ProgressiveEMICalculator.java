@@ -35,6 +35,7 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
+import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsDataWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.EmiAdjustment;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.InterestPeriod;
@@ -57,9 +58,10 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     @NotNull
     public ProgressiveLoanInterestScheduleModel generatePeriodInterestScheduleModel(@NotNull List<LoanScheduleModelRepaymentPeriod> periods,
             @NotNull LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail,
-            final Integer installmentAmountInMultiplesOf, final MathContext mc) {
+            LoanTermVariationsDataWrapper loanTermVariations, final Integer installmentAmountInMultiplesOf, final MathContext mc) {
         return generateInterestScheduleModel(periods, LoanScheduleModelRepaymentPeriod::periodFromDate,
-                LoanScheduleModelRepaymentPeriod::periodDueDate, loanProductRelatedDetail, installmentAmountInMultiplesOf, mc);
+                LoanScheduleModelRepaymentPeriod::periodDueDate, loanProductRelatedDetail, loanTermVariations,
+                installmentAmountInMultiplesOf, mc);
     }
 
     @Override
@@ -67,16 +69,17 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     public ProgressiveLoanInterestScheduleModel generateInstallmentInterestScheduleModel(
             @NotNull List<LoanRepaymentScheduleInstallment> installments,
             @NotNull LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail,
-            final Integer installmentAmountInMultiplesOf, final MathContext mc) {
+            LoanTermVariationsDataWrapper loanTermVariations, final Integer installmentAmountInMultiplesOf, final MathContext mc) {
         installments = installments.stream().filter(installment -> !installment.isDownPayment() && !installment.isAdditional()).toList();
         return generateInterestScheduleModel(installments, LoanRepaymentScheduleInstallment::getFromDate,
-                LoanRepaymentScheduleInstallment::getDueDate, loanProductRelatedDetail, installmentAmountInMultiplesOf, mc);
+                LoanRepaymentScheduleInstallment::getDueDate, loanProductRelatedDetail, loanTermVariations, installmentAmountInMultiplesOf,
+                mc);
     }
 
     @NotNull
     private <T> ProgressiveLoanInterestScheduleModel generateInterestScheduleModel(@NotNull List<T> periods, Function<T, LocalDate> from,
             Function<T, LocalDate> to, @NotNull LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail,
-            final Integer installmentAmountInMultiplesOf, final MathContext mc) {
+            LoanTermVariationsDataWrapper loanTermVariations, final Integer installmentAmountInMultiplesOf, final MathContext mc) {
         final Money zero = Money.zero(loanProductRelatedDetail.getCurrencyData(), mc);
         final AtomicReference<RepaymentPeriod> prev = new AtomicReference<>();
         List<RepaymentPeriod> repaymentPeriods = periods.stream().map(e -> {
@@ -84,7 +87,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             prev.set(rp);
             return rp;
         }).toList();
-        return new ProgressiveLoanInterestScheduleModel(repaymentPeriods, loanProductRelatedDetail, installmentAmountInMultiplesOf, mc);
+        return new ProgressiveLoanInterestScheduleModel(repaymentPeriods, loanProductRelatedDetail, loanTermVariations,
+                installmentAmountInMultiplesOf, mc);
     }
 
     @Override
@@ -310,7 +314,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         }
         calculateOutstandingBalance(scheduleModel);
         calculateLastUnpaidRepaymentPeriodEMI(scheduleModel);
-        if (onlyOnActualModelShouldApply) {
+        if (onlyOnActualModelShouldApply
+                && (scheduleModel.loanTermVariations() == null || scheduleModel.loanTermVariations().getDueDateVariation().isEmpty())) {
             checkAndAdjustEmiIfNeededOnRelatedRepaymentPeriods(scheduleModel, relatedRepaymentPeriods);
         }
     }
@@ -415,9 +420,9 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             final ProgressiveLoanInterestScheduleModel scheduleModel) {
         repaymentPeriod.getInterestPeriods().forEach(interestPeriod -> {
             interestPeriod.setRateFactor(calculateRateFactorPerPeriod(scheduleModel, repaymentPeriod, interestPeriod.getFromDate(),
-                    interestPeriod.getDueDate()));
+                    interestPeriod.getDueDate(), false));
             interestPeriod.setRateFactorTillPeriodDueDate(calculateRateFactorPerPeriod(scheduleModel, repaymentPeriod,
-                    interestPeriod.getFromDate(), repaymentPeriod.getDueDate()));
+                    interestPeriod.getFromDate(), repaymentPeriod.getDueDate(), true));
         });
     }
 
@@ -425,7 +430,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
      * Calculate Rate Factor for an exact Period
      */
     private BigDecimal calculateRateFactorPerPeriod(final ProgressiveLoanInterestScheduleModel scheduleModel,
-            final RepaymentPeriod repaymentPeriod, final LocalDate interestPeriodFromDate, final LocalDate interestPeriodDueDate) {
+            final RepaymentPeriod repaymentPeriod, final LocalDate interestPeriodFromDate, final LocalDate interestPeriodDueDate,
+            final boolean isTillDate) {
         final MathContext mc = scheduleModel.mc();
         final LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail = scheduleModel.loanProductRelatedDetail();
         final BigDecimal interestRate = calcNominalInterestRatePercentage(scheduleModel.getInterestRate(interestPeriodFromDate),
@@ -444,6 +450,14 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         final int numberOfYearsDifferenceInPeriod = interestPeriodDueDate.getYear() - interestPeriodFromDate.getYear();
         final boolean partialPeriodCalculationNeeded = daysInYearType == DaysInYearType.ACTUAL && numberOfYearsDifferenceInPeriod > 0;
 
+        long addedDays = !isTillDate || scheduleModel.loanTermVariations() == null ? 0L
+                : scheduleModel.loanTermVariations().getDueDateVariation().stream()
+                        .filter(x -> !repaymentPeriod.getFromDate().isAfter(x.getTermVariationApplicableFrom())
+                                && !repaymentPeriod.getDueDate().isBefore(x.getTermVariationApplicableFrom())
+                                && !repaymentPeriod.getDueDate().isAfter(x.getDateValue()))
+                        .map(x -> DateUtils.getDifferenceInDays(x.getTermVariationApplicableFrom(), x.getDateValue()))
+                        .reduce(0L, Long::sum);
+
         // TODO check: loanApplicationTerms.calculatePeriodsBetweenDates(startDate, endDate); // calculate period data
         // TODO review: (repayment frequency: days, weeks, years; validation day is month fix 30)
         // TODO refactor this logic to represent in interest period
@@ -454,7 +468,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         }
 
         return calculateRateFactorPerPeriodBasedOnRepaymentFrequency(interestRate, repaymentFrequency, repaymentEvery, daysInMonth,
-                daysInYear, actualDaysInPeriod, calculatedDaysInPeriod, mc);
+                daysInYear, actualDaysInPeriod, calculatedDaysInPeriod.subtract(BigDecimal.valueOf(addedDays), mc), mc);
     }
 
     /**
