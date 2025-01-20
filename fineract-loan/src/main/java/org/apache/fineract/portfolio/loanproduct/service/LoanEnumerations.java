@@ -425,6 +425,8 @@ public final class LoanEnumerations {
             case INTEREST_RATE_FROM_INSTALLMENT ->
                 new EnumOptionData(LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT.getValue().longValue(),
                         LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT.getCode(), "interestRateForInstallment");
+            case INTEREST_PAUSE -> new EnumOptionData(LoanTermVariationType.INTEREST_PAUSE.getValue().longValue(),
+                    LoanTermVariationType.INTEREST_PAUSE.getCode(), "interestPause");
             default -> new EnumOptionData(LoanTermVariationType.INVALID.getValue().longValue(), LoanTermVariationType.INVALID.getCode(),
                     "Invalid");
         };
