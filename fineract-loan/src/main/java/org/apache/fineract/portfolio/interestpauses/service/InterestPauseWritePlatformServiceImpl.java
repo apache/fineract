@@ -114,14 +114,13 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
         LocalDate endDate = parseDate(endDateString, dateFormat, locale);
 
         validateActiveLoan(loan);
-        validateInterestPauseDates(loan, startDate, endDate, dateFormat, locale);
 
         LoanTermVariations variation = loanTermVariationsRepository
                 .findByIdAndLoanIdAndTermType(variationId, loan.getId(), INTEREST_PAUSE.getValue())
                 .orElseThrow(() -> new GeneralPlatformDomainRuleException("error.msg.variation.not.found",
                         "Variation not found for the given loan ID"));
 
-        validateVariations(loan, variation);
+        validateInterestPauseDates(loan, startDate, endDate, dateFormat, locale, variation.getId());
 
         variation.setTermApplicableFrom(startDate);
         variation.setDateValue(endDate);
@@ -135,7 +134,7 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
     private CommandProcessingResult processInterestPause(Loan loan, LocalDate startDate, LocalDate endDate, String dateFormat,
             String locale) {
         validateActiveLoan(loan);
-        validateInterestPauseDates(loan, startDate, endDate, dateFormat, locale);
+        validateInterestPauseDates(loan, startDate, endDate, dateFormat, locale, null);
 
         LoanTermVariations variation = new LoanTermVariations(INTEREST_PAUSE.getValue(), startDate, null, endDate, false, loan);
 
@@ -144,7 +143,8 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
         return new CommandProcessingResultBuilder().withEntityId(savedVariation.getId()).build();
     }
 
-    private void validateInterestPauseDates(Loan loan, LocalDate startDate, LocalDate endDate, String dateFormat, String locale) {
+    private void validateInterestPauseDates(Loan loan, LocalDate startDate, LocalDate endDate, String dateFormat, String locale,
+            Long currentVariationId) {
 
         validateOrThrow(baseDataValidator -> {
             baseDataValidator.reset().parameter("startDate").value(startDate).notBlank();
@@ -182,11 +182,15 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
                     "Interest pause is only supported for loans with recalculate interest enabled.");
         }
 
-        for (LoanTermVariations existingVariation : loan.getLoanTermVariations()) {
-            if (Objects.equals(existingVariation.getTermType().getValue(), INTEREST_PAUSE.getValue())) {
-                if (!(endDate.isBefore(existingVariation.getTermApplicableFrom()) || startDate.isAfter(existingVariation.getDateValue()))) {
-                    throw new GeneralPlatformDomainRuleException("interest.pause.overlapping",
-                            "Overlapping interest pauses are not allowed.");
+        List<LoanTermVariations> existingVariations = loan.getLoanTermVariations();
+        for (LoanTermVariations existingVariation : existingVariations) {
+            if (currentVariationId == null || !existingVariation.getId().equals(currentVariationId)) {
+                if (Objects.equals(existingVariation.getTermType().getValue(), INTEREST_PAUSE.getValue())) {
+                    if (!(endDate.isBefore(existingVariation.getTermApplicableFrom())
+                            || startDate.isAfter(existingVariation.getDateValue()))) {
+                        throw new GeneralPlatformDomainRuleException("interest.pause.overlapping",
+                                "Overlapping interest pauses are not allowed.");
+                    }
                 }
             }
         }
@@ -196,25 +200,6 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
         if (!Objects.equals(loan.getLoanStatus(), ACTIVE.getValue())) {
             throw new GeneralPlatformDomainRuleException("loan.must.be.active",
                     "Operations on interest pauses are restricted to active loans.");
-        }
-    }
-
-    private void validateVariations(Loan loan, LoanTermVariations variation) {
-        if (variation == null) {
-            throw new GeneralPlatformDomainRuleException("interest.pause.not.found",
-                    "The specified interest pause does not exist for the given loan.");
-        }
-
-        List<LoanTermVariations> existingVariations = loan.getLoanTermVariations();
-        for (LoanTermVariations existingVariation : existingVariations) {
-            if (!existingVariation.equals(variation)
-                    && Objects.equals(existingVariation.getTermType().getValue(), INTEREST_PAUSE.getValue())) {
-                if (!(variation.getDateValue().isBefore(existingVariation.getTermApplicableFrom())
-                        || variation.getTermApplicableFrom().isAfter(existingVariation.getDateValue()))) {
-                    throw new GeneralPlatformDomainRuleException("interest.pause.overlapping",
-                            "Overlapping interest pauses are not allowed.");
-                }
-            }
         }
     }
 
