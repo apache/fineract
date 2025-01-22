@@ -216,6 +216,17 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         return changedTransactionDetail;
     }
 
+    boolean areNormalInstalmentsFullyRepaid(List<LoanRepaymentScheduleInstallment> installments) {
+        return installments.stream() //
+                .filter(i -> !i.isAdditional() && !i.isDownPayment()) //
+                .noneMatch(LoanRepaymentScheduleInstallment::isNotFullyPaidOff); //
+    }
+
+    boolean isClosedOrOverpaid(Loan loan) {
+        var status = loan.getStatus();
+        return status.isClosed() || status.isOverpaid();
+    }
+
     protected void calculateAccrualActivity(LoanTransaction loanTransaction, MonetaryCurrency currency,
             List<LoanRepaymentScheduleInstallment> installments) {
 
@@ -225,8 +236,9 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 .filter(installment -> LoanRepaymentScheduleProcessingWrapper.isInPeriod(loanTransaction.getTransactionDate(), installment,
                         installment.getInstallmentNumber().equals(firstNormalInstallmentNumber)))
                 .findFirst().orElseThrow();
-        if (loanTransaction.getDateOf().isEqual(currentInstallment.getDueDate()) || installments.stream()
-                .filter(i -> !i.isAdditional() && !i.isDownPayment()).noneMatch(LoanRepaymentScheduleInstallment::isNotFullyPaidOff)) {
+        boolean areNormalInstalmentsFullyRepaid = areNormalInstalmentsFullyRepaid(installments);
+        boolean isAAonDueDate = loanTransaction.getDateOf().isEqual(currentInstallment.getDueDate());
+        if (areNormalInstalmentsFullyRepaid || (isAAonDueDate && !isClosedOrOverpaid(loanTransaction.getLoan()))) {
             loanTransaction.resetDerivedComponents();
             final Money principalPortion = Money.zero(currency);
             Money interestPortion = currentInstallment.getInterestCharged(currency);
