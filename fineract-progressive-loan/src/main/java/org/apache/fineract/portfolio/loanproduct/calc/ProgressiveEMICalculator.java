@@ -792,6 +792,20 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 .reduce(scheduleModel.zero(), Money::add); //
     }
 
+    @Override
+    public void applyInterestPause(final ProgressiveLoanInterestScheduleModel scheduleModel, final LocalDate fromDate,
+            final LocalDate endDate) {
+        scheduleModel.updateInterestPeriodsForInterestPause(fromDate, endDate)
+                .ifPresent(repaymentPeriod -> calculateRateFactorsForInterestPause(scheduleModel, repaymentPeriod.getFromDate()));
+    }
+
+    private void calculateRateFactorsForInterestPause(final ProgressiveLoanInterestScheduleModel scheduleModel, final LocalDate startDate) {
+        final List<RepaymentPeriod> relatedRepaymentPeriods = scheduleModel.getRelatedRepaymentPeriods(startDate);
+        calculateRateFactorForPeriods(relatedRepaymentPeriods, scheduleModel);
+        calculateOutstandingBalance(scheduleModel);
+        calculateLastUnpaidRepaymentPeriodEMI(scheduleModel);
+    }
+
     private long getUncountablePeriods(final List<RepaymentPeriod> relatedRepaymentPeriods, final Money originalEmi) {
         return relatedRepaymentPeriods.stream() //
                 .filter(repaymentPeriod -> originalEmi.isLessThan(repaymentPeriod.getTotalPaidAmount())) //

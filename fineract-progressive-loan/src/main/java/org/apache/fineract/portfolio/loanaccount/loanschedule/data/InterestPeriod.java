@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
 import java.util.Optional;
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -34,6 +35,7 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 @Getter
 @ToString(exclude = { "repaymentPeriod" })
 @EqualsAndHashCode(exclude = { "repaymentPeriod" })
+@AllArgsConstructor
 public class InterestPeriod implements Comparable<InterestPeriod> {
 
     private final RepaymentPeriod repaymentPeriod;
@@ -49,25 +51,13 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
     private Money balanceCorrectionAmount;
     private Money outstandingLoanBalance;
     private final MathContext mc;
-
-    public InterestPeriod(RepaymentPeriod repaymentPeriod, LocalDate fromDate, LocalDate dueDate, BigDecimal rateFactor,
-            BigDecimal rateFactorTillPeriodDueDate, Money disbursementAmount, Money balanceCorrectionAmount, Money outstandingLoanBalance,
-            MathContext mc) {
-        this.repaymentPeriod = repaymentPeriod;
-        this.fromDate = fromDate;
-        this.dueDate = dueDate;
-        this.rateFactor = rateFactor;
-        this.rateFactorTillPeriodDueDate = rateFactorTillPeriodDueDate;
-        this.disbursementAmount = disbursementAmount;
-        this.balanceCorrectionAmount = balanceCorrectionAmount;
-        this.outstandingLoanBalance = outstandingLoanBalance;
-        this.mc = mc;
-    }
+    private final boolean isPaused;
 
     public InterestPeriod(RepaymentPeriod repaymentPeriod, InterestPeriod interestPeriod) {
         this(repaymentPeriod, interestPeriod.getFromDate(), interestPeriod.getDueDate(), interestPeriod.getRateFactor(),
                 interestPeriod.getRateFactorTillPeriodDueDate(), interestPeriod.getDisbursementAmount(),
-                interestPeriod.getBalanceCorrectionAmount(), interestPeriod.getOutstandingLoanBalance(), interestPeriod.getMc());
+                interestPeriod.getBalanceCorrectionAmount(), interestPeriod.getOutstandingLoanBalance(), interestPeriod.getMc(),
+                interestPeriod.isPaused());
     }
 
     @Override
@@ -84,6 +74,10 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
     }
 
     public Money getCalculatedDueInterest() {
+        if (isPaused) {
+            return Money.zero(outstandingLoanBalance.getCurrencyData(), mc);
+        }
+
         long lengthTillPeriodDueDate = getLengthTillPeriodDueDate();
         final BigDecimal interestDueTillRepaymentDueDate = lengthTillPeriodDueDate == 0 //
                 ? BigDecimal.ZERO //

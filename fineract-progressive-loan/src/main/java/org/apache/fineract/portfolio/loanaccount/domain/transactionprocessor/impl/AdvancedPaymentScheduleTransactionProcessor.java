@@ -261,7 +261,12 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             final LoanTermVariationsData interestRateChange, final ProgressiveLoanInterestScheduleModel scheduleModel) {
         final LocalDate interestRateChangeSubmittedOnDate = interestRateChange.getTermVariationApplicableFrom();
         final BigDecimal newInterestRate = interestRateChange.getDecimalValue();
-        emiCalculator.changeInterestRate(scheduleModel, interestRateChangeSubmittedOnDate, newInterestRate);
+        if (interestRateChange.getTermVariationType().isInterestPauseVariation()) {
+            final LocalDate pauseEndDate = interestRateChange.getDateValue();
+            emiCalculator.applyInterestPause(scheduleModel, interestRateChangeSubmittedOnDate, pauseEndDate);
+        } else {
+            emiCalculator.changeInterestRate(scheduleModel, interestRateChangeSubmittedOnDate, newInterestRate);
+        }
         processInterestRateChangeOnInstallments(scheduleModel, interestRateChangeSubmittedOnDate, installments);
     }
 
@@ -820,9 +825,14 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     @NotNull
     private List<ChangeOperation> createSortedChangeList(final LoanTermVariationsDataWrapper loanTermVariations,
             final List<LoanTransaction> loanTransactions, final Set<LoanCharge> charges) {
-        List<ChangeOperation> changeOperations = new ArrayList<>();
-        if (loanTermVariations != null && !loanTermVariations.getInterestRateFromInstallment().isEmpty()) {
-            changeOperations.addAll(loanTermVariations.getInterestRateFromInstallment().stream().map(ChangeOperation::new).toList());
+        final List<ChangeOperation> changeOperations = new ArrayList<>();
+        if (loanTermVariations != null) {
+            if (!loanTermVariations.getInterestPauseVariations().isEmpty()) {
+                changeOperations.addAll(loanTermVariations.getInterestPauseVariations().stream().map(ChangeOperation::new).toList());
+            }
+            if (!loanTermVariations.getInterestRateFromInstallment().isEmpty()) {
+                changeOperations.addAll(loanTermVariations.getInterestRateFromInstallment().stream().map(ChangeOperation::new).toList());
+            }
         }
         if (charges != null) {
             changeOperations.addAll(charges.stream().map(ChangeOperation::new).toList());

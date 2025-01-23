@@ -139,15 +139,36 @@ public class LoanAssemblerImpl implements LoanAssembler {
 
     @Override
     public Loan assembleFrom(final Long accountId) {
-        final Loan loanAccount = this.loanRepository.findOneWithNotFoundDetection(accountId, true);
-        loanAccount.setHelpers(defaultLoanLifecycleStateMachine, this.loanRepaymentScheduleTransactionProcessorFactory);
+        return assembleFrom(accountId, true);
+    }
+
+    @Override
+    public Loan assembleFrom(final Long accountId, final boolean loadLazyCollections) {
+        final Loan loanAccount = loanRepository.findOneWithNotFoundDetection(accountId, loadLazyCollections);
+        setHelpers(loanAccount);
+
+        return loanAccount;
+    }
+
+    @Override
+    public Loan assembleFrom(final ExternalId externalId) {
+        final Loan loanAccount = loanRepository.findOneWithNotFoundDetection(externalId, true);
+        setHelpers(loanAccount);
+
+        return loanAccount;
+    }
+
+    @Override
+    public Loan assembleFrom(final ExternalId externalId, final boolean loadLazyCollections) {
+        final Loan loanAccount = loanRepository.findOneWithNotFoundDetection(externalId, loadLazyCollections);
+        setHelpers(loanAccount);
 
         return loanAccount;
     }
 
     @Override
     public void setHelpers(final Loan loanAccount) {
-        loanAccount.setHelpers(defaultLoanLifecycleStateMachine, this.loanRepaymentScheduleTransactionProcessorFactory);
+        loanAccount.setHelpers(defaultLoanLifecycleStateMachine, loanRepaymentScheduleTransactionProcessorFactory);
     }
 
     @Override

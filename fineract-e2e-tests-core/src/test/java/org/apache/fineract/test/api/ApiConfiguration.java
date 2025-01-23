@@ -40,6 +40,7 @@ import org.apache.fineract.client.services.JournalEntriesApi;
 import org.apache.fineract.client.services.LoanAccountLockApi;
 import org.apache.fineract.client.services.LoanChargesApi;
 import org.apache.fineract.client.services.LoanCobCatchUpApi;
+import org.apache.fineract.client.services.LoanInterestPauseApi;
 import org.apache.fineract.client.services.LoanProductsApi;
 import org.apache.fineract.client.services.LoanTransactionsApi;
 import org.apache.fineract.client.services.LoansApi;
@@ -243,5 +244,10 @@ public class ApiConfiguration {
     @Bean
     public RescheduleLoansApi rescheduleLoansApi() {
         return fineractClient.createService(RescheduleLoansApi.class);
+    }
+
+    @Bean
+    public LoanInterestPauseApi loanInterestPauseApi() {
+        return fineractClient.createService(LoanInterestPauseApi.class);
     }
 }

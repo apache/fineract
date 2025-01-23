@@ -23,16 +23,23 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 public class LoanTermVariationsDataWrapper {
 
+    @Getter
     private final List<LoanTermVariationsData> exceptionData;
     private ListIterator<LoanTermVariationsData> iterator;
+    @Getter
     private final List<LoanTermVariationsData> interestRateChanges;
+    @Getter
     private final List<LoanTermVariationsData> interestRateFromInstallment;
+    @Getter
     private final List<LoanTermVariationsData> dueDateVariation;
     private ListIterator<LoanTermVariationsData> dueDateIterator;
+    @Getter
+    private final List<LoanTermVariationsData> interestPauseVariations;
 
     public LoanTermVariationsDataWrapper(final List<LoanTermVariationsData> exceptionData) {
         if (exceptionData == null) {
@@ -43,6 +50,7 @@ public class LoanTermVariationsDataWrapper {
         this.interestRateChanges = new ArrayList<>();
         this.dueDateVariation = new ArrayList<>();
         this.interestRateFromInstallment = new ArrayList<>();
+        this.interestPauseVariations = new ArrayList<>();
         deriveLoanTermVariations();
     }
 
@@ -80,18 +88,6 @@ public class LoanTermVariationsDataWrapper {
         return this.dueDateIterator.previous();
     }
 
-    public List<LoanTermVariationsData> getInterestRateChanges() {
-        return this.interestRateChanges;
-    }
-
-    public List<LoanTermVariationsData> getDueDateVariation() {
-        return this.dueDateVariation;
-    }
-
-    public List<LoanTermVariationsData> getExceptionData() {
-        return this.exceptionData;
-    }
-
     public void setExceptionData(final List<LoanTermVariationsData> exceptionData) {
         clearTerms();
         this.exceptionData.addAll(exceptionData);
@@ -103,10 +99,7 @@ public class LoanTermVariationsDataWrapper {
         this.interestRateChanges.clear();
         this.dueDateVariation.clear();
         this.interestRateFromInstallment.clear();
-    }
-
-    public List<LoanTermVariationsData> getInterestRateFromInstallment() {
-        return this.interestRateFromInstallment;
+        this.interestPauseVariations.clear();
     }
 
     public int adjustNumberOfRepayments() {
@@ -133,12 +126,11 @@ public class LoanTermVariationsDataWrapper {
     }
 
     public boolean hasExceptionVariation(final LocalDate date, ListIterator<LoanTermVariationsData> exceptionDataListIterator) {
-        ListIterator<LoanTermVariationsData> iterator = exceptionDataListIterator;
-        return hasNext(date, iterator);
+        return hasNext(date, exceptionDataListIterator);
     }
 
     public void updateLoanTermVariationsData(final List<LoanTermVariationsData> exceptionData) {
-        if (this.exceptionData != null && exceptionData != null && exceptionData.size() > 0) {
+        if (this.exceptionData != null && exceptionData != null && !exceptionData.isEmpty()) {
             this.exceptionData.addAll(exceptionData);
             deriveLoanTermVariations();
         }
@@ -153,12 +145,15 @@ public class LoanTermVariationsDataWrapper {
                 this.dueDateVariation.add(loanTermVariationsData);
             } else if (loanTermVariationsData.getTermVariationType().isInterestRateFromInstallment()) {
                 this.interestRateFromInstallment.add(loanTermVariationsData);
+            } else if (loanTermVariationsData.getTermVariationType().isInterestPauseVariation()) {
+                this.interestPauseVariations.add(loanTermVariationsData);
             }
         }
         Collections.sort(this.dueDateVariation);
         this.exceptionData.removeAll(this.interestRateChanges);
         this.exceptionData.removeAll(this.dueDateVariation);
         this.exceptionData.removeAll(this.interestRateFromInstallment);
+        this.exceptionData.removeAll(this.interestPauseVariations);
         this.iterator = this.exceptionData.listIterator();
         this.dueDateIterator = this.dueDateVariation.listIterator();
     }

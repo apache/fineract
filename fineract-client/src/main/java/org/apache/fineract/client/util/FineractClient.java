@@ -88,6 +88,7 @@ import org.apache.fineract.client.services.LoanChargesApi;
 import org.apache.fineract.client.services.LoanCobCatchUpApi;
 import org.apache.fineract.client.services.LoanCollateralApi;
 import org.apache.fineract.client.services.LoanDisbursementDetailsApi;
+import org.apache.fineract.client.services.LoanInterestPauseApi;
 import org.apache.fineract.client.services.LoanProductsApi;
 import org.apache.fineract.client.services.LoanReschedulingApi;
 import org.apache.fineract.client.services.LoanTransactionsApi;
@@ -290,6 +291,7 @@ public final class FineractClient {
     public final UserGeneratedDocumentsApi templates;
     public final UsersApi users;
     public final WorkingDaysApi workingDays;
+    public final LoanInterestPauseApi loanInterestPauseApi;
 
     public final ExternalAssetOwnersApi externalAssetOwners;
     public final ExternalAssetOwnerLoanProductAttributesApi externalAssetOwnerLoanProductAttributes;
@@ -415,6 +417,7 @@ public final class FineractClient {
         templates = retrofit.create(UserGeneratedDocumentsApi.class);
         users = retrofit.create(UsersApi.class);
         workingDays = retrofit.create(WorkingDaysApi.class);
+        loanInterestPauseApi = retrofit.create(LoanInterestPauseApi.class);
     }
 
     public static Builder builder() {

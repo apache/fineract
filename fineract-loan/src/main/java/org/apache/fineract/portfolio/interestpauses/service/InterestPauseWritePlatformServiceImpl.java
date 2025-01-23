@@ -22,6 +22,7 @@ import static org.apache.fineract.portfolio.loanaccount.domain.LoanStatus.ACTIVE
 import static org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType.INTEREST_PAUSE;
 import static org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType.PROGRESSIVE;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -43,6 +44,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanTermVariationsRepository;
+import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.springframework.transaction.annotation.Transactional;
 
 @AllArgsConstructor
@@ -51,24 +53,26 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
 
     private final LoanTermVariationsRepository loanTermVariationsRepository;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
+    private final LoanAssembler loanAssembler;
 
     @Override
-    public CommandProcessingResult createInterestPause(ExternalId loanExternalId, String startDateString, String endDateString,
-            String dateFormat, String locale) {
+    public CommandProcessingResult createInterestPause(final ExternalId loanExternalId, final String startDateString,
+            final String endDateString, final String dateFormat, final String locale) {
         final LocalDate startDate = parseDate(startDateString, dateFormat, locale);
         final LocalDate endDate = parseDate(endDateString, dateFormat, locale);
+        final Loan loan = loanAssembler.assembleFrom(loanExternalId, false);
 
-        return processInterestPause(loanRepositoryWrapper.findOneWithNotFoundDetection(loanExternalId), startDate, endDate, dateFormat,
-                locale);
+        return processInterestPause(loan, startDate, endDate, dateFormat, locale);
     }
 
     @Override
-    public CommandProcessingResult createInterestPause(Long loanId, String startDateString, String endDateString, String dateFormat,
-            String locale) {
+    public CommandProcessingResult createInterestPause(final Long loanId, final String startDateString, final String endDateString,
+            final String dateFormat, final String locale) {
         final LocalDate startDate = parseDate(startDateString, dateFormat, locale);
         final LocalDate endDate = parseDate(endDateString, dateFormat, locale);
+        final Loan loan = loanAssembler.assembleFrom(loanId, false);
 
-        return processInterestPause(loanRepositoryWrapper.findOneWithNotFoundDetection(loanId), startDate, endDate, dateFormat, locale);
+        return processInterestPause(loan, startDate, endDate, dateFormat, locale);
     }
 
     @Override
@@ -131,14 +135,18 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
                 .with(Map.of("startDate", startDate.toString(), "endDate", endDate.toString())).build();
     }
 
-    private CommandProcessingResult processInterestPause(Loan loan, LocalDate startDate, LocalDate endDate, String dateFormat,
-            String locale) {
+    private CommandProcessingResult processInterestPause(final Loan loan, final LocalDate startDate, final LocalDate endDate,
+            String dateFormat, String locale) {
         validateActiveLoan(loan);
         validateInterestPauseDates(loan, startDate, endDate, dateFormat, locale, null);
 
-        LoanTermVariations variation = new LoanTermVariations(INTEREST_PAUSE.getValue(), startDate, null, endDate, false, loan);
+        final LoanTermVariations variation = new LoanTermVariations(INTEREST_PAUSE.getValue(), startDate, BigDecimal.ZERO, endDate, false,
+                loan);
 
-        LoanTermVariations savedVariation = loanTermVariationsRepository.saveAndFlush(variation);
+        final LoanTermVariations savedVariation = loanTermVariationsRepository.saveAndFlush(variation);
+
+        loan.getLoanTermVariations().add(savedVariation);
+        loan.reprocessTransactions();
 
         return new CommandProcessingResultBuilder().withEntityId(savedVariation.getId()).build();
     }

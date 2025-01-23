@@ -98,6 +98,10 @@ public enum LoanTermVariationType {
         return this.value.equals(LoanTermVariationType.INTEREST_RATE.getValue());
     }
 
+    public boolean isInterestPauseVariation() {
+        return this.value.equals(LoanTermVariationType.INTEREST_PAUSE.getValue());
+    }
+
     public boolean isPrincipalAmountVariation() {
         return this.value.equals(LoanTermVariationType.PRINCIPAL_AMOUNT.getValue());
     }

@@ -77,4 +77,6 @@ public interface EMICalculator {
     OutstandingDetails getOutstandingAmountsTillDate(ProgressiveLoanInterestScheduleModel model, LocalDate targetDate);
 
     Money getSumOfDueInterestsOnDate(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate subjectDate);
+
+    void applyInterestPause(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate fromDate, LocalDate endDate);
 }

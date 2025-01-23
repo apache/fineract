@@ -1343,6 +1343,82 @@ class ProgressiveEMICalculatorTest {
     }
 
     @Test
+    public void test_singleInterestPauseAmt100_dayInYears360_daysInMonth30_repayEvery1Month() {
+        final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
+                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+
+        final BigDecimal interestRate = BigDecimal.valueOf(7.0);
+        final Integer installmentAmountInMultiplesOf = null;
+
+        Mockito.when(loanProductRelatedDetail.getAnnualNominalInterestRate()).thenReturn(interestRate);
+        Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
+        Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.DAYS_30.getValue());
+        Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.MONTHS);
+        Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
+        Mockito.when(loanProductRelatedDetail.getCurrencyData()).thenReturn(currency);
+
+        final ProgressiveLoanInterestScheduleModel interestSchedule = emiCalculator.generatePeriodInterestScheduleModel(
+                expectedRepaymentPeriods, loanProductRelatedDetail, loanTermVariations, installmentAmountInMultiplesOf, mc);
+
+        final Money disbursedAmount = toMoney(100.0);
+        emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
+        emiCalculator.applyInterestPause(interestSchedule, LocalDate.of(2024, 2, 5), LocalDate.of(2024, 2, 10));
+
+        checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
+        checkPeriod(interestSchedule, 1, 0, 17.01, 0.000603448276, 0.05, 0.39, 16.62, 66.95);
+        checkPeriod(interestSchedule, 1, 1, 17.01, 0.001206896552, 0.0, 0.39, 16.62, 66.95);
+        checkPeriod(interestSchedule, 1, 2, 17.01, 0.004022988506, 0.34, 0.39, 16.62, 66.95);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.39, 0.39, 16.62, 50.33);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 0.29, 16.72, 33.61);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.2, 0.2, 16.81, 16.8);
+        checkPeriod(interestSchedule, 5, 0, 16.9, 0.005833333333, 0.1, 0.1, 16.8, 0.0);
+    }
+
+    @Test
+    public void test_interestPauseBetweenTwoPeriodsAmt100_dayInYears360_daysInMonth30_repayEvery1Month() {
+        final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
+                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+
+        final BigDecimal interestRate = BigDecimal.valueOf(7.0);
+        final Integer installmentAmountInMultiplesOf = null;
+
+        Mockito.when(loanProductRelatedDetail.getAnnualNominalInterestRate()).thenReturn(interestRate);
+        Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
+        Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.DAYS_30.getValue());
+        Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.MONTHS);
+        Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
+        Mockito.when(loanProductRelatedDetail.getCurrencyData()).thenReturn(currency);
+
+        final ProgressiveLoanInterestScheduleModel interestSchedule = emiCalculator.generatePeriodInterestScheduleModel(
+                expectedRepaymentPeriods, loanProductRelatedDetail, loanTermVariations, installmentAmountInMultiplesOf, mc);
+
+        final Money disbursedAmount = toMoney(100.0);
+        emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
+        emiCalculator.applyInterestPause(interestSchedule, LocalDate.of(2024, 2, 10), LocalDate.of(2024, 3, 10));
+
+        checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
+        checkPeriod(interestSchedule, 1, 0, 17.01, 0.001609195402, 0.13, 0.13, 16.88, 66.69);
+        checkPeriod(interestSchedule, 1, 1, 17.01, 0.004224137931, 0.0, 0.13, 16.88, 66.69);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.0, 0.28, 16.73, 49.96);
+        checkPeriod(interestSchedule, 2, 1, 17.01, 0.004139784946, 0.28, 0.28, 16.73, 49.96);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 0.29, 16.72, 33.24);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.19, 0.19, 16.82, 16.42);
+        checkPeriod(interestSchedule, 5, 0, 16.52, 0.005833333333, 0.1, 0.1, 16.42, 0.0);
+    }
+
+    @Test
     public void test_reschedule_disbursedAmt100_dayInYears360_daysInMonth30_repayEvery1Month() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
                 repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 3, 1)),
