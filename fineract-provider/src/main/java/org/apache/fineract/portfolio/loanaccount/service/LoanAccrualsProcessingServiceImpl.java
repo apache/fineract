@@ -427,9 +427,9 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
         AccrualPeriodData period = accrualPeriods.getPeriodByInstallmentNumber(installment.getInstallmentNumber());
         MonetaryCurrency currency = accrualPeriods.getCurrency();
         Money interest = null;
-        boolean isFullPeriod = isFullPeriod(tillDate, installment);
+        boolean isPastPeriod = isAfterPeriod(tillDate, installment);
         boolean isInPeriod = isInPeriod(tillDate, installment, false);
-        if (isFullPeriod) {
+        if (isPastPeriod || loan.isClosed() || loan.isOverPaid()) {
             interest = installment.getInterestCharged(currency);
         } else {
             if (isInPeriod) { // first period first day is not accrued
@@ -447,7 +447,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
             unrecognizedWaived = MathUtil.min(unrecognizedWaived,
                     MathUtil.minusToZero(installment.getInterestWaived(currency), transactionWaived), false);
             period.setUnrecognizedWaive(unrecognizedWaived);
-            Money waived = isFullPeriod ? installment.getInterestWaived(currency) : MathUtil.plus(transactionWaived, unrecognizedWaived);
+            Money waived = isPastPeriod ? installment.getInterestWaived(currency) : MathUtil.plus(transactionWaived, unrecognizedWaived);
             accruable = MathUtil.minusToZero(period.getInterestAmount(), waived);
         }
         period.setInterestAccruable(accruable);
@@ -499,7 +499,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
                     .map(p -> MathUtil.toBigDecimal(p.getTransactionAccrued())).reduce(BigDecimal.ZERO, MathUtil::add);
             BigDecimal accrued = MathUtil.subtractToZero(totalAccrued, prevAccrued);
             // if this is the current-last period, all the remaining accrued amount is added
-            return isInPeriod(tillDate, installment, false) ? accrued : MathUtil.min(installment.getInterestCharged(), accrued, false);
+            return isInPeriod(tillDate, installment, false) ? accrued : MathUtil.min(installment.getInterestAccrued(), accrued, false);
         } else {
             return isFullPeriod(tillDate, installment) ? installment.getInterestAccrued()
                     : loan.getLoanTransactions().stream()

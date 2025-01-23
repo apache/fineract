@@ -26,8 +26,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 
 @Slf4j
 public class LoanCOBCreateAccrualsTest extends BaseLoanIntegrationTest {
@@ -422,5 +424,62 @@ public class LoanCOBCreateAccrualsTest extends BaseLoanIntegrationTest {
                     transaction(100.0d, "Repayment", "22 October 2024", 0, 100.0, 0, 0, 0, 0, 0, false));
 
         });
+    }
+
+    @Test
+    public void testEarlyRepaymentAccruals() {
+        AtomicReference<Long> loanIdRef = new AtomicReference<>();
+        setup();
+        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
+
+        runAt("20 December 2024", () -> {
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "20 December 2024",
+                    430.0, 26.0, 6, null);
+
+            loanIdRef.set(loanId);
+
+            disburseLoan(loanId, BigDecimal.valueOf(430), "20 December 2024");
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "20 January 2025", 67.88, 0, 0, 9.32);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 2, "20 February 2025", 69.35, 0, 0, 7.85);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 3, "20 March 2025", 70.86, 0, 0, 6.34);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 4, "20 April 2025", 72.39, 0, 0, 4.81);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 5, "20 May 2025", 73.96, 0, 0, 3.24);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 6, "20 June 2025", 75.56, 0, 0, 1.64);
+
+            verifyTransactions(loanId, transaction(430.0d, "Disbursement", "20 December 2024"));
+            executeInlineCOB(loanId);
+        });
+        runAt("30 December 2024", () -> {
+            Long loanId = loanIdRef.get();
+            loanTransactionHelper.makeLoanRepayment(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+                    .transactionDate("30 December 2024").locale("en").transactionAmount(200.0));
+        });
+        runAt("22 March 2025", () -> {
+            Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+
+            // No unexpected big accruals or any accrual adjustments
+            Assertions.assertTrue(loanDetails.getTransactions().stream().noneMatch(t -> (t.getType().getAccrual() && t.getAmount() > 0.31)
+                    || "loanTransactionType.accrualAdjustment".equals(t.getType().getCode())));
+
+            // Accruals around installment due dates are as expected
+            Assertions.assertTrue(loanDetails.getTransactions().stream().anyMatch(
+                    t -> t.getDate().equals(LocalDate.of(2025, 1, 20)) && t.getType().getAccrual() && t.getAmount().equals(0.16D)));
+            Assertions.assertTrue(loanDetails.getTransactions().stream().anyMatch(
+                    t -> t.getDate().equals(LocalDate.of(2025, 1, 21)) && t.getType().getAccrual() && t.getAmount().equals(0.16D)));
+            Assertions.assertTrue(loanDetails.getTransactions().stream().anyMatch(
+                    t -> t.getDate().equals(LocalDate.of(2025, 2, 20)) && t.getType().getAccrual() && t.getAmount().equals(0.16D)));
+            Assertions.assertTrue(loanDetails.getTransactions().stream().anyMatch(
+                    t -> t.getDate().equals(LocalDate.of(2025, 2, 21)) && t.getType().getAccrual() && t.getAmount().equals(0.18D)));
+            Assertions.assertTrue(loanDetails.getTransactions().stream().anyMatch(
+                    t -> t.getDate().equals(LocalDate.of(2025, 3, 20)) && t.getType().getAccrual() && t.getAmount().equals(0.18D)));
+            Assertions.assertTrue(loanDetails.getTransactions().stream().anyMatch(
+                    t -> t.getDate().equals(LocalDate.of(2025, 3, 21)) && t.getType().getAccrual() && t.getAmount().equals(0.16D)));
+        });
+
     }
 }
