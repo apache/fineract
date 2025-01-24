@@ -64,6 +64,7 @@ import org.apache.fineract.portfolio.fund.domain.FundRepository;
 import org.apache.fineract.portfolio.fund.service.FundReadPlatformService;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
 import org.apache.fineract.portfolio.group.service.GroupReadPlatformService;
+import org.apache.fineract.portfolio.interestpauses.service.AccountTransfersService;
 import org.apache.fineract.portfolio.interestpauses.service.InterestPauseReadPlatformService;
 import org.apache.fineract.portfolio.interestpauses.service.InterestPauseReadPlatformServiceImpl;
 import org.apache.fineract.portfolio.interestpauses.service.InterestPauseWritePlatformService;
@@ -471,7 +472,10 @@ public class LoanAccountConfiguration {
     @Bean
     @ConditionalOnMissingBean(InterestPauseWritePlatformService.class)
     public InterestPauseWritePlatformService interestPauseWritePlatformService(LoanTermVariationsRepository loanTermVariationsRepository,
-            LoanRepositoryWrapper loanRepositoryWrapper, LoanAssembler loanAssembler) {
-        return new InterestPauseWritePlatformServiceImpl(loanTermVariationsRepository, loanRepositoryWrapper, loanAssembler);
+            LoanRepositoryWrapper loanRepositoryWrapper, LoanAssembler loanAssembler, LoanAccountDomainService loanAccountDomainService,
+            AccountTransfersService accountTransfersService,
+            ReplayedTransactionBusinessEventService replayedTransactionBusinessEventService) {
+        return new InterestPauseWritePlatformServiceImpl(loanTermVariationsRepository, loanRepositoryWrapper, loanAssembler,
+                loanAccountDomainService, accountTransfersService, replayedTransactionBusinessEventService);
     }
 }

@@ -40,11 +40,15 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanTermVariationsRepository;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
+import org.apache.fineract.portfolio.loanaccount.service.ReplayedTransactionBusinessEventService;
 import org.springframework.transaction.annotation.Transactional;
 
 @AllArgsConstructor
@@ -54,6 +58,9 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
     private final LoanTermVariationsRepository loanTermVariationsRepository;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final LoanAssembler loanAssembler;
+    private final LoanAccountDomainService loanAccountDomainService;
+    private final AccountTransfersService accountTransfersService;
+    private final ReplayedTransactionBusinessEventService replayedTransactionBusinessEventService;
 
     @Override
     public CommandProcessingResult createInterestPause(final ExternalId loanExternalId, final String startDateString,
@@ -146,7 +153,14 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
         final LoanTermVariations savedVariation = loanTermVariationsRepository.saveAndFlush(variation);
 
         loan.getLoanTermVariations().add(savedVariation);
-        loan.reprocessTransactions();
+        final ChangedTransactionDetail changedTransactionDetail = loan.reprocessTransactions();
+        if (changedTransactionDetail != null) {
+            for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
+                loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(mapEntry.getValue());
+                accountTransfersService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
+            }
+            replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
+        }
 
         return new CommandProcessingResultBuilder().withEntityId(savedVariation.getId()).build();
     }
