@@ -1079,6 +1079,11 @@ public abstract class BaseLoanIntegrationTest {
         return new Installment(principalAmount, interestAmount, null, null, 0.0, true, dueDate, null, null);
     }
 
+    protected Installment unpaidInstallment(double principalAmount, double interestAmount, String dueDate) {
+        Double amount = principalAmount + interestAmount;
+        return new Installment(principalAmount, interestAmount, null, null, amount, false, dueDate, null, null);
+    }
+
     protected Installment installment(double principalAmount, double interestAmount, double feeAmount, double totalOutstandingAmount,
             Boolean completed, String dueDate) {
         return new Installment(principalAmount, interestAmount, feeAmount, null, totalOutstandingAmount, completed, dueDate, null, null);

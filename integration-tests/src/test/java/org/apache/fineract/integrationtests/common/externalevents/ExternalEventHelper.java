@@ -26,18 +26,21 @@ import java.util.List;
 import java.util.Map;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.CommandProcessingResult;
+import org.apache.fineract.client.models.PutExternalEventConfigurationsRequest;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.infrastructure.event.external.service.validation.ExternalEventDTO;
+import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.ExternalEventConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Assertions;
 
 @Slf4j
-public final class ExternalEventHelper {
+public final class ExternalEventHelper extends IntegrationTest {
 
     private static final Gson GSON = new JSON().getGson();
 
-    private ExternalEventHelper() {}
+    public ExternalEventHelper() {}
 
     @Builder
     public static class Filter {
@@ -115,6 +118,27 @@ public final class ExternalEventHelper {
         Assertions.assertEquals(updatedConfigurations.size(), 1);
         Assertions.assertTrue(updatedConfigurations.containsKey(eventName));
         Assertions.assertEquals(status, updatedConfigurations.get(eventName));
+    }
+
+    public void configureBusinessEvent(String eventName, boolean enabled) {
+        CommandProcessingResult result = ok(fineract().externalEventConfigurationApi.updateExternalEventConfigurationsDetails(
+                new PutExternalEventConfigurationsRequest().putExternalEventConfigurationsItem(eventName, enabled)));
+        Map<String, Object> changes = result.getChanges();
+        Assertions.assertNotNull(changes);
+        Assertions.assertInstanceOf(Map.class, changes);
+        Map<String, Boolean> updatedConfigurations = (Map<String, Boolean>) changes.get("externalEventConfigurations");
+        Assertions.assertNotNull(updatedConfigurations);
+        Assertions.assertEquals(1, updatedConfigurations.size());
+        Assertions.assertTrue(updatedConfigurations.containsKey(eventName));
+        Assertions.assertEquals(enabled, updatedConfigurations.get(eventName));
+    }
+
+    public void enableBusinessEvent(String eventName) {
+        configureBusinessEvent(eventName, true);
+    }
+
+    public void disableBusinessEvent(String eventName) {
+        configureBusinessEvent(eventName, false);
     }
 
 }

@@ -42,6 +42,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.client.models.GlobalConfigurationPropertyData;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
 import org.apache.fineract.client.models.PostCreateRescheduleLoansResponse;
@@ -49,21 +50,25 @@ import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.event.external.service.validation.ExternalEventDTO;
 import org.apache.fineract.integrationtests.common.BusinessStepHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.ExternalEventConfigurationHelper;
 import org.apache.fineract.integrationtests.common.LoanRescheduleRequestHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.externalevents.ExternalEventHelper;
 import org.apache.fineract.integrationtests.common.externalevents.ExternalEventsExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -79,6 +84,7 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
     private static ResponseSpecification responseSpec;
     private static RequestSpecification requestSpec;
     Long chargeId = createCharge(111.0, "USD").getResourceId();
+    private final ExternalEventHelper externalEventHelper = new ExternalEventHelper();
 
     @BeforeAll
     public static void beforeAll() {
@@ -165,8 +171,8 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
     @Test
     public void verifyLoanChargeAdjustmentPostBusinessEvent01() {
         runAt("1 January 2021", () -> {
-            enableBusinessEvent("LoanChargeAdjustmentPostBusinessEvent");
-            enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
+            externalEventHelper.enableBusinessEvent("LoanChargeAdjustmentPostBusinessEvent");
+            externalEventHelper.enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
             PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(create4IProgressive().currencyCode("USD"));
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 600.0, 9.99,
                     4, null);
@@ -206,8 +212,8 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
     @Test
     public void verifyLoanChargeAdjustmentPostBusinessEvent02() {
         runAt("1 January 2021", () -> {
-            enableBusinessEvent("LoanChargeAdjustmentPostBusinessEvent");
-            enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
+            externalEventHelper.enableBusinessEvent("LoanChargeAdjustmentPostBusinessEvent");
+            externalEventHelper.enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
             PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(create4IProgressive().currencyCode("USD"));
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 600.0, 9.99,
                     4, null);
@@ -273,8 +279,8 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
     @Test
     public void verifyLoanChargeAdjustmentPostBusinessEvent03() {
         runAt("1 January 2021", () -> {
-            enableBusinessEvent("LoanChargeAdjustmentPostBusinessEvent");
-            enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
+            externalEventHelper.enableBusinessEvent("LoanChargeAdjustmentPostBusinessEvent");
+            externalEventHelper.enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
             PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(create4IProgressive().currencyCode("USD"));
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 600.0, 9.99,
                     4, null);
@@ -348,8 +354,8 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
     @Test
     public void verifyLoanChargeAdjustmentPostBusinessEvent04() {
         runAt("1 January 2021", () -> {
-            enableBusinessEvent("LoanChargeAdjustmentPostBusinessEvent");
-            enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
+            externalEventHelper.enableBusinessEvent("LoanChargeAdjustmentPostBusinessEvent");
+            externalEventHelper.enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
             PostLoanProductsResponse loanProduct = loanProductHelper
                     .createLoanProduct(create4IProgressive().isInterestRecalculationEnabled(false).currencyCode("USD"));
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 600.0, 9.99,
@@ -390,8 +396,8 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
     @Test
     public void verifyLoanChargeAdjustmentPostBusinessEvent05() {
         runAt("1 January 2021", () -> {
-            enableBusinessEvent("LoanChargeAdjustmentPostBusinessEvent");
-            enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
+            externalEventHelper.enableBusinessEvent("LoanChargeAdjustmentPostBusinessEvent");
+            externalEventHelper.enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
             PostLoanProductsResponse loanProduct = loanProductHelper
                     .createLoanProduct(create4IProgressive().isInterestRecalculationEnabled(false).currencyCode("USD"));
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 600.0, 9.99,
@@ -458,8 +464,8 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
     @Test
     public void verifyLoanChargeAdjustmentPostBusinessEvent06() {
         runAt("1 January 2021", () -> {
-            enableBusinessEvent("LoanChargeAdjustmentPostBusinessEvent");
-            enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
+            externalEventHelper.enableBusinessEvent("LoanChargeAdjustmentPostBusinessEvent");
+            externalEventHelper.enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
             PostLoanProductsResponse loanProduct = loanProductHelper
                     .createLoanProduct(create4IProgressive().isInterestRecalculationEnabled(false).currencyCode("USD"));
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 600.0, 9.99,
@@ -533,8 +539,8 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
     @Test
     public void verifyLoanChargeAdjustmentPostBusinessEvent07() {
         runAt("1 January 2021", () -> {
-            enableBusinessEvent("LoanChargeAdjustmentPostBusinessEvent");
-            enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
+            externalEventHelper.enableBusinessEvent("LoanChargeAdjustmentPostBusinessEvent");
+            externalEventHelper.enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
             PostLoanProductsResponse loanProduct = loanProductHelper
                     .createLoanProduct(create4IProgressive().isInterestRecalculationEnabled(false).currencyCode("USD"));
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 600.0, 0.0, 4,
@@ -574,8 +580,8 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
     @Test
     public void verifyLoanChargeAdjustmentPostBusinessEvent08() {
         runAt("1 January 2021", () -> {
-            enableBusinessEvent("LoanChargeAdjustmentPostBusinessEvent");
-            enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
+            externalEventHelper.enableBusinessEvent("LoanChargeAdjustmentPostBusinessEvent");
+            externalEventHelper.enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
             PostLoanProductsResponse loanProduct = loanProductHelper
                     .createLoanProduct(create4IProgressive().isInterestRecalculationEnabled(false).currencyCode("USD"));
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 600.0, 0.0, 4,
@@ -641,8 +647,8 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
     @Test
     public void verifyLoanChargeAdjustmentPostBusinessEvent09() {
         runAt("1 January 2021", () -> {
-            enableBusinessEvent("LoanChargeAdjustmentPostBusinessEvent");
-            enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
+            externalEventHelper.enableBusinessEvent("LoanChargeAdjustmentPostBusinessEvent");
+            externalEventHelper.enableBusinessEvent("LoanTransactionMakeRepaymentPostBusinessEvent");
             PostLoanProductsResponse loanProduct = loanProductHelper
                     .createLoanProduct(create4IProgressive().isInterestRecalculationEnabled(false).currencyCode("USD"));
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 600.0, 0.0, 4,
@@ -769,33 +775,105 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
         });
     }
 
-    private static void enableLoanBalanceChangedBusinessEvent() {
-        enableBusinessEvent("LoanBalanceChangedBusinessEvent");
+    @Nested
+    class ExternalIdGenerationTest {
+
+        Boolean actualConfiguration = null;
+
+        @BeforeEach
+        void setUpEnableExternalIdGenerationIfActuallyDisabled() {
+            if (actualConfiguration == null) {
+                GlobalConfigurationPropertyData globalConfigurationByName = globalConfigurationHelper
+                        .getGlobalConfigurationByName(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID);
+                if (globalConfigurationByName != null) {
+                    actualConfiguration = globalConfigurationByName.getEnabled();
+                    Assertions.assertNotNull(actualConfiguration);
+                }
+            }
+            if (!actualConfiguration) {
+                globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, true);
+            }
+        }
+
+        @AfterEach
+        void tearDownDisableExternalIdGenerationIfPreviouslyDisabled() {
+            if (!actualConfiguration) {
+                globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, false);
+            }
+        }
+
+        @Test
+        public void testInterestPaymentWaiverNotReverseReplayOnCreationAndHasGeneratedExternalId() {
+            externalEventHelper.enableBusinessEvent("LoanAdjustTransactionBusinessEvent");
+            AtomicReference<Long> loanIdRef = new AtomicReference<>();
+            runAt("15 January 2025", () -> {
+                PostLoanProductsResponse loanProductResponse = loanProductHelper
+                        .createLoanProduct(create4IProgressive().isInterestRecalculationEnabled(true));
+
+                Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductResponse.getResourceId(), "15 January 2025",
+                        430.0, 9.9, 4, null);
+                loanIdRef.set(loanId);
+
+                loanTransactionHelper.disburseLoan(loanId, new PostLoansLoanIdRequest().actualDisbursementDate("15 January 2025")
+                        .dateFormat(DATETIME_PATTERN).transactionAmount(BigDecimal.valueOf(430.0)).locale("en"));
+
+                verifyTransactions(loanId, transaction(430.0, "Disbursement", "15 January 2025") //
+                );
+
+                verifyRepaymentSchedule(loanId, //
+                        installment(430.0, null, "15 January 2025"), //
+                        unpaidInstallment(106.18, 3.55, "15 February 2025"), //
+                        unpaidInstallment(107.06, 2.67, "15 March 2025"), //
+                        unpaidInstallment(107.94, 1.79, "15 April 2025"), //
+                        unpaidInstallment(108.82, 0.9, "15 May 2025") //
+                );
+            });
+            runAt("16 January 2025", () -> {
+                Long loanId = loanIdRef.get();
+                executeInlineCOB(loanId);
+                verifyTransactions(loanId, transaction(430.0, "Disbursement", "15 January 2025") //
+                );
+            });
+            runAt("17 January 2025", () -> {
+                Long loanId = loanIdRef.get();
+                executeInlineCOB(loanId);
+                verifyTransactions(loanId, transaction(430.0, "Disbursement", "15 January 2025"), //
+                        transaction(0.11, "Accrual", "16 January 2025"));
+                deleteAllExternalEvents();
+                PostLoansLoanIdTransactionsResponse interestPaymentWaiverResponse = loanTransactionHelper.makeLoanRepayment(loanId,
+                        "InterestPaymentWaiver", "17 January 2025", 10.0);
+
+                List<ExternalEventDTO> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+                List<ExternalEventDTO> adjustments = allExternalEvents.stream()
+                        .filter(e -> "LoanAdjustTransactionBusinessEvent".equals(e.getType())).toList();
+                Assertions.assertEquals(0, adjustments.size());
+                Assertions.assertNotNull(interestPaymentWaiverResponse);
+                Assertions.assertNotNull(interestPaymentWaiverResponse.getResourceExternalId());
+
+                verifyTransactions(loanId, transaction(430.0, "Disbursement", "15 January 2025"), //
+                        transaction(10.0, "Interest Payment Waiver", "17 January 2025"), //
+                        transaction(0.11, "Accrual", "16 January 2025"));
+                verifyRepaymentSchedule(loanId, //
+                        installment(430.0, null, "15 January 2025"), //
+                        installment(106.26, 3.47, 99.73, false, "15 February 2025"), //
+                        unpaidInstallment(107.06, 2.67, "15 March 2025"), //
+                        unpaidInstallment(107.94, 1.79, "15 April 2025"), //
+                        unpaidInstallment(108.74, 0.9, "15 May 2025") //
+                );
+            });
+        }
     }
 
-    private static void configureBusinessEvent(String eventName, boolean enabled) {
-        String value = enabled ? "true" : "false";
-        final Map<String, Boolean> updatedConfigurations = ExternalEventConfigurationHelper.updateExternalEventConfigurations(requestSpec,
-                responseSpec, "{\"externalEventConfigurations\":{\"" + eventName + "\":" + value + "}}\n");
-        Assertions.assertEquals(1, updatedConfigurations.size());
-        Assertions.assertTrue(updatedConfigurations.containsKey(eventName));
-        Assertions.assertEquals(enabled, updatedConfigurations.get(eventName));
+    private void enableLoanBalanceChangedBusinessEvent() {
+        externalEventHelper.enableBusinessEvent("LoanBalanceChangedBusinessEvent");
     }
 
-    private static void enableBusinessEvent(String eventName) {
-        configureBusinessEvent(eventName, true);
+    private void enableLoanRescheduledDueAdjustScheduleBusinessEvent() {
+        externalEventHelper.enableBusinessEvent("LoanRescheduledDueAdjustScheduleBusinessEvent");
     }
 
-    private static void disableBusinessEvent(String eventName) {
-        configureBusinessEvent(eventName, false);
-    }
-
-    private static void enableLoanRescheduledDueAdjustScheduleBusinessEvent() {
-        enableBusinessEvent("LoanRescheduledDueAdjustScheduleBusinessEvent");
-    }
-
-    private static void disableLoanBalanceChangedBusinessEvent() {
-        disableBusinessEvent("LoanBalanceChangedBusinessEvent");
+    private void disableLoanBalanceChangedBusinessEvent() {
+        externalEventHelper.disableBusinessEvent("LoanBalanceChangedBusinessEvent");
     }
 
     private void deleteAllExternalEvents() {
@@ -871,8 +949,8 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
         });
     }
 
-    private static void enableLoanInterestRefundPstBusinessEvent(boolean enabled) {
-        configureBusinessEvent("LoanTransactionInterestRefundPostBusinessEvent", enabled);
+    private void enableLoanInterestRefundPstBusinessEvent(boolean enabled) {
+        externalEventHelper.configureBusinessEvent("LoanTransactionInterestRefundPostBusinessEvent", enabled);
     }
 
     public void verifyBusinessEvents(BusinessEvent... businessEvents) {

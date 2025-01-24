@@ -1142,14 +1142,21 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             ScheduleGeneratorDTO scheduleGeneratorDTO) {
         if (loan.getLoanRepaymentScheduleDetail().isInterestRecalculationEnabled()) {
             loanScheduleService.regenerateRepaymentScheduleWithInterestRecalculation(loan, scheduleGeneratorDTO);
-            loanAccrualsProcessingService.reprocessExistingAccruals(loan);
-            loanAccrualsProcessingService.processIncomePostingAndAccruals(loan);
+
         } else if (loan.getLoanProductRelatedDetail() != null
                 && loan.getLoanProductRelatedDetail().getLoanScheduleType().equals(LoanScheduleType.PROGRESSIVE)
                 && loan.getLoanTransactions().stream().anyMatch(LoanTransaction::isChargeOff)) {
             loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
         }
-        return loan.reprocessTransactions();
+
+        ChangedTransactionDetail changedTransactionDetail = loan.reprocessTransactions();
+
+        if (loan.getLoanRepaymentScheduleDetail().isInterestRecalculationEnabled()) {
+            loanAccrualsProcessingService.reprocessExistingAccruals(loan);
+            loanAccrualsProcessingService.processIncomePostingAndAccruals(loan);
+        }
+
+        return changedTransactionDetail;
     }
 
     @Transactional

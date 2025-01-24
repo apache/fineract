@@ -870,6 +870,12 @@ public class LoanTransactionHelper extends IntegrationTest {
         return postLoanTransaction(createLoanTransactionURL(repaymentTypeCommand, loanID), getRepaymentBodyAsJSON(date, amountToBePaid));
     }
 
+    public PostLoansLoanIdTransactionsResponse makeLoanRepayment(final Long loanId, final String command, final String date,
+            final Double amountToBePaid) {
+        return ok(fineract().loanTransactions.executeLoanTransaction(loanId, new PostLoansLoanIdTransactionsRequest()
+                .transactionAmount(amountToBePaid).transactionDate(date).dateFormat("dd MMMM yyyy").locale("en"), command));
+    }
+
     // TODO: Rewrite to use fineract-client instead!
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
