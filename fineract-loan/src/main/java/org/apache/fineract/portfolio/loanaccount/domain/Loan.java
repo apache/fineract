@@ -2666,6 +2666,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return this.actualMaturityDate;
     }
 
+    public boolean isMatured(final LocalDate referenceDate) {
+        return (this.actualMaturityDate != null) ? (referenceDate.compareTo(this.actualMaturityDate) >= 0) : false;
+    }
+
     public ChangedTransactionDetail processTransactions() {
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = getTransactionProcessor();
         final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retrieveListOfTransactionsForReprocessing();

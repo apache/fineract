@@ -80,6 +80,9 @@ public class ProgressiveLoanSummaryDataProvider extends CommonLoanSummaryDataPro
     @Override
     public BigDecimal computeTotalUnpaidPayableNotDueInterestAmountOnActualPeriod(final Loan loan,
             final Collection<LoanSchedulePeriodData> periods, final LocalDate businessDate, final CurrencyData currency) {
+        if (loan.isMatured(businessDate)) {
+            return BigDecimal.ZERO;
+        }
 
         LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = getRelatedRepaymentScheduleInstallment(loan, businessDate);
         if (loan.isInterestBearing() && loanRepaymentScheduleInstallment != null) {
