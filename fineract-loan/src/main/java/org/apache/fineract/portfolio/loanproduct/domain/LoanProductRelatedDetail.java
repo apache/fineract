@@ -263,12 +263,10 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         return currency.toData();
     }
 
-    @Override
     public Money getPrincipal() {
         return Money.of(getCurrencyData(), this.principal);
     }
 
-    @Override
     public Money getInArrearsTolerance() {
         return Money.of(getCurrencyData(), this.inArrearsTolerance);
     }

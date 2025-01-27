@@ -25,7 +25,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.organisation.monetary.domain.Money;
-import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsDataWrapper;
+import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OutstandingDetails;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.PeriodDueDetails;
@@ -39,13 +39,13 @@ public interface EMICalculator {
     @NotNull
     ProgressiveLoanInterestScheduleModel generatePeriodInterestScheduleModel(@NotNull List<LoanScheduleModelRepaymentPeriod> periods,
             @NotNull LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail,
-            LoanTermVariationsDataWrapper loanTermVariations, Integer installmentAmountInMultiplesOf, MathContext mc);
+            List<LoanTermVariationsData> loanTermVariations, Integer installmentAmountInMultiplesOf, MathContext mc);
 
     @NotNull
     ProgressiveLoanInterestScheduleModel generateInstallmentInterestScheduleModel(
             @NotNull List<LoanRepaymentScheduleInstallment> installments,
             @NotNull LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail,
-            LoanTermVariationsDataWrapper loanTermVariations, Integer installmentAmountInMultiplesOf, MathContext mc);
+            List<LoanTermVariationsData> loanTermVariations, Integer installmentAmountInMultiplesOf, MathContext mc);
 
     Optional<RepaymentPeriod> findRepaymentPeriod(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate dueDate);
 

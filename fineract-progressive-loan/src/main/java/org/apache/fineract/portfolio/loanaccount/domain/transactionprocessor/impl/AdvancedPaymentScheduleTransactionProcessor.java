@@ -65,7 +65,6 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsDataWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
@@ -76,6 +75,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanPaymentAllocationRul
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionComparator;
@@ -183,10 +183,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
         MoneyHolder overpaymentHolder = new MoneyHolder(Money.zero(currency));
         final Loan loan = loanTransactions.get(0).getLoan();
-        LoanTermVariationsDataWrapper loanTermVariations = Optional
-                .ofNullable(loan.getActiveLoanTermVariations()).map(loanTermVariationsSet -> loanTermVariationsSet.stream()
-                        .map(LoanTermVariations::toData).collect(Collectors.toCollection(ArrayList::new)))
-                .map(LoanTermVariationsDataWrapper::new).orElse(null);
+        List<LoanTermVariationsData> loanTermVariations = loan.getActiveLoanTermVariations().stream().map(LoanTermVariations::toData)
+                .collect(Collectors.toCollection(ArrayList::new));
         final Integer installmentAmountInMultiplesOf = loan.getLoanProduct().getInstallmentAmountInMultiplesOf();
         final LoanProductRelatedDetail loanProductRelatedDetail = loan.getLoanRepaymentScheduleDetail();
         ProgressiveLoanInterestScheduleModel scheduleModel = emiCalculator.generateInstallmentInterestScheduleModel(installments,
@@ -235,8 +233,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     public ChangedTransactionDetail reprocessLoanTransactions(LocalDate disbursementDate, List<LoanTransaction> loanTransactions,
             MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges) {
         LocalDate currentDate = DateUtils.getBusinessLocalDate();
-        return reprocessProgressiveLoanTransactions(disbursementDate, currentDate, loanTransactions, currency, installments, charges)
-                .getLeft();
+        Pair<ChangedTransactionDetail, ProgressiveLoanInterestScheduleModel> result = reprocessProgressiveLoanTransactions(disbursementDate,
+                currentDate, loanTransactions, currency, installments, charges);
+        return result.getLeft();
     }
 
     @NotNull
@@ -823,16 +822,18 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     }
 
     @NotNull
-    private List<ChangeOperation> createSortedChangeList(final LoanTermVariationsDataWrapper loanTermVariations,
+    private List<ChangeOperation> createSortedChangeList(final List<LoanTermVariationsData> loanTermVariations,
             final List<LoanTransaction> loanTransactions, final Set<LoanCharge> charges) {
-        final List<ChangeOperation> changeOperations = new ArrayList<>();
-        if (loanTermVariations != null) {
-            if (!loanTermVariations.getInterestPauseVariations().isEmpty()) {
-                changeOperations.addAll(loanTermVariations.getInterestPauseVariations().stream().map(ChangeOperation::new).toList());
-            }
-            if (!loanTermVariations.getInterestRateFromInstallment().isEmpty()) {
-                changeOperations.addAll(loanTermVariations.getInterestRateFromInstallment().stream().map(ChangeOperation::new).toList());
-            }
+        List<ChangeOperation> changeOperations = new ArrayList<>();
+        Map<LoanTermVariationType, List<LoanTermVariationsData>> loanTermVariationsMap = loanTermVariations.stream()
+                .collect(Collectors.groupingBy(ltvd -> LoanTermVariationType.fromInt(ltvd.getTermType().getId().intValue())));
+        if (loanTermVariationsMap.get(LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT) != null) {
+            changeOperations.addAll(loanTermVariationsMap.get(LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT).stream()
+                    .map(ChangeOperation::new).toList());
+        }
+        if (loanTermVariationsMap.get(LoanTermVariationType.INTEREST_PAUSE) != null) {
+            changeOperations
+                    .addAll(loanTermVariationsMap.get(LoanTermVariationType.INTEREST_PAUSE).stream().map(ChangeOperation::new).toList());
         }
         if (charges != null) {
             changeOperations.addAll(charges.stream().map(ChangeOperation::new).toList());

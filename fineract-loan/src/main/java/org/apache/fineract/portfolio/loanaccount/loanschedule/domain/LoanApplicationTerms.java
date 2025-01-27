@@ -1549,10 +1549,10 @@ public final class LoanApplicationTerms {
     public LoanProductMinimumRepaymentScheduleRelatedDetail toLoanProductRelatedDetailMinimumData() {
         final CurrencyData currency = new CurrencyData(this.currency.getCode(), this.currency.getDecimalPlaces(),
                 this.currency.getInMultiplesOf());
-        return new LoanProductRelatedDetailMinimumData(currency, principal, inArrearsTolerance, interestRatePerPeriod,
-                annualNominalInterestRate, interestChargingGrace, interestPaymentGrace, principalGrace,
-                recurringMoratoriumOnPrincipalPeriods, interestMethod, interestCalculationPeriodMethod, daysInYearType, daysInMonthType,
-                amortizationMethod, repaymentPeriodFrequencyType, repaymentEvery, numberOfRepayments);
+        return new LoanProductRelatedDetailMinimumData(currency, interestRatePerPeriod, annualNominalInterestRate, interestChargingGrace,
+                interestPaymentGrace, principalGrace, recurringMoratoriumOnPrincipalPeriods, interestMethod,
+                interestCalculationPeriodMethod, daysInYearType, daysInMonthType, amortizationMethod, repaymentPeriodFrequencyType,
+                repaymentEvery, numberOfRepayments);
     }
 
     public Integer getLoanTermFrequency() {

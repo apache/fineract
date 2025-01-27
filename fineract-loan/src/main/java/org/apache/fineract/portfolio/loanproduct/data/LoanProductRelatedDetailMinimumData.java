@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.loanproduct.data;
 
 import java.math.BigDecimal;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
-import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
@@ -32,39 +31,28 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProductMinimumRepaym
 public class LoanProductRelatedDetailMinimumData implements LoanProductMinimumRepaymentScheduleRelatedDetail {
 
     private final CurrencyData currency;
-
-    private final Money principal;
-    private final Money inArrearsTolerance;
-
     private final BigDecimal interestRatePerPeriod;
     private final BigDecimal annualNominalInterestRate;
-
     private final Integer interestChargingGrace;
     private final Integer interestPaymentGrace;
     private final Integer principalGrace;
     private final Integer recurringMoratoriumOnPrincipalPeriods;
-
     private final InterestMethod interestMethod;
     private final InterestCalculationPeriodMethod interestCalculationPeriodMethod;
-
     private final DaysInYearType daysInYearType;
     private final DaysInMonthType daysInMonthType;
-
     private final AmortizationMethod amortizationMethod;
-
     private final PeriodFrequencyType repaymentPeriodFrequencyType;
     private final Integer repaymentEvery;
     private final Integer numberOfRepayments;
 
-    public LoanProductRelatedDetailMinimumData(CurrencyData currency, Money principal, Money inArrearsTolerance,
-            BigDecimal interestRatePerPeriod, BigDecimal annualNominalInterestRate, Integer interestChargingGrace,
-            Integer interestPaymentGrace, Integer principalGrace, Integer recurringMoratoriumOnPrincipalPeriods,
-            InterestMethod interestMethod, InterestCalculationPeriodMethod interestCalculationPeriodMethod, DaysInYearType daysInYearType,
-            DaysInMonthType daysInMonthType, AmortizationMethod amortizationMethod, PeriodFrequencyType repaymentPeriodFrequencyType,
-            Integer repaymentEvery, Integer numberOfRepayments) {
+    public LoanProductRelatedDetailMinimumData(CurrencyData currency, BigDecimal interestRatePerPeriod,
+            BigDecimal annualNominalInterestRate, Integer interestChargingGrace, Integer interestPaymentGrace, Integer principalGrace,
+            Integer recurringMoratoriumOnPrincipalPeriods, InterestMethod interestMethod,
+            InterestCalculationPeriodMethod interestCalculationPeriodMethod, DaysInYearType daysInYearType, DaysInMonthType daysInMonthType,
+            AmortizationMethod amortizationMethod, PeriodFrequencyType repaymentPeriodFrequencyType, Integer repaymentEvery,
+            Integer numberOfRepayments) {
         this.currency = currency;
-        this.principal = principal;
-        this.inArrearsTolerance = inArrearsTolerance;
         this.interestRatePerPeriod = interestRatePerPeriod;
         this.annualNominalInterestRate = annualNominalInterestRate;
         this.interestChargingGrace = defaultToNullIfZero(interestChargingGrace);
@@ -95,11 +83,6 @@ public class LoanProductRelatedDetailMinimumData implements LoanProductMinimumRe
     }
 
     @Override
-    public Money getPrincipal() {
-        return principal;
-    }
-
-    @Override
     public Integer getGraceOnInterestCharged() {
         return interestChargingGrace;
     }
@@ -117,11 +100,6 @@ public class LoanProductRelatedDetailMinimumData implements LoanProductMinimumRe
     @Override
     public Integer getRecurringMoratoriumOnPrincipalPeriods() {
         return recurringMoratoriumOnPrincipalPeriods;
-    }
-
-    @Override
-    public Money getInArrearsTolerance() {
-        return inArrearsTolerance;
     }
 
     @Override
