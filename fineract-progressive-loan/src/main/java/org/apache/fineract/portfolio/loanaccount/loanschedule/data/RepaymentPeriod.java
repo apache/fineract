@@ -45,7 +45,8 @@ public class RepaymentPeriod {
     @Getter
     private final LocalDate dueDate;
     @Getter
-    private final List<InterestPeriod> interestPeriods;
+    @Setter
+    private List<InterestPeriod> interestPeriods;
     @Setter
     @Getter
     private Money emi;
