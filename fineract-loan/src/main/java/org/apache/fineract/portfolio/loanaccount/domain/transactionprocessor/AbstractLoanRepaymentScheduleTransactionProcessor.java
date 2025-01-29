@@ -185,7 +185,10 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                      * Check if the transaction amounts have changed. If so, reverse the original transaction and update
                      * changedTransactionDetail accordingly
                      **/
-                    if (LoanTransaction.transactionAmountsMatch(currency, loanTransaction, newLoanTransaction)) {
+                    if (newLoanTransaction.isReversed()) {
+                        loanTransaction.reverse();
+                        changedTransactionDetail.getNewTransactionMappings().put(loanTransaction.getId(), loanTransaction);
+                    } else if (LoanTransaction.transactionAmountsMatch(currency, loanTransaction, newLoanTransaction)) {
                         loanTransaction.updateLoanTransactionToRepaymentScheduleMappings(
                                 newLoanTransaction.getLoanTransactionToRepaymentScheduleMappings());
                     } else {
@@ -225,8 +228,12 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 .filter(installment -> LoanRepaymentScheduleProcessingWrapper.isInPeriod(loanTransaction.getTransactionDate(), installment,
                         installment.getInstallmentNumber().equals(firstNormalInstallmentNumber)))
                 .findFirst().orElseThrow();
-        if (loanTransaction.getDateOf().isEqual(currentInstallment.getDueDate()) || installments.stream()
-                .filter(i -> !i.isAdditional() && !i.isDownPayment()).noneMatch(LoanRepaymentScheduleInstallment::isNotFullyPaidOff)) {
+
+        if (currentInstallment.isNotFullyPaidOff() && (currentInstallment.getDueDate().isAfter(loanTransaction.getTransactionDate())
+                || (currentInstallment.getDueDate().isEqual(loanTransaction.getTransactionDate())
+                        && loanTransaction.getTransactionDate().equals(DateUtils.getBusinessLocalDate())))) {
+            loanTransaction.reverse();
+        } else {
             loanTransaction.resetDerivedComponents();
             final Money principalPortion = Money.zero(currency);
             Money interestPortion = currentInstallment.getInterestCharged(currency);

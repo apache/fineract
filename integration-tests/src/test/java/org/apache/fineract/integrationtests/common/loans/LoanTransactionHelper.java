@@ -100,6 +100,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class LoanTransactionHelper extends IntegrationTest {
 
+    public static final String DATE_FORMAT = "d MMMM yyyy";
     public static final String DATE_TIME_FORMAT = "dd MMMM yyyy HH:mm";
     private static final String LOAN_PRODUCTS_URL = "/fineract-provider/api/v1/loanproducts";
     private static final String CREATE_LOAN_PRODUCT_URL = "/fineract-provider/api/v1/loanproducts?" + Utils.TENANT_IDENTIFIER;
@@ -871,9 +872,10 @@ public class LoanTransactionHelper extends IntegrationTest {
     }
 
     public PostLoansLoanIdTransactionsResponse makeLoanRepayment(final Long loanId, final String command, final String date,
-            final Double amountToBePaid) {
+            final Double amount) {
+        log.info("Make {} with amount {} in {} for Loan {}", command, amount, date, loanId);
         return ok(fineract().loanTransactions.executeLoanTransaction(loanId, new PostLoansLoanIdTransactionsRequest()
-                .transactionAmount(amountToBePaid).transactionDate(date).dateFormat("dd MMMM yyyy").locale("en"), command));
+                .transactionAmount(amount).transactionDate(date).dateFormat("dd MMMM yyyy").locale("en"), command));
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -1208,6 +1210,13 @@ public class LoanTransactionHelper extends IntegrationTest {
     public PostLoansLoanIdTransactionsResponse reverseLoanTransaction(final Long loanId, final Long transactionId,
             final PostLoansLoanIdTransactionsTransactionIdRequest request) {
         return ok(fineract().loanTransactions.adjustLoanTransaction(loanId, transactionId, request, "undo"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse reverseLoanTransaction(final Long loanId, final Long transactionId, String date) {
+        return ok(fineract().loanTransactions.adjustLoanTransaction(loanId, transactionId,
+                new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATE_FORMAT).transactionDate(date).transactionAmount(0.0)
+                        .locale("en"),
+                "undo"));
     }
 
     public HashMap makeRepaymentWithPDC(final String date, final Float amountToBePaid, final Integer loanID, final Long paymentType) {

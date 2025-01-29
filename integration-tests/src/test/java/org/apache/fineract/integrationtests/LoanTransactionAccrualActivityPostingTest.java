@@ -43,6 +43,7 @@ import org.apache.fineract.client.models.ChargeToGLAccountMapper;
 import org.apache.fineract.client.models.GetLoanFeeToIncomeAccountMappings;
 import org.apache.fineract.client.models.GetLoanPaymentChannelToFundSourceMappings;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdStatus;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostChargesRequest;
 import org.apache.fineract.client.models.PostChargesResponse;
@@ -106,6 +107,323 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
         businessStepHelper.updateSteps("LOAN_CLOSE_OF_BUSINESS", "APPLY_CHARGE_TO_OVERDUE_LOANS", "LOAN_DELINQUENCY_CLASSIFICATION",
                 "CHECK_LOAN_REPAYMENT_DUE", "CHECK_LOAN_REPAYMENT_OVERDUE", "UPDATE_LOAN_ARREARS_AGING", "ADD_PERIODIC_ACCRUAL_ENTRIES",
                 "EXTERNAL_ASSET_OWNER_TRANSFER", "ACCRUAL_ACTIVITY_POSTING");
+    }
+
+    /**
+     * Using Interest bearing Progressive Loan, Accrual Activity Posting, NO InterestRecalculation, 25% yearly interest
+     * 6 repayment 450 USD principal.
+     * <li>apply, approve and disburse backdated on 17 August 2024</li>
+     * <li>repay 600 on 17 January 2025</li>
+     * <li>verify Accrual and Accrual Activity transaction creation</li>
+     * <li>verify that the loan become overpaid</li>
+     * <li>reverse repayment on same day</li>
+     * <li>verify transaction reversals</li>
+     */
+    @Test
+    public void testInterestBearingProgressiveNoInterestRecalculationReopenDueReverseRepayment1() {
+        runAt("17 January 2025", () -> {
+            final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive() //
+                    .description("Interest bearing Progressive Loan USD, Accrual Activity Posting, NO InterestRecalculation") //
+                    .enableAccrualActivityPosting(true) //
+                    .daysInMonthType(DaysInMonthType.ACTUAL) //
+                    .daysInYearType(DaysInYearType.ACTUAL) //
+                    .isInterestRecalculationEnabled(false));//
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applyLP2ProgressiveLoanRequest(client.getClientId(),
+                    loanProductsResponse.getResourceId(), "17 August 2024", 450.0, 25.0, 6, null));
+            Long loanId = postLoansResponse.getLoanId();
+            Assertions.assertNotNull(loanId);
+            loanTransactionHelper.approveLoan(loanId, approveLoanRequest(450.0, "17 August 2024"));
+            disburseLoan(loanId, BigDecimal.valueOf(450.0), "17 August 2024");
+            verifyTransactions(loanId, //
+                    transaction(450.0, "Disbursement", "17 August 2024") //
+            );
+            Long repaymentId = loanTransactionHelper.makeLoanRepayment("17 January 2025", 600.0f, loanId.intValue()).getResourceId();
+            Assertions.assertNotNull(repaymentId);
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            verifyLoanStatus(loanDetails, GetLoansLoanIdStatus::getOverpaid);
+            verifyTransactions(loanId, //
+                    transaction(450.0, "Disbursement", "17 August 2024"), //
+                    transaction(600.0, "Repayment", "17 January 2025"), //
+                    transaction(33.52, "Accrual", "17 January 2025"), //
+                    transaction(9.53, "Accrual Activity", "17 September 2024"), //
+                    transaction(7.77, "Accrual Activity", "17 October 2024"), //
+                    transaction(6.48, "Accrual Activity", "17 November 2024"), //
+                    transaction(4.75, "Accrual Activity", "17 December 2024"), //
+                    transaction(4.99, "Accrual Activity", "17 January 2025")); //
+            loanTransactionHelper.reverseRepayment(loanId.intValue(), repaymentId.intValue(), "17 January 2025");
+            loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            verifyLoanStatus(loanDetails, GetLoansLoanIdStatus::getActive);
+            verifyTransactions(loanId, transaction(450.0, "Disbursement", "17 August 2024"), //
+                    transaction(33.52, "Accrual", "17 January 2025"), //
+                    reversedTransaction(600.0, "Repayment", "17 January 2025"), //
+                    transaction(9.53, "Accrual Activity", "17 September 2024"), //
+                    transaction(7.77, "Accrual Activity", "17 October 2024"), //
+                    transaction(6.48, "Accrual Activity", "17 November 2024"), //
+                    transaction(4.75, "Accrual Activity", "17 December 2024")); //
+        });
+    }
+
+    /**
+     * Using Interest bearing Progressive Loan, Accrual Activity Posting, InterestRecalculation, 25% yearly interest 6
+     * repayment 450 USD principal.
+     * <li>apply, approve and disburse backdated on 17 August 2024</li>
+     * <li>repay 600 on 17 January 2025</li>
+     * <li>verify Accrual and Accrual Activity transaction creation</li>
+     * <li>verify that the loan become overpaid</li>
+     * <li>reverse repayment on same day</li>
+     * <li>verify transaction reversals</li>
+     */
+    @Test
+    public void testInterestBearingProgressiveInterestRecalculationReopenDueReverseRepayment() {
+        runAt("17 January 2025", () -> {
+            final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive() //
+                    .description("Interest bearing Progressive Loan USD, Accrual Activity Posting, NO InterestRecalculation") //
+                    .enableAccrualActivityPosting(true) //
+                    .daysInMonthType(DaysInMonthType.ACTUAL) //
+                    .daysInYearType(DaysInYearType.ACTUAL) //
+                    .isInterestRecalculationEnabled(false));//
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applyLP2ProgressiveLoanRequest(client.getClientId(),
+                    loanProductsResponse.getResourceId(), "17 August 2024", 450.0, 25.0, 6, null));
+            Long loanId = postLoansResponse.getLoanId();
+            Assertions.assertNotNull(loanId);
+            loanTransactionHelper.approveLoan(loanId, approveLoanRequest(450.0, "17 August 2024"));
+            disburseLoan(loanId, BigDecimal.valueOf(450.0), "17 August 2024");
+            verifyTransactions(loanId, //
+                    transaction(450.0, "Disbursement", "17 August 2024") //
+            );
+            Long repaymentId = loanTransactionHelper.makeLoanRepayment("17 January 2025", 600.0f, loanId.intValue()).getResourceId();
+            Assertions.assertNotNull(repaymentId);
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            verifyLoanStatus(loanDetails, GetLoansLoanIdStatus::getOverpaid);
+            verifyTransactions(loanId, //
+                    transaction(450.0, "Disbursement", "17 August 2024"), //
+                    transaction(600.0, "Repayment", "17 January 2025"), //
+                    transaction(33.52, "Accrual", "17 January 2025"), //
+                    transaction(9.53, "Accrual Activity", "17 September 2024"), //
+                    transaction(7.77, "Accrual Activity", "17 October 2024"), //
+                    transaction(6.48, "Accrual Activity", "17 November 2024"), //
+                    transaction(4.75, "Accrual Activity", "17 December 2024"), //
+                    transaction(4.99, "Accrual Activity", "17 January 2025")); //
+            loanTransactionHelper.reverseRepayment(loanId.intValue(), repaymentId.intValue(), "17 January 2025");
+
+            loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            verifyLoanStatus(loanDetails, GetLoansLoanIdStatus::getActive);
+            verifyTransactions(loanId, transaction(450.0, "Disbursement", "17 August 2024"), //
+                    transaction(33.52, "Accrual", "17 January 2025"), //
+                    reversedTransaction(600.0, "Repayment", "17 January 2025"), //
+                    transaction(9.53, "Accrual Activity", "17 September 2024"), //
+                    transaction(7.77, "Accrual Activity", "17 October 2024"), //
+                    transaction(6.48, "Accrual Activity", "17 November 2024"), //
+                    transaction(4.75, "Accrual Activity", "17 December 2024")); //
+        });
+    }
+
+    /**
+     * Using Interest bearing Progressive Loan, Accrual Activity Posting, NO InterestRecalculation, 25% yearly interest
+     * 6 repayment 450 USD principal.
+     * <li>apply, approve and disburse backdated on 17 August 2024</li>
+     * <li>repay 600 on 17 January 2025</li>
+     * <li>verify Accrual and Accrual Activity transaction creation</li>
+     * <li>verify that the loan become overpaid</li>
+     * <li>reverse repayment on same day</li>
+     * <li>verify transaction reversals</li>
+     */
+    @Test
+    public void testInterestBearingProgressiveNoInterestRecalculationReopenDueReverseRepayment1b() {
+        runAt("18 January 2025", () -> {
+            final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive() //
+                    .description("Interest bearing Progressive Loan USD, Accrual Activity Posting, NO InterestRecalculation") //
+                    .enableAccrualActivityPosting(true) //
+                    .daysInMonthType(DaysInMonthType.ACTUAL) //
+                    .daysInYearType(DaysInYearType.ACTUAL) //
+                    .isInterestRecalculationEnabled(false));//
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applyLP2ProgressiveLoanRequest(client.getClientId(),
+                    loanProductsResponse.getResourceId(), "17 August 2024", 450.0, 25.0, 6, null));
+            Long loanId = postLoansResponse.getLoanId();
+            Assertions.assertNotNull(loanId);
+            loanTransactionHelper.approveLoan(loanId, approveLoanRequest(450.0, "17 August 2024"));
+            disburseLoan(loanId, BigDecimal.valueOf(450.0), "17 August 2024");
+            verifyTransactions(loanId, //
+                    transaction(450.0, "Disbursement", "17 August 2024") //
+            );
+            Long repaymentId = loanTransactionHelper.makeLoanRepayment("17 January 2025", 600.0f, loanId.intValue()).getResourceId();
+            Assertions.assertNotNull(repaymentId);
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            verifyLoanStatus(loanDetails, GetLoansLoanIdStatus::getOverpaid);
+            verifyTransactions(loanId, //
+                    transaction(450.0, "Disbursement", "17 August 2024"), //
+                    transaction(600.0, "Repayment", "17 January 2025"), //
+                    transaction(33.52, "Accrual", "18 January 2025"), //
+                    transaction(9.53, "Accrual Activity", "17 September 2024"), //
+                    transaction(7.77, "Accrual Activity", "17 October 2024"), //
+                    transaction(6.48, "Accrual Activity", "17 November 2024"), //
+                    transaction(4.75, "Accrual Activity", "17 December 2024"), //
+                    transaction(4.99, "Accrual Activity", "17 January 2025")); //
+            loanTransactionHelper.reverseRepayment(loanId.intValue(), repaymentId.intValue(), "17 January 2025");
+            loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            verifyLoanStatus(loanDetails, GetLoansLoanIdStatus::getActive);
+            verifyTransactions(loanId, transaction(450.0, "Disbursement", "17 August 2024"), //
+                    transaction(33.52, "Accrual", "18 January 2025"), //
+                    reversedTransaction(600.0, "Repayment", "17 January 2025"), //
+                    transaction(9.53, "Accrual Activity", "17 September 2024"), //
+                    transaction(7.77, "Accrual Activity", "17 October 2024"), //
+                    transaction(6.48, "Accrual Activity", "17 November 2024"), //
+                    transaction(4.75, "Accrual Activity", "17 December 2024"), //
+                    transaction(3.31, "Accrual Activity", "17 January 2025")); //
+        });
+    }
+
+    @Test
+    public void testAccrualActivityPostingAndReversalsInterestBearingProgressiveInterestRecalculationMerchantIssuedRefund() {
+        runAt("17 January 2025", () -> {
+            final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive() //
+                    .description("Interest bearing Progressive Loan USD, Accrual Activity Posting, InterestRecalculation") //
+                    .enableAccrualActivityPosting(true) //
+                    .currencyCode("USD") //
+                    .daysInMonthType(DaysInMonthType.ACTUAL) //
+                    .daysInYearType(DaysInYearType.ACTUAL) //
+                    .isInterestRecalculationEnabled(true));//
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applyLP2ProgressiveLoanRequest(client.getClientId(),
+                    loanProductsResponse.getResourceId(), "17 August 2024", 450.0, 25.0, 6, null));
+            Long loanId = postLoansResponse.getLoanId();
+            Assertions.assertNotNull(loanId);
+            loanTransactionHelper.approveLoan(loanId, approveLoanRequest(450.0, "17 August 2024"));
+            disburseLoan(loanId, BigDecimal.valueOf(450.0), "17 August 2024");
+            verifyTransactions(loanId, //
+                    transaction(450.0, "Disbursement", "17 August 2024") //
+            );
+            Long repaymentId = loanTransactionHelper.makeLoanRepayment("17 January 2025", 497.04f, loanId.intValue()).getResourceId();
+            Assertions.assertNotNull(repaymentId);
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            verifyLoanStatus(loanDetails, GetLoansLoanIdStatus::getClosedObligationsMet);
+            verifyTransactions(loanId, //
+                    transaction(450.0, "Disbursement", "17 August 2024"), //
+                    transaction(497.04, "Repayment", "17 January 2025"), //
+                    transaction(47.04, "Accrual", "17 January 2025"), //
+                    transaction(9.53, "Accrual Activity", "17 September 2024"), //
+                    transaction(9.22, "Accrual Activity", "17 October 2024"), //
+                    transaction(9.53, "Accrual Activity", "17 November 2024"), //
+                    transaction(9.22, "Accrual Activity", "17 December 2024"), //
+                    transaction(9.54, "Accrual Activity", "17 January 2025")); //
+            loanTransactionHelper.makeLoanRepayment("MerchantIssuedRefund", "17 August 2024", 450.0f, loanId.intValue()).getResourceId();
+            loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            verifyLoanStatus(loanDetails, GetLoansLoanIdStatus::getOverpaid);
+            verifyTransactions(loanId, transaction(450.0, "Disbursement", "17 August 2024"), //
+                    transaction(450.0, "Merchant Issued Refund", "17 August 2024"), //
+                    transaction(497.04, "Repayment", "17 January 2025"), //
+                    transaction(47.04, "Accrual", "17 January 2025"), //
+                    transaction(47.04, "Accrual Adjustment", "17 January 2025")); //
+        });
+    }
+
+    /**
+     * Using Interest bearing Progressive Loan, Accrual Activity Posting, NO InterestRecalculation, 25% yearly interest
+     * 6 repayment 450 USD principal.
+     * <li>apply, approve and disburse backdated on 17 August 2024</li>
+     * <li>repay 600 on 17 January 2025</li>
+     * <li>verify Accrual and Accrual Activity transaction creation</li>
+     * <li>verify that the loan become overpaid</li>
+     * <li>reverse repayment on same day verify transaction reversals</li>
+     */
+    @Test
+    public void testInterestBearingProgressiveNoInterestRecalculationReopenDueReverseRepayment2b() {
+        runAt("17 January 2025", () -> {
+            final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive() //
+                    .description("Interest bearing Progressive Loan USD, Accrual Activity Posting, NO InterestRecalculation") //
+                    .enableAccrualActivityPosting(true) //
+                    .currencyCode("USD") //
+                    .daysInMonthType(DaysInMonthType.ACTUAL) //
+                    .daysInYearType(DaysInYearType.ACTUAL) //
+                    .isInterestRecalculationEnabled(false));//
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applyLP2ProgressiveLoanRequest(client.getClientId(),
+                    loanProductsResponse.getResourceId(), "17 August 2024", 450.0, 25.0, 6, null));
+            Long loanId = postLoansResponse.getLoanId();
+            Assertions.assertNotNull(loanId);
+            loanTransactionHelper.approveLoan(loanId, approveLoanRequest(450.0, "17 August 2024"));
+            disburseLoan(loanId, BigDecimal.valueOf(450.0), "17 August 2024");
+            verifyTransactions(loanId, //
+                    transaction(450.0, "Disbursement", "17 August 2024") //
+            );
+            Long repaymentId = loanTransactionHelper.makeLoanRepayment("17 January 2025", 483.52f, loanId.intValue()).getResourceId();
+            Assertions.assertNotNull(repaymentId);
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            verifyLoanStatus(loanDetails, GetLoansLoanIdStatus::getClosedObligationsMet);
+            verifyTransactions(loanId, //
+                    transaction(450.0, "Disbursement", "17 August 2024"), //
+                    transaction(483.52, "Repayment", "17 January 2025"), //
+                    transaction(33.52, "Accrual", "17 January 2025"), //
+                    transaction(9.53, "Accrual Activity", "17 September 2024"), //
+                    transaction(7.77, "Accrual Activity", "17 October 2024"), //
+                    transaction(6.48, "Accrual Activity", "17 November 2024"), //
+                    transaction(4.75, "Accrual Activity", "17 December 2024"), //
+                    transaction(4.99, "Accrual Activity", "17 January 2025")); //
+            addCharge(loanId, false, 15.0, "15 January 2025");
+            loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            verifyLoanStatus(loanDetails, GetLoansLoanIdStatus::getActive);
+            verifyTransactions(loanId, transaction(450.0, "Disbursement", "17 August 2024"), //
+                    transaction(33.52, "Accrual", "17 January 2025"), //
+                    transaction(483.52, "Repayment", "17 January 2025"), //
+                    transaction(9.53, "Accrual Activity", "17 September 2024"), //
+                    transaction(7.77, "Accrual Activity", "17 October 2024"), //
+                    transaction(6.48, "Accrual Activity", "17 November 2024"), //
+                    transaction(4.75, "Accrual Activity", "17 December 2024")); //
+        });
+    }
+
+    /**
+     * Using Interest bearing Progressive Loan, Accrual Activity Posting, NO InterestRecalculation, 25% yearly interest
+     * 6 repayment 450 USD principal.
+     * <li>apply, approve and disburse backdated on 17 August 2024</li>
+     * <li>repay 600 on 17 January 2025</li>
+     * <li>verify Accrual and Accrual Activity transaction creation</li>
+     * <li>verify that the loan become overpaid</li>
+     * <li>reverse repayment on same day verify transaction reversals</li>
+     */
+    @Test
+    public void testInterestBearingProgressiveNoInterestRecalculationReopenDueReverseRepayment2c() {
+        runAt("18 January 2025", () -> {
+            final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive() //
+                    .description("Interest bearing Progressive Loan USD, Accrual Activity Posting, NO InterestRecalculation") //
+                    .enableAccrualActivityPosting(true) //
+                    .currencyCode("USD") //
+                    .daysInMonthType(DaysInMonthType.ACTUAL) //
+                    .daysInYearType(DaysInYearType.ACTUAL) //
+                    .isInterestRecalculationEnabled(false));//
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applyLP2ProgressiveLoanRequest(client.getClientId(),
+                    loanProductsResponse.getResourceId(), "17 August 2024", 450.0, 25.0, 6, null));
+            Long loanId = postLoansResponse.getLoanId();
+            Assertions.assertNotNull(loanId);
+            loanTransactionHelper.approveLoan(loanId, approveLoanRequest(450.0, "17 August 2024"));
+            disburseLoan(loanId, BigDecimal.valueOf(450.0), "17 August 2024");
+            verifyTransactions(loanId, //
+                    transaction(450.0, "Disbursement", "17 August 2024") //
+            );
+            Long repaymentId = loanTransactionHelper.makeLoanRepayment("17 January 2025", 483.52f, loanId.intValue()).getResourceId();
+            Assertions.assertNotNull(repaymentId);
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            verifyLoanStatus(loanDetails, GetLoansLoanIdStatus::getClosedObligationsMet);
+            verifyTransactions(loanId, //
+                    transaction(450.0, "Disbursement", "17 August 2024"), //
+                    transaction(483.52, "Repayment", "17 January 2025"), //
+                    transaction(33.52, "Accrual", "18 January 2025"), //
+                    transaction(9.53, "Accrual Activity", "17 September 2024"), //
+                    transaction(7.77, "Accrual Activity", "17 October 2024"), //
+                    transaction(6.48, "Accrual Activity", "17 November 2024"), //
+                    transaction(4.75, "Accrual Activity", "17 December 2024"), //
+                    transaction(4.99, "Accrual Activity", "17 January 2025")); //
+            addCharge(loanId, false, 15.0, "15 January 2025");
+            loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            verifyLoanStatus(loanDetails, GetLoansLoanIdStatus::getActive);
+            verifyTransactions(loanId, transaction(450.0, "Disbursement", "17 August 2024"), //
+                    transaction(33.52, "Accrual", "18 January 2025"), //
+                    transaction(483.52, "Repayment", "17 January 2025"), //
+                    transaction(9.53, "Accrual Activity", "17 September 2024"), //
+                    transaction(7.77, "Accrual Activity", "17 October 2024"), //
+                    transaction(6.48, "Accrual Activity", "17 November 2024"), //
+                    transaction(4.75, "Accrual Activity", "17 December 2024"), //
+                    transaction(18.31, "Accrual Activity", "17 January 2025")); //
+
+        });
     }
 
     // Create Loan with Interest and enabled Accrual Activity Posting
@@ -955,10 +1273,7 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
             Long repaymentId = loanTransactionHelper.makeLoanRepayment("02 January 2024", 370.0f, loanId.intValue()).getResourceId();
             Assertions.assertNotNull(repaymentId);
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
-            Assertions.assertNotNull(loanDetails);
-            Assertions.assertNotNull(loanDetails.getStatus());
-            Assertions.assertNotNull(loanDetails.getStatus().getOverpaid());
-            Assertions.assertTrue(loanDetails.getStatus().getOverpaid());
+            verifyLoanStatus(loanDetails, GetLoansLoanIdStatus::getOverpaid);
 
             verifyTransactions(loanId, transaction(400.0, "Disbursement", "01 January 2024"),
                     transaction(100.0, "Down Payment", "01 January 2024"), transaction(8.76, "Accrual", "02 January 2024"),
@@ -991,10 +1306,7 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
             Long repaymentId = loanTransactionHelper.makeLoanRepayment("01 January 2024", 370.0f, loanId.intValue()).getResourceId();
             Assertions.assertNotNull(repaymentId);
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
-            Assertions.assertNotNull(loanDetails);
-            Assertions.assertNotNull(loanDetails.getStatus());
-            Assertions.assertNotNull(loanDetails.getStatus().getOverpaid());
-            Assertions.assertTrue(loanDetails.getStatus().getOverpaid());
+            verifyLoanStatus(loanDetails, GetLoansLoanIdStatus::getOverpaid);
 
             verifyTransactions(loanId, transaction(400.0, "Disbursement", "01 January 2024"),
                     transaction(100.0, "Down Payment", "01 January 2024"), transaction(8.76, "Accrual", "01 January 2024"),
@@ -1002,10 +1314,7 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
 
             loanTransactionHelper.reverseRepayment(loanId.intValue(), repaymentId.intValue(), "01 January 2024");
             loanDetails = loanTransactionHelper.getLoanDetails(loanId);
-            Assertions.assertNotNull(loanDetails);
-            Assertions.assertNotNull(loanDetails.getStatus());
-            Assertions.assertNotNull(loanDetails.getStatus().getActive());
-            Assertions.assertTrue(loanDetails.getStatus().getActive());
+            verifyLoanStatus(loanDetails, GetLoansLoanIdStatus::getActive);
             verifyTransactions(loanId, transaction(400.0, "Disbursement", "01 January 2024"),
                     transaction(100.0, "Down Payment", "01 January 2024"), transaction(8.76, "Accrual", "01 January 2024"),
                     reversedTransaction(370.0, "Repayment", "01 January 2024"));
@@ -1038,20 +1347,14 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
             Long repaymentId = loanTransactionHelper.makeLoanRepayment("01 January 2024", 370.0f, loanId.intValue()).getResourceId();
             Assertions.assertNotNull(repaymentId);
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
-            Assertions.assertNotNull(loanDetails);
-            Assertions.assertNotNull(loanDetails.getStatus());
-            Assertions.assertNotNull(loanDetails.getStatus().getOverpaid());
-            Assertions.assertTrue(loanDetails.getStatus().getOverpaid());
+            verifyLoanStatus(loanDetails, GetLoansLoanIdStatus::getOverpaid);
 
             verifyTransactions(loanId, transaction(400.0, "Disbursement", "01 January 2024"),
                     transaction(100.0, "Down Payment", "01 January 2024"), transaction(38.76, "Accrual", "01 January 2024"),
                     transaction(38.76, "Accrual Activity", "01 January 2024"), transaction(370.0, "Repayment", "01 January 2024"));
             loanTransactionHelper.reverseRepayment(loanId.intValue(), repaymentId.intValue(), "01 January 2024");
             loanDetails = loanTransactionHelper.getLoanDetails(loanId);
-            Assertions.assertNotNull(loanDetails);
-            Assertions.assertNotNull(loanDetails.getStatus());
-            Assertions.assertNotNull(loanDetails.getStatus().getActive());
-            Assertions.assertTrue(loanDetails.getStatus().getActive());
+            verifyLoanStatus(loanDetails, GetLoansLoanIdStatus::getActive);
             verifyTransactions(loanId, transaction(400.0, "Disbursement", "01 January 2024"),
                     transaction(100.0, "Down Payment", "01 January 2024"), transaction(38.76, "Accrual", "01 January 2024"),
                     reversedTransaction(370.0, "Repayment", "01 January 2024"));
