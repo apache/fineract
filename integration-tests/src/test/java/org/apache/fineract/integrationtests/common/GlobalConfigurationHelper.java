@@ -30,26 +30,26 @@ import org.apache.fineract.client.models.GetGlobalConfigurationsResponse;
 import org.apache.fineract.client.models.GlobalConfigurationPropertyData;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsResponse;
+import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.junit.jupiter.api.Assertions;
 
 @SuppressWarnings({ "unused", "rawtypes" })
 @Slf4j
 @RequiredArgsConstructor
-public class GlobalConfigurationHelper extends IntegrationTest {
+public class GlobalConfigurationHelper {
 
     private static final Gson GSON = new JSON().getGson();
 
     public GetGlobalConfigurationsResponse getAllGlobalConfigurations() {
         log.info("------------------------ RETRIEVING ALL GLOBAL CONFIGURATIONS -------------------------");
-        return ok(fineract().globalConfigurations.retrieveConfiguration(false));
+        return Calls.ok(FineractClientHelper.getFineractClient().globalConfigurations.retrieveConfiguration(false));
     }
 
     public GlobalConfigurationPropertyData getGlobalConfigurationByName(final String configName) {
         log.info("------------------------ RETRIEVING GLOBAL CONFIGURATION BY NAME -------------------------");
-        return ok(fineract().globalConfigurations.retrieveOneByName(configName));
+        return Calls.ok(FineractClientHelper.getFineractClient().globalConfigurations.retrieveOneByName(configName));
     }
 
     // TODO: This is quite a bad pattern and adds a lot of time to individual test executions
@@ -540,12 +540,12 @@ public class GlobalConfigurationHelper extends IntegrationTest {
 
     public PutGlobalConfigurationsResponse updateGlobalConfiguration(final String configName, PutGlobalConfigurationsRequest request) {
         log.info("---------------------------------UPDATE VALUE FOR GLOBAL CONFIG---------------------------------------------");
-        return ok(fineract().globalConfigurations.updateConfigurationByName(configName, request));
+        return Calls.ok(FineractClientHelper.getFineractClient().globalConfigurations.updateConfigurationByName(configName, request));
     }
 
     public void updateGlobalConfigurationInternal(final String configName, final Long value) {
         log.info("---------------------------UPDATE VALUE FOR GLOBAL CONFIG (internal) ---------------------------------------");
-        ok(fineract().legacy.updateGlobalConfiguration(configName, value));
+        Calls.ok(FineractClientHelper.getFineractClient().legacy.updateGlobalConfiguration(configName, value));
     }
 
     public void manageConfigurations(final String configurationName, final boolean enabled) {

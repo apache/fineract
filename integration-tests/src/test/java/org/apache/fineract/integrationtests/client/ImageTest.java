@@ -52,47 +52,47 @@ public class ImageTest extends IntegrationTest {
     @Test
     @Order(1)
     void create() {
-        ok(fineract().images.create("staff", staffId, testPart));
-        ok(fineract().images.create("clients", clientId, testPart));
+        ok(fineractClient().images.create("staff", staffId, testPart));
+        ok(fineractClient().images.create("clients", clientId, testPart));
     }
 
     @Test
     @Order(2)
     void getOriginalSize() throws IOException {
-        ResponseBody r = ok(fineract().images.get("staff", staffId, 3505, 1972, null));
+        ResponseBody r = ok(fineractClient().images.get("staff", staffId, 3505, 1972, null));
         assertThat(r.contentType()).isEqualTo(MediaType.get("text/plain"));
         String encodedImage = r.string();
         assertThat(encodedImage).startsWith("data:image/jpeg;base64,");
-        assertThat(encodedImage).hasLength(2846549);
+        assertThat(encodedImage).hasSize(2846549);
         assertThat(r.contentLength()).isEqualTo(-1);
     }
 
     @Test
     @Order(3)
     void getSmallerSize() throws IOException {
-        ResponseBody r = ok(fineract().images.get("staff", staffId, 128, 128, null));
-        assertThat(r.string()).hasLength(6591);
+        ResponseBody r = ok(fineractClient().images.get("staff", staffId, 128, 128, null));
+        assertThat(r.string()).hasSize(6591);
     }
 
     @Test
     @Order(4)
     void getBiggerSize() throws IOException {
-        ResponseBody r = ok(fineract().images.get("staff", staffId, 9000, 6000, null));
-        assertThat(r.string()).hasLength(2846549);
+        ResponseBody r = ok(fineractClient().images.get("staff", staffId, 9000, 6000, null));
+        assertThat(r.string()).hasSize(2846549);
     }
 
     @Test
     @Order(5)
     void getInlineOctetOutput() throws IOException {
         // 3505x1972 is the exact original size of testFile
-        Response<ResponseBody> r = okR(fineract().images.get("staff", staffId, 3505, 1972, "inline_octet"));
+        Response<ResponseBody> r = okR(fineractClient().images.get("staff", staffId, 3505, 1972, "inline_octet"));
         try (ResponseBody body = r.body()) {
             assertThat(body.contentType()).isEqualTo(MediaType.get("image/jpeg"));
             assertThat(body.bytes().length).isEqualTo(testPart.body().contentLength());
             assertThat(body.contentLength()).isEqualTo(testPart.body().contentLength());
         }
 
-        var staff = ok(fineract().staff.retrieveOne8(staffId));
+        var staff = ok(fineractClient().staff.retrieveOne8(staffId));
         String expectedFileName = staff.getDisplayName() + "JPEG"; // without dot!
         assertThat(Parts.fileName(r)).hasValue(expectedFileName);
     }
@@ -100,7 +100,7 @@ public class ImageTest extends IntegrationTest {
     @Test
     @Order(6)
     void getOctetOutput() throws IOException {
-        ResponseBody r = ok(fineract().images.get("staff", staffId, 3505, 1972, "octet"));
+        ResponseBody r = ok(fineractClient().images.get("staff", staffId, 3505, 1972, "octet"));
         assertThat(r.contentType()).isEqualTo(MediaType.get("image/jpeg"));
         assertThat(r.bytes().length).isEqualTo(testPart.body().contentLength());
         assertThat(r.contentLength()).isEqualTo(testPart.body().contentLength());
@@ -109,7 +109,7 @@ public class ImageTest extends IntegrationTest {
     @Test
     @Order(7)
     void getAnotherOutput() throws IOException {
-        ResponseBody r = ok(fineract().images.get("staff", staffId, 3505, 1972, "abcd"));
+        ResponseBody r = ok(fineractClient().images.get("staff", staffId, 3505, 1972, "abcd"));
         assertThat(r.contentType()).isEqualTo(MediaType.get("text/plain"));
         assertThat(r.string()).startsWith("data:image/jpeg;base64,");
     }
@@ -117,7 +117,7 @@ public class ImageTest extends IntegrationTest {
     @Test
     @Order(8)
     void getText() throws IOException {
-        ResponseBody r = ok(fineract().createService(ImagesApiWithHeadersForTest.class).getText("staff", staffId, 3505, 1972, null));
+        ResponseBody r = ok(fineractClient().createService(ImagesApiWithHeadersForTest.class).getText("staff", staffId, 3505, 1972, null));
         assertThat(r.contentType()).isEqualTo(MediaType.get("text/plain"));
         assertThat(r.string()).startsWith("data:image/jpeg;base64,");
     }
@@ -125,7 +125,7 @@ public class ImageTest extends IntegrationTest {
     @Test
     @Order(9)
     void getBytes() throws IOException {
-        ResponseBody r = ok(fineract().createService(ImagesApiWithHeadersForTest.class).getBytes("staff", staffId, 3505, 1972, null));
+        ResponseBody r = ok(fineractClient().createService(ImagesApiWithHeadersForTest.class).getBytes("staff", staffId, 3505, 1972, null));
         assertThat(r.contentType()).isEqualTo(MediaType.get("image/jpeg"));
         assertThat(r.bytes().length).isEqualTo(testPart.body().contentLength());
     }
@@ -133,14 +133,14 @@ public class ImageTest extends IntegrationTest {
     @Test
     @Order(50)
     void update() {
-        ok(fineract().images.update("staff", staffId, testPart));
+        ok(fineractClient().images.update("staff", staffId, testPart));
     }
 
     @Test
     @Order(99)
     void delete() {
-        ok(fineract().images.delete("staff", staffId));
-        ok(fineract().images.delete("clients", clientId));
+        ok(fineractClient().images.delete("staff", staffId));
+        ok(fineractClient().images.delete("clients", clientId));
     }
 
     @Test
@@ -152,7 +152,7 @@ public class ImageTest extends IntegrationTest {
         assertThat(part).isNotNull();
 
         Exception exception = assertThrows(Exception.class, () -> {
-            ok(fineract().images.create("clients", clientId, part));
+            ok(fineractClient().images.create("clients", clientId, part));
         });
 
         assertThat(exception).isNotNull();
@@ -168,7 +168,7 @@ public class ImageTest extends IntegrationTest {
         assertThat(part).isNotNull();
 
         Exception exception = assertThrows(Exception.class, () -> {
-            ok(fineract().images.create("clients", clientId, part));
+            ok(fineractClient().images.create("clients", clientId, part));
         });
 
         assertThat(exception).isNotNull();
@@ -184,7 +184,7 @@ public class ImageTest extends IntegrationTest {
         assertThat(part).isNotNull();
 
         Exception exception = assertThrows(Exception.class, () -> {
-            ok(fineract().images.create("clients", clientId, part));
+            ok(fineractClient().images.create("clients", clientId, part));
         });
 
         assertThat(exception).isNotNull();
@@ -201,7 +201,7 @@ public class ImageTest extends IntegrationTest {
         assertThat(part).isNotNull();
 
         Exception exception = assertThrows(Exception.class, () -> {
-            ok(fineract().images.create("clients", clientId, part));
+            ok(fineractClient().images.create("clients", clientId, part));
         });
 
         assertThat(exception).isNotNull();
@@ -217,7 +217,7 @@ public class ImageTest extends IntegrationTest {
         assertThat(part).isNotNull();
 
         Exception exception = assertThrows(Exception.class, () -> {
-            ok(fineract().images.create("clients", clientId, part));
+            ok(fineractClient().images.create("clients", clientId, part));
         });
 
         assertThat(exception).isNotNull();
@@ -233,7 +233,7 @@ public class ImageTest extends IntegrationTest {
         assertThat(part).isNotNull();
 
         Exception exception = assertThrows(Exception.class, () -> {
-            ok(fineract().images.create("clients", clientId, part));
+            ok(fineractClient().images.create("clients", clientId, part));
         });
 
         assertThat(exception).isNotNull();

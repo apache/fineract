@@ -24,11 +24,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import org.apache.fineract.client.models.PostGLAccountsRequest;
 import org.apache.fineract.client.models.PostGLAccountsResponse;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
+import org.apache.fineract.client.util.Calls;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 
 @SuppressWarnings("rawtypes")
-public class AccountHelper extends IntegrationTest {
+public class AccountHelper {
 
     private static final String CREATE_GL_ACCOUNT_URL = "/fineract-provider/api/v1/glaccounts?" + Utils.TENANT_IDENTIFIER;
     private static final String GL_ACCOUNT_ID_RESPONSE = "resourceId";
@@ -142,7 +143,7 @@ public class AccountHelper extends IntegrationTest {
     }
 
     public PostGLAccountsResponse createGLAccount(final PostGLAccountsRequest request) {
-        return ok(fineract().glAccounts.createGLAccount1(request));
+        return Calls.ok(FineractClientHelper.getFineractClient().glAccounts.createGLAccount1(request));
     }
 
 }

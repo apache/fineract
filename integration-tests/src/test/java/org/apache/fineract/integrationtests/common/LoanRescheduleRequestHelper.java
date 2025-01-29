@@ -27,9 +27,9 @@ import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
 import org.apache.fineract.client.models.PostCreateRescheduleLoansResponse;
 import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
 import org.apache.fineract.client.models.PostUpdateRescheduleLoansResponse;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
+import org.apache.fineract.client.util.Calls;
 
-public class LoanRescheduleRequestHelper extends IntegrationTest {
+public class LoanRescheduleRequestHelper {
 
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
@@ -101,14 +101,16 @@ public class LoanRescheduleRequestHelper extends IntegrationTest {
     }
 
     public PostCreateRescheduleLoansResponse createLoanRescheduleRequest(PostCreateRescheduleLoansRequest request) {
-        return ok(fineract().rescheduleLoans.createLoanRescheduleRequest(request));
+        return Calls.ok(FineractClientHelper.getFineractClient().rescheduleLoans.createLoanRescheduleRequest(request));
     }
 
     public PostUpdateRescheduleLoansResponse approveLoanRescheduleRequest(Long scheduleId, PostUpdateRescheduleLoansRequest request) {
-        return ok(fineract().rescheduleLoans.updateLoanRescheduleRequest(scheduleId, request, "approve"));
+        return Calls
+                .ok(FineractClientHelper.getFineractClient().rescheduleLoans.updateLoanRescheduleRequest(scheduleId, request, "approve"));
     }
 
     public PostUpdateRescheduleLoansResponse rejectLoanRescheduleRequest(Long scheduleId, PostUpdateRescheduleLoansRequest request) {
-        return ok(fineract().rescheduleLoans.updateLoanRescheduleRequest(scheduleId, request, "reject"));
+        return Calls
+                .ok(FineractClientHelper.getFineractClient().rescheduleLoans.updateLoanRescheduleRequest(scheduleId, request, "reject"));
     }
 }

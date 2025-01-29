@@ -22,9 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.client.models.BusinessStep;
 import org.apache.fineract.client.models.UpdateBusinessStepConfigRequest;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
+import org.apache.fineract.client.util.Calls;
 
-public class BusinessStepHelper extends IntegrationTest {
+public class BusinessStepHelper {
 
     public BusinessStepHelper() {}
 
@@ -38,7 +38,7 @@ public class BusinessStepHelper extends IntegrationTest {
             businessStep.setOrder(order);
             stepList.add(businessStep);
         }
-        ok(fineract().businessStepConfiguration.updateJobBusinessStepConfig(jobName,
+        Calls.ok(FineractClientHelper.getFineractClient().businessStepConfiguration.updateJobBusinessStepConfig(jobName,
                 new UpdateBusinessStepConfigRequest().businessSteps(stepList)));
     }
 }

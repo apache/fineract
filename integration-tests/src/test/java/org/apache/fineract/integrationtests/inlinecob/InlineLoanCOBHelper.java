@@ -24,11 +24,10 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.Utils;
 
 @Slf4j
-public class InlineLoanCOBHelper extends IntegrationTest {
+public class InlineLoanCOBHelper {
 
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;

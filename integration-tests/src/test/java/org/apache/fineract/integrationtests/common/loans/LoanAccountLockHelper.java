@@ -22,10 +22,9 @@ import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import org.apache.fineract.client.util.JSON;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.Utils;
 
-public class LoanAccountLockHelper extends IntegrationTest {
+public class LoanAccountLockHelper {
 
     private static final String INTERNAL_PLACE_LOCK_ON_LOAN_ACCOUNT_URL = "/fineract-provider/api/v1/internal/loans/";
     private static final Gson GSON = new JSON().getGson();

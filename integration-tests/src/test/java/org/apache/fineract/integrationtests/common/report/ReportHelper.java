@@ -21,12 +21,13 @@ package org.apache.fineract.integrationtests.common.report;
 import java.io.IOException;
 import java.util.Map;
 import okhttp3.ResponseBody;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import retrofit2.Response;
 
-public class ReportHelper extends IntegrationTest {
+public class ReportHelper {
 
     public Response<ResponseBody> runReport(String reportName, Map<String, String> reportParameters) throws IOException {
-        return fineract().reportsRun.runReportGetFile("Transaction Summary Report with Asset Owner", reportParameters, false).execute();
+        return FineractClientHelper.getFineractClient().reportsRun
+                .runReportGetFile("Transaction Summary Report with Asset Owner", reportParameters, false).execute();
     }
 }

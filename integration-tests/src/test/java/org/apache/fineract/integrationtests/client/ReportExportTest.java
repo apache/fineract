@@ -50,7 +50,7 @@ public class ReportExportTest extends IntegrationTest {
     @Test
     void runClientListingTableReportCSV() throws IOException {
         Response<ResponseBody> result = okR(
-                fineract().reportsRun.runReportGetFile("Client Listing", Map.of("R_officeId", "1", "exportCSV", "true"), false));
+                fineractClient().reportsRun.runReportGetFile("Client Listing", Map.of("R_officeId", "1", "exportCSV", "true"), false));
         assertThat(result.body().contentType()).isEqualTo(MediaType.parse("text/csv"));
         assertThat(result.body().string()).contains("Office/Branch");
     }
@@ -59,7 +59,7 @@ public class ReportExportTest extends IntegrationTest {
     @CIOnly
     void runClientListingTableReportS3() throws IOException {
         Response<ResponseBody> result = okR(
-                fineract().reportsRun.runReportGetFile("Client Listing", Map.of("R_officeId", "1", "exportS3", "true"), false));
+                fineractClient().reportsRun.runReportGetFile("Client Listing", Map.of("R_officeId", "1", "exportS3", "true"), false));
         assertThat(result.code()).isEqualTo(204);
     }
 

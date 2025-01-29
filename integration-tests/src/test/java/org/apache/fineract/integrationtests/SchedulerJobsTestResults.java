@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.google.common.truth.Truth;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -60,6 +59,7 @@ import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.models.PutJobsJobIDRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
+import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.BusinessStepHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -101,7 +101,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @TestMethodOrder(MethodName.class)
 @ExtendWith(LoanTestLifecycleExtension.class)
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class SchedulerJobsTestResults {
+public class SchedulerJobsTestResults extends IntegrationTest {
 
     private static final String FROM_ACCOUNT_TYPE_SAVINGS = "2";
     private static final String TO_ACCOUNT_TYPE_SAVINGS = "2";
@@ -212,8 +212,7 @@ public class SchedulerJobsTestResults {
                     annualFeeDueDateAsArrayList.get(2));
             LocalDate expectedDueDate = LocalDate.of(2023, 1, 15);
 
-            Truth.assertWithMessage("Verifying that all due Annual Fees have been paid").that(nextDueDateForAnnualFee)
-                    .isEquivalentAccordingToCompareTo(expectedDueDate);
+            assertThat(nextDueDateForAnnualFee).isEqualTo(expectedDueDate);
         } finally {
             savingsAccountHelper.closeSavingsAccountOnDate(savingsId, "true", "11 November 2022");
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,

@@ -60,16 +60,16 @@ import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PutClientsClientIdResponse;
 import org.apache.fineract.client.models.SortOrder;
+import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
 
 @Slf4j
 @RequiredArgsConstructor
-public class ClientHelper extends IntegrationTest {
+public class ClientHelper {
 
     private static final String CLIENT_URL = "/fineract-provider/api/v1/clients";
     private static final String CREATE_CLIENT_URL = CLIENT_URL + "?" + Utils.TENANT_IDENTIFIER;
@@ -108,12 +108,12 @@ public class ClientHelper extends IntegrationTest {
     }
 
     public PostClientsResponse createClient(final PostClientsRequest request) {
-        return ok(fineract().clients.create6(request));
+        return Calls.ok(FineractClientHelper.getFineractClient().clients.create6(request));
     }
 
     public PostClientsClientIdIdentifiersResponse createClientIdentifer(final Long clientId,
             final PostClientsClientIdIdentifiersRequest request) {
-        return ok(fineract().clientIdentifiers.createClientIdentifier(clientId, request));
+        return Calls.ok(FineractClientHelper.getFineractClient().clientIdentifiers.createClientIdentifier(clientId, request));
     }
 
     public PageClientSearchData searchClients(String text) {
@@ -144,7 +144,7 @@ public class ClientHelper extends IntegrationTest {
     }
 
     public PageClientSearchData searchClients(PagedRequestClientTextSearch request) {
-        return ok(fineract().clientSearchV2.searchByText(request));
+        return Calls.ok(FineractClientHelper.getFineractClient().clientSearchV2.searchByText(request));
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -1134,27 +1134,31 @@ public class ClientHelper extends IntegrationTest {
     }
 
     public GetClientsClientIdTransactionsResponse getAllClientTransactionsByExternalId(final String externalId) {
-        return ok(fineract().clientTransactions.retrieveAllClientTransactions1(externalId, 0, 100));
+        return Calls.ok(FineractClientHelper.getFineractClient().clientTransactions.retrieveAllClientTransactions1(externalId, 0, 100));
     }
 
     public GetClientsClientIdTransactionsTransactionIdResponse getClientTransactionByExternalId(final String externalId,
             final String transactionId) {
-        return ok(fineract().clientTransactions.retrieveClientTransaction2(externalId, Long.parseLong(transactionId)));
+        return Calls.ok(FineractClientHelper.getFineractClient().clientTransactions.retrieveClientTransaction2(externalId,
+                Long.parseLong(transactionId)));
     }
 
     public GetClientsClientIdTransactionsTransactionIdResponse getClientTransactionByTransactionExternalId(final Long clientId,
             final String transactionExternalId) {
-        return ok(fineract().clientTransactions.retrieveClientTransaction1(clientId, transactionExternalId));
+        return Calls.ok(
+                FineractClientHelper.getFineractClient().clientTransactions.retrieveClientTransaction1(clientId, transactionExternalId));
     }
 
     public PostClientsClientIdTransactionsTransactionIdResponse undoClientTransactionByExternalId(final String externalId,
             final String transactionId) {
-        return ok(fineract().clientTransactions.undoClientTransaction2(externalId, Long.parseLong(transactionId), "undo"));
+        return Calls.ok(FineractClientHelper.getFineractClient().clientTransactions.undoClientTransaction2(externalId,
+                Long.parseLong(transactionId), "undo"));
     }
 
     public PostClientsClientIdTransactionsTransactionIdResponse undoClientTransactionByTransactionExternalId(final Long clientId,
             final String transactionExternalId) {
-        return ok(fineract().clientTransactions.undoClientTransaction1(clientId, transactionExternalId, "undo"));
+        return Calls.ok(FineractClientHelper.getFineractClient().clientTransactions.undoClientTransaction1(clientId, transactionExternalId,
+                "undo"));
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -1212,7 +1216,7 @@ public class ClientHelper extends IntegrationTest {
     }
 
     public GetLoanAccountLockResponse retrieveLockedAccounts(int page, int limit) {
-        return ok(fineract().loanAccountLockApi.retrieveLockedAccounts(page, limit));
+        return Calls.ok(FineractClientHelper.getFineractClient().loanAccountLockApi.retrieveLockedAccounts(page, limit));
     }
 
     public static PostClientsClientIdIdentifiersRequest createClientIdentifer(final Long documentType) {

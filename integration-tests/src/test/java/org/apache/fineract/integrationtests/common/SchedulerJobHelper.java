@@ -44,14 +44,14 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.apache.fineract.client.models.PutJobsJobIDRequest;
+import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.hamcrest.MatcherAssert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SchedulerJobHelper extends IntegrationTest {
+public class SchedulerJobHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(SchedulerJobHelper.class);
     private final RequestSpecification requestSpec;
@@ -131,7 +131,7 @@ public class SchedulerJobHelper extends IntegrationTest {
 
     public void updateSchedulerStatus(final boolean on) {
         String command = on ? "start" : "stop";
-        ok(fineract().jobsScheduler.changeSchedulerStatus(command));
+        Calls.ok(FineractClientHelper.getFineractClient().jobsScheduler.changeSchedulerStatus(command));
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -147,7 +147,7 @@ public class SchedulerJobHelper extends IntegrationTest {
     }
 
     public void updateSchedulerJob(long jobId, PutJobsJobIDRequest request) {
-        ok(fineract().jobs.updateJobDetail(jobId, request));
+        Calls.ok(FineractClientHelper.getFineractClient().jobs.updateJobDetail(jobId, request));
     }
 
     // TODO: Rewrite to use fineract-client instead!

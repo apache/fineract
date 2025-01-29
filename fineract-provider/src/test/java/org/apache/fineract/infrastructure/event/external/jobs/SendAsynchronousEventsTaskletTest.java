@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.event.external.jobs;
 
-import static com.google.common.truth.Truth.assertThat;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;

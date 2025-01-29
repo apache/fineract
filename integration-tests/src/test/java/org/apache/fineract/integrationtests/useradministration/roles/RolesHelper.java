@@ -28,12 +28,13 @@ import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.PutPermissionsRequest;
+import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.JSON;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.useradministration.data.PermissionData;
 
-public final class RolesHelper extends IntegrationTest {
+public final class RolesHelper {
 
     public static final long SUPER_USER_ROLE_ID = 1L; // This is hardcoded into the initial Liquibase migration
 
@@ -128,7 +129,7 @@ public final class RolesHelper extends IntegrationTest {
     }
 
     public CommandProcessingResult updatePermissions(PutPermissionsRequest request) {
-        return ok(fineract().permissions.updatePermissionsDetails(request));
+        return Calls.ok(FineractClientHelper.getFineractClient().permissions.updatePermissionsDetails(request));
     }
 
     // TODO: Rewrite to use fineract-client instead!

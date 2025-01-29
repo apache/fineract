@@ -33,14 +33,13 @@ import org.apache.fineract.client.models.GetOfficesResponse;
 import org.apache.fineract.client.models.PutOfficesOfficeIdRequest;
 import org.apache.fineract.client.models.PutOfficesOfficeIdResponse;
 import org.apache.fineract.client.util.JSON;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import retrofit2.Response;
 
-public class OfficeHelper extends IntegrationTest {
+public class OfficeHelper {
 
     public static final long HEAD_OFFICE_ID = 1L; // The ID is hardcoded in the initial Liquibase migration script
 
@@ -117,12 +116,12 @@ public class OfficeHelper extends IntegrationTest {
     }
 
     public Response<GetOfficesResponse> retrieveOfficeByExternalId(String externalId) throws IOException {
-        return fineract().offices.retrieveOfficeByExternalId(externalId).execute();
+        return FineractClientHelper.getFineractClient().offices.retrieveOfficeByExternalId(externalId).execute();
     }
 
     public Response<PutOfficesOfficeIdResponse> updateOfficeUsingExternalId(String externalId, String name, String openingDate)
             throws IOException {
-        return fineract().offices
+        return FineractClientHelper.getFineractClient().offices
                 .updateOfficeWithExternalId(externalId,
                         new PutOfficesOfficeIdRequest().name(name).openingDate(openingDate).dateFormat("dd MMMM yyyy").locale("en"))
                 .execute();

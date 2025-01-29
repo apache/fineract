@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.apache.fineract.integrationtests.client.IntegrationTest.assertThat;
 import static org.apache.fineract.integrationtests.common.ClientHelper.DEFAULT_DATE;
 import static org.apache.fineract.integrationtests.common.ClientHelper.LEGALFORM_ID_PERSON;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -232,9 +232,9 @@ public class ClientTest {
         List<GetClientClientIdAddressesResponse> clientAddresses = ClientHelper.getClientAddresses(requestSpec, responseSpec, clientId);
         GetClientClientIdAddressesResponse addressResponse = clientAddresses.get(0);
         assertThat(addressResponse.getCity()).isEqualTo(city);
-        assertThat(addressResponse.getCountryId()).isEqualTo(countryId);
-        assertThat(addressResponse.getStateProvinceId()).isEqualTo(stateId);
-        assertThat(addressResponse.getAddressTypeId()).isEqualTo(addressTypeId);
+        assertThat(addressResponse.getCountryId()).isEqualTo((long) countryId);
+        assertThat(addressResponse.getStateProvinceId()).isEqualTo((long) stateId);
+        assertThat(addressResponse.getAddressTypeId()).isEqualTo((long) addressTypeId);
         assertThat(addressResponse.getIsActive()).isEqualTo(addressIsActive);
         assertThat(addressResponse.getPostalCode()).isEqualTo(postalCode);
     }
@@ -262,9 +262,9 @@ public class ClientTest {
         List<GetClientClientIdAddressesResponse> clientAddresses = ClientHelper.getClientAddresses(requestSpec, responseSpec, clientId);
         GetClientClientIdAddressesResponse addressResponse = clientAddresses.get(0);
         assertThat(addressResponse.getCity()).isEqualTo(city);
-        assertThat(addressResponse.getCountryId()).isEqualTo(countryId);
-        assertThat(addressResponse.getStateProvinceId()).isEqualTo(stateId);
-        assertThat(addressResponse.getAddressTypeId()).isEqualTo(addressTypeId);
+        assertThat(addressResponse.getCountryId()).isEqualTo((long) countryId);
+        assertThat(addressResponse.getStateProvinceId()).isEqualTo((long) stateId);
+        assertThat(addressResponse.getAddressTypeId()).isEqualTo((long) addressTypeId);
         assertThat(addressResponse.getIsActive()).isEqualTo(addressIsActive);
         assertThat(addressResponse.getPostalCode()).isEqualTo(postalCode);
     }

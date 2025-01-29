@@ -45,9 +45,10 @@ import java.util.Locale;
 import java.util.Map;
 import org.apache.fineract.client.models.PagedLocalRequestAdvancedQueryRequest;
 import org.apache.fineract.client.models.SavingsAccountTransactionsSearchResponse;
+import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.JSON;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.CommonConstants;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -56,7 +57,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "rawtypes" })
-public class SavingsAccountHelper extends IntegrationTest {
+public class SavingsAccountHelper {
 
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
@@ -1043,7 +1044,8 @@ public class SavingsAccountHelper extends IntegrationTest {
     }
 
     public Map<String, Object> querySavingsTransactions(Integer savingsId, PagedLocalRequestAdvancedQueryRequest request) {
-        String response = ok(fineract().savingsTransactions.advancedQuery1(savingsId.longValue(), request));
+        String response = Calls
+                .ok(FineractClientHelper.getFineractClient().savingsTransactions.advancedQuery1(savingsId.longValue(), request));
         return JsonPath.from(response).get("");
     }
 

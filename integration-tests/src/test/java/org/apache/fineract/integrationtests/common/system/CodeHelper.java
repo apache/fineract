@@ -30,10 +30,11 @@ import java.util.List;
 import org.apache.fineract.client.models.GetCodesResponse;
 import org.apache.fineract.client.models.PostCodeValueDataResponse;
 import org.apache.fineract.client.models.PostCodeValuesDataRequest;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
+import org.apache.fineract.client.util.Calls;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 
-public final class CodeHelper extends IntegrationTest {
+public final class CodeHelper {
 
     private static final String COUNTRY_CODE_NAME = "COUNTRY";
     private static final String STATE_CODE_NAME = "STATE";
@@ -381,10 +382,10 @@ public final class CodeHelper extends IntegrationTest {
     }
 
     public PostCodeValueDataResponse createCodeValue(Long codeId, PostCodeValuesDataRequest request) {
-        return ok(fineract().codeValues.createCodeValue(codeId, request));
+        return Calls.ok(FineractClientHelper.getFineractClient().codeValues.createCodeValue(codeId, request));
     }
 
     public List<GetCodesResponse> retrieveCodes() {
-        return ok(fineract().codes.retrieveCodes());
+        return Calls.ok(FineractClientHelper.getFineractClient().codes.retrieveCodes());
     }
 }

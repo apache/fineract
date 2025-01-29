@@ -21,6 +21,7 @@ package org.apache.fineract.integrationtests.client;
 import java.util.Optional;
 import org.apache.fineract.client.models.GetClientsResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
+import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
@@ -55,14 +56,14 @@ public class ClientTest extends IntegrationTest {
         // TODO activationDate() why String? https://issues.apache.org/jira/browse/FINERACT-1232
         // TODO why dateFormat and locale required even when no activationDate?!
         // https://issues.apache.org/jira/browse/FINERACT-1233
-        return ok(fineract().clients.create6(
-                new PostClientsRequest().legalFormId(1L).officeId(1L).fullname("TestClient").dateFormat(dateFormat()).locale("en_US")))
+        return ok(fineractClient().clients.create6(
+                new PostClientsRequest().legalFormId(1L).officeId(1L).fullname("TestClient").dateFormat(Utils.DATE_FORMAT).locale("en_US")))
                 .getClientId();
     }
 
     Optional<Long> retrieveFirst() {
         GetClientsResponse clients = ok(
-                fineract().clients.retrieveAll21(null, null, null, null, null, null, null, 0, 1, null, null, false));
+                fineractClient().clients.retrieveAll21(null, null, null, null, null, null, null, 0, 1, null, null, false));
         if (clients.getTotalFilteredRecords() != null && clients.getTotalFilteredRecords() > 0) {
             return clients.getPageItems().stream().findFirst().map(item -> item.getId());
         }

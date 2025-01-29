@@ -28,15 +28,16 @@ import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.PutExternalEventConfigurationsRequest;
+import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.infrastructure.event.external.service.validation.ExternalEventDTO;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.ExternalEventConfigurationHelper;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Assertions;
 
 @Slf4j
-public final class ExternalEventHelper extends IntegrationTest {
+public final class ExternalEventHelper {
 
     private static final Gson GSON = new JSON().getGson();
 
@@ -121,8 +122,9 @@ public final class ExternalEventHelper extends IntegrationTest {
     }
 
     public void configureBusinessEvent(String eventName, boolean enabled) {
-        CommandProcessingResult result = ok(fineract().externalEventConfigurationApi.updateExternalEventConfigurationsDetails(
-                new PutExternalEventConfigurationsRequest().putExternalEventConfigurationsItem(eventName, enabled)));
+        CommandProcessingResult result = Calls
+                .ok(FineractClientHelper.getFineractClient().externalEventConfigurationApi.updateExternalEventConfigurationsDetails(
+                        new PutExternalEventConfigurationsRequest().putExternalEventConfigurationsItem(eventName, enabled)));
         Map<String, Object> changes = result.getChanges();
         Assertions.assertNotNull(changes);
         Assertions.assertInstanceOf(Map.class, changes);

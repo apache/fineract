@@ -58,7 +58,7 @@ public class SavingsAccountsExternalIdTest extends IntegrationTest {
         request.submittedOnDate(formattedDate);
         request.setExternalId(EXTERNAL_ID);
 
-        Response<PostSavingsAccountsResponse> response = okR(fineract().savingsAccounts.submitApplication2(request));
+        Response<PostSavingsAccountsResponse> response = okR(fineractClient().savingsAccounts.submitApplication2(request));
 
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.body()).isNotNull();
@@ -71,7 +71,7 @@ public class SavingsAccountsExternalIdTest extends IntegrationTest {
         PutSavingsAccountsAccountIdRequest request = new PutSavingsAccountsAccountIdRequest();
         request.setLocale(locale);
         request.setNominalAnnualInterestRate(5.999);
-        Response<PutSavingsAccountsAccountIdResponse> response = okR(fineract().savingsAccounts.update21(EXTERNAL_ID, request, ""));
+        Response<PutSavingsAccountsAccountIdResponse> response = okR(fineractClient().savingsAccounts.update21(EXTERNAL_ID, request, ""));
 
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.body()).isNotNull();
@@ -86,7 +86,7 @@ public class SavingsAccountsExternalIdTest extends IntegrationTest {
         request.setLocale(locale);
         request.setApprovedOnDate(formattedDate);
         Response<PostSavingsAccountsAccountIdResponse> response = okR(
-                fineract().savingsAccounts.handleCommands7(EXTERNAL_ID, request, "approve"));
+                fineractClient().savingsAccounts.handleCommands7(EXTERNAL_ID, request, "approve"));
 
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.body()).isNotNull();
@@ -100,7 +100,8 @@ public class SavingsAccountsExternalIdTest extends IntegrationTest {
         request.dateFormat(dateFormat);
         request.setLocale(locale);
         request.setActivatedOnDate(formattedDate);
-        Response<GetSavingsAccountsAccountIdResponse> response = okR(fineract().savingsAccounts.retrieveOne26(EXTERNAL_ID, false, "all"));
+        Response<GetSavingsAccountsAccountIdResponse> response = okR(
+                fineractClient().savingsAccounts.retrieveOne26(EXTERNAL_ID, false, "all"));
 
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.body()).isNotNull();
@@ -114,7 +115,7 @@ public class SavingsAccountsExternalIdTest extends IntegrationTest {
         LOG.info("------------------------------ UNDO APPROVAL SAVINGS ACCOUNT ---------------------------------------");
         PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
         Response<PostSavingsAccountsAccountIdResponse> response = okR(
-                fineract().savingsAccounts.handleCommands7(EXTERNAL_ID, request, "undoapproval"));
+                fineractClient().savingsAccounts.handleCommands7(EXTERNAL_ID, request, "undoapproval"));
 
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.body()).isNotNull();
@@ -128,7 +129,8 @@ public class SavingsAccountsExternalIdTest extends IntegrationTest {
         request.dateFormat(dateFormat);
         request.setLocale(locale);
         request.setActivatedOnDate(formattedDate);
-        Response<GetSavingsAccountsAccountIdResponse> response = okR(fineract().savingsAccounts.retrieveOne26(EXTERNAL_ID, false, "all"));
+        Response<GetSavingsAccountsAccountIdResponse> response = okR(
+                fineractClient().savingsAccounts.retrieveOne26(EXTERNAL_ID, false, "all"));
 
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.body()).isNotNull();
@@ -143,7 +145,7 @@ public class SavingsAccountsExternalIdTest extends IntegrationTest {
         request.dateFormat(dateFormat);
         request.setLocale(locale);
         request.setActivatedOnDate(formattedDate);
-        Response<DeleteSavingsAccountsAccountIdResponse> response = okR(fineract().savingsAccounts.delete20(EXTERNAL_ID));
+        Response<DeleteSavingsAccountsAccountIdResponse> response = okR(fineractClient().savingsAccounts.delete20(EXTERNAL_ID));
 
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.body()).isNotNull();
@@ -158,7 +160,7 @@ public class SavingsAccountsExternalIdTest extends IntegrationTest {
         request.setLocale(locale);
         request.setActivatedOnDate(formattedDate);
         Response<GetSavingsAccountsAccountIdResponse> response = Calls
-                .executeU(fineract().savingsAccounts.retrieveOne26(EXTERNAL_ID, false, "all"));
+                .executeU(fineractClient().savingsAccounts.retrieveOne26(EXTERNAL_ID, false, "all"));
 
         assertThat(response.raw().code()).isEqualTo(404);
     }

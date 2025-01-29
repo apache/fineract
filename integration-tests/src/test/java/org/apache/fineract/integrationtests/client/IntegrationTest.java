@@ -18,27 +18,22 @@
  */
 package org.apache.fineract.integrationtests.client;
 
-import com.google.common.truth.BigDecimalSubject;
-import com.google.common.truth.BooleanSubject;
-import com.google.common.truth.ComparableSubject;
-import com.google.common.truth.DoubleSubject;
-import com.google.common.truth.FloatSubject;
-import com.google.common.truth.IntegerSubject;
-import com.google.common.truth.IterableSubject;
-import com.google.common.truth.LongSubject;
-import com.google.common.truth.OptionalSubject;
-import com.google.common.truth.StringSubject;
-import com.google.common.truth.Subject;
-import com.google.common.truth.Truth;
-import com.google.common.truth.Truth8;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.math.BigDecimal;
-import java.security.SecureRandom;
 import java.util.Optional;
-import okhttp3.logging.HttpLoggingInterceptor.Level;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.FineractClient;
-import org.apache.fineract.integrationtests.ConfigProperties;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
+import org.assertj.core.api.AbstractBigDecimalAssert;
+import org.assertj.core.api.AbstractBooleanAssert;
+import org.assertj.core.api.AbstractDoubleAssert;
+import org.assertj.core.api.AbstractFloatAssert;
+import org.assertj.core.api.AbstractIntegerAssert;
+import org.assertj.core.api.AbstractLongAssert;
+import org.assertj.core.api.AbstractStringAssert;
+import org.assertj.core.api.Assertions;
+import org.assertj.core.api.IterableAssert;
+import org.assertj.core.api.ObjectAssert;
+import org.assertj.core.api.OptionalAssert;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -47,7 +42,7 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 /**
- * Integration Test for /documents API.
+ * Base Integration Test class
  *
  * @author Michael Vorburger.ch
  */
@@ -57,29 +52,12 @@ import retrofit2.Response;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public abstract class IntegrationTest {
 
-    private static final SecureRandom random = new SecureRandom();
-
-    private FineractClient fineract;
-
-    protected FineractClient fineract() {
-        if (fineract == null) {
-            fineract = newFineract(ConfigProperties.Backend.USERNAME, ConfigProperties.Backend.PASSWORD);
-        }
-        return fineract;
+    protected FineractClient fineractClient() {
+        return FineractClientHelper.getFineractClient();
     }
 
-    private String buildURI() {
-        return ConfigProperties.Backend.PROTOCOL + "://" + ConfigProperties.Backend.HOST + ":" + ConfigProperties.Backend.PORT
-                + "/fineract-provider/api/";
-    }
-
-    protected FineractClient newFineract(String username, String password) {
-        String url = System.getProperty("fineract.it.url", buildURI());
-        // insecure(true) should *ONLY* ever be used for https://localhost:8443, NOT in real clients!!
-        FineractClient.Builder builder = FineractClient.builder().insecure(true).baseURL(url).tenant(ConfigProperties.Backend.TENANT)
-                .basicAuth(username, password).logging(Level.NONE);
-        customizeFineractClient(builder);
-        return builder.build();
+    protected FineractClient newFineractClient(String username, String password) {
+        return FineractClientHelper.createNewFineractClient(username, password, this::customizeFineractClient);
     }
 
     /**
@@ -92,19 +70,6 @@ public abstract class IntegrationTest {
 
     }
 
-    /**
-     * See {@link FineractClient#DATE_FORMAT}.
-     */
-    protected String dateFormat() {
-        return FineractClient.DATE_FORMAT;
-    }
-
-    @SuppressFBWarnings(value = {
-            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
-    protected String random() {
-        return Long.toString(random.nextLong());
-    }
-
     // This method just makes it easier to use Calls.ok() in tests (it avoids having to static import)
     protected <T> T ok(Call<T> call) {
         return Calls.ok(call);
@@ -114,54 +79,43 @@ public abstract class IntegrationTest {
         return Calls.okR(call);
     }
 
-    // as above, avoids import static CallSubject.assertThat
-    protected <T> CallSubject assertThat(Call<T> call) {
-        return CallSubject.assertThat(call);
+    public static IterableAssert<?> assertThat(Iterable<?> actual) {
+        return Assertions.assertThat(actual);
     }
 
-    // as above, this avoids issues with e.g. the Eclipse compiler getting confused which assertThat is which
-    public static IterableSubject assertThat(Iterable<?> actual) {
-        return Truth.assertThat(actual);
+    public static AbstractBigDecimalAssert<?> assertThat(BigDecimal actual) {
+        return Assertions.assertThat(actual);
     }
 
-    public static <T extends Comparable<?>> ComparableSubject<T> assertThat(T actual) {
-        return Truth.assertThat(actual);
+    public static <T> ObjectAssert<T> assertThat(T actual) {
+        return Assertions.assertThat(actual);
     }
 
-    public static BigDecimalSubject assertThat(BigDecimal actual) {
-        return Truth.assertThat(actual);
+    public static AbstractLongAssert<?> assertThat(Long actual) {
+        return Assertions.assertThat(actual);
     }
 
-    public static Subject assertThat(Object actual) {
-        return Truth.assertThat(actual);
+    public static AbstractDoubleAssert<?> assertThat(Double actual) {
+        return Assertions.assertThat(actual);
     }
 
-    public static LongSubject assertThat(Long actual) {
-        return Truth.assertThat(actual);
+    public static AbstractFloatAssert<?> assertThat(Float actual) {
+        return Assertions.assertThat(actual);
     }
 
-    public static DoubleSubject assertThat(Double actual) {
-        return Truth.assertThat(actual);
+    public static AbstractIntegerAssert<?> assertThat(Integer actual) {
+        return Assertions.assertThat(actual);
     }
 
-    public static FloatSubject assertThat(Float actual) {
-        return Truth.assertThat(actual);
+    public static AbstractBooleanAssert<?> assertThat(Boolean actual) {
+        return Assertions.assertThat(actual);
     }
 
-    public static IntegerSubject assertThat(Integer actual) {
-        return Truth.assertThat(actual);
+    public static AbstractStringAssert<?> assertThat(String actual) {
+        return Assertions.assertThat(actual);
     }
 
-    public static BooleanSubject assertThat(Boolean actual) {
-        return Truth.assertThat(actual);
-    }
-
-    public static StringSubject assertThat(String actual) {
-        return Truth.assertThat(actual);
-    }
-
-    // from truth-java8-extension
-    public static OptionalSubject assertThat(Optional<?> actual) {
-        return Truth8.assertThat(actual);
+    public static <T> OptionalAssert<T> assertThat(Optional<T> actual) {
+        return Assertions.assertThat(actual);
     }
 }

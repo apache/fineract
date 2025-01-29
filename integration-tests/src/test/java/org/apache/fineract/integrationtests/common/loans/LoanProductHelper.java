@@ -24,33 +24,34 @@ import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdResponse;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
+import org.apache.fineract.client.util.Calls;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
 
-public class LoanProductHelper extends IntegrationTest {
+public class LoanProductHelper {
 
     public LoanProductHelper() {}
 
     public PostLoanProductsResponse createLoanProduct(PostLoanProductsRequest request) {
-        return ok(fineract().loanProducts.createLoanProduct(request));
+        return Calls.ok(FineractClientHelper.getFineractClient().loanProducts.createLoanProduct(request));
     }
 
     public GetLoanProductsProductIdResponse retrieveLoanProductByExternalId(String externalId) {
-        return ok(fineract().loanProducts.retrieveLoanProductDetails1(externalId));
+        return Calls.ok(FineractClientHelper.getFineractClient().loanProducts.retrieveLoanProductDetails1(externalId));
     }
 
     public GetLoanProductsProductIdResponse retrieveLoanProductById(Long loanProductId) {
-        return ok(fineract().loanProducts.retrieveLoanProductDetails(loanProductId));
+        return Calls.ok(FineractClientHelper.getFineractClient().loanProducts.retrieveLoanProductDetails(loanProductId));
     }
 
     public PutLoanProductsProductIdResponse updateLoanProductByExternalId(String externalId, PutLoanProductsProductIdRequest request) {
-        return ok(fineract().loanProducts.updateLoanProduct1(externalId, request));
+        return Calls.ok(FineractClientHelper.getFineractClient().loanProducts.updateLoanProduct1(externalId, request));
     }
 
     public PutLoanProductsProductIdResponse updateLoanProductById(Long loanProductId, PutLoanProductsProductIdRequest request) {
-        return ok(fineract().loanProducts.updateLoanProduct(loanProductId, request));
+        return Calls.ok(FineractClientHelper.getFineractClient().loanProducts.updateLoanProduct(loanProductId, request));
     }
 
     public GetLoanProductsTemplateResponse getLoanProductTemplate(boolean isProductMixTemplate) {
-        return ok(fineract().loanProducts.retrieveTemplate11(isProductMixTemplate));
+        return Calls.ok(FineractClientHelper.getFineractClient().loanProducts.retrieveTemplate11(isProductMixTemplate));
     }
 }

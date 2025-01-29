@@ -57,7 +57,7 @@ public class SavingsAccountsTest extends IntegrationTest {
         request.setDateFormat(dateFormat);
         request.submittedOnDate(formattedDate);
 
-        Response<PostSavingsAccountsResponse> response = okR(fineract().savingsAccounts.submitApplication2(request));
+        Response<PostSavingsAccountsResponse> response = okR(fineractClient().savingsAccounts.submitApplication2(request));
 
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.body()).isNotNull();
@@ -73,7 +73,7 @@ public class SavingsAccountsTest extends IntegrationTest {
         request.setLocale(locale);
         request.setApprovedOnDate(formattedDate);
         Response<PostSavingsAccountsAccountIdResponse> response = okR(
-                fineract().savingsAccounts.handleCommands6((long) savingId, request, "approve"));
+                fineractClient().savingsAccounts.handleCommands6((long) savingId, request, "approve"));
 
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.body()).isNotNull();
@@ -88,7 +88,7 @@ public class SavingsAccountsTest extends IntegrationTest {
         request.setLocale(locale);
         request.setActivatedOnDate(formattedDate);
         Response<PostSavingsAccountsAccountIdResponse> response = okR(
-                fineract().savingsAccounts.handleCommands6((long) savingId, request, "activate"));
+                fineractClient().savingsAccounts.handleCommands6((long) savingId, request, "activate"));
 
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.body()).isNotNull();

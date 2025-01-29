@@ -22,7 +22,6 @@ import static java.time.temporal.ChronoUnit.DAYS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.google.common.truth.Truth;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -52,6 +51,7 @@ import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivi
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
@@ -82,7 +82,7 @@ import org.mockito.Mockito;
 
 @Slf4j
 @SuppressWarnings({ "unused", "unchecked", "rawtypes", "static-access" })
-public class FixedDepositTest {
+public class FixedDepositTest extends IntegrationTest {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -1946,8 +1946,7 @@ public class FixedDepositTest {
         maturityAmount = new BigDecimal(maturityAmount).setScale(0, RoundingMode.FLOOR).floatValue();
         log.info("{}", principal.toString());
 
-        Truth.assertWithMessage("Verifying Maturity amount for Fixed Deposit Account").that(maturityAmount).isAnyOf(principal,
-                principal - 1); // FINERACT-887
+        assertThat(maturityAmount).isIn(principal, principal - 1); // FINERACT-887
     }
 
     @Test

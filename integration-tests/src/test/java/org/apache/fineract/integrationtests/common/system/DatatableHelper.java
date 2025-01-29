@@ -42,13 +42,14 @@ import org.apache.fineract.client.models.PostDataTablesResponse;
 import org.apache.fineract.client.models.PutDataTablesAppTableIdDatatableIdResponse;
 import org.apache.fineract.client.models.PutDataTablesRequest;
 import org.apache.fineract.client.models.PutDataTablesResponse;
+import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.JSON;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DatatableHelper extends IntegrationTest {
+public class DatatableHelper {
 
     private static final Gson GSON = new JSON().getGson();
 
@@ -100,7 +101,7 @@ public class DatatableHelper extends IntegrationTest {
     }
 
     public PostDataTablesResponse createDatatable(PostDataTablesRequest request) {
-        return ok(fineract().dataTables.createDatatable(request));
+        return Calls.ok(FineractClientHelper.getFineractClient().dataTables.createDatatable(request));
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -116,7 +117,7 @@ public class DatatableHelper extends IntegrationTest {
     }
 
     public GetDataTablesResponse getDataTableDetails(final String dataTableName) {
-        return ok(fineract().dataTables.getDatatable(dataTableName));
+        return Calls.ok(FineractClientHelper.getFineractClient().dataTables.getDatatable(dataTableName));
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -134,12 +135,12 @@ public class DatatableHelper extends IntegrationTest {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Map<String, Object> queryDatatable(String dataTableName, PagedLocalRequestAdvancedQueryData request) {
-        String response = ok(fineract().dataTables.advancedQuery(dataTableName, request));
+        String response = Calls.ok(FineractClientHelper.getFineractClient().dataTables.advancedQuery(dataTableName, request));
         return JsonPath.from(response).get("");
     }
 
     public PutDataTablesResponse updateDatatable(String dataTableName, PutDataTablesRequest request) {
-        return ok(fineract().dataTables.updateDatatable(dataTableName, request));
+        return Calls.ok(FineractClientHelper.getFineractClient().dataTables.updateDatatable(dataTableName, request));
     }
 
     // TODO: Rewrite to use fineract-client instead!

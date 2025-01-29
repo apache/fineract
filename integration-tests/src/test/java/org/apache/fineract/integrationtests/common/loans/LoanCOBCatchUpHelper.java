@@ -23,12 +23,13 @@ import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetOldestCOBProcessedLoanResponse;
 import org.apache.fineract.client.models.IsCatchUpRunningResponse;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
+import org.apache.fineract.client.util.Calls;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.jetbrains.annotations.NotNull;
 import retrofit2.Response;
 
 @Slf4j
-public class LoanCOBCatchUpHelper extends IntegrationTest {
+public class LoanCOBCatchUpHelper {
 
     public LoanCOBCatchUpHelper() {}
 
@@ -47,15 +48,15 @@ public class LoanCOBCatchUpHelper extends IntegrationTest {
     }
 
     public Response<Void> executeLoanCOBCatchUp() {
-        return okR(fineract().loanCobCatchUpApi.executeLoanCOBCatchUp());
+        return Calls.okR(FineractClientHelper.getFineractClient().loanCobCatchUpApi.executeLoanCOBCatchUp());
     }
 
     public GetOldestCOBProcessedLoanResponse executeRetrieveOldestCOBProcessedLoan() {
-        return ok(fineract().loanCobCatchUpApi.getOldestCOBProcessedLoan());
+        return Calls.ok(FineractClientHelper.getFineractClient().loanCobCatchUpApi.getOldestCOBProcessedLoan());
     }
 
     public Response<IsCatchUpRunningResponse> executeGetLoanCatchUpStatus() {
-        return okR(fineract().loanCobCatchUpApi.isCatchUpRunning());
+        return Calls.okR(FineractClientHelper.getFineractClient().loanCobCatchUpApi.isCatchUpRunning());
     }
 
 }

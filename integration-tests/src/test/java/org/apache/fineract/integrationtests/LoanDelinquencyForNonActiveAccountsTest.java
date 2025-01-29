@@ -18,8 +18,6 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.math.BigDecimal;
 import java.util.List;
 import lombok.AllArgsConstructor;

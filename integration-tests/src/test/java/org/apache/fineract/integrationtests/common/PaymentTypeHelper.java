@@ -33,11 +33,11 @@ import org.apache.fineract.client.models.PostPaymentTypesRequest;
 import org.apache.fineract.client.models.PostPaymentTypesResponse;
 import org.apache.fineract.client.models.PutPaymentTypesPaymentTypeIdRequest;
 import org.apache.fineract.client.models.PutPaymentTypesPaymentTypeIdResponse;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
+import org.apache.fineract.client.util.Calls;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 @Slf4j
-public final class PaymentTypeHelper extends IntegrationTest {
+public final class PaymentTypeHelper {
 
     public PaymentTypeHelper() {
 
@@ -48,24 +48,25 @@ public final class PaymentTypeHelper extends IntegrationTest {
 
     public List<GetPaymentTypesResponse> getAllPaymentTypes(final Boolean onlyWithCode) {
         log.info("-------------------------------GETTING ALL PAYMENT TYPES-------------------------------------------");
-        return ok(fineract().paymentTypes.getAllPaymentTypes(onlyWithCode));
+        return Calls.ok(FineractClientHelper.getFineractClient().paymentTypes.getAllPaymentTypes(onlyWithCode));
     }
 
     public PostPaymentTypesResponse createPaymentType(final PostPaymentTypesRequest postPaymentTypesRequest) {
         log.info("---------------------------------CREATING A PAYMENT TYPE---------------------------------------------");
-        return ok(fineract().paymentTypes.createPaymentType(postPaymentTypesRequest));
+        return Calls.ok(FineractClientHelper.getFineractClient().paymentTypes.createPaymentType(postPaymentTypesRequest));
     }
 
     public void verifyPaymentTypeCreatedOnServer(final Long generatedPaymentTypeID) {
         log.info("-------------------------------CHECK PAYMENT DETAILS-------------------------------------------");
-        GetPaymentTypesPaymentTypeIdResponse response = ok(fineract().paymentTypes.retrieveOnePaymentType(generatedPaymentTypeID));
+        GetPaymentTypesPaymentTypeIdResponse response = Calls
+                .ok(FineractClientHelper.getFineractClient().paymentTypes.retrieveOnePaymentType(generatedPaymentTypeID));
         Long responsePaymentTypeID = response.getId();
         assertEquals(generatedPaymentTypeID, responsePaymentTypeID, "ERROR IN CREATING THE PAYMENT TYPE");
     }
 
     public GetPaymentTypesPaymentTypeIdResponse retrieveById(final Long paymentTypeId) {
         log.info("-------------------------------GETTING PAYMENT TYPE-------------------------------------------");
-        return ok(fineract().paymentTypes.retrieveOnePaymentType(paymentTypeId));
+        return Calls.ok(FineractClientHelper.getFineractClient().paymentTypes.retrieveOnePaymentType(paymentTypeId));
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -83,12 +84,13 @@ public final class PaymentTypeHelper extends IntegrationTest {
     public PutPaymentTypesPaymentTypeIdResponse updatePaymentType(final Long paymentTypeId,
             PutPaymentTypesPaymentTypeIdRequest putPaymentTypesPaymentTypeIdRequest) {
         log.info("-------------------------------UPDATING PAYMENT TYPE-------------------------------------------");
-        return ok(fineract().paymentTypes.updatePaymentType(paymentTypeId, putPaymentTypesPaymentTypeIdRequest));
+        return Calls.ok(FineractClientHelper.getFineractClient().paymentTypes.updatePaymentType(paymentTypeId,
+                putPaymentTypesPaymentTypeIdRequest));
     }
 
     public DeletePaymentTypesPaymentTypeIdResponse deletePaymentType(final Long paymentTypeId) {
         log.info("-------------------------------DELETING PAYMENT TYPE-------------------------------------------");
-        return ok(fineract().paymentTypes.deleteCode1(paymentTypeId));
+        return Calls.ok(FineractClientHelper.getFineractClient().paymentTypes.deleteCode1(paymentTypeId));
     }
 
     public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {

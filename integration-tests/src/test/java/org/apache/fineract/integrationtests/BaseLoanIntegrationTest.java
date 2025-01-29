@@ -81,6 +81,7 @@ import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
+import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.BatchHelper;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -113,7 +114,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 @Slf4j
 @ExtendWith(LoanTestLifecycleExtension.class)
-public abstract class BaseLoanIntegrationTest {
+public abstract class BaseLoanIntegrationTest extends IntegrationTest {
 
     protected static final String DATETIME_PATTERN = "dd MMMM yyyy";
 

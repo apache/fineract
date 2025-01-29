@@ -25,12 +25,13 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.fineract.client.models.GetTellersTellerIdCashiersCashiersIdSummaryAndTransactionsResponse;
 import org.apache.fineract.client.models.GetTellersTellerIdCashiersCashiersIdTransactionsResponse;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
+import org.apache.fineract.client.util.Calls;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CashierTransactionsHelper extends IntegrationTest {
+public class CashierTransactionsHelper {
 
     private final ResponseSpecification responseSpecification;
     private final RequestSpecification requestSpecification;
@@ -50,13 +51,14 @@ public class CashierTransactionsHelper extends IntegrationTest {
 
     public GetTellersTellerIdCashiersCashiersIdTransactionsResponse getTellersTellerIdCashiersCashiersIdTransactionsResponse(Long tellerId,
             Long cashierId, String currencyCode, int offset, int limit, String orderBy, String sortOrder) {
-        return ok(fineract().tellers.getTransactionsForCashier(tellerId, cashierId, currencyCode, offset, limit, orderBy, sortOrder));
+        return Calls.ok(FineractClientHelper.getFineractClient().tellers.getTransactionsForCashier(tellerId, cashierId, currencyCode,
+                offset, limit, orderBy, sortOrder));
     }
 
     public GetTellersTellerIdCashiersCashiersIdSummaryAndTransactionsResponse getTellersTellerIdCashiersCashiersIdSummaryAndTransactionsResponse(
             Long tellerId, Long cashierId, String currencyCode, int offset, int limit, String orderBy, String sortOrder) {
-        return ok(fineract().tellers.getTransactionsWithSummaryForCashier(tellerId, cashierId, currencyCode, offset, limit, orderBy,
-                sortOrder));
+        return Calls.ok(FineractClientHelper.getFineractClient().tellers.getTransactionsWithSummaryForCashier(tellerId, cashierId,
+                currencyCode, offset, limit, orderBy, sortOrder));
     }
 
     // TODO: Rewrite to use fineract-client instead!

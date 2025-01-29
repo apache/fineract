@@ -332,7 +332,7 @@ public class DatatableIntegrationTest extends IntegrationTest {
         for (String column : columnsToValidate) {
             String valueFilter = column.equals(tst_tst_tst_cd_itsADropdown) ? createdCodeValueId.toString()
                     : datatableEntryMap.get(column).toString();
-            String rows = Calls.ok(fineract().dataTables.queryValues(datatableName, column, valueFilter, column));
+            String rows = Calls.ok(fineractClient().dataTables.queryValues(datatableName, column, valueFilter, column));
             JsonArray jsonArray = JsonParser.parseString(rows).getAsJsonArray();
             if (itsADatetime.equals(column)) {
                 DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

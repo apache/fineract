@@ -675,8 +675,6 @@ configure(project.fineractJavaProjects) {
                 'org.bouncycastle:bcpkix-jdk15to18',
                 'org.bouncycastle:bcprov-jdk15to18',
                 'org.awaitility:awaitility',
-                'com.google.truth:truth',
-                'com.google.truth.extensions:truth-java8-extension'
                 )
 
         testCompileOnly 'org.projectlombok:lombok'
@@ -791,8 +789,6 @@ configure(project.fineractCustomProjects) {
                 'org.bouncycastle:bcpkix-jdk15to18',
                 'org.bouncycastle:bcprov-jdk15to18',
                 'org.awaitility:awaitility',
-                'com.google.truth:truth',
-                'com.google.truth.extensions:truth-java8-extension',
                 'io.github.classgraph:classgraph',
                 'io.cucumber:cucumber-core',
                 'io.cucumber:cucumber-java:7.20.1',

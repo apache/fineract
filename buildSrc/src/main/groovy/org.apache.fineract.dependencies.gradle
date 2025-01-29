@@ -54,8 +54,6 @@ dependencyManagement {
         dependency 'org.eclipse.persistence:org.eclipse.persistence.jpa:4.0.2'
         dependency 'com.google.guava:guava:32.0.0-jre'
         dependency 'com.google.code.gson:gson:2.11.0'
-        dependency 'com.google.truth:truth:1.4.4'
-        dependency 'com.google.truth.extensions:truth-java8-extension:1.4.4'
         dependency 'com.google.googlejavaformat:google-java-format:1.24.0'
         dependency 'org.apache.commons:commons-collections4:4.4'
         dependency ('software.amazon.msk:aws-msk-iam-auth:2.2.0') {

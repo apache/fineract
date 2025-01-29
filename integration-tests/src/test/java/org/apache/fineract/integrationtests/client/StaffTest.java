@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Optional;
 import org.apache.fineract.client.models.PostStaffRequest;
+import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
@@ -51,14 +52,13 @@ public class StaffTest extends IntegrationTest {
     }
 
     Long create() {
-        return ok(fineract().staff
-                .create3(new PostStaffRequest().officeId(1L).firstname("StaffTest " + random()).lastname("Staffer " + random())
-                        .externalId(random()).joiningDate(LocalDate.now(ZoneId.of("UTC"))).dateFormat(dateFormat()).locale("en_US")))
-                .getResourceId();
+        return ok(fineractClient().staff.create3(new PostStaffRequest().officeId(1L).firstname(Utils.randomStringGenerator("StaffTest", 6))
+                .lastname(Utils.randomStringGenerator("Staffer_", 6)).externalId(Utils.randomStringGenerator("", 12))
+                .joiningDate(LocalDate.now(ZoneId.of("UTC"))).dateFormat("yyyy-MM-dd").locale("en_US"))).getResourceId();
     }
 
     Optional<Long> retrieveFirst() {
-        var staff = ok(fineract().staff.retrieveAll16(1L, true, false, "ACTIVE"));
+        var staff = ok(fineractClient().staff.retrieveAll16(1L, true, false, "ACTIVE"));
         if (staff.size() > 0) {
             return Optional.of((long) staff.get(0).getId());
         }
