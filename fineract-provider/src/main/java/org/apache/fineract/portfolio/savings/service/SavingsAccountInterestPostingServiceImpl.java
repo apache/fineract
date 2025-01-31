@@ -137,17 +137,18 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                             applyWithHoldTaxForOldTransaction = true;
                         }
                         SavingsAccountTransactionData newPostingTransaction;
-                        if (interestEarnedToBePostedForPeriod.isGreaterThanOrEqualTo(Money.zero(savingsAccountData.getCurrency()))) {
+                        if (interestEarnedToBePostedForPeriod.isGreaterThanZero() || interestEarnedToBePostedForPeriod.isLessThanZero()) {
                             newPostingTransaction = SavingsAccountTransactionData.interestPosting(savingsAccountData,
                                     interestPostingTransactionDate, interestEarnedToBePostedForPeriod,
                                     interestPostingPeriod.isUserPosting());
-                        } else {
+                            savingsAccountData.updateTransactions(newPostingTransaction);
+                        } /*else {
                             newPostingTransaction = SavingsAccountTransactionData.overdraftInterest(savingsAccountData,
                                     interestPostingTransactionDate, interestEarnedToBePostedForPeriod.negated(),
                                     interestPostingPeriod.isUserPosting(), isNegativeBalance);
-                        }
+                        }*/
 
-                        savingsAccountData.updateTransactions(newPostingTransaction);
+
                         if (savingsAccountData.getSavingsProductData().isAccrualBasedAccountingEnabled()) {
                             savingsAccountData.updateTransactions(
                                     SavingsAccountTransactionData.accrual(savingsAccountData, interestPostingTransactionDate,
