@@ -318,7 +318,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
             }
         }
 
-        AccrualPeriodsData accrualPeriods = calculateAccrualAmounts(loan, tillDate, periodic);
+        AccrualPeriodsData accrualPeriods = calculateAccrualAmounts(loan, tillDate, periodic, isFinal);
         boolean mergeTransactions = isFinal || progressiveAccrual;
         MonetaryCurrency currency = loan.getLoanProductRelatedDetail().getCurrency();
         List<LoanTransaction> accrualTransactions = new ArrayList<>();
@@ -393,7 +393,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
         }
     }
 
-    private AccrualPeriodsData calculateAccrualAmounts(@NotNull Loan loan, @NotNull LocalDate tillDate, boolean periodic) {
+    private AccrualPeriodsData calculateAccrualAmounts(@NotNull Loan loan, @NotNull LocalDate tillDate, boolean periodic, boolean isFinal) {
         boolean chargeOnDueDate = isChargeOnDueDate();
         LoanProductRelatedDetail productDetail = loan.getLoanProductRelatedDetail();
         MonetaryCurrency currency = productDetail.getCurrency();
@@ -402,11 +402,12 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
         int firstInstallmentNumber = fetchFirstNormalInstallmentNumber(loan.getRepaymentScheduleInstallments());
         LocalDate interestCalculationTillDate = loan.isProgressiveSchedule()
                 && loan.getLoanProductRelatedDetail().isInterestRecognitionOnDisbursementDate() ? tillDate.plusDays(1L) : tillDate;
-        List<LoanRepaymentScheduleInstallment> installments = getInstallmentsToAccrue(loan, interestCalculationTillDate, periodic);
+        List<LoanRepaymentScheduleInstallment> installments = isFinal ? loan.getRepaymentScheduleInstallments()
+                : getInstallmentsToAccrue(loan, interestCalculationTillDate, periodic);
         AccrualPeriodsData accrualPeriods = AccrualPeriodsData.create(installments, firstInstallmentNumber, currency);
         for (LoanRepaymentScheduleInstallment installment : installments) {
             addInterestAccrual(loan, interestCalculationTillDate, scheduleGenerator, installment, accrualPeriods);
-            addChargeAccrual(loan, tillDate, chargeOnDueDate, installment, accrualPeriods);
+            addChargeAccrual(loan, tillDate, chargeOnDueDate, installment, accrualPeriods, isFinal);
         }
         return accrualPeriods;
     }
@@ -512,12 +513,12 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
     }
 
     private void addChargeAccrual(@NotNull Loan loan, @NotNull LocalDate tillDate, boolean chargeOnDueDate,
-            @NotNull LoanRepaymentScheduleInstallment installment, @NotNull AccrualPeriodsData accrualPeriods) {
+            @NotNull LoanRepaymentScheduleInstallment installment, @NotNull AccrualPeriodsData accrualPeriods, boolean isFinal) {
         AccrualPeriodData period = accrualPeriods.getPeriodByInstallmentNumber(installment.getInstallmentNumber());
         LocalDate dueDate = installment.getDueDate();
-        List<LoanCharge> loanCharges = loan
-                .getLoanCharges(lc -> !lc.isDueAtDisbursement() && (lc.isInstalmentFee() ? !DateUtils.isBefore(tillDate, dueDate)
-                        : isChargeDue(lc, tillDate, chargeOnDueDate, installment, period.isFirstPeriod())));
+        Collection<LoanCharge> loanCharges;
+        loanCharges = loan.getLoanCharges(lc -> !lc.isDueAtDisbursement() && (lc.isInstalmentFee() ? !DateUtils.isBefore(tillDate, dueDate)
+                : isChargeDue(lc, tillDate, chargeOnDueDate, installment, period.isFirstPeriod())));
         for (LoanCharge loanCharge : loanCharges) {
             addChargeAccrual(loanCharge, tillDate, chargeOnDueDate, installment, accrualPeriods);
         }
@@ -596,6 +597,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
         LocalDate fromDate = installment.getFromDate();
         LocalDate dueDate = installment.getDueDate();
         LocalDate toDate = DateUtils.isBefore(dueDate, tillDate) ? dueDate : tillDate;
+        chargeOnDueDate = chargeOnDueDate || loanCharge.getDueLocalDate().isBefore(loanCharge.getSubmittedOnDate());
         return chargeOnDueDate ? loanCharge.isDueInPeriod(fromDate, toDate, isFirstPeriod)
                 : isInPeriod(loanCharge.getSubmittedOnDate(), fromDate, toDate, isFirstPeriod);
     }
