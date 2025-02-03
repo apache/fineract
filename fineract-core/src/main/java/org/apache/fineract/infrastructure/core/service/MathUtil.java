@@ -217,6 +217,10 @@ public final class MathUtil {
         return nullToZero(first).compareTo(nullToZero(second)) < 0;
     }
 
+    public static boolean isLessThanOrEqualTo(BigDecimal first, BigDecimal second) {
+        return nullToZero(first).compareTo(second) <= 0;
+    }
+
     public static boolean isGreaterThanOrEqualTo(BigDecimal first, BigDecimal second) {
         return nullToZero(first).compareTo(nullToZero(second)) >= 0;
     }

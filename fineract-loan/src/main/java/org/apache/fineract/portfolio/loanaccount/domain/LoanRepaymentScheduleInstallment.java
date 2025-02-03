@@ -721,6 +721,18 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         this.penaltyAccrued = MathUtil.zeroToNull(MathUtil.toBigDecimal(penalityCharges));
     }
 
+    public void setInterestAccrued(BigDecimal interestAccrued) {
+        this.interestAccrued = interestAccrued;
+    }
+
+    public void setFeeAccrued(BigDecimal feeAccrued) {
+        this.feeAccrued = feeAccrued;
+    }
+
+    public void setPenaltyAccrued(BigDecimal penaltyAccrued) {
+        this.penaltyAccrued = penaltyAccrued;
+    }
+
     public void updateObligationsMet(final MonetaryCurrency currency, final LocalDate transactionDate) {
         if (!this.obligationsMet && getTotalOutstanding(currency).isZero()) {
             this.obligationsMet = true;
