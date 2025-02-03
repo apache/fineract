@@ -1204,6 +1204,8 @@ final class LoansApiResourceSwagger {
         @Schema(description = "List of GetLoansLoanIdLoanTermVariations")
         public List<GetLoansLoanIdLoanTermVariations> loanTermVariations;
         public StringEnumOptionData chargeOffBehaviour;
+        @Schema(example = "false")
+        public Boolean interestRecognitionOnDisbursementDate;
     }
 
     @Schema(description = "GetLoansResponse")
@@ -1303,6 +1305,8 @@ final class LoansApiResourceSwagger {
         public Boolean enableAutoRepaymentForDownPayment;
         @Schema(example = "10.00")
         public BigDecimal fixedEmiAmount;
+        @Schema(example = "false")
+        public Boolean interestRecognitionOnDisbursementDate;
 
         public List<PostLoansRequestChargeData> charges;
 
@@ -1473,6 +1477,8 @@ final class LoansApiResourceSwagger {
         public BigDecimal disbursedAmountPercentageForDownPayment;
         @Schema(example = "false")
         public Boolean enableAutoRepaymentForDownPayment;
+        @Schema(example = "false")
+        public Boolean interestRecognitionOnDisbursementDate;
 
         static final class PutLoansLoanIdChanges {
 

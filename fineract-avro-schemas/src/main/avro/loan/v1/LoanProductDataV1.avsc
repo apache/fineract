@@ -641,6 +641,14 @@
                 "null",
                 "org.apache.fineract.avro.loan.v1.DelinquencyBucketDataV1"
             ]
+        },
+        {
+            "default": null,
+            "name": "interestRecognitionOnDisbursementDate",
+            "type": [
+                "null",
+                "boolean"
+            ]
         }
     ]
 }

@@ -165,6 +165,7 @@ public class LoanProductTestBuilder {
     private FullAccountingConfig fullAccountingConfig;
     private List<String> supportedInterestRefundTypes = null;
     private String chargeOffBehaviour;
+    private boolean interestRecognitionOnDisbursementDate = false;
 
     public String build() {
         final HashMap<String, Object> map = build(null, null);
@@ -323,6 +324,9 @@ public class LoanProductTestBuilder {
         }
         if (enableAutoRepaymentForDownPayment) {
             map.put("enableAutoRepaymentForDownPayment", enableAutoRepaymentForDownPayment);
+        }
+        if (interestRecognitionOnDisbursementDate) {
+            map.put("interestRecognitionOnDisbursementDate", interestRecognitionOnDisbursementDate);
         }
 
         if (this.repaymentStartDateType != null) {

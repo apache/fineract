@@ -443,6 +443,12 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
         final boolean enableAccrualActivityPosting = command
                 .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ENABLE_ACCRUAL_ACTIVITY_POSTING);
 
+        boolean interestRecognitionOnDisbursementDate = false;
+        if (command.parameterExists(LoanProductConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE)) {
+            interestRecognitionOnDisbursementDate = command
+                    .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE);
+        }
+
         List<LoanSupportedInterestRefundTypes> supportedInterestRefundTypes = new ArrayList<>();
         if (command.parameterExists(LoanProductConstants.SUPPORTED_INTEREST_REFUND_TYPES)) {
             JsonArray supportedTransactionsForInterestRefund = command
@@ -480,7 +486,7 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
                 allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber, dueDaysForRepaymentEvent,
                 overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageDownPayment, enableAutoRepaymentForDownPayment,
                 repaymentStartDateType, enableInstallmentLevelDelinquency, loanScheduleType, loanScheduleProcessingType, fixedLength,
-                enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour);
+                enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour, interestRecognitionOnDisbursementDate);
 
     }
 
@@ -699,7 +705,7 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
             final boolean enableInstallmentLevelDelinquency, final LoanScheduleType loanScheduleType,
             final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength,
             final boolean enableAccrualActivityPosting, final List<LoanSupportedInterestRefundTypes> supportedInterestRefundTypes,
-            final LoanChargeOffBehaviour chargeOffBehaviour) {
+            final LoanChargeOffBehaviour chargeOffBehaviour, final boolean isInterestRecognitionOnDisbursementDate) {
         this.fund = fund;
         this.transactionProcessingStrategyCode = transactionProcessingStrategyCode;
 
@@ -749,7 +755,7 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
                 inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType.getValue(), daysInYearType.getValue(),
                 isInterestRecalculationEnabled, isEqualAmortization, enableDownPayment, disbursedAmountPercentageForDownPayment,
                 enableAutoRepaymentForDownPayment, loanScheduleType, loanScheduleProcessingType, fixedLength, enableAccrualActivityPosting,
-                supportedInterestRefundTypes, chargeOffBehaviour);
+                supportedInterestRefundTypes, chargeOffBehaviour, isInterestRecognitionOnDisbursementDate);
 
         this.loanProductMinMaxConstraints = new LoanProductMinMaxConstraints(defaultMinPrincipal, defaultMaxPrincipal,
                 defaultMinNominalInterestRatePerPeriod, defaultMaxNominalInterestRatePerPeriod, defaultMinNumberOfInstallments,
@@ -802,7 +808,6 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
         this.repaymentStartDateType = repaymentStartDateType;
 
         this.enableInstallmentLevelDelinquency = enableInstallmentLevelDelinquency;
-
         validateLoanProductPreSave();
     }
 
@@ -868,6 +873,14 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
                 throw new LoanProductGeneralRuleException("allowApprovedDisbursedAmountsOverApplied.is.set.overAppliedNumber.is.mandatory",
                         "Allow Approved / Disbursed Amounts Over Applied is Set - Over Applied Number is Mandatory");
             }
+        }
+
+        if (this.getLoanProductRelatedDetail().isInterestRecognitionOnDisbursementDate()
+                && this.getLoanProductRelatedDetail().getLoanScheduleType().equals(LoanScheduleType.CUMULATIVE)) {
+            throw new LoanProductGeneralRuleException(
+                    "interestRecognitionOnDisbursementDate.is.only.supported.for.progressive.loan.schedule.type",
+                    "interestRecognitionOnDisbursementDate is only supported for progressive loan schedule type");
+
         }
 
     }
@@ -1621,4 +1634,5 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
     public void updateEnableInstallmentLevelDelinquency(boolean enableInstallmentLevelDelinquency) {
         this.enableInstallmentLevelDelinquency = enableInstallmentLevelDelinquency;
     }
+
 }

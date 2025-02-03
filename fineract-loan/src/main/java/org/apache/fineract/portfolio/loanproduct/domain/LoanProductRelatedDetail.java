@@ -165,6 +165,9 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     @Enumerated(EnumType.STRING)
     private LoanChargeOffBehaviour chargeOffBehaviour;
 
+    @Column(name = "interest_recognition_on_disbursement_date", nullable = false)
+    private boolean interestRecognitionOnDisbursementDate = false;
+
     public static LoanProductRelatedDetail createFrom(final CurrencyData currencyData, final BigDecimal principal,
             final BigDecimal nominalInterestRatePerPeriod, final PeriodFrequencyType interestRatePeriodFrequencyType,
             final BigDecimal nominalAnnualInterestRate, final InterestMethod interestMethod,
@@ -178,7 +181,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final boolean enableAutoRepaymentForDownPayment, final LoanScheduleType loanScheduleType,
             final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength,
             final boolean enableAccrualActivityPosting, final List<LoanSupportedInterestRefundTypes> supportedInterestRefundTypes,
-            final LoanChargeOffBehaviour chargeOffBehaviour) {
+            final LoanChargeOffBehaviour chargeOffBehaviour, final boolean interestRecognitionOnDisbursementDate) {
 
         final MonetaryCurrency currency = MonetaryCurrency.fromCurrencyData(currencyData);
         return new LoanProductRelatedDetail(currency, principal, nominalInterestRatePerPeriod, interestRatePeriodFrequencyType,
@@ -188,7 +191,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
                 inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
                 isEqualAmortization, enableDownPayment, disbursedAmountPercentageForDownPayment, enableAutoRepaymentForDownPayment,
                 loanScheduleType, loanScheduleProcessingType, fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes,
-                chargeOffBehaviour);
+                chargeOffBehaviour, interestRecognitionOnDisbursementDate);
     }
 
     protected LoanProductRelatedDetail() {
@@ -208,7 +211,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final boolean enableAutoRepaymentForDownPayment, final LoanScheduleType loanScheduleType,
             final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength,
             final boolean enableAccrualActivityPosting, List<LoanSupportedInterestRefundTypes> supportedInterestRefundTypes,
-            final LoanChargeOffBehaviour chargeOffBehaviour) {
+            final LoanChargeOffBehaviour chargeOffBehaviour, final boolean interestRecognitionOnDisbursementDate) {
         this.currency = currency;
         this.principal = defaultPrincipal;
         this.nominalInterestRatePerPeriod = defaultNominalInterestRatePerPeriod;
@@ -244,6 +247,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         this.enableAccrualActivityPosting = enableAccrualActivityPosting;
         this.supportedInterestRefundTypes = supportedInterestRefundTypes;
         this.chargeOffBehaviour = chargeOffBehaviour;
+        this.interestRecognitionOnDisbursementDate = interestRecognitionOnDisbursementDate;
     }
 
     private Integer defaultToNullIfZero(final Integer value) {
@@ -520,6 +524,14 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             this.isEqualAmortization = newValue;
         }
 
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE,
+                this.isInterestRecognitionOnDisbursementDate())) {
+            final boolean newValue = command
+                    .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE);
+            actualChanges.put(LoanProductConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE, newValue);
+            this.updateInterestRecognitionOnDisbursementDate(newValue);
+        }
+
         return actualChanges;
     }
 
@@ -545,5 +557,9 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         this.nominalInterestRatePerPeriod = null;
         this.interestPeriodFrequencyType = PeriodFrequencyType.INVALID;
         this.annualNominalInterestRate = null;
+    }
+
+    public void updateInterestRecognitionOnDisbursementDate(boolean interestRecognitionOnDisbursementDate) {
+        this.interestRecognitionOnDisbursementDate = interestRecognitionOnDisbursementDate;
     }
 }

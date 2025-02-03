@@ -172,6 +172,8 @@ final class LoanProductsApiResourceSwagger {
         public Integer repaymentStartDateType;
         @Schema(example = "false")
         public Boolean enableAccrualActivityPosting;
+        @Schema(example = "false")
+        public Boolean interestRecognitionOnDisbursementDate;
 
         // Interest Recalculation
         @Schema(example = "false")
@@ -1421,6 +1423,8 @@ final class LoanProductsApiResourceSwagger {
         public List<StringEnumOptionData> supportedInterestRefundTypes;
         public List<GetLoanProductsTemplateResponse.GetLoanProductsChargeOffReasonOptions> chargeOffReasonOptions;
         public StringEnumOptionData chargeOffBehaviour;
+        @Schema(example = "false")
+        public Boolean interestRecognitionOnDisbursementDate;
     }
 
     @Schema(description = "PutLoanProductsProductIdRequest")
@@ -1558,6 +1562,8 @@ final class LoanProductsApiResourceSwagger {
         public Boolean enableAutoRepaymentForDownPayment;
         @Schema(example = "1")
         public Integer repaymentStartDateType;
+        @Schema(example = "false")
+        public Boolean interestRecognitionOnDisbursementDate;
 
         // Interest Recalculation
         @Schema(example = "false")

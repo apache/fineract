@@ -169,7 +169,8 @@ public final class LoanApplicationValidator {
             LoanApiConstants.DISALLOW_EXPECTED_DISBURSEMENTS, LoanApiConstants.FRAUD_ATTRIBUTE_NAME,
             LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE, LoanProductConstants.FIXED_LENGTH,
             LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY, LoanProductConstants.ENABLE_DOWN_PAYMENT,
-            LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT, LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT));
+            LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT, LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT,
+            LoanApiConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE));
     public static final String LOANAPPLICATION_UNDO = "loanapplication.undo";
 
     private final FromJsonHelper fromApiJsonHelper;
@@ -760,6 +761,14 @@ public final class LoanApplicationValidator {
         validateTransactionProcessingStrategy(transactionProcessingStrategy, loanProduct);
 
         fixedLengthValidations(element);
+
+        if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE, element)) {
+            if (!LoanScheduleType.PROGRESSIVE.equals(loanProduct.getLoanProductRelatedDetail().getLoanScheduleType())) {
+                List<String> unsupportedParameterList = new ArrayList<>();
+                unsupportedParameterList.add(LoanApiConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE);
+                throw new UnsupportedParameterException(unsupportedParameterList);
+            }
+        }
     }
 
     private void fixedLengthValidations(final JsonElement element) {
@@ -1442,6 +1451,14 @@ public final class LoanApplicationValidator {
 
             loanProductDataValidator.validateRepaymentPeriodWithGraceSettings(numberOfRepayments, graceOnPrincipalPayment,
                     graceOnInterestPayment, graceOnInterestCharged, recurringMoratoriumOnPrincipalPeriods, baseDataValidator);
+
+            if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE, element)) {
+                if (!LoanScheduleType.PROGRESSIVE.equals(loanProduct.getLoanProductRelatedDetail().getLoanScheduleType())) {
+                    List<String> unsupportedParameterList = new ArrayList<>();
+                    unsupportedParameterList.add(LoanApiConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE);
+                    throw new UnsupportedParameterException(unsupportedParameterList);
+                }
+            }
         });
     }
 

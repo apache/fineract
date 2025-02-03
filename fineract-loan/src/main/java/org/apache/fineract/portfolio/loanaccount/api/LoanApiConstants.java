@@ -177,6 +177,8 @@ public interface LoanApiConstants {
     // Data Validator names
     String LOAN_FRAUD_DATAVALIDATOR_PREFIX = "loans.fraud";
 
+    String INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE = "interestRecognitionOnDisbursementDate";
+
     // Loan Summary Transaction Types
     List<Integer> LOAN_SUMMARY_TRANSACTION_TYPES = List.of(LoanTransactionType.CHARGE_ADJUSTMENT.getValue(), //
             LoanTransactionType.CHARGEBACK.getValue(), //

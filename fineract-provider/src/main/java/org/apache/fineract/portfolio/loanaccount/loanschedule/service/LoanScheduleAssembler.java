@@ -518,6 +518,12 @@ public class LoanScheduleAssembler {
             fixedLength = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(LoanProductConstants.FIXED_LENGTH, element);
         }
 
+        Boolean interestRecognitionOnDisbursementDate = loanProduct.getLoanProductRelatedDetail().isInterestRecognitionOnDisbursementDate();
+        if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE, element)) {
+            interestRecognitionOnDisbursementDate = this.fromApiJsonHelper
+                    .extractBooleanNamed(LoanApiConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE, element);
+        }
+
         return LoanApplicationTerms.assembleFrom(applicationCurrency.toData(), loanTermFrequency, loanTermPeriodFrequencyType,
                 numberOfRepayments, repaymentEvery, repaymentPeriodFrequencyType, nthDay, weekDayType, amortizationMethod, interestMethod,
                 interestRatePerPeriod, interestRatePeriodFrequencyType, annualNominalInterestRate, interestCalculationPeriodMethod,
@@ -535,7 +541,7 @@ public class LoanScheduleAssembler {
                 loanScheduleType, loanScheduleProcessingType, fixedLength,
                 loanProduct.getLoanProductRelatedDetail().isEnableAccrualActivityPosting(),
                 loanProduct.getLoanProductRelatedDetail().getSupportedInterestRefundTypes(),
-                loanProduct.getLoanProductRelatedDetail().getChargeOffBehaviour());
+                loanProduct.getLoanProductRelatedDetail().getChargeOffBehaviour(), interestRecognitionOnDisbursementDate);
     }
 
     private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,
@@ -1451,6 +1457,14 @@ public class LoanScheduleAssembler {
                 }
             }
             loanProductRelatedDetail.setDisbursedAmountPercentageForDownPayment(disbursedAmountPercentageDownPayment);
+        }
+
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE,
+                loanProductRelatedDetail.isInterestRecognitionOnDisbursementDate())) {
+            final boolean newValue = command
+                    .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE);
+            changes.put(LoanProductConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE, newValue);
+            loanProductRelatedDetail.updateInterestRecognitionOnDisbursementDate(newValue);
         }
     }
 

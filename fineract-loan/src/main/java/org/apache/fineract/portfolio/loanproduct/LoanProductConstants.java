@@ -169,4 +169,5 @@ public interface LoanProductConstants {
     String SUPPORTED_INTEREST_REFUND_TYPES = "supportedInterestRefundTypes";
     String CHARGE_OFF_BEHAVIOUR = "chargeOffBehaviour";
 
+    String INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE = "interestRecognitionOnDisbursementDate";
 }

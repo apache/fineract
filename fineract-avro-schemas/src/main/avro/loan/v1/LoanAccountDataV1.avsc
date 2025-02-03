@@ -815,6 +815,14 @@
                 "null",
                 "boolean"
             ]
+        },
+        {
+            "default": null,
+            "name": "interestRecognitionOnDisbursementDate",
+            "type": [
+                "null",
+                "boolean"
+            ]
         }
     ]
 }

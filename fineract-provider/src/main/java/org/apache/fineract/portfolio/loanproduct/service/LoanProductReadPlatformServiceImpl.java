@@ -265,7 +265,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lpr.is_compounding_to_be_posted_as_transaction as isCompoundingToBePostedAsTransaction, "
                     + "lpr.allow_compounding_on_eod as allowCompoundingOnEod, "
                     + "lpr.disallow_interest_calc_on_past_due as disallowInterestCalculationOnPastDue, "
-                    + "lp.hold_guarantee_funds as holdGuaranteeFunds, "
+                    + "lp.hold_guarantee_funds as holdGuaranteeFunds, lp.interest_recognition_on_disbursement_date as interestRecognitionOnDisbursementDate, "
                     + "lp.principal_threshold_for_last_installment as principalThresholdForLastInstallment, "
                     + "lp.fixed_principal_percentage_per_installment fixedPrincipalPercentagePerInstallment, "
                     + "lp.sync_expected_with_disbursement_date as syncExpectedWithDisbursementDate, "
@@ -547,6 +547,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             }
             final String chargeOffBehaviourStr = rs.getString("chargeOffBehaviour");
             final LoanChargeOffBehaviour loanChargeOffBehaviour = LoanChargeOffBehaviour.valueOf(chargeOffBehaviourStr);
+            final boolean interestRecognitionOnDisbursementDate = rs.getBoolean("interestRecognitionOnDisbursementDate");
 
             return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                     numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -570,7 +571,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     enableAutoRepaymentForDownPayment, advancedPaymentData, creditAllocationData, repaymentStartDateType,
                     enableInstallmentLevelDelinquency, loanScheduleType.asEnumOptionData(), loanScheduleProcessingType.asEnumOptionData(),
                     fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes,
-                    loanChargeOffBehaviour.getValueAsStringEnumOptionData());
+                    loanChargeOffBehaviour.getValueAsStringEnumOptionData(), interestRecognitionOnDisbursementDate);
         }
     }
 
