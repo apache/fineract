@@ -183,4 +183,5 @@
     <include file="parts/0162_add_additional_audit_fields_to_term_variations.xml" relativeToChangelogFile="true" />
     <include file="parts/0163_transaction_summary_with_asset_owner_report_accrual_adj_merged_with_accrual.xml" relativeToChangelogFile="true" />
     <include file="parts/0164_transaction_summary_with_asset_owner_report_accrual_adj_report_separately_and_exclude_accrual_activity.xml" relativeToChangelogFile="true" />
+    <include file="parts/0165_add_credited_interest_to_instalment.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

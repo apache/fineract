@@ -140,6 +140,9 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     @Column(name = "credits_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal creditedPrincipal;
 
+    @Column(name = "credited_interest", scale = 6, precision = 19, nullable = true)
+    private BigDecimal creditedInterest;
+
     @Column(name = "credited_fee", scale = 6, precision = 19, nullable = true)
     private BigDecimal creditedFee;
 
@@ -232,8 +235,8 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
 
     public LoanRepaymentScheduleInstallment(Loan loan, Integer installmentNumber, LocalDate fromDate, LocalDate dueDate,
             BigDecimal principal, BigDecimal interestCharged, BigDecimal feeChargesCharged, BigDecimal penaltyCharges,
-            BigDecimal creditedPrincipal, BigDecimal creditedFee, BigDecimal creditedPenalty, boolean additional, boolean isDownPayment,
-            boolean isReAged) {
+            BigDecimal creditedPrincipal, BigDecimal creditedInterest, BigDecimal creditedFee, BigDecimal creditedPenalty,
+            boolean additional, boolean isDownPayment, boolean isReAged) {
         this.loan = loan;
         this.installmentNumber = installmentNumber;
         this.fromDate = fromDate;
@@ -243,6 +246,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         this.feeChargesCharged = feeChargesCharged;
         this.penaltyCharges = penaltyCharges;
         this.creditedPrincipal = creditedPrincipal;
+        this.creditedInterest = creditedInterest;
         this.creditedFee = creditedFee;
         this.creditedPenalty = creditedPenalty;
         this.additional = additional;
@@ -253,7 +257,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     public static LoanRepaymentScheduleInstallment newReAgedInstallment(final Loan loan, final Integer installmentNumber,
             final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal) {
         return new LoanRepaymentScheduleInstallment(loan, installmentNumber, fromDate, dueDate, principal, null, null, null, null, null,
-                null, false, false, true);
+                null, null, false, false, true);
     }
 
     public static LoanRepaymentScheduleInstallment getLastNonDownPaymentInstallment(List<LoanRepaymentScheduleInstallment> installments) {
@@ -441,6 +445,10 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         if (this.creditedPrincipal != null) {
             this.principal = this.principal.subtract(this.creditedPrincipal);
             this.creditedPrincipal = null;
+        }
+        if (this.creditedInterest != null) {
+            this.interestCharged = this.interestCharged.subtract(this.creditedInterest);
+            this.creditedInterest = null;
         }
         if (this.creditedFee != null) {
             this.feeChargesCharged = this.feeChargesCharged.subtract(this.creditedFee);
@@ -850,6 +858,14 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
             this.creditedPrincipal = amount;
         } else {
             this.creditedPrincipal = this.creditedPrincipal.add(amount);
+        }
+    }
+
+    public void addToCreditedInterest(final BigDecimal amount) {
+        if (this.creditedInterest == null) {
+            this.creditedInterest = amount;
+        } else {
+            this.creditedInterest = this.creditedInterest.add(amount);
         }
     }
 

@@ -159,4 +159,6 @@ public abstract class TestContextKey {
     public static final String TRANSACTION_EVENT = "transactionEvent";
     public static final String LOAN_WRITE_OFF_RESPONSE = "loanWriteOffResponse";
     public static final String LOAN_DELINQUENCY_ACTION_RESPONSE = "loanDelinquencyActionResponse";
+    public static final String LP2_NO_INTEREST_RECALCULATION_CHARGEBACK_ALLOCATION_INTEREST_FIRST_RESPONSE = "loanProductCreateResponseLP2NoInterestRecalculationChargebackAllocationInterestFirst";
+    public static final String LP2_NO_INTEREST_RECALCULATION_CHARGEBACK_ALLOCATION_PRINCIPAL_FIRST_RESPONSE = "loanProductCreateResponseLP2NoInterestRecalculationChargebackAllocationPrincipalFirst";
 }

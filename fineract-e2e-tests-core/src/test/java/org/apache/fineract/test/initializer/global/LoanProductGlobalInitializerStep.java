@@ -1242,6 +1242,47 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .createLoanProduct(loanProductsRequestAdvCustomAccelerateMaturityChargeOffBehaviourProgressiveLoanSchedule).execute();
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_ACCELERATE_MATURITY_CHARGE_OFF_BEHAVIOUR,
                 responseLoanProductsRequestAdvCustomAccelerateMaturityChargeOffBehaviourProgressiveLoanSchedule);
+
+        // LP2 with disabled interest recalculation + chargeback allocation(INTEREST, PENALTY, FEE, PRINCIPAL)
+        // (LP2_NO_INTEREST_RECALCULATION_CHARGEBACK_ALLOCATION_INTEREST_FIRST)
+        String name56 = DefaultLoanProduct.LP2_NO_INTEREST_RECALCULATION_CHARGEBACK_ALLOCATION_INTEREST_FIRST.getName();
+        PostLoanProductsRequest loanProductsRequestChargebackAllocation = loanProductsRequestFactory.defaultLoanProductsRequestLP2Emi()//
+                .name(name56)//
+                .daysInYearType(DaysInYearType.DAYS360.value)//
+                .daysInMonthType(DaysInMonthType.DAYS30.value)//
+                .creditAllocation(List.of(//
+                        createCreditAllocation("CHARGEBACK", List.of("INTEREST", "PENALTY", "FEE", "PRINCIPAL"))//
+                ))//
+                .paymentAllocation(List.of(//
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                        createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                        createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                        createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
+        Response<PostLoanProductsResponse> loanProductsResponseChargebackAllocation = loanProductsApi
+                .createLoanProduct(loanProductsRequestChargebackAllocation).execute();
+        TestContext.INSTANCE.set(TestContextKey.LP2_NO_INTEREST_RECALCULATION_CHARGEBACK_ALLOCATION_INTEREST_FIRST_RESPONSE,
+                loanProductsResponseChargebackAllocation);
+
+        // LP2 with disabled interest recalculation + chargeback allocation(PRINCIPAL, INTEREST, PENALTY, FEE)
+        // (LP2_NO_INTEREST_RECALCULATION_CHARGEBACK_ALLOCATION_PRINCIPAL_FIRST)
+        String name57 = DefaultLoanProduct.LP2_NO_INTEREST_RECALCULATION_CHARGEBACK_ALLOCATION_PRINCIPAL_FIRST.getName();
+        PostLoanProductsRequest loanProductsRequestChargebackAllocationPrincipalFirst = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2Emi()//
+                .name(name57)//
+                .daysInYearType(DaysInYearType.DAYS360.value)//
+                .daysInMonthType(DaysInMonthType.DAYS30.value)//
+                .creditAllocation(List.of(//
+                        createCreditAllocation("CHARGEBACK", List.of("PRINCIPAL", "INTEREST", "PENALTY", "FEE"))//
+                ))//
+                .paymentAllocation(List.of(//
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                        createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                        createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                        createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
+        Response<PostLoanProductsResponse> loanProductsResponseChargebackAllocationPrincipalFirst = loanProductsApi
+                .createLoanProduct(loanProductsRequestChargebackAllocationPrincipalFirst).execute();
+        TestContext.INSTANCE.set(TestContextKey.LP2_NO_INTEREST_RECALCULATION_CHARGEBACK_ALLOCATION_PRINCIPAL_FIRST_RESPONSE,
+                loanProductsResponseChargebackAllocationPrincipalFirst);
     }
 
     public static AdvancedPaymentData createPaymentAllocation(String transactionType, String futureInstallmentAllocationRule,

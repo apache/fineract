@@ -540,24 +540,30 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         return allocation;
     }
 
-    private void recognizeAmountsAfterChargeback(TransactionCtx ctx, LocalDate transactionDate,
-            LoanRepaymentScheduleInstallment installment, Map<AllocationType, Money> chargebackAllocation) {
-        Money principal = chargebackAllocation.get(PRINCIPAL);
-        if (principal.isGreaterThanZero()) {
+    private void recognizeAmountsAfterChargeback(final TransactionCtx ctx, final LocalDate transactionDate,
+            final LoanRepaymentScheduleInstallment installment, final Map<AllocationType, Money> chargebackAllocation) {
+        final Money principal = chargebackAllocation.get(PRINCIPAL);
+        if (principal != null && principal.isGreaterThanZero()) {
             installment.addToCreditedPrincipal(principal.getAmount());
             installment.addToPrincipal(transactionDate, principal);
         }
 
-        MonetaryCurrency currency = ctx.getCurrency();
-        Money fee = chargebackAllocation.get(FEE);
-        if (fee.isGreaterThanZero()) {
+        final Money interest = chargebackAllocation.get(INTEREST);
+        if (interest != null && interest.isGreaterThanZero()) {
+            installment.addToCreditedInterest(interest.getAmount());
+            installment.addToInterest(transactionDate, interest);
+        }
+
+        final MonetaryCurrency currency = ctx.getCurrency();
+        final Money fee = chargebackAllocation.get(FEE);
+        if (fee != null && fee.isGreaterThanZero()) {
             installment.addToCreditedFee(fee.getAmount());
             installment.addToChargePortion(fee, Money.zero(currency), Money.zero(currency), Money.zero(currency), Money.zero(currency),
                     Money.zero(currency));
         }
 
-        Money penalty = chargebackAllocation.get(PENALTY);
-        if (penalty.isGreaterThanZero()) {
+        final Money penalty = chargebackAllocation.get(PENALTY);
+        if (penalty != null && penalty.isGreaterThanZero()) {
             installment.addToCreditedPenalty(penalty.getAmount());
             installment.addToChargePortion(Money.zero(currency), Money.zero(currency), Money.zero(currency), penalty, Money.zero(currency),
                     Money.zero(currency));
@@ -566,9 +572,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
     @NotNull
     private LoanCreditAllocationRule getChargebackAllocationRules(LoanTransaction loanTransaction) {
-        LoanCreditAllocationRule chargeBackAllocationRule = loanTransaction.getLoan().getCreditAllocationRules().stream()
+        return loanTransaction.getLoan().getCreditAllocationRules().stream()
                 .filter(tr -> tr.getTransactionType().equals(CreditAllocationTransactionType.CHARGEBACK)).findFirst().orElseThrow();
-        return chargeBackAllocationRule;
     }
 
     @NotNull
@@ -1270,7 +1275,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
                     final LoanRepaymentScheduleInstallment installmentForCharges = new LoanRepaymentScheduleInstallment(loan,
                             lastInstallment.getInstallmentNumber() + 1, currentInstallment.getDueDate(), latestDueDate.get(),
-                            BigDecimal.ZERO, BigDecimal.ZERO, futureFee, futurePenalty, null, null, null, true, false, false);
+                            BigDecimal.ZERO, BigDecimal.ZERO, futureFee, futurePenalty, null, null, null, null, true, false, false);
                     installmentsUpToTransactionDate.add(installmentForCharges);
                 }
             }
