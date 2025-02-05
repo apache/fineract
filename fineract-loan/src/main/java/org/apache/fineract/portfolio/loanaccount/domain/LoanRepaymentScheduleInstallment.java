@@ -853,19 +853,19 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         checkIfRepaymentPeriodObligationsAreMet(transactionDate, transactionAmount.getCurrency());
     }
 
-    public void addToCreditedPrincipal(final BigDecimal amount) {
-        if (this.creditedPrincipal == null) {
-            this.creditedPrincipal = amount;
-        } else {
-            this.creditedPrincipal = this.creditedPrincipal.add(amount);
-        }
-    }
-
     public void addToCreditedInterest(final BigDecimal amount) {
         if (this.creditedInterest == null) {
             this.creditedInterest = amount;
         } else {
             this.creditedInterest = this.creditedInterest.add(amount);
+        }
+    }
+
+    public void addToCreditedPrincipal(final BigDecimal amount) {
+        if (this.creditedPrincipal == null) {
+            this.creditedPrincipal = amount;
+        } else {
+            this.creditedPrincipal = this.creditedPrincipal.add(amount);
         }
     }
 

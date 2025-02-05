@@ -16,19 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
+package org.apache.fineract.portfolio.loanproduct.calc.data;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import org.jetbrains.annotations.NotNull;
+import lombok.Data;
+import org.apache.fineract.organisation.monetary.domain.Money;
 
-public record InterestRate(//
-        LocalDate effectiveFrom, //
-        BigDecimal interestRate//
-) implements Comparable<InterestRate> {
+@Data
+public class OutstandingDetails {
 
-    @Override
-    public int compareTo(@NotNull InterestRate o) {
-        return this.effectiveFrom().compareTo(o.effectiveFrom());
-    }
+    private final Money outstandingPrincipal;
+    private final Money outstandingInterest;
 }

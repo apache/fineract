@@ -48,10 +48,10 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleD
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleModelDownPaymentPeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleParams;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePlan;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OutstandingDetails;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.data.ProgressiveLoanInterestScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.exception.MultiDisbursementOutstandingAmoutException;
 import org.apache.fineract.portfolio.loanproduct.calc.EMICalculator;
+import org.apache.fineract.portfolio.loanproduct.calc.data.OutstandingDetails;
+import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
 import org.apache.fineract.portfolio.loanproduct.domain.RepaymentStartDateType;
 import org.springframework.stereotype.Component;
 
@@ -182,9 +182,15 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
                 .principal(outstandingAmounts.getOutstandingPrincipal()) //
                 .interest(outstandingAmounts.getOutstandingInterest());//
 
-        installments.forEach(installment -> result //
-                .plusFeeCharges(installment.getFeeChargesOutstanding(currency))
-                .plusPenaltyCharges(installment.getPenaltyChargesOutstanding(currency)));
+        installments.forEach(installment -> {
+            if (installment.isAdditional()) {
+                result.plusPrincipal(installment.getPrincipalOutstanding(currency))
+                        .plusInterest(installment.getInterestOutstanding(currency));
+            }
+            result //
+                    .plusFeeCharges(installment.getFeeChargesOutstanding(currency))
+                    .plusPenaltyCharges(installment.getPenaltyChargesOutstanding(currency));
+        });
 
         return result;
     }
@@ -200,7 +206,7 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
             return Money.zero(loan.getCurrency());
         }
         ProgressiveLoanInterestScheduleModel model = processor.calculateInterestScheduleModel(loan.getId(), targetDate);
-        return emiCalculator.getPeriodInterestTillDate(model, installment.getDueDate(), targetDate);
+        return emiCalculator.getPeriodInterestTillDate(model, installment.getDueDate(), targetDate, false);
     }
 
     // Private, internal methods
