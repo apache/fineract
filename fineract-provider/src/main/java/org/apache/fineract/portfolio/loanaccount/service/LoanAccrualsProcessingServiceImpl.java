@@ -400,10 +400,12 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
         LoanScheduleGenerator scheduleGenerator = loanScheduleFactory.create(productDetail.getLoanScheduleType(),
                 productDetail.getInterestMethod());
         int firstInstallmentNumber = fetchFirstNormalInstallmentNumber(loan.getRepaymentScheduleInstallments());
-        List<LoanRepaymentScheduleInstallment> installments = getInstallmentsToAccrue(loan, tillDate, periodic);
+        LocalDate interestCalculationTillDate = loan.isProgressiveSchedule()
+                && loan.getLoanProductRelatedDetail().isInterestRecognitionOnDisbursementDate() ? tillDate.plusDays(1L) : tillDate;
+        List<LoanRepaymentScheduleInstallment> installments = getInstallmentsToAccrue(loan, interestCalculationTillDate, periodic);
         AccrualPeriodsData accrualPeriods = AccrualPeriodsData.create(installments, firstInstallmentNumber, currency);
         for (LoanRepaymentScheduleInstallment installment : installments) {
-            addInterestAccrual(loan, tillDate, scheduleGenerator, installment, accrualPeriods);
+            addInterestAccrual(loan, interestCalculationTillDate, scheduleGenerator, installment, accrualPeriods);
             addChargeAccrual(loan, tillDate, chargeOnDueDate, installment, accrualPeriods);
         }
         return accrualPeriods;

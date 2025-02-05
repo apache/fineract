@@ -482,4 +482,85 @@ public class LoanCOBCreateAccrualsTest extends BaseLoanIntegrationTest {
         });
 
     }
+
+    @Test
+    public void testInterestRecognitionOnDisbursementDateTrue() {
+        AtomicReference<Long> loanIdRef = new AtomicReference<>();
+        setup();
+        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
+                .createLoanProduct(create4IProgressive().interestRecognitionOnDisbursementDate(true));
+
+        runAt("20 December 2024", () -> {
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "20 December 2024",
+                    430.0, 26.0, 6, null);
+
+            loanIdRef.set(loanId);
+
+            disburseLoan(loanId, BigDecimal.valueOf(430), "20 December 2024");
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "20 January 2025", 67.88, 0, 0, 9.32);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 2, "20 February 2025", 69.35, 0, 0, 7.85);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 3, "20 March 2025", 70.86, 0, 0, 6.34);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 4, "20 April 2025", 72.39, 0, 0, 4.81);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 5, "20 May 2025", 73.96, 0, 0, 3.24);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 6, "20 June 2025", 75.56, 0, 0, 1.64);
+
+            verifyTransactions(loanId, transaction(430.0d, "Disbursement", "20 December 2024"));
+            executeInlineCOB(loanId);
+        });
+        // disbursement date is included
+        runAt("21 December 2024", () -> {
+            Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
+
+            verifyTransactions(loanId, //
+                    transaction(430.0d, "Disbursement", "20 December 2024", 430.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false), //
+                    transaction(0.30d, "Accrual", "20 December 2024", 0.0, 0.0, 0.3, 0.0, 0.0, 0.0, 0.0, false));
+        });
+        // last installment due date is excluded
+        runAt("21 June 2025", () -> {
+            Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+
+            Assertions.assertTrue(loanDetails.getTransactions().stream()
+                    .noneMatch(t -> t.getDate().equals(LocalDate.of(2025, 6, 20)) && t.getType().getAccrual()));
+        });
+    }
+
+    @Test
+    public void testInterestRecognitionOnDisbursementDateFalse() {
+        AtomicReference<Long> loanIdRef = new AtomicReference<>();
+        setup();
+        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
+                .createLoanProduct(create4IProgressive().interestRecognitionOnDisbursementDate(false));
+
+        runAt("20 December 2024", () -> {
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "20 December 2024",
+                    430.0, 26.0, 6, null);
+
+            loanIdRef.set(loanId);
+
+            disburseLoan(loanId, BigDecimal.valueOf(430), "20 December 2024");
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "20 January 2025", 67.88, 0, 0, 9.32);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 2, "20 February 2025", 69.35, 0, 0, 7.85);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 3, "20 March 2025", 70.86, 0, 0, 6.34);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 4, "20 April 2025", 72.39, 0, 0, 4.81);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 5, "20 May 2025", 73.96, 0, 0, 3.24);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 6, "20 June 2025", 75.56, 0, 0, 1.64);
+
+            verifyTransactions(loanId, transaction(430.0d, "Disbursement", "20 December 2024"));
+            executeInlineCOB(loanId);
+        });
+        runAt("21 December 2024", () -> {
+            Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
+
+            verifyTransactions(loanId, //
+                    transaction(430.0d, "Disbursement", "20 December 2024", 430.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false));
+        });
+    }
 }
