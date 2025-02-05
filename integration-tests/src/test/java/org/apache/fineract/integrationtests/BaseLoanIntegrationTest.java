@@ -65,6 +65,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdStatus;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostChargesResponse;
@@ -266,6 +267,25 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
         Boolean actualValue = extractor.apply(loanDetails.getStatus());
         Assertions.assertNotNull(actualValue);
         Assertions.assertTrue(actualValue);
+    }
+
+    protected GetLoansLoanIdTransactionsTemplateResponse getPrepayAmount(Long loanId, String date) {
+        return ok(fineractClient().loanTransactions.retrieveTransactionTemplate(loanId, "prepayLoan", DATETIME_PATTERN, date, "en"));
+    }
+
+    protected Long verifyPrepayAmountByRepayment(Long loanId, String date) {
+        GetLoansLoanIdTransactionsTemplateResponse prepayAmount = getPrepayAmount(loanId, date);
+        Double amountToPrepayLoan = prepayAmount.getAmount();
+        Long repaymentId = null;
+        if (amountToPrepayLoan != null && amountToPrepayLoan > 0) {
+            PostLoansLoanIdTransactionsResponse repayment = loanTransactionHelper.makeLoanRepayment(loanId, "repayment", date,
+                    amountToPrepayLoan);
+            Assertions.assertNotNull(repayment);
+            Assertions.assertNotNull(repayment.getResourceId());
+            repaymentId = repayment.getResourceId();
+        }
+        verifyLoanStatus(loanId, LoanStatus.CLOSED_OBLIGATIONS_MET);
+        return repaymentId;
     }
 
     private String getNonByPassUserAuthKey(RequestSpecification requestSpec, ResponseSpecification responseSpec) {
@@ -673,6 +693,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     }
 
     protected void disburseLoan(Long loanId, BigDecimal amount, String date) {
+        log.info("Disbursing loan with id {} with amount {}", loanId, amount);
         loanTransactionHelper.disburseLoan(loanId, new PostLoansLoanIdRequest().actualDisbursementDate(date).dateFormat(DATETIME_PATTERN)
                 .transactionAmount(amount).locale("en"));
     }
@@ -1110,7 +1131,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     }
 
     protected Installment unpaidInstallment(double principalAmount, double interestAmount, String dueDate) {
-        Double amount = principalAmount + interestAmount;
+        Double amount = BigDecimal.valueOf(principalAmount).add(BigDecimal.valueOf(interestAmount)).doubleValue();
         return new Installment(principalAmount, interestAmount, null, null, amount, false, dueDate, null, null);
     }
 
@@ -1159,6 +1180,10 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
 
         assertEquals(expectedMaturityDate, loanDetails.getTimeline().getExpectedMaturityDate());
         assertEquals(actualMaturityDate, loanDetails.getTimeline().getActualMaturityDate());
+    }
+
+    protected void verifyLoanStatus(GetLoansLoanIdResponse loanDetails, LoanStatus loanStatus) {
+        assertEquals(loanStatus.getCode(), loanDetails.getStatus().getCode());
     }
 
     protected void verifyLoanStatus(long loanId, LoanStatus loanStatus) {

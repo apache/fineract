@@ -16,14 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
+package org.apache.fineract.portfolio.loanproduct.calc.data;
 
 import lombok.Data;
 import org.apache.fineract.organisation.monetary.domain.Money;
 
 @Data
-public class OutstandingDetails {
+public class PeriodDueDetails {
 
-    private final Money outstandingPrincipal;
-    private final Money outstandingInterest;
+    private final Money emi;
+    private final Money duePrincipal;
+    private final Money dueInterest;
 }

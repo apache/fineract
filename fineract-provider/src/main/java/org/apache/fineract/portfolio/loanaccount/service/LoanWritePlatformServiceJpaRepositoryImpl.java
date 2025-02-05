@@ -1635,7 +1635,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             throw new PlatformServiceUnavailableException("error.msg.loan.chargeback.operation.not.allowed",
                     "Loan transaction:" + transactionId + " chargeback not allowed as loan status is written off", transactionId);
         }
-        if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
+        if (loan.isInterestBearingAndInterestRecalculationEnabled() && !loan.isProgressiveSchedule()) {
             throw new PlatformServiceUnavailableException("error.msg.loan.chargeback.operation.not.allowed",
                     "Loan transaction:" + transactionId + " chargeback not allowed as loan product is interest recalculation enabled",
                     transactionId);
@@ -1672,9 +1672,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 LoanTransactionRelationTypeEnum.CHARGEBACK);
         this.loanTransactionRelationRepository.save(loanTransactionRelation);
 
-        newTransaction = this.loanTransactionRepository.saveAndFlush(newTransaction);
-
         handleChargebackTransaction(loan, newTransaction, loanLifecycleStateMachine);
+
+        newTransaction = this.loanTransactionRepository.saveAndFlush(newTransaction);
 
         loan = saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
@@ -3423,15 +3423,21 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .build();
     }
 
-    public void handleChargebackTransaction(final Loan loan, final LoanTransaction chargebackTransaction,
+    public void handleChargebackTransaction(final Loan loan, LoanTransaction chargebackTransaction,
             final LoanLifecycleStateMachine loanLifecycleStateMachine) {
         loanTransactionValidator.validateIfTransactionIsChargeback(chargebackTransaction);
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loan.getTransactionProcessor();
 
         loan.addLoanTransaction(chargebackTransaction);
-        loanRepaymentScheduleTransactionProcessor.processLatestTransaction(chargebackTransaction, new TransactionCtx(loan.getCurrency(),
-                loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
-
+        if (loan.isInterestBearing() && loan.isInterestRecalculationEnabled()) {
+            loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(loan.getDisbursementDate(),
+                    loan.retrieveListOfTransactionsForReprocessing(), loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
+                    loan.getActiveCharges());
+        } else {
+            loanRepaymentScheduleTransactionProcessor.processLatestTransaction(chargebackTransaction,
+                    new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
+                            new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+        }
         loan.updateLoanSummaryDerivedFields();
         if (!loan.doPostLoanTransactionChecks(chargebackTransaction.getTransactionDate(), loanLifecycleStateMachine)) {
             loanLifecycleStateMachine.transition(LoanEvent.LOAN_CHARGEBACK, loan);

@@ -66,17 +66,12 @@ public class LoanScheduleService {
             final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
         existingTransactionIds.addAll(loan.findExistingTransactionIds());
         existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
-        /*
-         * LocalDate recalculateFrom = null; List<LoanTransaction> loanTransactions =
-         * this.retrieveListOfTransactionsPostDisbursementExcludeAccruals(); for (LoanTransaction loanTransaction :
-         * loanTransactions) { if (recalculateFrom == null ||
-         * loanTransaction.getTransactionDate().isAfter(recalculateFrom)) { recalculateFrom =
-         * loanTransaction.getTransactionDate(); } } generatorDTO.setRecalculateFrom(recalculateFrom);
-         */
-        if (loan.isInterestBearingAndInterestRecalculationEnabled() && !loan.isChargedOff()) {
-            regenerateRepaymentScheduleWithInterestRecalculation(loan, generatorDTO);
-        } else {
-            regenerateRepaymentSchedule(loan, generatorDTO);
+        if (!loan.isProgressiveSchedule()) {
+            if (loan.isInterestBearingAndInterestRecalculationEnabled() && !loan.isChargedOff()) {
+                regenerateRepaymentScheduleWithInterestRecalculation(loan, generatorDTO);
+            } else {
+                regenerateRepaymentSchedule(loan, generatorDTO);
+            }
         }
         return loan.reprocessTransactions();
     }

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
+package org.apache.fineract.portfolio.loanproduct.calc.data;
 
 import static org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper.isInPeriod;
 
@@ -147,7 +147,7 @@ public class ProgressiveLoanInterestScheduleModel {
             return 0;
         }
         final RepaymentPeriod firstPeriod = repaymentPeriods.get(0);
-        final RepaymentPeriod lastPeriod = repaymentPeriods.size() > 1 ? repaymentPeriods.get(repaymentPeriods.size() - 1) : firstPeriod;
+        final RepaymentPeriod lastPeriod = repaymentPeriods.size() > 1 ? getLastRepaymentPeriod() : firstPeriod;
         return DateUtils.getExactDifferenceInDays(firstPeriod.getFromDate(), lastPeriod.getDueDate());
     }
 
@@ -156,7 +156,7 @@ public class ProgressiveLoanInterestScheduleModel {
     }
 
     public LocalDate getMaturityDate() {
-        return !repaymentPeriods.isEmpty() ? repaymentPeriods.get(repaymentPeriods.size() - 1).getDueDate() : null;
+        return !repaymentPeriods.isEmpty() ? getLastRepaymentPeriod().getDueDate() : null;
     }
 
     public Optional<RepaymentPeriod> changeOutstandingBalanceAndUpdateInterestPeriods(final LocalDate balanceChangeDate,
@@ -201,7 +201,10 @@ public class ProgressiveLoanInterestScheduleModel {
     private Consumer<RepaymentPeriod> updateInterestPeriodOnRepaymentPeriod(final LocalDate balanceChangeDate, final Money disbursedAmount,
             final Money correctionAmount) {
         return repaymentPeriod -> {
-            final Optional<InterestPeriod> interestPeriodOptional = findInterestPeriodForBalanceChange(repaymentPeriod, balanceChangeDate);
+            final boolean isChangeOnMaturityDate = isLastRepaymentPeriod(repaymentPeriod)
+                    && balanceChangeDate.isEqual(repaymentPeriod.getDueDate());
+            final Optional<InterestPeriod> interestPeriodOptional = findInterestPeriodForBalanceChange(repaymentPeriod, balanceChangeDate,
+                    isChangeOnMaturityDate);
             if (interestPeriodOptional.isPresent()) {
                 interestPeriodOptional.get().addDisbursementAmount(disbursedAmount);
                 interestPeriodOptional.get().addBalanceCorrectionAmount(correctionAmount);
@@ -212,9 +215,15 @@ public class ProgressiveLoanInterestScheduleModel {
     }
 
     private Optional<InterestPeriod> findInterestPeriodForBalanceChange(final RepaymentPeriod repaymentPeriod,
-            final LocalDate balanceChangeDate) {
+            final LocalDate balanceChangeDate, final boolean isChangeOnMaturityDate) {
         if (repaymentPeriod == null || balanceChangeDate == null) {
             return Optional.empty();
+        }
+        // We want to create a 0 length interest period (if not existed yet) for any credit activity occurs on maturity
+        // date
+        if (isChangeOnMaturityDate) {
+            var lastInterestPeriod = repaymentPeriod.getLastInterestPeriod();
+            return lastInterestPeriod.getLength() == 0 ? Optional.of(lastInterestPeriod) : Optional.empty();
         }
         return repaymentPeriod.getInterestPeriods().stream()//
                 .filter(interestPeriod -> balanceChangeDate.isEqual(interestPeriod.getDueDate()))//
@@ -231,8 +240,7 @@ public class ProgressiveLoanInterestScheduleModel {
         previousInterestPeriod.addDisbursementAmount(disbursedAmount);
         previousInterestPeriod.addBalanceCorrectionAmount(correctionAmount);
 
-        final InterestPeriod interestPeriod = new InterestPeriod(repaymentPeriod, newDueDate, originalDueDate, BigDecimal.ZERO,
-                BigDecimal.ZERO, zero, zero, zero, mc, false);
+        final InterestPeriod interestPeriod = InterestPeriod.withEmptyAmounts(repaymentPeriod, newDueDate, originalDueDate);
         repaymentPeriod.getInterestPeriods().add(interestPeriod);
     }
 
@@ -248,24 +256,20 @@ public class ProgressiveLoanInterestScheduleModel {
                 newInterestPeriods.add(interestPeriod);
             } else {
                 if (interestPeriod.getFromDate().isBefore(finalPauseStart)) {
-                    final InterestPeriod leftSlice = new InterestPeriod(repaymentPeriod, interestPeriod.getFromDate(), finalPauseStart,
-                            interestPeriod.getRateFactor(), interestPeriod.getRateFactorTillPeriodDueDate(),
-                            interestPeriod.getDisbursementAmount(), interestPeriod.getBalanceCorrectionAmount(),
-                            interestPeriod.getOutstandingLoanBalance(), interestPeriod.getMc(), false);
+                    final InterestPeriod leftSlice = InterestPeriod.copy(repaymentPeriod, interestPeriod);
+                    leftSlice.setDueDate(finalPauseStart);
+
                     newInterestPeriods.add(leftSlice);
                 }
                 if (interestPeriod.getDueDate().isAfter(finalPauseEnd)) {
-                    final InterestPeriod rightSlice = new InterestPeriod(repaymentPeriod, finalPauseEnd, interestPeriod.getDueDate(),
-                            interestPeriod.getRateFactor(), interestPeriod.getRateFactorTillPeriodDueDate(),
-                            interestPeriod.getDisbursementAmount(), interestPeriod.getBalanceCorrectionAmount(),
-                            interestPeriod.getOutstandingLoanBalance(), interestPeriod.getMc(), false);
+                    final InterestPeriod rightSlice = InterestPeriod.copy(repaymentPeriod, interestPeriod);
+                    rightSlice.setFromDate(finalPauseEnd);
                     newInterestPeriods.add(rightSlice);
                 }
             }
         }
 
-        final InterestPeriod pausedSlice = new InterestPeriod(repaymentPeriod, finalPauseStart, finalPauseEnd, BigDecimal.ZERO,
-                BigDecimal.ZERO, zero, zero, zero, mc, true);
+        final InterestPeriod pausedSlice = InterestPeriod.withPausedAndEmptyAmounts(repaymentPeriod, finalPauseStart, finalPauseEnd);
         newInterestPeriods.add(pausedSlice);
 
         newInterestPeriods.sort(Comparator.comparing(InterestPeriod::getFromDate));
@@ -275,7 +279,7 @@ public class ProgressiveLoanInterestScheduleModel {
 
     private InterestPeriod findPreviousInterestPeriod(final RepaymentPeriod repaymentPeriod, final LocalDate date) {
         if (date.isAfter(repaymentPeriod.getFromDate())) {
-            return repaymentPeriod.getInterestPeriods().get(repaymentPeriod.getInterestPeriods().size() - 1);
+            return repaymentPeriod.getLastInterestPeriod();
         } else {
             return repaymentPeriod.getInterestPeriods().stream()
                     .filter(ip -> date.isAfter(ip.getFromDate()) && !date.isAfter(ip.getDueDate())).reduce((first, second) -> second)
@@ -283,22 +287,52 @@ public class ProgressiveLoanInterestScheduleModel {
         }
     }
 
+    /**
+     * Gives back the total due interest amount in the whole repayment schedule. Also includes chargeback interest
+     * amount.
+     *
+     * @return
+     */
     public Money getTotalDueInterest() {
         return repaymentPeriods().stream().flatMap(rp -> rp.getInterestPeriods().stream().map(InterestPeriod::getCalculatedDueInterest))
                 .reduce(zero(), Money::plus);
     }
 
+    /**
+     * Gives back the total due principal amount in the whole repayment schedule based on disbursements. Do not contain
+     * chargeback principal amount.
+     *
+     * @return
+     */
     public Money getTotalDuePrincipal() {
-        return repaymentPeriods.stream().flatMap(rp -> rp.getInterestPeriods().stream().map(InterestPeriod::getDisbursementAmount))
-                .reduce(zero(), Money::plus);
+        return repaymentPeriods.stream().map(RepaymentPeriod::getCreditedAmounts).reduce(zero(), Money::plus);
     }
 
+    /**
+     * Gives back the total paid interest amount in the whole repayment schedule.
+     *
+     * @return
+     */
     public Money getTotalPaidInterest() {
         return repaymentPeriods().stream().map(RepaymentPeriod::getPaidInterest).reduce(zero, Money::plus);
     }
 
+    /**
+     * Gives back the total paid principal amount in the whole repayment schedule.
+     *
+     * @return
+     */
     public Money getTotalPaidPrincipal() {
         return repaymentPeriods().stream().map(RepaymentPeriod::getPaidPrincipal).reduce(zero, Money::plus);
+    }
+
+    /**
+     * Gives back the total chargeback principal amount in the whole repayment schedule.
+     *
+     * @return
+     */
+    public Money getTotalChargebackPrincipal() {
+        return repaymentPeriods().stream().map(RepaymentPeriod::getChargebackPrincipal).reduce(zero, Money::plus);
     }
 
     public Optional<RepaymentPeriod> findRepaymentPeriod(@NotNull LocalDate transactionDate) {
@@ -307,11 +341,25 @@ public class ProgressiveLoanInterestScheduleModel {
                 .findFirst();
     }
 
+    /**
+     * Check if there is a disbursement in the model.
+     *
+     * @return
+     */
     public boolean isEmpty() {
         return repaymentPeriods.stream() //
                 .filter(rp -> !rp.getEmi().isZero()) //
                 .findFirst() //
                 .isEmpty(); //
+    }
+
+    @NotNull
+    public RepaymentPeriod getLastRepaymentPeriod() {
+        return repaymentPeriods.get(repaymentPeriods.size() - 1);
+    }
+
+    public boolean isLastRepaymentPeriod(@NotNull RepaymentPeriod repaymentPeriod) {
+        return getLastRepaymentPeriod().equals(repaymentPeriod);
     }
 
     /**

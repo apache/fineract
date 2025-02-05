@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
@@ -137,9 +138,11 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     // TODO: At some point in time this database column needs to be renamed to credited_principal using the following
     // approach
     // https://blog.thepete.net/blog/2023/12/05/expand/contract-making-a-breaking-change-without-a-big-bang/
+    @Setter
     @Column(name = "credits_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal creditedPrincipal;
 
+    @Setter
     @Column(name = "credited_interest", scale = 6, precision = 19, nullable = true)
     private BigDecimal creditedInterest;
 
@@ -853,19 +856,19 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         checkIfRepaymentPeriodObligationsAreMet(transactionDate, transactionAmount.getCurrency());
     }
 
-    public void addToCreditedPrincipal(final BigDecimal amount) {
-        if (this.creditedPrincipal == null) {
-            this.creditedPrincipal = amount;
-        } else {
-            this.creditedPrincipal = this.creditedPrincipal.add(amount);
-        }
-    }
-
     public void addToCreditedInterest(final BigDecimal amount) {
         if (this.creditedInterest == null) {
             this.creditedInterest = amount;
         } else {
             this.creditedInterest = this.creditedInterest.add(amount);
+        }
+    }
+
+    public void addToCreditedPrincipal(final BigDecimal amount) {
+        if (this.creditedPrincipal == null) {
+            this.creditedPrincipal = amount;
+        } else {
+            this.creditedPrincipal = this.creditedPrincipal.add(amount);
         }
     }
 
