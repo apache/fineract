@@ -280,7 +280,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             // TODO: check whether this is needed!
             this.loanRepositoryWrapper.saveAndFlush(loan);
             // Save interest recalculation calendar
-            if (loan.getLoanProductRelatedDetail().isInterestRecalculationEnabled()
+            if (loan.isInterestBearingAndInterestRecalculationEnabled()
                     && changes.containsKey(LoanProductConstants.IS_INTEREST_RECALCULATION_ENABLED_PARAMETER_NAME)) {
                 createAndPersistCalendarInstanceForInterestRecalculation(loan);
             }

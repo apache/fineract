@@ -268,7 +268,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         boolean reprocessRequired = true;
         // overpaid transactions will be reprocessed and pay this charge
         boolean overpaidReprocess = !loanCharge.isDueAtDisbursement() && !loanCharge.isPaid() && loan.getStatus().isOverpaid();
-        if (!overpaidReprocess && loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
+        if (!overpaidReprocess && loan.isInterestBearingAndInterestRecalculationEnabled()) {
             if (isAppliedOnBackDate && loan.isFeeCompoundingEnabledForInterestRecalculation()) {
                 loan = runScheduleRecalculation(loan, recalculateFrom);
                 reprocessRequired = false;
@@ -308,7 +308,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
             loan = loanAccountDomainService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
         }
 
-        if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled() && isAppliedOnBackDate
+        if (loan.isInterestBearingAndInterestRecalculationEnabled() && isAppliedOnBackDate
                 && loan.isFeeCompoundingEnabledForInterestRecalculation()) {
             loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan, true, false);
         }
@@ -558,7 +558,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                 existingTransactionIds, existingReversedTransactionIds, loanInstallmentNumber, scheduleGeneratorDTO, accruedCharge,
                 externalId);
 
-        if (loan.getLoanRepaymentScheduleDetail().isInterestRecalculationEnabled()
+        if (loan.isInterestBearingAndInterestRecalculationEnabled()
                 && DateUtils.isBefore(loanCharge.getDueLocalDate(), DateUtils.getBusinessLocalDate())) {
             loanAccrualsProcessingService.reprocessExistingAccruals(loan);
             loanAccrualsProcessingService.processIncomePostingAndAccruals(loan);
@@ -810,7 +810,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                 recalculateFrom = recalculatedTill;
             }
 
-            if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
+            if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
                 if (runInterestRecalculation && loan.isFeeCompoundingEnabledForInterestRecalculation()) {
                     loan = runScheduleRecalculation(loan, recalculateFrom);
                     reprocessRequired = false;
@@ -839,7 +839,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                 loan = loanAccountDomainService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
             }
 
-            if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled() && runInterestRecalculation
+            if (loan.isInterestBearingAndInterestRecalculationEnabled() && runInterestRecalculation
                     && loan.isFeeCompoundingEnabledForInterestRecalculation()) {
                 loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan, true, false);
             }
@@ -865,7 +865,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
                 .determineProcessor(loan.transactionProcessingStrategy());
         loan.addLoanTransaction(loanChargeAdjustmentTransaction);
-        if (loan.isInterestBearing() && loan.getLoanProductRelatedDetail().isInterestRecalculationEnabled()) {
+        if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
             if (loan.getLoanProductRelatedDetail() != null
                     && loan.getLoanProductRelatedDetail().getLoanScheduleType().equals(LoanScheduleType.PROGRESSIVE)
                     && loan.getLoanTransactions().stream().anyMatch(LoanTransaction::isChargeOff)) {
@@ -1019,7 +1019,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         } else if (loanCharge.getDueLocalDate() != null) {
             // TODO: Review, error message seems not valid if interest recalculation is not enabled.
             boolean isCumulative = loan.getLoanRepaymentScheduleDetail().getLoanScheduleType().equals(LoanScheduleType.CUMULATIVE);
-            LocalDate validationDate = loan.repaymentScheduleDetail().isInterestRecalculationEnabled() && isCumulative
+            LocalDate validationDate = loan.isInterestBearingAndInterestRecalculationEnabled() && isCumulative
                     ? loan.getLastUserTransactionDate()
                     : loan.getDisbursementDate();
             if (DateUtils.isBefore(loanCharge.getDueLocalDate(), validationDate)) {
@@ -1027,7 +1027,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                 throw new LoanChargeCannotBeAddedException("loanCharge", "date.is.before.last.transaction.date", defaultUserMessage, null,
                         chargeDefinition.getName());
             }
-        } else if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
+        } else if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
             if (loanCharge.isInstalmentFee() && loan.getStatus().isActive()) {
                 final String defaultUserMessage = "installment charge addition not allowed after disbursement";
                 throw new LoanChargeCannotBeAddedException("loanCharge", "installment.charge", defaultUserMessage, null,
@@ -1173,7 +1173,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
     }
 
     public Loan runScheduleRecalculation(Loan loan, final LocalDate recalculateFrom) {
-        if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled() && !loan.isChargedOff()) {
+        if (loan.isInterestBearingAndInterestRecalculationEnabled() && !loan.isChargedOff()) {
             final List<Long> existingTransactionIds = loan.findExistingTransactionIds();
             ScheduleGeneratorDTO generatorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
             ChangedTransactionDetail changedTransactionDetail = loanScheduleService
@@ -1456,8 +1456,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                 waiveLoanChargeTransaction.getAmount(loan.getCurrency()).getAmount(), loanInstallmentNumber);
         waiveLoanChargeTransaction.getLoanChargesPaid().add(loanChargePaidBy);
         loan.addLoanTransaction(waiveLoanChargeTransaction);
-        if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()
-                && DateUtils.isBefore(loanCharge.getDueLocalDate(), businessDate)) {
+        if (loan.isInterestBearingAndInterestRecalculationEnabled() && DateUtils.isBefore(loanCharge.getDueLocalDate(), businessDate)) {
             loanScheduleService.regenerateRepaymentScheduleWithInterestRecalculation(loan, scheduleGeneratorDTO);
         } else if (loan.getLoanProductRelatedDetail() != null
                 && loan.getLoanProductRelatedDetail().getLoanScheduleType().equals(LoanScheduleType.PROGRESSIVE)

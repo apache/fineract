@@ -385,7 +385,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
     }
 
     private void handleArrearsForLoan(Loan loan) {
-        if (loan != null && loan.isOpen() && loan.repaymentScheduleDetail().isInterestRecalculationEnabled()
+        if (loan != null && loan.isOpen() && loan.isInterestBearingAndInterestRecalculationEnabled()
                 && loan.loanProduct().isArrearsBasedOnOriginalSchedule()) {
             updateLoanArrearsAgeingDetailsWithOriginalSchedule(loan);
         } else {

@@ -987,7 +987,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     private void recalculateInterestForDate(LocalDate targetDate, ProgressiveTransactionCtx ctx) {
         if (ctx.getInstallments() != null && !ctx.getInstallments().isEmpty()) {
             Loan loan = ctx.getInstallments().get(0).getLoan();
-            if (loan.isInterestRecalculationEnabled() && !loan.isNpa() && !ctx.isChargedOff()) {
+            if (loan.isInterestBearingAndInterestRecalculationEnabled() && !loan.isNpa() && !ctx.isChargedOff()) {
 
                 List<LoanRepaymentScheduleInstallment> overdueInstallmentsSortedByInstallmentNumber = findOverdueInstallmentsBeforeDateSortedByInstallmentNumber(
                         targetDate, ctx);
@@ -1226,7 +1226,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
         if (!installments.isEmpty() && transactionDate.isBefore(loan.getMaturityDate())) {
             if (transactionCtx instanceof ProgressiveTransactionCtx progressiveTransactionCtx
-                    && loanTransaction.getLoan().isInterestRecalculationEnabled()) {
+                    && loanTransaction.getLoan().isInterestBearingAndInterestRecalculationEnabled()) {
                 final BigDecimal newInterest = emiCalculator
                         .getPeriodInterestTillDate(progressiveTransactionCtx.getModel(), currentInstallment.getDueDate(), transactionDate)
                         .getAmount();
@@ -1291,7 +1291,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
         if (!installments.isEmpty()) {
             if (transactionCtx instanceof ProgressiveTransactionCtx progressiveTransactionCtx
-                    && loanTransaction.getLoan().isInterestRecalculationEnabled()) {
+                    && loanTransaction.getLoan().isInterestBearingAndInterestRecalculationEnabled()) {
                 installments.stream().filter(installment -> !installment.getFromDate().isAfter(transactionDate)
                         && installment.getDueDate().isAfter(transactionDate)).forEach(installment -> {
                             final BigDecimal newInterest = emiCalculator.getPeriodInterestTillDate(progressiveTransactionCtx.getModel(),
@@ -1683,8 +1683,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                             LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping = getTransactionMapping(
                                     transactionMappings, loanTransaction, oldestPastDueInstallment, currency);
                             Loan loan = loanTransaction.getLoan();
-                            if (transactionCtx instanceof ProgressiveTransactionCtx ctx && loan.isInterestBearing()
-                                    && loan.getLoanProductRelatedDetail().isInterestRecalculationEnabled() && !ctx.isChargedOff()) {
+                            if (transactionCtx instanceof ProgressiveTransactionCtx ctx
+                                    && loan.isInterestBearingAndInterestRecalculationEnabled() && !ctx.isChargedOff()) {
                                 paidPortion = handlingPaymentAllocationForInterestBearingProgressiveLoan(loanTransaction,
                                         transactionAmountUnprocessed, balances, paymentAllocationType, oldestPastDueInstallment, ctx,
                                         loanTransactionToRepaymentScheduleMapping, oldestPastDueInstallmentCharges);
@@ -1705,8 +1705,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                             LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping = getTransactionMapping(
                                     transactionMappings, loanTransaction, dueInstallment, currency);
                             Loan loan = loanTransaction.getLoan();
-                            if (transactionCtx instanceof ProgressiveTransactionCtx ctx && loan.isInterestBearing()
-                                    && loan.getLoanProductRelatedDetail().isInterestRecalculationEnabled() && !ctx.isChargedOff()) {
+                            if (transactionCtx instanceof ProgressiveTransactionCtx ctx
+                                    && loan.isInterestBearingAndInterestRecalculationEnabled() && !ctx.isChargedOff()) {
                                 paidPortion = handlingPaymentAllocationForInterestBearingProgressiveLoan(loanTransaction,
                                         transactionAmountUnprocessed, balances, paymentAllocationType, dueInstallment, ctx,
                                         loanTransactionToRepaymentScheduleMapping, dueInstallmentCharges);
@@ -1740,8 +1740,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                                 if (inAdvanceInstallment.equals(inAdvanceInstallments.get(numberOfInstallments - 1))) {
                                     evenPortion = evenPortion.add(balanceAdjustment);
                                 }
-                                if (transactionCtx instanceof ProgressiveTransactionCtx ctx && loan.isInterestBearing()
-                                        && loan.getLoanProductRelatedDetail().isInterestRecalculationEnabled() && !ctx.isChargedOff()) {
+                                if (transactionCtx instanceof ProgressiveTransactionCtx ctx
+                                        && loan.isInterestBearingAndInterestRecalculationEnabled() && !ctx.isChargedOff()) {
                                     paidPortion = handlingPaymentAllocationForInterestBearingProgressiveLoan(loanTransaction, evenPortion,
                                             balances, paymentAllocationType, inAdvanceInstallment, ctx,
                                             loanTransactionToRepaymentScheduleMapping, inAdvanceInstallmentCharges);

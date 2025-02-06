@@ -685,7 +685,7 @@ public final class LoanTransactionValidator {
     }
 
     public void validateActivityNotBeforeLastTransactionDate(final Loan loan, final LocalDate activityDate, final LoanEvent event) {
-        if (!(loan.repaymentScheduleDetail().isInterestRecalculationEnabled() || loan.loanProduct().isHoldGuaranteeFunds())
+        if (!(loan.isInterestBearingAndInterestRecalculationEnabled() || loan.loanProduct().isHoldGuaranteeFunds())
                 || !loan.getLoanRepaymentScheduleDetail().getLoanScheduleType().equals(LoanScheduleType.CUMULATIVE)) {
             return;
         }
@@ -985,8 +985,7 @@ public final class LoanTransactionValidator {
     private void validateTransactionNotBeforeLastTransactionDate(final Loan loan, LoanTransactionType loanTransactionType,
             final LocalDate transactionDate) {
         if (!((LoanScheduleType.CUMULATIVE.equals(loan.getLoanProductRelatedDetail().getLoanScheduleType())
-                && loan.getLoanRepaymentScheduleDetail().isInterestRecalculationEnabled())
-                || loan.getLoanProduct().isHoldGuaranteeFunds())) {
+                && loan.isInterestBearingAndInterestRecalculationEnabled()) || loan.getLoanProduct().isHoldGuaranteeFunds())) {
             return;
         }
         LocalDate lastTransactionDate = loan.getLastUserTransactionDate();

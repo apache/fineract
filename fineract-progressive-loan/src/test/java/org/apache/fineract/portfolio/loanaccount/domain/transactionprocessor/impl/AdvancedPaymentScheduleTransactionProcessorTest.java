@@ -449,16 +449,13 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         Loan loan = mock(Loan.class);
         LoanProductRelatedDetail loanProductRelatedDetail = mock(LoanProductRelatedDetail.class);
         LoanPaymentAllocationRule loanPaymentAllocationRule = mock(LoanPaymentAllocationRule.class);
-        when(loan.isInterestBearing()).thenReturn(true);
-        when(loanProductRelatedDetail.isInterestRecalculationEnabled()).thenReturn(true);
+        when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
+        when(loanProductRelatedDetail.getLoanScheduleProcessingType()).thenReturn(LoanScheduleProcessingType.HORIZONTAL);
+        when(loan.isInterestBearingAndInterestRecalculationEnabled()).thenReturn(Boolean.TRUE);
 
         when(loanTransaction.getLoan()).thenReturn(loan);
         when(loan.getCurrency()).thenReturn(currency);
-        when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
-        when(loanProductRelatedDetail.getLoanScheduleProcessingType()).thenReturn(LoanScheduleProcessingType.HORIZONTAL);
         when(loan.getPaymentAllocationRules()).thenReturn(List.of(loanPaymentAllocationRule));
-        when(loan.isInterestBearing()).thenReturn(true);
-        when(loanProductRelatedDetail.isInterestRecalculationEnabled()).thenReturn(true);
 
         when(loanPaymentAllocationRule.getTransactionType()).thenReturn(PaymentAllocationTransactionType.DEFAULT);
         when(loanPaymentAllocationRule.getAllocationTypes())
