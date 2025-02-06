@@ -22,6 +22,7 @@ import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseType;
 import org.apache.fineract.infrastructure.core.service.database.JdbcJavaType;
@@ -29,6 +30,7 @@ import org.apache.fineract.infrastructure.core.service.database.JdbcJavaType;
 /**
  * Immutable data object representing a resultset column.
  */
+@Getter
 public final class ResultsetColumnHeaderData implements Serializable {
 
     private final String columnName;
@@ -39,7 +41,6 @@ public final class ResultsetColumnHeaderData implements Serializable {
     private final boolean isColumnPrimaryKey;
     private final boolean isColumnUnique;
     private final boolean isColumnIndexed;
-
     private final List<ResultsetColumnValueData> columnValues;
     private final String columnCode;
 
@@ -80,20 +81,8 @@ public final class ResultsetColumnHeaderData implements Serializable {
         this.columnDisplayType = calcDisplayType();
     }
 
-    public String getColumnName() {
-        return this.columnName;
-    }
-
     public boolean isNamed(final String columnName) {
         return this.columnName.equalsIgnoreCase(columnName);
-    }
-
-    public JdbcJavaType getColumnType() {
-        return this.columnType;
-    }
-
-    public Long getColumnLength() {
-        return this.columnLength;
     }
 
     public boolean getIsColumnNullable() {
@@ -110,18 +99,6 @@ public final class ResultsetColumnHeaderData implements Serializable {
 
     public boolean getIsColumnIndexed() {
         return isColumnIndexed;
-    }
-
-    public DisplayType getColumnDisplayType() {
-        return this.columnDisplayType;
-    }
-
-    public String getColumnCode() {
-        return this.columnCode;
-    }
-
-    public List<ResultsetColumnValueData> getColumnValues() {
-        return this.columnValues;
     }
 
     public boolean isDateDisplayType() {
@@ -195,27 +172,17 @@ public final class ResultsetColumnHeaderData implements Serializable {
     }
 
     // --- Calculation ---
-
     private String adjustColumnType(String type) {
         type = type.toUpperCase();
-        switch (type) {
-            case "CLOB":
-            case "ENUM":
-            case "SET":
-                return "VARCHAR";
-            case "NEWDECIMAL":
-                return "DECIMAL";
-            case "LONGLONG":
-                return "BIGINT";
-            case "SHORT":
-                return "SMALLINT";
-            case "TINY":
-                return "TINYINT";
-            case "INT24":
-                return "INT";
-            default:
-                return type;
-        }
+        return switch (type) {
+            case "CLOB", "ENUM", "SET" -> "VARCHAR";
+            case "NEWDECIMAL" -> "DECIMAL";
+            case "LONGLONG" -> "BIGINT";
+            case "SHORT" -> "SMALLINT";
+            case "TINY" -> "TINYINT";
+            case "INT24" -> "INT";
+            default -> type;
+        };
     }
 
     @NotNull
@@ -272,7 +239,9 @@ public final class ResultsetColumnHeaderData implements Serializable {
         return null;
     }
 
+    // Enum representing the different ways a column can be displayed.
     public enum DisplayType {
-        TEXT, STRING, INTEGER, FLOAT, DECIMAL, DATE, TIME, DATETIME, BOOLEAN, BINARY, CODELOOKUP, CODEVALUE,;
+        TEXT, STRING, INTEGER, FLOAT, DECIMAL, DATE, TIME, DATETIME, BOOLEAN, BINARY, CODELOOKUP, CODEVALUE;
     }
+
 }
