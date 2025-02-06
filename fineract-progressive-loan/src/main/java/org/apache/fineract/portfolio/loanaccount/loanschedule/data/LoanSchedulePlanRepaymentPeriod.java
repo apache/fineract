@@ -34,6 +34,7 @@ public final class LoanSchedulePlanRepaymentPeriod implements LoanSchedulePlanPe
     private final BigDecimal penaltyAmount;
     private final BigDecimal totalDueAmount;
     private final BigDecimal outstandingLoanBalance;
+    private final BigDecimal totalOutstandingLoanBalance;
 
     @Override
     public Integer periodNumber() {

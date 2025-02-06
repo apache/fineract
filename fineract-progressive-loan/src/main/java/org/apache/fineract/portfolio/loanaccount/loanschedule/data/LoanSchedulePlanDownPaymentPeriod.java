@@ -31,6 +31,7 @@ public final class LoanSchedulePlanDownPaymentPeriod implements LoanSchedulePlan
     private final BigDecimal principalAmount;
     private final BigDecimal totalDueAmount;
     private final BigDecimal outstandingLoanBalance;
+    private final BigDecimal totalOutstandingLoanBalance;
 
     @Override
     public Integer periodNumber() {

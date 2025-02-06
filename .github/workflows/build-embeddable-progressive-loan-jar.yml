@@ -27,6 +27,8 @@ jobs:
         run: |
           EMBEDDABLE_JAR_FILE=(`ls fineract-progressive-loan-embeddable-schedule-generator/build/libs/*-all.jar | head -n 1`)
           echo "EMBEDDABLE_JAR_FILE=$EMBEDDABLE_JAR_FILE" >> $GITHUB_ENV
+      - name: Run unit tests
+        run: ./gradlew --no-daemon --console=plain :fineract-progressive-loan-embeddable-schedule-generator:test
       - name: Build Sample Application
         run: |
             mkdir sample-app

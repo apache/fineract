@@ -75,9 +75,9 @@ public class Main {
             if (period instanceof LoanSchedulePlanDisbursementPeriod dp) {
                 System.out.printf("  Disbursement - Date: %s, Amount: %s%n", dp.periodDueDate(), dp.getPrincipalAmount());
             } if (period instanceof LoanSchedulePlanDownPaymentPeriod rp) {
-                System.out.printf("  Down payment Period: #%d, Due Date: %s, Balance: %s, Principal: %s, Total: %s%n", rp.periodNumber(), rp.periodDueDate(), rp.getOutstandingLoanBalance(), rp.getPrincipalAmount(), rp.getTotalDueAmount());
+                System.out.printf("  Down payment Period: #%d, Due Date: %s, Balance: %s, Principal: %s, Total: %s, Total Outstanding Balance: %s%n", rp.periodNumber(), rp.periodDueDate(), rp.getOutstandingLoanBalance(), rp.getPrincipalAmount(), rp.getTotalDueAmount(), rp.getTotalOutstandingLoanBalance());
             } if (period instanceof LoanSchedulePlanRepaymentPeriod rp) {
-                System.out.printf("  Repayment Period: #%d, Due Date: %s, Balance: %s, Principal: %s, Interest: %s, Total: %s%n", rp.periodNumber(), rp.periodDueDate(), rp.getOutstandingLoanBalance(), rp.getPrincipalAmount(), rp.getInterestAmount(), rp.getTotalDueAmount());
+                System.out.printf("  Repayment Period: #%d, Due Date: %s, Balance: %s, Principal: %s, Interest: %s, Total: %s, Total Outstanding Balance: %s%n", rp.periodNumber(), rp.periodDueDate(), rp.getOutstandingLoanBalance(), rp.getPrincipalAmount(), rp.getInterestAmount(), rp.getTotalDueAmount(), rp.getTotalOutstandingLoanBalance());
             }
         }
     }

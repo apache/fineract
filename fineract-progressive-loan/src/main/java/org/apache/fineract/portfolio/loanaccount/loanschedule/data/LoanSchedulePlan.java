@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import lombok.Data;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
@@ -44,6 +45,8 @@ public class LoanSchedulePlan {
     public static LoanSchedulePlan from(LoanScheduleModel model) {
         List<LoanSchedulePlanPeriod> periods = new ArrayList<>();
 
+        BigDecimal remainingTotalOutstanding = model.getTotalRepaymentExpected();
+        AtomicReference<BigDecimal> remainingTotalOutstandingRef = new AtomicReference<>(remainingTotalOutstanding);
         model.getPeriods().forEach(periodModel -> {
             LoanSchedulePlanPeriod periodPlan = null;
             if (periodModel instanceof LoanScheduleModelDisbursementPeriod disbursementPeriod) {
@@ -52,13 +55,17 @@ public class LoanSchedulePlan {
                         disbursementPeriod.getPrincipalDisbursed().getAmount(), //
                         disbursementPeriod.getPrincipalDisbursed().getAmount());//
             } else if (periodModel instanceof LoanScheduleModelDownPaymentPeriod downPaymentPeriod) {
+                remainingTotalOutstandingRef
+                        .set(remainingTotalOutstandingRef.get().subtract(downPaymentPeriod.getPrincipalDue().getAmount()));
                 periodPlan = new LoanSchedulePlanDownPaymentPeriod(downPaymentPeriod.getPeriodNumber(), //
                         downPaymentPeriod.getPeriodDate(), //
                         downPaymentPeriod.getPeriodDate(), //
                         downPaymentPeriod.getPrincipalDue().getAmount(), //
                         downPaymentPeriod.getPrincipalDue().getAmount(), //
-                        downPaymentPeriod.getOutstandingLoanBalance().getAmount());//
+                        downPaymentPeriod.getOutstandingLoanBalance().getAmount(), //
+                        remainingTotalOutstandingRef.get());//
             } else if (periodModel instanceof LoanScheduleModelRepaymentPeriod repaymentPeriod) {
+                remainingTotalOutstandingRef.set(remainingTotalOutstandingRef.get().subtract(repaymentPeriod.getTotalDue().getAmount()));
                 periodPlan = new LoanSchedulePlanRepaymentPeriod(repaymentPeriod.getPeriodNumber(), //
                         repaymentPeriod.getFromDate(), //
                         repaymentPeriod.getDueDate(), //
@@ -67,7 +74,8 @@ public class LoanSchedulePlan {
                         repaymentPeriod.getFeeChargesDue().getAmount(), //
                         repaymentPeriod.getPenaltyChargesDue().getAmount(), //
                         repaymentPeriod.getTotalDue().getAmount(), //
-                        repaymentPeriod.getOutstandingLoanBalance().getAmount());//
+                        repaymentPeriod.getOutstandingLoanBalance().getAmount(), //
+                        remainingTotalOutstandingRef.get());//
             }
             if (periodPlan != null) {
                 periods.add(periodPlan);
