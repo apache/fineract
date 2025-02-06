@@ -34,6 +34,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
@@ -52,11 +53,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class NotificationApiResource {
 
-    private final PlatformSecurityContext context;
-    private final NotificationReadPlatformService notificationReadPlatformService;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final ToApiJsonSerializer<NotificationData> toApiJsonSerializer;
-    private final SqlValidator sqlValidator;
+    private final @NonNull PlatformSecurityContext context;
+    private final @NonNull NotificationReadPlatformService notificationReadPlatformService;
+    private final @NonNull ApiRequestParameterHelper apiRequestParameterHelper;
+    private final @NonNull ToApiJsonSerializer<NotificationData> toApiJsonSerializer;
+    private final @NonNull SqlValidator sqlValidator;
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
