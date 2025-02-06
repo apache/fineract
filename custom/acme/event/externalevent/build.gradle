@@ -18,7 +18,7 @@
  */
 description = 'ACME Fineract Event External Event'
 
-group = 'com.acme.fineract'
+group = 'com.acme.fineract.event'
 
 base {
     archivesName = 'acme-fineract-event-externalevent'
