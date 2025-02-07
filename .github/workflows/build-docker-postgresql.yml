@@ -1,16 +1,12 @@
 name: Fineract Docker build - PostgreSQL
-
 on: [push, pull_request]
-
 permissions:
   contents: read
-
 jobs:
   build:
     runs-on: ubuntu-24.04
     env:
       DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
-
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -23,7 +19,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@94baf225fe0a508e581a564467443d0e2379123b # v4.3.0
       - name: Build the image
-        run: ./gradlew --no-daemon --console=plain :fineract-provider:clean :fineract-provider:build :fineract-provider:jibDockerBuild -x test -x cucumber
+        run: ./gradlew --no-daemon --console=plain :fineract-provider:jibDockerBuild -x test -x cucumber
       - name: Start the Standalone Stack
         run: docker compose -f docker-compose-postgresql.yml up -d
       - name: Check the stack

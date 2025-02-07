@@ -7,7 +7,6 @@ on:
   - cron: "0 0 * * *"
 permissions:
   contents: read
-
 jobs:
   stale:
     permissions:

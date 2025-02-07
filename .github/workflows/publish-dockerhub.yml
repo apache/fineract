@@ -1,21 +1,17 @@
 name: Fineract Publish to DockerHub
-
 on:
   push:
     branches:
       - develop
     tags:
       - 1.*
-
 permissions:
   contents: read
-
 jobs:
   build:
     runs-on: ubuntu-24.04
     env:
       DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
-
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4

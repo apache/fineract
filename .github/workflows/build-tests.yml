@@ -1,16 +1,12 @@
 name: Fineract Tests
-
 on: [push, pull_request]
-
 permissions:
   contents: read
-
 jobs:
   build:
     runs-on: ubuntu-24.04
     env:
       DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
-
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -23,7 +19,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@94baf225fe0a508e581a564467443d0e2379123b # v4.3.0
       - name: Build the image
-        run: ./gradlew --no-daemon --console=plain :fineract-provider:clean :fineract-provider:build :fineract-provider:jibDockerBuild -x test -x cucumber -x :integration-tests:test
+        run: ./gradlew --no-daemon --console=plain :fineract-provider:jibDockerBuild -x test -x cucumber
       - name: Start the Fineract stack
         run: docker compose -f docker-compose-postgresql-test-activemq.yml up -d
       - name: Check the stack
@@ -41,4 +37,4 @@ jobs:
           EVENT_VERIFICATION_ENABLED: true
           ACTIVEMQ_BROKER_URL: tcp://localhost:61616
           ACTIVEMQ_TOPIC_NAME: events
-        run: ./gradlew --no-daemon --console=plain -x test -x :integration-tests:test fineract-e2e-tests-runner:cucumber --tags 'not @Skip' allureReport
+        run: ./gradlew --no-daemon --console=plain :fineract-e2e-tests-runner:cucumber --tags 'not @Skip' allureReport

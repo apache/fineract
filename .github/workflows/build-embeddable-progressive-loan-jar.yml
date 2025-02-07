@@ -1,14 +1,10 @@
 name: Fineract Build Progressive Loan Embeddable Jar & Test with a Sample Application
 on: [push, pull_request]
-
 permissions:
   contents: read
-
-
 jobs:
   build:
     runs-on: ubuntu-24.04
-
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -35,14 +31,12 @@ jobs:
             javac -cp $EMBEDDABLE_JAR_FILE -d sample-app fineract-progressive-loan-embeddable-schedule-generator/misc/Main.java
         env:
           EMBEDDABLE_JAR_FILE: ${{ env.EMBEDDABLE_JAR_FILE }}
-
       - name: Run Schedule Generator Sample Application
         run: |
           java -cp $EMBEDDABLE_JAR_FILE:sample-app Main
           java -cp $EMBEDDABLE_JAR_FILE:sample-app Main 25
         env:
           EMBEDDABLE_JAR_FILE: ${{ env.EMBEDDABLE_JAR_FILE }}
-
       - name: Archive test results
         if: always()
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4

@@ -1,9 +1,7 @@
 name: Fineract Documentation build
 on: [push, pull_request]
-
 permissions:
   contents: read
-
 jobs:
   build:
     runs-on: ubuntu-24.04
@@ -32,6 +30,5 @@ jobs:
         run: |
             sudo apt-get update
             sudo apt-get install ghostscript graphviz -y
-
       - name: Documentation build
         run: ./gradlew --no-daemon --console=plain doc

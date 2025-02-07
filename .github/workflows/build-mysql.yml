@@ -1,13 +1,10 @@
 name: Fineract Build & Test - MySQL
 on: [push, pull_request]
-
 permissions:
   contents: read
-
 jobs:
   build:
     runs-on: ubuntu-24.04
-
     services:
         mariad:
             image: mysql:9.1
@@ -16,7 +13,6 @@ jobs:
             env:
                 MYSQL_ROOT_PASSWORD: mysql
             options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
-
         mock-oauth2-server:
           image: ghcr.io/navikt/mock-oauth2-server:2.1.10
           ports:
@@ -24,7 +20,6 @@ jobs:
           env:
             SERVER_PORT: 9000
             JSON_CONFIG: '{ "interactiveLogin": true, "httpServer": "NettyWrapper", "tokenCallbacks": [ { "issuerId": "auth/realms/fineract", "tokenExpiry": 120, "requestMappings": [{ "requestParam": "scope", "match": "fineract", "claims": { "sub": "mifos", "scope": [ "test" ] } } ] } ] }'
-
     env:
         TZ: Asia/Kolkata
         DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
@@ -38,11 +33,6 @@ jobs:
         with:
           java-version: '17'
           distribution: 'zulu'
-      - uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4
-        with:
-          node-version: 16
-      - name: Congfigure vega-cli
-        run: npm i -g vega-cli --unsafe
       - name: Setup Gradle and Validate Wrapper
         uses: gradle/actions/setup-gradle@94baf225fe0a508e581a564467443d0e2379123b # v4.3.0
         with:
@@ -67,11 +57,6 @@ jobs:
           sleep 10
           docker exec localstack awslocal s3api create-bucket --bucket fineract-reports
           echo "LocalStack initialization complete"
-      - name: Install additional software
-        run: |
-            sudo apt-get update
-            sudo apt-get install ghostscript graphviz -y
-
       - name: Build & Test
         env:
           AWS_ENDPOINT_URL: http://localhost:4566
@@ -86,7 +71,6 @@ jobs:
             ./gradlew --no-daemon --console=plain test -x :twofactor-tests:test -x :oauth2-test:test :fineract-e2e-tests-runner:test -PdbType=mysql
             ./gradlew --no-daemon --console=plain :twofactor-tests:test -PdbType=mysql
             ./gradlew --no-daemon --console=plain :oauth2-tests:test -PdbType=mysql
-
       - name: Archive test results
         if: always()
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
@@ -97,7 +81,6 @@ jobs:
             integration-tests/build/reports/
             twofactor-tests/build/reports/
             oauth2-tests/build/reports/
-
       - name: Archive server logs
         if: always()
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4

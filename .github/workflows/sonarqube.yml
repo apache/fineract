@@ -3,10 +3,8 @@ on:
   push:
     branches:
       - develop
-
 permissions:
   contents: read
-
 jobs:
   build:
     runs-on: ubuntu-24.04
