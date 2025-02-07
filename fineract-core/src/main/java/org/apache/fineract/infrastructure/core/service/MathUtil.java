@@ -269,9 +269,13 @@ public final class MathUtil {
 
     /** @return sum the values considering null values */
     public static BigDecimal add(BigDecimal... amounts) {
+        return add(MoneyHelper.getMathContext(), amounts);
+    }
+
+    public static BigDecimal add(MathContext mc, BigDecimal... amounts) {
         BigDecimal result = null;
         for (BigDecimal amount : amounts) {
-            result = add(result, amount, MoneyHelper.getMathContext());
+            result = add(result, amount, mc);
         }
         return result;
     }

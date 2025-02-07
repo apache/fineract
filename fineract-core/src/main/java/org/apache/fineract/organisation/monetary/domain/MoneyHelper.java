@@ -33,7 +33,7 @@ public class MoneyHelper {
 
     private static RoundingMode roundingMode = null;
     private static MathContext mathContext;
-    private static final int PRECISION = 12;
+    public static final int PRECISION = 19;
 
     private static ConfigurationDomainService staticConfigurationDomainService;
 

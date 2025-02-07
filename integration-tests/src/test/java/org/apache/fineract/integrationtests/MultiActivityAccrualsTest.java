@@ -96,12 +96,12 @@ public class MultiActivityAccrualsTest extends BaseLoanIntegrationTest {
 
             verifyTransactions(loanId, //
                     transaction(600.0, "Disbursement", "09 August 2024", 600.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
-                    transaction(20.00, "Accrual", "09 December 2024", 0, 0, 20.00, 0, 0, 0.0, 0.0),
-                    transaction(5.0, "Accrual Activity", "09 September 2024", 0, 0, 5.0, 0, 0, 0.0, 0.0),
+                    transaction(19.98, "Accrual", "09 December 2024", 0, 0, 19.98, 0, 0, 0.0, 0.0),
+                    transaction(4.99, "Accrual Activity", "09 September 2024", 0, 0, 4.99, 0, 0, 0.0, 0.0),
                     transaction(5.0, "Accrual Activity", "09 October 2024", 0, 0, 5.0, 0, 0, 0.0, 0.0),
-                    transaction(5.0, "Accrual Activity", "09 November 2024", 0, 0, 5.0, 0, 0, 0.0, 0.0),
+                    transaction(4.99, "Accrual Activity", "09 November 2024", 0, 0, 4.99, 0, 0, 0.0, 0.0),
                     transaction(5.0, "Accrual Activity", "09 December 2024", 0, 0, 5.0, 0, 0, 0.0, 0.0),
-                    transaction(700.00, "Repayment", "09 December 2024", 0, 600.00, 20.0, 0, 0, 0.0, 80.0));
+                    transaction(700.00, "Repayment", "09 December 2024", 0, 600.00, 19.98, 0, 0, 0.0, 80.02));
         });
     }
 }

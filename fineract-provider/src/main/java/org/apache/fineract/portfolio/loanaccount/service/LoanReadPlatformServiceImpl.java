@@ -1226,7 +1226,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             Set<Long> disbursementPeriodIds = new HashSet<>();
             while (rs.next()) {
 
-                final Long loanId = rs.getLong("loanId");
                 final Integer period = JdbcSupport.getInteger(rs, "period");
                 LocalDate fromDate = JdbcSupport.getLocalDate(rs, "fromDate");
                 final LocalDate dueDate = JdbcSupport.getLocalDate(rs, "dueDate");
@@ -1306,8 +1305,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
 
                 final BigDecimal totalOutstandingForPeriod = principalOutstanding.add(interestOutstanding).add(feeChargesOutstanding)
                         .add(penaltyChargesOutstanding);
-
-                final BigDecimal totalActualCostOfLoanForPeriod = interestActualDue.add(feeChargesActualDue).add(penaltyChargesActualDue);
 
                 totalRepaymentExpected = totalRepaymentExpected.plus(totalDueForPeriod);
                 totalRepayment = totalRepayment.plus(totalPaidForPeriod);
