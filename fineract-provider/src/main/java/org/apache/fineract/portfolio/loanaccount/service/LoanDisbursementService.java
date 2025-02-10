@@ -58,6 +58,7 @@ public class LoanDisbursementService {
 
     private final LoanChargeValidator loanChargeValidator;
     private final LoanDisbursementValidator loanDisbursementValidator;
+    private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
 
     public void updateDisbursementDetails(final Loan loan, final JsonCommand jsonCommand, final Map<String, Object> actualChanges) {
         final List<Long> disbursementList = loan.fetchDisbursementIds();
@@ -262,7 +263,7 @@ public class LoanDisbursementService {
             for (LoanCharge loanCharge : tempCharges) {
                 loanChargeValidator.validateLoanIsNotClosed(loan, loanCharge);
                 loanChargeValidator.validateLoanChargeIsNotWaived(loan, loanCharge);
-                loan.removeLoanCharge(loanCharge);
+                reprocessLoanTransactionsService.removeLoanCharge(loan, loanCharge);
             }
             loan.getTrancheCharges().clear();
         } else {
@@ -272,7 +273,7 @@ public class LoanDisbursementService {
                     if (loan.getCharges().contains(deleteCharge)) {
                         loanChargeValidator.validateLoanIsNotClosed(loan, deleteCharge);
                         loanChargeValidator.validateLoanChargeIsNotWaived(loan, deleteCharge);
-                        loan.removeLoanCharge(deleteCharge);
+                        reprocessLoanTransactionsService.removeLoanCharge(loan, deleteCharge);
                     }
                 }
             }
@@ -295,6 +296,6 @@ public class LoanDisbursementService {
                     loanChargeValidator.validateLoanChargeIsNotWaived(loan, charge); //
                     return true; //
                 }) //
-                .forEach(loan::removeLoanCharge);
+                .forEach(loanCharge -> reprocessLoanTransactionsService.removeLoanCharge(loan, loanCharge));
     }
 }

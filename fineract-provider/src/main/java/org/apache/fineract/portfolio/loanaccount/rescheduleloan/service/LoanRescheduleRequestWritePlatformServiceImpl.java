@@ -47,12 +47,9 @@ import org.apache.fineract.infrastructure.event.business.service.BusinessEventNo
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
-import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatformService;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
-import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
@@ -62,7 +59,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRescheduleRequestToT
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.DefaultScheduledDateGenerator;
@@ -82,7 +78,7 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualsProcessingS
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
-import org.apache.fineract.portfolio.loanaccount.service.ReplayedTransactionBusinessEventService;
+import org.apache.fineract.portfolio.loanaccount.service.ReprocessLoanTransactionsService;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,6 +94,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanRescheduleRequestWritePlatformService {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanRescheduleRequestWritePlatformServiceImpl.class);
+    private static final DefaultScheduledDateGenerator DEFAULT_SCHEDULED_DATE_GENERATOR = new DefaultScheduledDateGenerator();
 
     private final CodeValueRepositoryWrapper codeValueRepositoryWrapper;
     private final PlatformSecurityContext platformSecurityContext;
@@ -112,15 +109,12 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
     private final LoanUtilService loanUtilService;
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
     private final LoanScheduleGeneratorFactory loanScheduleFactory;
-    private final AccountTransfersWritePlatformService accountTransfersWritePlatformService;
-    private static final DefaultScheduledDateGenerator DEFAULT_SCHEDULED_DATE_GENERATOR = new DefaultScheduledDateGenerator();
-    private final LoanAccountDomainService loanAccountDomainService;
     private final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository;
-    private final ReplayedTransactionBusinessEventService replayedTransactionBusinessEventService;
     private final LoanAccrualTransactionBusinessEventService loanAccrualTransactionBusinessEventService;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanAccrualsProcessingService loanAccrualsProcessingService;
     private final LoanChargeService loanChargeService;
+    private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
 
     /**
      * create a new instance of the LoanRescheduleRequest object from the JsonCommand object and persist
@@ -440,7 +434,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             }
             loanAccrualsProcessingService.reprocessExistingAccruals(loan);
             loanChargeService.recalculateAllCharges(loan);
-            ChangedTransactionDetail changedTransactionDetail = loan.reprocessTransactions();
+            reprocessLoanTransactionsService.reprocessTransactions(loan);
 
             this.loanRepaymentScheduleHistoryRepository.saveAll(loanRepaymentScheduleHistoryList);
 
@@ -450,19 +444,6 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             // update the status of the request
             loanRescheduleRequest.approve(appUser, approvedOnDate);
 
-            /***
-             * TODO Vishwas Batch save is giving me a HibernateOptimisticLockingFailureException, looping and saving for
-             * the time being, not a major issue for now as this loop is entered only in edge cases (when a adjustment
-             * is made before the latest payment recorded against the loan)
-             ***/
-            if (changedTransactionDetail != null) {
-                for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
-                    loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(mapEntry.getValue());
-                    accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
-                }
-                // Trigger transaction replayed event
-                replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
-            }
             loan = saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
             loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan, true, false);

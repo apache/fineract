@@ -32,13 +32,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
-import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
-import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
@@ -77,9 +74,7 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
-import org.apache.fineract.portfolio.account.domain.AccountTransferRepository;
 import org.apache.fineract.portfolio.account.domain.AccountTransferStandingInstruction;
-import org.apache.fineract.portfolio.account.domain.AccountTransferTransaction;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionRepository;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -99,7 +94,6 @@ import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanDownPaymentTransactionValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanForeclosureValidator;
@@ -114,7 +108,7 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanDownPaymentHandlerS
 import org.apache.fineract.portfolio.loanaccount.service.LoanRefundService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanScheduleService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
-import org.apache.fineract.portfolio.loanaccount.service.ReplayedTransactionBusinessEventService;
+import org.apache.fineract.portfolio.loanaccount.service.ReprocessLoanTransactionsService;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedInterestRefundTypes;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
@@ -122,8 +116,6 @@ import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.data.PostDatedChecksStatus;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecksRepository;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -141,7 +133,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final NoteRepository noteRepository;
-    private final AccountTransferRepository accountTransferRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanUtilService loanUtilService;
     private final StandingInstructionRepository standingInstructionRepository;
@@ -150,7 +141,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final DelinquencyWritePlatformService delinquencyWritePlatformService;
     private final LoanLifecycleStateMachine defaultLoanLifecycleStateMachine;
     private final ExternalIdFactory externalIdFactory;
-    private final ReplayedTransactionBusinessEventService replayedTransactionBusinessEventService;
     private final LoanAccrualTransactionBusinessEventService loanAccrualTransactionBusinessEventService;
     private final DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper;
     private final DelinquencyReadPlatformService delinquencyReadPlatformService;
@@ -165,6 +155,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final LoanDownPaymentHandlerService loanDownPaymentHandlerService;
     private final LoanChargeValidator loanChargeValidator;
     private final LoanRefundService loanRefundService;
+    private final LoanAccountService loanAccountService;
+    private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
 
     @Transactional
     @Override
@@ -264,30 +256,16 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         loanDownPaymentTransactionValidator.validateRepaymentTypeAccountStatus(loan, newRepaymentTransaction, event);
         loanTransactionValidator.validateActivityNotBeforeClientOrGroupTransferDate(loan, event,
                 newRepaymentTransaction.getTransactionDate());
-        final ChangedTransactionDetail changedTransactionDetail = makeRepayment(loan, newRepaymentTransaction,
-                defaultLoanLifecycleStateMachine, existingTransactionIds, existingReversedTransactionIds, scheduleGeneratorDTO);
+        makeRepayment(loan, newRepaymentTransaction, defaultLoanLifecycleStateMachine, existingTransactionIds,
+                existingReversedTransactionIds, scheduleGeneratorDTO);
 
         if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
             loanAccrualsProcessingService.reprocessExistingAccruals(loan);
             loanAccrualsProcessingService.processIncomePostingAndAccruals(loan);
         }
 
-        saveLoanTransactionWithDataIntegrityViolationChecks(newRepaymentTransaction);
-
-        /***
-         * TODO Vishwas Batch save is giving me a HibernateOptimisticLockingFailureException, looping and saving for the
-         * time being, not a major issue for now as this loop is entered only in edge cases (when a payment is made
-         * before the latest payment recorded against the loan)
-         ***/
-        if (changedTransactionDetail != null) {
-            for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
-                saveLoanTransactionWithDataIntegrityViolationChecks(mapEntry.getValue());
-                updateLoanTransferTransaction(mapEntry.getKey(), mapEntry.getValue());
-            }
-            // Trigger transaction replayed event
-            replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
-        }
-        loan = saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+        loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(newRepaymentTransaction);
+        loan = loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         if (StringUtils.isNotBlank(noteText)) {
             final Note note = Note.loanTransactionNote(loan, newRepaymentTransaction, noteText);
@@ -396,50 +374,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     }
 
     @Override
-    public LoanTransaction saveLoanTransactionWithDataIntegrityViolationChecks(LoanTransaction newRepaymentTransaction) {
-        try {
-            return this.loanTransactionRepository.saveAndFlush(newRepaymentTransaction);
-        } catch (final JpaSystemException | DataIntegrityViolationException e) {
-            raiseValidationExceptionForUniqueConstraintViolation(e);
-            throw e;
-        }
-    }
-
-    @Override
-    public Loan saveAndFlushLoanWithDataIntegrityViolationChecks(final Loan loan) {
-        try {
-            return this.loanRepositoryWrapper.saveAndFlush(loan);
-        } catch (final JpaSystemException | DataIntegrityViolationException e) {
-            raiseValidationExceptionForUniqueConstraintViolation(e);
-            throw e;
-        }
-    }
-
-    @Override
-    public Loan saveLoanWithDataIntegrityViolationChecks(final Loan loan) {
-        try {
-            return this.loanRepositoryWrapper.save(loan);
-        } catch (final JpaSystemException | DataIntegrityViolationException e) {
-            raiseValidationExceptionForUniqueConstraintViolation(e);
-            throw e;
-        }
-    }
-
-    private void raiseValidationExceptionForUniqueConstraintViolation(Exception e) {
-        final Throwable realCause = e.getCause();
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
-        if (realCause.getMessage().toLowerCase().contains("external_id_unique") || realCause.getMessage()
-                .contains("duplicate key value violates unique constraint \"m_loan_transaction_external_id_key\"")) {
-            baseDataValidator.reset().parameter("externalId").failWithCode("value.must.be.unique");
-        }
-        if (!dataValidationErrors.isEmpty()) {
-            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                    dataValidationErrors, e);
-        }
-    }
-
-    @Override
     @Transactional
     public LoanTransaction makeChargePayment(final Loan loan, final Long chargeId, final LocalDate transactionDate,
             final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final String noteText, final ExternalId txnExternalId,
@@ -487,8 +421,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             loanChargeService.makeChargePayment(loan, chargeId, defaultLoanLifecycleStateMachine, existingTransactionIds,
                     existingReversedTransactionIds, newPaymentTransaction, installmentNumber);
         }
-        saveLoanTransactionWithDataIntegrityViolationChecks(newPaymentTransaction);
-        saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+        loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(newPaymentTransaction);
+        loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         if (StringUtils.isNotBlank(noteText)) {
             final Note note = Note.loanTransactionNote(loan, newPaymentTransaction, noteText);
@@ -579,7 +513,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         loanRefundService.makeRefund(loan, newRefundTransaction, defaultLoanLifecycleStateMachine, existingTransactionIds,
                 existingReversedTransactionIds);
 
-        saveLoanTransactionWithDataIntegrityViolationChecks(newRefundTransaction);
+        loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(newRefundTransaction);
         this.loanRepositoryWrapper.saveAndFlush(loan);
 
         if (StringUtils.isNotBlank(noteText)) {
@@ -628,8 +562,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         disbursementTransaction.updateLoan(loan);
         loan.addLoanTransaction(disbursementTransaction);
-        saveLoanTransactionWithDataIntegrityViolationChecks(disbursementTransaction);
-        saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+        loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(disbursementTransaction);
+        loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         if (StringUtils.isNotBlank(noteText)) {
             final Note note = Note.loanTransactionNote(loan, disbursementTransaction, noteText);
@@ -651,7 +585,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
         loanChargeValidator.validateRepaymentTypeTransactionNotBeforeAChargeRefund(loanTransaction.getLoan(), loanTransaction, "reversed");
         loanTransaction.reverse();
-        saveLoanTransactionWithDataIntegrityViolationChecks(loanTransaction);
+        loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(loanTransaction);
     }
 
     @Override
@@ -683,14 +617,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             this.delinquencyWritePlatformService.applyDelinquencyTagToLoan(loanDelinquencyData, effectiveDelinquencyList);
         } else {
             this.delinquencyWritePlatformService.removeDelinquencyTagToLoan(loanDelinquencyData.getLoan());
-        }
-    }
-
-    private void updateLoanTransferTransaction(final Long loanTransactionId, final LoanTransaction newLoanTransaction) {
-        final AccountTransferTransaction transferTransaction = this.accountTransferRepository.findByToLoanTransactionId(loanTransactionId);
-        if (transferTransaction != null) {
-            transferTransaction.updateToLoanTransaction(newLoanTransaction);
-            this.accountTransferRepository.save(transferTransaction);
         }
     }
 
@@ -841,36 +767,21 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             loanForeclosureValidator.validateForForeclosure(loan, payment.getTransactionDate());
         }
         loanDownPaymentTransactionValidator.validateAccountStatus(loan, LoanEvent.LOAN_FORECLOSURE);
-        final ChangedTransactionDetail changedTransactionDetail = handleForeClosureTransactions(loan, payment,
-                defaultLoanLifecycleStateMachine, scheduleGeneratorDTO);
+        handleForeClosureTransactions(loan, payment, defaultLoanLifecycleStateMachine, scheduleGeneratorDTO);
 
         loanAccrualsProcessingService.reprocessExistingAccruals(loan);
         if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
             loanAccrualsProcessingService.processIncomePostingAndAccruals(loan);
         }
 
-        /***
-         * TODO Vishwas Batch save is giving me a HibernateOptimisticLockingFailureException, looping and saving for the
-         * time being, not a major issue for now as this loop is entered only in edge cases (when a payment is made
-         * before the latest payment recorded against the loan)
-         ***/
-
         for (LoanTransaction newTransaction : newTransactions) {
-            saveLoanTransactionWithDataIntegrityViolationChecks(newTransaction);
+            loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(newTransaction);
             transactionIds.add(newTransaction.getId());
         }
         changes.put("transactions", transactionIds);
         changes.put("eventAmount", payPrincipal.getAmount().negate());
 
-        if (changedTransactionDetail != null) {
-            for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
-                saveLoanTransactionWithDataIntegrityViolationChecks(mapEntry.getValue());
-                updateLoanTransferTransaction(mapEntry.getKey(), mapEntry.getValue());
-            }
-            // Trigger transaction replayed event
-            replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
-        }
-        loan = saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+        loan = loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         if (StringUtils.isNotBlank(noteText)) {
             changes.put("note", noteText);
@@ -978,36 +889,23 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                                 new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
             }
         } else {
-            if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
+            if (loan.isCumulativeSchedule() && loan.isInterestBearingAndInterestRecalculationEnabled()) {
                 loanScheduleService.regenerateRepaymentScheduleWithInterestRecalculation(loan, scheduleGeneratorDTO);
-            } else if (loan.getLoanProductRelatedDetail() != null
-                    && loan.getLoanProductRelatedDetail().getLoanScheduleType().equals(LoanScheduleType.PROGRESSIVE)
-                    && loan.getLoanTransactions().stream().anyMatch(LoanTransaction::isChargeOff)) {
+            } else if (loan.isProgressiveSchedule() && loan.hasChargeOffTransaction()) {
                 loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
             }
             loan.getLoanTransactions().add(refundTransaction);
             if (interestRefundTransaction != null) {
                 loan.addLoanTransaction(interestRefundTransaction);
             }
-            ChangedTransactionDetail changedTransactionDetail = loan.reprocessTransactions();
+
+            reprocessLoanTransactionsService.reprocessTransactions(loan);
 
             // Store and flush newly created transaction to generate PK
-            saveLoanTransactionWithDataIntegrityViolationChecks(refundTransaction);
+            loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(refundTransaction);
             if (interestRefundTransaction != null) {
-                saveLoanTransactionWithDataIntegrityViolationChecks(interestRefundTransaction);
+                loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(interestRefundTransaction);
             }
-            /*
-             * TODO Vishwas Batch save is giving me a HibernateOptimisticLockingFailureException, looping and saving for
-             * the time being, not a major issue for now as this loop is entered only in edge cases (when a payment is
-             * made before the latest payment recorded against the loan)
-             */
-            // Apply reprocessed transactions (if applicable)
-            for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
-                saveLoanTransactionWithDataIntegrityViolationChecks(mapEntry.getValue());
-                updateLoanTransferTransaction(mapEntry.getKey(), mapEntry.getValue());
-            }
-            // Trigger transaction replayed event
-            replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
         }
 
         loan.updateLoanSummaryDerivedFields();
@@ -1076,7 +974,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 loanRefundRequest.getPrincipal(), loanRefundRequest.getInterest(), loanRefundRequest.getFeeCharges(),
                 loanRefundRequest.getPenaltyCharges(), paymentDetail, transactionDate, externalIdFactory.create());
         interestRefundTransaction.updateLoan(loan);
-        saveLoanTransactionWithDataIntegrityViolationChecks(interestRefundTransaction);
+        loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(interestRefundTransaction);
         loan.addLoanTransaction(interestRefundTransaction);
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds, false);
 
@@ -1154,21 +1052,21 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     }
 
     @SuppressWarnings("null")
-    private ChangedTransactionDetail makeRepayment(final Loan loan, final LoanTransaction repaymentTransaction,
+    private void makeRepayment(final Loan loan, final LoanTransaction repaymentTransaction,
             final LoanLifecycleStateMachine loanLifecycleStateMachine, final List<Long> existingTransactionIds,
             final List<Long> existingReversedTransactionIds, final ScheduleGeneratorDTO scheduleGeneratorDTO) {
         loanChargeValidator.validateRepaymentTypeTransactionNotBeforeAChargeRefund(loan, repaymentTransaction, "created");
         existingTransactionIds.addAll(loan.findExistingTransactionIds());
         existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
 
-        return loanDownPaymentHandlerService.handleRepaymentOrRecoveryOrWaiverTransaction(loan, repaymentTransaction,
-                loanLifecycleStateMachine, null, scheduleGeneratorDTO);
+        loanDownPaymentHandlerService.handleRepaymentOrRecoveryOrWaiverTransaction(loan, repaymentTransaction, loanLifecycleStateMachine,
+                null, scheduleGeneratorDTO);
     }
 
-    private ChangedTransactionDetail handleForeClosureTransactions(final Loan loan, final LoanTransaction repaymentTransaction,
+    private void handleForeClosureTransactions(final Loan loan, final LoanTransaction repaymentTransaction,
             final LoanLifecycleStateMachine loanLifecycleStateMachine, final ScheduleGeneratorDTO scheduleGeneratorDTO) {
         loan.setLoanSubStatus(LoanSubStatus.FORECLOSED.getValue());
-        return loanDownPaymentHandlerService.handleRepaymentOrRecoveryOrWaiverTransaction(loan, repaymentTransaction,
-                loanLifecycleStateMachine, null, scheduleGeneratorDTO);
+        loanDownPaymentHandlerService.handleRepaymentOrRecoveryOrWaiverTransaction(loan, repaymentTransaction, loanLifecycleStateMachine,
+                null, scheduleGeneratorDTO);
     }
 }

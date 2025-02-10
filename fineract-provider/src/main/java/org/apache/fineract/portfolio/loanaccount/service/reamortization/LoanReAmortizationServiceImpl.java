@@ -49,6 +49,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.Mon
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
+import org.apache.fineract.portfolio.loanaccount.service.ReprocessLoanTransactionsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,6 +65,7 @@ public class LoanReAmortizationServiceImpl {
     private final LoanTransactionRepository loanTransactionRepository;
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
     private final LoanChargeValidator loanChargeValidator;
+    private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
 
     public CommandProcessingResult reAmortize(Long loanId, JsonCommand command) {
         Loan loan = loanAssembler.assembleFrom(loanId);
@@ -132,7 +134,7 @@ public class LoanReAmortizationServiceImpl {
                 "reversed");
         reAmortizeTransaction.reverse(reversalExternalId);
         reAmortizeTransaction.manuallyAdjustedOrReversed();
-        reAmortizeTransaction.getLoan().reprocessTransactions();
+        reprocessLoanTransactionsService.reprocessTransactions(reAmortizeTransaction.getLoan());
     }
 
     private LoanTransaction findLatestNonReversedReAmortizeTransaction(Loan loan) {

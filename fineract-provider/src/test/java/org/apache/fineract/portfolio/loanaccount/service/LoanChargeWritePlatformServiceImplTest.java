@@ -40,6 +40,7 @@ import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
@@ -131,6 +132,12 @@ class LoanChargeWritePlatformServiceImplTest {
     @Mock
     private LoanAccrualTransactionBusinessEventService loanAccrualTransactionBusinessEventService;
 
+    @Mock
+    private ReprocessLoanTransactionsService reprocessLoanTransactionsService;
+
+    @Mock
+    private LoanAccountService loanAccountService;
+
     @BeforeEach
     void setUp() {
         when(loanAssembler.assembleFrom(LOAN_ID)).thenReturn(loan);
@@ -143,7 +150,7 @@ class LoanChargeWritePlatformServiceImplTest {
         when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
         when(loanChargeRepository.saveAndFlush(any(LoanCharge.class))).thenReturn(loanCharge);
         when(loan.getCurrency()).thenReturn(monetaryCurrency);
-        when(loanAccountDomainService.saveAndFlushLoanWithDataIntegrityViolationChecks(any())).thenReturn(loan);
+        when(loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(any())).thenReturn(loan);
     }
 
     @ParameterizedTest

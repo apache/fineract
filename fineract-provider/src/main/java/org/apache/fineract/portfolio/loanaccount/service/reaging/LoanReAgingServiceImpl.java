@@ -47,16 +47,15 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParameter;
-import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgingParameterRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanScheduleService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
+import org.apache.fineract.portfolio.loanaccount.service.ReprocessLoanTransactionsService;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.springframework.stereotype.Service;
@@ -72,12 +71,12 @@ public class LoanReAgingServiceImpl {
     private final ExternalIdFactory externalIdFactory;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanTransactionRepository loanTransactionRepository;
-    private final LoanReAgingParameterRepository reAgingParameterRepository;
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
     private final NoteRepository noteRepository;
     private final LoanChargeValidator loanChargeValidator;
     private final LoanUtilService loanUtilService;
     private final LoanScheduleService loanScheduleService;
+    private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
 
     public CommandProcessingResult reAge(Long loanId, JsonCommand command) {
         Loan loan = loanAssembler.assembleFrom(loanId);
@@ -129,13 +128,11 @@ public class LoanReAgingServiceImpl {
         }
         reverseReAgeTransaction(reAgeTransaction, command);
         loanTransactionRepository.saveAndFlush(reAgeTransaction);
-        if (loan.getLoanProductRelatedDetail() != null
-                && loan.getLoanProductRelatedDetail().getLoanScheduleType().equals(LoanScheduleType.PROGRESSIVE)
-                && loan.getLoanTransactions().stream().anyMatch(LoanTransaction::isChargeOff)) {
+        if (loan.isProgressiveSchedule() && loan.hasChargeOffTransaction()) {
             final ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, null);
             loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
         }
-        loan.reprocessTransactions();
+        reprocessLoanTransactionsService.reprocessTransactions(loan);
         loan.updateLoanScheduleDependentDerivedFields();
         persistNote(loan, command, changes);
 

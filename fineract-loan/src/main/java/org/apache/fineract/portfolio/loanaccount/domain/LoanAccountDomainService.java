@@ -74,12 +74,6 @@ public interface LoanAccountDomainService {
             boolean isRecoveryRepayment, String chargeRefundChargeType, boolean isAccountTransfer, HolidayDetailDTO holidayDetailDto,
             Boolean isHolidayValidationDone, boolean isLoanToLoanTransfer);
 
-    LoanTransaction saveLoanTransactionWithDataIntegrityViolationChecks(LoanTransaction newRepaymentTransaction);
-
-    Loan saveAndFlushLoanWithDataIntegrityViolationChecks(Loan loan);
-
-    Loan saveLoanWithDataIntegrityViolationChecks(Loan loan);
-
     LoanTransaction foreCloseLoan(Loan loan, LocalDate foreClourseDate, String noteText, ExternalId externalId,
             Map<String, Object> changes);
 

@@ -34,7 +34,7 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.transaction
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionAccrualActivityPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
@@ -54,7 +54,7 @@ public class LoanAccrualActivityProcessingServiceImpl implements LoanAccrualActi
     private final ExternalIdFactory externalIdFactory;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanTransactionAssembler loanTransactionAssembler;
-    private final LoanAccountDomainService loanAccountDomainService;
+    private final LoanAccountService loanAccountService;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -207,7 +207,7 @@ public class LoanAccrualActivityProcessingServiceImpl implements LoanAccrualActi
             newLoanTransaction.copyLoanTransactionRelations(loanTransaction.getLoanTransactionRelations());
             newLoanTransaction.getLoanTransactionRelations().add(LoanTransactionRelation.linkToTransaction(newLoanTransaction,
                     loanTransaction, LoanTransactionRelationTypeEnum.REPLAYED));
-            loanAccountDomainService.saveLoanTransactionWithDataIntegrityViolationChecks(newLoanTransaction);
+            loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(newLoanTransaction);
             loan.addLoanTransaction(newLoanTransaction);
 
             LoanAdjustTransactionBusinessEvent.Data data = new LoanAdjustTransactionBusinessEvent.Data(loanTransaction);
@@ -242,7 +242,7 @@ public class LoanAccrualActivityProcessingServiceImpl implements LoanAccrualActi
 
     private LoanTransaction makeAccrualActivityTransaction(@NotNull Loan loan, @NotNull LoanTransaction newAccrualActivityTransaction) {
         businessEventNotifierService.notifyPreBusinessEvent(new LoanTransactionAccrualActivityPreBusinessEvent(loan));
-        newAccrualActivityTransaction = loanAccountDomainService
+        newAccrualActivityTransaction = loanAccountService
                 .saveLoanTransactionWithDataIntegrityViolationChecks(newAccrualActivityTransaction);
 
         loan.addLoanTransaction(newAccrualActivityTransaction);

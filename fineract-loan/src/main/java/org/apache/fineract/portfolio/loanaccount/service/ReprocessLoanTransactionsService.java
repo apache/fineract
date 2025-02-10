@@ -18,18 +18,18 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
+import java.time.LocalDate;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 
-public interface LoanDownPaymentHandlerService {
+public interface ReprocessLoanTransactionsService {
 
-    LoanTransaction handleDownPayment(ScheduleGeneratorDTO scheduleGeneratorDTO, JsonCommand command,
-            LoanTransaction disbursementTransaction, Loan loan);
+    void reprocessTransactions(Loan loan);
 
-    void handleRepaymentOrRecoveryOrWaiverTransaction(Loan loan, LoanTransaction newTransactionDetail,
-            LoanLifecycleStateMachine loanLifecycleStateMachine, LoanTransaction transactionForAdjustment,
-            ScheduleGeneratorDTO scheduleGeneratorDTO);
+    void reprocessTransactionsWithPostTransactionChecks(Loan loan, LocalDate transactionDate);
+
+    void processPostDisbursementTransactions(Loan loan);
+
+    void removeLoanCharge(Loan loan, LoanCharge loanCharge);
+
 }

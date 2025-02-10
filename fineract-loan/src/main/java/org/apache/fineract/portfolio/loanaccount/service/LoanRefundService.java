@@ -65,7 +65,7 @@ public class LoanRefundService {
         existingTransactionIds.addAll(loan.findExistingTransactionIds());
         existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
 
-        handleRefundTransaction(loan, loanTransaction, loanLifecycleStateMachine, null);
+        handleRefundTransaction(loan, loanTransaction, loanLifecycleStateMachine);
     }
 
     public void creditBalanceRefund(final Loan loan, final LoanTransaction newCreditBalanceRefundTransaction,
@@ -88,7 +88,7 @@ public class LoanRefundService {
     }
 
     private void handleRefundTransaction(final Loan loan, final LoanTransaction loanTransaction,
-            final LoanLifecycleStateMachine loanLifecycleStateMachine, final LoanTransaction adjustedTransaction) {
+            final LoanLifecycleStateMachine loanLifecycleStateMachine) {
         loanLifecycleStateMachine.transition(LoanEvent.LOAN_REFUND, loan);
 
         loanTransaction.updateLoan(loan);
@@ -104,18 +104,12 @@ public class LoanRefundService {
         final LocalDate loanTransactionDate = extractTransactionDate(loan, loanTransaction);
 
         loanRefundValidator.validateTransactionDateNotInFuture(loanTransactionDate);
-        loanRefundValidator.validateTransactionAmountThreshold(loan, adjustedTransaction);
+        loanRefundValidator.validateTransactionAmountThreshold(loan, null);
 
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loan.getTransactionProcessor();
 
-        // If it's a refund
-        if (adjustedTransaction == null) {
-            loanRepaymentScheduleTransactionProcessor.processLatestTransaction(loanTransaction,
-                    new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
-                            new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
-        } else {
-            loan.reprocessTransactions();
-        }
+        loanRepaymentScheduleTransactionProcessor.processLatestTransaction(loanTransaction, new TransactionCtx(loan.getCurrency(),
+                loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
 
         loan.updateLoanSummaryDerivedFields();
         loan.doPostLoanTransactionChecks(loanTransaction.getTransactionDate(), loanLifecycleStateMachine);

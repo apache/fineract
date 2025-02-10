@@ -36,7 +36,6 @@ import org.apache.fineract.infrastructure.event.business.service.BusinessEventNo
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
-import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
@@ -48,7 +47,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.Mon
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanStateTransitionException;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanTransactionTypeException;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanDownPaymentTransactionValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanRefundValidator;
 
@@ -62,6 +60,7 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
     private final LoanScheduleService loanScheduleService;
     private final LoanRefundService loanRefundService;
     private final LoanRefundValidator loanRefundValidator;
+    private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
 
     @Override
     public LoanTransaction handleDownPayment(ScheduleGeneratorDTO scheduleGeneratorDTO, JsonCommand command,
@@ -77,11 +76,9 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
     }
 
     @Override
-    public ChangedTransactionDetail handleRepaymentOrRecoveryOrWaiverTransaction(final Loan loan, final LoanTransaction loanTransaction,
+    public void handleRepaymentOrRecoveryOrWaiverTransaction(final Loan loan, final LoanTransaction loanTransaction,
             final LoanLifecycleStateMachine loanLifecycleStateMachine, final LoanTransaction adjustedTransaction,
             final ScheduleGeneratorDTO scheduleGeneratorDTO) {
-        ChangedTransactionDetail changedTransactionDetail = null;
-
         if (loanTransaction.isRecoveryRepayment()) {
             loanLifecycleStateMachine.transition(LoanEvent.LOAN_RECOVERY_PAYMENT, loan);
         }
@@ -155,15 +152,12 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
             }
         }
         if (reprocess) {
-            if (loan.isInterestBearingAndInterestRecalculationEnabled()
-                    && !loan.getLoanProductRelatedDetail().getLoanScheduleType().equals(LoanScheduleType.PROGRESSIVE)) {
+            if (loan.isCumulativeSchedule() && loan.isInterestBearingAndInterestRecalculationEnabled()) {
                 loanScheduleService.regenerateRepaymentScheduleWithInterestRecalculation(loan, scheduleGeneratorDTO);
-            } else if (loan.getLoanProductRelatedDetail() != null
-                    && loan.getLoanProductRelatedDetail().getLoanScheduleType().equals(LoanScheduleType.PROGRESSIVE)
-                    && loan.getLoanTransactions().stream().anyMatch(LoanTransaction::isChargeOff)) {
+            } else if (loan.isProgressiveSchedule() && loan.hasChargeOffTransaction()) {
                 loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
             }
-            changedTransactionDetail = loan.reprocessTransactions();
+            reprocessLoanTransactionsService.reprocessTransactions(loan);
         }
 
         loan.updateLoanSummaryDerivedFields();
@@ -185,8 +179,6 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
                 throw new InvalidLoanStateTransitionException("transaction", "amount.exceeds.threshold", errorMessage);
             }
         }
-
-        return changedTransactionDetail;
     }
 
     private LoanTransaction handleDownPayment(final Loan loan, final LoanTransaction disbursementTransaction, final JsonCommand command,

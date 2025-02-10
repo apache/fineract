@@ -24,9 +24,8 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.data.AccountTransferDTO;
 import org.apache.fineract.portfolio.account.domain.AccountTransferDetails;
-import org.apache.fineract.portfolio.interestpauses.service.AccountTransfersService;
 
-public interface AccountTransfersWritePlatformService extends AccountTransfersService {
+public interface AccountTransfersWritePlatformService {
 
     CommandProcessingResult create(JsonCommand command);
 

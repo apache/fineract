@@ -20,7 +20,7 @@ package org.apache.fineract.portfolio.interestpauses.service;
 
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 
-public interface AccountTransfersService {
+public interface LoanAccountTransfersService {
 
     void updateLoanTransaction(Long loanTransactionId, LoanTransaction newLoanTransaction);
 
