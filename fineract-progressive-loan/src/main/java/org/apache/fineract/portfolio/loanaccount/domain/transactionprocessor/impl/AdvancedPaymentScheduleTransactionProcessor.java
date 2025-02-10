@@ -498,7 +498,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     private Optional<LoanRepaymentScheduleInstallment> createAdditionalInstalment(LoanTransaction loanTransaction,
             ProgressiveTransactionCtx ctx) {
         LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(loanTransaction.getLoan(),
-                (ctx.getInstallments().size() + 1), loanTransaction.getTransactionDate(), loanTransaction.getTransactionDate(), ZERO, ZERO,
+                (ctx.getInstallments().size() + 1), ctx.getModel().getMaturityDate(), loanTransaction.getTransactionDate(), ZERO, ZERO,
                 ZERO, ZERO, false, null);
         installment.markAsAdditional();
         loanTransaction.getLoan().addLoanRepaymentScheduleInstallment(installment);
@@ -538,13 +538,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             Money transactionAmount = loanTransaction.getAmount(currency);
             Money totalOverpaid = ctx.getOverpaymentHolder().getMoneyObject();
             Money amountToDistribute = MathUtil.negativeToZero(transactionAmount).minus(totalOverpaid);
-            // transaction amount should be greater than or equal to 0
-            // total overpaid amount should be greater than or equal to 0
-            // amountToDistribute = transactionAmount - totalOverpaid
             Money overpaymentAmount = MathUtil.negativeToZero(transactionAmount.minus(amountToDistribute));
-            // overpaymentAmount = negativeToZero ( transactionAmount - (transactionAmount - totalOverpaid) )
-            // overpaymentAmount = negativeToZero ( totalOverpaid )
-            // TODO does above lines make sense????
             loanTransaction.setOverPayments(overpaymentAmount);
             if (!transactionAmount.isGreaterThanZero()) {
                 return;
