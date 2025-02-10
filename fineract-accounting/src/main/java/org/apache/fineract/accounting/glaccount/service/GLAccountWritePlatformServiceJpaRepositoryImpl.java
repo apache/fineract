@@ -194,7 +194,7 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
         final boolean journalEntriesForAccountExist = this.glJournalEntryRepository
                 .exists((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("glAccountId"), glAccountId));
         if (journalEntriesForAccountExist) {
-            throw new GLAccountInvalidDeleteException(GlAccountInvalidDeleteReason.TRANSANCTIONS_LOGGED, glAccountId);
+            throw new GLAccountInvalidDeleteException(GlAccountInvalidDeleteReason.TRANSACTIONS_LOGGED, glAccountId);
         }
         this.glAccountRepository.delete(glAccount);
 
