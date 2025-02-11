@@ -434,7 +434,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
         boolean isPastPeriod = isAfterPeriod(tillDate, installment);
         boolean isInPeriod = isInPeriod(tillDate, installment, false);
         if (isPastPeriod || loan.isClosed() || loan.isOverPaid()) {
-            interest = installment.getInterestCharged(currency);
+            interest = installment.getInterestCharged(currency).minus(installment.getCreditedInterest());
         } else {
             if (isInPeriod) { // first period first day is not accrued
                 interest = scheduleGenerator.getPeriodInterestTillDate(installment, tillDate);
