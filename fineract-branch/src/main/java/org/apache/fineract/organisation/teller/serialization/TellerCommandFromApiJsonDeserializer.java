@@ -68,6 +68,7 @@ public final class TellerCommandFromApiJsonDeserializer {
     public static final String TXN_DATE = "txnDate";
     public static final String TXN_NOTE = "txnNote";
     public static final String TELLER = "teller";
+    private static final String START_TIME = "startTime";
     /**
      * The parameters supported for this command.
      */
@@ -159,9 +160,9 @@ public final class TellerCommandFromApiJsonDeserializer {
 
         if (!isFullDay) {
             final String hourStartTime = this.fromApiJsonHelper.extractStringNamed(HOUR_START_TIME, element);
-            baseDataValidator.reset().parameter("startTime").value(hourStartTime).notBlank();
+            baseDataValidator.reset().parameter(START_TIME).value(hourStartTime).notBlank();
             final String minStartTime = this.fromApiJsonHelper.extractStringNamed(MIN_START_TIME, element);
-            baseDataValidator.reset().parameter("startTime").value(minStartTime).notBlank();
+            baseDataValidator.reset().parameter(START_TIME).value(minStartTime).notBlank();
             final String hourEndTime = this.fromApiJsonHelper.extractStringNamed(HOUR_END_TIME, element);
             baseDataValidator.reset().parameter(HOUR_END_TIME).value(hourEndTime).notBlank();
             final String minEndTime = this.fromApiJsonHelper.extractStringNamed(MIN_END_TIME, element);
