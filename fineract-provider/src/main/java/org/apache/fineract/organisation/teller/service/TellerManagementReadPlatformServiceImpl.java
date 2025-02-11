@@ -34,6 +34,7 @@ import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
@@ -70,6 +71,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final PaginationHelper paginationHelper;
     private final ColumnValidator columnValidator;
+    private final SqlValidator sqlValidator;
 
     private static final class TellerMapper implements RowMapper<TellerData> {
 
@@ -399,6 +401,8 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
     public CashierTransactionsWithSummaryData retrieveCashierTransactionsWithSummary(final Long cashierId, final boolean includeAllTellers,
             final LocalDate fromDate, final LocalDate toDate, final String currencyCode, final SearchParameters searchParameters) {
 
+        sqlValidator.validate(searchParameters.getOrderBy());
+        sqlValidator.validate(searchParameters.getSortOrder());
         final String nextDay = sqlGenerator.incrementDateByOneDay("c.end_date");
 
         final CashierTransactionSummaryMapper ctsm = new CashierTransactionSummaryMapper();
@@ -442,6 +446,8 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
     public Page<CashierTransactionData> retrieveCashierTransactions(final Long cashierId, final boolean includeAllTellers,
             final LocalDate fromDate, final LocalDate toDate, final String currencyCode, final SearchParameters searchParameters) {
 
+        sqlValidator.validate(searchParameters.getOrderBy());
+        sqlValidator.validate(searchParameters.getSortOrder());
         final String nextDay = sqlGenerator.incrementDateByOneDay("c.end_date");
 
         final CashierTransactionMapper ctm = new CashierTransactionMapper();

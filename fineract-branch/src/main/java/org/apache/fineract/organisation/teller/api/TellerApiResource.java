@@ -49,14 +49,16 @@ import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSer
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.apache.fineract.organisation.teller.data.CashierData;
 import org.apache.fineract.organisation.teller.data.CashierTransactionData;
 import org.apache.fineract.organisation.teller.data.CashierTransactionsWithSummaryData;
 import org.apache.fineract.organisation.teller.data.TellerData;
 import org.apache.fineract.organisation.teller.data.TellerJournalData;
 import org.apache.fineract.organisation.teller.data.TellerTransactionData;
+import org.apache.fineract.organisation.teller.domain.model.CashiersForTeller;
+import org.apache.fineract.organisation.teller.domain.model.request.CashierRequest;
+import org.apache.fineract.organisation.teller.domain.model.request.CashierTransactionRequest;
+import org.apache.fineract.organisation.teller.domain.model.request.TellerRequest;
 import org.apache.fineract.organisation.teller.service.TellerManagementReadPlatformService;
 import org.apache.fineract.organisation.teller.util.DateRange;
 import org.springframework.stereotype.Component;
@@ -67,11 +69,9 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class TellerApiResource {
 
-    private final PlatformSecurityContext securityContext;
-    private final DefaultToApiJsonSerializer<TellerData> jsonSerializer;
     private final TellerManagementReadPlatformService readPlatformService;
     private final PortfolioCommandSourceWritePlatformService commandWritePlatformService;
-    private final SqlValidator sqlValidator;
+    private final DefaultToApiJsonSerializer<String> apiJsonSerializer;
 
     @GET
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
@@ -79,10 +79,8 @@ public class TellerApiResource {
     @Operation(summary = "List all tellers", description = "Retrieves list tellers")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = TellerApiResourceSwagger.GetTellersResponse.class)))) })
-    public String getTellerData(@QueryParam("officeId") @Parameter(description = "officeId") final Long officeId) {
-        final Collection<TellerData> foundTellers = this.readPlatformService.getTellers(officeId);
-
-        return this.jsonSerializer.serialize(foundTellers);
+    public Collection<TellerData> getTellerData(@QueryParam("officeId") @Parameter(description = "officeId") final Long officeId) {
+        return readPlatformService.getTellers(officeId);
     }
 
     @GET
@@ -92,10 +90,8 @@ public class TellerApiResource {
     @Operation(summary = "Retrieve tellers", description = "")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.GetTellersResponse.class))) })
-    public String findTeller(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId) {
-        final TellerData teller = this.readPlatformService.findTeller(tellerId);
-
-        return this.jsonSerializer.serialize(teller);
+    public TellerData findTeller(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId) {
+        return readPlatformService.findTeller(tellerId);
     }
 
     @POST
@@ -106,12 +102,10 @@ public class TellerApiResource {
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.PostTellersRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.PostTellersResponse.class))) })
-    public String createTeller(@Parameter(hidden = true) final String tellerData) {
-        final CommandWrapper request = new CommandWrapperBuilder().createTeller().withJson(tellerData).build();
+    public CommandProcessingResult createTeller(@Parameter(hidden = true) TellerRequest tellerData) {
+        final CommandWrapper request = new CommandWrapperBuilder().createTeller().withJson(apiJsonSerializer.serialize(tellerData)).build();
 
-        final CommandProcessingResult result = this.commandWritePlatformService.logCommandSource(request);
-
-        return this.jsonSerializer.serialize(result);
+        return this.commandWritePlatformService.logCommandSource(request);
     }
 
     @PUT
@@ -122,25 +116,21 @@ public class TellerApiResource {
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.PutTellersRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.PutTellersResponse.class))) })
-    public String updateTeller(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
-            @Parameter(hidden = true) final String tellerData) {
-        final CommandWrapper request = new CommandWrapperBuilder().updateTeller(tellerId).withJson(tellerData).build();
+    public CommandProcessingResult updateTeller(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
+            @Parameter(hidden = true) TellerRequest tellerData) {
+        final CommandWrapper request = new CommandWrapperBuilder().updateTeller(tellerId).withJson(apiJsonSerializer.serialize(tellerData))
+                .build();
 
-        final CommandProcessingResult result = this.commandWritePlatformService.logCommandSource(request);
-
-        return this.jsonSerializer.serialize(result);
+        return this.commandWritePlatformService.logCommandSource(request);
     }
 
     @DELETE
     @Path("{tellerId}")
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
-    public String deleteTeller(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId) {
+    public CommandProcessingResult deleteTeller(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId) {
         final CommandWrapper request = new CommandWrapperBuilder().deleteTeller(tellerId).build();
-
-        final CommandProcessingResult result = this.commandWritePlatformService.logCommandSource(request);
-
-        return this.jsonSerializer.serialize(result);
+        return this.commandWritePlatformService.logCommandSource(request);
     }
 
     @GET
@@ -150,7 +140,7 @@ public class TellerApiResource {
     @Operation(summary = "List Cashiers", description = "")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.GetTellersTellerIdCashiersResponse.class))) })
-    public String getCashierData(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
+    public CashiersForTeller getCashierData(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
             @QueryParam("fromdate") @Parameter(description = "fromdate") final String fromDateStr,
             @QueryParam("todate") @Parameter(description = "todate") final String toDateStr) {
         final DateTimeFormatter dateFormatter = DateTimeFormatter.BASIC_ISO_DATE;
@@ -161,14 +151,7 @@ public class TellerApiResource {
         final TellerData teller = this.readPlatformService.findTeller(tellerId);
         final Collection<CashierData> cashiers = this.readPlatformService.getCashiersForTeller(tellerId, fromDate, toDate);
 
-        CashiersForTeller cashiersForTeller = new CashiersForTeller();
-        cashiersForTeller.cashiers = cashiers;
-        cashiersForTeller.tellerId = tellerId;
-        cashiersForTeller.tellerName = teller.getName();
-        cashiersForTeller.officeId = teller.getOfficeId();
-        cashiersForTeller.officeName = teller.getOfficeName();
-
-        return this.jsonSerializer.serialize(cashiersForTeller);
+        return new CashiersForTeller(tellerId, teller.getName(), teller.getOfficeId(), teller.getOfficeName(), cashiers);
     }
 
     @GET
@@ -178,11 +161,9 @@ public class TellerApiResource {
     @Operation(summary = "Retrieve a cashier", description = "")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.GetTellersTellerIdCashiersCashierIdResponse.class))) })
-    public String findCashierData(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
+    public CashierData findCashierData(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
             @PathParam("cashierId") @Parameter(description = "cashierId") final Long cashierId) {
-        final CashierData cashier = this.readPlatformService.findCashier(cashierId);
-
-        return this.jsonSerializer.serialize(cashier);
+        return readPlatformService.findCashier(cashierId);
     }
 
     @GET
@@ -192,14 +173,12 @@ public class TellerApiResource {
     @Operation(summary = "Find Cashiers", description = "")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.GetTellersTellerIdCashiersTemplateResponse.class))) })
-    public String getCashierTemplate(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId) {
+    public CashierData getCashierTemplate(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId) {
 
         final TellerData teller = this.readPlatformService.findTeller(tellerId);
         Long officeId = teller.getOfficeId();
 
-        final CashierData cashier = this.readPlatformService.retrieveCashierTemplate(officeId, tellerId, true);
-
-        return this.jsonSerializer.serialize(cashier);
+        return this.readPlatformService.retrieveCashierTemplate(officeId, tellerId, true);
     }
 
     @POST
@@ -212,13 +191,12 @@ public class TellerApiResource {
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.PostTellersTellerIdCashiersRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.PostTellersTellerIdCashiersResponse.class))) })
-    public String createCashier(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
-            @Parameter(hidden = true) final String cashierData) {
-        final CommandWrapper request = new CommandWrapperBuilder().allocateTeller(tellerId).withJson(cashierData).build();
+    public CommandProcessingResult createCashier(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
+            @Parameter(hidden = true) final CashierRequest cashierData) {
+        final CommandWrapper request = new CommandWrapperBuilder().allocateTeller(tellerId)
+                .withJson(apiJsonSerializer.serialize(cashierData)).build();
 
-        final CommandProcessingResult result = this.commandWritePlatformService.logCommandSource(request);
-
-        return this.jsonSerializer.serialize(result);
+        return this.commandWritePlatformService.logCommandSource(request);
     }
 
     @PUT
@@ -229,15 +207,14 @@ public class TellerApiResource {
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.PutTellersTellerIdCashiersCashierIdRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.PutTellersTellerIdCashiersCashierIdResponse.class))) })
-    public String updateCashier(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
+    public CommandProcessingResult updateCashier(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
             @PathParam("cashierId") @Parameter(description = "cashierId") final Long cashierId,
-            @Parameter(hidden = true) final String cashierDate) {
-        final CommandWrapper request = new CommandWrapperBuilder().updateAllocationTeller(tellerId, cashierId).withJson(cashierDate)
-                .build();
+            @Parameter(hidden = true) final CashierRequest cashierDate) {
+        final CommandWrapper request = new CommandWrapperBuilder().updateAllocationTeller(tellerId, cashierId)
+                .withJson(apiJsonSerializer.serialize(cashierDate)).build();
 
-        final CommandProcessingResult result = this.commandWritePlatformService.logCommandSource(request);
+        return this.commandWritePlatformService.logCommandSource(request);
 
-        return this.jsonSerializer.serialize(result);
     }
 
     @DELETE
@@ -247,13 +224,12 @@ public class TellerApiResource {
     @Operation(summary = "Delete Cashier", description = "")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.DeleteTellersTellerIdCashiersCashierIdResponse.class))) })
-    public String deleteCashier(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
+    public CommandProcessingResult deleteCashier(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
             @PathParam("cashierId") @Parameter(description = "cashierId") final Long cashierId) {
         final CommandWrapper request = new CommandWrapperBuilder().deleteAllocationTeller(tellerId, cashierId).build();
 
-        final CommandProcessingResult result = this.commandWritePlatformService.logCommandSource(request);
+        return this.commandWritePlatformService.logCommandSource(request);
 
-        return this.jsonSerializer.serialize(result);
     }
 
     @POST
@@ -264,15 +240,13 @@ public class TellerApiResource {
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.PostTellersTellerIdCashiersCashierIdAllocateRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.PostTellersTellerIdCashiersCashierIdAllocateResponse.class))) })
-    public String allocateCashToCashier(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
+    public CommandProcessingResult allocateCashToCashier(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
             @PathParam("cashierId") @Parameter(description = "cashierId") final Long cashierId,
-            @Parameter(hidden = true) final String cashierTxnData) {
-        final CommandWrapper request = new CommandWrapperBuilder().allocateCashToCashier(tellerId, cashierId).withJson(cashierTxnData)
-                .build();
+            @Parameter(hidden = true) CashierTransactionRequest cashierTxnData) {
+        final CommandWrapper request = new CommandWrapperBuilder().allocateCashToCashier(tellerId, cashierId)
+                .withJson(apiJsonSerializer.serialize(cashierTxnData)).build();
 
-        final CommandProcessingResult result = this.commandWritePlatformService.logCommandSource(request);
-
-        return this.jsonSerializer.serialize(result);
+        return this.commandWritePlatformService.logCommandSource(request);
 
     }
 
@@ -284,16 +258,13 @@ public class TellerApiResource {
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.PostTellersTellerIdCashiersCashierIdSettleRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.PostTellersTellerIdCashiersCashierIdSettleResponse.class))) })
-    public String settleCashFromCashier(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
+    public CommandProcessingResult settleCashFromCashier(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
             @PathParam("cashierId") @Parameter(description = "cashierId") final Long cashierId,
-            @Parameter(hidden = true) final String cashierTxnData) {
-        final CommandWrapper request = new CommandWrapperBuilder().settleCashFromCashier(tellerId, cashierId).withJson(cashierTxnData)
-                .build();
+            @Parameter(hidden = true) CashierTransactionRequest cashierTxnData) {
+        final CommandWrapper request = new CommandWrapperBuilder().settleCashFromCashier(tellerId, cashierId)
+                .withJson(apiJsonSerializer.serialize(cashierTxnData)).build();
 
-        final CommandProcessingResult result = this.commandWritePlatformService.logCommandSource(request);
-
-        return this.jsonSerializer.serialize(result);
-
+        return this.commandWritePlatformService.logCommandSource(request);
     }
 
     @GET
@@ -303,28 +274,18 @@ public class TellerApiResource {
     @Operation(summary = "Retrieve Cashier Transactions", description = "")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.GetTellersTellerIdCashiersCashiersIdTransactionsResponse.class))) })
-    public String getTransactionsForCashier(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
+    public Page<CashierTransactionData> getTransactionsForCashier(
+            @PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
             @PathParam("cashierId") @Parameter(description = "cashierId") final Long cashierId,
             @QueryParam("currencyCode") @Parameter(description = "currencyCode") final String currencyCode,
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
             @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder) {
-        // TODO: can we remove these 2 calls? we don't use the results, but left it here in case something is done in
-        // the functions
-        this.readPlatformService.findTeller(tellerId);
-        this.readPlatformService.findCashier(cashierId);
 
-        final LocalDate fromDate = null;
-        final LocalDate toDate = null;
-        sqlValidator.validate(orderBy);
-        sqlValidator.validate(sortOrder);
         final SearchParameters searchParameters = SearchParameters.builder().limit(limit).offset(offset).orderBy(orderBy)
                 .sortOrder(sortOrder).build();
-        final Page<CashierTransactionData> cashierTxns = this.readPlatformService.retrieveCashierTransactions(cashierId, false, fromDate,
-                toDate, currencyCode, searchParameters);
-
-        return this.jsonSerializer.serialize(cashierTxns);
+        return this.readPlatformService.retrieveCashierTransactions(cashierId, false, null, null, currencyCode, searchParameters);
     }
 
     @GET
@@ -334,30 +295,20 @@ public class TellerApiResource {
     @Operation(summary = "Retrieve Transactions With Summary For Cashier", description = "")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.GetTellersTellerIdCashiersCashiersIdSummaryAndTransactionsResponse.class))) })
-    public String getTransactionsWithSummaryForCashier(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
+    public CashierTransactionsWithSummaryData getTransactionsWithSummaryForCashier(
+            @PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
             @PathParam("cashierId") @Parameter(description = "cashierId") final Long cashierId,
             @QueryParam("currencyCode") @Parameter(description = "currencyCode") final String currencyCode,
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
             @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder) {
-        // TODO: can we remove these 2 calls? we don't use the results, but left it here in case something is done in
-        // the functions
-        this.readPlatformService.findTeller(tellerId);
-        this.readPlatformService.findCashier(cashierId);
 
-        final LocalDate fromDate = null;
-        final LocalDate toDate = null;
-
-        sqlValidator.validate(orderBy);
-        sqlValidator.validate(sortOrder);
         final SearchParameters searchParameters = SearchParameters.builder().limit(limit).offset(offset).orderBy(orderBy)
                 .sortOrder(sortOrder).build();
 
-        final CashierTransactionsWithSummaryData cashierTxnWithSummary = this.readPlatformService
-                .retrieveCashierTransactionsWithSummary(cashierId, false, fromDate, toDate, currencyCode, searchParameters);
-
-        return this.jsonSerializer.serialize(cashierTxnWithSummary);
+        return this.readPlatformService.retrieveCashierTransactionsWithSummary(cashierId, false, null, null, currencyCode,
+                searchParameters);
     }
 
     @GET
@@ -367,61 +318,44 @@ public class TellerApiResource {
     @Operation(summary = "Retrieve Cashier Transaction Template", description = "")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.GetTellersTellerIdCashiersCashiersIdTransactionsTemplateResponse.class))) })
-    public String getCashierTxnTemplate(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
+    public CashierTransactionData getCashierTxnTemplate(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
             @PathParam("cashierId") @Parameter(description = "cashierId") final Long cashierId) {
 
-        final CashierTransactionData cashierTxnTemplate = this.readPlatformService.retrieveCashierTxnTemplate(cashierId);
-
-        return this.jsonSerializer.serialize(cashierTxnTemplate);
+        return this.readPlatformService.retrieveCashierTxnTemplate(cashierId);
     }
 
     @GET
     @Path("{tellerId}/transactions")
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
-    public String getTransactionData(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
+    public Collection<TellerTransactionData> getTransactionData(
+            @PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
             @QueryParam("dateRange") @Parameter(description = "dateRange") final String dateRange) {
         final DateRange dateRangeHolder = DateRange.fromString(dateRange);
 
-        final Collection<TellerTransactionData> transactions = this.readPlatformService.fetchTellerTransactionsByTellerId(tellerId,
-                dateRangeHolder.getStartDate(), dateRangeHolder.getEndDate());
-
-        return this.jsonSerializer.serialize(transactions);
+        return this.readPlatformService.fetchTellerTransactionsByTellerId(tellerId, dateRangeHolder.getStartDate(),
+                dateRangeHolder.getEndDate());
     }
 
     @GET
     @Path("{tellerId}/transactions/{transactionId}")
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
-    public String findTransactionData(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerid,
+    public TellerTransactionData findTransactionData(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerid,
             @PathParam("transactionId") @Parameter(description = "transactionId") final Long transactionId) {
-        final TellerTransactionData transaction = this.readPlatformService.findTellerTransaction(transactionId);
-
-        return this.jsonSerializer.serialize(transaction);
+        return this.readPlatformService.findTellerTransaction(transactionId);
     }
 
     @GET
     @Path("{tellerId}/journals")
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
-    public String getJournalData(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
+    public Collection<TellerJournalData> getJournalData(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
             @QueryParam("cashierId") @Parameter(description = "cashierId") final Long cashierDate,
             @QueryParam("dateRange") @Parameter(description = "dateRange") final String dateRange) {
         final DateRange dateRangeHolder = DateRange.fromString(dateRange);
 
-        final Collection<TellerJournalData> journals = this.readPlatformService.fetchTellerJournals(tellerId, cashierDate,
-                dateRangeHolder.getStartDate(), dateRangeHolder.getEndDate());
-
-        return this.jsonSerializer.serialize(journals);
-    }
-
-    private static final class CashiersForTeller {
-
-        public Long tellerId;
-        public String tellerName;
-        public Long officeId;
-        public String officeName;
-        public Collection<CashierData> cashiers;
-
+        return this.readPlatformService.fetchTellerJournals(tellerId, cashierDate, dateRangeHolder.getStartDate(),
+                dateRangeHolder.getEndDate());
     }
 }
