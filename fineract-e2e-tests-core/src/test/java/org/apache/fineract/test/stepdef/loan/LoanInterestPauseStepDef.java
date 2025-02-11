@@ -35,7 +35,7 @@ public class LoanInterestPauseStepDef extends AbstractStepDef {
     @Autowired
     private LoanInterestPauseApi loanInterestPauseApi;
 
-    @And("Create interest pause period with start date {string} and end date {string}")
+    @And("Create an interest pause period with start date {string} and end date {string}")
     public void createInterestPause(final String startDate, final String endDate) throws IOException {
         final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         assert loanResponse.body() != null;

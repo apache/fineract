@@ -186,16 +186,22 @@ Feature: LoanProduct
     When Admin sets the business date to "12 December 2021"
     When Admin creates a client with random data
     And Admin successfully creates a new customised Loan submitted on date: "12 December 2021", with Principal: "1000", a loanTermFrequency: 1 months, and numberOfRepayments: 1
-    Then Loan Product Charge-Off reasons options from loan product template have 2 options, with the following data:
+    Then Loan Product Charge-Off reasons options from loan product template have 5 options, with the following data:
       | Charge-Off Reason Name | Description | Position | Is Active | Is Mandatory |
       | debit_card             |             | 0        | true      | false        |
       | credit_card            |             | 1        | true      | false        |
+      | Fraud                  |             | 2        | true      | false        |
+      | Delinquent             |             | 3        | true      | false        |
+      | Other                  |             | 4        | true      | false        |
 
   Scenario: As a user I would like to verify Charge-Off reasons options in specific loan product response
     When Admin sets the business date to "12 December 2021"
     When Admin creates a client with random data
     And Admin successfully creates a new customised Loan submitted on date: "12 December 2021", with Principal: "1000", a loanTermFrequency: 1 months, and numberOfRepayments: 1
-    Then Loan Product "LP1" Charge-Off reasons options from specific loan product have 2 options, with the following data:
+    Then Loan Product "LP1" Charge-Off reasons options from specific loan product have 5 options, with the following data:
       | Charge-Off Reason Name | Description | Position | Is Active | Is Mandatory |
       | debit_card             |             | 0        | true      | false        |
       | credit_card            |             | 1        | true      | false        |
+      | Fraud                  |             | 2        | true      | false        |
+      | Delinquent             |             | 3        | true      | false        |
+      | Other                  |             | 4        | true      | false        |

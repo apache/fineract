@@ -52,6 +52,16 @@ public class SchedulerStepDef extends AbstractStepDef {
         jobService.executeAndWait(DefaultJob.LOAN_DELINQUENCY_CLASSIFICATION);
     }
 
+    @When("Admin runs the Add Accrual Transactions For Loans With Income Posted As Transactions job")
+    public void runAddAccrualTransactionsForLoansWithIncomePostedAsTransactions() {
+        jobService.executeAndWait(DefaultJob.ADD_ACCRUAL_TRANSACTIONS_FOR_LOANS_WITH_INCOME_POSTED_AS_TRANSACTIONS);
+    }
+
+    @When("Admin runs the Recalculate Interest for Loans job")
+    public void runRecalculateInterestForLoans() {
+        jobService.executeAndWait(DefaultJob.RECALCULATE_INTEREST_FOR_LOANS);
+    }
+
     @When("Admin runs COB job")
     public void runCOB() {
         jobService.executeAndWait(DefaultJob.LOAN_COB);

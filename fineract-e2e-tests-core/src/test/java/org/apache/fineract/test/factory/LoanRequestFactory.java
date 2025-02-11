@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.client.models.InterestPauseRequestDto;
 import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
@@ -278,5 +279,10 @@ public class LoanRequestFactory {
     public static PostLoansLoanIdTransactionsRequest defaultWriteOffRequest() {
         return new PostLoansLoanIdTransactionsRequest().transactionDate(DEFAULT_TRANSACTION_DATE).dateFormat(DATE_FORMAT)
                 .locale(DEFAULT_LOCALE).note("Write Off");
+    }
+
+    public static InterestPauseRequestDto defaultInterestPauseRequest() {
+        return new InterestPauseRequestDto().dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE).startDate(DEFAULT_TRANSACTION_DATE)
+                .endDate(DEFAULT_TRANSACTION_DATE);
     }
 }

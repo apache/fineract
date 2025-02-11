@@ -71,6 +71,10 @@ public final class ErrorMessageHelper {
         return "Loan disbursal amount can't be greater than maximum applied loan amount calculation. Total disbursed amount: [0-9]*  Maximum disbursal amount: [0-9]*";
     }
 
+    public static String disburseChargedOffLoanFailure() {
+        return "Loan: [0-9]* disbursement is not allowed on charged-off loan.";
+    }
+
     public static String loanSubmitDateInFutureFailureMsg() {
         return "The date on which a loan is submitted cannot be in the future.";
     }
@@ -273,6 +277,10 @@ public final class ErrorMessageHelper {
                 expectedToStr);
     }
 
+    public static String transactionHasNullResourceValue(String transactionType, String resourceName) {
+        return String.format("The transaction %s should has non-null value for %s, but it is null.", transactionType, resourceName);
+    }
+
     public static String wrongDataInChargesName(String actual, String expected) {
         return String.format("Wrong data in Charges / Name. Actual value is: %s - But expected value is: %s", actual, expected);
     }
@@ -447,6 +455,10 @@ public final class ErrorMessageHelper {
 
     public static String idempotencyKeyNoMatch(String actual, String expected) {
         return String.format("Idempotency key is not matching:  Actual value is: %s - But expected value is: %s", actual, expected);
+    }
+
+    public static String wrongNumberOfLinesInRepaymentSchedule(int actual, int expected) {
+        return wrongNumberOfLinesInRepaymentSchedule(null, actual, expected);
     }
 
     public static String wrongNumberOfLinesInRepaymentSchedule(String resourceId, int actual, int expected) {
