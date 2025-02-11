@@ -583,6 +583,11 @@ public class ExternalEventConfigurationHelper {
         loanTransactionInterestRefundPreBusinessEvent.put("enabled", false);
         defaults.add(loanTransactionInterestRefundPreBusinessEvent);
 
+        Map<String, Object> loanMigrationCompletedBusinessEvent = new HashMap<>();
+        loanMigrationCompletedBusinessEvent.put("type", "LoanMigrationCompletedBusinessEvent");
+        loanMigrationCompletedBusinessEvent.put("enabled", false);
+        defaults.add(loanMigrationCompletedBusinessEvent);
+
         return defaults;
     }
 

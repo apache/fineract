@@ -3785,4 +3785,20 @@ public class CommandWrapperBuilder {
         this.href = "/v1/loans/external-id/" + loanExternalId + "/interest-pauses/" + variationId;
         return this;
     }
+
+    public CommandWrapperBuilder initiateLoanMigration(final Long loanId) {
+        this.actionName = "CREATE";
+        this.entityName = "LOAN_MIGRATION";
+        this.loanId = loanId;
+        this.href = "/v1/loans/" + loanId + "/migration";
+        return this;
+    }
+
+    public CommandWrapperBuilder initiateLoanMigrationByExternalId(final String loanExternalId) {
+        this.actionName = "CREATE";
+        this.entityName = "LOAN_MIGRATION";
+        this.loanExternalId = new ExternalId(loanExternalId);
+        this.href = "/v1/loans/external-id/" + loanExternalId + "/migration";
+        return this;
+    }
 }

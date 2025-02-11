@@ -47,7 +47,8 @@ buildscript {
                 'fineract-e2e-tests-core',
                 'fineract-e2e-tests-runner',
                 'fineract-progressive-loan',
-                'fineract-progressive-loan-embeddable-schedule-generator'
+                'fineract-progressive-loan-embeddable-schedule-generator',
+                'fineract-migration'
             ].contains(it.name)
         }
         fineractPublishProjects = subprojects.findAll{
@@ -68,7 +69,8 @@ buildscript {
                 'fineract-branch',
                 'fineract-document',
                 'fineract-progressive-loan',
-                'fineract-progressive-loan-embeddable-schedule-generator'
+                'fineract-progressive-loan-embeddable-schedule-generator',
+                'fineract-migration'
             ].contains(it.name)
         }
         npmRepository = 'https://npm.pkg.github.com'

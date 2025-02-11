@@ -33,6 +33,7 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.LoanChargeb
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanCloseAsRescheduleBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanCloseBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanCreatedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.LoanMigrationCompletedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.product.LoanProductCreateBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionMakeRepaymentPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.savings.SavingsApproveBusinessEvent;
@@ -94,6 +95,8 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         businessEventNotifierService.addPostBusinessEventListener(ShareAccountCreateBusinessEvent.class, new ShareAccountCreatedListener());
         businessEventNotifierService.addPostBusinessEventListener(ShareAccountApproveBusinessEvent.class,
                 new ShareAccountApprovedListener());
+        businessEventNotifierService.addPostBusinessEventListener(LoanMigrationCompletedBusinessEvent.class,
+                new LoanMigrationCompletedBusinessListener());
     }
 
     private final class ClientCreatedListener implements BusinessEventListener<ClientCreateBusinessEvent> {
@@ -310,6 +313,16 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
             ShareAccount shareAccount = event.get();
             buildNotification("ACTIVATE_SHAREACCOUNT", "shareAccount", shareAccount.getId(), "Share account approved", "approved",
                     context.authenticatedUser().getId(), shareAccount.getOfficeId());
+        }
+    }
+
+    private final class LoanMigrationCompletedBusinessListener implements BusinessEventListener<LoanMigrationCompletedBusinessEvent> {
+
+        @Override
+        public void onBusinessEvent(LoanMigrationCompletedBusinessEvent event) {
+            Loan loan = event.get();
+            buildNotification("MIGRATE_LOAN", "loan", loan.getId(), "Migrate loan", "migrate", context.authenticatedUser().getId(),
+                    loan.getOfficeId());
         }
     }
 

@@ -95,6 +95,7 @@ import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
+import org.apache.fineract.migration.domain.LoanMigrationStatus;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -128,6 +129,7 @@ public class LoanTransactionHelper {
     private static final String RECOVER_FROM_GUARANTORS_COMMAND = "recoverGuarantees";
     private static final String MAKE_REFUND_BY_CASH_COMMAND = "refundByCash";
     private static final String FORECLOSURE_COMMAND = "foreclosure";
+    private static final String MIGRATION_LOAN_COMMAND = "migration";
     private static final Gson GSON = new JSON().getGson();
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
@@ -972,6 +974,30 @@ public class LoanTransactionHelper {
         return Utils.performServerGet(requestSpec, responseSpec, url);
     }
 
+    public PostLoansLoanIdTransactionsResponse createMigrationByLoanId(final LoanMigrationStatus action, final Integer loanID) {
+        log.info("Creating migration for Loan {} with status {}", loanID, action.name());
+        String body = getMigrationLoanBodyAsJSON(action.name());
+        return postLoanTransaction(createLoanMigration(MIGRATION_LOAN_COMMAND, loanID), body);
+    }
+
+    public PostLoansLoanIdTransactionsResponse createMigrationByExternalId(final LoanMigrationStatus action, final String externalId) {
+        log.info("Creating migration for Loan {} with status {}", externalId, action.name());
+        String body = getMigrationLoanBodyAsJSON(action.name());
+        return postLoanTransaction(createLoanMigration(MIGRATION_LOAN_COMMAND, externalId), body);
+    }
+
+    public String retrieveLoanMigrationByLoanId(final Integer loanID) {
+        log.info("Retrieving loan migration for Loan ID {}", loanID);
+        String url = retrieveLoanMigration(loanID);
+        return Utils.performServerGet(requestSpec, responseSpec, url);
+    }
+
+    public String retrieveLoanMigrationByExternalId(final String externalId) {
+        log.info("Retrieving loan migration for External ID {}", externalId);
+        String url = retrieveLoanMigration(externalId);
+        return Utils.performServerGet(requestSpec, responseSpec, url);
+    }
+
     public PostLoansLoanIdTransactionsResponse makeInterestPaymentWaiver(final Long loanId,
             final PostLoansLoanIdTransactionsRequest request) {
         return Calls.ok(
@@ -1768,6 +1794,12 @@ public class LoanTransactionHelper {
         return new Gson().toJson(map);
     }
 
+    private String getMigrationLoanBodyAsJSON(final String action) {
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("action", action);
+        return new Gson().toJson(map);
+    }
+
     // TODO: Rewrite to use fineract-client instead!
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
@@ -2110,6 +2142,23 @@ public class LoanTransactionHelper {
     private String deleteInterestPause(final Long termVariationId, final String externalID) {
         return "/fineract-provider/api/v1/loans/external-id/" + externalID + "/interest-pauses/" + termVariationId + "?"
                 + Utils.TENANT_IDENTIFIER;
+    }
+
+    private String createLoanMigration(final String command, final Integer loanID) {
+        return "/fineract-provider/api/v1/loans/" + loanID + "/migration?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
+    }
+
+    private String createLoanMigration(final String command, final String externalId) {
+        return "/fineract-provider/api/v1/loans/external-id/" + externalId + "/migration?command=" + command + "&"
+                + Utils.TENANT_IDENTIFIER;
+    }
+
+    private String retrieveLoanMigration(final Integer loanID) {
+        return "/fineract-provider/api/v1/loans/" + loanID + "/migration?" + Utils.TENANT_IDENTIFIER;
+    }
+
+    private String retrieveLoanMigration(final String externalId) {
+        return "/fineract-provider/api/v1/loans/external-id/" + externalId + "/migration?" + Utils.TENANT_IDENTIFIER;
     }
 
     // TODO: Rewrite to use fineract-client instead!
