@@ -996,6 +996,24 @@ public final class BatchHelper {
         return createTransactionRequest(requestId, reference, "payoutRefund", amount, LocalDate.now(Utils.getZoneIdOfTenant()));
     }
 
+    public static BatchRequest chargeOffRequest(final Long requestId, final Long referenceId) {
+        return chargeOffRequest(requestId, referenceId, LocalDate.now(Utils.getZoneIdOfTenant()));
+    }
+
+    public static BatchRequest chargeOffRequest(final Long requestId, final Long referenceId, LocalDate date) {
+        final BatchRequest br = new BatchRequest();
+
+        br.setRequestId(requestId);
+        br.setReference(referenceId);
+        br.setRelativeUrl(String.format("v1/loans/$.loanId/transactions?command=%s", "charge-off"));
+        br.setMethod("POST");
+        String dateString = date.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+        br.setBody(String.format("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", " + "\"transactionDate\": \"%s\", \"note\":null}",
+                dateString));
+
+        return br;
+    }
+
     /**
      * Creates and returns a
      * {@link org.apache.fineract.batch.command.internal.CreateLoanRescheduleRequestCommandStrategy} request with given

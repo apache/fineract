@@ -64,7 +64,7 @@ public class CreateTransactionLoanCommandStrategy implements CommandStrategy {
         final List<String> pathParameters = Splitter.on('/').splitToList(relativeUrlWithoutVersion(request));
         final Long loanId = Long.parseLong(pathParameters.get(1));
 
-        final Pattern commandPattern = Pattern.compile("^?command=[a-zA-Z]+");
+        final Pattern commandPattern = Pattern.compile("^?command=[a-zA-Z\\-]+");
         final Matcher commandMatcher = commandPattern.matcher(pathParameters.get(2));
 
         if (!commandMatcher.find()) {

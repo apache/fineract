@@ -2612,6 +2612,73 @@ public class BatchApiTest extends BaseLoanIntegrationTest {
                 transactionWithdrawal2.get("runningBalance"), "Verify running balance after second withdrawal");
     }
 
+    @Test
+    public void shouldReturnOkStatusForBatchChargeOff() {
+
+        final String loanProductJSON = new LoanProductTestBuilder() //
+                .withPrincipal("10000000.00") //
+                .withNumberOfRepayments("24") //
+                .withRepaymentAfterEvery("1") //
+                .withRepaymentTypeAsMonth() //
+                .withinterestRatePerPeriod("2") //
+                .withInterestRateFrequencyTypeAsMonths() //
+                .withAmortizationTypeAsEqualPrincipalPayment() //
+                .withInterestTypeAsDecliningBalance() //
+                .currencyDetails("0", "100").build(null);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+                clientID.toString(), collateralId);
+        Assertions.assertNotNull(clientCollateralId);
+
+        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+
+        // Create a createClient Request
+        final BatchRequest br1 = BatchHelper.createClientRequest(4730L, "");
+
+        // Create a activateClient Request
+        final BatchRequest br2 = BatchHelper.activateClientRequest(4731L, 4730L);
+
+        // Create a ApplyLoan Request
+        final BatchRequest br3 = BatchHelper.applyLoanRequest(4732L, 4731L, productId, clientCollateralId);
+
+        // Create a approveLoan Request
+        final BatchRequest br4 = BatchHelper.approveLoanRequest(4733L, 4732L);
+
+        // Create a disburseLoan Request
+        final BatchRequest br5 = BatchHelper.disburseLoanRequest(4734L, 4733L);
+
+        // Create a loanRepay Request
+        final BatchRequest br6 = BatchHelper.repayLoanRequest(4735L, 4734L, "500");
+
+        // Create a loanRepay Request
+        final BatchRequest br7 = BatchHelper.repayLoanRequest(4736L, 4734L, "500");
+
+        final BatchRequest br8 = BatchHelper.chargeOffRequest(4737L, 4736L);
+
+        final List<BatchRequest> batchRequests = new ArrayList<>();
+
+        batchRequests.add(br1);
+        batchRequests.add(br2);
+        batchRequests.add(br3);
+        batchRequests.add(br4);
+        batchRequests.add(br5);
+        batchRequests.add(br6);
+        batchRequests.add(br7);
+        batchRequests.add(br8);
+
+        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
+
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+                jsonifiedRequest);
+
+        Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(7).getStatusCode(), "Verify Status Code 200 for ChargeOff");
+    }
+
     /**
      * Delete datatable
      *

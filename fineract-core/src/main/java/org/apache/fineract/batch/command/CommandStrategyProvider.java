@@ -62,7 +62,7 @@ public class CommandStrategyProvider {
     /**
      * Regex pattern for specifying a mandatory query param that has key = 'command'.
      */
-    private static final String MANDATORY_COMMAND_PARAM_REGEX = "\\?command=[\\w]+";
+    private static final String MANDATORY_COMMAND_PARAM_REGEX = "\\?command=[\\w\\-]+";
 
     /**
      * Regex pattern for specifying a UUID param.

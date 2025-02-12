@@ -65,7 +65,7 @@ public class CreateTransactionByLoanExternalIdCommandStrategy implements Command
         final List<String> pathParameters = Splitter.on('/').splitToList(relativeUrlWithoutVersion(request));
         final String loanExternalId = pathParameters.get(2);
 
-        final Pattern commandPattern = Pattern.compile("^?command=[a-zA-Z]+");
+        final Pattern commandPattern = Pattern.compile("^?command=[a-zA-Z\\-]+");
         final Matcher commandMatcher = commandPattern.matcher(pathParameters.get(3));
 
         if (!commandMatcher.find()) {
