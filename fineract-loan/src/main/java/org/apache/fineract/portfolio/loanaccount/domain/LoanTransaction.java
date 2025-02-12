@@ -1035,4 +1035,8 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
 
     // TODO missing hashCode(), equals(Object obj), but probably OK as long as
     // this is never stored in a Collection.
+
+    public void updateTransactionDate(final LocalDate transactionDate) {
+        this.dateOf = transactionDate;
+    }
 }

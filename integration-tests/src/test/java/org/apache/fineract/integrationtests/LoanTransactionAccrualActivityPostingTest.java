@@ -417,7 +417,6 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
                     transaction(6.48, "Accrual Activity", "17 November 2024"), //
                     transaction(4.75, "Accrual Activity", "17 December 2024"), //
                     transaction(18.31, "Accrual Activity", "17 January 2025")); //
-
         });
     }
 
@@ -719,7 +718,7 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
 
             Long localLoanProductId = createLoanProductAccountingAccrualPeriodicAdvancedPaymentAllocation();
             loanId.set(applyForLoanApplicationAdvancedPaymentAllocation(client.getClientId(), localLoanProductId, BigDecimal.valueOf(40000),
-                    disbursementDay));
+                    disbursementDay, BigDecimal.ZERO));
 
             loanTransactionHelper.approveLoan(loanId.get(), new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000))
                     .dateFormat(DATETIME_PATTERN).approvedOnDate(disbursementDay).locale("en"));
@@ -798,7 +797,7 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
 
             Long localLoanProductId = createLoanProductAccountingAccrualPeriodicAdvancedPaymentAllocation();
             loanId.set(applyForLoanApplicationAdvancedPaymentAllocation(client.getClientId(), localLoanProductId, BigDecimal.valueOf(40000),
-                    disbursementDay));
+                    disbursementDay, BigDecimal.ZERO));
 
             loanTransactionHelper.approveLoan(loanId.get(), new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000))
                     .dateFormat(DATETIME_PATTERN).approvedOnDate(disbursementDay).locale("en"));
@@ -850,7 +849,7 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
         runAt(creationBusinessDay, () -> {
             Long localLoanProductId = createLoanProductAccountingAccrualPeriodicAdvancedPaymentAllocation();
             loanId.set(applyForLoanApplicationAdvancedPaymentAllocation(client.getClientId(), localLoanProductId, BigDecimal.valueOf(40000),
-                    disbursementDay));
+                    disbursementDay, BigDecimal.ZERO));
 
             loanTransactionHelper.approveLoan(loanId.get(), new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000))
                     .dateFormat(DATETIME_PATTERN).approvedOnDate(disbursementDay).locale("en"));
@@ -955,7 +954,7 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
             Long localLoanProductId = createLoanProductAccountingAccrualPeriodicAdvancedPaymentAllocation(true);
 
             loanId.set(applyForLoanApplicationAdvancedPaymentAllocation(client.getClientId(), localLoanProductId, BigDecimal.valueOf(40000),
-                    disbursementDay, disbursementDay2));
+                    disbursementDay, disbursementDay2, BigDecimal.ZERO));
 
             loanTransactionHelper.approveLoan(loanId.get(), new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000))
                     .dateFormat(DATETIME_PATTERN).approvedOnDate(disbursementDay).locale("en"));
@@ -1014,7 +1013,7 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
             Long localLoanProductId = createLoanProductAccountingAccrualPeriodicAdvancedPaymentAllocation(true);
 
             loanId.set(applyForLoanApplicationAdvancedPaymentAllocation(client.getClientId(), localLoanProductId, BigDecimal.valueOf(40000),
-                    disbursementDay, disbursementDay2));
+                    disbursementDay, disbursementDay2, BigDecimal.ZERO));
 
             loanTransactionHelper.approveLoan(loanId.get(), new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000))
                     .dateFormat(DATETIME_PATTERN).approvedOnDate(disbursementDay).locale("en"));
@@ -1119,7 +1118,7 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
         runAt(creationBusinessDay, () -> {
             Long localLoanProductId = createLoanProductAccountingAccrualPeriodicAdvancedPaymentAllocation(true);
             loanId.set(applyForLoanApplicationAdvancedPaymentAllocation(client.getClientId(), localLoanProductId, BigDecimal.valueOf(1000),
-                    disbursementDay, disbursementDay2));
+                    disbursementDay, disbursementDay2, BigDecimal.ZERO));
             loanTransactionHelper.approveLoan(loanId.get(), new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000))
                     .dateFormat(DATETIME_PATTERN).approvedOnDate(disbursementDay).locale("en"));
 
@@ -1391,6 +1390,41 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
         });
     }
 
+    @Test
+    public void testReverseAndReplayedCoupleOfTimesAfterBackdatedRepayment() {
+        final String disbursementDay = "01 January 2025";
+        AtomicReference<Long> loanId = new AtomicReference<>();
+        runAt(disbursementDay, () -> {
+            Long localLoanProductId = createLoanProductAccountingAccrualPeriodicAdvancedPaymentAllocationInterestRecalculation(true);
+            loanId.set(applyForLoanApplicationAdvancedPaymentAllocation(client.getClientId(), localLoanProductId, BigDecimal.valueOf(800),
+                    disbursementDay, disbursementDay, BigDecimal.valueOf(0.3)));
+
+            loanTransactionHelper.approveLoan(loanId.get(), new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(800))
+                    .dateFormat(DATETIME_PATTERN).approvedOnDate(disbursementDay).locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanId.get(), new PostLoansLoanIdRequest().actualDisbursementDate(disbursementDay)
+                    .dateFormat(DATETIME_PATTERN).transactionAmount(BigDecimal.valueOf(800.0)).locale("en"));
+        });
+
+        runAt("02 February 2025", () -> {
+            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId.get()));
+            verifyTransactions(loanId.get(),
+                    transaction(10.60, "Accrual Activity", "01 February 2025", 0.0, 0.0, 10.60, 0.0, 0.0, 0.0, 0.0, false), //
+                    transaction(10.60, "Accrual", "01 February 2025", 0.0, 0.0, 10.60, 0.0, 0.0, 0.0, 0.0, false), //
+                    transaction(800.0, "Disbursement", disbursementDay, 800.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false));
+
+            loanTransactionHelper.makeLoanRepayment("31 January 2025", 900.0F, loanId.get().intValue());
+
+            verifyTransactions(loanId.get(),
+                    transaction(0.34, "Accrual Adjustment", "02 February 2025", 0.0, 0.0, 0.34, 0.0, 0.0, 0.0, 0.0, false), //
+                    transaction(10.60, "Accrual", "01 February 2025", 0.0, 0.0, 10.60, 0.0, 0.0, 0.0, 0.0, false), //
+                    transaction(10.26, "Accrual Activity", "31 January 2025", 0.0, 0.0, 10.26, 0.0, 0.0, 0.0, 0.0, false), //
+                    transaction(900.0, "Repayment", "31 January 2025", 0.0, 800, 10.26, 0.0, 0.0, 0.0, 89.74, false), //
+                    transaction(800.0, "Disbursement", disbursementDay, 800.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false));
+
+        });
+    }
+
     private PostLoanProductsRequest loanProductsRequestInterestDecliningBalanceDailyRecalculationCompoundingNoneAccrualActivity() {
         String name = Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6);
         String shortName = Utils.uniqueRandomStringGenerator("", 4);
@@ -1439,6 +1473,7 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
                 .minInterestRatePerPeriod(0.0)//
                 .interestRatePerPeriod(12.0)//
                 .maxInterestRatePerPeriod(30.0)//
+                .interestRateFrequencyType(2)// Month
                 .interestRateFrequencyType(3)//
                 .repaymentEvery(30)//
                 .repaymentFrequencyType(0L)//
@@ -1631,19 +1666,28 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
     }
 
     private Long createLoanProductAccountingAccrualPeriodicAdvancedPaymentAllocation(boolean isMultiDisburse) {
+        Long resourceId = loanTransactionHelper
+                .createLoanProduct(loanProductAccountingAccrualAdvanvedPaymentAllocationAccrualActivity(isMultiDisburse)).getResourceId();
+        LOG.info("Test Progressive Loan Product Id {} isMultiDisburse {} http://localhost:4200/#/products/loan-products/{1}/general",
+                resourceId, isMultiDisburse);
+        return resourceId;
+    }
+
+    private PostLoanProductsRequest loanProductAccountingAccrualAdvanvedPaymentAllocationAccrualActivity(boolean isMultiDisburse) {
         String name = Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6);
         String shortName = Utils.uniqueRandomStringGenerator("", 4);
         AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation();
-        Long resourceId = loanTransactionHelper.createLoanProduct(new PostLoanProductsRequest().name(name).shortName(shortName)
-                .multiDisburseLoan(isMultiDisburse).maxTrancheCount(isMultiDisburse ? 2 : 1).interestType(isMultiDisburse ? 0 : 1)
+        return new PostLoanProductsRequest().name(name).shortName(shortName).multiDisburseLoan(isMultiDisburse)
+                .maxTrancheCount(isMultiDisburse ? 2 : 1).interestType(isMultiDisburse ? 0 : 1)
                 .interestCalculationPeriodType(isMultiDisburse ? 0 : 1).disallowExpectedDisbursements(isMultiDisburse)
                 .description("Test loan description").currencyCode("USD").digitsAfterDecimal(2).daysInYearType(1).daysInMonthType(1)
                 .recalculationRestFrequencyType(1).rescheduleStrategyMethod(1).loanScheduleType(LoanScheduleType.PROGRESSIVE.name())
-                .recalculationRestFrequencyInterval(0).isInterestRecalculationEnabled(false).locale("en_GB").numberOfRepayments(4)
-                .repaymentFrequencyType(2L).repaymentEvery(1).minPrincipal(100.0).principal(1000.0).maxPrincipal(10000000.0)
-                .amortizationType(1).interestRatePerPeriod(0.0).interestRateFrequencyType(1).dateFormat("dd MMMM yyyy")
+                .recalculationRestFrequencyInterval(0).locale("en_GB").numberOfRepayments(4).repaymentFrequencyType(2L).repaymentEvery(1)
+                .minPrincipal(100.0).principal(1000.0).maxPrincipal(10000000.0).amortizationType(1).interestRatePerPeriod(0.0)
+                .interestRateFrequencyType(1).dateFormat("dd MMMM yyyy")
                 .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION_STRATEGY).paymentAllocation(List.of(defaultAllocation))
-                .accountingRule(3).enableAccrualActivityPosting(true).fundSourceAccountId(fundSource.getAccountID().longValue())//
+                .accountingRule(3).isInterestRecalculationEnabled(false).enableAccrualActivityPosting(true)
+                .fundSourceAccountId(fundSource.getAccountID().longValue())//
                 .loanPortfolioAccountId(loansReceivableAccount.getAccountID().longValue())//
                 .transfersInSuspenseAccountId(suspenseAccount.getAccountID().longValue())//
                 .interestOnLoanAccountId(interestIncomeAccount.getAccountID().longValue())//
@@ -1663,18 +1707,30 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
                 .incomeFromChargeOffFeesAccountId(feeChargeOffAccount.getAccountID().longValue())//
                 .chargeOffExpenseAccountId(chargeOffExpenseAccount.getAccountID().longValue())//
                 .chargeOffFraudExpenseAccountId(chargeOffFraudExpenseAccount.getAccountID().longValue())//
-                .incomeFromChargeOffPenaltyAccountId(penaltyChargeOffAccount.getAccountID().longValue())//
-        ).getResourceId();
+                .incomeFromChargeOffPenaltyAccountId(penaltyChargeOffAccount.getAccountID().longValue());//
+    }
+
+    private Long createLoanProductAccountingAccrualPeriodicAdvancedPaymentAllocationInterestRecalculation(boolean isMultiDisburse) {
+        Long resourceId = loanTransactionHelper
+                .createLoanProduct(loanProductAccountingAccrualAdvanvedPaymentAllocationAccrualActivity(isMultiDisburse) //
+                        .interestRatePerPeriod(10.0) //
+                        .isInterestRecalculationEnabled(true)//
+                        .preClosureInterestCalculationStrategy(1) // TILL_PRE_CLOSE_DATE
+                        .rescheduleStrategyMethod(4) // ADJUST_LAST_UNPAID_PERIOD
+                        .interestRecalculationCompoundingMethod(0) // NONE
+                        .recalculationRestFrequencyType(2) // DAILY
+                        .recalculationRestFrequencyInterval(1)//
+                ).getResourceId();
         LOG.info("Test Progressive Loan Product Id {} isMultiDisburse {} http://localhost:4200/#/products/loan-products/{1}/general",
                 resourceId, isMultiDisburse);
         return resourceId;
     }
 
     private static Long applyForLoanApplicationAdvancedPaymentAllocation(final Long clientID, final Long loanProductID,
-            BigDecimal principal, String applicationDisbursementDate) {
+            BigDecimal principal, String applicationDisbursementDate, BigDecimal interestRatePerPeriod) {
         final PostLoansRequest loanRequest = new PostLoansRequest() //
                 .loanTermFrequency(4).locale("en_GB").loanTermFrequencyType(2).numberOfRepayments(4).repaymentFrequencyType(2)
-                .repaymentEvery(1).principal(principal).amortizationType(1).interestType(0).interestRatePerPeriod(BigDecimal.ZERO)
+                .repaymentEvery(1).principal(principal).amortizationType(1).interestType(0).interestRatePerPeriod(interestRatePerPeriod)
                 .interestCalculationPeriodType(1).dateFormat("dd MMMM yyyy")
                 .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION_STRATEGY).loanType("individual")
                 .expectedDisbursementDate(applicationDisbursementDate).submittedOnDate(applicationDisbursementDate).clientId(clientID)
@@ -1686,10 +1742,11 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
     }
 
     private static Long applyForLoanApplicationAdvancedPaymentAllocation(final Long clientID, final Long loanProductID,
-            BigDecimal principal, String applicationDisbursementDate, String applicationDisbursementDate2) {
+            BigDecimal principal, String applicationDisbursementDate, String applicationDisbursementDate2,
+            BigDecimal interestRatePerPeriod) {
         final PostLoansRequest loanRequest = new PostLoansRequest() //
                 .loanTermFrequency(4).locale("en_GB").loanTermFrequencyType(2).numberOfRepayments(4).repaymentFrequencyType(2)
-                .repaymentEvery(1).principal(principal).amortizationType(1).interestType(0).interestRatePerPeriod(BigDecimal.ZERO)
+                .repaymentEvery(1).principal(principal).amortizationType(1).interestType(0).interestRatePerPeriod(interestRatePerPeriod)
                 .interestCalculationPeriodType(0).dateFormat("dd MMMM yyyy")
                 .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION_STRATEGY).loanType("individual")
                 .submittedOnDate(applicationDisbursementDate).clientId(clientID).expectedDisbursementDate(applicationDisbursementDate2)

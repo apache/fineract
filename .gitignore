@@ -30,3 +30,6 @@ fineract-provider/src/main/generated/
 
 **/out/
 gradleExp/
+
+.run/
+.java-version

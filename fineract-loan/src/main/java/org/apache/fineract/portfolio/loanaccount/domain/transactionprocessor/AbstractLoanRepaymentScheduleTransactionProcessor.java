@@ -239,7 +239,16 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             Money interestPortion = currentInstallment.getInterestCharged(currency);
             Money feeChargesPortion = currentInstallment.getFeeChargesCharged(currency);
             Money penaltyChargesPortion = currentInstallment.getPenaltyChargesCharged(currency);
-            loanTransaction.updateComponentsAndTotal(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
+            if (interestPortion.plus(feeChargesPortion).plus(penaltyChargesPortion).isZero()) {
+                loanTransaction.reverse();
+            } else {
+                loanTransaction.updateComponentsAndTotal(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
+                final Loan loan = loanTransaction.getLoan();
+                if ((loan.isClosedObligationsMet() || loan.isOverPaid()) && currentInstallment.isObligationsMet()
+                        && currentInstallment.isTransactionDateWithinPeriod(currentInstallment.getObligationsMetOnDate())) {
+                    loanTransaction.updateTransactionDate(currentInstallment.getObligationsMetOnDate());
+                }
+            }
         }
     }
 
