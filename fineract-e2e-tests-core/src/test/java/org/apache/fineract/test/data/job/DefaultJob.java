@@ -25,7 +25,9 @@ public enum DefaultJob implements Job {
     INCREASE_BUSINESS_DAY("Increase Business Date by 1 day", "BDT_INC1"), //
     LOAN_DELINQUENCY_CLASSIFICATION("Loan Delinquency Classification", "LA_DECL"), //
     LOAN_COB("Loan COB", "LA_ECOB"), //
-    ACCRUAL_ACTIVITY_POSTING("Accrual Activity Posting", "ACC_ACPO");
+    ACCRUAL_ACTIVITY_POSTING("Accrual Activity Posting", "ACC_ACPO"), ADD_ACCRUAL_TRANSACTIONS_FOR_LOANS_WITH_INCOME_POSTED_AS_TRANSACTIONS(
+            "Add Accrual Transactions For Loans With Income Posted As Transactions",
+            "LA_AATR"), RECALCULATE_INTEREST_FOR_LOANS("Recalculate Interest For Loans", "LA_RINT");
 
     private final String customName;
     private final String shortName;

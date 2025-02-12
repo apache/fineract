@@ -21,6 +21,7 @@ package org.apache.fineract.test.stepdef.loan;
 import static org.apache.fineract.test.data.paymenttype.DefaultPaymentType.AUTOPAY;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.google.gson.Gson;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -51,6 +52,7 @@ import org.apache.fineract.client.models.PostUsersResponse;
 import org.apache.fineract.client.services.LoanTransactionsApi;
 import org.apache.fineract.client.services.LoansApi;
 import org.apache.fineract.client.services.UsersApi;
+import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.test.data.TransactionType;
 import org.apache.fineract.test.data.paymenttype.DefaultPaymentType;
 import org.apache.fineract.test.data.paymenttype.PaymentTypeResolver;
@@ -78,6 +80,8 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
     public static final String DEFAULT_BANK_NB = "1234567890";
     public static final String DEFAULT_REPAYMENT_TYPE = "AUTOPAY";
     private static final String PWD_USER_WITH_ROLE = "1234567890Aa!";
+
+    private static final Gson GSON = new JSON().getGson();
 
     @Autowired
     private LoanTransactionsApi loanTransactionsApi;
@@ -444,6 +448,40 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.LOAN_TRANSACTION_UNDO_RESPONSE, transactionUndoResponse);
         eventCheckHelper.checkTransactionWithLoanTransactionAdjustmentBizEvent(targetTransaction);
         eventCheckHelper.loanBalanceChangedEventCheck(loanId);
+    }
+
+    @Then("Customer is forbidden to undo {string}th {string} transaction made on {string}")
+    public void makeTransactionUndoForbidden(String nthItemStr, String transactionType, String transactionDate) throws IOException {
+        eventStore.reset();
+        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.body().getLoanId();
+        GetLoansLoanIdTransactions targetTransaction = eventCheckHelper.findNthTransaction(nthItemStr, transactionType, transactionDate,
+                loanId);
+
+        PostLoansLoanIdTransactionsTransactionIdRequest transactionUndoRequest = LoanRequestFactory.defaultTransactionUndoRequest()
+                .transactionDate(transactionDate);
+
+        Response<PostLoansLoanIdTransactionsResponse> transactionUndoResponse = loanTransactionsApi
+                .adjustLoanTransaction(loanId, targetTransaction.getId(), transactionUndoRequest, "").execute();
+
+        String string = transactionUndoResponse.errorBody().string();
+        ErrorResponse errorResponse = GSON.fromJson(string, ErrorResponse.class);
+        Integer httpStatusCodeActual = errorResponse.getHttpStatusCode();
+        String developerMessageActual = errorResponse.getErrors().get(0).getDeveloperMessage();
+
+        Integer httpStatusCodeExpected = 403;
+        String developerMessageExpected = String.format("Interest refund transaction: %s cannot be reversed or adjusted directly",
+                targetTransaction.getId());
+
+        assertThat(httpStatusCodeActual)
+                .as(ErrorMessageHelper.wrongErrorCodeInFailedChargeAdjustment(httpStatusCodeActual, httpStatusCodeExpected))
+                .isEqualTo(httpStatusCodeExpected);
+        assertThat(developerMessageActual)
+                .as(ErrorMessageHelper.wrongErrorMessageInFailedChargeAdjustment(developerMessageActual, developerMessageExpected))
+                .isEqualTo(developerMessageExpected);
+
+        log.debug("Error code: {}", httpStatusCodeActual);
+        log.debug("Error message: {}", developerMessageActual);
     }
 
     @When("Customer undo {string}th {string} transaction made on {string} with linked {string} transaction")

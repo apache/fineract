@@ -251,6 +251,14 @@ public class EventCheckHelper {
         return targetTransaction;
     }
 
+    public GetLoansLoanIdTransactions findNthTransaction(String nthItemStr, String transactionType, String transactionDate, long loanId)
+            throws IOException {
+        List<GetLoansLoanIdTransactions> transactions = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute().body()
+                .getTransactions();
+        GetLoansLoanIdTransactions targetTransaction = getNthTransactionType(nthItemStr, transactionType, transactionDate, transactions);
+        return targetTransaction;
+    }
+
     public void checkTransactionWithLoanTransactionAdjustmentBizEvent(GetLoansLoanIdTransactions transaction) {
         EventAssertion.EventAssertionBuilder<LoanTransactionAdjustmentDataV1> eventAssertionBuilder = eventAssertion
                 .assertEvent(LoanAdjustTransactionBusinessEvent.class, transaction.getId());

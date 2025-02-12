@@ -36,7 +36,8 @@ public class CacheConfiguration {
         simpleCacheManager.setCaches(List.of(new ConcurrentMapCache("paymentTypesByName"), //
                 new ConcurrentMapCache("jobsByShortName"), //
                 new ConcurrentMapCache("loanProductsByName"), //
-                new ConcurrentMapCache("accountTypesByName")));//
+                new ConcurrentMapCache("accountTypesByName"), //
+                new ConcurrentMapCache("codeValuesByName")));//
         return simpleCacheManager;
     }
 }

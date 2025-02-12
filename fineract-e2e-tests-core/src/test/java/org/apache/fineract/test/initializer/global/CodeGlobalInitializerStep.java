@@ -53,6 +53,9 @@ public class CodeGlobalInitializerStep implements FineractGlobalInitializerStep 
     public static final Long CODE_VALUE_FINANCIAL_INSTRUMENT_ID = 39L;
     public static final String CODE_VALUE_FINANCIAL_INSTRUMENT_DEBIT = "debit_card";
     public static final String CODE_VALUE_FINANCIAL_INSTRUMENT_CREDIT = "credit_card";
+    public static final String CODE_VALUE_FINANCIAL_INSTRUMENT_FRAUD = "Fraud";
+    public static final String CODE_VALUE_FINANCIAL_INSTRUMENT_DELINQUENT = "Delinquent";
+    public static final String CODE_VALUE_FINANCIAL_INSTRUMENT_OTHER = "Other";
     public static final Long CODE_VALUE_TRANSACTION_TYPE_ID = 40L;
     public static final String CODE_VALUE_TRANSACTION_TYPE_SCHEDULED_PAYMENT = "scheduled_payment";
     public static final Long CODE_VALUE_BANKRUPTCY_TAG_ID = 41L;
@@ -138,6 +141,9 @@ public class CodeGlobalInitializerStep implements FineractGlobalInitializerStep 
         List<String> financialInstrumentNames = new ArrayList<>();
         financialInstrumentNames.add(CODE_VALUE_FINANCIAL_INSTRUMENT_DEBIT);
         financialInstrumentNames.add(CODE_VALUE_FINANCIAL_INSTRUMENT_CREDIT);
+        financialInstrumentNames.add(CODE_VALUE_FINANCIAL_INSTRUMENT_FRAUD);
+        financialInstrumentNames.add(CODE_VALUE_FINANCIAL_INSTRUMENT_DELINQUENT);
+        financialInstrumentNames.add(CODE_VALUE_FINANCIAL_INSTRUMENT_OTHER);
         createCodeValues(CODE_VALUE_FINANCIAL_INSTRUMENT_ID, financialInstrumentNames);
 
         // transaction type
