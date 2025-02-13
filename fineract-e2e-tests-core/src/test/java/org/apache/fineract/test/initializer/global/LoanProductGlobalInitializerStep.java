@@ -1477,18 +1477,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestDailyEmi36030ChargebackPrincipalInterestFee).execute();
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_CHARGEBACK_PRINCIPAL_INTEREST_FEE,
-                responseLoanProductsRequestLP2AdvancedpaymentInterestDailyEmi36030ChargebackPrincipalInterestFee); // LP2
-                                                                                                                   // with
-                                                                                                                   // progressive
-                                                                                                                   // loan
-                                                                                                                   // schedule
-                                                                                                                   // +
-                                                                                                                   // horizontal
-                                                                                                                   // +
-                                                                                                                   // interest
-                                                                                                                   // EMI
-                                                                                                                   // +
-                                                                                                                   // 360/30
+                responseLoanProductsRequestLP2AdvancedpaymentInterestDailyEmi36030ChargebackPrincipalInterestFee);
 
         // LP2 with progressive loan schedule + horizontal + interest EMI + 360/30
         // Chargeback: Interest, Penalty, Fee, Principal
@@ -1646,15 +1635,115 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         TestContext.INSTANCE.set(TestContextKey.LP2_NO_INTEREST_RECALCULATION_CHARGEBACK_ALLOCATION_PRINCIPAL_FIRST_RESPONSE,
                 loanProductsResponseChargebackAllocationPrincipalFirst);
 
+        // LP2 with progressive loan schedule + horizontal + interest EMI + 360/30
+        // Chargeback: Interest, Penalty, Fee, Principal
+        // + interest recalculation, preClosureInterestCalculationStrategy= till preclose,
+        // Frequency for recalculate Outstanding Principal: Daily, Frequency Interval for recalculation: 1
+        // (LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALC_EMI_360_30_CHARGEBACK_INTEREST_PENALTY_FEE_PRINCIPAL)
+        String name71 = DefaultLoanProduct.LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALC_EMI_360_30_CHARGEBACK_INTEREST_PENALTY_FEE_PRINCIPAL
+                .getName();
+        PostLoanProductsRequest loanProductsRequestLP2AdvancedpaymentInterestDailyInterestRecalcEmi36030ChargebackInterestPenaltyFeePrincipal = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2Emi()//
+                .name(name71)//
+                .daysInYearType(DaysInYearType.DAYS360.value)//
+                .daysInMonthType(DaysInMonthType.DAYS30.value)//
+                .isInterestRecalculationEnabled(true)//
+                .preClosureInterestCalculationStrategy(1)//
+                .rescheduleStrategyMethod(4)//
+                .interestRecalculationCompoundingMethod(0)//
+                .recalculationRestFrequencyType(2)//
+                .recalculationRestFrequencyInterval(1)//
+                .creditAllocation(List.of(//
+                        createCreditAllocation("CHARGEBACK", List.of("INTEREST", "PENALTY", "FEE", "PRINCIPAL"))//
+                ))//
+                .paymentAllocation(List.of(//
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                        createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                        createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                        createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
+        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestDailyInterestRecalcEmi36030ChargebackInterestPenaltyFeePrincipal = loanProductsApi
+                .createLoanProduct(
+                        loanProductsRequestLP2AdvancedpaymentInterestDailyInterestRecalcEmi36030ChargebackInterestPenaltyFeePrincipal)
+                .execute();
+        TestContext.INSTANCE.set(
+                TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALC_EMI_360_30_CHARGEBACK_INTEREST_PENALTY_FEE_PRINCIPAL,
+                responseLoanProductsRequestLP2AdvancedpaymentInterestDailyInterestRecalcEmi36030ChargebackInterestPenaltyFeePrincipal);
+
+        // LP2 with progressive loan schedule + horizontal + interest EMI + 360/30
+        // Chargeback: Interest, Fee, Principal, Penalty
+        // + interest recalculation, preClosureInterestCalculationStrategy= till preclose,
+        // Frequency for recalculate Outstanding Principal: Daily, Frequency Interval for recalculation: 1
+        // (LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALC_EMI_360_30_CHARGEBACK_INTEREST_FEE_PRINCIPAL)
+        String name72 = DefaultLoanProduct.LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALC_EMI_360_30_CHARGEBACK_INTEREST_FEE_PRINCIPAL
+                .getName();
+        PostLoanProductsRequest loanProductsRequestLP2AdvancedpaymentInterestDailyInterestRecalcEmi36030ChargebackInterestFeePrincipal = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2Emi()//
+                .name(name72)//
+                .daysInYearType(DaysInYearType.DAYS360.value)//
+                .daysInMonthType(DaysInMonthType.DAYS30.value)//
+                .isInterestRecalculationEnabled(true)//
+                .preClosureInterestCalculationStrategy(1)//
+                .rescheduleStrategyMethod(4)//
+                .interestRecalculationCompoundingMethod(0)//
+                .recalculationRestFrequencyType(2)//
+                .recalculationRestFrequencyInterval(1)//
+                .creditAllocation(List.of(//
+                        createCreditAllocation("CHARGEBACK", List.of("INTEREST", "FEE", "PRINCIPAL", "PENALTY"))//
+                ))//
+                .paymentAllocation(List.of(//
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                        createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                        createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                        createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
+        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestDailyInterestRecalcEmi36030ChargebackInterestFeePrincipal = loanProductsApi
+                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestDailyInterestRecalcEmi36030ChargebackInterestFeePrincipal)
+                .execute();
+        TestContext.INSTANCE.set(
+                TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALC_EMI_360_30_CHARGEBACK_INTEREST_FEE_PRINCIPAL,
+                responseLoanProductsRequestLP2AdvancedpaymentInterestDailyInterestRecalcEmi36030ChargebackInterestFeePrincipal);
+
+        // LP2 with progressive loan schedule + horizontal + interest EMI + 360/30
+        // Chargeback: Principal, Interest, Fee, Penalty
+        // + interest recalculation, preClosureInterestCalculationStrategy= till preclose,
+        // Frequency for recalculate Outstanding Principal: Daily, Frequency Interval for recalculation: 1
+        // (LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALC_EMI_360_30_CHARGEBACK_PRINCIPAL_INTEREST_FEE)
+        String name73 = DefaultLoanProduct.LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALC_EMI_360_30_CHARGEBACK_PRINCIPAL_INTEREST_FEE
+                .getName();
+        PostLoanProductsRequest loanProductsRequestLP2AdvancedpaymentInterestDailyInterestRecalcEmi36030ChargebackPrincipalInterestFee = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2Emi()//
+                .name(name73)//
+                .daysInYearType(DaysInYearType.DAYS360.value)//
+                .daysInMonthType(DaysInMonthType.DAYS30.value)//
+                .isInterestRecalculationEnabled(true)//
+                .preClosureInterestCalculationStrategy(1)//
+                .rescheduleStrategyMethod(4)//
+                .interestRecalculationCompoundingMethod(0)//
+                .recalculationRestFrequencyType(2)//
+                .recalculationRestFrequencyInterval(1)//
+                .creditAllocation(List.of(//
+                        createCreditAllocation("CHARGEBACK", List.of("PRINCIPAL", "INTEREST", "FEE", "PENALTY"))//
+                ))//
+                .paymentAllocation(List.of(//
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                        createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                        createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                        createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
+        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestDailyInterestRecalcEmi36030ChargebackPrincipalInterestFee = loanProductsApi
+                .createLoanProduct(loanProductsRequestLP2AdvancedpaymentInterestDailyInterestRecalcEmi36030ChargebackPrincipalInterestFee)
+                .execute();
+        TestContext.INSTANCE.set(
+                TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALC_EMI_360_30_CHARGEBACK_PRINCIPAL_INTEREST_FEE,
+                responseLoanProductsRequestLP2AdvancedpaymentInterestDailyInterestRecalcEmi36030ChargebackPrincipalInterestFee);
+
         // LP2 with progressive loan schedule + horizontal + interest EMI + 360/30 +
         // accelerate-maturity chargeOff behaviour + last installment strategy
         // (LP2_INTEREST_RECALCULATION_ACCELERATE_MATURITY_CHARGE_OFF_BEHAVIOUR_LAST_INSTALLMENT_STRATEGY)
-        final String name71 = DefaultLoanProduct.LP2_INTEREST_RECALCULATION_ACCELERATE_MATURITY_CHARGE_OFF_BEHAVIOUR_LAST_INSTALLMENT_STRATEGY
+        final String name74 = DefaultLoanProduct.LP2_INTEREST_RECALCULATION_ACCELERATE_MATURITY_CHARGE_OFF_BEHAVIOUR_LAST_INSTALLMENT_STRATEGY
                 .getName();
 
         final PostLoanProductsRequest loanProductsRequestAdvCustomInterestRecalculationAccelerateMaturityChargeOffBehaviourLastInstallmentStrategyProgressiveLoanSchedule = loanProductsRequestFactory
                 .defaultLoanProductsRequestLP2InterestDailyRecalculation()//
-                .name(name71)//
+                .name(name74)//
                 .paymentAllocation(List.of(//
                         createPaymentAllocation("DEFAULT", "LAST_INSTALLMENT",
                                 LoanProductPaymentAllocationRule.AllocationTypesEnum.PAST_DUE_PENALTY, //
@@ -1681,11 +1770,11 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         // LP2 with progressive loan schedule + horizontal + accelerate-maturity chargeOff behaviour + last installment
         // strategy
         // (LP2_ACCELERATE_MATURITY_CHARGE_OFF_BEHAVIOUR_LAST_INSTALLMENT_STRATEGY)
-        final String name72 = DefaultLoanProduct.LP2_ACCELERATE_MATURITY_CHARGE_OFF_BEHAVIOUR_LAST_INSTALLMENT_STRATEGY.getName();
+        final String name75 = DefaultLoanProduct.LP2_ACCELERATE_MATURITY_CHARGE_OFF_BEHAVIOUR_LAST_INSTALLMENT_STRATEGY.getName();
 
         final PostLoanProductsRequest loanProductsRequestAdvCustomAccelerateMaturityChargeOffBehaviourLastInstallmentStrategyProgressiveLoanSchedule = loanProductsRequestFactory
                 .defaultLoanProductsRequestLP2()//
-                .name(name72)//
+                .name(name75)//
                 .enableDownPayment(false)//
                 .enableAutoRepaymentForDownPayment(null)//
                 .disbursedAmountPercentageForDownPayment(null)//
