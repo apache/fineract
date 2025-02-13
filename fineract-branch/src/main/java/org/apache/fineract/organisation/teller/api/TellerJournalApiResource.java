@@ -27,9 +27,6 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import java.util.Collection;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.organisation.teller.data.TellerData;
 import org.apache.fineract.organisation.teller.data.TellerJournalData;
 import org.apache.fineract.organisation.teller.service.TellerManagementReadPlatformService;
 import org.apache.fineract.organisation.teller.util.DateRange;
@@ -41,20 +38,16 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class TellerJournalApiResource {
 
-    private final PlatformSecurityContext securityContext;
-    private final DefaultToApiJsonSerializer<TellerData> jsonSerializer;
     private final TellerManagementReadPlatformService readPlatformService;
 
     @GET
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
-    public String getJournalData(@QueryParam("officeId") final Long officeId, @QueryParam("tellerId") final Long tellerId,
-            @QueryParam("cashierId") final Long cashierId, @QueryParam("dateRange") final String dateRange) {
+    public Collection<TellerJournalData> getJournalData(@QueryParam("officeId") final Long officeId,
+            @QueryParam("tellerId") final Long tellerId, @QueryParam("cashierId") final Long cashierId,
+            @QueryParam("dateRange") final String dateRange) {
         final DateRange dateRangeHolder = DateRange.fromString(dateRange);
 
-        final Collection<TellerJournalData> journals = this.readPlatformService.getJournals(officeId, tellerId, cashierId,
-                dateRangeHolder.getStartDate(), dateRangeHolder.getEndDate());
-
-        return this.jsonSerializer.serialize(journals);
+        return readPlatformService.getJournals(officeId, tellerId, cashierId, dateRangeHolder.getStartDate(), dateRangeHolder.getEndDate());
     }
 }

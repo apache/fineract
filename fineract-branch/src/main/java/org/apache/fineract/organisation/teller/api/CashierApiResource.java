@@ -29,7 +29,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.teller.data.CashierData;
 import org.apache.fineract.organisation.teller.service.TellerManagementReadPlatformService;
@@ -41,20 +40,15 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CashierApiResource {
 
-    private final DefaultToApiJsonSerializer<CashierData> jsonSerializer;
     private final TellerManagementReadPlatformService readPlatformService;
 
     @GET
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
-    public String getCashierData(@QueryParam("officeId") final Long officeId, @QueryParam("tellerId") final Long tellerId,
+    public Collection<CashierData> getCashierData(@QueryParam("officeId") final Long officeId, @QueryParam("tellerId") final Long tellerId,
             @QueryParam("staffId") final Long staffId, @QueryParam("date") final String date) {
-        final DateTimeFormatter dateFormatter = DateTimeFormatter.BASIC_ISO_DATE;
-
-        final LocalDate dateRestriction = (date != null ? LocalDate.parse(date, dateFormatter) : DateUtils.getBusinessLocalDate());
-
-        final Collection<CashierData> allCashiers = this.readPlatformService.getCashierData(officeId, tellerId, staffId, dateRestriction);
-
-        return this.jsonSerializer.serialize(allCashiers);
+        final LocalDate dateRestriction = date != null ? LocalDate.parse(date, DateTimeFormatter.BASIC_ISO_DATE)
+                : DateUtils.getBusinessLocalDate();
+        return readPlatformService.getCashierData(officeId, tellerId, staffId, dateRestriction);
     }
 }
