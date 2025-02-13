@@ -54,7 +54,7 @@ class LoanScheduleGeneratorTest {
     void testGenerateLoanSchedule() {
         LoanRepaymentScheduleModelData modelData = new LoanRepaymentScheduleModelData(LocalDate.of(2024, 1, 1), CURRENCY,
                 DISBURSEMENT_AMOUNT, DISBURSEMENT_DATE, NUMBER_OF_REPAYMENTS, REPAYMENT_FREQUENCY, REPAYMENT_FREQUENCY_TYPE,
-                NOMINAL_INTEREST_RATE, false, DaysInMonthType.DAYS_30, DaysInYearType.DAYS_360, null, null, null);
+                NOMINAL_INTEREST_RATE, false, DaysInMonthType.DAYS_30, DaysInYearType.DAYS_360, null, null, null, false);
 
         ScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
         ProgressiveLoanScheduleGenerator generator = new ProgressiveLoanScheduleGenerator(scheduledDateGenerator, emiCalculator);
@@ -89,7 +89,7 @@ class LoanScheduleGeneratorTest {
     void testGenerateLoanScheduleWithDownPayment() {
         LoanRepaymentScheduleModelData modelData = new LoanRepaymentScheduleModelData(LocalDate.of(2024, 1, 1), CURRENCY,
                 DISBURSEMENT_AMOUNT_100, LocalDate.of(2024, 1, 1), NUMBER_OF_REPAYMENTS, REPAYMENT_FREQUENCY, REPAYMENT_FREQUENCY_TYPE,
-                NOMINAL_INTEREST_RATE, true, DaysInMonthType.DAYS_30, DaysInYearType.DAYS_360, DOWN_PAYMENT_PORTION, null, null);
+                NOMINAL_INTEREST_RATE, true, DaysInMonthType.DAYS_30, DaysInYearType.DAYS_360, DOWN_PAYMENT_PORTION, null, null, false);
 
         ScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
         ProgressiveLoanScheduleGenerator generator = new ProgressiveLoanScheduleGenerator(scheduledDateGenerator, emiCalculator);

@@ -511,7 +511,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         // TODO review: (repayment frequency: days, weeks, years; validation day is month fix 30)
         // TODO refactor this logic to represent in interest period
         if (partialPeriodCalculationNeeded) {
-            final BigDecimal cumulatedPeriodFractions = calculatePeriodFractions(interestPeriodFromDate, interestPeriodDueDate, mc);
+            final BigDecimal cumulatedPeriodFractions = calculatePeriodFractions(scheduleModel, interestPeriodFromDate,
+                    interestPeriodDueDate, mc);
             return rateFactorByRepaymentPartialPeriod(interestRate, BigDecimal.ONE, cumulatedPeriodFractions, BigDecimal.ONE,
                     BigDecimal.ONE, mc);
         }
@@ -623,7 +624,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         // TODO review: (repayment frequency: days, weeks, years; validation day is month fix 30)
         // TODO refactor this logic to represent in interest period
         if (partialPeriodCalculationNeeded) {
-            final BigDecimal cumulatedPeriodFractions = calculatePeriodFractions(interestPeriodFromDate, interestPeriodDueDate, mc);
+            final BigDecimal cumulatedPeriodFractions = calculatePeriodFractions(scheduleModel, interestPeriodFromDate,
+                    interestPeriodDueDate, mc);
             return rateFactorByRepaymentPartialPeriod(interestRate, BigDecimal.ONE, cumulatedPeriodFractions, BigDecimal.ONE,
                     BigDecimal.ONE, mc);
         }
@@ -640,27 +642,45 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     /**
      * Calculate Period fractions part based on how much year has in the period
      *
+     * @param scheduleModel
      * @param interestPeriodFromDate
      * @param interestPeriodDueDate
      * @return
      */
-    private BigDecimal calculatePeriodFractions(final LocalDate interestPeriodFromDate, final LocalDate interestPeriodDueDate,
-            MathContext mc) {
+    public BigDecimal calculatePeriodFractions(ProgressiveLoanInterestScheduleModel scheduleModel, final LocalDate interestPeriodFromDate,
+            final LocalDate interestPeriodDueDate, MathContext mc) {
         BigDecimal cumulatedRateFactor = BigDecimal.ZERO;
         int actualYear = interestPeriodFromDate.getYear();
         int endYear = interestPeriodDueDate.getYear();
         LocalDate actualDate = interestPeriodFromDate;
-        LocalDate endOfActualYear;
+        LocalDate fractionPeriodDueDate;
 
         while (actualYear <= endYear) {
-            endOfActualYear = actualYear == endYear ? interestPeriodDueDate : LocalDate.of(actualYear, 12, 31);
+            fractionPeriodDueDate = actualYear == endYear ? interestPeriodDueDate
+                    : getFractionPeriodDueDateForEndOfYear(scheduleModel, actualYear);
             BigDecimal numberOfDaysInYear = BigDecimal.valueOf(Year.of(actualYear).length());
-            BigDecimal calculatedDaysInActualYear = BigDecimal.valueOf(DateUtils.getDifferenceInDays(actualDate, endOfActualYear));
+            BigDecimal calculatedDaysInActualYear = BigDecimal.valueOf(DateUtils.getDifferenceInDays(actualDate, fractionPeriodDueDate));
             cumulatedRateFactor = cumulatedRateFactor.add(calculatedDaysInActualYear.divide(numberOfDaysInYear, mc), mc);
-            actualDate = endOfActualYear;
+            actualDate = fractionPeriodDueDate;
             actualYear++;
         }
         return cumulatedRateFactor;
+    }
+
+    /**
+     * Determines the last date of the year for interest calculation depending on the
+     * isInterestRecognitionOnDisbursementDate flag.
+     *
+     * @param scheduleModel
+     * @param year
+     * @return
+     */
+    private LocalDate getFractionPeriodDueDateForEndOfYear(ProgressiveLoanInterestScheduleModel scheduleModel, int year) {
+        if (scheduleModel.loanProductRelatedDetail().isInterestRecognitionOnDisbursementDate()) {
+            return LocalDate.of(year + 1, 1, 1);
+        } else {
+            return LocalDate.of(year, 12, 31);
+        }
     }
 
     /**

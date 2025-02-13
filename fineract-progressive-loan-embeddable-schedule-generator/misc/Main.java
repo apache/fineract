@@ -55,8 +55,9 @@ public class Main {
         final DaysInYearType daysInYearType = DaysInYearType.DAYS_360;
         final Integer installmentAmountInMultiplesOf = null;
         final Integer fixedLength = null;
+        final Boolean interestRecognitionOnDisbursementDate = false;
 
-        var config = new LoanRepaymentScheduleModelData(startDate, currency, disbursedAmount, disbursementDate, noRepayments, repaymentFrequency, repaymentFrequencyType, annualNominalInterestRate, isDownPaymentEnabled, daysInMonthType, daysInYearType, downPaymentPercentage, installmentAmountInMultiplesOf, fixedLength);
+        var config = new LoanRepaymentScheduleModelData(startDate, currency, disbursedAmount, disbursementDate, noRepayments, repaymentFrequency, repaymentFrequencyType, annualNominalInterestRate, isDownPaymentEnabled, daysInMonthType, daysInYearType, downPaymentPercentage, installmentAmountInMultiplesOf, fixedLength, interestRecognitionOnDisbursementDate);
 
         final LoanSchedulePlan plan = calculator.generate(mc, config);
         printPlan(plan);

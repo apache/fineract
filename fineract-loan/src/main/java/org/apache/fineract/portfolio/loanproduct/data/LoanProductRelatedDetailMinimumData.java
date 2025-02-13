@@ -45,13 +45,14 @@ public class LoanProductRelatedDetailMinimumData implements LoanProductMinimumRe
     private final PeriodFrequencyType repaymentPeriodFrequencyType;
     private final Integer repaymentEvery;
     private final Integer numberOfRepayments;
+    private final boolean interestRecognitionOnDisbursementDate;
 
     public LoanProductRelatedDetailMinimumData(CurrencyData currency, BigDecimal interestRatePerPeriod,
             BigDecimal annualNominalInterestRate, Integer interestChargingGrace, Integer interestPaymentGrace, Integer principalGrace,
             Integer recurringMoratoriumOnPrincipalPeriods, InterestMethod interestMethod,
             InterestCalculationPeriodMethod interestCalculationPeriodMethod, DaysInYearType daysInYearType, DaysInMonthType daysInMonthType,
             AmortizationMethod amortizationMethod, PeriodFrequencyType repaymentPeriodFrequencyType, Integer repaymentEvery,
-            Integer numberOfRepayments) {
+            Integer numberOfRepayments, boolean interestRecognitionOnDisbursementDate) {
         this.currency = currency;
         this.interestRatePerPeriod = interestRatePerPeriod;
         this.annualNominalInterestRate = annualNominalInterestRate;
@@ -67,6 +68,7 @@ public class LoanProductRelatedDetailMinimumData implements LoanProductMinimumRe
         this.repaymentPeriodFrequencyType = repaymentPeriodFrequencyType;
         this.repaymentEvery = repaymentEvery;
         this.numberOfRepayments = numberOfRepayments;
+        this.interestRecognitionOnDisbursementDate = interestRecognitionOnDisbursementDate;
     }
 
     private Integer defaultToNullIfZero(final Integer value) {
@@ -160,5 +162,10 @@ public class LoanProductRelatedDetailMinimumData implements LoanProductMinimumRe
     @Override
     public Integer getDaysInYearType() {
         return daysInYearType.getValue();
+    }
+
+    @Override
+    public boolean isInterestRecognitionOnDisbursementDate() {
+        return interestRecognitionOnDisbursementDate;
     }
 }

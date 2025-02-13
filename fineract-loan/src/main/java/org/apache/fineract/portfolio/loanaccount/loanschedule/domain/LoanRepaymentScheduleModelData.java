@@ -30,5 +30,16 @@ public record LoanRepaymentScheduleModelData(@NotNull LocalDate scheduleGenerati
         @NotNull BigDecimal disbursementAmount, @NotNull LocalDate disbursementDate, @NotNull int numberOfRepayments,
         @NotNull int repaymentFrequency, @NotBlank String repaymentFrequencyType, @NotNull BigDecimal annualNominalInterestRate,
         @NotNull boolean downPaymentEnabled, @NotNull DaysInMonthType daysInMonth, @NotNull DaysInYearType daysInYear,
-        BigDecimal downPaymentPercentage, Integer installmentAmountInMultiplesOf, Integer fixedLength) {
+        BigDecimal downPaymentPercentage, Integer installmentAmountInMultiplesOf, Integer fixedLength,
+        @NotNull Boolean interestRecognitionOnDisbursementDate) {
+
+    LoanRepaymentScheduleModelData(@NotNull LocalDate scheduleGenerationStartDate, @NotNull CurrencyData currency,
+            @NotNull BigDecimal disbursementAmount, @NotNull LocalDate disbursementDate, @NotNull int numberOfRepayments,
+            @NotNull int repaymentFrequency, @NotBlank String repaymentFrequencyType, @NotNull BigDecimal annualNominalInterestRate,
+            @NotNull boolean downPaymentEnabled, @NotNull DaysInMonthType daysInMonth, @NotNull DaysInYearType daysInYear,
+            BigDecimal downPaymentPercentage, Integer installmentAmountInMultiplesOf, Integer fixedLength) {
+        this(scheduleGenerationStartDate, currency, disbursementAmount, disbursementDate, numberOfRepayments, repaymentFrequency,
+                repaymentFrequencyType, annualNominalInterestRate, downPaymentEnabled, daysInMonth, daysInYear, downPaymentPercentage,
+                installmentAmountInMultiplesOf, fixedLength, false);
+    }
 }

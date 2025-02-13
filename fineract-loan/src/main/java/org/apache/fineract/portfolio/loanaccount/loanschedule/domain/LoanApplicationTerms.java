@@ -254,6 +254,8 @@ public final class LoanApplicationTerms {
         this.seedDate = builder.seedDate;
         this.isDownPaymentEnabled = builder.isDownPaymentEnabled;
         this.disbursedAmountPercentageForDownPayment = builder.downPaymentPercentage;
+        this.interestRecognitionOnDisbursementDate = builder.interestRecognitionOnDisbursementDate != null
+                && builder.interestRecognitionOnDisbursementDate;
         if (isDownPaymentEnabled) {
             this.downPaymentAmount = Money.of(getCurrency(),
                     MathUtil.percentageOf(getPrincipal().getAmount(), getDisbursedAmountPercentageForDownPayment(), builder.mc),
@@ -291,6 +293,7 @@ public final class LoanApplicationTerms {
         private LocalDate submittedOnDate;
         private LocalDate seedDate;
         private MathContext mc;
+        private Boolean interestRecognitionOnDisbursementDate;
 
         public Builder currency(CurrencyData currency) {
             this.currency = currency;
@@ -402,6 +405,11 @@ public final class LoanApplicationTerms {
             return this;
         }
 
+        public Builder interestRecognitionOnDisbursementDate(boolean value) {
+            this.interestRecognitionOnDisbursementDate = value;
+            return this;
+        }
+
         public LoanApplicationTerms build() {
             return new LoanApplicationTerms(this);
         }
@@ -430,7 +438,8 @@ public final class LoanApplicationTerms {
                 .daysInMonthType(modelData.daysInMonth()).daysInYearType(modelData.daysInYear()).fixedLength(modelData.fixedLength())
                 .inArrearsTolerance(Money.zero(modelData.currency(), mc)).disbursementDatas(new ArrayList<>())
                 .isDownPaymentEnabled(modelData.downPaymentEnabled()).downPaymentPercentage(downPaymentPercentage)
-                .submittedOnDate(modelData.scheduleGenerationStartDate()).seedDate(seedDate).mc(mc).build();
+                .submittedOnDate(modelData.scheduleGenerationStartDate()).seedDate(seedDate)
+                .interestRecognitionOnDisbursementDate(modelData.interestRecognitionOnDisbursementDate()).mc(mc).build();
     }
 
     public static LoanApplicationTerms assembleFrom(final CurrencyData currency, final Integer loanTermFrequency,
@@ -1557,7 +1566,8 @@ public final class LoanApplicationTerms {
         return new LoanProductRelatedDetailMinimumData(currency, interestRatePerPeriod, annualNominalInterestRate, interestChargingGrace,
                 interestPaymentGrace, principalGrace, recurringMoratoriumOnPrincipalPeriods, interestMethod,
                 interestCalculationPeriodMethod, daysInYearType, daysInMonthType, amortizationMethod, repaymentPeriodFrequencyType,
-                repaymentEvery, numberOfRepayments);
+                repaymentEvery, numberOfRepayments,
+                isInterestChargedFromDateSameAsDisbursalDateEnabled != null && isInterestChargedFromDateSameAsDisbursalDateEnabled);
     }
 
     public Integer getLoanTermFrequency() {

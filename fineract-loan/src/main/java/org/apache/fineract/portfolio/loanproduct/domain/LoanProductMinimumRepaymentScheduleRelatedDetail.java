@@ -60,4 +60,6 @@ public interface LoanProductMinimumRepaymentScheduleRelatedDetail {
     Integer getDaysInMonthType();
 
     Integer getDaysInYearType();
+
+    boolean isInterestRecognitionOnDisbursementDate();
 }
