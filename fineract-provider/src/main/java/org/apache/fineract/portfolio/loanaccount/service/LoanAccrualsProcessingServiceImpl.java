@@ -129,6 +129,9 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
     @Override
     @Transactional
     public void addPeriodicAccruals(@NotNull LocalDate tillDate, @NotNull Loan loan) {
+        if (loan.isClosed() || loan.getStatus().isOverpaid()) {
+            return;
+        }
         addAccruals(loan, tillDate, true, false, true);
     }
 
