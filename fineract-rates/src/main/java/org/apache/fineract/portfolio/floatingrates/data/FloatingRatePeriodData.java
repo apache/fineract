@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.floatingrates.data;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -26,12 +28,15 @@ import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class FloatingRatePeriodData implements Comparable<FloatingRatePeriodData>, Serializable {
 
     private Long id;
     private LocalDate fromDate;
     private BigDecimal interestRate;
+    @JsonProperty("isDifferentialToBaseLendingRate")
     private boolean isDifferentialToBaseLendingRate;
+    @JsonProperty("isActive")
     private boolean isActive;
     private String createdBy;
     private OffsetDateTime createdOn;

@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.floatingrates.data;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -26,11 +28,14 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class FloatingRateData implements Comparable<FloatingRateData>, Serializable {
 
     private final Long id;
     private final String name;
+    @JsonProperty("isBaseLendingRate")
     private final boolean isBaseLendingRate;
+    @JsonProperty("isActive")
     private final boolean isActive;
     private final String createdBy;
     private final OffsetDateTime createdOn;
