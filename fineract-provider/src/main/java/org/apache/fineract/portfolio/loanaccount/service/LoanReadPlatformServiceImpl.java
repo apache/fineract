@@ -2172,4 +2172,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         return loanRepositoryWrapper.findIdByExternalId(externalId);
     }
 
+    @Override
+    public List<Long> retrieveLoanIdsByExternalIds(List<ExternalId> externalIds) {
+        return loanRepositoryWrapper.findIdByExternalIds(externalIds);
+    }
+
 }

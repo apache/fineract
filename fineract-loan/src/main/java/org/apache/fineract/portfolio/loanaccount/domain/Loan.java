@@ -2693,11 +2693,15 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return changedTransactionDetail;
     }
 
+    /*
+     * Probably this is buggy when a chargeback transaction happens
+     */
     public void processPostDisbursementTransactions() {
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = getTransactionProcessor();
         final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retrieveListOfTransactionsForReprocessing();
         final List<LoanTransaction> copyTransactions = new ArrayList<>();
         if (!allNonContraTransactionsPostDisbursement.isEmpty()) {
+            // TODO: Probably this is not needed and can be eliminated, make sure to double check it
             for (LoanTransaction loanTransaction : allNonContraTransactionsPostDisbursement) {
                 copyTransactions.add(LoanTransaction.copyTransactionProperties(loanTransaction));
             }
@@ -3507,6 +3511,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return Optional.ofNullable(this.charges).orElse(new HashSet<>());
     }
 
+    public void removeCharges(Predicate<LoanCharge> predicate) {
+        charges.removeIf(predicate);
+    }
+
     public boolean hasDelinquencyBucket() {
         return (getLoanProduct().getDelinquencyBucket() != null);
     }
@@ -3535,6 +3543,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     public LoanTransaction getLoanTransaction(Predicate<LoanTransaction> predicate) {
         return getLoanTransactions().stream().filter(predicate).findFirst().orElse(null);
+    }
+
+    public void removeLoanTransactions(Predicate<LoanTransaction> predicate) {
+        loanTransactions.removeIf(predicate);
     }
 
     public LoanTransaction findChargedOffTransaction() {

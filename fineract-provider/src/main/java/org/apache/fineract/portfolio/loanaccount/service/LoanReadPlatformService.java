@@ -141,4 +141,6 @@ public interface LoanReadPlatformService {
     Long retrieveLoanTransactionIdByExternalId(ExternalId externalId);
 
     Long retrieveLoanIdByExternalId(ExternalId externalId);
+
+    List<Long> retrieveLoanIdsByExternalIds(List<ExternalId> externalIds);
 }

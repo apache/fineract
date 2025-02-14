@@ -1088,7 +1088,8 @@ public final class LoanProductDataValidator {
                     && !LoanRescheduleStrategyMethod.ADJUST_LAST_UNPAID_PERIOD.equals(loanRescheduleStrategyMethod)) {
                 baseDataValidator.reset().parameter(LoanProductConstants.rescheduleStrategyMethodParameterName).failWithCode(
                         "reschedule.strategy.method.not.supported.for.loan.schedule.type.progressive",
-                        loanScheduleType.toString() + " reschedule strategy type is not supported for Progressive loan schedule type");
+                        loanRescheduleStrategyMethod.toString()
+                                + " reschedule strategy type is not supported for Progressive loan schedule type");
             }
         }
 

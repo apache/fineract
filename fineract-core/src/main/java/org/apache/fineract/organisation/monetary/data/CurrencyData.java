@@ -21,6 +21,8 @@ package org.apache.fineract.organisation.monetary.data;
 import java.io.Serializable;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 
 /**
  * Immutable data object representing currency.
@@ -86,5 +88,13 @@ public class CurrencyData implements Serializable {
         }
 
         return builder.toString();
+    }
+
+    @org.mapstruct.Mapper(config = MapstructMapperConfig.class)
+    public interface Mapper {
+
+        default CurrencyData map(MonetaryCurrency source) {
+            return source.toData();
+        }
     }
 }

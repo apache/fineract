@@ -19,6 +19,9 @@
 package org.apache.fineract.portfolio.loanaccount.data;
 
 import lombok.Getter;
+import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 
 /**
  * Immutable data object represent loan status enumerations.
@@ -50,5 +53,13 @@ public class LoanStatusEnumData {
         this.closedRescheduled = Long.valueOf(602).equals(this.id);
         this.closed = this.closedObligationsMet || this.closedWrittenOff || this.closedRescheduled;
         this.overpaid = Long.valueOf(700).equals(this.id);
+    }
+
+    @org.mapstruct.Mapper(config = MapstructMapperConfig.class)
+    public interface Mapper {
+
+        default LoanStatusEnumData map(Loan source) {
+            return LoanEnumerations.status(source.getPlainStatus());
+        }
     }
 }

@@ -53,7 +53,7 @@ public class LoanScheduleService {
         }
     }
 
-    public void recalculateScheduleFromLastTransaction(final Loan loan, final ScheduleGeneratorDTO generatorDTO) {
+    public void recalculateSchedule(final Loan loan, final ScheduleGeneratorDTO generatorDTO) {
         if (loan.isInterestBearingAndInterestRecalculationEnabled() && !loan.isChargedOff()) {
             regenerateRepaymentScheduleWithInterestRecalculation(loan, generatorDTO);
         } else {

@@ -285,4 +285,7 @@ public class LoanRepositoryWrapper {
         return repository.findLoansForAddAccrual(accountingType, tillDate, futureCharges);
     }
 
+    public List<Long> findIdByExternalIds(List<ExternalId> externalIds) {
+        return repository.findIdsByExternalIds(externalIds);
+    }
 }

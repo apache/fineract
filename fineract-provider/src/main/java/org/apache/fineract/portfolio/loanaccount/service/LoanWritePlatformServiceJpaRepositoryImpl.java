@@ -3810,7 +3810,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                                 && DateUtils.isEqual(loanTermVariations.getTermApplicableFrom(), lastTransactionDate))
                         || DateUtils.isAfter(loanTermVariations.getTermApplicableFrom(), lastTransactionDate));
         reverseExistingTransactionsTillLastDisbursal(loan, lastDisbursalTransaction);
-        loanScheduleService.recalculateScheduleFromLastTransaction(loan, scheduleGeneratorDTO);
+        loanScheduleService.recalculateSchedule(loan, scheduleGeneratorDTO);
         actualChanges.put("undolastdisbursal", "true");
         actualChanges.put("disbursedAmount", loan.getDisbursedAmount());
         loan.updateLoanSummaryDerivedFields();

@@ -597,7 +597,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
                     installment(312.0, 0, 0, 0, 0, true, "01 March 2023"), //
                     installment(312.0, 0, 0, 0, 0, true, "01 April 2023"), //
                     installment(314.0, 0, 0, 0, 0, true, "01 May 2023"), //
-                    installment(100.0, 0, 0, 0, outstanding(50.0, 0d, 0d, 50.0), false, "02 May 2023") //
+                    installment(100.0, 0, 0, 0, outstanding(50.0, 0.0, 0d, 0d, 50.0), false, "02 May 2023") //
             );
         });
     }
@@ -659,7 +659,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             // DEFAULT payment allocation is ..., DUE_PENALTY, DUE_FEE, DUE_PRINCIPAL, ...
             verifyRepaymentSchedule(loanId, //
                     installment(1250.0, null, "01 January 2023"), //
-                    installment(342.0, 0, 100, 40, outstanding(30.0, 20.0, 0.0, 50.0), false, "01 February 2023"), //
+                    installment(342.0, 0, 100, 40, outstanding(30.0, 0.0, 20.0, 0.0, 50.0), false, "01 February 2023"), //
                     installment(312.0, 0, 0, 0, 0.0, true, "01 March 2023"), //
                     installment(312.0, 0, 0, 0, 0.0, true, "01 April 2023"), //
                     installment(314.0, 0, 0, 0, 0.0, true, "01 May 2023") //
@@ -726,7 +726,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             // DEFAULT payment allocation is ..., DUE_PRINCIPAL, DUE_FEE, DUE_PENALTY ...
             verifyRepaymentSchedule(loanId, //
                     installment(1250.0, null, "01 January 2023"), //
-                    installment(342.0, 0, 100, 40, outstanding(0.0, 30.0, 20.0, 50.0), false, "01 February 2023"), //
+                    installment(342.0, 0, 100, 40, outstanding(0.0, 0.0, 30.0, 20.0, 50.0), false, "01 February 2023"), //
                     installment(312.0, 0, 0, 0, 0.0, true, "01 March 2023"), //
                     installment(312.0, 0, 0, 0, 0.0, true, "01 April 2023"), //
                     installment(314.0, 0, 0, 0, 0.0, true, "01 May 2023") //

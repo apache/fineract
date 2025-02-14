@@ -66,6 +66,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdStatus;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
+import org.apache.fineract.client.models.LoanPointInTimeData;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
@@ -79,7 +80,9 @@ import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
+import org.apache.fineract.client.models.RetrieveLoansPointInTimeRequest;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
+import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.BatchHelper;
@@ -685,6 +688,26 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
         loanTransactionHelper.undoLastDisbursalLoan(loanId, new PostLoansLoanIdRequest());
     }
 
+    protected LoanPointInTimeData getPointInTimeData(Long loanId, String date) {
+        return Calls.ok(fineractClient().loansPointInTimeApi.retrieveLoanPointInTime(loanId, date, DATETIME_PATTERN, "en"));
+    }
+
+    protected List<LoanPointInTimeData> getPointInTimeData(List<Long> loanIds, String date) {
+        RetrieveLoansPointInTimeRequest request = new RetrieveLoansPointInTimeRequest().loanIds(loanIds).date(date)
+                .dateFormat(DATETIME_PATTERN).locale("en");
+        return Calls.ok(fineractClient().loansPointInTimeApi.retrieveLoansPointInTime(request));
+    }
+
+    protected void verifyOutstanding(LoanPointInTimeData loan, OutstandingAmounts outstanding) {
+        assertThat(BigDecimal.valueOf(outstanding.principalOutstanding))
+                .isEqualByComparingTo(loan.getPrincipal().getPrincipalOutstanding());
+        assertThat(BigDecimal.valueOf(outstanding.interestOutstanding)).isEqualByComparingTo(loan.getInterest().getInterestOutstanding());
+        assertThat(BigDecimal.valueOf(outstanding.feeOutstanding)).isEqualByComparingTo(loan.getFee().getFeeChargesOutstanding());
+        assertThat(BigDecimal.valueOf(outstanding.penaltyOutstanding))
+                .isEqualByComparingTo(loan.getPenalty().getPenaltyChargesOutstanding());
+        assertThat(BigDecimal.valueOf(outstanding.totalOutstanding)).isEqualByComparingTo(loan.getTotal().getTotalOutstanding());
+    }
+
     // Note: this is buggy because if multiple journal entries are for the same account, amount and type, the
     // verification will pass
     // not all journal entries have been validated - since there might be duplicates
@@ -1137,8 +1160,8 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
                 loanBalance);
     }
 
-    protected OutstandingAmounts outstanding(double principal, double fee, double penalty, double total) {
-        return new OutstandingAmounts(principal, fee, penalty, total);
+    protected OutstandingAmounts outstanding(double principal, double interestOutstanding, double fee, double penalty, double total) {
+        return new OutstandingAmounts(principal, interestOutstanding, fee, penalty, total);
     }
 
     protected BatchRequestBuilder batchRequest() {
@@ -1296,6 +1319,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     public static class OutstandingAmounts {
 
         Double principalOutstanding;
+        Double interestOutstanding;
         Double feeOutstanding;
         Double penaltyOutstanding;
         Double totalOutstanding;

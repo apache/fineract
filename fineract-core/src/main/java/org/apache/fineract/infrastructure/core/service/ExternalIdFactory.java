@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.core.service;
 
+import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -33,6 +35,11 @@ public class ExternalIdFactory {
 
     public static ExternalId produce(String value) {
         return StringUtils.isBlank(value) ? ExternalId.empty() : new ExternalId(value);
+    }
+
+    public static List<ExternalId> produce(List<String> values) {
+        Objects.requireNonNull(values, "values must not be null");
+        return values.stream().map(ExternalIdFactory::produce).toList();
     }
 
     public ExternalId createFromCommand(JsonCommand command, final String externalIdKey) {
