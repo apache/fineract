@@ -357,7 +357,6 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             interestPeriod.addChargebackPrincipalAmount(nextInterestPeriod.getChargebackPrincipal());
             interestPeriod.addChargebackInterestAmount(nextInterestPeriod.getChargebackInterest());
         }
-
         repaymentPeriod.getInterestPeriods().subList(nextIdx, repaymentPeriod.getInterestPeriods().size()).clear();
         scheduleModelCopy.repaymentPeriods().forEach(rp -> rp.getInterestPeriods().removeIf(ip -> ip.getDueDate().isAfter(targetDate)));
         calculateRateFactorForPeriods(scheduleModelCopy.repaymentPeriods(), scheduleModelCopy);

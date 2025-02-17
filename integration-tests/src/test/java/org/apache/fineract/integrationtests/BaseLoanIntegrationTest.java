@@ -767,6 +767,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     }
 
     protected void verifyTRJournalEntries(Long transactionId, Journal... entries) {
+        Assertions.assertNotNull(transactionId, "transactionId is null");
         GetJournalEntriesTransactionIdResponse journalEntriesForLoan = journalEntryHelper.getJournalEntries("L" + transactionId.toString());
         Assertions.assertEquals(entries.length, journalEntriesForLoan.getPageItems().size());
         Arrays.stream(entries).forEach(journalEntry -> {
@@ -1425,6 +1426,8 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     public static class FuturePaymentAllocationRule {
 
         public static final String LAST_INSTALLMENT = "LAST_INSTALLMENT";
+        public static final String NEXT_INSTALLMENT = "NEXT_INSTALLMENT";
+
     }
 
     public static class SupportedInterestRefundTypesItem {
