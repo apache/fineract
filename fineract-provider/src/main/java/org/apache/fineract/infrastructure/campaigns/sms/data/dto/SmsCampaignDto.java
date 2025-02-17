@@ -16,32 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.campaigns.sms.constants;
+package org.apache.fineract.infrastructure.campaigns.sms.data.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import java.io.Serial;
+import java.io.Serializable;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
-public enum SmsCampaignStatus {
+@Setter
+@NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public abstract class SmsCampaignDto implements Serializable {
 
-    INVALID(-1, "smsCampaignStatus.invalid"), //
-    PENDING(100, "smsCampaignStatus.pending"), //
-    ACTIVE(300, "smsCampaignStatus.active"), //
-    CLOSED(600, "smsCampaignStatus.closed");
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    private final Integer value;
-    private final String code;
-
-    SmsCampaignStatus(Integer value, String code) {
-        this.value = value;
-        this.code = code;
-    }
-
-    public static SmsCampaignStatus fromInt(final Integer statusValue) {
-        return switch (statusValue) {
-            case 100 -> PENDING;
-            case 300 -> ACTIVE;
-            case 600 -> CLOSED;
-            default -> INVALID;
-        };
-    }
+    private String campaignName;
+    private Long campaignType;
+    private Long triggerType;
+    private Long runReportId;
+    private String message;
+    private SmsCampaignParamReq paramValue;
+    private String recurrenceStartDate;
+    private String submittedOnDate;
+    private Boolean isNotification;
+    private String locale;
+    private String dateFormat;
+    private String dateTimeFormat;
 }

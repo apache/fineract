@@ -472,20 +472,14 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
         CampaignPreviewData campaignMessage = null;
         this.context.authenticatedUser();
         this.smsCampaignValidator.validatePreviewMessage(query.json());
-        // final String smsParams =
-        // this.fromJsonHelper.extractJsonObjectNamed("paramValue",
-        // query.parsedJson()).getAsString();
         final JsonElement smsParamsElement = this.fromJsonHelper.extractJsonObjectNamed(SmsCampaignValidator.paramValue,
                 query.parsedJson());
         String smsParams = smsParamsElement.toString();
         final String textMessageTemplate = this.fromJsonHelper.extractStringNamed("message", query.parsedJson());
 
         try {
-            HashMap<String, String> campaignParams = new ObjectMapper().readValue(smsParams,
-                    new TypeReference<HashMap<String, String>>() {});
-
-            HashMap<String, String> queryParamForRunReport = new ObjectMapper().readValue(smsParams,
-                    new TypeReference<HashMap<String, String>>() {});
+            HashMap<String, String> campaignParams = new ObjectMapper().readValue(smsParams, new TypeReference<>() {});
+            HashMap<String, String> queryParamForRunReport = new ObjectMapper().readValue(smsParams, new TypeReference<>() {});
 
             List<HashMap<String, Object>> runReportObject = this.getRunReportByServiceImpl(campaignParams.get("reportName"),
                     queryParamForRunReport);

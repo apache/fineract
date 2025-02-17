@@ -18,12 +18,13 @@
  */
 package org.apache.fineract.infrastructure.sms.service;
 
+import jakarta.annotation.PostConstruct;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -31,34 +32,31 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
+import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.infrastructure.sms.data.SmsData;
 import org.apache.fineract.infrastructure.sms.domain.SmsMessageEnumerations;
 import org.apache.fineract.infrastructure.sms.domain.SmsMessageStatusType;
 import org.apache.fineract.infrastructure.sms.exception.SmsNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
-    private final SmsMapper smsRowMapper;
     private final PaginationHelper paginationHelper;
     private final ColumnValidator columnValidator;
+    private final SqlValidator sqlValidator;
+    private SmsMapper smsRowMapper;
 
-    @Autowired
-    public SmsReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final ColumnValidator columnValidator,
-            DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.sqlGenerator = sqlGenerator;
+    @PostConstruct
+    public void init() {
         this.smsRowMapper = new SmsMapper();
-        this.columnValidator = columnValidator;
-        this.paginationHelper = paginationHelper;
     }
 
     private static final class SmsMapper implements RowMapper<SmsData> {
@@ -113,7 +111,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
     }
 
     @Override
-    public Collection<SmsData> retrieveAll() {
+    public List<SmsData> retrieveAll() {
 
         final String sql = "select " + this.smsRowMapper.schema();
 
@@ -131,7 +129,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
     }
 
     @Override
-    public Collection<SmsData> retrieveAllPending(final Long campaignId, final Integer limit) {
+    public List<SmsData> retrieveAllPending(final Long campaignId, final Integer limit) {
         final String sqlPlusLimit = limit > 0 ? " " + sqlGenerator.limit(limit) : "";
         String sql = "select " + this.smsRowMapper.schema() + " where smo.status_enum = " + SmsMessageStatusType.PENDING.getValue();
         if (campaignId != null) {
@@ -144,7 +142,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
     }
 
     @Override
-    public Collection<SmsData> retrieveAllSent(final Integer limit) {
+    public List<SmsData> retrieveAllSent(final Integer limit) {
         final String sqlPlusLimit = limit > 0 ? " " + sqlGenerator.limit(limit) : "";
         final String sql = "select " + this.smsRowMapper.schema() + " where smo.status_enum IN ("
                 + SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT.getValue() + "," + SmsMessageStatusType.SENT.getValue() + ")"
@@ -180,7 +178,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
     }
 
     @Override
-    public Collection<SmsData> retrieveAllDelivered(final Integer limit) {
+    public List<SmsData> retrieveAllDelivered(final Integer limit) {
         final String sqlPlusLimit = limit > 0 ? " " + sqlGenerator.limit(limit) : "";
         final String sql = "select " + this.smsRowMapper.schema() + " where smo.status_enum = " + SmsMessageStatusType.DELIVERED.getValue()
                 + sqlPlusLimit;
@@ -189,7 +187,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
     }
 
     @Override
-    public Collection<SmsData> retrieveAllFailed(final Integer limit) {
+    public List<SmsData> retrieveAllFailed(final Integer limit) {
         final String sqlPlusLimit = limit > 0 ? " " + sqlGenerator.limit(limit) : "";
         final String sql = "select " + this.smsRowMapper.schema() + " where smo.status_enum = " + SmsMessageStatusType.FAILED.getValue()
                 + sqlPlusLimit;
@@ -200,6 +198,9 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
     @Override
     public Page<SmsData> retrieveSmsByStatus(final Long campaignId, final SearchParameters searchParameters, final Integer status,
             final LocalDate dateFrom, final LocalDate dateTo) {
+        sqlValidator.validate(searchParameters.getOrderBy());
+        sqlValidator.validate(searchParameters.getSortOrder());
+
         final StringBuilder sqlBuilder = new StringBuilder(200);
         final Object[] objectArray = new Object[10];
         int arrayPos = 0;

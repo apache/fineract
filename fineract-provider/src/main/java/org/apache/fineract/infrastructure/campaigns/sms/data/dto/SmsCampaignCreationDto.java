@@ -16,17 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.campaigns.sms.service;
+package org.apache.fineract.infrastructure.campaigns.sms.data.dto;
 
-import org.apache.fineract.infrastructure.campaigns.sms.data.SmsCampaignData;
-import org.apache.fineract.infrastructure.core.service.Page;
-import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-public interface SmsCampaignReadPlatformService {
+@Getter
+@Setter
+@NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class SmsCampaignCreationDto extends SmsCampaignDto {
 
-    SmsCampaignData retrieveOne(Long campaignId);
-
-    Page<SmsCampaignData> retrieveAll(SearchParameters searchParameters);
-
-    SmsCampaignData retrieveTemplate(String reportType);
+    private Long providerId;
+    private String frequency;
+    private String interval;
+    private String repeatsOnDay;
 }

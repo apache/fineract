@@ -16,17 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.campaigns.sms.service;
+package org.apache.fineract.infrastructure.sms.param;
 
-import org.apache.fineract.infrastructure.campaigns.sms.data.SmsCampaignData;
-import org.apache.fineract.infrastructure.core.service.Page;
-import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.core.api.DateParam;
 
-public interface SmsCampaignReadPlatformService {
-
-    SmsCampaignData retrieveOne(Long campaignId);
-
-    Page<SmsCampaignData> retrieveAll(SearchParameters searchParameters);
-
-    SmsCampaignData retrieveTemplate(String reportType);
+public record SmsRequestParam(Long status, DateParam fromDate, DateParam toDate, String locale, String rawDateFormat, Integer offset,
+        Integer limit, String orderBy, String sortOrder) {
 }

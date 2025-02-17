@@ -18,8 +18,10 @@
  */
 package org.apache.fineract.infrastructure.campaigns.sms.constants;
 
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
+@Getter
 public enum SmsCampaignTriggerType {
 
     INVALID(-1, "triggerType.invalid"), DIRECT(1, "triggerType.direct"), SCHEDULE(2, "triggerType.schedule"), TRIGGERED(3,
@@ -33,29 +35,17 @@ public enum SmsCampaignTriggerType {
         this.code = code;
     }
 
-    public Integer getValue() {
-        return value;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
     public static SmsCampaignTriggerType fromInt(final Integer v) {
         if (v == null) {
             return INVALID;
         }
 
-        switch (v) {
-            case 1:
-                return DIRECT;
-            case 2:
-                return SCHEDULE;
-            case 3:
-                return TRIGGERED;
-            default:
-                return INVALID;
-        }
+        return switch (v) {
+            case 1 -> DIRECT;
+            case 2 -> SCHEDULE;
+            case 3 -> TRIGGERED;
+            default -> INVALID;
+        };
     }
 
     public static EnumOptionData triggerType(final Integer triggerTypeId) {
@@ -63,32 +53,12 @@ public enum SmsCampaignTriggerType {
     }
 
     public static EnumOptionData triggerType(final SmsCampaignTriggerType triggerType) {
-        switch (triggerType) {
-            case INVALID:
-                return new EnumOptionData(INVALID.getValue().longValue(), INVALID.getCode(), "Invalid");
-            case DIRECT:
-                return new EnumOptionData(DIRECT.getValue().longValue(), DIRECT.getCode(), "Direct");
-            case SCHEDULE:
-                return new EnumOptionData(SCHEDULE.getValue().longValue(), SCHEDULE.getCode(), "Schedule");
-            case TRIGGERED:
-                return new EnumOptionData(TRIGGERED.getValue().longValue(), TRIGGERED.getCode(), "Triggered");
-            default:
-                return new EnumOptionData(INVALID.getValue().longValue(), INVALID.getCode(), "Invalid");
-        }
+        return switch (triggerType) {
+            case DIRECT -> new EnumOptionData(DIRECT.getValue().longValue(), DIRECT.getCode(), "Direct");
+            case SCHEDULE -> new EnumOptionData(SCHEDULE.getValue().longValue(), SCHEDULE.getCode(), "Schedule");
+            case TRIGGERED -> new EnumOptionData(TRIGGERED.getValue().longValue(), TRIGGERED.getCode(), "Triggered");
+            default -> new EnumOptionData(INVALID.getValue().longValue(), INVALID.getCode(), "Invalid");
+        };
     }
 
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isDirect() {
-        return this.equals(DIRECT);
-    }
-
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isSchedule() {
-        return this.equals(SCHEDULE);
-    }
-
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isTriggered() {
-        return this.equals(TRIGGERED);
-    }
 }

@@ -16,17 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.campaigns.sms.service;
+package org.apache.fineract.infrastructure.campaigns.sms.data.dto;
 
-import org.apache.fineract.infrastructure.campaigns.sms.data.SmsCampaignData;
-import org.apache.fineract.infrastructure.core.service.Page;
-import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-public interface SmsCampaignReadPlatformService {
+@Getter
+@Setter
+@NoArgsConstructor
+public class SmsCampaignParamReq implements Serializable {
 
-    SmsCampaignData retrieveOne(Long campaignId);
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    Page<SmsCampaignData> retrieveAll(SearchParameters searchParameters);
-
-    SmsCampaignData retrieveTemplate(String reportType);
+    private Integer officeId;
+    private Integer loanOfficerId;
+    private Integer transactionId;
+    private String reportName;
 }

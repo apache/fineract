@@ -16,32 +16,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.campaigns.sms.constants;
+package org.apache.fineract.infrastructure.campaigns.sms.data.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
-public enum SmsCampaignStatus {
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class SmsCampaignHandlerDto implements Serializable {
 
-    INVALID(-1, "smsCampaignStatus.invalid"), //
-    PENDING(100, "smsCampaignStatus.pending"), //
-    ACTIVE(300, "smsCampaignStatus.active"), //
-    CLOSED(600, "smsCampaignStatus.closed");
+    public static final String ACTIVATE_COMMAND = "activate";
+    public static final String CLOSE_COMMAND = "close";
+    public static final String REACTIVATE_COMMAND = "reactivate";
 
-    private final Integer value;
-    private final String code;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    SmsCampaignStatus(Integer value, String code) {
-        this.value = value;
-        this.code = code;
-    }
+    private String locale;
+    private String dateFormat;
+    private String activationDate;
+    private String closureDate;
 
-    public static SmsCampaignStatus fromInt(final Integer statusValue) {
-        return switch (statusValue) {
-            case 100 -> PENDING;
-            case 300 -> ACTIVE;
-            case 600 -> CLOSED;
-            default -> INVALID;
-        };
-    }
 }

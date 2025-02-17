@@ -18,6 +18,13 @@
  */
 package org.apache.fineract.infrastructure.campaigns.sms.domain;
 
+import static org.apache.fineract.infrastructure.campaigns.sms.constants.SmsCampaignStatus.ACTIVE;
+import static org.apache.fineract.infrastructure.campaigns.sms.constants.SmsCampaignStatus.CLOSED;
+import static org.apache.fineract.infrastructure.campaigns.sms.constants.SmsCampaignStatus.PENDING;
+import static org.apache.fineract.infrastructure.campaigns.sms.constants.SmsCampaignTriggerType.DIRECT;
+import static org.apache.fineract.infrastructure.campaigns.sms.constants.SmsCampaignTriggerType.SCHEDULE;
+import static org.apache.fineract.infrastructure.campaigns.sms.constants.SmsCampaignTriggerType.TRIGGERED;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -159,7 +166,7 @@ public class SmsCampaign extends AbstractPersistableCustom<Long> {
         String recurrence = null;
 
         LocalDateTime recurrenceStartDate = null;
-        if (SmsCampaignTriggerType.fromInt(triggerType.intValue()).isSchedule()) {
+        if (SCHEDULE.getValue().equals(triggerType.intValue())) {
             final Locale locale = command.extractLocale();
             String dateTimeFormat;
             recurrenceStartDate = DateUtils.getLocalDateTimeOfTenant();
@@ -228,7 +235,7 @@ public class SmsCampaign extends AbstractPersistableCustom<Long> {
             actualChanges.put(SmsCampaignValidator.isNotificationParamName, newValue);
         }
 
-        if (SmsCampaignTriggerType.fromInt(this.triggerType).isSchedule()) {
+        if (isSchedule()) {
             final String dateFormatAsInput = command.dateFormat();
             final String dateTimeFormatAsInput = command.stringValueOfParameterNamed(SmsCampaignValidator.dateTimeFormat);
             final String localeAsInput = command.locale();
@@ -260,7 +267,7 @@ public class SmsCampaign extends AbstractPersistableCustom<Long> {
         }
         this.approvedOnDate = activationLocalDate;
         this.approvedBy = currentUser;
-        this.status = SmsCampaignStatus.ACTIVE.getValue();
+        this.status = ACTIVE.getValue();
 
         validate();
     }
@@ -301,7 +308,7 @@ public class SmsCampaign extends AbstractPersistableCustom<Long> {
         }
 
         this.approvedOnDate = reactivateLocalDate;
-        this.status = SmsCampaignStatus.ACTIVE.getValue();
+        this.status = ACTIVE.getValue();
         this.approvedBy = currentUser;
         this.closureDate = null;
         this.isVisible = true;
@@ -326,27 +333,27 @@ public class SmsCampaign extends AbstractPersistableCustom<Long> {
     }
 
     public boolean isActive() {
-        return SmsCampaignStatus.fromInt(this.status).isActive();
+        return SmsCampaignStatus.fromInt(this.status).equals(ACTIVE);
     }
 
     public boolean isPending() {
-        return SmsCampaignStatus.fromInt(this.status).isPending();
+        return SmsCampaignStatus.fromInt(this.status).equals(PENDING);
     }
 
     public boolean isClosed() {
-        return SmsCampaignStatus.fromInt(this.status).isClosed();
+        return SmsCampaignStatus.fromInt(this.status).equals(CLOSED);
     }
 
     public boolean isDirect() {
-        return SmsCampaignTriggerType.fromInt(this.triggerType).isDirect();
+        return SmsCampaignTriggerType.fromInt(this.triggerType).equals(DIRECT);
     }
 
     public boolean isSchedule() {
-        return SmsCampaignTriggerType.fromInt(this.triggerType).isSchedule();
+        return SmsCampaignTriggerType.fromInt(this.triggerType).equals(SCHEDULE);
     }
 
     public boolean isTriggered() {
-        return SmsCampaignTriggerType.fromInt(this.triggerType).isTriggered();
+        return SmsCampaignTriggerType.fromInt(this.triggerType).equals(TRIGGERED);
     }
 
     private void validate() {
