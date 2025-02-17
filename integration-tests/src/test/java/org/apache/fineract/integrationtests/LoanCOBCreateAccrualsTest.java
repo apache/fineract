@@ -33,9 +33,8 @@ import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.junit.Ignore;
-import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 @Slf4j
 public class LoanCOBCreateAccrualsTest extends BaseLoanIntegrationTest {
@@ -474,7 +473,7 @@ public class LoanCOBCreateAccrualsTest extends BaseLoanIntegrationTest {
 
             // Accruals around installment due dates are as expected
             validateTransactionsExist(loanDetails, //
-                    transaction(0.16, "Accrual", "20 January 2025", 0.0, 0.0, 0.16, 0.0, 0.0, 0.0, 0.0), //
+                    transaction(0.17, "Accrual", "20 January 2025", 0.0, 0.0, 0.17, 0.0, 0.0, 0.0, 0.0), //
                     transaction(0.16, "Accrual", "21 January 2025", 0.0, 0.0, 0.16, 0.0, 0.0, 0.0, 0.0), //
                     transaction(0.16, "Accrual", "20 February 2025", 0.0, 0.0, 0.16, 0.0, 0.0, 0.0, 0.0), //
                     transaction(0.18, "Accrual", "21 February 2025", 0.0, 0.0, 0.18, 0.0, 0.0, 0.0, 0.0), //
@@ -623,7 +622,6 @@ public class LoanCOBCreateAccrualsTest extends BaseLoanIntegrationTest {
         });
     }
 
-    @Ignore // TODO: enable when implementation is complete
     @Test
     public void testProgressiveChargeBackInterestRecalculation() {
         AtomicReference<Long> loanIdRef = new AtomicReference<>();

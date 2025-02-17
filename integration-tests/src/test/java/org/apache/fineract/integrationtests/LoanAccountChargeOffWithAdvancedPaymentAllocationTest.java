@@ -28,6 +28,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -35,6 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.AllowAttributeOverrides;
 import org.apache.fineract.client.models.ChargeData;
@@ -46,6 +48,7 @@ import org.apache.fineract.client.models.GetLoanTransactionRelation;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
+import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
@@ -539,6 +542,58 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends BaseL
             verifyTransaction(LocalDate.of(2022, 9, 7), 1010.0f, 1000.0f, 0.0f, 10.0f, 0.0f, loanId, "chargeoff");
         });
 
+    }
+
+    @Test
+    public void testProgressiveChargeOffWithEarlyRepaymentZeroInterest() {
+        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        AtomicReference<Long> loanIdRef = new AtomicReference<>();
+        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
+                .createLoanProduct(create4IProgressive().chargeOffBehaviour("ZERO_INTEREST"));
+
+        runAt("01 January 2024", () -> {
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "01 January 2024",
+                    1000.0, 7.0, 6, null);
+
+            loanIdRef.set(loanId);
+
+            disburseLoan(loanId, BigDecimal.valueOf(1000), "01 January 2024");
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2024", 164.26, 0, 0, 5.83);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 2, "01 March 2024", 165.21, 0, 0, 4.88);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 3, "01 April 2024", 166.18, 0, 0, 3.91);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 4, "01 May 2024", 167.15, 0, 0, 2.94);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 5, "01 June 2024", 168.12, 0, 0, 1.97);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 6, "01 July 2024", 169.08, 0, 0, 0.99);
+
+            verifyTransactions(loanId, transaction(1000.0d, "Disbursement", "01 January 2024"));
+            executeInlineCOB(loanId);
+        });
+        runAt("10 February 2024", () -> {
+            Long loanId = loanIdRef.get();
+
+            loanTransactionHelper.makeLoanRepayment(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+                    .transactionDate("15 January 2024").locale("en").transactionAmount(170.09));
+
+            loanTransactionHelper.chargeOffLoan(loanId,
+                    new PostLoansLoanIdTransactionsRequest().transactionDate("31 January 2024").locale("en").dateFormat("dd MMMM yyyy"));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 1), 164.95, 167.46, -2.51, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5.14,
+                    2.63, 2.51, 170.09, 0.0);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 2, "01 March 2024", 170.09, 0, 0, 0.0);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 3, "01 April 2024", 170.09, 0, 0, 0.0);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 4, "01 May 2024", 170.09, 0, 0, 0.0);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 5, "01 June 2024", 170.09, 0, 0, 0.0);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 6, "01 July 2024", 154.69, 0, 0, 0.0);
+
+            verifyTransactions(loanId, //
+                    transaction(1000.0d, "Disbursement", "01 January 2024", 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false), //
+                    transaction(170.09d, "Repayment", "15 January 2024", 832.54, 167.46, 2.63, 0.0, 0.0, 0.0, 0.0, false), //
+                    transaction(835.05d, "Charge-off", "31 January 2024", 0.0, 832.54, 2.51, 0.0, 0.0, 0.0, 0.0, false) //
+            );
+        });
     }
 
     private void verifyJournalEntry(JournalEntryTransactionItem journalEntryTransactionItem, Double amount, LocalDate entryDate,

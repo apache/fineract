@@ -1349,13 +1349,11 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         Money feeChargesPortion = Money.zero(transactionCtx.getCurrency());
         Money penaltychargesPortion = Money.zero(transactionCtx.getCurrency());
         for (final LoanRepaymentScheduleInstallment currentInstallment : transactionCtx.getInstallments()) {
-            if (currentInstallment.isNotFullyPaidOff()) {
-                principalPortion = principalPortion.plus(currentInstallment.getPrincipalOutstanding(transactionCtx.getCurrency()));
-                interestPortion = interestPortion.plus(currentInstallment.getInterestOutstanding(transactionCtx.getCurrency()));
-                feeChargesPortion = feeChargesPortion.plus(currentInstallment.getFeeChargesOutstanding(transactionCtx.getCurrency()));
-                penaltychargesPortion = penaltychargesPortion
-                        .plus(currentInstallment.getPenaltyChargesOutstanding(transactionCtx.getCurrency()));
-            }
+            principalPortion = principalPortion.plus(currentInstallment.getPrincipalOutstanding(transactionCtx.getCurrency()));
+            interestPortion = interestPortion.plus(currentInstallment.getInterestOutstanding(transactionCtx.getCurrency()));
+            feeChargesPortion = feeChargesPortion.plus(currentInstallment.getFeeChargesOutstanding(transactionCtx.getCurrency()));
+            penaltychargesPortion = penaltychargesPortion
+                    .plus(currentInstallment.getPenaltyChargesOutstanding(transactionCtx.getCurrency()));
         }
 
         loanTransaction.updateComponentsAndTotal(principalPortion, interestPortion, feeChargesPortion, penaltychargesPortion);
@@ -1489,9 +1487,20 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             final Money amountToEditLastInstallment = loanTransaction.getLoan().getPrincipal().minus(installments.stream()
                     .filter(i -> !i.isAdditional()).map(LoanRepaymentScheduleInstallment::getPrincipal).reduce(ZERO, BigDecimal::add));
 
-            if (amountToEditLastInstallment.getAmount().signum() != 0) {
-                installments.stream().filter(i -> !i.isAdditional() && !i.isObligationsMet()).reduce((first, second) -> second)
-                        .ifPresent(last -> last.updatePrincipal(last.getPrincipal().add(amountToEditLastInstallment.getAmount())));
+            BigDecimal principalBalance = amountToEditLastInstallment.getAmount();
+            for (int i = installments.size() - 1; i > 0 && BigDecimal.ZERO.compareTo(principalBalance) != 0; i--) {
+                final LoanRepaymentScheduleInstallment installment = installments.get(i);
+                if (!installment.isAdditional() && !installment.isObligationsMet()) {
+                    final BigDecimal installmentPrincipal = MathUtil.nullToZero(installment.getPrincipal());
+
+                    installment.updatePrincipal(MathUtil.negativeToZero(installmentPrincipal.add(principalBalance)));
+                    if (MathUtil.isLessThanOrEqualTo(MathUtil.abs(principalBalance), installmentPrincipal)) {
+                        principalBalance = BigDecimal.ZERO;
+                    } else {
+                        principalBalance = principalBalance.signum() < 0 ? principalBalance.add(installmentPrincipal)
+                                : principalBalance.subtract(installmentPrincipal);
+                    }
+                }
             }
         }
     }
