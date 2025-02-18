@@ -29,7 +29,7 @@ import java.time.ZoneId;
 import java.util.stream.Stream;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,7 +63,7 @@ public class LoanAccrualActivityProcessingServiceImplTest {
     private BusinessEventNotifierService businessEventNotifierService;
 
     @Mock
-    private LoanAccountDomainService loanAccountDomainService;
+    private LoanAccountService loanAccountService;
 
     @Mock
     private LoanTransactionAssembler loanTransactionAssembler;
@@ -96,7 +96,7 @@ public class LoanAccrualActivityProcessingServiceImplTest {
 
         verify(loan, never()).getRepaymentScheduleInstallments(any());
         verify(loan, never()).addLoanTransaction(any());
-        verify(loanAccountDomainService, never()).saveLoanTransactionWithDataIntegrityViolationChecks(any());
+        verify(loanAccountService, never()).saveLoanTransactionWithDataIntegrityViolationChecks(any());
         verify(loanTransactionAssembler, never()).assembleAccrualActivityTransaction(any(), any(), any());
         verify(businessEventNotifierService, never()).notifyPreBusinessEvent(any());
         verify(businessEventNotifierService, never()).notifyPostBusinessEvent(any());
