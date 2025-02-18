@@ -118,6 +118,7 @@ import org.apache.fineract.test.helper.ErrorResponse;
 import org.apache.fineract.test.helper.Utils;
 import org.apache.fineract.test.initializer.global.LoanProductGlobalInitializerStep;
 import org.apache.fineract.test.messaging.EventAssertion;
+import org.apache.fineract.test.messaging.config.EventProperties;
 import org.apache.fineract.test.messaging.event.EventCheckHelper;
 import org.apache.fineract.test.messaging.event.loan.LoanRescheduledDueAdjustScheduleEvent;
 import org.apache.fineract.test.messaging.event.loan.LoanStatusChangedEvent;
@@ -188,6 +189,9 @@ public class LoanStepDef extends AbstractStepDef {
 
     @Autowired
     private LoanInterestPauseApi loanInterestPauseApi;
+
+    @Autowired
+    private EventProperties eventProperties;
 
     @When("Admin creates a new Loan")
     public void createLoan() throws IOException {
@@ -2233,8 +2237,11 @@ public class LoanStepDef extends AbstractStepDef {
         long loanId = loanResponse.body().getLoanId();
 
         LoanStatusEnumDataV1 expectedStatus = getExpectedStatus(loanStatus);
-        eventAssertion.assertEvent(LoanStatusChangedEvent.class, loanId).extractingData(LoanAccountDataV1::getStatus)
-                .isEqualTo(expectedStatus);
+        await().pollDelay(Duration.ofSeconds(1L)).pollInterval(Duration.ofSeconds(1L))
+                .atMost(Duration.ofSeconds(eventProperties.getEventWaitTimeoutInSec())).untilAsserted(() -> {
+                    eventAssertion.assertEvent(LoanStatusChangedEvent.class, loanId).extractingData(LoanAccountDataV1::getStatus)
+                            .isEqualTo(expectedStatus);
+                });
     }
 
     @Then("Loan marked as charged-off on {string}")
