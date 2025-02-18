@@ -48,4 +48,18 @@ public final class Utils {
     public static LocalDate now() {
         return LocalDate.now(Clock.systemUTC());
     }
+
+    public record DoubleFormatter(double value) {
+
+        public String format() {
+            boolean isWholeNumber = (value % 1.0 == 0);
+
+            String result = isWholeNumber ? String.format("%.1f", value) : String.format("%.2f", value);
+
+            if (!isWholeNumber && result.endsWith("0")) {
+                result = result.substring(0, result.length() - 1);
+            }
+            return result;
+        }
+    }
 }

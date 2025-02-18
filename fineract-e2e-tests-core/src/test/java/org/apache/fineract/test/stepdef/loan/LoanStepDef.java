@@ -2003,10 +2003,11 @@ public class LoanStepDef extends AbstractStepDef {
             actualValues.add(t.getChargeTimeType().getValue() == null ? null : t.getChargeTimeType().getValue());
             actualValues.add(t.getDueDate() == null ? null : FORMATTER.format(t.getDueDate()));
             actualValues.add(t.getChargeCalculationType().getValue() == null ? null : t.getChargeCalculationType().getValue());
-            actualValues.add(t.getAmount() == null ? null : String.valueOf(t.getAmount()));
+            actualValues.add(t.getAmount() == null ? null : String.valueOf(new Utils.DoubleFormatter(t.getAmount()).format()));
             actualValues.add(t.getAmountPaid() == null ? null : String.valueOf(t.getAmountPaid()));
             actualValues.add(t.getAmountWaived() == null ? null : String.valueOf(t.getAmountWaived()));
-            actualValues.add(t.getAmountOutstanding() == null ? null : String.valueOf(t.getAmountOutstanding()));
+            actualValues.add(
+                    t.getAmountOutstanding() == null ? null : String.valueOf(new Utils.DoubleFormatter(t.getAmountOutstanding()).format()));
             return actualValues;
         }).collect(Collectors.toList());
     }
@@ -3181,6 +3182,7 @@ public class LoanStepDef extends AbstractStepDef {
 
     private List<String> fetchValuesOfRepaymentSchedule(List<String> header, GetLoansLoanIdRepaymentPeriod repaymentPeriod) {
         List<String> actualValues = new ArrayList<>();
+
         for (String headerName : header) {
             switch (headerName) {
                 case "Nr" -> actualValues.add(repaymentPeriod.getPeriod() == null ? null : String.valueOf(repaymentPeriod.getPeriod()));
@@ -3196,12 +3198,12 @@ public class LoanStepDef extends AbstractStepDef {
                     actualValues.add(repaymentPeriod.getPrincipalDue() == null ? null : String.valueOf(repaymentPeriod.getPrincipalDue()));
                 case "Interest" ->
                     actualValues.add(repaymentPeriod.getInterestDue() == null ? null : String.valueOf(repaymentPeriod.getInterestDue()));
-                case "Fees" -> actualValues
-                        .add(repaymentPeriod.getFeeChargesDue() == null ? null : String.valueOf(repaymentPeriod.getFeeChargesDue()));
-                case "Penalties" -> actualValues.add(
-                        repaymentPeriod.getPenaltyChargesDue() == null ? null : String.valueOf(repaymentPeriod.getPenaltyChargesDue()));
-                case "Due" -> actualValues.add(
-                        repaymentPeriod.getTotalDueForPeriod() == null ? null : String.valueOf(repaymentPeriod.getTotalDueForPeriod()));
+                case "Fees" -> actualValues.add(repaymentPeriod.getFeeChargesDue() == null ? null
+                        : String.valueOf(new Utils.DoubleFormatter(repaymentPeriod.getFeeChargesDue()).format()));
+                case "Penalties" -> actualValues.add(repaymentPeriod.getPenaltyChargesDue() == null ? null
+                        : String.valueOf(new Utils.DoubleFormatter(repaymentPeriod.getPenaltyChargesDue()).format()));
+                case "Due" -> actualValues.add(repaymentPeriod.getTotalDueForPeriod() == null ? null
+                        : String.valueOf(new Utils.DoubleFormatter(repaymentPeriod.getTotalDueForPeriod()).format()));
                 case "Paid" -> actualValues.add(
                         repaymentPeriod.getTotalPaidForPeriod() == null ? null : String.valueOf(repaymentPeriod.getTotalPaidForPeriod()));
                 case "In advance" -> actualValues.add(repaymentPeriod.getTotalPaidInAdvanceForPeriod() == null ? null
@@ -3211,7 +3213,7 @@ public class LoanStepDef extends AbstractStepDef {
                 case "Waived" -> actualValues.add(repaymentPeriod.getTotalWaivedForPeriod() == null ? null
                         : String.valueOf(repaymentPeriod.getTotalWaivedForPeriod()));
                 case "Outstanding" -> actualValues.add(repaymentPeriod.getTotalOutstandingForPeriod() == null ? null
-                        : String.valueOf(repaymentPeriod.getTotalOutstandingForPeriod()));
+                        : String.valueOf(new Utils.DoubleFormatter(repaymentPeriod.getTotalOutstandingForPeriod()).format()));
                 default -> throw new IllegalStateException(String.format("Header name %s cannot be found", headerName));
             }
         }
