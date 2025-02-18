@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.accounting.accrual.service;
 
+import static org.apache.fineract.accounting.accrual.api.AccrualAccountingConstants.ACCRUE_TILL_PARAM_NAME;
 import static org.apache.fineract.accounting.accrual.api.AccrualAccountingConstants.PERIODIC_ACCRUAL_ACCOUNTING_EXECUTION_ERROR_CODE;
 import static org.apache.fineract.accounting.accrual.api.AccrualAccountingConstants.PERIODIC_ACCRUAL_ACCOUNTING_RESOURCE_NAME;
-import static org.apache.fineract.accounting.accrual.api.AccrualAccountingConstants.accrueTillParamName;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -44,7 +44,7 @@ public class AccrualAccountingWritePlatformServiceImpl implements AccrualAccount
     @Override
     public CommandProcessingResult executeLoansPeriodicAccrual(JsonCommand command) {
         this.accountingDataValidator.validateLoanPeriodicAccrualData(command.json());
-        LocalDate tillDate = command.localDateValueOfParameterNamed(accrueTillParamName);
+        LocalDate tillDate = command.localDateValueOfParameterNamed(ACCRUE_TILL_PARAM_NAME);
         try {
             this.loanAccrualsProcessingService.addPeriodicAccruals(tillDate);
         } catch (MultiException e) {

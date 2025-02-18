@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.accounting.accrual.serialization;
 
+import static org.apache.fineract.accounting.accrual.api.AccrualAccountingConstants.ACCRUE_TILL_PARAM_NAME;
 import static org.apache.fineract.accounting.accrual.api.AccrualAccountingConstants.PERIODIC_ACCRUAL_ACCOUNTING_RESOURCE_NAME;
-import static org.apache.fineract.accounting.accrual.api.AccrualAccountingConstants.accrueTillParamName;
 
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
@@ -46,8 +46,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public final class AccrualAccountingDataValidator {
 
-    private static final Set<String> LOAN_PERIODIC_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(accrueTillParamName, AccrualAccountingConstants.localeParamName, AccrualAccountingConstants.dateFormatParamName));
+    private static final Set<String> LOAN_PERIODIC_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(ACCRUE_TILL_PARAM_NAME,
+            AccrualAccountingConstants.LOCALE_PARAM_NAME, AccrualAccountingConstants.DATE_FORMAT_PARAM_NAME));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -63,8 +63,9 @@ public final class AccrualAccountingDataValidator {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(PERIODIC_ACCRUAL_ACCOUNTING_RESOURCE_NAME);
 
-        final LocalDate date = this.fromApiJsonHelper.extractLocalDateNamed(accrueTillParamName, element);
-        baseDataValidator.reset().parameter(accrueTillParamName).value(date).notNull().validateDateBefore(DateUtils.getBusinessLocalDate());
+        final LocalDate date = this.fromApiJsonHelper.extractLocalDateNamed(ACCRUE_TILL_PARAM_NAME, element);
+        baseDataValidator.reset().parameter(ACCRUE_TILL_PARAM_NAME).value(date).notNull()
+                .validateDateBefore(DateUtils.getBusinessLocalDate());
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 

@@ -16,18 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.accounting.accrual.api;
+package org.apache.fineract.accounting.accrual.request;
 
-public final class AccrualAccountingConstants {
+import java.io.Serial;
+import java.io.Serializable;
 
-    private AccrualAccountingConstants() {
+public record AccrualAccountRequest(String locale, String dateFormat, String tillDate) implements Serializable {
 
-    }
-
-    public static final String ACCRUE_TILL_PARAM_NAME = "tillDate";
-    public static final String LOCALE_PARAM_NAME = "locale";
-    public static final String DATE_FORMAT_PARAM_NAME = "dateFormat";
-
-    public static final String PERIODIC_ACCRUAL_ACCOUNTING_RESOURCE_NAME = "periodicaccrual";
-    public static final String PERIODIC_ACCRUAL_ACCOUNTING_EXECUTION_ERROR_CODE = "execution.failed";
+    @Serial
+    private static final long serialVersionUID = 1L;
 }
