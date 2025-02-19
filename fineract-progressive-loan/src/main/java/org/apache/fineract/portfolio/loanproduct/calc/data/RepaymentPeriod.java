@@ -37,7 +37,7 @@ import org.apache.fineract.portfolio.util.Memo;
 
 @ToString(exclude = { "previous" })
 @EqualsAndHashCode(exclude = { "previous" })
-public class RepaymentPeriod {
+public final class RepaymentPeriod {
 
     private final RepaymentPeriod previous;
     @Getter
@@ -59,40 +59,59 @@ public class RepaymentPeriod {
     @Getter
     private Money paidInterest;
 
+    private final MathContext mc;
+
     private Memo<BigDecimal> rateFactorPlus1Calculation;
     private Memo<Money> calculatedDueInterestCalculation;
     private Memo<Money> dueInterestCalculation;
     private Memo<Money> outstandingBalanceCalculation;
-    private final MathContext mc;
 
-    public RepaymentPeriod(RepaymentPeriod previous, LocalDate fromDate, LocalDate dueDate, Money emi, MathContext mc) {
+    private RepaymentPeriod(RepaymentPeriod previous, LocalDate fromDate, LocalDate dueDate, List<InterestPeriod> interestPeriods,
+            Money emi, Money originalEmi, Money paidPrincipal, Money paidInterest, MathContext mc) {
         this.previous = previous;
         this.fromDate = fromDate;
         this.dueDate = dueDate;
+        this.interestPeriods = interestPeriods;
         this.emi = emi;
-        this.originalEmi = emi;
+        this.originalEmi = originalEmi;
+        this.paidPrincipal = paidPrincipal;
+        this.paidInterest = paidInterest;
         this.mc = mc;
-        this.interestPeriods = new ArrayList<>();
-        // There is always at least 1 interest period, by default with same from-due date as repayment period
-        getInterestPeriods().add(InterestPeriod.withEmptyAmounts(this, getFromDate(), getDueDate()));
-        this.paidInterest = getZero(mc);
-        this.paidPrincipal = getZero(mc);
     }
 
-    public RepaymentPeriod(RepaymentPeriod previous, RepaymentPeriod repaymentPeriod, MathContext mc) {
-        this.previous = previous;
-        this.fromDate = repaymentPeriod.fromDate;
-        this.dueDate = repaymentPeriod.dueDate;
-        this.emi = repaymentPeriod.emi;
-        this.originalEmi = repaymentPeriod.originalEmi;
-        this.interestPeriods = new ArrayList<>();
-        this.paidPrincipal = repaymentPeriod.paidPrincipal;
-        this.paidInterest = repaymentPeriod.paidInterest;
-        this.mc = mc;
+    public static RepaymentPeriod create(RepaymentPeriod previous, LocalDate fromDate, LocalDate dueDate, Money emi, MathContext mc) {
+        final Money zero = emi.zero();
+        final RepaymentPeriod newRepaymentPeriod = new RepaymentPeriod(previous, fromDate, dueDate, new ArrayList<>(), emi, emi, zero, zero,
+                mc);
+        // There is always at least 1 interest period, by default with same from-due date as repayment period
+        newRepaymentPeriod.interestPeriods.add(InterestPeriod.withEmptyAmounts(newRepaymentPeriod, fromDate, dueDate));
+        return newRepaymentPeriod;
+    }
+
+    public static RepaymentPeriod copy(RepaymentPeriod previous, RepaymentPeriod repaymentPeriod, MathContext mc) {
+        final RepaymentPeriod newRepaymentPeriod = new RepaymentPeriod(previous, repaymentPeriod.fromDate, repaymentPeriod.dueDate,
+                new ArrayList<>(), repaymentPeriod.emi, repaymentPeriod.originalEmi, repaymentPeriod.paidPrincipal,
+                repaymentPeriod.paidInterest, mc);
         // There is always at least 1 interest period, by default with same from-due date as repayment period
         for (InterestPeriod interestPeriod : repaymentPeriod.interestPeriods) {
-            interestPeriods.add(InterestPeriod.copy(this, interestPeriod));
+            newRepaymentPeriod.interestPeriods.add(InterestPeriod.copy(newRepaymentPeriod, interestPeriod));
         }
+        return newRepaymentPeriod;
+    }
+
+    public static RepaymentPeriod copyWithoutPaidAmounts(RepaymentPeriod previous, RepaymentPeriod repaymentPeriod, MathContext mc) {
+        final Money zero = repaymentPeriod.emi.zero();
+        final RepaymentPeriod newRepaymentPeriod = new RepaymentPeriod(previous, repaymentPeriod.fromDate, repaymentPeriod.dueDate,
+                new ArrayList<>(), repaymentPeriod.emi, repaymentPeriod.originalEmi, zero, zero, mc);
+        // There is always at least 1 interest period, by default with same from-due date as repayment period
+        for (InterestPeriod interestPeriod : repaymentPeriod.interestPeriods) {
+            var interestPeriodCopy = InterestPeriod.copy(newRepaymentPeriod, interestPeriod);
+            if (!interestPeriodCopy.getBalanceCorrectionAmount().isZero()) {
+                interestPeriodCopy.addBalanceCorrectionAmount(interestPeriodCopy.getBalanceCorrectionAmount().negated());
+            }
+            newRepaymentPeriod.interestPeriods.add(interestPeriodCopy);
+        }
+        return newRepaymentPeriod;
     }
 
     public Optional<RepaymentPeriod> getPrevious() {

@@ -56,6 +56,7 @@ public class ProgressiveLoanInterestScheduleModel {
     private final Integer installmentAmountInMultiplesOf;
     private final MathContext mc;
     private final Money zero;
+    private final boolean isCopiedForCalculation;
 
     public ProgressiveLoanInterestScheduleModel(final List<RepaymentPeriod> repaymentPeriods,
             final LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail,
@@ -67,33 +68,34 @@ public class ProgressiveLoanInterestScheduleModel {
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
         this.mc = mc;
         this.zero = Money.zero(loanProductRelatedDetail.getCurrencyData(), mc);
+        this.isCopiedForCalculation = false;
     }
 
     private ProgressiveLoanInterestScheduleModel(final List<RepaymentPeriod> repaymentPeriods, final TreeSet<InterestRate> interestRates,
             final LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail,
             final Map<LoanTermVariationType, List<LoanTermVariationsData>> loanTermVariations, final Integer installmentAmountInMultiplesOf,
-            final MathContext mc) {
+            final MathContext mc, final boolean isCopiedForCalculation) {
         this.mc = mc;
         this.repaymentPeriods = copyRepaymentPeriods(repaymentPeriods,
-                (previousPeriod, repaymentPeriod) -> new RepaymentPeriod(previousPeriod, repaymentPeriod, mc));
+                (previousPeriod, repaymentPeriod) -> RepaymentPeriod.copy(previousPeriod, repaymentPeriod, mc));
         this.interestRates = new TreeSet<>(interestRates);
         this.loanProductRelatedDetail = loanProductRelatedDetail;
         this.loanTermVariations = loanTermVariations;
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
         this.zero = Money.zero(loanProductRelatedDetail.getCurrencyData(), mc);
+        this.isCopiedForCalculation = isCopiedForCalculation;
     }
 
     public ProgressiveLoanInterestScheduleModel deepCopy(MathContext mc) {
         return new ProgressiveLoanInterestScheduleModel(repaymentPeriods, interestRates, loanProductRelatedDetail, loanTermVariations,
-                installmentAmountInMultiplesOf, mc);
+                installmentAmountInMultiplesOf, mc, false);
     }
 
-    public ProgressiveLoanInterestScheduleModel emptyCopy() {
+    public ProgressiveLoanInterestScheduleModel copyWithoutPaidAmounts() {
         final List<RepaymentPeriod> repaymentPeriodCopies = copyRepaymentPeriods(repaymentPeriods,
-                (previousPeriod, repaymentPeriod) -> new RepaymentPeriod(previousPeriod, repaymentPeriod.getFromDate(),
-                        repaymentPeriod.getDueDate(), repaymentPeriod.getEmi().zero(), mc));
+                (previousPeriod, repaymentPeriod) -> RepaymentPeriod.copyWithoutPaidAmounts(previousPeriod, repaymentPeriod, mc));
         return new ProgressiveLoanInterestScheduleModel(repaymentPeriodCopies, interestRates, loanProductRelatedDetail, loanTermVariations,
-                installmentAmountInMultiplesOf, mc);
+                installmentAmountInMultiplesOf, mc, true);
     }
 
     private List<RepaymentPeriod> copyRepaymentPeriods(final List<RepaymentPeriod> repaymentPeriods,

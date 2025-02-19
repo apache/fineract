@@ -934,16 +934,16 @@ class ProgressiveEMICalculatorTest {
         disbursedAmount = toMoney(25.0);
         emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 8), disbursedAmount);
 
-        checkTotalInterestDue(interestSchedule, 4.65);
+        checkTotalInterestDue(interestSchedule, 4.64);
 
-        checkPeriod(interestSchedule, 0, 0, 29.93, 0.001019591398, 0.00, 1.15, 28.78, 146.22);
-        checkPeriod(interestSchedule, 0, 1, 29.93, 0.000764693548, 0.08, 1.15, 28.78, 146.22);
-        checkPeriod(interestSchedule, 0, 2, 29.93, 0.006117548387, 1.07, 1.15, 28.78, 146.22);
-        checkPeriod(interestSchedule, 1, 0, 29.93, 0.007901833333, 1.16, 28.77, 117.45);
-        checkPeriod(interestSchedule, 2, 0, 29.93, 0.007901833333, 0.93, 29.00, 88.45);
-        checkPeriod(interestSchedule, 3, 0, 29.93, 0.007901833333, 0.70, 29.23, 59.22);
-        checkPeriod(interestSchedule, 4, 0, 29.93, 0.007901833333, 0.47, 29.46, 29.76);
-        checkPeriod(interestSchedule, 5, 0, 30.0, 0.007901833333, 0.24, 29.76, 0.0);
+        checkPeriod(interestSchedule, 0, 0, 29.94, 0.001019591398, 0.00, 1.15, 28.79, 146.21);
+        checkPeriod(interestSchedule, 0, 1, 29.94, 0.000764693548, 0.08, 1.15, 28.79, 146.21);
+        checkPeriod(interestSchedule, 0, 2, 29.94, 0.006117548387, 1.07, 1.15, 28.79, 146.21);
+        checkPeriod(interestSchedule, 1, 0, 29.94, 0.007901833333, 1.16, 28.78, 117.43);
+        checkPeriod(interestSchedule, 2, 0, 29.94, 0.007901833333, 0.93, 29.01, 88.42);
+        checkPeriod(interestSchedule, 3, 0, 29.94, 0.007901833333, 0.70, 29.24, 59.18);
+        checkPeriod(interestSchedule, 4, 0, 29.94, 0.007901833333, 0.47, 29.47, 29.71);
+        checkPeriod(interestSchedule, 5, 0, 29.94, 0.007901833333, 0.23, 29.71, 0.0);
     }
 
     @Test
@@ -1024,8 +1024,8 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), toMoney(200.0));
         checkTotalInterestDue(interestSchedule, 4.11);
 
-        checkEmi(interestSchedule, 4, 85.05);
-        checkEmi(interestSchedule, 5, 78.86);
+        checkEmi(interestSchedule, 4, 85.04);
+        checkEmi(interestSchedule, 5, 78.91);
     }
 
     @Test
