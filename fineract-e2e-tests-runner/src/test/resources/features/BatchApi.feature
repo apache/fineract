@@ -139,5 +139,6 @@ Feature: Batch API
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        |
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        |
+      | 01 February 2024 | Accrual          | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          |
       | 01 February 2024 | Charge-off       | 83.57  | 83.57     | 0.0      | 0.0  | 0.0       | 0.0          |
     And Admin checks the loan has been charged-off on "01 February 2024"

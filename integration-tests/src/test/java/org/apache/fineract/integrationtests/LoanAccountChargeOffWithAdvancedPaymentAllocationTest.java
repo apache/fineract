@@ -591,6 +591,7 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends BaseL
             verifyTransactions(loanId, //
                     transaction(1000.0d, "Disbursement", "01 January 2024", 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false), //
                     transaction(170.09d, "Repayment", "15 January 2024", 832.54, 167.46, 2.63, 0.0, 0.0, 0.0, 0.0, false), //
+                    transaction(5.14d, "Accrual", "31 January 2024", 0.0, 0.0, 5.14, 0.0, 0.0, 0.0, 0.0, false), //
                     transaction(835.05d, "Charge-off", "31 January 2024", 0.0, 832.54, 2.51, 0.0, 0.0, 0.0, 0.0, false) //
             );
         });
