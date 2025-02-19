@@ -46,4 +46,11 @@ public class EmiChangeOperation {
     public static EmiChangeOperation changeInterestRate(final LocalDate newInterestSubmittedOnDate, final BigDecimal newInterestRate) {
         return new EmiChangeOperation(EmiChangeOperation.Action.INTEREST_RATE_CHANGE, newInterestSubmittedOnDate, null, newInterestRate);
     }
+
+    public EmiChangeOperation withZeroAmount() {
+        if (action == Action.DISBURSEMENT) {
+            return new EmiChangeOperation(action, submittedOnDate, amount.zero(), null);
+        }
+        return null;
+    }
 }

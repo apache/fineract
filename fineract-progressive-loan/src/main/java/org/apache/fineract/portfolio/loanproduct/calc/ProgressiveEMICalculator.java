@@ -89,7 +89,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         final Money zero = Money.zero(loanProductRelatedDetail.getCurrencyData(), mc);
         final AtomicReference<RepaymentPeriod> prev = new AtomicReference<>();
         List<RepaymentPeriod> repaymentPeriods = periods.stream().map(e -> {
-            RepaymentPeriod rp = new RepaymentPeriod(prev.get(), from.apply(e), to.apply(e), zero, mc);
+            RepaymentPeriod rp = RepaymentPeriod.create(prev.get(), from.apply(e), to.apply(e), zero, mc);
             prev.set(rp);
             return rp;
         }).toList();
@@ -374,14 +374,14 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             final ProgressiveLoanInterestScheduleModel scheduleModel, final EmiChangeOperation operation) {
         final List<RepaymentPeriod> relatedRepaymentPeriods = scheduleModel.getRelatedRepaymentPeriods(calculateFromRepaymentPeriodDueDate);
         final boolean onlyOnActualModelShouldApply = scheduleModel.isEmpty()
-                || operation.getAction() == EmiChangeOperation.Action.INTEREST_RATE_CHANGE;
+                || operation.getAction() == EmiChangeOperation.Action.INTEREST_RATE_CHANGE || scheduleModel.isCopiedForCalculation();
 
         calculateRateFactorForPeriods(relatedRepaymentPeriods, scheduleModel);
         calculateOutstandingBalance(scheduleModel);
         if (onlyOnActualModelShouldApply) {
             calculateEMIOnActualModel(relatedRepaymentPeriods, scheduleModel);
         } else {
-            calculateEMIOnNewEmptyModelAndMerge(relatedRepaymentPeriods, scheduleModel, operation);
+            calculateEMIOnNewModelAndMerge(relatedRepaymentPeriods, scheduleModel, operation);
         }
         calculateOutstandingBalance(scheduleModel);
         calculateLastUnpaidRepaymentPeriodEMI(scheduleModel);
@@ -733,18 +733,18 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         });
     }
 
-    private void calculateEMIOnNewEmptyModelAndMerge(List<RepaymentPeriod> repaymentPeriods,
-            ProgressiveLoanInterestScheduleModel scheduleModel, final EmiChangeOperation operation) {
+    private void calculateEMIOnNewModelAndMerge(List<RepaymentPeriod> repaymentPeriods, ProgressiveLoanInterestScheduleModel scheduleModel,
+            final EmiChangeOperation operation) {
         if (repaymentPeriods.isEmpty()) {
             return;
         }
-        final ProgressiveLoanInterestScheduleModel scheduleModelCopy = scheduleModel.emptyCopy();
-        addDisbursement(scheduleModelCopy, operation);
+        final ProgressiveLoanInterestScheduleModel scheduleModelCopy = scheduleModel.copyWithoutPaidAmounts();
+        addDisbursement(scheduleModelCopy, operation.withZeroAmount());
 
         final LocalDate firstDueDate = repaymentPeriods.get(0).getDueDate();
         scheduleModel.copyPeriodsFrom(firstDueDate, scheduleModelCopy.repaymentPeriods(), (newRepaymentPeriod, actualRepaymentPeriod) -> {
-            actualRepaymentPeriod.setEmi(actualRepaymentPeriod.getEmi().plus(newRepaymentPeriod.getEmi()));
-            actualRepaymentPeriod.setOriginalEmi(actualRepaymentPeriod.getOriginalEmi().plus(newRepaymentPeriod.getOriginalEmi()));
+            actualRepaymentPeriod.setEmi(newRepaymentPeriod.getEmi());
+            actualRepaymentPeriod.setOriginalEmi(newRepaymentPeriod.getOriginalEmi());
         });
     }
 
