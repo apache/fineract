@@ -39,21 +39,21 @@ public class AcmeNoteWritePlatformService implements NoteWritePlatformService, I
 
     @Override
     public CommandProcessingResult createNote(JsonCommand command) {
-        return null;
+        throw new UnsupportedOperationException("createNote() is not yet implemented.");
     }
 
     @Override
     public CommandProcessingResult updateNote(JsonCommand command) {
-        return null;
+        throw new UnsupportedOperationException("updateNote() is not yet implemented.");
     }
 
     @Override
     public CommandProcessingResult deleteNote(JsonCommand command) {
-        return null;
+        throw new UnsupportedOperationException("deleteNote() is not yet implemented.");
     }
 
     @Override
     public void createAndPersistClientNote(Client client, JsonCommand command) {
-
+        log.warn("createAndPersistClientNote() is intentionally left empty and does nothing.");
     }
 }
