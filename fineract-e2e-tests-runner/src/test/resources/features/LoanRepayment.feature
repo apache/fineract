@@ -3969,7 +3969,7 @@ Feature: LoanRepayment
       | 15 January 2024  | Merchant Issued Refund | 50.0   | 48.9      | 1.1      | 0.0  | 0.0       | 126.1        | false    |
       | 15 January 2024  | Interest Refund        | 0.29   | 0.29      | 0.0      | 0.0  | 0.0       | 125.81       | false    |
       | 16 January 2024  | Payout Refund          | 50.0   | 49.95     | 0.05     | 0.0  | 0.0       | 75.86        | false    |
-      | 16 January 2024  | Interest Refund        | 0.3    | 0.3       | 0.0      | 0.0  | 0.0       | 75.56        | false    |
+      | 16 January 2024  | Interest Refund        | 0.31   | 0.31      | 0.0      | 0.0  | 0.0       | 75.55        | false    |
     Then In Loan Transactions the "4"th Transaction has relationship type=RELATED with the "3"th Transaction
     Then In Loan Transactions the "6"th Transaction has relationship type=RELATED with the "5"th Transaction
     When Customer undo "1"th "Merchant Issued Refund" transaction made on "15 January 2024"
@@ -4220,12 +4220,12 @@ Feature: LoanRepayment
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                 | 300.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
       |    |      | 01 January 2024  |                 | 200.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
-      | 1  | 31   | 01 February 2024 |                 | 417.87	         | 82.13         | 2.92	    | 0.0  | 0.0       | 85.05  | 49.5   | 49.5       | 0.0  | 35.55       |
-      | 2  | 29   | 01 March 2024    |                 | 335.26	         | 82.61         | 2.44     | 0.0  | 0.0       | 85.05  | 49.79  | 49.79      | 0.0  | 35.26       |
-      | 3  | 31   | 01 April 2024    |                 | 252.17          | 83.09         | 1.96	    | 0.0  | 0.0       | 85.05  | 50.08  | 50.08      | 0.0  | 34.97       |
-      | 4  | 30   | 01 May 2024      |                 | 168.59          | 83.58	     | 1.47     | 0.0  | 0.0       | 85.05  | 50.22  | 50.22      | 0.0  | 34.83       |
-      | 5  | 31   | 01 June 2024     |                 | 84.52           | 84.07         | 0.98	    | 0.0  | 0.0       | 85.05  | 50.22  | 50.22      | 0.0  | 34.83       |
-      | 6  | 30   | 01 July 2024     |                 | 0.0             | 84.52	     | 0.49     | 0.0  | 0.0       | 85.01  | 50.19  | 50.19      | 0.0  | 34.82       |
+      | 1  | 31   | 01 February 2024 |                 | 417.88	         | 82.12         | 2.92	    | 0.0  | 0.0       | 85.04  | 49.5   | 49.5       | 0.0  | 35.54       |
+      | 2  | 29   | 01 March 2024    |                 | 335.28	         | 82.6          | 2.44     | 0.0  | 0.0       | 85.04  | 49.79  | 49.79      | 0.0  | 35.25       |
+      | 3  | 31   | 01 April 2024    |                 | 252.2           | 83.08         | 1.96	    | 0.0  | 0.0       | 85.04  | 50.08  | 50.08      | 0.0  | 34.96       |
+      | 4  | 30   | 01 May 2024      |                 | 168.63          | 83.57	     | 1.47     | 0.0  | 0.0       | 85.04  | 50.22  | 50.22      | 0.0  | 34.82       |
+      | 5  | 31   | 01 June 2024     |                 | 84.57           | 84.06         | 0.98	    | 0.0  | 0.0       | 85.04  | 50.22  | 50.22      | 0.0  | 34.82       |
+      | 6  | 30   | 01 July 2024     |                 | 0.0             | 84.57	     | 0.49     | 0.0  | 0.0       | 85.06  | 50.19  | 50.19      | 0.0  | 34.87       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid    | In advance | Late | Outstanding |
       | 500.0         | 10.26    | 0.0  | 0.0       | 510.26  | 300.0   | 300.0      | 0.0  | 210.26      |
@@ -4283,14 +4283,14 @@ Feature: LoanRepayment
       |    |      | 01 January 2024  |                 | 300.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
       | 1  | 31   | 01 February 2024 |                 | 250.72	         | 49.28         | 1.75	    | 0.0  | 0.0       | 51.03  | 49.5   | 49.5       | 0.0  | 1.53        |
       |    |      | 10 February 2024 |                 | 200.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
-      | 2  | 29   | 01 March 2024    |                 | 361.32	         | 89.4          | 2.26     | 0.0  | 0.0       | 91.66  | 49.79  | 49.79      | 0.0  | 41.87       |
-      | 3  | 31   | 01 April 2024    |                 | 271.77          | 89.55         | 2.11	    | 0.0  | 0.0       | 91.66  | 50.08  | 50.08      | 0.0  | 41.58       |
-      | 4  | 30   | 01 May 2024      |                 | 181.7           | 90.07	     | 1.59     | 0.0  | 0.0       | 91.66  | 50.22  | 50.22      | 0.0  | 41.44       |
-      | 5  | 31   | 01 June 2024     |                 | 91.1            | 90.6          | 1.06	    | 0.0  | 0.0       | 91.66  | 50.22  | 50.22      | 0.0  | 41.44       |
-      | 6  | 30   | 01 July 2024     |                 | 0.0             | 91.1	         | 0.53     | 0.0  | 0.0       | 91.63  | 50.19  | 50.19      | 0.0  | 41.44       |
+      | 2  | 29   | 01 March 2024    |                 | 361.33	         | 89.39         | 2.27     | 0.0  | 0.0       | 91.66  | 49.79  | 49.79      | 0.0  | 41.87       |
+      | 3  | 31   | 01 April 2024    |                 | 271.78          | 89.55         | 2.11	    | 0.0  | 0.0       | 91.66  | 50.08  | 50.08      | 0.0  | 41.58       |
+      | 4  | 30   | 01 May 2024      |                 | 181.71          | 90.07	     | 1.59     | 0.0  | 0.0       | 91.66  | 50.22  | 50.22      | 0.0  | 41.44       |
+      | 5  | 31   | 01 June 2024     |                 | 91.11           | 90.6          | 1.06	    | 0.0  | 0.0       | 91.66  | 50.22  | 50.22      | 0.0  | 41.44       |
+      | 6  | 30   | 01 July 2024     |                 | 0.0             | 91.11         | 0.53     | 0.0  | 0.0       | 91.64  | 50.19  | 50.19      | 0.0  | 41.45       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid    | In advance | Late | Outstanding |
-      | 500.0         | 9.3      | 0.0  | 0.0       | 509.3   | 300.0   | 300.0      | 0.0  | 209.3      |
+      | 500.0         | 9.31     | 0.0  | 0.0       | 509.31  | 300.0   | 300.0      | 0.0  | 209.31     |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement           | 300.0  | 0.0       | 0.0      | 0.0  | 0.0       | 300.0        | false    | false    |

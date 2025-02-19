@@ -262,12 +262,12 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
 
         checkPeriod(interestSchedule, 0, 0, 17.43, 0.0, 0.0, 1.33, 16.1, 83.9);
-        checkPeriod(interestSchedule, 0, 1, 17.43, 0.013315561644, 1.33, 16.1, 83.9);
-        checkPeriod(interestSchedule, 1, 0, 17.43, 0.012456493151, 1.05, 16.38, 67.52);
-        checkPeriod(interestSchedule, 2, 0, 17.43, 0.013315561644, 0.90, 16.53, 50.99);
-        checkPeriod(interestSchedule, 3, 0, 17.43, 0.012886027397, 0.66, 16.77, 34.22);
-        checkPeriod(interestSchedule, 4, 0, 17.43, 0.013315561644, 0.46, 16.97, 17.25);
-        checkPeriod(interestSchedule, 5, 0, 17.47, 0.012886027397, 0.22, 17.25, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.43, 0.013315561644, 1.3315561644, 1.33, 16.1, 83.9);
+        checkPeriod(interestSchedule, 1, 0, 17.43, 0.012456493151, 1.04509977537, 1.05, 16.38, 67.52);
+        checkPeriod(interestSchedule, 2, 0, 17.43, 0.013315561644, 0.899066722202, 0.90, 16.53, 50.99);
+        checkPeriod(interestSchedule, 3, 0, 17.43, 0.012886027397, 0.657058536972, 0.66, 16.77, 34.22);
+        checkPeriod(interestSchedule, 4, 0, 17.43, 0.013315561644, 0.455658519458, 0.46, 16.97, 17.25);
+        checkPeriod(interestSchedule, 5, 0, 17.47, 0.012886027397, 0.222283972598, 0.22, 17.25, 0.0);
     }
 
     @Test
@@ -299,12 +299,12 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
 
         checkPeriod(interestSchedule, 0, 0, 17.13, 0.0, 0.0, 0.79, 16.34, 83.66);
-        checkPeriod(interestSchedule, 0, 1, 17.13, 0.007901833333, 0.79, 16.34, 83.66);
-        checkPeriod(interestSchedule, 1, 0, 17.13, 0.007901833333, 0.66, 16.47, 67.19);
-        checkPeriod(interestSchedule, 2, 0, 17.13, 0.007901833333, 0.53, 16.60, 50.59);
-        checkPeriod(interestSchedule, 3, 0, 17.13, 0.007901833333, 0.40, 16.73, 33.86);
-        checkPeriod(interestSchedule, 4, 0, 17.13, 0.007901833333, 0.27, 16.86, 17.0);
-        checkPeriod(interestSchedule, 5, 0, 17.13, 0.007901833333, 0.13, 17.00, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.13, 0.007901833333, 0.790183333301, 0.79, 16.34, 83.66);
+        checkPeriod(interestSchedule, 1, 0, 17.13, 0.007901833333, 0.66106737664, 0.66, 16.47, 67.19);
+        checkPeriod(interestSchedule, 2, 0, 17.13, 0.007901833333, 0.530924181643, 0.53, 16.60, 50.59);
+        checkPeriod(interestSchedule, 3, 0, 17.13, 0.007901833333, 0.399753748317, 0.40, 16.73, 33.86);
+        checkPeriod(interestSchedule, 4, 0, 17.13, 0.007901833333, 0.267556076655, 0.27, 16.86, 17.0);
+        checkPeriod(interestSchedule, 5, 0, 17.13, 0.007901833333, 0.134331166661, 0.13, 17.00, 0.0);
     }
 
     @Test
@@ -336,22 +336,22 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
 
         checkPeriod(interestSchedule, 0, 0, 17.13, 0.0, 0.0, 0.79, 16.34, 83.66);
-        checkPeriod(interestSchedule, 0, 1, 17.13, 0.007901833333, 0.79, 16.34, 83.66);
-        checkPeriod(interestSchedule, 1, 0, 17.13, 0.007901833333, 0.66, 16.47, 67.19);
-        checkPeriod(interestSchedule, 2, 0, 17.13, 0.007901833333, 0.53, 16.60, 50.59);
-        checkPeriod(interestSchedule, 3, 0, 17.13, 0.007901833333, 0.40, 16.73, 33.86);
-        checkPeriod(interestSchedule, 4, 0, 17.13, 0.007901833333, 0.27, 16.86, 17.0);
-        checkPeriod(interestSchedule, 5, 0, 17.13, 0.007901833333, 0.13, 17.00, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.13, 0.007901833333, 0.790183333301, 0.79, 16.34, 83.66);
+        checkPeriod(interestSchedule, 1, 0, 17.13, 0.007901833333, 0.66106737664, 0.66, 16.47, 67.19);
+        checkPeriod(interestSchedule, 2, 0, 17.13, 0.007901833333, 0.530924181643, 0.53, 16.60, 50.59);
+        checkPeriod(interestSchedule, 3, 0, 17.13, 0.007901833333, 0.399753748317, 0.40, 16.73, 33.86);
+        checkPeriod(interestSchedule, 4, 0, 17.13, 0.007901833333, 0.267556076655, 0.27, 16.86, 17.0);
+        checkPeriod(interestSchedule, 5, 0, 17.13, 0.007901833333, 0.134331166661, 0.13, 17.00, 0.0);
 
         emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 3, 1), disbursedAmount);
 
         checkPeriod(interestSchedule, 0, 0, 17.13, 0.0, 0.0, 0.79, 16.34, 83.66);
-        checkPeriod(interestSchedule, 0, 1, 17.13, 0.007901833333, 0.79, 16.34, 83.66);
-        checkPeriod(interestSchedule, 1, 0, 17.13, 0.007901833333, 0.66, 16.47, 167.19);
-        checkPeriod(interestSchedule, 2, 0, 42.63, 0.007901833333, 1.32, 1.32, 41.31, 125.88);
-        checkPeriod(interestSchedule, 3, 0, 42.63, 0.007901833333, 0.99, 41.64, 84.24);
-        checkPeriod(interestSchedule, 4, 0, 42.63, 0.007901833333, 0.67, 41.96, 42.28);
-        checkPeriod(interestSchedule, 5, 0, 42.61, 0.007901833333, 0.33, 42.28, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.13, 0.007901833333, 0.790183333301, 0.79, 16.34, 83.66);
+        checkPeriod(interestSchedule, 1, 0, 17.13, 0.007901833333, 0.66106737664, 0.66, 16.47, 167.19);
+        checkPeriod(interestSchedule, 2, 0, 42.63, 0.007901833333, 1.32110751494, 1.32, 41.31, 125.88);
+        checkPeriod(interestSchedule, 3, 0, 42.63, 0.007901833333, 0.994682779959, 0.99, 41.64, 84.24);
+        checkPeriod(interestSchedule, 4, 0, 42.63, 0.007901833333, 0.665650439972, 0.67, 41.96, 42.28);
+        checkPeriod(interestSchedule, 5, 0, 42.61, 0.007901833333, 0.334089513318, 0.33, 42.28, 0.0);
     }
 
     @Test
@@ -389,12 +389,12 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.changeInterestRate(interestSchedule, interestChangeDate, interestRateNewValue);
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 1, 0, 16.88, 0.003333333333, 0.28, 16.60, 66.97);
-        checkPeriod(interestSchedule, 2, 0, 16.88, 0.003333333333, 0.22, 16.66, 50.31);
-        checkPeriod(interestSchedule, 3, 0, 16.88, 0.003333333333, 0.17, 16.71, 33.60);
-        checkPeriod(interestSchedule, 4, 0, 16.88, 0.003333333333, 0.11, 16.77, 16.83);
-        checkPeriod(interestSchedule, 5, 0, 16.89, 0.003333333333, 0.06, 16.83, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
+        checkPeriod(interestSchedule, 1, 0, 16.88, 0.003333333333, 0.278566666639, 0.28, 16.60, 66.97);
+        checkPeriod(interestSchedule, 2, 0, 16.88, 0.003333333333, 0.223233333311, 0.22, 16.66, 50.31);
+        checkPeriod(interestSchedule, 3, 0, 16.88, 0.003333333333, 0.167699999983, 0.17, 16.71, 33.60);
+        checkPeriod(interestSchedule, 4, 0, 16.88, 0.003333333333, 0.111999999989, 0.11, 16.77, 16.83);
+        checkPeriod(interestSchedule, 5, 0, 16.89, 0.003333333333, 0.0560999999943, 0.06, 16.83, 0.0);
     }
 
     @Test
@@ -436,12 +436,12 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.changeInterestRate(interestModel, interestChangeDate, interestRateNewValue);
 
         checkPeriod(interestModel, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 66.67);
-        checkPeriod(interestModel, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 66.67);
-        checkPeriod(interestModel, 1, 0, 17.01, 0.003333333333, 0.22, 0.0, 17.01, 66.56);
-        checkPeriod(interestModel, 2, 0, 16.83, 0.003333333333, 0.22, 0.44, 16.39, 50.17);
-        checkPeriod(interestModel, 3, 0, 16.83, 0.003333333333, 0.17, 16.66, 33.51);
-        checkPeriod(interestModel, 4, 0, 16.83, 0.003333333333, 0.11, 16.72, 16.79);
-        checkPeriod(interestModel, 5, 0, 16.85, 0.003333333333, 0.06, 16.79, 0.0);
+        checkPeriod(interestModel, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 66.67);
+        checkPeriod(interestModel, 1, 0, 17.01, 0.003333333333, 0.222233333311, 0.0, 17.01, 66.56);
+        checkPeriod(interestModel, 2, 0, 16.83, 0.003333333333, 0.221866666644, 0.44, 16.39, 50.17);
+        checkPeriod(interestModel, 3, 0, 16.83, 0.003333333333, 0.167233333317, 0.17, 16.66, 33.51);
+        checkPeriod(interestModel, 4, 0, 16.83, 0.003333333333, 0.111699999989, 0.11, 16.72, 16.79);
+        checkPeriod(interestModel, 5, 0, 16.85, 0.003333333333, 0.0559666666611, 0.06, 16.79, 0.0);
     }
 
     @Test
@@ -482,13 +482,13 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.changeInterestRate(interestModel, interestChangeDate, interestRateNewValue);
 
         checkPeriod(interestModel, 0, 0, 16.80, 0.0, 0.0, 0.44, 16.36, 66.63);
-        checkPeriod(interestModel, 0, 1, 16.80, 0.002634408602, 0.26, 0.44, 16.36, 66.63);
-        checkPeriod(interestModel, 0, 2, 16.80, 0.000752688172, 0.06, 0.44, 16.36, 66.63);
-        checkPeriod(interestModel, 0, 3, 16.80, 0.001397849462, 0.12, 0.44, 16.36, 66.63);
-        checkPeriod(interestModel, 1, 0, 16.80, 0.003333333333, 0.22, 16.58, 50.05);
-        checkPeriod(interestModel, 2, 0, 16.80, 0.003333333333, 0.17, 16.63, 33.42);
-        checkPeriod(interestModel, 3, 0, 16.80, 0.003333333333, 0.11, 16.69, 16.73);
-        checkPeriod(interestModel, 4, 0, 16.79, 0.003333333333, 0.06, 16.73, 0.0);
+        checkPeriod(interestModel, 0, 1, 16.80, 0.002634408602, 0.2634408602, 0.44, 16.36, 66.63);
+        checkPeriod(interestModel, 0, 2, 16.80, 0.000752688172, 0.0624655913944, 0.44, 16.36, 66.63);
+        checkPeriod(interestModel, 0, 3, 16.80, 0.001397849462, 0.116007526851, 0.44, 16.36, 66.63);
+        checkPeriod(interestModel, 1, 0, 16.80, 0.003333333333, 0.222099999978, 0.22, 16.58, 50.05);
+        checkPeriod(interestModel, 2, 0, 16.80, 0.003333333333, 0.166833333317, 0.17, 16.63, 33.42);
+        checkPeriod(interestModel, 3, 0, 16.80, 0.003333333333, 0.111399999989, 0.11, 16.69, 16.73);
+        checkPeriod(interestModel, 4, 0, 16.79, 0.003333333333, 0.055766666661, 0.06, 16.73, 0.0);
         checkPeriod(interestModel, 5, 0, 17.01, 0.003333333333, 0.0, 17.01, 0.0);
     }
 
@@ -527,13 +527,13 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.changeInterestRate(interestSchedule, interestChangeDate, interestRateNewValue);
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 1, 0, 16.90, 0.002614942529, 0.22, 0.37, 16.53, 67.04);
-        checkPeriod(interestSchedule, 1, 1, 16.90, 0.001839080460, 0.15, 0.37, 16.53, 67.04);
-        checkPeriod(interestSchedule, 2, 0, 16.90, 0.003333333333, 0.22, 16.68, 50.36);
-        checkPeriod(interestSchedule, 3, 0, 16.90, 0.003333333333, 0.17, 16.73, 33.63);
-        checkPeriod(interestSchedule, 4, 0, 16.90, 0.003333333333, 0.11, 16.79, 16.84);
-        checkPeriod(interestSchedule, 5, 0, 16.90, 0.003333333333, 0.06, 16.84, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
+        checkPeriod(interestSchedule, 1, 0, 16.90, 0.002614942529, 0.218530747114, 0.37, 16.53, 67.04);
+        checkPeriod(interestSchedule, 1, 1, 16.90, 0.001839080460, 0.153691954042, 0.37, 16.53, 67.04);
+        checkPeriod(interestSchedule, 2, 0, 16.90, 0.003333333333, 0.223466666644, 0.22, 16.68, 50.36);
+        checkPeriod(interestSchedule, 3, 0, 16.90, 0.003333333333, 0.16786666665, 0.17, 16.73, 33.63);
+        checkPeriod(interestSchedule, 4, 0, 16.90, 0.003333333333, 0.112099999989, 0.11, 16.79, 16.84);
+        checkPeriod(interestSchedule, 5, 0, 16.90, 0.003333333333, 0.0561333333276, 0.06, 16.84, 0.0);
     }
 
     /**
@@ -593,13 +593,13 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.payPrincipal(interestSchedule, op1stCorrectionPeriodDueDate, op1stCorrectionDate, op1stCorrectionAmount);
         emiCalculator.payInterest(interestSchedule, op1stCorrectionPeriodDueDate, op1stCorrectionDate, toMoney(0.24));
 
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 1, 0, 17.01, 0.002816091954, 0.24, 16.77, 66.80);
-        checkPeriod(interestSchedule, 1, 1, 17.01, 0.003017241379, 0.20, 0.24, 16.77, 66.80);
-        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.39, 0.59, 16.42, 50.38);
-        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 16.72, 33.66);
-        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.20, 16.81, 16.85);
-        checkPeriod(interestSchedule, 5, 0, 16.95, 0.005833333333, 0.10, 16.85, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
+        checkPeriod(interestSchedule, 1, 0, 17.01, 0.002816091954, 0.235340804584, 0.24, 16.77, 66.80);
+        checkPeriod(interestSchedule, 1, 1, 17.01, 0.003017241379, 0.201551724117, 0.24, 16.77, 66.80);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.389666666644, 0.59, 16.42, 50.38);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.293883333317, 0.29, 16.72, 33.66);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.196349999989, 0.20, 16.81, 16.85);
+        checkPeriod(interestSchedule, 5, 0, 16.95, 0.005833333333, 0.098291666661, 0.10, 16.85, 0.0);
 
         // totally pay off another period with balance correction
         final LocalDate op2ndCorrectionPeriodDueDate = LocalDate.of(2024, 4, 1);
@@ -615,13 +615,13 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.payPrincipal(interestSchedule, op2ndCorrectionPeriodDueDate, op2ndCorrectionDate, op2ndCorrectionAmount);
         emiCalculator.payInterest(interestSchedule, op2ndCorrectionPeriodDueDate, op2ndCorrectionDate, toMoney(0.49));
 
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 1, 0, 17.01, 0.002816091954, 0.24, 16.77, 50.38);
-        checkPeriod(interestSchedule, 1, 1, 17.01, 0.003017241379, 0.20, 0.24, 16.77, 50.38);
-        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.29, 0.49, 16.52, 50.28);
-        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 16.72, 33.56);
-        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.20, 16.81, 16.75);
-        checkPeriod(interestSchedule, 5, 0, 16.85, 0.005833333333, 0.10, 16.75, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
+        checkPeriod(interestSchedule, 1, 0, 17.01, 0.002816091954, 0.235340804584, 0.24, 16.77, 50.38);
+        checkPeriod(interestSchedule, 1, 1, 17.01, 0.003017241379, 0.201551724117, 0.24, 16.77, 50.38);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.293883333317, 0.49, 16.52, 50.28);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.293299999983, 0.29, 16.72, 33.56);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.195766666655, 0.20, 16.81, 16.75);
+        checkPeriod(interestSchedule, 5, 0, 16.85, 0.005833333333, 0.0977083333278, 0.10, 16.75, 0.0);
 
         // check numbers on last period due date
         LocalDate periodDueDate = LocalDate.of(2024, 7, 1);
@@ -710,8 +710,8 @@ class ProgressiveEMICalculatorTest {
 
         // check periods in model
 
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 1, 0, 17.01, 0.002816091954, 0.24, 0.24, 16.77, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
+        checkPeriod(interestSchedule, 1, 0, 17.01, 0.002816091954, 0.235340804584, 0.24, 16.77, 0.0);
         checkPeriod(interestSchedule, 1, 1, 17.01, 0.003017241379, 0.0, 0.24, 16.77, 0.0);
         checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.0, 0.0, 17.01, 0.0);
         checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.0, 0.0, 17.01, 0.0);
@@ -777,19 +777,19 @@ class ProgressiveEMICalculatorTest {
 
         // check periods in model
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.26, 16.75, 15.21);
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.002634408602, 0.26, 16.75, 15.21);
-        checkPeriod(interestSchedule, 0, 2, 17.01, 0.003198924731, 0.05, 0.26, 16.75, 15.21);
-        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.09, 0.0, 17.01, 15.21);
-        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.09, 0.0, 17.01, 15.21);
-        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.09, 0.0, 17.01, 15.21);
-        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.09, 0.0, 17.01, 15.21);
-        checkPeriod(interestSchedule, 5, 0, 15.71, 0.005833333333, 0.09, 0.5, 15.21, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.002634408602, 0.2634408602, 0.26, 16.75, 15.21);
+        checkPeriod(interestSchedule, 0, 2, 17.01, 0.003198924731, 0.0486556451585, 0.26, 16.75, 15.21);
+        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.0887249999948, 0.0, 17.01, 15.21);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.0887249999949, 0.0, 17.01, 15.21);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.0887249999949, 0.0, 17.01, 15.21);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.0887249999949, 0.0, 17.01, 15.21);
+        checkPeriod(interestSchedule, 5, 0, 15.71, 0.005833333333, 0.0887249999949, 0.5, 15.21, 0.0);
 
         emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 7, 1), LocalDate.of(2024, 1, 15), toMoney(15.21));
 
         // check periods in model
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.26, 16.75, 0.0);
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.002634408602, 0.26, 16.75, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.002634408602, 0.2634408602, 0.26, 16.75, 0.0);
         checkPeriod(interestSchedule, 0, 2, 17.01, 0.003198924731, 0.0, 0.26, 16.75, 0.0);
         checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.0, 0.0, 17.01, 0.0);
         checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.0, 0.0, 17.01, 0.0);
@@ -828,24 +828,24 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
 
         checkPeriod(interestSchedule, 0, 0, 17.13, 0.0, 0.0, 0.79, 16.34, 83.66);
-        checkPeriod(interestSchedule, 0, 1, 17.13, 0.007901833333, 0.79, 16.34, 83.66);
-        checkPeriod(interestSchedule, 1, 0, 17.13, 0.007901833333, 0.66, 16.47, 67.19);
-        checkPeriod(interestSchedule, 2, 0, 17.13, 0.007901833333, 0.53, 16.60, 50.59);
-        checkPeriod(interestSchedule, 3, 0, 17.13, 0.007901833333, 0.40, 16.73, 33.86);
-        checkPeriod(interestSchedule, 4, 0, 17.13, 0.007901833333, 0.27, 16.86, 17.0);
-        checkPeriod(interestSchedule, 5, 0, 17.13, 0.007901833333, 0.13, 17.00, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.13, 0.007901833333, 0.790183333301, 0.79, 16.34, 83.66);
+        checkPeriod(interestSchedule, 1, 0, 17.13, 0.007901833333, 0.66106737664, 0.66, 16.47, 67.19);
+        checkPeriod(interestSchedule, 2, 0, 17.13, 0.007901833333, 0.530924181643, 0.53, 16.60, 50.59);
+        checkPeriod(interestSchedule, 3, 0, 17.13, 0.007901833333, 0.399753748317, 0.40, 16.73, 33.86);
+        checkPeriod(interestSchedule, 4, 0, 17.13, 0.007901833333, 0.267556076655, 0.27, 16.86, 17.0);
+        checkPeriod(interestSchedule, 5, 0, 17.13, 0.007901833333, 0.134331166661, 0.13, 17.00, 0.0);
 
         disbursedAmount = toMoney(200.0);
         emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 8), disbursedAmount);
 
-        checkPeriod(interestSchedule, 0, 0, 51.33, 0.0, 0.0, 2.02, 49.31, 250.69);
-        checkPeriod(interestSchedule, 0, 1, 51.33, 0.001784284946, 0.18, 2.02, 49.31, 250.69);
-        checkPeriod(interestSchedule, 0, 2, 51.33, 0.006117548387, 1.84, 2.02, 49.31, 250.69);
-        checkPeriod(interestSchedule, 1, 0, 51.33, 0.007901833333, 1.98, 49.35, 201.34);
-        checkPeriod(interestSchedule, 2, 0, 51.33, 0.007901833333, 1.59, 49.74, 151.60);
-        checkPeriod(interestSchedule, 3, 0, 51.33, 0.007901833333, 1.20, 50.13, 101.47);
-        checkPeriod(interestSchedule, 4, 0, 51.33, 0.007901833333, 0.80, 50.53, 50.94);
-        checkPeriod(interestSchedule, 5, 0, 51.34, 0.007901833333, 0.40, 50.94, 0.0);
+        checkPeriod(interestSchedule, 0, 0, 51.33, 0.0, 0.0, 2.01, 49.32, 250.68);
+        checkPeriod(interestSchedule, 0, 1, 51.33, 0.001784284946, 0.178428494616, 2.01, 49.32, 250.68);
+        checkPeriod(interestSchedule, 0, 2, 51.33, 0.006117548387, 1.8352645161, 2.01, 49.32, 250.68);
+        checkPeriod(interestSchedule, 1, 0, 51.33, 0.007901833333, 1.98083157992, 1.98, 49.35, 201.33);
+        checkPeriod(interestSchedule, 2, 0, 51.33, 0.007901833333, 1.59087610493, 1.59, 49.74, 151.59);
+        checkPeriod(interestSchedule, 3, 0, 51.33, 0.007901833333, 1.19783891495, 1.2, 50.13, 101.46);
+        checkPeriod(interestSchedule, 4, 0, 51.33, 0.007901833333, 0.801720009967, 0.80, 50.53, 50.93);
+        checkPeriod(interestSchedule, 5, 0, 51.33, 0.007901833333, 0.40244037165, 0.40, 50.93, 0.0);
     }
 
     @Test
@@ -878,24 +878,24 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
 
         checkPeriod(interestSchedule, 0, 0, 17.13, 0.0, 0.0, 0.79, 16.34, 83.66);
-        checkPeriod(interestSchedule, 0, 1, 17.13, 0.007901833333, 0.79, 16.34, 83.66);
-        checkPeriod(interestSchedule, 1, 0, 17.13, 0.007901833333, 0.66, 16.47, 67.19);
-        checkPeriod(interestSchedule, 2, 0, 17.13, 0.007901833333, 0.53, 16.60, 50.59);
-        checkPeriod(interestSchedule, 3, 0, 17.13, 0.007901833333, 0.40, 16.73, 33.86);
-        checkPeriod(interestSchedule, 4, 0, 17.13, 0.007901833333, 0.27, 16.86, 17.0);
-        checkPeriod(interestSchedule, 5, 0, 17.13, 0.007901833333, 0.13, 17.00, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.13, 0.007901833333, 0.790183333301, 0.79, 16.34, 83.66);
+        checkPeriod(interestSchedule, 1, 0, 17.13, 0.007901833333, 0.66106737664, 0.66, 16.47, 67.19);
+        checkPeriod(interestSchedule, 2, 0, 17.13, 0.007901833333, 0.530924181643, 0.53, 16.60, 50.59);
+        checkPeriod(interestSchedule, 3, 0, 17.13, 0.007901833333, 0.399753748317, 0.40, 16.73, 33.86);
+        checkPeriod(interestSchedule, 4, 0, 17.13, 0.007901833333, 0.267556076655, 0.27, 16.86, 17.0);
+        checkPeriod(interestSchedule, 5, 0, 17.13, 0.007901833333, 0.134331166661, 0.13, 17.00, 0.0);
 
         disbursedAmount = toMoney(100.0);
         emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 2, 15), disbursedAmount);
 
         checkPeriod(interestSchedule, 0, 0, 17.13, 0.0, 0.0, 0.79, 16.34, 83.66);
-        checkPeriod(interestSchedule, 0, 1, 17.13, 0.007901833333, 0.79, 16.34, 83.66);
-        checkPeriod(interestSchedule, 1, 0, 37.53, 0.003814678161, 0.32, 1.07, 36.46, 147.20);
-        checkPeriod(interestSchedule, 1, 1, 37.53, 0.004087155172, 0.75, 1.07, 36.46, 147.20);
-        checkPeriod(interestSchedule, 2, 0, 37.53, 0.007901833333, 1.16, 36.37, 110.83);
-        checkPeriod(interestSchedule, 3, 0, 37.53, 0.007901833333, 0.88, 36.65, 74.18);
-        checkPeriod(interestSchedule, 4, 0, 37.53, 0.007901833333, 0.59, 36.94, 37.24);
-        checkPeriod(interestSchedule, 5, 0, 37.53, 0.007901833333, 0.29, 37.24, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.13, 0.007901833333, 0.790183333301, 0.79, 16.34, 83.66);
+        checkPeriod(interestSchedule, 1, 0, 37.53, 0.003814678161, 0.31913597493, 1.07, 36.46, 147.20);
+        checkPeriod(interestSchedule, 1, 1, 37.53, 0.004087155172, 0.75064691889, 1.07, 36.46, 147.20);
+        checkPeriod(interestSchedule, 2, 0, 37.53, 0.007901833333, 1.16314986662, 1.16, 36.37, 110.83);
+        checkPeriod(interestSchedule, 3, 0, 37.53, 0.007901833333, 0.875760188295, 0.88, 36.65, 74.18);
+        checkPeriod(interestSchedule, 4, 0, 37.53, 0.007901833333, 0.586157996641, 0.59, 36.94, 37.24);
+        checkPeriod(interestSchedule, 5, 0, 37.53, 0.007901833333, 0.294264273321, 0.29, 37.24, 0.0);
     }
 
     @Test
@@ -937,13 +937,13 @@ class ProgressiveEMICalculatorTest {
         checkTotalInterestDue(interestSchedule, 4.64);
 
         checkPeriod(interestSchedule, 0, 0, 29.94, 0.001019591398, 0.00, 1.15, 28.79, 146.21);
-        checkPeriod(interestSchedule, 0, 1, 29.94, 0.000764693548, 0.08, 1.15, 28.79, 146.21);
-        checkPeriod(interestSchedule, 0, 2, 29.94, 0.006117548387, 1.07, 1.15, 28.79, 146.21);
-        checkPeriod(interestSchedule, 1, 0, 29.94, 0.007901833333, 1.16, 28.78, 117.43);
-        checkPeriod(interestSchedule, 2, 0, 29.94, 0.007901833333, 0.93, 29.01, 88.42);
-        checkPeriod(interestSchedule, 3, 0, 29.94, 0.007901833333, 0.70, 29.24, 59.18);
-        checkPeriod(interestSchedule, 4, 0, 29.94, 0.007901833333, 0.47, 29.47, 29.71);
-        checkPeriod(interestSchedule, 5, 0, 29.94, 0.007901833333, 0.23, 29.71, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 29.94, 0.000764693548, 0.0764693548332, 1.15, 28.79, 146.21);
+        checkPeriod(interestSchedule, 0, 2, 29.94, 0.006117548387, 1.07057096772, 1.15, 28.79, 146.21);
+        checkPeriod(interestSchedule, 1, 0, 29.94, 0.007901833333, 1.15532705162, 1.16, 28.78, 117.43);
+        checkPeriod(interestSchedule, 2, 0, 29.94, 0.007901833333, 0.927912288294, 0.93, 29.01, 88.42);
+        checkPeriod(interestSchedule, 3, 0, 29.94, 0.007901833333, 0.698680103304, 0.70, 29.24, 59.18);
+        checkPeriod(interestSchedule, 4, 0, 29.94, 0.007901833333, 0.467630496646, 0.47, 29.47, 29.71);
+        checkPeriod(interestSchedule, 5, 0, 29.94, 0.007901833333, 0.234763468323, 0.23, 29.71, 0.0);
     }
 
     @Test
@@ -975,12 +975,12 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2023, 12, 12), disbursedAmount);
 
         checkPeriod(interestSchedule, 0, 0, 17.13, 0.0, 0.0, 0.80, 16.33, 83.67);
-        checkPeriod(interestSchedule, 0, 1, 17.13, 0.008044857759, 0.80, 16.33, 83.67);
-        checkPeriod(interestSchedule, 1, 0, 17.13, 0.008031371585, 0.67, 16.46, 67.21);
-        checkPeriod(interestSchedule, 2, 0, 17.13, 0.007513218579, 0.50, 16.63, 50.58);
-        checkPeriod(interestSchedule, 3, 0, 17.13, 0.008031371585, 0.41, 16.72, 33.86);
-        checkPeriod(interestSchedule, 4, 0, 17.13, 0.007772295082, 0.26, 16.87, 16.99);
-        checkPeriod(interestSchedule, 5, 0, 17.13, 0.008031371585, 0.14, 16.99, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.13, 0.008044857759, 0.8044857759, 0.80, 16.33, 83.67);
+        checkPeriod(interestSchedule, 1, 0, 17.13, 0.008031371585, 0.671984860516, 0.67, 16.46, 67.21);
+        checkPeriod(interestSchedule, 2, 0, 17.13, 0.007513218579, 0.504963420695, 0.50, 16.63, 50.58);
+        checkPeriod(interestSchedule, 3, 0, 17.13, 0.008031371585, 0.40622677477, 0.41, 16.72, 33.86);
+        checkPeriod(interestSchedule, 4, 0, 17.13, 0.007772295082, 0.263169911477, 0.26, 16.87, 16.99);
+        checkPeriod(interestSchedule, 5, 0, 17.13, 0.008031371585, 0.136453003229, 0.14, 16.99, 0.0);
     }
 
     @Test
@@ -1089,12 +1089,12 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
 
         checkPeriod(interestSchedule, 0, 0, 16.77, 0.0, 0.0, 0.18, 16.59, 83.41);
-        checkPeriod(interestSchedule, 0, 1, 16.77, 0.001823500000, 0.18, 16.59, 83.41);
-        checkPeriod(interestSchedule, 1, 0, 16.77, 0.001823500000, 0.15, 16.62, 66.79);
-        checkPeriod(interestSchedule, 2, 0, 16.77, 0.001823500000, 0.12, 16.65, 50.14);
-        checkPeriod(interestSchedule, 3, 0, 16.77, 0.001823500000, 0.09, 16.68, 33.46);
-        checkPeriod(interestSchedule, 4, 0, 16.77, 0.001823500000, 0.06, 16.71, 16.75);
-        checkPeriod(interestSchedule, 5, 0, 16.78, 0.001823500000, 0.03, 16.75, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 16.77, 0.001823500000, 0.18235, 0.18, 16.59, 83.41);
+        checkPeriod(interestSchedule, 1, 0, 16.77, 0.001823500000, 0.152098135, 0.15, 16.62, 66.79);
+        checkPeriod(interestSchedule, 2, 0, 16.77, 0.001823500000, 0.121791565, 0.12, 16.65, 50.14);
+        checkPeriod(interestSchedule, 3, 0, 16.77, 0.001823500000, 0.09143029, 0.09, 16.68, 33.46);
+        checkPeriod(interestSchedule, 4, 0, 16.77, 0.001823500000, 0.06101431, 0.06, 16.71, 16.75);
+        checkPeriod(interestSchedule, 5, 0, 16.78, 0.001823500000, 0.030543625, 0.03, 16.75, 0.0);
     }
 
     @Test
@@ -1123,9 +1123,9 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
 
         checkPeriod(interestSchedule, 0, 0, 33.57, 0.0, 0.0, 0.36, 33.21, 66.79);
-        checkPeriod(interestSchedule, 0, 1, 33.57, 0.003647000000, 0.36, 33.21, 66.79);
-        checkPeriod(interestSchedule, 1, 0, 33.57, 0.003647000000, 0.24, 33.33, 33.46);
-        checkPeriod(interestSchedule, 2, 0, 33.58, 0.003647000000, 0.12, 33.46, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 33.57, 0.003647000000, 0.3647, 0.36, 33.21, 66.79);
+        checkPeriod(interestSchedule, 1, 0, 33.57, 0.003647000000, 0.24358313, 0.24, 33.33, 33.46);
+        checkPeriod(interestSchedule, 2, 0, 33.58, 0.003647000000, 0.12202862, 0.12, 33.46, 0.0);
     }
 
     @Test
@@ -1157,12 +1157,12 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
 
         checkPeriod(interestSchedule, 0, 0, 16.90, 0.0, 0.0, 0.40, 16.50, 83.50);
-        checkPeriod(interestSchedule, 0, 1, 16.90, 0.003950916667, 0.40, 16.50, 83.50);
-        checkPeriod(interestSchedule, 1, 0, 16.90, 0.003950916667, 0.33, 16.57, 66.93);
-        checkPeriod(interestSchedule, 2, 0, 16.90, 0.003950916667, 0.26, 16.64, 50.29);
-        checkPeriod(interestSchedule, 3, 0, 16.90, 0.003950916667, 0.20, 16.70, 33.59);
-        checkPeriod(interestSchedule, 4, 0, 16.90, 0.003950916667, 0.13, 16.77, 16.82);
-        checkPeriod(interestSchedule, 5, 0, 16.89, 0.003950916667, 0.07, 16.82, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 16.90, 0.003950916667, 0.3950916667, 0.40, 16.50, 83.50);
+        checkPeriod(interestSchedule, 1, 0, 16.90, 0.003950916667, 0.329901541694, 0.33, 16.57, 66.93);
+        checkPeriod(interestSchedule, 2, 0, 16.90, 0.003950916667, 0.264434852522, 0.26, 16.64, 50.29);
+        checkPeriod(interestSchedule, 3, 0, 16.90, 0.003950916667, 0.198691599183, 0.20, 16.70, 33.59);
+        checkPeriod(interestSchedule, 4, 0, 16.90, 0.003950916667, 0.132711290845, 0.13, 16.77, 16.82);
+        checkPeriod(interestSchedule, 5, 0, 16.89, 0.003950916667, 0.066454418339, 0.07, 16.82, 0.0);
     }
 
     @Test
@@ -1249,7 +1249,7 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.addDisbursement(interestModel, LocalDate.of(2024, 1, 1), disbursedAmount);
 
         checkPeriod(interestModel, 0, 0, 1005.83, 0.0, 0.0, 5.83, 1000.0, 0.0);
-        checkPeriod(interestModel, 0, 1, 1005.83, 0.005833333333, 5.83, 1000.0, 0.0);
+        checkPeriod(interestModel, 0, 1, 1005.83, 0.005833333333, 5.833333333, 5.83, 1000.0, 0.0);
 
         final LocalDate dueDate = LocalDate.of(2024, 2, 1);
         final LocalDate startDay = LocalDate.of(2024, 1, 1);
@@ -1311,7 +1311,7 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.addDisbursement(interestModel, LocalDate.of(2024, 1, 1), disbursedAmount);
 
         checkPeriod(interestModel, 0, 0, 1005.83, 0.0, 0.0, 5.83, 1000.0, 0.0);
-        checkPeriod(interestModel, 0, 1, 1005.83, 0.005833333333, 5.83, 1000.0, 0.0);
+        checkPeriod(interestModel, 0, 1, 1005.83, 0.005833333333, 5.833333333, 5.83, 1000.0, 0.0);
 
         final LocalDate dueDate = LocalDate.of(2024, 2, 1);
         final LocalDate startDay = LocalDate.of(2024, 1, 1);
@@ -1381,8 +1381,8 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.addDisbursement(interestModel, LocalDate.of(2024, 1, 15), disbursedAmount2nd);
 
         checkPeriod(interestModel, 0, 0, 2009.03, 0.0, 0.0, 9.03, 2000.0, 0.0);
-        checkPeriod(interestModel, 0, 1, 2009.03, 0.002634408602, 2.63, 9.03, 2000.0, 0.0);
-        checkPeriod(interestModel, 0, 2, 2009.03, 0.003198924731, 6.40, 9.03, 2000.0, 0.0);
+        checkPeriod(interestModel, 0, 1, 2009.03, 0.002634408602, 2.634408602, 9.03, 2000.0, 0.0);
+        checkPeriod(interestModel, 0, 2, 2009.03, 0.003198924731, 6.397849462, 9.03, 2000.0, 0.0);
 
         final LocalDate dueDate = LocalDate.of(2024, 2, 1);
         final LocalDate startDay = LocalDate.of(2024, 1, 1);
@@ -1407,22 +1407,22 @@ class ProgressiveEMICalculatorTest {
         // 2nd 1000 disbursement accruals
         // Total Interest: 6.40 (17 days)
         checkDailyInterest(interestModel, dueDate, startDay, 15, 0.38, 3.01);
-        checkDailyInterest(interestModel, dueDate, startDay, 16, 0.37, 3.38);
-        checkDailyInterest(interestModel, dueDate, startDay, 17, 0.38, 3.76);
+        checkDailyInterest(interestModel, dueDate, startDay, 16, 0.38, 3.39);
+        checkDailyInterest(interestModel, dueDate, startDay, 17, 0.37, 3.76);
         checkDailyInterest(interestModel, dueDate, startDay, 18, 0.38, 4.14);
-        checkDailyInterest(interestModel, dueDate, startDay, 19, 0.37, 4.51);
-        checkDailyInterest(interestModel, dueDate, startDay, 20, 0.38, 4.89);
-        checkDailyInterest(interestModel, dueDate, startDay, 21, 0.37, 5.26);
-        checkDailyInterest(interestModel, dueDate, startDay, 22, 0.38, 5.64);
-        checkDailyInterest(interestModel, dueDate, startDay, 23, 0.38, 6.02);
-        checkDailyInterest(interestModel, dueDate, startDay, 24, 0.37, 6.39);
-        checkDailyInterest(interestModel, dueDate, startDay, 25, 0.38, 6.77);
+        checkDailyInterest(interestModel, dueDate, startDay, 19, 0.38, 4.52);
+        checkDailyInterest(interestModel, dueDate, startDay, 20, 0.37, 4.89);
+        checkDailyInterest(interestModel, dueDate, startDay, 21, 0.38, 5.27);
+        checkDailyInterest(interestModel, dueDate, startDay, 22, 0.38, 5.65);
+        checkDailyInterest(interestModel, dueDate, startDay, 23, 0.37, 6.02);
+        checkDailyInterest(interestModel, dueDate, startDay, 24, 0.38, 6.4);
+        checkDailyInterest(interestModel, dueDate, startDay, 25, 0.37, 6.77);
         checkDailyInterest(interestModel, dueDate, startDay, 26, 0.38, 7.15);
-        checkDailyInterest(interestModel, dueDate, startDay, 27, 0.37, 7.52);
-        checkDailyInterest(interestModel, dueDate, startDay, 28, 0.38, 7.90);
+        checkDailyInterest(interestModel, dueDate, startDay, 27, 0.38, 7.53);
+        checkDailyInterest(interestModel, dueDate, startDay, 28, 0.37, 7.90);
         checkDailyInterest(interestModel, dueDate, startDay, 29, 0.38, 8.28);
-        checkDailyInterest(interestModel, dueDate, startDay, 30, 0.37, 8.65);
-        checkDailyInterest(interestModel, dueDate, startDay, 31, 0.38, 9.03);
+        checkDailyInterest(interestModel, dueDate, startDay, 30, 0.38, 8.66);
+        checkDailyInterest(interestModel, dueDate, startDay, 31, 0.37, 9.03);
     }
 
     @Test
@@ -1454,14 +1454,14 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.applyInterestPause(interestSchedule, LocalDate.of(2024, 2, 5), LocalDate.of(2024, 2, 10));
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 1, 0, 17.01, 0.000603448276, 0.05, 0.39, 16.62, 66.95);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
+        checkPeriod(interestSchedule, 1, 0, 17.01, 0.000603448276, 0.0504301724109, 0.39, 16.62, 66.95);
         checkPeriod(interestSchedule, 1, 1, 17.01, 0.001206896552, 0.0, 0.39, 16.62, 66.95);
-        checkPeriod(interestSchedule, 1, 2, 17.01, 0.004022988506, 0.34, 0.39, 16.62, 66.95);
-        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.39, 0.39, 16.62, 50.33);
-        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 0.29, 16.72, 33.61);
-        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.2, 0.2, 16.81, 16.8);
-        checkPeriod(interestSchedule, 5, 0, 16.9, 0.005833333333, 0.1, 0.1, 16.8, 0.0);
+        checkPeriod(interestSchedule, 1, 2, 17.01, 0.004022988506, 0.336201149446, 0.39, 16.62, 66.95);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.390541666643, 0.39, 16.62, 50.33);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29359166665, 0.29, 16.72, 33.61);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.196058333322, 0.2, 16.81, 16.8);
+        checkPeriod(interestSchedule, 5, 0, 16.9, 0.005833333333, 0.0979999999944, 0.1, 16.8, 0.0);
     }
 
     @Test
@@ -1493,14 +1493,14 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.applyInterestPause(interestSchedule, LocalDate.of(2024, 2, 10), LocalDate.of(2024, 3, 10));
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 1, 0, 17.01, 0.001609195402, 0.13, 0.13, 16.88, 66.69);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
+        checkPeriod(interestSchedule, 1, 0, 17.01, 0.001609195402, 0.134480459762, 0.13, 16.88, 66.69);
         checkPeriod(interestSchedule, 1, 1, 17.01, 0.004224137931, 0.0, 0.13, 16.88, 66.69);
         checkPeriod(interestSchedule, 2, 0, 17.01, 0.001693548387, 0.0, 0.28, 16.73, 49.96);
-        checkPeriod(interestSchedule, 2, 1, 17.01, 0.004139784946, 0.28, 0.28, 16.73, 49.96);
-        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 0.29, 16.72, 33.24);
-        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.19, 0.19, 16.82, 16.42);
-        checkPeriod(interestSchedule, 5, 0, 16.52, 0.005833333333, 0.1, 0.1, 16.42, 0.0);
+        checkPeriod(interestSchedule, 2, 1, 17.01, 0.004139784946, 0.276082258049, 0.28, 16.73, 49.96);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.291433333317, 0.29, 16.72, 33.24);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.193899999989, 0.19, 16.82, 16.42);
+        checkPeriod(interestSchedule, 5, 0, 16.52, 0.005833333333, 0.095783333328, 0.1, 16.42, 0.0);
     }
 
     @Test
@@ -1533,14 +1533,14 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.applyInterestPause(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 5));
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.56, 16.45, 83.55);
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.00564516129, 0.56, 0.56, 16.45, 83.55);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.00564516129, 0.564516129, 0.56, 16.45, 83.55);
         checkPeriod(interestSchedule, 0, 2, 17.01, 0.000188172043, 0.0, 0.56, 16.45, 83.55);
         checkPeriod(interestSchedule, 1, 0, 17.01, 0.000804597701, 0.0, 0.42, 16.59, 66.96);
-        checkPeriod(interestSchedule, 1, 1, 17.01, 0.005028735632, 0.42, 0.42, 16.59, 66.96);
-        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.39, 0.39, 16.62, 50.34);
-        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 0.29, 16.72, 33.62);
-        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.2, 0.2, 16.81, 16.81);
-        checkPeriod(interestSchedule, 5, 0, 16.91, 0.005833333333, 0.1, 0.1, 16.81, 0.0);
+        checkPeriod(interestSchedule, 1, 1, 17.01, 0.005028735632, 0.420150862055, 0.42, 16.59, 66.96);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.390599999978, 0.39, 16.62, 50.34);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.293649999983, 0.29, 16.72, 33.62);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.196116666655, 0.2, 16.81, 16.81);
+        checkPeriod(interestSchedule, 5, 0, 16.91, 0.005833333333, 0.0980583333276, 0.1, 16.81, 0.0);
     }
 
     @Test
@@ -1573,14 +1573,14 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.applyInterestPause(interestSchedule, LocalDate.of(2024, 1, 10), LocalDate.of(2024, 1, 31));
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.17, 16.84, 83.16);
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.001505376344, 0.15, 0.17, 16.84, 83.16);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.001505376344, 0.1505376344, 0.17, 16.84, 83.16);
         checkPeriod(interestSchedule, 0, 2, 17.01, 0.004139784946, 0.0, 0.17, 16.84, 83.16);
-        checkPeriod(interestSchedule, 0, 3, 17.01, 0.000188172043, 0.02, 0.17, 16.84, 83.16);
-        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.49, 0.49, 16.52, 66.64);
-        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.39, 0.39, 16.62, 50.02);
-        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 0.29, 16.72, 33.3);
-        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.19, 0.19, 16.82, 16.48);
-        checkPeriod(interestSchedule, 5, 0, 16.58, 0.005833333333, 0.1, 0.1, 16.48, 0.0);
+        checkPeriod(interestSchedule, 0, 3, 17.01, 0.000188172043, 0.0188172043, 0.17, 16.84, 83.16);
+        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.485099999971, 0.49, 16.52, 66.64);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.38873333331, 0.39, 16.62, 50.02);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.291783333317, 0.29, 16.72, 33.3);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.194249999989, 0.19, 16.82, 16.48);
+        checkPeriod(interestSchedule, 5, 0, 16.58, 0.005833333333, 0.0961333333278, 0.1, 16.48, 0.0);
     }
 
     @Test
@@ -1613,14 +1613,14 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.applyInterestPause(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 29));
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.56, 16.45, 83.55);
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.00564516129, 0.56, 0.56, 16.45, 83.55);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.00564516129, 0.564516129, 0.56, 16.45, 83.55);
         checkPeriod(interestSchedule, 0, 2, 17.01, 0.000188172043, 0.0, 0.56, 16.45, 83.55);
         checkPeriod(interestSchedule, 1, 0, 17.01, 0.005632183908, 0.0, 0.02, 16.99, 66.56);
-        checkPeriod(interestSchedule, 1, 1, 17.01, 0.000201149425, 0.02, 0.02, 16.99, 66.56);
-        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.39, 0.39, 16.62, 49.94);
-        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 0.29, 16.72, 33.22);
-        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.19, 0.19, 16.82, 16.4);
-        checkPeriod(interestSchedule, 5, 0, 16.5, 0.005833333333, 0.1, 0.1, 16.4, 0.0);
+        checkPeriod(interestSchedule, 1, 1, 17.01, 0.000201149425, 0.0168060344588, 0.02, 16.99, 66.56);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.388266666645, 0.39, 16.62, 49.94);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29131666665, 0.29, 16.72, 33.22);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.193783333322, 0.19, 16.82, 16.4);
+        checkPeriod(interestSchedule, 5, 0, 16.5, 0.005833333333, 0.0956666666613, 0.1, 16.4, 0.0);
     }
 
     @Test
@@ -1653,14 +1653,14 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.applyInterestPause(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 31));
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.56, 16.45, 83.55);
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.00564516129, 0.56, 0.56, 16.45, 83.55);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.00564516129, 0.564516129, 0.56, 16.45, 83.55);
         checkPeriod(interestSchedule, 0, 2, 17.01, 0.000188172043, 0.0, 0.56, 16.45, 83.55);
         checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.0, 0.0, 17.01, 66.54);
         checkPeriod(interestSchedule, 2, 0, 17.01, 0.00564516129, 0.0, 0.01, 17.0, 49.54);
-        checkPeriod(interestSchedule, 2, 1, 17.01, 0.000188172043, 0.01, 0.01, 17.0, 49.54);
-        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 0.29, 16.72, 32.82);
-        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.19, 0.19, 16.82, 16.0);
-        checkPeriod(interestSchedule, 5, 0, 16.09, 0.005833333333, 0.09, 0.09, 16.0, 0.0);
+        checkPeriod(interestSchedule, 2, 1, 17.01, 0.000188172043, 0.0125209677412, 0.01, 17.0, 49.54);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.288983333317, 0.29, 16.72, 32.82);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.191449999989, 0.19, 16.82, 16.0);
+        checkPeriod(interestSchedule, 5, 0, 16.09, 0.005833333333, 0.0933333333279, 0.09, 16.0, 0.0);
     }
 
     @Test
@@ -1695,15 +1695,15 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.applyInterestPause(interestSchedule, LocalDate.of(2024, 2, 5), LocalDate.of(2024, 2, 15));
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 1, 0, 17.01, 0.000603448276, 0.05, 0.3, 16.71, 66.86);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
+        checkPeriod(interestSchedule, 1, 0, 17.01, 0.000603448276, 0.0504301724109, 0.3, 16.71, 66.86);
         checkPeriod(interestSchedule, 1, 1, 17.01, 0.002212643678, 0.0, 0.3, 16.71, 66.86);
-        checkPeriod(interestSchedule, 1, 2, 17.01, 0.001005747126, 0.08, 0.3, 16.71, 66.86);
-        checkPeriod(interestSchedule, 1, 3, 17.01, 0.002011494253, 0.17, 0.3, 16.71, 66.86);
-        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.39, 0.39, 16.62, 50.24);
-        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 0.29, 16.72, 33.52);
-        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.2, 0.2, 16.81, 16.71);
-        checkPeriod(interestSchedule, 5, 0, 16.81, 0.005833333333, 0.1, 0.1, 16.71, 0.0);
+        checkPeriod(interestSchedule, 1, 2, 17.01, 0.001005747126, 0.0840502873475, 0.3, 16.71, 66.86);
+        checkPeriod(interestSchedule, 1, 3, 17.01, 0.002011494253, 0.168100574723, 0.3, 16.71, 66.86);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.390016666645, 0.39, 16.62, 50.24);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29306666665, 0.29, 16.72, 33.52);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.195533333322, 0.2, 16.81, 16.71);
+        checkPeriod(interestSchedule, 5, 0, 16.81, 0.005833333333, 0.0974749999944, 0.1, 16.71, 0.0);
     }
 
     @Test
@@ -1740,16 +1740,16 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.applyInterestPause(interestSchedule, LocalDate.of(2024, 2, 10), LocalDate.of(2024, 3, 10));
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 1, 0, 17.01, 0.000804597701, 0.07, 0.14, 16.87, 66.7);
-        checkPeriod(interestSchedule, 1, 1, 17.01, 0.000804597701, 0.07, 0.14, 16.87, 66.7);
-        checkPeriod(interestSchedule, 1, 2, 17.01, 0.004224137931, 0.0, 0.14, 16.87, 66.7);
-        checkPeriod(interestSchedule, 2, 0, 17.01, 0.001693548387, 0.0, 0.28, 16.73, 49.97);
-        checkPeriod(interestSchedule, 2, 1, 17.01, 0.001881720430, 0.13, 0.28, 16.73, 49.97);
-        checkPeriod(interestSchedule, 2, 1, 17.01, 0.00188172043, 0.13, 0.28, 16.73, 49.97);
-        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 0.29, 16.72, 33.25);
-        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.19, 0.19, 16.82, 16.43);
-        checkPeriod(interestSchedule, 5, 0, 16.53, 0.005833333333, 0.1, 0.1, 16.43, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
+        checkPeriod(interestSchedule, 1, 0, 17.01, 0.000804597701, 0.0672402298812, 0.13, 16.88, 66.69);
+        checkPeriod(interestSchedule, 1, 1, 17.01, 0.000804597701, 0.0672402298824, 0.13, 16.88, 66.69);
+        checkPeriod(interestSchedule, 1, 2, 17.01, 0.004224137931, 0.0, 0.13, 16.88, 66.69);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.001693548387, 0.0, 0.28, 16.73, 49.96);
+        checkPeriod(interestSchedule, 2, 1, 17.01, 0.001881720430, 0.125491935477, 0.28, 16.73, 49.96);
+        checkPeriod(interestSchedule, 2, 1, 17.01, 0.00188172043, 0.125491935477, 0.28, 16.73, 49.96);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.291433333317, 0.29, 16.72, 33.24);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.193899999989, 0.19, 16.82, 16.42);
+        checkPeriod(interestSchedule, 5, 0, 16.52, 0.005833333333, 0.095783333328, 0.1, 16.42, 0.0);
     }
 
     @Test
@@ -1784,14 +1784,14 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.applyInterestPause(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 5));
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.56, 16.45, 83.55);
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.00564516129, 0.56, 0.56, 16.45, 83.55);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.00564516129, 0.564516129, 0.56, 16.45, 83.55);
         checkPeriod(interestSchedule, 0, 2, 17.01, 0.000188172043, 0.0, 0.56, 16.45, 83.55);
         checkPeriod(interestSchedule, 1, 0, 17.01, 0.000804597701, 0.0, 0.42, 16.59, 66.96);
-        checkPeriod(interestSchedule, 1, 1, 17.01, 0.005028735632, 0.42, 0.42, 16.59, 66.96);
-        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.39, 0.39, 16.62, 50.34);
-        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 0.29, 16.72, 33.62);
-        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.2, 0.2, 16.81, 16.81);
-        checkPeriod(interestSchedule, 5, 0, 16.91, 0.005833333333, 0.1, 0.1, 16.81, 0.0);
+        checkPeriod(interestSchedule, 1, 1, 17.01, 0.005028735632, 0.420150862055, 0.42, 16.59, 66.96);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.390599999978, 0.39, 16.62, 50.34);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.293649999983, 0.29, 16.72, 33.62);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.196116666655, 0.2, 16.81, 16.81);
+        checkPeriod(interestSchedule, 5, 0, 16.91, 0.005833333333, 0.0980583333276, 0.1, 16.81, 0.0);
     }
 
     @Test
@@ -1824,13 +1824,13 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.applyInterestPause(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1));
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.56, 16.45, 83.55);
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.00564516129, 0.56, 0.56, 16.45, 83.55);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.00564516129, 0.564516129, 0.56, 16.45, 83.55);
         checkPeriod(interestSchedule, 0, 2, 17.01, 0.000188172043, 0.0, 0.56, 16.45, 83.55);
         checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.0, 0.0, 17.01, 66.54);
-        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.39, 0.39, 16.62, 49.92);
-        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 0.29, 16.72, 33.2);
-        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.19, 0.19, 16.82, 16.38);
-        checkPeriod(interestSchedule, 5, 0, 16.48, 0.005833333333, 0.1, 0.1, 16.38, 0.0);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.388149999977, 0.39, 16.62, 49.92);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.291199999983, 0.29, 16.72, 33.2);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.193666666656, 0.19, 16.82, 16.38);
+        checkPeriod(interestSchedule, 5, 0, 16.48, 0.005833333333, 0.0955499999946, 0.1, 16.38, 0.0);
     }
 
     @Test
@@ -1865,12 +1865,12 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 1.17, 15.84, 84.16);
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 1.17, 15.84, 84.16);
-        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.49, 16.52, 67.64);
-        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.39, 16.62, 51.02);
-        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.30, 16.71, 34.31);
-        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.20, 16.81, 17.50);
-        checkPeriod(interestSchedule, 5, 0, 17.60, 0.005833333333, 0.10, 17.50, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 1.1666666667, 1.17, 15.84, 84.16);
+        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.490933333306, 0.49, 16.52, 67.64);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.394566666645, 0.39, 16.62, 51.02);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29761666665, 0.30, 16.71, 34.31);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.200141666655, 0.20, 16.81, 17.50);
+        checkPeriod(interestSchedule, 5, 0, 17.60, 0.005833333333, 0.102083333328, 0.10, 17.50, 0.0);
     }
 
     @Test
@@ -1908,12 +1908,12 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 1.17, 15.84, 84.16);
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 1.17, 15.84, 84.16);
-        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.49, 16.52, 67.64);
-        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.79, 16.22, 51.42);
-        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.30, 16.71, 34.71);
-        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.20, 16.81, 17.90);
-        checkPeriod(interestSchedule, 5, 0, 18.00, 0.005833333333, 0.10, 17.90, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 1.1666666667, 1.17, 15.84, 84.16);
+        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.490933333306, 0.49, 16.52, 67.64);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.789133333354, 0.79, 16.22, 51.42);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.299949999983, 0.30, 16.71, 34.71);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.202474999988, 0.20, 16.81, 17.90);
+        checkPeriod(interestSchedule, 5, 0, 18.00, 0.005833333333, 0.104416666661, 0.10, 17.90, 0.0);
     }
 
     @Test
@@ -1948,12 +1948,12 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 1.20, 15.81, 67.76);
-        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.40, 16.61, 51.15);
-        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.30, 16.71, 34.44);
-        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.20, 16.81, 17.63);
-        checkPeriod(interestSchedule, 5, 0, 17.73, 0.005833333333, 0.10, 17.63, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
+        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 1.20247944445, 1.20, 15.81, 67.76);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.395266666644, 0.40, 16.61, 51.15);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.298374999983, 0.3, 16.71, 34.44);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.200899999989, 0.20, 16.81, 17.63);
+        checkPeriod(interestSchedule, 5, 0, 17.73, 0.005833333333, 0.102841666661, 0.10, 17.63, 0.0);
     }
 
     @Test
@@ -2425,12 +2425,12 @@ class ProgressiveEMICalculatorTest {
             emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
 
             checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
-            checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
-            checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.49, 16.52, 67.05);
-            checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.39, 16.62, 50.43);
-            checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 16.72, 33.71);
-            checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.2, 16.81, 16.90);
-            checkPeriod(interestSchedule, 5, 0, 17.00, 0.005833333333, 0.1, 16.9, 0.0);
+            checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
+            checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.487491666639, 0.49, 16.52, 67.05);
+            checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.391124999979, 0.39, 16.62, 50.43);
+            checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.294174999983, 0.29, 16.72, 33.71);
+            checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.196641666655, 0.2, 16.81, 16.90);
+            checkPeriod(interestSchedule, 5, 0, 17.00, 0.005833333333, 0.0985833333276, 0.1, 16.9, 0.0);
 
             // repay 1st period
             emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1), toMoney(16.43));
@@ -2443,12 +2443,12 @@ class ProgressiveEMICalculatorTest {
             emiCalculator.chargebackPrincipal(interestSchedule, LocalDate.of(2024, 3, 1), toMoney(17.01));
 
             checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
-            checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
-            checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.49, 16.52, 84.06);
-            checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.49, 33.53, 50.53);
-            checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 16.72, 33.81);
-            checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.2, 16.81, 17.00);
-            checkPeriod(interestSchedule, 5, 0, 17.10, 0.005833333333, 0.1, 17.00, 0.0);
+            checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
+            checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.487491666639, 0.49, 16.52, 84.06);
+            checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.490349999973, 0.49, 33.53, 50.53);
+            checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.294758333316, 0.29, 16.72, 33.81);
+            checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.197224999989, 0.2, 16.81, 17.00);
+            checkPeriod(interestSchedule, 5, 0, 17.10, 0.005833333333, 0.0991666666611, 0.1, 17.00, 0.0);
         }
 
         @Test
@@ -2478,12 +2478,12 @@ class ProgressiveEMICalculatorTest {
             emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
 
             checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
-            checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
-            checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.49, 16.52, 67.05);
-            checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.39, 16.62, 50.43);
-            checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 16.72, 33.71);
-            checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.2, 16.81, 16.90);
-            checkPeriod(interestSchedule, 5, 0, 17.00, 0.005833333333, 0.1, 16.9, 0.0);
+            checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
+            checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.487491666639, 0.49, 16.52, 67.05);
+            checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.391124999979, 0.39, 16.62, 50.43);
+            checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.294174999983, 0.29, 16.72, 33.71);
+            checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.196641666655, 0.2, 16.81, 16.90);
+            checkPeriod(interestSchedule, 5, 0, 17.00, 0.005833333333, 0.0985833333276, 0.1, 16.9, 0.0);
 
             // repay 1st period
             emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1), toMoney(16.43));
@@ -2496,23 +2496,23 @@ class ProgressiveEMICalculatorTest {
             emiCalculator.chargebackPrincipal(interestSchedule, LocalDate.of(2024, 3, 1), toMoney(15.0));
 
             checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
-            checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
-            checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.49, 16.52, 82.05);
-            checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.48, 31.53, 50.52);
-            checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 16.72, 33.80);
-            checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.2, 16.81, 16.99);
-            checkPeriod(interestSchedule, 5, 0, 17.09, 0.005833333333, 0.1, 16.99, 0.0);
+            checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
+            checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.487491666639, 0.49, 16.52, 82.05);
+            checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.478624999974, 0.48, 31.53, 50.52);
+            checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.294699999983, 0.29, 16.72, 33.80);
+            checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.197166666655, 0.2, 16.81, 16.99);
+            checkPeriod(interestSchedule, 5, 0, 17.09, 0.005833333333, 0.0991083333276, 0.1, 16.99, 0.0);
 
             // full chargeback
             emiCalculator.chargebackPrincipal(interestSchedule, LocalDate.of(2024, 3, 1), toMoney(17.01));
 
             checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
-            checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
-            checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.49, 16.52, 99.06);
-            checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.58, 48.44, 50.62);
-            checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.3, 16.71, 33.91);
-            checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.2, 16.81, 17.1);
-            checkPeriod(interestSchedule, 5, 0, 17.20, 0.005833333333, 0.1, 17.1, 0.0);
+            checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
+            checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.487491666639, 0.49, 16.52, 99.06);
+            checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.577849999968, 0.58, 48.44, 50.62);
+            checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.295283333316, 0.3, 16.71, 33.91);
+            checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.197808333322, 0.2, 16.81, 17.1);
+            checkPeriod(interestSchedule, 5, 0, 17.20, 0.005833333333, 0.0997499999943, 0.1, 17.1, 0.0);
         }
 
         @Test
@@ -2542,12 +2542,12 @@ class ProgressiveEMICalculatorTest {
             emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
 
             checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
-            checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
-            checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.49, 16.52, 67.05);
-            checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.39, 16.62, 50.43);
-            checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 16.72, 33.71);
-            checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.2, 16.81, 16.90);
-            checkPeriod(interestSchedule, 5, 0, 17.00, 0.005833333333, 0.1, 16.9, 0.0);
+            checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
+            checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.487491666639, 0.49, 16.52, 67.05);
+            checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.391124999979, 0.39, 16.62, 50.43);
+            checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.294174999983, 0.29, 16.72, 33.71);
+            checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.196641666655, 0.2, 16.81, 16.90);
+            checkPeriod(interestSchedule, 5, 0, 17.00, 0.005833333333, 0.0985833333276, 0.1, 16.9, 0.0);
 
             // repay 1st period
             emiCalculator.payPrincipal(interestSchedule, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 1), toMoney(16.43));
@@ -2560,13 +2560,13 @@ class ProgressiveEMICalculatorTest {
             emiCalculator.chargebackPrincipal(interestSchedule, LocalDate.of(2024, 3, 15), toMoney(17.01));
 
             checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
-            checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
-            checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.49, 16.52, 67.05);
-            checkPeriod(interestSchedule, 2, 0, 17.01, 0.002634408602, 0.18, 0.45, 33.57, 50.49);
-            checkPeriod(interestSchedule, 2, 1, 17.01, 0.003198924731, 0.27, 0.45, 33.57, 50.49);
-            checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 16.72, 33.77);
-            checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.2, 16.81, 16.96);
-            checkPeriod(interestSchedule, 5, 0, 17.06, 0.005833333333, 0.1, 16.96, 0.0);
+            checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
+            checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.487491666639, 0.49, 16.52, 67.05);
+            checkPeriod(interestSchedule, 2, 0, 17.01, 0.002634408602, 0.176637096765, 0.45, 33.57, 50.49);
+            checkPeriod(interestSchedule, 2, 1, 17.01, 0.003198924731, 0.268901612888, 0.45, 33.57, 50.49);
+            checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.294524999983, 0.29, 16.72, 33.77);
+            checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.196991666655, 0.2, 16.81, 16.96);
+            checkPeriod(interestSchedule, 5, 0, 17.06, 0.005833333333, 0.0989333333277, 0.1, 16.96, 0.0);
         }
     }
 
@@ -2597,12 +2597,12 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.49, 16.52, 67.05);
-        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.39, 16.62, 50.43);
-        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 16.72, 33.71);
-        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.2, 16.81, 16.90);
-        checkPeriod(interestSchedule, 5, 0, 17.00, 0.005833333333, 0.1, 16.9, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
+        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.487491666639, 0.49, 16.52, 67.05);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.391124999979, 0.39, 16.62, 50.43);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.294174999983, 0.29, 16.72, 33.71);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.196641666655, 0.2, 16.81, 16.90);
+        checkPeriod(interestSchedule, 5, 0, 17.00, 0.005833333333, 0.0985833333276, 0.1, 16.9, 0.0);
 
         // repay 1st period
         LocalDate txnDate = LocalDate.of(2024, 2, 1);
@@ -2620,12 +2620,12 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.chargebackInterest(interestSchedule, txnDate, toMoney(0.49));
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.49, 16.52, 83.57);
-        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.98, 33.04, 50.53);
-        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 16.72, 33.81);
-        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.2, 16.81, 17.0);
-        checkPeriod(interestSchedule, 5, 0, 17.10, 0.005833333333, 0.1, 17.0, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
+        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.487491666639, 0.49, 16.52, 83.57);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.977491666638, 0.98, 33.04, 50.53);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.294758333316, 0.29, 16.72, 33.81);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.197224999989, 0.2, 16.81, 17.0);
+        checkPeriod(interestSchedule, 5, 0, 17.10, 0.005833333333, 0.0991666666611, 0.1, 17.0, 0.0);
     }
 
     @Test
@@ -2655,12 +2655,12 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.49, 16.52, 67.05);
-        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.39, 16.62, 50.43);
-        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 16.72, 33.71);
-        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.2, 16.81, 16.90);
-        checkPeriod(interestSchedule, 5, 0, 17.00, 0.005833333333, 0.1, 16.9, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
+        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.487491666639, 0.49, 16.52, 67.05);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.391124999979, 0.39, 16.62, 50.43);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.294174999983, 0.29, 16.72, 33.71);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.196641666655, 0.2, 16.81, 16.90);
+        checkPeriod(interestSchedule, 5, 0, 17.00, 0.005833333333, 0.0985833333276, 0.1, 16.9, 0.0);
 
         // repay 1st period
         LocalDate txnDate = LocalDate.of(2024, 2, 1);
@@ -2677,7 +2677,7 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.chargebackPrincipal(interestSchedule, txnDate, toMoney(16.52));
         emiCalculator.chargebackInterest(interestSchedule, txnDate, toMoney(0.49));
 
-        checkPeriod(interestSchedule, 5, 0, 17.00, 0.005833333333, 0.1, 0.59, 33.42, 0.0);
+        checkPeriod(interestSchedule, 5, 0, 17.00, 0.005833333333, 0.0985833333276, 0.59, 33.42, 0.0);
     }
 
     @Test
@@ -2707,12 +2707,12 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.49, 16.52, 67.05);
-        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.39, 16.62, 50.43);
-        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 16.72, 33.71);
-        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.2, 16.81, 16.90);
-        checkPeriod(interestSchedule, 5, 0, 17.00, 0.005833333333, 0.1, 16.9, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
+        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.487491666639, 0.49, 16.52, 67.05);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.391124999979, 0.39, 16.62, 50.43);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.294174999983, 0.29, 16.72, 33.71);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.196641666655, 0.2, 16.81, 16.90);
+        checkPeriod(interestSchedule, 5, 0, 17.00, 0.005833333333, 0.0985833333276, 0.1, 16.9, 0.0);
 
         // repay 1st period
         LocalDate txnDate = LocalDate.of(2024, 2, 1);
@@ -2730,12 +2730,12 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.chargebackInterest(interestSchedule, txnDate, toMoney(0.49));
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.49, 16.52, 81.56);
-        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.97, 31.04, 50.52);
-        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 16.72, 33.80);
-        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.2, 16.81, 16.99);
-        checkPeriod(interestSchedule, 5, 0, 17.09, 0.005833333333, 0.1, 16.99, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
+        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.487491666639, 0.49, 16.52, 81.56);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.96576666664, 0.97, 31.04, 50.52);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.294699999983, 0.29, 16.72, 33.80);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.197166666655, 0.2, 16.81, 16.99);
+        checkPeriod(interestSchedule, 5, 0, 17.09, 0.005833333333, 0.0991083333276, 0.1, 16.99, 0.0);
     }
 
     @Test
@@ -2765,12 +2765,12 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.49, 16.52, 67.05);
-        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.39, 16.62, 50.43);
-        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 16.72, 33.71);
-        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.2, 16.81, 16.90);
-        checkPeriod(interestSchedule, 5, 0, 17.00, 0.005833333333, 0.1, 16.9, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
+        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.487491666639, 0.49, 16.52, 67.05);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.391124999979, 0.39, 16.62, 50.43);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.294174999983, 0.29, 16.72, 33.71);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.196641666655, 0.2, 16.81, 16.90);
+        checkPeriod(interestSchedule, 5, 0, 17.00, 0.005833333333, 0.0985833333276, 0.1, 16.9, 0.0);
 
         // repay 1st period
         LocalDate txnDate = LocalDate.of(2024, 2, 1);
@@ -2787,12 +2787,12 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.chargebackPrincipal(interestSchedule, txnDate, toMoney(15.0));
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.49, 16.52, 82.05);
-        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.48, 31.53, 50.52);
-        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 16.72, 33.80);
-        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.2, 16.81, 16.99);
-        checkPeriod(interestSchedule, 5, 0, 17.09, 0.005833333333, 0.1, 16.99, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
+        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.487491666639, 0.49, 16.52, 82.05);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.478624999974, 0.48, 31.53, 50.52);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.294699999983, 0.29, 16.72, 33.80);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.197166666655, 0.2, 16.81, 16.99);
+        checkPeriod(interestSchedule, 5, 0, 17.09, 0.005833333333, 0.0991083333276, 0.1, 16.99, 0.0);
     }
 
     @Test
@@ -2822,12 +2822,12 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.49, 16.52, 67.05);
-        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.39, 16.62, 50.43);
-        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 16.72, 33.71);
-        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.2, 16.81, 16.90);
-        checkPeriod(interestSchedule, 5, 0, 17.00, 0.005833333333, 0.1, 16.9, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
+        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.487491666639, 0.49, 16.52, 67.05);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.391124999979, 0.39, 16.62, 50.43);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.294174999983, 0.29, 16.72, 33.71);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.196641666655, 0.2, 16.81, 16.90);
+        checkPeriod(interestSchedule, 5, 0, 17.00, 0.005833333333, 0.0985833333276, 0.1, 16.9, 0.0);
 
         // repay 1st period
         LocalDate txnDate = LocalDate.of(2024, 2, 1);
@@ -2847,12 +2847,12 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.chargebackInterest(interestSchedule, txnDate, toMoney(0.49));
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.49, 16.52, 98.57);
-        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 1.06, 47.96, 50.61);
-        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.30, 16.71, 33.90);
-        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.20, 16.81, 17.09);
-        checkPeriod(interestSchedule, 5, 0, 17.19, 0.005833333333, 0.10, 17.09, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
+        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.487491666639, 0.49, 16.52, 98.57);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 1.06499166663, 1.06, 47.96, 50.61);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.295224999983, 0.30, 16.71, 33.90);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.197749999989, 0.20, 16.81, 17.09);
+        checkPeriod(interestSchedule, 5, 0, 17.19, 0.005833333333, 0.0996916666611, 0.10, 17.09, 0.0);
     }
 
     @Test
@@ -2882,12 +2882,12 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), disbursedAmount);
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.49, 16.52, 67.05);
-        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.39, 16.62, 50.43);
-        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 16.72, 33.71);
-        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.2, 16.81, 16.90);
-        checkPeriod(interestSchedule, 5, 0, 17.00, 0.005833333333, 0.1, 16.9, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
+        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.487491666639, 0.49, 16.52, 67.05);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.005833333333, 0.391124999979, 0.39, 16.62, 50.43);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.294174999983, 0.29, 16.72, 33.71);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.196641666655, 0.2, 16.81, 16.90);
+        checkPeriod(interestSchedule, 5, 0, 17.00, 0.005833333333, 0.0985833333276, 0.1, 16.9, 0.0);
 
         // repay 1st period
         LocalDate txnDate = LocalDate.of(2024, 2, 1);
@@ -2905,18 +2905,18 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.chargebackInterest(interestSchedule, txnDate, toMoney(0.49));
 
         PeriodDueDetails dueAmounts = emiCalculator.getDueAmounts(interestSchedule, LocalDate.of(2024, 4, 1), txnDate);
-        Assertions.assertEquals(33.08, toDouble(interestSchedule.repaymentPeriods().get(2).getDuePrincipal()));
+        Assertions.assertEquals(33.09, toDouble(interestSchedule.repaymentPeriods().get(2).getDuePrincipal()));
         Assertions.assertEquals(33.35, toDouble(dueAmounts.getDuePrincipal()));
         Assertions.assertEquals(0.67, toDouble(dueAmounts.getDueInterest()));
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.58, 16.43, 83.57);
-        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.49, 16.52, 67.05);
-        checkPeriod(interestSchedule, 2, 0, 17.01, 0.002634408602, 0.18, 0.94, 33.08, 50.49);
-        checkPeriod(interestSchedule, 2, 1, 17.01, 0.003198924731, 0.76, 0.94, 33.08, 50.49);
-        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29, 16.72, 33.77);
-        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.20, 16.81, 16.96);
-        checkPeriod(interestSchedule, 5, 0, 17.06, 0.005833333333, 0.10, 16.96, 0.0);
+        checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
+        checkPeriod(interestSchedule, 1, 0, 17.01, 0.005833333333, 0.487491666639, 0.49, 16.52, 67.05);
+        checkPeriod(interestSchedule, 2, 0, 17.01, 0.002634408602, 0.176637096765, 0.93, 33.09, 50.48);
+        checkPeriod(interestSchedule, 2, 1, 17.01, 0.003198924731, 0.75733413977, 0.93, 33.09, 50.48);
+        checkPeriod(interestSchedule, 3, 0, 17.01, 0.005833333333, 0.29446666665, 0.29, 16.72, 33.76);
+        checkPeriod(interestSchedule, 4, 0, 17.01, 0.005833333333, 0.196933333322, 0.20, 16.81, 16.95);
+        checkPeriod(interestSchedule, 5, 0, 17.05, 0.005833333333, 0.0988749999945, 0.10, 16.95, 0.0);
     }
 
     private static LoanScheduleModelRepaymentPeriod repayment(int periodNumber, LocalDate fromDate, LocalDate dueDate) {

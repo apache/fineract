@@ -6263,15 +6263,15 @@ Feature: Loan
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance  | Late | Outstanding |
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |             |      |             |
-      | 1  | 31   | 01 February 2024 |           | 83.52           | 16.48         | 0.53     | 0.0  | 0.0       | 17.01 | 0.0   | 0.0         | 0.0  | 17.01       |
-      | 2  | 29   | 01 March 2024    |           | 66.91           | 16.61         | 0.4      | 0.0  | 0.0       | 17.01 | 0.0   | 0.0         | 0.0  | 17.01       |
-      | 3  | 31   | 01 April 2024    |           | 50.2            | 16.71         | 0.3      | 0.0  | 0.0       | 17.01 | 0.0   | 0.0         | 0.0  | 17.01       |
-      | 4  | 30   | 01 May 2024      |           | 33.4            | 16.8          | 0.21     | 0.0  | 0.0       | 17.01 | 0.0   | 0.0         | 0.0  | 17.01       |
-      | 5  | 31   | 01 June 2024     |           | 16.5            | 16.9          | 0.11     | 0.0  | 0.0       | 17.01 | 0.0   | 0.0         | 0.0  | 17.01       |
-      | 6  | 30   | 01 July 2024     |           | 0.0             | 16.5          | 0.01     | 0.0  | 0.0       | 16.51 | 15.0  | 15.0        | 0.0  | 1.51        |
+      | 1  | 31   | 01 February 2024 |           | 83.53           | 16.47         | 0.54     | 0.0  | 0.0       | 17.01 | 0.0   | 0.0         | 0.0  | 17.01       |
+      | 2  | 29   | 01 March 2024    |           | 66.92           | 16.61         | 0.4      | 0.0  | 0.0       | 17.01 | 0.0   | 0.0         | 0.0  | 17.01       |
+      | 3  | 31   | 01 April 2024    |           | 50.21           | 16.71         | 0.3      | 0.0  | 0.0       | 17.01 | 0.0   | 0.0         | 0.0  | 17.01       |
+      | 4  | 30   | 01 May 2024      |           | 33.41           | 16.8          | 0.21     | 0.0  | 0.0       | 17.01 | 0.0   | 0.0         | 0.0  | 17.01       |
+      | 5  | 31   | 01 June 2024     |           | 16.51           | 16.9          | 0.11     | 0.0  | 0.0       | 17.01 | 0.0   | 0.0         | 0.0  | 17.01       |
+      | 6  | 30   | 01 July 2024     |           | 0.0             | 16.51         | 0.01     | 0.0  | 0.0       | 16.52 | 15.0  | 15.0        | 0.0  | 1.52        |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
-      | 100.0         | 1.56     | 0.0  | 0.0       | 101.56 | 15.0 | 15.0       | 0.0  | 86.56       |
+      | 100.0         | 1.57     | 0.0  | 0.0       | 101.57 | 15.0 | 15.0       | 0.0  | 86.57       |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        |

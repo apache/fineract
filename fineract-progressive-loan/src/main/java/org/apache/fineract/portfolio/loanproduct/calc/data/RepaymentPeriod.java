@@ -149,8 +149,8 @@ public final class RepaymentPeriod {
     }
 
     private Money calculateCalculatedDueInterest() {
-        Money calculatedDueInterest = getInterestPeriods().stream().map(InterestPeriod::getCalculatedDueInterest).reduce(getZero(mc),
-                (m1, m2) -> m1.plus(m2, mc));
+        Money calculatedDueInterest = Money.of(emi.getCurrencyData(),
+                getInterestPeriods().stream().map(InterestPeriod::getCalculatedDueInterest).reduce(BigDecimal.ZERO, BigDecimal::add), mc);
         if (getPrevious().isPresent()) {
             calculatedDueInterest = calculatedDueInterest.add(getPrevious().get().getUnrecognizedInterest(), mc);
         }

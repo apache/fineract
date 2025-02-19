@@ -388,8 +388,8 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
             validateFullyPaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
             validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2023, 3, 1), 1991.63, 1041.84, 949.79, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 50.21,
                     0, 50.21, 0, 1041.84);
-            validateFullyUnpaidRepaymentPeriod(loanDetails, 3, "01 April 2023", 2000.85, 0.0, 0.0, 40.99);
-            validateFullyUnpaidRepaymentPeriod(loanDetails, 4, "01 May 2023", 2032.35, 0.0, 0.0, 16.94);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 3, "01 April 2023", 2000.86, 0.0, 0.0, 40.98);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 4, "01 May 2023", 2032.34, 0.0, 0.0, 16.94);
 
             loanTransactionHelper.makeLoanRepayment("20 March 2023", 1000f, loanId.intValue());
 
@@ -398,8 +398,8 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
 
             validateFullyPaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
             validateFullyPaidRepaymentPeriod(loanDetails, 2, "01 March 2023", 1991.63, 0.0, 0.0, 50.21, 2041.84);
-            validateFullyUnpaidRepaymentPeriod(loanDetails, 3, "01 April 2023", 2000.85, 0.0, 0.0, 40.99);
-            validateFullyUnpaidRepaymentPeriod(loanDetails, 4, "01 May 2023", 2032.35, 0.0, 0.0, 16.94);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 3, "01 April 2023", 2000.86, 0.0, 0.0, 40.98);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 4, "01 May 2023", 2032.34, 0.0, 0.0, 16.94);
         });
         payoffOnDateAndVerifyStatus("1 April 2023", loanIdRef.get());
     }

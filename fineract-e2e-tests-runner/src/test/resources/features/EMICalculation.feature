@@ -348,15 +348,15 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
       |    |      | 08 January 2024  |           | 200.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
-      | 1  | 31   | 01 February 2024 |           | 250.69          | 49.31         | 2.02     | 0.0  | 0.0       | 51.33 | 0.0  | 0.0        | 0.0  | 51.33       |
-      | 2  | 29   | 01 March 2024    |           | 201.34          | 49.35         | 1.98     | 0.0  | 0.0       | 51.33 | 0.0  | 0.0        | 0.0  | 51.33       |
-      | 3  | 31   | 01 April 2024    |           | 151.6           | 49.74         | 1.59     | 0.0  | 0.0       | 51.33 | 0.0  | 0.0        | 0.0  | 51.33       |
-      | 4  | 30   | 01 May 2024      |           | 101.47          | 50.13         | 1.2      | 0.0  | 0.0       | 51.33 | 0.0  | 0.0        | 0.0  | 51.33       |
-      | 5  | 31   | 01 June 2024     |           | 50.94           | 50.53         | 0.8      | 0.0  | 0.0       | 51.33 | 0.0  | 0.0        | 0.0  | 51.33       |
-      | 6  | 30   | 01 July 2024     |           | 0.0             | 50.94         | 0.4      | 0.0  | 0.0       | 51.34 | 0.0  | 0.0        | 0.0  | 51.34       |
+      | 1  | 31   | 01 February 2024 |           | 250.68          | 49.32         | 2.01     | 0.0  | 0.0       | 51.33 | 0.0  | 0.0        | 0.0  | 51.33       |
+      | 2  | 29   | 01 March 2024    |           | 201.33          | 49.35         | 1.98     | 0.0  | 0.0       | 51.33 | 0.0  | 0.0        | 0.0  | 51.33       |
+      | 3  | 31   | 01 April 2024    |           | 151.59          | 49.74         | 1.59     | 0.0  | 0.0       | 51.33 | 0.0  | 0.0        | 0.0  | 51.33       |
+      | 4  | 30   | 01 May 2024      |           | 101.46          | 50.13         | 1.2      | 0.0  | 0.0       | 51.33 | 0.0  | 0.0        | 0.0  | 51.33       |
+      | 5  | 31   | 01 June 2024     |           | 50.93           | 50.53         | 0.8      | 0.0  | 0.0       | 51.33 | 0.0  | 0.0        | 0.0  | 51.33       |
+      | 6  | 30   | 01 July 2024     |           | 0.0             | 50.93         | 0.4      | 0.0  | 0.0       | 51.33 | 0.0  | 0.0        | 0.0  | 51.33       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
-      | 300.0         | 7.99     | 0.0  | 0.0       | 307.99 | 0.0  | 0.0        | 0.0  | 307.99      |
+      | 300.0         | 7.98     | 0.0  | 0.0       | 307.98 | 0.0  | 0.0        | 0.0  | 307.98      |
 
 #  TODO unskip and check when early repayment for EMI is implemented (PS-2076, PS-1958)
   @Skip @TestRailId:C3195
@@ -611,14 +611,14 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
       | 1  | 31   | 01 February 2024 | 01 February 2024 | 83.66           | 16.34         | 0.79     | 0.0  | 0.0       | 17.13 | 17.13 | 0.0        | 0.0  | 0.0         |
       |    |      | 25 February 2024 |                  | 200.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
-      | 2  | 29   | 01 March 2024    |                  | 226.78          | 56.88         | 0.94     | 0.0  | 0.0       | 57.82 | 0.0   | 0.0        | 0.0  | 57.82       |
-      | 3  | 31   | 01 April 2024    |                  | 170.75          | 56.03         | 1.79     | 0.0  | 0.0       | 57.82 | 0.0   | 0.0        | 0.0  | 57.82       |
-      | 4  | 30   | 01 May 2024      |                  | 114.28          | 56.47         | 1.35     | 0.0  | 0.0       | 57.82 | 0.0   | 0.0        | 0.0  | 57.82       |
-      | 5  | 31   | 01 June 2024     |                  | 57.36           | 56.92         | 0.9      | 0.0  | 0.0       | 57.82 | 0.0   | 0.0        | 0.0  | 57.82       |
-      | 6  | 30   | 01 July 2024     |                  | 0.0             | 57.36         | 0.45     | 0.0  | 0.0       | 57.81 | 0.0   | 0.0        | 0.0  | 57.81       |
+      | 2  | 29   | 01 March 2024    |                  | 226.77          | 56.89         | 0.93     | 0.0  | 0.0       | 57.82 | 0.0   | 0.0        | 0.0  | 57.82       |
+      | 3  | 31   | 01 April 2024    |                  | 170.74          | 56.03         | 1.79     | 0.0  | 0.0       | 57.82 | 0.0   | 0.0        | 0.0  | 57.82       |
+      | 4  | 30   | 01 May 2024      |                  | 114.27          | 56.47         | 1.35     | 0.0  | 0.0       | 57.82 | 0.0   | 0.0        | 0.0  | 57.82       |
+      | 5  | 31   | 01 June 2024     |                  | 57.35           | 56.92         | 0.9      | 0.0  | 0.0       | 57.82 | 0.0   | 0.0        | 0.0  | 57.82       |
+      | 6  | 30   | 01 July 2024     |                  | 0.0             | 57.35         | 0.45     | 0.0  | 0.0       | 57.8 | 0.0   | 0.0        | 0.0  | 57.8       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
-      | 300.0         | 6.22     | 0.0  | 0.0       | 306.22 | 17.13 | 0.0        | 0.0  | 289.09      |
+      | 300.0         | 6.21     | 0.0  | 0.0       | 306.21 | 17.13 | 0.0        | 0.0  | 289.08      |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        |
@@ -3528,15 +3528,15 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
-      | 1  | 31   | 01 February 2024 |           | 83.52           | 16.48         | 0.53     | 0.0  | 0.0       | 17.01 | 15.0 | 15.0       | 0.0  | 2.01        |
-      | 2  | 29   | 01 March 2024    |           | 67.0            | 16.52         | 0.49     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 3  | 31   | 01 April 2024    |           | 50.38           | 16.62         | 0.39     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 4  | 30   | 01 May 2024      |           | 33.66           | 16.72         | 0.29     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 5  | 31   | 01 June 2024     |           | 16.85           | 16.81         | 0.2      | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 6  | 30   | 01 July 2024     |           | 0.0             | 16.85         | 0.1      | 0.0  | 0.0       | 16.95 | 0.0  | 0.0        | 0.0  | 16.95       |
+      | 1  | 31   | 01 February 2024 |           | 83.53           | 16.47         | 0.54     | 0.0  | 0.0       | 17.01 | 15.0 | 15.0       | 0.0  | 2.01        |
+      | 2  | 29   | 01 March 2024    |           | 67.01           | 16.52         | 0.49     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
+      | 3  | 31   | 01 April 2024    |           | 50.39           | 16.62         | 0.39     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
+      | 4  | 30   | 01 May 2024      |           | 33.67           | 16.72         | 0.29     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
+      | 5  | 31   | 01 June 2024     |           | 16.86           | 16.81         | 0.2      | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
+      | 6  | 30   | 01 July 2024     |           | 0.0             | 16.86         | 0.1      | 0.0  | 0.0       | 16.96 | 0.0  | 0.0        | 0.0  | 16.96       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
-      | 100.0         | 2.0      | 0.0  | 0.0       | 102.0 | 15.0 | 15.0       | 0.0  | 87.0        |
+      | 100.0         | 2.01     | 0.0  | 0.0       | 102.01| 15.0 | 15.0       | 0.0  | 87.01       |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
@@ -3680,9 +3680,9 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 15 January 2024  | Repayment        | 15.0   | 14.74     | 0.26     | 0.0  | 0.0       | 85.26        | false    | false    |
       | 15 January 2024  | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 January 2024  | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 17 January 2024  | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 18 January 2024  | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 19 January 2024  | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 17 January 2024  | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 18 January 2024  | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 January 2024  | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 20 January 2024  | Repayment        | 2.01   | 1.93      | 0.08     | 0.0  | 0.0       | 83.33        | false    | false    |
 
   @TestRailId:C3256
@@ -3780,13 +3780,13 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       |    |      | 01 January 2024  |                 | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
       | 1  | 31   | 01 February 2024 | 15 January 2024 | 83.25           | 16.75         | 0.26     | 0.0  | 0.0       | 17.01 | 17.01 | 17.01      | 0.0  | 0.0         |
       | 2  | 29   | 01 March 2024    | 15 January 2024 | 66.24           | 17.01         | 0.0      | 0.0  | 0.0       | 17.01 | 17.01 | 17.01      | 0.0  | 0.0         |
-      | 3  | 31   | 01 April 2024    |                 | 50.22           | 16.02         | 0.99     | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
-      | 4  | 30   | 01 May 2024      |                 | 33.5            | 16.72         | 0.29     | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
-      | 5  | 31   | 01 June 2024     |                 | 16.69           | 16.81         | 0.2      | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
-      | 6  | 30   | 01 July 2024     |                 | 0.0             | 16.69         | 0.1      | 0.0  | 0.0       | 16.79 | 0.0   | 0.0        | 0.0  | 16.79       |
+      | 3  | 31   | 01 April 2024    |                 | 50.23           | 16.01         | 1.0      | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
+      | 4  | 30   | 01 May 2024      |                 | 33.51           | 16.72         | 0.29     | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
+      | 5  | 31   | 01 June 2024     |                 | 16.7            | 16.81         | 0.2      | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
+      | 6  | 30   | 01 July 2024     |                 | 0.0             | 16.7          | 0.1      | 0.0  | 0.0       | 16.8  | 0.0   | 0.0        | 0.0  | 16.8        |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
-      | 100.0         | 1.84     | 0.0  | 0.0       | 101.84 | 34.02 | 34.02      | 0.0  | 67.82       |
+      | 100.0         | 1.85     | 0.0  | 0.0       | 101.85 | 34.02 | 34.02      | 0.0  | 67.83       |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
@@ -3940,7 +3940,7 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 16 January 2024  | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 17 January 2024  | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 18 January 2024  | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 19 January 2024  | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 January 2024  | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
     When Admin sets the business date to "25 January 2024"
     When Admin runs inline COB job for Loan
     Then Loan Transactions tab has the following data:
@@ -3964,8 +3964,8 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 16 January 2024  | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 17 January 2024  | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 18 January 2024  | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 19 January 2024  | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 20 January 2024  | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 January 2024  | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 January 2024  | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 21 January 2024  | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 22 January 2024  | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 23 January 2024  | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -4082,10 +4082,10 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                 | 750.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
       |    |      | 01 January 2024  |                 | 250.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
-      | 1  | 31   | 01 February 2024 | 22 January 2024 | 750.53          | 249.47        | 5.68     | 0.0  | 0.0       | 255.15 | 255.15 | 255.15     | 0.0  | 0.0         |
-      | 2  | 29   | 01 March 2024    | 22 January 2024 | 495.38          | 255.15        | 0.0      | 0.0  | 0.0       | 255.15 | 255.15 | 255.15     | 0.0  | 0.0         |
-      | 3  | 31   | 01 April 2024    | 22 January 2024 | 240.23          | 255.15        | 0.0      | 0.0  | 0.0       | 255.15 | 255.15 | 255.15     | 0.0  | 0.0         |
-      | 4  | 30   | 01 May 2024      | 22 January 2024 | 0.0             | 240.23        | 0.0      | 0.0  | 0.0       | 240.23 | 240.23 | 240.23     | 0.0  | 0.0         |
+      | 1  | 31   | 01 February 2024 | 22 January 2024 | 750.54          | 249.46        | 5.68     | 0.0  | 0.0       | 255.14 | 255.14 | 255.14     | 0.0  | 0.0         |
+      | 2  | 29   | 01 March 2024    | 22 January 2024 | 495.4           | 255.14        | 0.0      | 0.0  | 0.0       | 255.14 | 255.14 | 255.14     | 0.0  | 0.0         |
+      | 3  | 31   | 01 April 2024    | 22 January 2024 | 240.26          | 255.14        | 0.0      | 0.0  | 0.0       | 255.14 | 255.14 | 255.14     | 0.0  | 0.0         |
+      | 4  | 30   | 01 May 2024      | 22 January 2024 | 0.0             | 240.26        | 0.0      | 0.0  | 0.0       | 240.26 | 240.26 | 240.26     | 0.0  | 0.0         |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid    | In advance | Late | Outstanding |
       | 1000.0        | 5.68     | 0.0  | 0.0       | 1005.68 | 1005.68 | 1005.68    | 0.0  | 0.0         |
@@ -4354,10 +4354,10 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |           | 250.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
       |    |      | 01 January 2024  |           | 750.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
-      | 1  | 31   | 01 February 2024 |           | 753.24          | 246.76        | 8.39     | 0.0  | 0.0       | 255.15 | 0.0  | 0.0        | 0.0  | 255.15      |
-      | 2  | 29   | 01 March 2024    |           | 504.0           | 249.24        | 5.91     | 0.0  | 0.0       | 255.15 | 0.0  | 0.0        | 0.0  | 255.15      |
-      | 3  | 31   | 01 April 2024    |           | 253.08          | 250.92        | 4.23     | 0.0  | 0.0       | 255.15 | 0.0  | 0.0        | 0.0  | 255.15      |
-      | 4  | 30   | 01 May 2024      |           | 0.0             | 253.08        | 2.05     | 0.0  | 0.0       | 255.13 | 0.0  | 0.0        | 0.0  | 255.13      |
+      | 1  | 31   | 01 February 2024 |           | 753.25          | 246.75        | 8.39     | 0.0  | 0.0       | 255.14 | 0.0  | 0.0        | 0.0  | 255.14      |
+      | 2  | 29   | 01 March 2024    |           | 504.02          | 249.23        | 5.91     | 0.0  | 0.0       | 255.14 | 0.0  | 0.0        | 0.0  | 255.14      |
+      | 3  | 31   | 01 April 2024    |           | 253.11          | 250.91        | 4.23     | 0.0  | 0.0       | 255.14 | 0.0  | 0.0        | 0.0  | 255.14      |
+      | 4  | 30   | 01 May 2024      |           | 0.0             | 253.11        | 2.05     | 0.0  | 0.0       | 255.16 | 0.0  | 0.0        | 0.0  | 255.16      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
       | 1000.0        | 20.58    | 0.0  | 0.0       | 1020.58 | 0.0  | 0.0        | 0.0  | 1020.58     |
@@ -4371,10 +4371,10 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                 | 250.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
       |    |      | 01 January 2024  |                 | 750.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
-      | 1  | 31   | 01 February 2024 | 22 January 2024 | 750.53          | 249.47        | 5.68     | 0.0  | 0.0       | 255.15 | 255.15 | 255.15     | 0.0  | 0.0         |
-      | 2  | 29   | 01 March 2024    |                 | 500.68          | 249.85        | 5.3      | 0.0  | 0.0       | 255.15 | 247.69 | 247.69     | 0.0  | 7.46        |
-      | 3  | 31   | 01 April 2024    |                 | 249.73          | 250.95        | 4.2      | 0.0  | 0.0       | 255.15 | 0.0    | 0.0        | 0.0  | 255.15      |
-      | 4  | 30   | 01 May 2024      |                 | 0.0             | 249.73        | 2.03     | 0.0  | 0.0       | 251.76 | 0.0    | 0.0        | 0.0  | 251.76      |
+      | 1  | 31   | 01 February 2024 | 22 January 2024 | 750.54          | 249.46        | 5.68     | 0.0  | 0.0       | 255.14 | 255.14 | 255.14     | 0.0  | 0.0         |
+      | 2  | 29   | 01 March 2024    |                 | 500.7           | 249.84        | 5.3      | 0.0  | 0.0       | 255.14 | 247.7  | 247.7      | 0.0  | 7.44        |
+      | 3  | 31   | 01 April 2024    |                 | 249.76          | 250.94        | 4.2      | 0.0  | 0.0       | 255.14 | 0.0    | 0.0        | 0.0  | 255.14      |
+      | 4  | 30   | 01 May 2024      |                 | 0.0             | 249.76        | 2.03     | 0.0  | 0.0       | 251.79 | 0.0    | 0.0        | 0.0  | 251.79      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
       | 1000.0        | 17.21    | 0.0  | 0.0       | 1017.21 | 502.84 | 502.84     | 0.0  | 514.37      |
@@ -4394,13 +4394,13 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                 | 250.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
       |    |      | 01 January 2024  |                 | 750.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
-      | 1  | 31   | 01 February 2024 | 22 January 2024 | 750.53          | 249.47        | 5.68     | 0.0  | 0.0       | 255.15 | 255.15 | 255.15     | 0.0  | 0.0         |
-      | 2  | 29   | 01 March 2024    | 01 March 2024   | 500.68          | 249.85        | 5.3      | 0.0  | 0.0       | 255.15 | 255.15 | 247.69     | 0.0  | 0.0         |
-      | 3  | 31   | 01 April 2024    | 01 April 2024   | 249.73          | 250.95        | 4.2      | 0.0  | 0.0       | 255.15 | 255.15 | 0.0        | 0.0  | 0.0         |
-      | 4  | 30   | 01 May 2024      | 01 May 2024     | 0.0             | 249.73        | 2.03     | 0.0  | 0.0       | 251.76 | 251.76 | 0.0        | 0.0  | 0.0         |
+      | 1  | 31   | 01 February 2024 | 22 January 2024 | 750.54          | 249.46        | 5.68     | 0.0  | 0.0       | 255.14 | 255.14 | 255.14     | 0.0  | 0.0         |
+      | 2  | 29   | 01 March 2024    | 01 March 2024   | 500.7           | 249.84        | 5.3      | 0.0  | 0.0       | 255.14 | 255.14 | 247.7      | 0.0  | 0.0         |
+      | 3  | 31   | 01 April 2024    | 01 April 2024   | 249.76          | 250.94        | 4.2      | 0.0  | 0.0       | 255.14 | 255.14 | 0.02       | 0.0  | 0.0         |
+      | 4  | 30   | 01 May 2024      | 01 May 2024     | 0.0             | 249.76        | 2.03     | 0.0  | 0.0       | 251.79 | 251.79 | 0.03       | 0.0  | 0.0         |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid    | In advance | Late | Outstanding |
-      | 1000.0        | 17.21    | 0.0  | 0.0       | 1017.21 | 1017.21 | 502.84     | 0.0  | 0.0         |
+      | 1000.0        | 17.21    | 0.0  | 0.0       | 1017.21 | 1017.21 | 502.89     | 0.0  | 0.0         |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 250.0  | 0.0       | 0.0      | 0.0  | 0.0       | 250.0        | false    | false    |
@@ -4430,19 +4430,19 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                 | 250.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
       |    |      | 07 January 2024  |                 | 750.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
-      | 1  | 31   | 01 February 2024 | 22 January 2024 | 749.63          | 250.37        | 4.47     | 0.0  | 0.0       | 254.84 | 254.84 | 254.84     | 0.0  | 0.0         |
-      | 2  | 29   | 01 March 2024    |                 | 500.09          | 249.54        | 5.3      | 0.0  | 0.0       | 254.84 | 247.6  | 247.6      | 0.0  | 7.24        |
-      | 3  | 31   | 01 April 2024    |                 | 249.44          | 250.65        | 4.19     | 0.0  | 0.0       | 254.84 | 0.0    | 0.0        | 0.0  | 254.84      |
-      | 4  | 30   | 01 May 2024      |                 | 0.0             | 249.44        | 2.02     | 0.0  | 0.0       | 251.46 | 0.0    | 0.0        | 0.0  | 251.46      |
+      | 1  | 31   | 01 February 2024 | 22 January 2024 | 749.63          | 250.37        | 4.46     | 0.0  | 0.0       | 254.83 | 254.83 | 254.83     | 0.0  | 0.0         |
+      | 2  | 29   | 01 March 2024    |                 | 500.1           | 249.53        | 5.3      | 0.0  | 0.0       | 254.83 | 247.6  | 247.6      | 0.0  | 7.23        |
+      | 3  | 31   | 01 April 2024    |                 | 249.46          | 250.64        | 4.19     | 0.0  | 0.0       | 254.83 | 0.0    | 0.0        | 0.0  | 254.83      |
+      | 4  | 30   | 01 May 2024      |                 | 0.0             | 249.46        | 2.02     | 0.0  | 0.0       | 251.48 | 0.0    | 0.0        | 0.0  | 251.48      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
-      | 1000.0        | 15.98    | 0.0  | 0.0       | 1015.98 | 502.44 | 502.44     | 0.0  | 513.54      |
+      | 1000.0        | 15.97    | 0.0  | 0.0       | 1015.97 | 502.43 | 502.43     | 0.0  | 513.54      |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement           | 250.0  | 0.0       | 0.0      | 0.0  | 0.0       | 250.0        | false    | false    |
       | 07 January 2024  | Disbursement           | 750.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
-      | 22 January 2024  | Merchant Issued Refund | 500.0  | 495.53    | 4.47     | 0.0  | 0.0       | 504.47       | false    | false    |
-      | 22 January 2024  | Interest Refund        | 2.44   | 2.44      | 0.0      | 0.0  | 0.0       | 502.03       | false    | false    |
+      | 22 January 2024  | Merchant Issued Refund | 500.0  | 495.54    | 4.46     | 0.0  | 0.0       | 504.46       | false    | false    |
+      | 22 January 2024  | Interest Refund        | 2.43   | 2.43      | 0.0      | 0.0  | 0.0       | 502.03       | false    | false    |
     When Admin sets the business date to "01 March 2024"
     And Customer makes "AUTOPAY" repayment on "01 March 2024" with 7.24 EUR transaction amount
     When Admin sets the business date to "01 April 2024"
@@ -4453,23 +4453,23 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                 | 250.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
       |    |      | 07 January 2024  |                 | 750.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
-      | 1  | 31   | 01 February 2024 | 22 January 2024 | 749.63          | 250.37        | 4.47     | 0.0  | 0.0       | 254.84 | 254.84 | 254.84     | 0.0  | 0.0         |
-      | 2  | 29   | 01 March 2024    | 01 March 2024   | 500.09          | 249.54        | 5.3      | 0.0  | 0.0       | 254.84 | 254.84 | 247.6      | 0.0  | 0.0         |
-      | 3  | 31   | 01 April 2024    | 01 April 2024   | 249.44          | 250.65        | 4.19     | 0.0  | 0.0       | 254.84 | 254.84 | 0.0        | 0.0  | 0.0         |
-      | 4  | 30   | 01 May 2024      | 01 May 2024     | 0.0             | 249.44        | 2.02     | 0.0  | 0.0       | 251.46 | 251.46 | 0.0        | 0.0  | 0.0         |
+      | 1  | 31   | 01 February 2024 | 22 January 2024 | 749.63          | 250.37        | 4.46     | 0.0  | 0.0       | 254.83 | 254.83 | 254.83     | 0.0  | 0.0         |
+      | 2  | 29   | 01 March 2024    | 01 March 2024   | 500.1           | 249.53        | 5.3      | 0.0  | 0.0       | 254.83 | 254.83 | 247.6      | 0.0  | 0.0         |
+      | 3  | 31   | 01 April 2024    | 01 April 2024   | 249.46          | 250.64        | 4.19     | 0.0  | 0.0       | 254.83 | 254.83 | 0.01       | 0.0  | 0.0         |
+      | 4  | 30   | 01 May 2024      | 01 May 2024     | 0.0             | 249.46        | 2.02     | 0.0  | 0.0       | 251.48 | 251.48 | 0.02       | 0.0  | 0.0         |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid    | In advance | Late | Outstanding |
-      | 1000.0        | 15.98    | 0.0  | 0.0       | 1015.98 | 1015.98 | 502.44     | 0.0  | 0.0         |
+      | 1000.0        | 15.97    | 0.0  | 0.0       | 1015.97 | 1015.97 | 502.46     | 0.0  | 0.0         |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement           | 250.0  | 0.0       | 0.0      | 0.0  | 0.0       | 250.0        | false    | false    |
       | 07 January 2024  | Disbursement           | 750.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
-      | 22 January 2024  | Merchant Issued Refund | 500.0  | 495.53    | 4.47     | 0.0  | 0.0       | 504.47       | false    | false    |
-      | 22 January 2024  | Interest Refund        | 2.44   | 2.44      | 0.0      | 0.0  | 0.0       | 502.03       | false    | false    |
+      | 22 January 2024  | Merchant Issued Refund | 500.0  | 495.54    | 4.46     | 0.0  | 0.0       | 504.46       | false    | false    |
+      | 22 January 2024  | Interest Refund        | 2.43   | 2.43      | 0.0      | 0.0  | 0.0       | 502.03       | false    | false    |
       | 01 March 2024    | Repayment              | 7.24   | 1.94      | 5.3      | 0.0  | 0.0       | 500.09       | false    | false    |
       | 01 April 2024    | Repayment              | 254.84 | 250.65    | 4.19     | 0.0  | 0.0       | 249.44       | false    | false    |
       | 01 May 2024      | Repayment              | 251.46 | 249.44    | 2.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 01 May 2024      | Accrual                | 15.98  | 0.0       | 15.98    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 May 2024      | Accrual                | 15.97  | 0.0       | 15.97    | 0.0  | 0.0       | 0.0          | false    | false    |
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
 
   @TestRailId:C3281
@@ -4487,10 +4487,10 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |           | 250.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
       |    |      | 07 January 2024  |           | 750.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
-      | 1  | 31   | 01 February 2024 |           | 752.33          | 247.67        | 7.17     | 0.0  | 0.0       | 254.84 | 0.0  | 0.0        | 0.0  | 254.84      |
-      | 2  | 29   | 01 March 2024    |           | 503.39          | 248.94        | 5.9      | 0.0  | 0.0       | 254.84 | 0.0  | 0.0        | 0.0  | 254.84      |
-      | 3  | 31   | 01 April 2024    |           | 252.77          | 250.62        | 4.22     | 0.0  | 0.0       | 254.84 | 0.0  | 0.0        | 0.0  | 254.84      |
-      | 4  | 30   | 01 May 2024      |           | 0.0             | 252.77        | 2.05     | 0.0  | 0.0       | 254.82 | 0.0  | 0.0        | 0.0  | 254.82      |
+      | 1  | 31   | 01 February 2024 |           | 752.34          | 247.66        | 7.17     | 0.0  | 0.0       | 254.83 | 0.0  | 0.0        | 0.0  | 254.83      |
+      | 2  | 29   | 01 March 2024    |           | 503.41          | 248.93        | 5.9      | 0.0  | 0.0       | 254.83 | 0.0  | 0.0        | 0.0  | 254.83      |
+      | 3  | 31   | 01 April 2024    |           | 252.8           | 250.61        | 4.22     | 0.0  | 0.0       | 254.83 | 0.0  | 0.0        | 0.0  | 254.83      |
+      | 4  | 30   | 01 May 2024      |           | 0.0             | 252.8         | 2.05     | 0.0  | 0.0       | 254.85 | 0.0  | 0.0        | 0.0  | 254.85      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
       | 1000.0        | 19.34    | 0.0  | 0.0       | 1019.34 | 0.0  | 0.0        | 0.0  | 1019.34     |
@@ -4499,23 +4499,23 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 01 January 2024  | Disbursement     | 250.0  | 0.0       | 0.0      | 0.0  | 0.0       | 250.0        | false    | false    |
       | 07 January 2024  | Disbursement     | 750.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
     When Admin sets the business date to "01 February 2024"
-    And Customer makes "AUTOPAY" repayment on "01 February 2024" with 254.84 EUR transaction amount
+    And Customer makes "AUTOPAY" repayment on "01 February 2024" with 254.83 EUR transaction amount
     When Admin sets the business date to "01 March 2024"
-    And Customer makes "AUTOPAY" repayment on "01 March 2024" with 254.84 EUR transaction amount
+    And Customer makes "AUTOPAY" repayment on "01 March 2024" with 254.83 EUR transaction amount
     When Admin sets the business date to "01 April 2024"
-    And Customer makes "AUTOPAY" repayment on "01 April 2024" with 254.84 EUR transaction amount
+    And Customer makes "AUTOPAY" repayment on "01 April 2024" with 254.83 EUR transaction amount
     When Admin sets the business date to "01 May 2024"
-    And Customer makes "AUTOPAY" repayment on "01 May 2024" with 254.82 EUR transaction amount
+    And Customer makes "AUTOPAY" repayment on "01 May 2024" with 254.85 EUR transaction amount
     When Admin sets the business date to "10 May 2024"
     When Customer makes "PAYOUT_REFUND" transaction with "AUTOPAY" payment type on "10 May 2024" with 500 EUR transaction amount and system-generated Idempotency key
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 250.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
       |    |      | 07 January 2024  |                  | 750.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
-      | 1  | 31   | 01 February 2024 | 01 February 2024 | 752.33          | 247.67        | 7.17     | 0.0  | 0.0       | 254.84 | 254.84 | 0.0        | 0.0  | 0.0         |
-      | 2  | 29   | 01 March 2024    | 01 March 2024    | 503.39          | 248.94        | 5.9      | 0.0  | 0.0       | 254.84 | 254.84 | 0.0        | 0.0  | 0.0         |
-      | 3  | 31   | 01 April 2024    | 01 April 2024    | 252.77          | 250.62        | 4.22     | 0.0  | 0.0       | 254.84 | 254.84 | 0.0        | 0.0  | 0.0         |
-      | 4  | 30   | 01 May 2024      | 01 May 2024      | 0.0             | 252.77        | 2.05     | 0.0  | 0.0       | 254.82 | 254.82 | 0.0        | 0.0  | 0.0         |
+      | 1  | 31   | 01 February 2024 | 01 February 2024 | 752.34          | 247.66        | 7.17     | 0.0  | 0.0       | 254.83 | 254.83 | 0.0        | 0.0  | 0.0         |
+      | 2  | 29   | 01 March 2024    | 01 March 2024    | 503.41          | 248.93        | 5.9      | 0.0  | 0.0       | 254.83 | 254.83 | 0.0        | 0.0  | 0.0         |
+      | 3  | 31   | 01 April 2024    | 01 April 2024    | 252.8           | 250.61        | 4.22     | 0.0  | 0.0       | 254.83 | 254.83 | 0.0        | 0.0  | 0.0         |
+      | 4  | 30   | 01 May 2024      | 01 May 2024      | 0.0             | 252.8         | 2.05     | 0.0  | 0.0       | 254.85 | 254.85 | 0.0        | 0.0  | 0.0         |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid    | In advance | Late | Outstanding |
       | 1000.0        | 19.34    | 0.0  | 0.0       | 1019.34 | 1019.34 | 0.0        | 0.0  | 0.0         |
@@ -4523,10 +4523,10 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 250.0  | 0.0       | 0.0      | 0.0  | 0.0       | 250.0        | false    | false    |
       | 07 January 2024  | Disbursement     | 750.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
-      | 01 February 2024 | Repayment        | 254.84 | 247.67    | 7.17     | 0.0  | 0.0       | 752.33       | false    | false    |
-      | 01 March 2024    | Repayment        | 254.84 | 248.94    | 5.9      | 0.0  | 0.0       | 503.39       | false    | false    |
-      | 01 April 2024    | Repayment        | 254.84 | 250.62    | 4.22     | 0.0  | 0.0       | 252.77       | false    | false    |
-      | 01 May 2024      | Repayment        | 254.82 | 252.77    | 2.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 February 2024 | Repayment        | 254.83 | 247.66    | 7.17     | 0.0  | 0.0       | 752.34       | false    | false    |
+      | 01 March 2024    | Repayment        | 254.83 | 248.93    | 5.9      | 0.0  | 0.0       | 503.41       | false    | false    |
+      | 01 April 2024    | Repayment        | 254.83 | 250.61    | 4.22     | 0.0  | 0.0       | 252.8        | false    | false    |
+      | 01 May 2024      | Repayment        | 254.85 | 252.8     | 2.05     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 May 2024      | Accrual          | 19.34  | 0.0       | 19.34    | 0.0  | 0.0       | 0.0          | false    | false    |
       | 10 May 2024      | Payout Refund    | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 10 May 2024      | Interest Refund  | 14.01  | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -4536,10 +4536,10 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 250.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
       |    |      | 07 January 2024  |                  | 750.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
-      | 1  | 31   | 01 February 2024 | 01 February 2024 | 752.33          | 247.67        | 7.17     | 0.0  | 0.0       | 254.84 | 254.84 | 0.0        | 0.0  | 0.0         |
-      | 2  | 29   | 01 March 2024    | 01 March 2024    | 503.39          | 248.94        | 5.9      | 0.0  | 0.0       | 254.84 | 254.84 | 0.0        | 0.0  | 0.0         |
-      | 3  | 31   | 01 April 2024    | 01 April 2024    | 252.77          | 250.62        | 4.22     | 0.0  | 0.0       | 254.84 | 254.84 | 0.0        | 0.0  | 0.0         |
-      | 4  | 30   | 01 May 2024      | 01 May 2024      | 0.0             | 252.77        | 2.05     | 0.0  | 0.0       | 254.82 | 254.82 | 0.0        | 0.0  | 0.0         |
+      | 1  | 31   | 01 February 2024 | 01 February 2024 | 752.34          | 247.66        | 7.17     | 0.0  | 0.0       | 254.83 | 254.83 | 0.0        | 0.0  | 0.0         |
+      | 2  | 29   | 01 March 2024    | 01 March 2024    | 503.41          | 248.93        | 5.9      | 0.0  | 0.0       | 254.83 | 254.83 | 0.0        | 0.0  | 0.0         |
+      | 3  | 31   | 01 April 2024    | 01 April 2024    | 252.8           | 250.61        | 4.22     | 0.0  | 0.0       | 254.83 | 254.83 | 0.0        | 0.0  | 0.0         |
+      | 4  | 30   | 01 May 2024      | 01 May 2024      | 0.0             | 252.8         | 2.05     | 0.0  | 0.0       | 254.85 | 254.85 | 0.0        | 0.0  | 0.0         |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid    | In advance | Late | Outstanding |
       | 1000.0        | 19.34    | 0.0  | 0.0       | 1019.34 | 1019.34 | 0.0        | 0.0  | 0.0         |
@@ -4547,10 +4547,10 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | Transaction date | Transaction Type      | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement          | 250.0  | 0.0       | 0.0      | 0.0  | 0.0       | 250.0        | false    | false    |
       | 07 January 2024  | Disbursement          | 750.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
-      | 01 February 2024 | Repayment             | 254.84 | 247.67    | 7.17     | 0.0  | 0.0       | 752.33       | false    | false    |
-      | 01 March 2024    | Repayment             | 254.84 | 248.94    | 5.9      | 0.0  | 0.0       | 503.39       | false    | false    |
-      | 01 April 2024    | Repayment             | 254.84 | 250.62    | 4.22     | 0.0  | 0.0       | 252.77       | false    | false    |
-      | 01 May 2024      | Repayment             | 254.82 | 252.77    | 2.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 February 2024 | Repayment             | 254.83 | 247.66    | 7.17     | 0.0  | 0.0       | 752.34       | false    | false    |
+      | 01 March 2024    | Repayment             | 254.83 | 248.93    | 5.9      | 0.0  | 0.0       | 503.41       | false    | false    |
+      | 01 April 2024    | Repayment             | 254.83 | 250.61    | 4.22     | 0.0  | 0.0       | 252.8        | false    | false    |
+      | 01 May 2024      | Repayment             | 254.85 | 252.8     | 2.05     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 May 2024      | Accrual               | 19.34  | 0.0       | 19.34    | 0.0  | 0.0       | 0.0          | false    | false    |
       | 10 May 2024      | Payout Refund         | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 10 May 2024      | Interest Refund       | 14.01  | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -4602,20 +4602,20 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
       | 1  | 31   | 01 February 2024 | 14 January 2024 | 748.38          | 251.62        | 3.52     | 0.0  | 0.0       | 255.14 | 255.14 | 255.14     | 0.0  | 0.0         |
-      | 2  | 29   | 01 March 2024    | 22 January 2024 | 494.33          | 254.05        | 1.09     | 0.0  | 0.0       | 255.14 | 255.14 | 255.14     | 0.0  | 0.0         |
-      | 3  | 31   | 01 April 2024    | 22 January 2024 | 239.19          | 255.14        | 0.0      | 0.0  | 0.0       | 255.14 | 255.14 | 255.14     | 0.0  | 0.0         |
-      | 4  | 30   | 01 May 2024      | 22 January 2024 | 0.0             | 239.19        | 0.0      | 0.0  | 0.0       | 239.19 | 239.19 | 239.19     | 0.0  | 0.0         |
+      | 2  | 29   | 01 March 2024    | 22 January 2024 | 494.32          | 254.06        | 1.08     | 0.0  | 0.0       | 255.14 | 255.14 | 255.14     | 0.0  | 0.0         |
+      | 3  | 31   | 01 April 2024    | 22 January 2024 | 239.18          | 255.14        | 0.0      | 0.0  | 0.0       | 255.14 | 255.14 | 255.14     | 0.0  | 0.0         |
+      | 4  | 30   | 01 May 2024      | 22 January 2024 | 0.0             | 239.18        | 0.0      | 0.0  | 0.0       | 239.18 | 239.18 | 239.18     | 0.0  | 0.0         |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid    | In advance | Late | Outstanding |
-      | 1000.0        | 4.61     | 0.0  | 0.0       | 1004.61 | 1004.61 | 1004.61    | 0.0  | 0.0         |
+      | 1000.0        | 4.6      | 0.0  | 0.0       | 1004.6  | 1004.6  | 1004.6     | 0.0  | 0.0         |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement           | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
       | 14 January 2024  | Merchant Issued Refund | 500.0  | 496.48    | 3.52     | 0.0  | 0.0       | 503.52       | false    | false    |
       | 14 January 2024  | Interest Refund        | 1.76   | 1.76      | 0.0      | 0.0  | 0.0       | 501.76       | false    | false    |
-      | 22 January 2024  | Payout Refund          | 500.0  | 498.91    | 1.09     | 0.0  | 0.0       | 2.85         | false    | false    |
-      | 22 January 2024  | Interest Refund        | 2.85   | 2.85      | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 22 January 2024  | Accrual                | 4.61   | 0.0       | 4.61     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 January 2024  | Payout Refund          | 500.0  | 498.92    | 1.08     | 0.0  | 0.0       | 2.84         | false    | false    |
+      | 22 January 2024  | Interest Refund        | 2.84   | 2.84      | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 January 2024  | Accrual                | 4.6    | 0.0       | 4.6      | 0.0  | 0.0       | 0.0          | false    | false    |
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
 
   @TestRailId:C3305
@@ -4706,12 +4706,12 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |           | 250.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
       |    |      | 01 January 2024  |           | 750.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
-      | 1  | 31   | 01 February 2024 |           | 836.91          | 163.09        | 8.39     | 0.0  | 0.0       | 171.48 | 0.0  | 0.0        | 0.0  | 171.48      |
-      | 2  | 29   | 01 March 2024    |           | 671.99          | 164.92        | 6.56     | 0.0  | 0.0       | 171.48 | 0.0  | 0.0        | 0.0  | 171.48      |
-      | 3  | 31   | 01 April 2024    |           | 506.14          | 165.85        | 5.63     | 0.0  | 0.0       | 171.48 | 0.0  | 0.0        | 0.0  | 171.48      |
-      | 4  | 30   | 01 May 2024      |           | 338.77          | 167.37        | 4.11     | 0.0  | 0.0       | 171.48 | 0.0  | 0.0        | 0.0  | 171.48      |
-      | 5  | 31   | 01 June 2024     |           | 170.13          | 168.64        | 2.84     | 0.0  | 0.0       | 171.48 | 0.0  | 0.0        | 0.0  | 171.48      |
-      | 6  | 30   | 01 July 2024     |           | 0.0             | 170.13        | 1.38     | 0.0  | 0.0       | 171.51 | 0.0  | 0.0        | 0.0  | 171.51      |
+      | 1  | 31   | 01 February 2024 |           | 836.9           | 163.1         | 8.39     | 0.0  | 0.0       | 171.49 | 0.0  | 0.0        | 0.0  | 171.49      |
+      | 2  | 29   | 01 March 2024    |           | 671.97          | 164.93        | 6.56     | 0.0  | 0.0       | 171.49 | 0.0  | 0.0        | 0.0  | 171.49      |
+      | 3  | 31   | 01 April 2024    |           | 506.11          | 165.86        | 5.63     | 0.0  | 0.0       | 171.49 | 0.0  | 0.0        | 0.0  | 171.49      |
+      | 4  | 30   | 01 May 2024      |           | 338.73          | 167.38        | 4.11     | 0.0  | 0.0       | 171.49 | 0.0  | 0.0        | 0.0  | 171.49      |
+      | 5  | 31   | 01 June 2024     |           | 170.08          | 168.65        | 2.84     | 0.0  | 0.0       | 171.49 | 0.0  | 0.0        | 0.0  | 171.49      |
+      | 6  | 30   | 01 July 2024     |           | 0.0             | 170.08        | 1.38     | 0.0  | 0.0       | 171.46 | 0.0  | 0.0        | 0.0  | 171.46      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
       | 1000.0        | 28.91    | 0.0  | 0.0       | 1028.91 | 0.0  | 0.0        | 0.0  | 1028.91     |
@@ -4725,15 +4725,15 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                 | 250.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
       |    |      | 01 January 2024  |                 | 750.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
-      | 1  | 31   | 01 February 2024 | 22 January 2024 | 834.2           | 165.8         | 5.68     | 0.0  | 0.0       | 171.48 | 171.48 | 171.48     | 0.0  | 0.0         |
-      | 2  | 29   | 01 March 2024    | 22 January 2024 | 662.72          | 171.48        | 0.0      | 0.0  | 0.0       | 171.48 | 171.48 | 171.48     | 0.0  | 0.0         |
-      | 3  | 31   | 01 April 2024    |                 | 500.76          | 161.96        | 9.52     | 0.0  | 0.0       | 171.48 | 159.88 | 159.88     | 0.0  | 11.6        |
-      | 4  | 30   | 01 May 2024      |                 | 333.34          | 167.42        | 4.06     | 0.0  | 0.0       | 171.48 | 0.0    | 0.0        | 0.0  | 171.48      |
-      | 5  | 31   | 01 June 2024     |                 | 164.66          | 168.68        | 2.8      | 0.0  | 0.0       | 171.48 | 0.0    | 0.0        | 0.0  | 171.48      |
-      | 6  | 30   | 01 July 2024     |                 | 0.0             | 164.66        | 1.34     | 0.0  | 0.0       | 166.0  | 0.0    | 0.0        | 0.0  | 166.0       |
+      | 1  | 31   | 01 February 2024 | 22 January 2024 | 834.19          | 165.81        | 5.68     | 0.0  | 0.0       | 171.49 | 171.49 | 171.49     | 0.0  | 0.0         |
+      | 2  | 29   | 01 March 2024    | 22 January 2024 | 662.7           | 171.49        | 0.0      | 0.0  | 0.0       | 171.49 | 171.49 | 171.49     | 0.0  | 0.0         |
+      | 3  | 31   | 01 April 2024    |                 | 500.73          | 161.97        | 9.52     | 0.0  | 0.0       | 171.49 | 159.86 | 159.86     | 0.0  | 11.63       |
+      | 4  | 30   | 01 May 2024      |                 | 333.3           | 167.43        | 4.06     | 0.0  | 0.0       | 171.49 | 0.0    | 0.0        | 0.0  | 171.49      |
+      | 5  | 31   | 01 June 2024     |                 | 164.6           | 168.7         | 2.79     | 0.0  | 0.0       | 171.49 | 0.0    | 0.0        | 0.0  | 171.49      |
+      | 6  | 30   | 01 July 2024     |                 | 0.0             | 164.6         | 1.34     | 0.0  | 0.0       | 165.94 | 0.0    | 0.0        | 0.0  | 165.94      |
     Then Loan Repayment schedule has the following data in Total row:
-      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
-      | 1000.0        | 23.4     | 0.0  | 0.0       | 1023.4 | 502.84 | 502.84     | 0.0  | 520.56      |
+      | Principal due | Interest | Fees | Penalties | Due    | Paid    | In advance | Late | Outstanding |
+      | 1000.0        | 23.39    | 0.0  | 0.0       | 1023.39 | 502.84 | 502.84     | 0.0  | 520.55      |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement           | 250.0  | 0.0       | 0.0      | 0.0  | 0.0       | 250.0        | false    | false    |
@@ -4743,20 +4743,20 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
     When Admin sets the business date to "26 January 2024"
     And Customer makes "PAYOUT_REFUND" transaction with "AUTOPAY" payment type on "26 January 2024" with 400 EUR transaction amount and system-generated Idempotency key
     When Admin sets the business date to "01 February 2024"
-    And Customer makes "AUTOPAY" repayment on "01 February 2024" with 100.84 EUR transaction amount
+    And Customer makes "AUTOPAY" repayment on "01 February 2024" with 100.85 EUR transaction amount
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 250.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
       |    |      | 01 January 2024  |                  | 750.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
-      | 1  | 31   | 01 February 2024 | 22 January 2024  | 834.2           | 165.8         | 5.68     | 0.0  | 0.0       | 171.48 | 171.48 | 171.48     | 0.0  | 0.0         |
-      | 2  | 29   | 01 March 2024    | 22 January 2024  | 662.72          | 171.48        | 0.0      | 0.0  | 0.0       | 171.48 | 171.48 | 171.48     | 0.0  | 0.0         |
-      | 3  | 31   | 01 April 2024    | 26 January 2024  | 491.78          | 170.94        | 0.54     | 0.0  | 0.0       | 171.48 | 171.48 | 171.48     | 0.0  | 0.0         |
-      | 4  | 30   | 01 May 2024      | 26 January 2024  | 320.3           | 171.48        | 0.0      | 0.0  | 0.0       | 171.48 | 171.48 | 171.48     | 0.0  | 0.0         |
-      | 5  | 31   | 01 June 2024     | 26 January 2024  | 148.82          | 171.48        | 0.0      | 0.0  | 0.0       | 171.48 | 171.48 | 171.48     | 0.0  | 0.0         |
-      | 6  | 30   | 01 July 2024     | 01 February 2024 | 0.0             | 148.82        | 0.16     | 0.0  | 0.0       | 148.98 | 148.98 | 148.98     | 0.0  | 0.0         |
+      | 1  | 31   | 01 February 2024 | 22 January 2024  | 834.19          | 165.81        | 5.68     | 0.0  | 0.0       | 171.49 | 171.49 | 171.49     | 0.0  | 0.0         |
+      | 2  | 29   | 01 March 2024    | 22 January 2024  | 662.7           | 171.49        | 0.0      | 0.0  | 0.0       | 171.49 | 171.49 | 171.49     | 0.0  | 0.0         |
+      | 3  | 31   | 01 April 2024    | 26 January 2024  | 491.75          | 170.95        | 0.54     | 0.0  | 0.0       | 171.49 | 171.49 | 171.49     | 0.0  | 0.0         |
+      | 4  | 30   | 01 May 2024      | 26 January 2024  | 320.26          | 171.49        | 0.0      | 0.0  | 0.0       | 171.49 | 171.49 | 171.49     | 0.0  | 0.0         |
+      | 5  | 31   | 01 June 2024     | 26 January 2024  | 148.77          | 171.49        | 0.0      | 0.0  | 0.0       | 171.49 | 171.49 | 171.49     | 0.0  | 0.0         |
+      | 6  | 30   | 01 July 2024     | 01 February 2024 | 0.0             | 148.77        | 0.17     | 0.0  | 0.0       | 148.94 | 148.94 | 148.94     | 0.0  | 0.0         |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid    | In advance | Late | Outstanding |
-      | 1000.0        | 6.38     | 0.0  | 0.0       | 1006.38 | 1006.38 | 1006.38    | 0.0  | 0.0         |
+      | 1000.0        | 6.39     | 0.0  | 0.0       | 1006.39 | 1006.39 | 1006.39    | 0.0  | 0.0         |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement           | 250.0  | 0.0       | 0.0      | 0.0  | 0.0       | 250.0        | false    | false    |
@@ -4765,8 +4765,8 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 22 January 2024  | Interest Refund        | 2.84   | 2.84      | 0.0      | 0.0  | 0.0       | 502.84       | false    | false    |
       | 26 January 2024  | Payout Refund          | 400.0  | 399.46    | 0.54     | 0.0  | 0.0       | 103.38       | false    | false    |
       | 26 January 2024  | Interest Refund        | 2.7    | 2.7       | 0.0      | 0.0  | 0.0       | 100.68       | false    | false    |
-      | 01 February 2024 | Repayment              | 100.84 | 100.68    | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 01 February 2024 | Accrual                | 6.38   | 0.0       | 6.38     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 February 2024 | Repayment              | 100.85 | 100.68    | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 February 2024 | Accrual                | 6.39   | 0.0       | 6.39     | 0.0  | 0.0       | 0.0          | false    | false    |
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
 
   @TestRailId:C3307
@@ -4832,14 +4832,14 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       |    |      | 01 January 2024  |                 | 250.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
       |    |      | 05 January 2024  |                 | 500.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
       | 1  | 31   | 01 February 2024 | 22 January 2024 | 833.75          | 166.25        | 5.14     | 0.0  | 0.0       | 171.39 | 171.39 | 171.39     | 0.0  | 0.0         |
-      | 2  | 29   | 01 March 2024    | 26 January 2024 | 663.18          | 170.57        | 0.82     | 0.0  | 0.0       | 171.39 | 171.39 | 171.39     | 0.0  | 0.0         |
-      | 3  | 31   | 01 April 2024    | 26 January 2024 | 491.79          | 171.39        | 0.0      | 0.0  | 0.0       | 171.39 | 171.39 | 171.39     | 0.0  | 0.0         |
-      | 4  | 30   | 01 May 2024      |                 | 329.54          | 162.25        | 9.14     | 0.0  | 0.0       | 171.39 | 139.8  | 139.8      | 0.0  | 31.59       |
+      | 2  | 29   | 01 March 2024    | 26 January 2024 | 663.17          | 170.58        | 0.81     | 0.0  | 0.0       | 171.39 | 171.39 | 171.39     | 0.0  | 0.0         |
+      | 3  | 31   | 01 April 2024    | 26 January 2024 | 491.78          | 171.39        | 0.0      | 0.0  | 0.0       | 171.39 | 171.39 | 171.39     | 0.0  | 0.0         |
+      | 4  | 30   | 01 May 2024      |                 | 329.54          | 162.24        | 9.15     | 0.0  | 0.0       | 171.39 | 139.79 | 139.79     | 0.0  | 31.6        |
       | 5  | 31   | 01 June 2024     |                 | 160.91          | 168.63        | 2.76     | 0.0  | 0.0       | 171.39 | 0.0    | 0.0        | 0.0  | 171.39      |
       | 6  | 30   | 01 July 2024     |                 | 0.0             | 160.91        | 1.31     | 0.0  | 0.0       | 162.22 | 0.0    | 0.0        | 0.0  | 162.22      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
-      | 1000.0        | 19.17    | 0.0  | 0.0       | 1019.17 | 653.97 | 653.97     | 0.0  | 365.2       |
+      | 1000.0        | 19.17    | 0.0  | 0.0       | 1019.17 | 653.96 | 653.96     | 0.0  | 365.21      |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement           | 250.0  | 0.0       | 0.0      | 0.0  | 0.0       | 250.0        | false    | false    |
@@ -4847,9 +4847,9 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 05 January 2024  | Disbursement           | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
       | 22 January 2024  | Payout Refund          | 250.0  | 244.86    | 5.14     | 0.0  | 0.0       | 755.14       | false    | false    |
       | 22 January 2024  | Interest Refund        | 1.42   | 1.42      | 0.0      | 0.0  | 0.0       | 753.72       | false    | false    |
-      | 26 January 2024  | Merchant Issued Refund | 400.0  | 399.18    | 0.82     | 0.0  | 0.0       | 354.54       | false    | false    |
-      | 26 January 2024  | Interest Refund        | 2.55   | 2.55      | 0.0      | 0.0  | 0.0       | 351.99       | false    | false    |
-    And Customer makes "AUTOPAY" repayment on "01 February 2024" with 31.59 EUR transaction amount
+      | 26 January 2024  | Merchant Issued Refund | 400.0  | 399.19    | 0.81     | 0.0  | 0.0       | 354.53       | false    | false    |
+      | 26 January 2024  | Interest Refund        | 2.54   | 2.54      | 0.0      | 0.0  | 0.0       | 351.99       | false    | false    |
+    And Customer makes "AUTOPAY" repayment on "01 February 2024" with 31.60 EUR transaction amount
     When Admin sets the business date to "01 March 2024"
     And Customer makes "AUTOPAY" repayment on "01 March 2024" with 171.39 EUR transaction amount
     When Admin sets the business date to "01 April 2024"
@@ -4860,9 +4860,9 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       |    |      | 01 January 2024  |                  | 250.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
       |    |      | 05 January 2024  |                  | 500.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
       | 1  | 31   | 01 February 2024 | 22 January 2024  | 833.75          | 166.25        | 5.14     | 0.0  | 0.0       | 171.39 | 171.39 | 171.39     | 0.0  | 0.0         |
-      | 2  | 29   | 01 March 2024    | 26 January 2024  | 663.18          | 170.57        | 0.82     | 0.0  | 0.0       | 171.39 | 171.39 | 171.39     | 0.0  | 0.0         |
-      | 3  | 31   | 01 April 2024    | 26 January 2024  | 491.79          | 171.39        | 0.0      | 0.0  | 0.0       | 171.39 | 171.39 | 171.39     | 0.0  | 0.0         |
-      | 4  | 30   | 01 May 2024      | 01 February 2024 | 320.97          | 170.82        | 0.57     | 0.0  | 0.0       | 171.39 | 171.39 | 171.39     | 0.0  | 0.0         |
+      | 2  | 29   | 01 March 2024    | 26 January 2024  | 663.17          | 170.58        | 0.81     | 0.0  | 0.0       | 171.39 | 171.39 | 171.39     | 0.0  | 0.0         |
+      | 3  | 31   | 01 April 2024    | 26 January 2024  | 491.78          | 171.39        | 0.0      | 0.0  | 0.0       | 171.39 | 171.39 | 171.39     | 0.0  | 0.0         |
+      | 4  | 30   | 01 May 2024      | 01 February 2024 | 320.97          | 170.81        | 0.58     | 0.0  | 0.0       | 171.39 | 171.39 | 171.39     | 0.0  | 0.0         |
       | 5  | 31   | 01 June 2024     | 01 March 2024    | 152.1           | 168.87        | 2.52     | 0.0  | 0.0       | 171.39 | 171.39 | 171.39     | 0.0  | 0.0         |
       | 6  | 30   | 01 July 2024     | 01 April 2024    | 0.0             | 152.1         | 1.28     | 0.0  | 0.0       | 153.38 | 153.38 | 153.38     | 0.0  | 0.0         |
     Then Loan Repayment schedule has the following data in Total row:
@@ -4875,9 +4875,9 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 05 January 2024  | Disbursement           | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
       | 22 January 2024  | Payout Refund          | 250.0  | 244.86    | 5.14     | 0.0  | 0.0       | 755.14       | false    | false    |
       | 22 January 2024  | Interest Refund        | 1.42   | 1.42      | 0.0      | 0.0  | 0.0       | 753.72       | false    | false    |
-      | 26 January 2024  | Merchant Issued Refund | 400.0  | 399.18    | 0.82     | 0.0  | 0.0       | 354.54       | false    | false    |
-      | 26 January 2024  | Interest Refund        | 2.55   | 2.55      | 0.0      | 0.0  | 0.0       | 351.99       | false    | false    |
-      | 01 February 2024 | Repayment              | 31.59  | 31.02     | 0.57     | 0.0  | 0.0       | 320.97       | false    | false    |
+      | 26 January 2024  | Merchant Issued Refund | 400.0  | 399.19    | 0.81     | 0.0  | 0.0       | 354.53       | false    | false    |
+      | 26 January 2024  | Interest Refund        | 2.54   | 2.54      | 0.0      | 0.0  | 0.0       | 351.99       | false    | false    |
+      | 01 February 2024 | Repayment              | 31.6   | 31.02     | 0.58     | 0.0  | 0.0       | 320.97       | false    | false    |
       | 01 March 2024    | Repayment              | 171.39 | 168.87    | 2.52     | 0.0  | 0.0       | 152.1        | false    | false    |
       | 01 April 2024    | Repayment              | 153.38 | 152.1     | 1.28     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 April 2024    | Accrual                | 10.33  | 0.0       | 10.33    | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -4939,13 +4939,13 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       |    |      | 01 January 2024  |                  | 500.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
       | 1  | 31   | 01 February 2024 | 01 February 2024 | 836.45          | 163.55        | 7.84     | 0.0  | 0.0       | 171.39 | 171.39 | 0.0        | 0.0  | 0.0         |
       | 2  | 29   | 01 March 2024    | 13 February 2024 | 667.78          | 168.67        | 2.72     | 0.0  | 0.0       | 171.39 | 171.39 | 171.39     | 0.0  | 0.0         |
-      | 3  | 31   | 01 April 2024    |                  | 504.01          | 163.77        | 7.62     | 0.0  | 0.0       | 171.39 | 81.52  | 81.52      | 0.0  | 89.87       |
-      | 4  | 30   | 01 May 2024      |                  | 336.71          | 167.3         | 4.09     | 0.0  | 0.0       | 171.39 | 0.0    | 0.0        | 0.0  | 171.39      |
-      | 5  | 31   | 01 June 2024     |                  | 168.14          | 168.57        | 2.82     | 0.0  | 0.0       | 171.39 | 0.0    | 0.0        | 0.0  | 171.39      |
-      | 6  | 30   | 01 July 2024     |                  | 0.0             | 168.14        | 1.36     | 0.0  | 0.0       | 169.5  | 0.0    | 0.0        | 0.0  | 169.5       |
+      | 3  | 31   | 01 April 2024    |                  | 504.0           | 163.78        | 7.61     | 0.0  | 0.0       | 171.39 | 81.52  | 81.52      | 0.0  | 89.87       |
+      | 4  | 30   | 01 May 2024      |                  | 336.7           | 167.3         | 4.09     | 0.0  | 0.0       | 171.39 | 0.0    | 0.0        | 0.0  | 171.39      |
+      | 5  | 31   | 01 June 2024     |                  | 168.13          | 168.57        | 2.82     | 0.0  | 0.0       | 171.39 | 0.0    | 0.0        | 0.0  | 171.39      |
+      | 6  | 30   | 01 July 2024     |                  | 0.0             | 168.13        | 1.36     | 0.0  | 0.0       | 169.49 | 0.0    | 0.0        | 0.0  | 169.49      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid  | In advance | Late | Outstanding |
-      | 1000.0        | 26.45    | 0.0  | 0.0       | 1026.45 | 424.3 | 252.91     | 0.0  | 602.15      |
+      | 1000.0        | 26.44    | 0.0  | 0.0       | 1026.44 | 424.3 | 252.91     | 0.0  | 602.14      |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
@@ -5065,12 +5065,12 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 1  | 31   | 01 February 2024 | 01 February 2024 | 836.45          | 163.55        | 7.84     | 0.0  | 0.0       | 171.39 | 171.39 | 0.0        | 0.0  | 0.0         |
       | 2  | 29   | 01 March 2024    | 13 February 2024 | 667.78          | 168.67        | 2.72     | 0.0  | 0.0       | 171.39 | 171.39 | 171.39     | 0.0  | 0.0         |
       | 3  | 31   | 01 April 2024    | 13 February 2024 | 496.39          | 171.39        | 0.0      | 0.0  | 0.0       | 171.39 | 171.39 | 171.39     | 0.0  | 0.0         |
-      | 4  | 30   | 01 May 2024      |                  | 334.17          | 162.22        | 9.17     | 0.0  | 0.0       | 171.39 | 61.88  | 61.88      | 0.0  | 109.51      |
-      | 5  | 31   | 01 June 2024     |                  | 165.58          | 168.59        | 2.8      | 0.0  | 0.0       | 171.39 | 0.0    | 0.0        | 0.0  | 171.39      |
-      | 6  | 30   | 01 July 2024     |                  | 0.0             | 165.58        | 1.34     | 0.0  | 0.0       | 166.92 | 0.0    | 0.0        | 0.0  | 166.92      |
+      | 4  | 30   | 01 May 2024      |                  | 334.16          | 162.23        | 9.16     | 0.0  | 0.0       | 171.39 | 61.88  | 61.88      | 0.0  | 109.51      |
+      | 5  | 31   | 01 June 2024     |                  | 165.57          | 168.59        | 2.8      | 0.0  | 0.0       | 171.39 | 0.0    | 0.0        | 0.0  | 171.39      |
+      | 6  | 30   | 01 July 2024     |                  | 0.0             | 165.57        | 1.34     | 0.0  | 0.0       | 166.91 | 0.0    | 0.0        | 0.0  | 166.91      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
-      | 1000.0        | 23.87    | 0.0  | 0.0       | 1023.87 | 576.05 | 404.66     | 0.0  | 447.82      |
+      | 1000.0        | 23.86    | 0.0  | 0.0       | 1023.86 | 576.05 | 404.66     | 0.0  | 447.81     |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement           | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
@@ -5091,12 +5091,12 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 1  | 31   | 01 February 2024 | 01 February 2024 | 836.45          | 163.55        | 7.84     | 0.0  | 0.0       | 171.39 | 171.39 | 0.0        | 0.0  | 0.0         |
       | 2  | 29   | 01 March 2024    | 13 February 2024 | 667.78          | 168.67        | 2.72     | 0.0  | 0.0       | 171.39 | 171.39 | 171.39     | 0.0  | 0.0         |
       | 3  | 31   | 01 April 2024    | 13 February 2024 | 496.39          | 171.39        | 0.0      | 0.0  | 0.0       | 171.39 | 171.39 | 171.39     | 0.0  | 0.0         |
-      | 4  | 30   | 01 May 2024      | 01 March 2024    | 327.0           | 169.39        | 2.0      | 0.0  | 0.0       | 171.39 | 171.39 | 171.39     | 0.0  | 0.0         |
-      | 5  | 31   | 01 June 2024     | 01 April 2024    | 158.35          | 168.65        | 2.74     | 0.0  | 0.0       | 171.39 | 171.39 | 171.39     | 0.0  | 0.0         |
-      | 6  | 30   | 01 July 2024     | 06 April 2024    | 0.0             | 158.35        | 0.21     | 0.0  | 0.0       | 158.56 | 158.56 | 158.56     | 0.0  | 0.0         |
+      | 4  | 30   | 01 May 2024      | 01 March 2024    | 326.99          | 169.4         | 1.99     | 0.0  | 0.0       | 171.39 | 171.39 | 171.39     | 0.0  | 0.0         |
+      | 5  | 31   | 01 June 2024     | 01 April 2024    | 158.34          | 168.65        | 2.74     | 0.0  | 0.0       | 171.39 | 171.39 | 171.39     | 0.0  | 0.0         |
+      | 6  | 30   | 01 July 2024     | 06 April 2024    | 0.0             | 158.34        | 0.21     | 0.0  | 0.0       | 158.55 | 158.55 | 158.55     | 0.0  | 0.0         |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid    | In advance | Late | Outstanding |
-      | 1000.0        | 15.51    | 0.0  | 0.0       | 1015.51 | 1015.51 | 844.12     | 0.0  | 0.0         |
+      | 1000.0        | 15.5     | 0.0  | 0.0       | 1015.5  | 1015.5  | 844.11     | 0.0  | 0.0         |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement           | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
@@ -5104,11 +5104,11 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 01 February 2024 | Repayment              | 171.39 | 163.55    | 7.84     | 0.0  | 0.0       | 836.45       | false    | false    |
       | 13 February 2024 | Merchant Issued Refund | 400.0  | 397.28    | 2.72     | 0.0  | 0.0       | 439.17       | false    | false    |
       | 13 February 2024 | Interest Refund        | 4.66   | 4.66      | 0.0      | 0.0  | 0.0       | 434.51       | false    | false    |
-      | 01 March 2024    | Repayment              | 109.62 | 107.62    | 2.0      | 0.0  | 0.0       | 326.89       | false    | false    |
-      | 01 April 2024    | Repayment              | 171.39 | 168.65    | 2.74     | 0.0  | 0.0       | 158.24       | false    | false    |
-      | 06 April 2024    | Payout Refund          | 400.0  | 158.24    | 0.21     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 06 April 2024    | Interest Refund        | 9.15   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 06 April 2024    | Accrual                | 15.51  | 0.0       | 15.51    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 March 2024    | Repayment              | 109.62 | 107.63    | 1.99     | 0.0  | 0.0       | 326.88       | false    | false    |
+      | 01 April 2024    | Repayment              | 171.39 | 168.65    | 2.74     | 0.0  | 0.0       | 158.23       | false    | false    |
+      | 06 April 2024    | Payout Refund          | 400.0  | 158.23    | 0.21     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 April 2024    | Interest Refund        | 9.14   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 April 2024    | Accrual                | 15.5   | 0.0       | 15.5     | 0.0  | 0.0       | 0.0          | false    | false    |
     When Admin sets the business date to "07 April 2024"
     When Admin makes Credit Balance Refund transaction on "07 April 2024" with 250.7 EUR transaction amount
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
@@ -5118,12 +5118,12 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 1  | 31   | 01 February 2024 | 01 February 2024 | 836.45          | 163.55        | 7.84     | 0.0  | 0.0       | 171.39 | 171.39 | 0.0        | 0.0  | 0.0         |
       | 2  | 29   | 01 March 2024    | 13 February 2024 | 667.78          | 168.67        | 2.72     | 0.0  | 0.0       | 171.39 | 171.39 | 171.39     | 0.0  | 0.0         |
       | 3  | 31   | 01 April 2024    | 13 February 2024 | 496.39          | 171.39        | 0.0      | 0.0  | 0.0       | 171.39 | 171.39 | 171.39     | 0.0  | 0.0         |
-      | 4  | 30   | 01 May 2024      | 01 March 2024    | 327.0           | 169.39        | 2.0      | 0.0  | 0.0       | 171.39 | 171.39 | 171.39     | 0.0  | 0.0         |
-      | 5  | 31   | 01 June 2024     | 01 April 2024    | 158.35          | 168.65        | 2.74     | 0.0  | 0.0       | 171.39 | 171.39 | 171.39     | 0.0  | 0.0         |
-      | 6  | 30   | 01 July 2024     | 06 April 2024    | 0.0             | 158.35        | 0.21     | 0.0  | 0.0       | 158.56 | 158.56 | 158.56     | 0.0  | 0.0         |
+      | 4  | 30   | 01 May 2024      | 01 March 2024    | 326.99          | 169.4         | 1.99     | 0.0  | 0.0       | 171.39 | 171.39 | 171.39     | 0.0  | 0.0         |
+      | 5  | 31   | 01 June 2024     | 01 April 2024    | 158.34          | 168.65        | 2.74     | 0.0  | 0.0       | 171.39 | 171.39 | 171.39     | 0.0  | 0.0         |
+      | 6  | 30   | 01 July 2024     | 06 April 2024    | 0.0             | 158.34        | 0.21     | 0.0  | 0.0       | 158.55 | 158.55 | 158.55     | 0.0  | 0.0         |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid    | In advance | Late | Outstanding |
-      | 1000.0        | 15.51    | 0.0  | 0.0       | 1015.51 | 1015.51 | 844.12     | 0.0  | 0.0         |
+      | 1000.0        | 15.5     | 0.0  | 0.0       | 1015.5  | 1015.5  | 844.11     | 0.0  | 0.0         |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement           | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
@@ -5131,11 +5131,11 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 01 February 2024 | Repayment              | 171.39 | 163.55    | 7.84     | 0.0  | 0.0       | 836.45       | false    | false    |
       | 13 February 2024 | Merchant Issued Refund | 400.0  | 397.28    | 2.72     | 0.0  | 0.0       | 439.17       | false    | false    |
       | 13 February 2024 | Interest Refund        | 4.66   | 4.66      | 0.0      | 0.0  | 0.0       | 434.51       | false    | false    |
-      | 01 March 2024    | Repayment              | 109.62 | 107.62    | 2.0      | 0.0  | 0.0       | 326.89       | false    | false    |
-      | 01 April 2024    | Repayment              | 171.39 | 168.65    | 2.74     | 0.0  | 0.0       | 158.24       | false    | false    |
-      | 06 April 2024    | Payout Refund          | 400.0  | 158.24    | 0.21     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 06 April 2024    | Interest Refund        | 9.15   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 06 April 2024    | Accrual                | 15.51  | 0.0       | 15.51    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 March 2024    | Repayment              | 109.62 | 107.63    | 1.99     | 0.0  | 0.0       | 326.88       | false    | false    |
+      | 01 April 2024    | Repayment              | 171.39 | 168.65    | 2.74     | 0.0  | 0.0       | 158.23       | false    | false    |
+      | 06 April 2024    | Payout Refund          | 400.0  | 158.23    | 0.21     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 April 2024    | Interest Refund        | 9.14   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 April 2024    | Accrual                | 15.5   | 0.0       | 15.5     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 07 April 2024    | Credit Balance Refund  | 250.7  | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
 
@@ -5155,13 +5155,13 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       |    |      | 01 January 2024  |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
       | 1  | 31   | 01 February 2024 | 12 January 2024 | 831.49          | 168.51        | 2.98     | 0.0  | 0.0       | 171.49 | 171.49 | 171.49     | 0.0  | 0.0         |
       | 2  | 29   | 01 March 2024    | 12 January 2024 | 660.0           | 171.49        | 0.0      | 0.0  | 0.0       | 171.49 | 171.49 | 171.49     | 0.0  | 0.0         |
-      | 3  | 31   | 01 April 2024    |                 | 501.54          | 158.46        | 13.03    | 0.0  | 0.0       | 171.49 | 58.21  | 58.21      | 0.0  | 113.28      |
-      | 4  | 30   | 01 May 2024      |                 | 334.12          | 167.42        | 4.07     | 0.0  | 0.0       | 171.49 | 0.0    | 0.0        | 0.0  | 171.49      |
-      | 5  | 31   | 01 June 2024     |                 | 165.43          | 168.69        | 2.8      | 0.0  | 0.0       | 171.49 | 0.0    | 0.0        | 0.0  | 171.49      |
-      | 6  | 30   | 01 July 2024     |                 | 0.0             | 165.43        | 1.34     | 0.0  | 0.0       | 166.77 | 0.0    | 0.0        | 0.0  | 166.77      |
+      | 3  | 31   | 01 April 2024    |                 | 501.53          | 158.47        | 13.02    | 0.0  | 0.0       | 171.49 | 58.21  | 58.21      | 0.0  | 113.28      |
+      | 4  | 30   | 01 May 2024      |                 | 334.11          | 167.42        | 4.07     | 0.0  | 0.0       | 171.49 | 0.0    | 0.0        | 0.0  | 171.49      |
+      | 5  | 31   | 01 June 2024     |                 | 165.42          | 168.69        | 2.8      | 0.0  | 0.0       | 171.49 | 0.0    | 0.0        | 0.0  | 171.49      |
+      | 6  | 30   | 01 July 2024     |                 | 0.0             | 165.42        | 1.34     | 0.0  | 0.0       | 166.76 | 0.0    | 0.0        | 0.0  | 166.76      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
-      | 1000.0        | 24.22    | 0.0  | 0.0       | 1024.22 | 401.19 | 401.19     | 0.0  | 623.03      |
+      | 1000.0        | 24.21    | 0.0  | 0.0       | 1024.21 | 401.19 | 401.19     | 0.0  | 623.02      |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
@@ -5321,15 +5321,15 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
-      | 1  | 31   | 01 February 2024 |           | 83.52           | 16.48         | 0.53     | 0.0  | 0.0       | 17.01 | 0.0 | 0.0        | 0.0  | 17.01       |
-      | 2  | 29   | 01 March 2024    |           | 66.91           | 16.61         | 0.4      | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 3  | 31   | 01 April 2024    |           | 50.2            | 16.71         | 0.3      | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 4  | 30   | 01 May 2024      |           | 33.4            | 16.8          | 0.21     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 5  | 31   | 01 June 2024     |           | 16.5            | 16.9          | 0.11     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 6  | 30   | 01 July 2024     |           | 0.0             | 16.5          | 0.01     | 0.0  | 0.0       | 16.51 | 15.0 | 15.0       | 0.0  | 1.51        |
+      | 1  | 31   | 01 February 2024 |           | 83.53           | 16.47         | 0.54     | 0.0  | 0.0       | 17.01 | 0.0 | 0.0        | 0.0  | 17.01       |
+      | 2  | 29   | 01 March 2024    |           | 66.92           | 16.61         | 0.4      | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
+      | 3  | 31   | 01 April 2024    |           | 50.21           | 16.71         | 0.3      | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
+      | 4  | 30   | 01 May 2024      |           | 33.41           | 16.8          | 0.21     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
+      | 5  | 31   | 01 June 2024     |           | 16.51           | 16.9          | 0.11     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
+      | 6  | 30   | 01 July 2024     |           | 0.0             | 16.51         | 0.01     | 0.0  | 0.0       | 16.52 | 15.0 | 15.0       | 0.0  | 1.52        |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
-      | 100.0         | 1.56     | 0.0  | 0.0       | 101.56 | 15   | 15         | 0.0  | 86.56       |
+      | 100.0         | 1.57     | 0.0  | 0.0       | 101.57 | 15   | 15         | 0.0  | 86.57       |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
@@ -5667,7 +5667,7 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 16 January 2024  | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 17 January 2024  | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 18 January 2024  | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 19 January 2024  | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 January 2024  | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
     When Admin set "LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_TILL_PRECLOSE" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
 
   @TestRailId:C3297
@@ -5738,7 +5738,7 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 15 January 2024  | Repayment        | 17.01  | 16.75     | 0.26     | 0.0  | 0.0       | 83.25        | false    | false    |
       | 18 January 2024  | Accrual          | 0.31   | 0.0       | 0.31     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 19 January 2024  | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 January 2024  | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
 
   @TestRailId:C3298
   Scenario: Verify the Loan reschedule - Interest modification - UC2: Interest modification after early partial payment with Adjustment to NEXT installment
@@ -5808,7 +5808,7 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 15 January 2024  | Repayment        | 17.0   | 16.75     | 0.25     | 0.0  | 0.0       | 83.25        | false    | false    |
       | 18 January 2024  | Accrual          | 0.31   | 0.0       | 0.31     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 19 January 2024  | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 January 2024  | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
 
   @TestRailId:C3311
   Scenario: Verify the Loan reschedule - Interest modification - UC2: Interest modification after early partial payment with Adjustment to LAST installment
@@ -5879,7 +5879,7 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 15 January 2024  | Repayment        | 17.01  | 17.01     | 0.0      | 0.0  | 0.0       | 82.99        | false    | false    |
       | 18 January 2024  | Accrual          | 0.31   | 0.0       | 0.31     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 19 January 2024  | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 January 2024  | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
     When Admin set "LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_TILL_PRECLOSE" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
 
   @TestRailId:C3299
@@ -5938,14 +5938,14 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                 | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
       | 1  | 31   | 01 February 2024 | 15 January 2024 | 83.25           | 16.75         | 0.26     | 0.0  | 0.0       | 17.01 | 17.01 | 17.01      | 0.0  | 0.0         |
-      | 2  | 29   | 01 March 2024    |                 | 67.0            | 16.25         | 0.64     | 0.0  | 0.0       | 16.89 | 0.0   | 0.0        | 0.0  | 16.89       |
-      | 3  | 31   | 01 April 2024    |                 | 50.33           | 16.67         | 0.22     | 0.0  | 0.0       | 16.89 | 0.0   | 0.0        | 0.0  | 16.89       |
-      | 4  | 30   | 01 May 2024      |                 | 33.61           | 16.72         | 0.17     | 0.0  | 0.0       | 16.89 | 0.0   | 0.0        | 0.0  | 16.89       |
-      | 5  | 31   | 01 June 2024     |                 | 16.83           | 16.78         | 0.11     | 0.0  | 0.0       | 16.89 | 0.0   | 0.0        | 0.0  | 16.89       |
-      | 6  | 30   | 01 July 2024     |                 | 0.0             | 16.83         | 0.06     | 0.0  | 0.0       | 16.89 | 0.0   | 0.0        | 0.0  | 16.89       |
+      | 2  | 29   | 01 March 2024    |                 | 67.01           | 16.24         | 0.65     | 0.0  | 0.0       | 16.89 | 0.0   | 0.0        | 0.0  | 16.89       |
+      | 3  | 31   | 01 April 2024    |                 | 50.34           | 16.67         | 0.22     | 0.0  | 0.0       | 16.89 | 0.0   | 0.0        | 0.0  | 16.89       |
+      | 4  | 30   | 01 May 2024      |                 | 33.62           | 16.72         | 0.17     | 0.0  | 0.0       | 16.89 | 0.0   | 0.0        | 0.0  | 16.89       |
+      | 5  | 31   | 01 June 2024     |                 | 16.84           | 16.78         | 0.11     | 0.0  | 0.0       | 16.89 | 0.0   | 0.0        | 0.0  | 16.89       |
+      | 6  | 30   | 01 July 2024     |                 | 0.0             | 16.84         | 0.06     | 0.0  | 0.0       | 16.9  | 0.0   | 0.0        | 0.0  | 16.9        |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
-      | 100.0         | 1.46     | 0.0  | 0.0       | 101.46 | 17.01 | 17.01      | 0.0  | 84.45       |
+      | 100.0         | 1.47     | 0.0  | 0.0       | 101.47 | 17.01 | 17.01      | 0.0  | 84.46       |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
@@ -6430,22 +6430,22 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 15 January 2024  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 2000.0       |
       | 15 January 2024  | Accrual          | 0.18   | 0.0       | 0.18     | 0.0  | 0.0       | 0.0          |
       | 16 January 2024  | Accrual          | 0.38   | 0.0       | 0.38     | 0.0  | 0.0       | 0.0          |
-      | 17 January 2024  | Accrual          | 0.37   | 0.0       | 0.37     | 0.0  | 0.0       | 0.0          |
-      | 18 January 2024  | Accrual          | 0.38   | 0.0       | 0.38     | 0.0  | 0.0       | 0.0          |
+      | 17 January 2024  | Accrual          | 0.38   | 0.0       | 0.38     | 0.0  | 0.0       | 0.0          |
+      | 18 January 2024  | Accrual          | 0.37   | 0.0       | 0.37     | 0.0  | 0.0       | 0.0          |
       | 19 January 2024  | Accrual          | 0.38   | 0.0       | 0.38     | 0.0  | 0.0       | 0.0          |
-      | 20 January 2024  | Accrual          | 0.37   | 0.0       | 0.37     | 0.0  | 0.0       | 0.0          |
-      | 21 January 2024  | Accrual          | 0.38   | 0.0       | 0.38     | 0.0  | 0.0       | 0.0          |
-      | 22 January 2024  | Accrual          | 0.37   | 0.0       | 0.37     | 0.0  | 0.0       | 0.0          |
+      | 20 January 2024  | Accrual          | 0.38   | 0.0       | 0.38     | 0.0  | 0.0       | 0.0          |
+      | 21 January 2024  | Accrual          | 0.37   | 0.0       | 0.37     | 0.0  | 0.0       | 0.0          |
+      | 22 January 2024  | Accrual          | 0.38   | 0.0       | 0.38     | 0.0  | 0.0       | 0.0          |
       | 23 January 2024  | Accrual          | 0.38   | 0.0       | 0.38     | 0.0  | 0.0       | 0.0          |
-      | 24 January 2024  | Accrual          | 0.38   | 0.0       | 0.38     | 0.0  | 0.0       | 0.0          |
-      | 25 January 2024  | Accrual          | 0.37   | 0.0       | 0.37     | 0.0  | 0.0       | 0.0          |
-      | 26 January 2024  | Accrual          | 0.38   | 0.0       | 0.38     | 0.0  | 0.0       | 0.0          |
+      | 24 January 2024  | Accrual          | 0.37   | 0.0       | 0.37     | 0.0  | 0.0       | 0.0          |
+      | 25 January 2024  | Accrual          | 0.38   | 0.0       | 0.38     | 0.0  | 0.0       | 0.0          |
+      | 26 January 2024  | Accrual          | 0.37   | 0.0       | 0.37     | 0.0  | 0.0       | 0.0          |
       | 27 January 2024  | Accrual          | 0.38   | 0.0       | 0.38     | 0.0  | 0.0       | 0.0          |
-      | 28 January 2024  | Accrual          | 0.37   | 0.0       | 0.37     | 0.0  | 0.0       | 0.0          |
-      | 29 January 2024  | Accrual          | 0.38   | 0.0       | 0.38     | 0.0  | 0.0       | 0.0          |
+      | 28 January 2024  | Accrual          | 0.38   | 0.0       | 0.38     | 0.0  | 0.0       | 0.0          |
+      | 29 January 2024  | Accrual          | 0.37   | 0.0       | 0.37     | 0.0  | 0.0       | 0.0          |
       | 30 January 2024  | Accrual          | 0.38   | 0.0       | 0.38     | 0.0  | 0.0       | 0.0          |
-      | 31 January 2024  | Accrual          | 0.37   | 0.0       | 0.37     | 0.0  | 0.0       | 0.0          |
-      | 01 February 2024 | Accrual          | 0.38   | 0.0       | 0.38     | 0.0  | 0.0       | 0.0          |
+      | 31 January 2024  | Accrual          | 0.38   | 0.0       | 0.38     | 0.0  | 0.0       | 0.0          |
+      | 01 February 2024 | Accrual          | 0.37   | 0.0       | 0.37     | 0.0  | 0.0       | 0.0          |
 
   @TestRailId:C3327
   Scenario: Verify accruals isn't reversed and replayed in COB for loan with disabled auto repayment for down payment

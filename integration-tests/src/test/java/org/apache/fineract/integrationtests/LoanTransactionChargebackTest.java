@@ -1019,10 +1019,10 @@ public class LoanTransactionChargebackTest extends BaseLoanIntegrationTest {
                             installment(100.0, null, "01 January 2024"), //
                             fullyRepaidInstallment(16.43, 0.58, "01 February 2024"), //
                             fullyRepaidInstallment(16.52, 0.49, "01 March 2024"), //
-                            unpaidInstallment(33.08, 0.94, "01 April 2024"), //
+                            unpaidInstallment(33.09, 0.93, "01 April 2024"), //
                             unpaidInstallment(16.72, 0.29, "01 May 2024"), //
                             unpaidInstallment(16.81, 0.20, "01 June 2024"), //
-                            unpaidInstallment(16.96, 0.10, "01 July 2024") //
+                            unpaidInstallment(16.95, 0.10, "01 July 2024") //
                     ); //
                     verifyTransactions(loanId,
                             new TransactionExt(100.0, "Disbursement", "01 January 2024", 100.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false),
@@ -1249,10 +1249,10 @@ public class LoanTransactionChargebackTest extends BaseLoanIntegrationTest {
                             installment(100.0, null, "01 January 2024"), //
                             fullyRepaidInstallment(16.43, 0.58, "01 February 2024"), //
                             fullyRepaidInstallment(16.52, 0.49, "01 March 2024"), //
-                            unpaidInstallment(33.08, 0.94, "01 April 2024"), //
+                            unpaidInstallment(33.09, 0.93, "01 April 2024"), //
                             unpaidInstallment(16.72, 0.29, "01 May 2024"), //
                             unpaidInstallment(16.81, 0.20, "01 June 2024"), //
-                            unpaidInstallment(16.96, 0.10, "01 July 2024") //
+                            unpaidInstallment(16.95, 0.10, "01 July 2024") //
                     ); //
                     verifyTransactions(loanId,
                             new TransactionExt(100.0, "Disbursement", "01 January 2024", 100.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false),

@@ -1119,8 +1119,8 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
         return new Journal(amount, account, "CREDIT");
     }
 
-    protected Transaction transaction(double principalAmount, String type, String date) {
-        return new Transaction(principalAmount, type, date, null);
+    protected Transaction transaction(double amount, String type, String date) {
+        return new Transaction(amount, type, date, null);
     }
 
     protected Transaction reversedTransaction(double principalAmount, String type, String date) {

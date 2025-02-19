@@ -103,20 +103,19 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
         this.chargebackInterest = MathUtil.plus(this.chargebackInterest, chargebackInterest, mc);
     }
 
-    public Money getCalculatedDueInterest() {
+    public BigDecimal getCalculatedDueInterest() {
         if (isPaused) {
-            return chargebackInterest;
+            return chargebackInterest.getAmount();
         }
 
         long lengthTillPeriodDueDate = getLengthTillPeriodDueDate();
-        final Money interestDueTillRepaymentDueDate = Money.of(outstandingLoanBalance.getCurrencyData(), lengthTillPeriodDueDate == 0 //
+        final BigDecimal interestDueTillRepaymentDueDate = lengthTillPeriodDueDate == 0 //
                 ? BigDecimal.ZERO //
                 : getOutstandingLoanBalance().getAmount() //
                         .multiply(getRateFactorTillPeriodDueDate(), mc) //
                         .divide(BigDecimal.valueOf(lengthTillPeriodDueDate), mc) //
-                        .multiply(BigDecimal.valueOf(getLength()), mc),
-                mc); //
-        return MathUtil.plus(chargebackInterest, interestDueTillRepaymentDueDate, mc);
+                        .multiply(BigDecimal.valueOf(getLength()), mc); //
+        return MathUtil.add(chargebackInterest.getAmount(), interestDueTillRepaymentDueDate, mc);
     }
 
     public long getLength() {

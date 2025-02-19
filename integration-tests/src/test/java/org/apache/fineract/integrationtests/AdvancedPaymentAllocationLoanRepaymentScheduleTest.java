@@ -5013,10 +5013,10 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                             .transactionAmount(BigDecimal.valueOf(200.0)).locale("en"));
 
             loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
-            validateLoanSummaryBalances(loanDetails, 307.99, 0.0, 300.0, 0.0, null);
+            validateLoanSummaryBalances(loanDetails, 307.98, 0.0, 300.0, 0.0, null);
 
-            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 1), 49.31, 0.0, 49.31, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.02, 0.0,
-                    2.02, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 1), 49.32, 0.0, 49.32, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.01, 0.0,
+                    2.01, 0.0, 0.0);
             validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2024, 3, 1), 49.35, 0.0, 49.35, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.98, 0.0,
                     1.98, 0.0, 0.0);
             validateRepaymentPeriod(loanDetails, 3, LocalDate.of(2024, 4, 1), 49.74, 0.0, 49.74, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.59, 0.0,
@@ -5025,7 +5025,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     1.20, 0.0, 0.0);
             validateRepaymentPeriod(loanDetails, 5, LocalDate.of(2024, 6, 1), 50.53, 0.0, 50.53, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.80, 0.0,
                     0.80, 0.0, 0.0);
-            validateRepaymentPeriod(loanDetails, 6, LocalDate.of(2024, 7, 1), 50.94, 0.0, 50.94, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.40, 0.0,
+            validateRepaymentPeriod(loanDetails, 6, LocalDate.of(2024, 7, 1), 50.93, 0.0, 50.93, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.40, 0.0,
                     0.40, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getActive());
             assertEquals(loanDetails.getNumberOfRepayments(), 6);
@@ -5724,8 +5724,8 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             // On the due date of 2nd period
             prepayAmounts = loanTransactionHelper.getPrepayAmount(requestSpec, responseSpec, createdLoanId.intValue(),
                     LocalDate.of(2024, 3, 1));
-            assertEquals(79.05f, prepayAmounts.get("amount"));
-            assertEquals(0.48f, prepayAmounts.get("interestPortion"));
+            assertEquals(79.04f, prepayAmounts.get("amount"));
+            assertEquals(0.47f, prepayAmounts.get("interestPortion"));
             assertEquals(78.57f, prepayAmounts.get("principalPortion"));
 
             loanTransactionHelper.makeLoanRepayment(createdLoanId.get(), new PostLoansLoanIdTransactionsRequest()

@@ -3647,7 +3647,7 @@ Feature: Charge-off
       | 29 February 2024 | Charge-off       | 83.89  | 82.99     | 0.9      | 0.0  | 0.0       | 0.0          | false    | false    |
 
   @Skip @TestRailId:C3361 @AdvancedPaymentAllocation
-  Scenario: Verify accelerate maturity to charge-off date when interest recalculation is enabled - case when charge-off occurs with allocation to last installment with interest allocation change
+  Scenario: SKIPPED - Verify accelerate maturity to charge-off date when interest recalculation is enabled - case when charge-off occurs with allocation to last installment with interest allocation change
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
@@ -5638,16 +5638,16 @@ Feature: Charge-off
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
       | 1  | 31   | 01 February 2024 | 01 February 2024 | 83.57           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 17.01 | 0.0        | 0.0  | 0.0         |
-      | 2  | 28   | 29 February 2024 |                  | 0.0             | 83.57         | 0.43     | 0.0  | 0.0       | 84.0  | 17.01 | 17.01      | 0.0  | 66.99       |
+      | 2  | 28   | 29 February 2024 |                  | 0.0             | 83.57         | 0.42     | 0.0  | 0.0       | 83.99 | 17.01 | 17.01      | 0.0  | 66.98       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid  | In advance | Late | Outstanding |
-      | 100.0         | 1.01     | 0.0  | 0.0       | 101.01  | 34.02 | 17.01      | 0.0  | 66.99       |
+      | 100.0         | 1.0      | 0.0  | 0.0       | 101.0   | 34.02 | 17.01      | 0.0  | 66.98       |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
       | 15 February 2024 | Repayment        | 17.01  | 16.77     | 0.24     | 0.0  | 0.0       | 66.8         | false    | true     |
-      | 29 February 2024 | Charge-off       | 66.99  | 66.8      | 0.19     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 February 2024 | Charge-off       | 66.98  | 66.8      | 0.18     | 0.0  | 0.0       | 0.0          | false    | false    |
 
   @TestRailId:C3360 @AdvancedPaymentAllocation
   Scenario: Verify accelerate maturity to charge-off date when interest recalculation is disabled - case when charge-off occurs with adjustment to last installment

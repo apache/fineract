@@ -296,8 +296,7 @@ public class ProgressiveLoanInterestScheduleModel {
      * @return
      */
     public Money getTotalDueInterest() {
-        return repaymentPeriods().stream().flatMap(rp -> rp.getInterestPeriods().stream().map(InterestPeriod::getCalculatedDueInterest))
-                .reduce(zero(), Money::plus);
+        return repaymentPeriods().stream().map(RepaymentPeriod::getCalculatedDueInterest).reduce(zero(), Money::plus);
     }
 
     /**

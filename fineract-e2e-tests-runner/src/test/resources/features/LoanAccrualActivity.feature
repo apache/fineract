@@ -2106,12 +2106,12 @@ Feature: LoanAccrualActivity
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
       | 1  | 31   | 01 February 2024 | 15 January 2024 | 746.09          | 253.91        | 9.78     | 0.0  | 0.0       | 263.69 | 263.69 | 263.69     | 0.0  | 0.0         |
-      | 2  | 29   | 01 March 2024    |                 | 507.43          | 238.66        | 25.03    | 0.0  | 0.0       | 263.69 | 0.0    | 0.0        | 0.0  | 263.69      |
-      | 3  | 31   | 01 April 2024    |                 | 254.73          | 252.7         | 10.99    | 0.0  | 0.0       | 263.69 | 0.0    | 0.0        | 0.0  | 263.69      |
-      | 4  | 30   | 01 May 2024      |                 | 0.0             | 254.73        | 5.52     | 0.0  | 0.0       | 260.25 | 0.0    | 0.0        | 0.0  | 260.25      |
+      | 2  | 29   | 01 March 2024    |                 | 507.44          | 238.65        | 25.04    | 0.0  | 0.0       | 263.69 | 0.0    | 0.0        | 0.0  | 263.69      |
+      | 3  | 31   | 01 April 2024    |                 | 254.74          | 252.7         | 10.99    | 0.0  | 0.0       | 263.69 | 0.0    | 0.0        | 0.0  | 263.69      |
+      | 4  | 30   | 01 May 2024      |                 | 0.0             | 254.74        | 5.52     | 0.0  | 0.0       | 260.26 | 0.0    | 0.0        | 0.0  | 260.26      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
-      | 1000.0        | 51.32    | 0.0  | 0.0       | 1051.32 | 263.69 | 263.69     | 0.0  | 787.63      |
+      | 1000.0        | 51.33    | 0.0  | 0.0       | 1051.33 | 263.69 | 263.69     | 0.0  | 787.64      |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
@@ -2127,10 +2127,10 @@ Feature: LoanAccrualActivity
       | 14 January 2024  | Accrual          | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 January 2024  | Repayment        | 263.69 | 253.91    | 9.78     | 0.0  | 0.0       | 746.09       | false    | false    |
       | 15 January 2024  | Accrual          | 0.69   | 0.0       | 0.69     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 16 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 16 January 2024  | Accrual          | 0.53   | 0.0       | 0.53     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 17 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 18 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 19 January 2024  | Accrual          | 0.53   | 0.0       | 0.53     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 20 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
     When Customer undo "1"th repayment on "15 January 2024"
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
@@ -2150,10 +2150,10 @@ Feature: LoanAccrualActivity
       | 14 January 2024  | Accrual          | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 January 2024  | Repayment        | 263.69 | 253.91    | 9.78     | 0.0  | 0.0       | 746.09       | true     | false    |
       | 15 January 2024  | Accrual          | 0.69   | 0.0       | 0.69     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 16 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 16 January 2024  | Accrual          | 0.53   | 0.0       | 0.53     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 17 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 18 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 19 January 2024  | Accrual          | 0.53   | 0.0       | 0.53     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 20 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
     When Admin sets the business date to "23 January 2024"
     And Admin runs inline COB job for Loan
@@ -2174,10 +2174,10 @@ Feature: LoanAccrualActivity
       | 14 January 2024  | Accrual          | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 January 2024  | Repayment        | 263.69 | 253.91    | 9.78     | 0.0  | 0.0       | 746.09       | true     | false    |
       | 15 January 2024  | Accrual          | 0.69   | 0.0       | 0.69     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 16 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 16 January 2024  | Accrual          | 0.53   | 0.0       | 0.53     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 17 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 18 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 19 January 2024  | Accrual          | 0.53   | 0.0       | 0.53     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 20 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 21 January 2024  | Accrual          | 1.59   | 0.0       | 1.59     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 22 January 2024  | Accrual          | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -2200,10 +2200,10 @@ Feature: LoanAccrualActivity
       | 14 January 2024  | Accrual          | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 January 2024  | Repayment        | 263.69 | 253.91    | 9.78     | 0.0  | 0.0       | 746.09       | true     | false    |
       | 15 January 2024  | Accrual          | 0.69   | 0.0       | 0.69     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 16 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 16 January 2024  | Accrual          | 0.53   | 0.0       | 0.53     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 17 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 18 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 19 January 2024  | Accrual          | 0.53   | 0.0       | 0.53     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 20 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 21 January 2024  | Accrual          | 1.59   | 0.0       | 1.59     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 22 January 2024  | Accrual          | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -2603,12 +2603,12 @@ Feature: LoanAccrualActivity
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
       | 1  | 31   | 01 February 2024 | 15 January 2024 | 746.09          | 253.91        | 9.78     | 0.0  | 0.0       | 263.69 | 263.69 | 263.69     | 0.0  | 0.0         |
-      | 2  | 29   | 01 March 2024    |                 | 507.43          | 238.66        | 25.03    | 0.0  | 0.0       | 263.69 | 0.0    | 0.0        | 0.0  | 263.69      |
-      | 3  | 31   | 01 April 2024    |                 | 254.73          | 252.7         | 10.99    | 0.0  | 0.0       | 263.69 | 0.0    | 0.0        | 0.0  | 263.69      |
-      | 4  | 30   | 01 May 2024      |                 | 0.0             | 254.73        | 5.52     | 0.0  | 0.0       | 260.25 | 0.0    | 0.0        | 0.0  | 260.25      |
+      | 2  | 29   | 01 March 2024    |                 | 507.44          | 238.65        | 25.04    | 0.0  | 0.0       | 263.69 | 0.0    | 0.0        | 0.0  | 263.69      |
+      | 3  | 31   | 01 April 2024    |                 | 254.74          | 252.7         | 10.99    | 0.0  | 0.0       | 263.69 | 0.0    | 0.0        | 0.0  | 263.69      |
+      | 4  | 30   | 01 May 2024      |                 | 0.0             | 254.74        | 5.52     | 0.0  | 0.0       | 260.26 | 0.0    | 0.0        | 0.0  | 260.26      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
-      | 1000.0        | 51.32    | 0.0  | 0.0       | 1051.32 | 263.69 | 263.69     | 0.0  | 787.63      |
+      | 1000.0        | 51.33    | 0.0  | 0.0       | 1051.33 | 263.69 | 263.69     | 0.0  | 787.64      |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement       | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
@@ -2617,19 +2617,19 @@ Feature: LoanAccrualActivity
       | 19 January 2024  | Accrual            | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 20 January 2024  | Accrual            | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 21 January 2024  | Accrual Adjustment | 0.37   | 0.0       | 0.37     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 22 January 2024  | Accrual            | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 January 2024  | Accrual            | 0.53   | 0.0       | 0.53     | 0.0  | 0.0       | 0.0          | false    | false    |
     When Admin sets the business date to "26 January 2024"
     And Admin runs inline COB job for Loan
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
       | 1  | 31   | 01 February 2024 | 15 January 2024 | 746.09          | 253.91        | 9.78     | 0.0  | 0.0       | 263.69 | 263.69 | 263.69     | 0.0  | 0.0         |
-      | 2  | 29   | 01 March 2024    |                 | 507.43          | 238.66        | 25.03    | 0.0  | 0.0       | 263.69 | 0.0    | 0.0        | 0.0  | 263.69      |
-      | 3  | 31   | 01 April 2024    |                 | 254.73          | 252.7         | 10.99    | 0.0  | 0.0       | 263.69 | 0.0    | 0.0        | 0.0  | 263.69      |
-      | 4  | 30   | 01 May 2024      |                 | 0.0             | 254.73        | 5.52     | 0.0  | 0.0       | 260.25 | 0.0    | 0.0        | 0.0  | 260.25      |
+      | 2  | 29   | 01 March 2024    |                 | 507.44          | 238.65        | 25.04    | 0.0  | 0.0       | 263.69 | 0.0    | 0.0        | 0.0  | 263.69      |
+      | 3  | 31   | 01 April 2024    |                 | 254.74          | 252.7         | 10.99    | 0.0  | 0.0       | 263.69 | 0.0    | 0.0        | 0.0  | 263.69      |
+      | 4  | 30   | 01 May 2024      |                 | 0.0             | 254.74        | 5.52     | 0.0  | 0.0       | 260.26 | 0.0    | 0.0        | 0.0  | 260.26      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
-      | 1000.0        | 51.32    | 0.0  | 0.0       | 1051.32 | 263.69 | 263.69     | 0.0  | 787.63      |
+      | 1000.0        | 51.33    | 0.0  | 0.0       | 1051.33 | 263.69 | 263.69     | 0.0  | 787.64      |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement       | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
@@ -2638,7 +2638,7 @@ Feature: LoanAccrualActivity
       | 19 January 2024  | Accrual            | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 20 January 2024  | Accrual            | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 21 January 2024  | Accrual Adjustment | 0.37   | 0.0       | 0.37     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 22 January 2024  | Accrual            | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 January 2024  | Accrual            | 0.53   | 0.0       | 0.53     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 23 January 2024  | Accrual            | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 24 January 2024  | Accrual            | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 25 January 2024  | Accrual            | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -2704,12 +2704,12 @@ Feature: LoanAccrualActivity
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
       | 1  | 31   | 01 February 2024 | 15 January 2024 | 746.09          | 253.91        | 9.78     | 0.0  | 0.0       | 263.69 | 263.69 | 263.69     | 0.0  | 0.0         |
-      | 2  | 29   | 01 March 2024    |                 | 507.43          | 238.66        | 25.03    | 0.0  | 0.0       | 263.69 | 0.0    | 0.0        | 0.0  | 263.69      |
-      | 3  | 31   | 01 April 2024    |                 | 254.73          | 252.7         | 10.99    | 0.0  | 0.0       | 263.69 | 0.0    | 0.0        | 0.0  | 263.69      |
-      | 4  | 30   | 01 May 2024      |                 | 0.0             | 254.73        | 5.52     | 0.0  | 0.0       | 260.25 | 0.0    | 0.0        | 0.0  | 260.25      |
+      | 2  | 29   | 01 March 2024    |                 | 507.44          | 238.65        | 25.04    | 0.0  | 0.0       | 263.69 | 0.0    | 0.0        | 0.0  | 263.69      |
+      | 3  | 31   | 01 April 2024    |                 | 254.74          | 252.7         | 10.99    | 0.0  | 0.0       | 263.69 | 0.0    | 0.0        | 0.0  | 263.69      |
+      | 4  | 30   | 01 May 2024      |                 | 0.0             | 254.74        | 5.52     | 0.0  | 0.0       | 260.26 | 0.0    | 0.0        | 0.0  | 260.26      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
-      | 1000.0        | 51.32    | 0.0  | 0.0       | 1051.32 | 263.69 | 263.69     | 0.0  | 787.63      |
+      | 1000.0        | 51.33    | 0.0  | 0.0       | 1051.33 | 263.69 | 263.69     | 0.0  | 787.64      |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
@@ -2729,19 +2729,19 @@ Feature: LoanAccrualActivity
       | 15 January 2024  | Accrual          | 0.69   | 0.0       | 0.69     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 January 2024  | Repayment        | 263.69 | 253.91    | 9.78     | 0.0  | 0.0       | 746.09       | false    | false    |
       | 16 January 2024  | Accrual          | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 17 January 2024  | Accrual          | 0.34   | 0.0       | 0.34     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 17 January 2024  | Accrual          | 0.35   | 0.0       | 0.35     | 0.0  | 0.0       | 0.0          | false    | false    |
     When Admin sets the business date to "26 January 2024"
     And Admin runs inline COB job for Loan
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
       | 1  | 31   | 01 February 2024 | 15 January 2024 | 746.09          | 253.91        | 9.78     | 0.0  | 0.0       | 263.69 | 263.69 | 263.69     | 0.0  | 0.0         |
-      | 2  | 29   | 01 March 2024    |                 | 507.43          | 238.66        | 25.03    | 0.0  | 0.0       | 263.69 | 0.0    | 0.0        | 0.0  | 263.69      |
-      | 3  | 31   | 01 April 2024    |                 | 254.73          | 252.7         | 10.99    | 0.0  | 0.0       | 263.69 | 0.0    | 0.0        | 0.0  | 263.69      |
-      | 4  | 30   | 01 May 2024      |                 | 0.0             | 254.73        | 5.52     | 0.0  | 0.0       | 260.25 | 0.0    | 0.0        | 0.0  | 260.25      |
+      | 2  | 29   | 01 March 2024    |                 | 507.44          | 238.65        | 25.04    | 0.0  | 0.0       | 263.69 | 0.0    | 0.0        | 0.0  | 263.69      |
+      | 3  | 31   | 01 April 2024    |                 | 254.74          | 252.7         | 10.99    | 0.0  | 0.0       | 263.69 | 0.0    | 0.0        | 0.0  | 263.69      |
+      | 4  | 30   | 01 May 2024      |                 | 0.0             | 254.74        | 5.52     | 0.0  | 0.0       | 260.26 | 0.0    | 0.0        | 0.0  | 260.26      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
-      | 1000.0        | 51.32    | 0.0  | 0.0       | 1051.32 | 263.69 | 263.69     | 0.0  | 787.63      |
+      | 1000.0        | 51.33    | 0.0  | 0.0       | 1051.33 | 263.69 | 263.69     | 0.0  | 787.64      |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
@@ -2761,12 +2761,12 @@ Feature: LoanAccrualActivity
       | 15 January 2024  | Accrual          | 0.69   | 0.0       | 0.69     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 January 2024  | Repayment        | 263.69 | 253.91    | 9.78     | 0.0  | 0.0       | 746.09       | false    | false    |
       | 16 January 2024  | Accrual          | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 17 January 2024  | Accrual          | 0.34   | 0.0       | 0.34     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 17 January 2024  | Accrual          | 0.35   | 0.0       | 0.35     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 18 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 19 January 2024  | Accrual          | 0.53   | 0.0       | 0.53     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 20 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 21 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 22 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 January 2024  | Accrual          | 0.53   | 0.0       | 0.53     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 23 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 24 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 25 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -2835,13 +2835,13 @@ Feature: LoanAccrualActivity
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
       |    |      | 15 January 2024  |           | 500.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
-      | 1  | 31   | 01 February 2024 |           | 1133.33         | 366.67        | 27.6     | 0.0  | 0.0       | 394.27 | 0.0  | 0.0        | 0.0  | 394.27      |
-      | 2  | 29   | 01 March 2024    |           | 763.62          | 369.71        | 24.56    | 0.0  | 0.0       | 394.27 | 0.0  | 0.0        | 0.0  | 394.27      |
-      | 3  | 31   | 01 April 2024    |           | 385.9           | 377.72        | 16.55    | 0.0  | 0.0       | 394.27 | 0.0  | 0.0        | 0.0  | 394.27      |
-      | 4  | 30   | 01 May 2024      |           | 0.0             | 385.9         | 8.36     | 0.0  | 0.0       | 394.26 | 0.0  | 0.0        | 0.0  | 394.26      |
+      | 1  | 31   | 01 February 2024 |           | 1133.34         | 366.66        | 27.61    | 0.0  | 0.0       | 394.27 | 0.0  | 0.0        | 0.0  | 394.27      |
+      | 2  | 29   | 01 March 2024    |           | 763.63          | 369.71        | 24.56    | 0.0  | 0.0       | 394.27 | 0.0  | 0.0        | 0.0  | 394.27      |
+      | 3  | 31   | 01 April 2024    |           | 385.91          | 377.72        | 16.55    | 0.0  | 0.0       | 394.27 | 0.0  | 0.0        | 0.0  | 394.27      |
+      | 4  | 30   | 01 May 2024      |           | 0.0             | 385.91        | 8.36     | 0.0  | 0.0       | 394.27 | 0.0  | 0.0        | 0.0  | 394.27      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
-      | 1500.0        | 77.07    | 0.0  | 0.0       | 1577.07 | 0.0  | 0.0        | 0.0  | 1577.07     |
+      | 1500.0        | 77.08    | 0.0  | 0.0       | 1577.08 | 0.0  | 0.0        | 0.0  | 1577.08     |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
@@ -2864,20 +2864,20 @@ Feature: LoanAccrualActivity
       | 17 January 2024  | Accrual          | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 18 January 2024  | Accrual          | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 19 January 2024  | Accrual          | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 20 January 2024  | Accrual          | 2.44   | 0.0       | 2.44     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 January 2024  | Accrual          | 2.45   | 0.0       | 2.45     | 0.0  | 0.0       | 0.0          | false    | false    |
     When Admin sets the business date to "2 February 2024"
     And Admin runs inline COB job for Loan
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
       |    |      | 15 January 2024  |           | 500.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
-      | 1  | 31   | 01 February 2024 |           | 1133.33         | 366.67        | 27.6     | 0.0  | 0.0       | 394.27 | 0.0  | 0.0        | 0.0  | 394.27      |
-      | 2  | 29   | 01 March 2024    |           | 763.89          | 369.44        | 24.83    | 0.0  | 0.0       | 394.27 | 0.0  | 0.0        | 0.0  | 394.27      |
-      | 3  | 31   | 01 April 2024    |           | 386.17          | 377.72        | 16.55    | 0.0  | 0.0       | 394.27 | 0.0  | 0.0        | 0.0  | 394.27      |
-      | 4  | 30   | 01 May 2024      |           | 0.0             | 386.17        | 8.37     | 0.0  | 0.0       | 394.54 | 0.0  | 0.0        | 0.0  | 394.54      |
+      | 1  | 31   | 01 February 2024 |           | 1133.34         | 366.66        | 27.61    | 0.0  | 0.0       | 394.27 | 0.0  | 0.0        | 0.0  | 394.27      |
+      | 2  | 29   | 01 March 2024    |           | 763.9           | 369.44        | 24.83    | 0.0  | 0.0       | 394.27 | 0.0  | 0.0        | 0.0  | 394.27      |
+      | 3  | 31   | 01 April 2024    |           | 386.18          | 377.72        | 16.55    | 0.0  | 0.0       | 394.27 | 0.0  | 0.0        | 0.0  | 394.27      |
+      | 4  | 30   | 01 May 2024      |           | 0.0             | 386.18        | 8.37     | 0.0  | 0.0       | 394.55 | 0.0  | 0.0        | 0.0  | 394.55      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
-      | 1500.0        | 77.35    | 0.0  | 0.0       | 1577.35 | 0.0  | 0.0        | 0.0  | 1577.35     |
+      | 1500.0        | 77.36    | 0.0  | 0.0       | 1577.36 | 0.0  | 0.0        | 0.0  | 1577.36     |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
@@ -2900,18 +2900,18 @@ Feature: LoanAccrualActivity
       | 17 January 2024  | Accrual          | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 18 January 2024  | Accrual          | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 19 January 2024  | Accrual          | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 20 January 2024  | Accrual          | 2.44   | 0.0       | 2.44     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 January 2024  | Accrual          | 2.45   | 0.0       | 2.45     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 21 January 2024  | Accrual          | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 22 January 2024  | Accrual          | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 January 2024  | Accrual          | 1.04   | 0.0       | 1.04     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 23 January 2024  | Accrual          | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 24 January 2024  | Accrual          | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 25 January 2024  | Accrual          | 1.04   | 0.0       | 1.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 25 January 2024  | Accrual          | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 26 January 2024  | Accrual          | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 27 January 2024  | Accrual          | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 28 January 2024  | Accrual          | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 January 2024  | Accrual          | 1.04   | 0.0       | 1.04     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Accrual          | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 30 January 2024  | Accrual          | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 31 January 2024  | Accrual          | 1.04   | 0.0       | 1.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 31 January 2024  | Accrual          | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 February 2024 | Accrual          | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
 
   @TestRailId:C3285
@@ -2979,13 +2979,13 @@ Feature: LoanAccrualActivity
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
       |    |      | 15 January 2024  |           | 500.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
-      | 1  | 31   | 01 February 2024 |           | 1133.33         | 366.67        | 27.6     | 0.0  | 0.0       | 394.27 | 0.0  | 0.0        | 0.0  | 394.27      |
-      | 2  | 29   | 01 March 2024    |           | 763.62          | 369.71        | 24.56    | 0.0  | 0.0       | 394.27 | 0.0  | 0.0        | 0.0  | 394.27      |
-      | 3  | 31   | 01 April 2024    |           | 385.9           | 377.72        | 16.55    | 0.0  | 0.0       | 394.27 | 0.0  | 0.0        | 0.0  | 394.27      |
-      | 4  | 30   | 01 May 2024      |           | 0.0             | 385.9         | 8.36     | 0.0  | 0.0       | 394.26 | 0.0  | 0.0        | 0.0  | 394.26      |
+      | 1  | 31   | 01 February 2024 |           | 1133.34         | 366.66        | 27.61    | 0.0  | 0.0       | 394.27 | 0.0  | 0.0        | 0.0  | 394.27      |
+      | 2  | 29   | 01 March 2024    |           | 763.63          | 369.71        | 24.56    | 0.0  | 0.0       | 394.27 | 0.0  | 0.0        | 0.0  | 394.27      |
+      | 3  | 31   | 01 April 2024    |           | 385.91          | 377.72        | 16.55    | 0.0  | 0.0       | 394.27 | 0.0  | 0.0        | 0.0  | 394.27      |
+      | 4  | 30   | 01 May 2024      |           | 0.0             | 385.91        | 8.36     | 0.0  | 0.0       | 394.27 | 0.0  | 0.0        | 0.0  | 394.27      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
-      | 1500.0        | 77.07    | 0.0  | 0.0       | 1577.07 | 0.0  | 0.0        | 0.0  | 1577.07     |
+      | 1500.0        | 77.08   | 0.0  | 0.0        | 1577.08 | 0.0  | 0.0        | 0.0  | 1577.08     |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
@@ -3008,7 +3008,7 @@ Feature: LoanAccrualActivity
       | 17 January 2024  | Accrual          | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 18 January 2024  | Accrual          | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 19 January 2024  | Accrual          | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 20 January 2024  | Accrual          | 2.44   | 0.0       | 2.44     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 January 2024  | Accrual          | 2.45   | 0.0       | 2.45     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 21 January 2024  | Accrual          | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
     When Admin sets the business date to "31 January 2024"
     And Admin runs inline COB job for Loan
@@ -3016,13 +3016,13 @@ Feature: LoanAccrualActivity
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
       |    |      | 15 January 2024  |           | 500.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
-      | 1  | 31   | 01 February 2024 |           | 1133.33         | 366.67        | 27.6     | 0.0  | 0.0       | 394.27 | 0.0  | 0.0        | 0.0  | 394.27      |
-      | 2  | 29   | 01 March 2024    |           | 763.62          | 369.71        | 24.56    | 0.0  | 0.0       | 394.27 | 0.0  | 0.0        | 0.0  | 394.27      |
-      | 3  | 31   | 01 April 2024    |           | 385.9           | 377.72        | 16.55    | 0.0  | 0.0       | 394.27 | 0.0  | 0.0        | 0.0  | 394.27      |
-      | 4  | 30   | 01 May 2024      |           | 0.0             | 385.9         | 8.36     | 0.0  | 0.0       | 394.26 | 0.0  | 0.0        | 0.0  | 394.26      |
+      | 1  | 31   | 01 February 2024 |           | 1133.34         | 366.66        | 27.61    | 0.0  | 0.0       | 394.27 | 0.0  | 0.0        | 0.0  | 394.27      |
+      | 2  | 29   | 01 March 2024    |           | 763.63          | 369.71        | 24.56    | 0.0  | 0.0       | 394.27 | 0.0  | 0.0        | 0.0  | 394.27      |
+      | 3  | 31   | 01 April 2024    |           | 385.91          | 377.72        | 16.55    | 0.0  | 0.0       | 394.27 | 0.0  | 0.0        | 0.0  | 394.27      |
+      | 4  | 30   | 01 May 2024      |           | 0.0             | 385.91        | 8.36     | 0.0  | 0.0       | 394.27 | 0.0  | 0.0        | 0.0  | 394.27      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
-      | 1500.0        | 77.07    | 0.0  | 0.0       | 1577.07 | 0.0  | 0.0        | 0.0  | 1577.07     |
+      | 1500.0        | 77.08    | 0.0  | 0.0       | 1577.08 | 0.0  | 0.0        | 0.0  | 1577.08     |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
@@ -3045,15 +3045,15 @@ Feature: LoanAccrualActivity
       | 17 January 2024  | Accrual          | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 18 January 2024  | Accrual          | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 19 January 2024  | Accrual          | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 20 January 2024  | Accrual          | 2.44   | 0.0       | 2.44     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 January 2024  | Accrual          | 2.45   | 0.0       | 2.45     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 21 January 2024  | Accrual          | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 22 January 2024  | Accrual          | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 January 2024  | Accrual          | 1.04   | 0.0       | 1.04     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 23 January 2024  | Accrual          | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 24 January 2024  | Accrual          | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 25 January 2024  | Accrual          | 1.04   | 0.0       | 1.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 25 January 2024  | Accrual          | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 26 January 2024  | Accrual          | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 27 January 2024  | Accrual          | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 28 January 2024  | Accrual          | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 January 2024  | Accrual          | 1.04   | 0.0       | 1.04     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Accrual          | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 30 January 2024  | Accrual          | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
     And Admin successfully undo last disbursal
@@ -3063,12 +3063,12 @@ Feature: LoanAccrualActivity
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
       | 1  | 31   | 01 February 2024 |           | 757.98          | 242.02        | 21.67    | 0.0  | 0.0       | 263.69 | 0.0  | 0.0        | 0.0  | 263.69      |
-      | 2  | 29   | 01 March 2024    |           | 510.9           | 247.08        | 16.61    | 0.0  | 0.0       | 263.69 | 0.0  | 0.0        | 0.0  | 263.69      |
-      | 3  | 31   | 01 April 2024    |           | 258.28          | 252.62        | 11.07    | 0.0  | 0.0       | 263.69 | 0.0  | 0.0        | 0.0  | 263.69      |
-      | 4  | 30   | 01 May 2024      |           | 0.0             | 258.28        | 5.6      | 0.0  | 0.0       | 263.88 | 0.0  | 0.0        | 0.0  | 263.88      |
+      | 2  | 29   | 01 March 2024    |           | 510.89          | 247.09        | 16.6     | 0.0  | 0.0       | 263.69 | 0.0  | 0.0        | 0.0  | 263.69      |
+      | 3  | 31   | 01 April 2024    |           | 258.27          | 252.62        | 11.07    | 0.0  | 0.0       | 263.69 | 0.0  | 0.0        | 0.0  | 263.69      |
+      | 4  | 30   | 01 May 2024      |           | 0.0             | 258.27        | 5.6      | 0.0  | 0.0       | 263.87 | 0.0  | 0.0        | 0.0  | 263.87      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
-      | 1000.0        | 54.95    | 0.0  | 0.0       | 1054.95 | 0.0  | 0.0        | 0.0  | 1054.95     |
+      | 1000.0        | 54.94    | 0.0  | 0.0       | 1054.94 | 0.0  | 0.0        | 0.0  | 1054.94     |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement       | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
@@ -3090,15 +3090,15 @@ Feature: LoanAccrualActivity
       | 17 January 2024  | Accrual            | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 18 January 2024  | Accrual            | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 19 January 2024  | Accrual            | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 20 January 2024  | Accrual            | 2.44   | 0.0       | 2.44     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 January 2024  | Accrual            | 2.45   | 0.0       | 2.45     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 21 January 2024  | Accrual            | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 22 January 2024  | Accrual            | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 January 2024  | Accrual            | 1.04   | 0.0       | 1.04     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 23 January 2024  | Accrual            | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 24 January 2024  | Accrual            | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 25 January 2024  | Accrual            | 1.04   | 0.0       | 1.04     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 25 January 2024  | Accrual            | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 26 January 2024  | Accrual            | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 27 January 2024  | Accrual            | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 28 January 2024  | Accrual            | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 January 2024  | Accrual            | 1.04   | 0.0       | 1.04     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Accrual            | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 30 January 2024  | Accrual            | 1.05   | 0.0       | 1.05     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 31 January 2024  | Accrual Adjustment | 4.54   | 0.0       | 4.54     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -3136,10 +3136,10 @@ Feature: LoanAccrualActivity
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
       |    |      | 20 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
-      | 1  | 31   | 01 February 2024 |           | 832.79          | 267.21        | 22.51    | 0.0  | 0.0       | 289.72 | 0.0  | 0.0        | 0.0  | 289.72      |
-      | 2  | 29   | 01 March 2024    |           | 561.11          | 271.68        | 18.04    | 0.0  | 0.0       | 289.72 | 0.0  | 0.0        | 0.0  | 289.72      |
-      | 3  | 31   | 01 April 2024    |           | 283.55          | 277.56        | 12.16    | 0.0  | 0.0       | 289.72 | 0.0  | 0.0        | 0.0  | 289.72      |
-      | 4  | 30   | 01 May 2024      |           | 0.0             | 283.55        | 6.14     | 0.0  | 0.0       | 289.69 | 0.0  | 0.0        | 0.0  | 289.69      |
+      | 1  | 31   | 01 February 2024 |           | 832.8           | 267.2         | 22.51    | 0.0  | 0.0       | 289.71 | 0.0  | 0.0        | 0.0  | 289.71      |
+      | 2  | 29   | 01 March 2024    |           | 561.13          | 271.67        | 18.04    | 0.0  | 0.0       | 289.71 | 0.0  | 0.0        | 0.0  | 289.71      |
+      | 3  | 31   | 01 April 2024    |           | 283.58          | 277.55        | 12.16    | 0.0  | 0.0       | 289.71 | 0.0  | 0.0        | 0.0  | 289.71      |
+      | 4  | 30   | 01 May 2024      |           | 0.0             | 283.58        | 6.14     | 0.0  | 0.0       | 289.72 | 0.0  | 0.0        | 0.0  | 289.72      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
       | 1100.0        | 58.85    | 0.0  | 0.0       | 1158.85 | 0.0  | 0.0        | 0.0  | 1158.85     |
@@ -3175,12 +3175,12 @@ Feature: LoanAccrualActivity
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
       | 1  | 31   | 01 February 2024 |           | 757.98          | 242.02        | 21.67    | 0.0  | 0.0       | 263.69 | 0.0  | 0.0        | 0.0  | 263.69      |
-      | 2  | 29   | 01 March 2024    |           | 510.9           | 247.08        | 16.61    | 0.0  | 0.0       | 263.69 | 0.0  | 0.0        | 0.0  | 263.69      |
-      | 3  | 31   | 01 April 2024    |           | 258.28          | 252.62        | 11.07    | 0.0  | 0.0       | 263.69 | 0.0  | 0.0        | 0.0  | 263.69      |
-      | 4  | 30   | 01 May 2024      |           | 0.0             | 258.28        | 5.6      | 0.0  | 0.0       | 263.88 | 0.0  | 0.0        | 0.0  | 263.88      |
+      | 2  | 29   | 01 March 2024    |           | 510.89          | 247.09        | 16.6     | 0.0  | 0.0       | 263.69 | 0.0  | 0.0        | 0.0  | 263.69      |
+      | 3  | 31   | 01 April 2024    |           | 258.27          | 252.62        | 11.07    | 0.0  | 0.0       | 263.69 | 0.0  | 0.0        | 0.0  | 263.69      |
+      | 4  | 30   | 01 May 2024      |           | 0.0             | 258.27        | 5.6      | 0.0  | 0.0       | 263.87 | 0.0  | 0.0        | 0.0  | 263.87      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
-      | 1000.0        | 54.95    | 0.0  | 0.0       | 1054.95 | 0.0  | 0.0        | 0.0  | 1054.95     |
+      | 1000.0        | 54.94    | 0.0  | 0.0       | 1054.94 | 0.0  | 0.0        | 0.0  | 1054.94     |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
@@ -3517,8 +3517,8 @@ Feature: LoanAccrualActivity
       | 18 February 2024 | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 19 February 2024 | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 20 February 2024 | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 21 February 2024 | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 22 February 2024 | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 February 2024 | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 February 2024 | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 23 February 2024 | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 24 February 2024 | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 25 February 2024 | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -3664,8 +3664,8 @@ Feature: LoanAccrualActivity
       | 18 February 2024 | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 19 February 2024 | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 20 February 2024 | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 21 February 2024 | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 22 February 2024 | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 February 2024 | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 February 2024 | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 23 February 2024 | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 24 February 2024 | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 25 February 2024 | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -3866,15 +3866,15 @@ Feature: LoanAccrualActivity
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
-      | 1  | 31   | 01 February 2024 |           | 83.52           | 16.48         | 0.53     | 0.0  | 0.0       | 17.01 | 15.0 | 15.0       | 0.0  | 2.01        |
-      | 2  | 29   | 01 March 2024    |           | 67.0            | 16.52         | 0.49     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 3  | 31   | 01 April 2024    |           | 50.38           | 16.62         | 0.39     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 4  | 30   | 01 May 2024      |           | 33.66           | 16.72         | 0.29     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 5  | 31   | 01 June 2024     |           | 16.85           | 16.81         | 0.2      | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 6  | 30   | 01 July 2024     |           | 0.0             | 16.85         | 0.1      | 0.0  | 0.0       | 16.95 | 0.0  | 0.0        | 0.0  | 16.95       |
+      | 1  | 31   | 01 February 2024 |           | 83.53           | 16.47         | 0.54     | 0.0  | 0.0       | 17.01 | 15.0 | 15.0       | 0.0  | 2.01        |
+      | 2  | 29   | 01 March 2024    |           | 67.01           | 16.52         | 0.49     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
+      | 3  | 31   | 01 April 2024    |           | 50.39           | 16.62         | 0.39     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
+      | 4  | 30   | 01 May 2024      |           | 33.67           | 16.72         | 0.29     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
+      | 5  | 31   | 01 June 2024     |           | 16.86           | 16.81         | 0.2      | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
+      | 6  | 30   | 01 July 2024     |           | 0.0             | 16.86         | 0.1      | 0.0  | 0.0       | 16.96 | 0.0  | 0.0        | 0.0  | 16.96       |
     Then Loan Repayment schedule has the following data in Total row:
-      | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
-      | 100.0         | 2.0      | 0.0  | 0.0       | 102.0 | 15.0 | 15.0       | 0.0  | 87.0        |
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 100.0         | 2.01     | 0.0  | 0.0       | 102.01 | 15.0 | 15.0       | 0.0  | 87.01       |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
@@ -3928,23 +3928,23 @@ Feature: LoanAccrualActivity
       | 14 January 2024  | Accrual            | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 January 2024  | Repayment          | 15.0   | 15.0      | 0.0      | 0.0  | 0.0       | 85.0         | false    | false    |
       | 15 January 2024  | Accrual Adjustment | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 16 January 2024  | Accrual            | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 17 January 2024  | Accrual            | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 18 January 2024  | Accrual            | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 19 January 2024  | Accrual            | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 16 January 2024  | Accrual            | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 17 January 2024  | Accrual            | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 18 January 2024  | Accrual            | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 January 2024  | Accrual            | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 20 January 2024  | Accrual            | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 21 January 2024  | Accrual            | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 22 January 2024  | Accrual            | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 23 January 2024  | Accrual            | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 24 January 2024  | Accrual            | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 21 January 2024  | Accrual            | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 January 2024  | Accrual            | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 23 January 2024  | Accrual            | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 January 2024  | Accrual            | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 25 January 2024  | Accrual            | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 26 January 2024  | Accrual            | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 27 January 2024  | Accrual            | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 28 January 2024  | Accrual            | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 29 January 2024  | Accrual            | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 26 January 2024  | Accrual            | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 27 January 2024  | Accrual            | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 January 2024  | Accrual            | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 January 2024  | Accrual            | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 30 January 2024  | Accrual            | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 31 January 2024  | Accrual            | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 01 February 2024 | Accrual            | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 31 January 2024  | Accrual            | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 February 2024 | Accrual            | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 21 February 2024 | Accrual            | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 22 February 2024 | Accrual            | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 23 February 2024 | Accrual            | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -3986,14 +3986,14 @@ Feature: LoanAccrualActivity
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                 | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
       | 1  | 31   | 01 February 2024 | 14 January 2024 | 83.23           | 16.77         | 0.24     | 0.0  | 0.0       | 17.01 | 17.01 | 17.01      | 0.0  | 0.0         |
-      | 2  | 29   | 01 March 2024    |                 | 66.99           | 16.24         | 0.77     | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
-      | 3  | 31   | 01 April 2024    |                 | 50.37           | 16.62         | 0.39     | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
-      | 4  | 30   | 01 May 2024      |                 | 33.65           | 16.72         | 0.29     | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
-      | 5  | 31   | 01 June 2024     |                 | 16.84           | 16.81         | 0.2      | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
-      | 6  | 30   | 01 July 2024     |                 | 0.0             | 16.84         | 0.1      | 0.0  | 0.0       | 16.94 | 0.0   | 0.0        | 0.0  | 16.94       |
+      | 2  | 29   | 01 March 2024    |                 | 67.0            | 16.23         | 0.78     | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
+      | 3  | 31   | 01 April 2024    |                 | 50.38           | 16.62         | 0.39     | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
+      | 4  | 30   | 01 May 2024      |                 | 33.66           | 16.72         | 0.29     | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
+      | 5  | 31   | 01 June 2024     |                 | 16.85           | 16.81         | 0.2      | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
+      | 6  | 30   | 01 July 2024     |                 | 0.0             | 16.85         | 0.1      | 0.0  | 0.0       | 16.95 | 0.0   | 0.0        | 0.0  | 16.95       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
-      | 100           | 1.99     | 0    | 0         | 101.99 | 17.01 | 17.01      | 0    | 84.98       |
+      | 100           | 2.0      | 0    | 0         | 102.0  | 17.01 | 17.01      | 0    | 84.99       |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
@@ -4140,17 +4140,17 @@ Feature: LoanAccrualActivity
     When Customer undo "2"th repayment on "16 January 2025"
     When Admin runs inline COB job for Loan
     Then Loan status will be "ACTIVE"
-    Then Loan has 0.32 outstanding amount
+    Then Loan has 0.33 outstanding amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees  | Penalties | Due     | Paid   | In advance | Late | Outstanding |
       |    |      | 12 January 2025  |                 | 430.0           |               |          | 0.0   |           | 0.0     | 0.0    |            |      |             |
       | 1  | 31   | 12 February 2025 | 16 January 2025 | 321.25          | 108.75        | 0.32     | 0.0   | 0.0       | 109.07  | 109.07 | 109.07     | 0.0  | 0.0         |
       | 2  | 28   | 12 March 2025    | 16 January 2025 | 212.18          | 109.07        | 0.0      | 0.0   | 0.0       | 109.07  | 109.07 | 109.07     | 0.0  | 0.0         |
       | 3  | 31   | 12 April 2025    | 16 January 2025 | 103.11          | 109.07        | 0.0      | 0.0   | 0.0       | 109.07  | 109.07 | 109.07     | 0.0  | 0.0         |
-      | 4  | 30   | 12 May 2025      |                 | 0.0             | 103.11	     | 0.0      | 0.0   | 0.0       | 103.11  | 102.79 | 102.79     | 0.0  | 0.32        |
+      | 4  | 30   | 12 May 2025      |                 | 0.0             | 103.11	     | 0.01     | 0.0   | 0.0       | 103.12  | 102.79 | 102.79     | 0.0  | 0.33        |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
-      | 430           | 0.32     | 0    | 0         | 430.32  | 430.0  | 430.0      | 0    | 0.32        |
+      | 430           | 0.33     | 0    | 0         | 430.33  | 430.0  | 430.0      | 0    | 0.33        |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type  | Amount  | Principal | Interest | Fees  | Penalties | Loan Balance | Reverted | Replayed |
       | 12 January 2025  | Disbursement      | 430.0   | 0.0       | 0.0      | 0.0   | 0.0       | 430.0        | false    | false    |
@@ -4227,26 +4227,26 @@ Feature: LoanAccrualActivity
       | 30 December 2024 | Repayment          | 200.0  | 196.99    | 3.01     | 0.0  | 0.0       | 233.01       | false    | false    |
       | 30 December 2024 | Accrual            | 0.31   | 0.0       | 0.31     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 31 December 2024 | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 01 January 2025  | Accrual            | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 02 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 03 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 January 2025  | Accrual            | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 04 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 05 January 2025  | Accrual            | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 06 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 January 2025  | Accrual            | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 07 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 08 January 2025  | Accrual            | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 10 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 January 2025  | Accrual            | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 12 January 2025  | Accrual            | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 13 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 12 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 13 January 2025  | Accrual            | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 15 January 2025  | Accrual            | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 17 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 17 January 2025  | Accrual            | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 18 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 19 January 2025  | Accrual            | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 20 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 January 2025  | Accrual            | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
     When Admin sets the business date to "20 February 2025"
     And Admin runs inline COB job for Loan
     Then Loan Transactions tab has the following data:
@@ -4256,26 +4256,26 @@ Feature: LoanAccrualActivity
       | 30 December 2024 | Repayment          | 200.0  | 196.99    | 3.01     | 0.0  | 0.0       | 233.01       | false    | false    |
       | 30 December 2024 | Accrual            | 0.31   | 0.0       | 0.31     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 31 December 2024 | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 01 January 2025  | Accrual            | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 02 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 03 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 January 2025  | Accrual            | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 04 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 05 January 2025  | Accrual            | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 06 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 January 2025  | Accrual            | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 07 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 08 January 2025  | Accrual            | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 10 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 January 2025  | Accrual            | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 12 January 2025  | Accrual            | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 13 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 12 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 13 January 2025  | Accrual            | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 15 January 2025  | Accrual            | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 17 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 17 January 2025  | Accrual            | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 18 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 19 January 2025  | Accrual            | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 20 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 January 2025  | Accrual            | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 21 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 22 January 2025  | Accrual            | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 23 January 2025  | Accrual            | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -4315,26 +4315,26 @@ Feature: LoanAccrualActivity
       | 30 December 2024 | Repayment        | 200.0  | 196.99    | 3.01     | 0.0  | 0.0       | 233.01       | false    | false    |
       | 30 December 2024 | Accrual          | 0.31   | 0.0       | 0.31     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 31 December 2024 | Accrual          | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 01 January 2025  | Accrual          | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 January 2025  | Accrual          | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 02 January 2025  | Accrual          | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 03 January 2025  | Accrual          | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 January 2025  | Accrual          | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 04 January 2025  | Accrual          | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 05 January 2025  | Accrual          | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 06 January 2025  | Accrual          | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 January 2025  | Accrual          | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 January 2025  | Accrual          | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 07 January 2025  | Accrual          | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 08 January 2025  | Accrual          | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 January 2025  | Accrual          | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 January 2025  | Accrual          | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 10 January 2025  | Accrual          | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 January 2025  | Accrual          | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2025  | Accrual          | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 12 January 2025  | Accrual          | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 13 January 2025  | Accrual          | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 12 January 2025  | Accrual          | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 13 January 2025  | Accrual          | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 January 2025  | Accrual          | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 15 January 2025  | Accrual          | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 January 2025  | Accrual          | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 January 2025  | Accrual          | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 17 January 2025  | Accrual          | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 17 January 2025  | Accrual          | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 18 January 2025  | Accrual          | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 19 January 2025  | Accrual          | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 20 January 2025  | Accrual          | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 January 2025  | Accrual          | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 January 2025  | Accrual          | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 21 January 2025  | Accrual          | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 22 January 2025  | Accrual          | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 23 January 2025  | Accrual          | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -4583,14 +4583,14 @@ Feature: LoanAccrualActivity
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       |    |      | 31 January 2024  |           | 2000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
       | 1  | 29   | 29 February 2024 |           | 1671.5	       | 328.5         | 11.67    | 0.0  | 0.0       | 340.17 | 0.0  | 0.0        | 0.0  | 340.17      |
-      | 2  | 31   | 31 March 2024    |           | 1341.15         | 330.35        | 9.82     | 0.0  | 0.0       | 340.17 | 0.0  | 0.0        | 0.0  | 340.17      |
-      | 3  | 30   | 30 April 2024    |           | 1008.8          | 332.35        | 7.82	  | 0.0  | 0.0       | 340.17 | 0.0  | 0.0        | 0.0  | 340.17      |
-      | 4  | 31   | 31 May 2024      |           | 674.51	       | 334.29        | 5.88	  | 0.0  | 0.0       | 340.17 | 0.0  | 0.0        | 0.0  | 340.17      |
-      | 5  | 30   | 30 June 2024     |           | 338.27 	       | 336.24        | 3.93	  | 0.0  | 0.0       | 340.17 | 0.0  | 0.0        | 0.0  | 340.17      |
-      | 6  | 31   | 31 July 2024     |           | 0.0             | 338.27        | 1.97	  | 0.0  | 0.0       | 340.24 | 0.0  | 0.0        | 0.0  | 340.24      |
+      | 2  | 31   | 31 March 2024    |           | 1341.14         | 330.36        | 9.81     | 0.0  | 0.0       | 340.17 | 0.0  | 0.0        | 0.0  | 340.17      |
+      | 3  | 30   | 30 April 2024    |           | 1008.79         | 332.35        | 7.82	  | 0.0  | 0.0       | 340.17 | 0.0  | 0.0        | 0.0  | 340.17      |
+      | 4  | 31   | 31 May 2024      |           | 674.5 	       | 334.29        | 5.88	  | 0.0  | 0.0       | 340.17 | 0.0  | 0.0        | 0.0  | 340.17      |
+      | 5  | 30   | 30 June 2024     |           | 338.26 	       | 336.24        | 3.93	  | 0.0  | 0.0       | 340.17 | 0.0  | 0.0        | 0.0  | 340.17      |
+      | 6  | 31   | 31 July 2024     |           | 0.0             | 338.26        | 1.97	  | 0.0  | 0.0       | 340.23 | 0.0  | 0.0        | 0.0  | 340.23      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
-      | 2000.0        | 41.09    | 0.0  | 0.0       | 2041.09 | 0.0  | 0.0        | 0.0  | 2041.09     |
+      | 2000.0        | 41.08    | 0.0  | 0.0       | 2041.08 | 0.0  | 0.0        | 0.0  | 2041.08     |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 31 January 2024  | Disbursement     | 2000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 2000.0       | false    | false    |
@@ -4630,14 +4630,14 @@ Feature: LoanAccrualActivity
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       |    |      | 31 January 2024  |                  | 2000.0          |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
       | 1  | 29   | 29 February 2024 | 15 February 2024 | 1665.86	      | 334.14        | 6.03     | 0.0  | 0.0       | 340.17 | 340.17 | 340.17     | 0.0  | 0.0         |
-      | 2  | 31   | 31 March 2024    |                  | 1340.09         | 325.77        | 14.4     | 0.0  | 0.0       | 340.17 | 0.0    | 0.0        | 0.0  | 340.17      |
-      | 3  | 30   | 30 April 2024    |                  | 1007.74         | 332.35        | 7.82	 | 0.0  | 0.0       | 340.17 | 0.0    | 0.0        | 0.0  | 340.17      |
-      | 4  | 31   | 31 May 2024      |                  | 673.45 	      | 334.29        | 5.88	 | 0.0  | 0.0       | 340.17 | 0.0    | 0.0        | 0.0  | 340.17      |
-      | 5  | 30   | 30 June 2024     |                  | 337.21          | 336.24        | 3.93  	 | 0.0  | 0.0       | 340.17 | 0.0    | 0.0        | 0.0  | 340.17      |
-      | 6  | 31   | 31 July 2024     |                  | 0.0             | 337.21        | 1.97  	 | 0.0  | 0.0       | 339.18 | 0.0    | 0.0        | 0.0  | 339.18      |
+      | 2  | 31   | 31 March 2024    |                  | 1340.11         | 325.75        | 14.42    | 0.0  | 0.0       | 340.17 | 0.0    | 0.0        | 0.0  | 340.17      |
+      | 3  | 30   | 30 April 2024    |                  | 1007.76         | 332.35        | 7.82	 | 0.0  | 0.0       | 340.17 | 0.0    | 0.0        | 0.0  | 340.17      |
+      | 4  | 31   | 31 May 2024      |                  | 673.47 	      | 334.29        | 5.88	 | 0.0  | 0.0       | 340.17 | 0.0    | 0.0        | 0.0  | 340.17      |
+      | 5  | 30   | 30 June 2024     |                  | 337.23          | 336.24        | 3.93  	 | 0.0  | 0.0       | 340.17 | 0.0    | 0.0        | 0.0  | 340.17      |
+      | 6  | 31   | 31 July 2024     |                  | 0.0             | 337.23        | 1.97  	 | 0.0  | 0.0       | 339.2  | 0.0    | 0.0        | 0.0  | 339.2       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
-      | 2000.0        | 40.03    | 0.0  | 0.0       | 2040.03 | 340.17 | 340.17     | 0.0  | 1699.86     |
+      | 2000.0        | 40.05    | 0.0  | 0.0       | 2040.05 | 340.17 | 340.17     | 0.0  | 1699.88     |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 31 January 2024  | Disbursement     | 2000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 2000.0       | false    | false    |
@@ -4679,14 +4679,14 @@ Feature: LoanAccrualActivity
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       |    |      | 31 January 2024  |                  | 2000.0          |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
       | 1  | 29   | 29 February 2024 | 15 February 2024 | 1665.86	      | 334.14        | 6.03     | 0.0  | 0.0       | 340.17 | 340.17 | 340.17     | 0.0  | 0.0         |
-      | 2  | 31   | 31 March 2024    |                  | 1340.1          | 325.76        | 14.41    | 0.0  | 0.0       | 340.17 | 0.0    | 0.0        | 0.0  | 340.17      |
-      | 3  | 30   | 30 April 2024    |                  | 1007.81         | 332.29        | 7.88	 | 0.0  | 0.0       | 340.17 | 0.0    | 0.0        | 0.0  | 340.17      |
-      | 4  | 31   | 31 May 2024      |                  | 673.52 	      | 334.29        | 5.88	 | 0.0  | 0.0       | 340.17 | 0.0    | 0.0        | 0.0  | 340.17      |
-      | 5  | 30   | 30 June 2024     |                  | 337.28          | 336.24        | 3.93  	 | 0.0  | 0.0       | 340.17 | 0.0    | 0.0        | 0.0  | 340.17      |
-      | 6  | 31   | 31 July 2024     |                  | 0.0             | 337.28        | 1.97  	 | 0.0  | 0.0       | 339.25 | 0.0    | 0.0        | 0.0  | 339.25      |
+      | 2  | 31   | 31 March 2024    |                  | 1340.11         | 325.75        | 14.42    | 0.0  | 0.0       | 340.17 | 0.0    | 0.0        | 0.0  | 340.17      |
+      | 3  | 30   | 30 April 2024    |                  | 1007.82         | 332.29        | 7.88	 | 0.0  | 0.0       | 340.17 | 0.0    | 0.0        | 0.0  | 340.17      |
+      | 4  | 31   | 31 May 2024      |                  | 673.53 	      | 334.29        | 5.88	 | 0.0  | 0.0       | 340.17 | 0.0    | 0.0        | 0.0  | 340.17      |
+      | 5  | 30   | 30 June 2024     |                  | 337.29          | 336.24        | 3.93  	 | 0.0  | 0.0       | 340.17 | 0.0    | 0.0        | 0.0  | 340.17      |
+      | 6  | 31   | 31 July 2024     |                  | 0.0             | 337.29        | 1.97  	 | 0.0  | 0.0       | 339.26 | 0.0    | 0.0        | 0.0  | 339.26      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
-      | 2000.0        | 40.1     | 0.0  | 0.0       | 2040.1  | 340.17 | 340.17     | 0.0  | 1699.93     |
+      | 2000.0        | 40.11    | 0.0  | 0.0       | 2040.11 | 340.17 | 340.17     | 0.0  | 1699.94     |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 31 January 2024  | Disbursement       | 2000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 2000.0       | false    | false    |
@@ -4722,7 +4722,7 @@ Feature: LoanAccrualActivity
       | 28 February 2024 | Accrual            | 0.41   | 0.0       | 0.41     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 February 2024 | Accrual            | 0.38   | 0.0       | 0.38     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 February 2024 | Accrual Activity   | 6.03   | 0.0       | 6.03     | 0.0  | 0.0       | 0.0          | false    | true     |
-      | 01 March 2024    | Accrual Adjustment | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false     |
+      | 01 March 2024    | Accrual Adjustment | 0.69   | 0.0       | 0.69     | 0.0  | 0.0       | 0.0          | false    | false     |
       | 02 March 2024    | Accrual            | 0.31   | 0.0       | 0.31     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 03 March 2024    | Accrual            | 0.31   | 0.0       | 0.31     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 04 March 2024    | Accrual            | 0.32   | 0.0       | 0.32     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -4753,7 +4753,7 @@ Feature: LoanAccrualActivity
       | 29 March 2024    | Accrual            | 0.31   | 0.0       | 0.31     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 30 March 2024    | Accrual            | 0.32   | 0.0       | 0.32     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 31 March 2024    | Accrual            | 0.32   | 0.0       | 0.32     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 31 March 2024    | Accrual Activity   | 14.41  | 0.0       | 14.41    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 31 March 2024    | Accrual Activity   | 14.42  | 0.0       | 14.42    | 0.0  | 0.0       | 0.0          | false    | false    |
 
   @TestRailId:C3503
   Scenario: Verify accruals on closed or overpaid backdated loan with current date before installment date with due-date charge config option - UC1
