@@ -69,7 +69,7 @@ public class LoanChargeOffAccrualTest extends BaseLoanIntegrationTest {
             executeInlineCOB(loanId);
             final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
             final List<GetLoansLoanIdTransactions> transactions = loanDetails.getTransactions();
-            Assertions.assertTrue(transactions.stream().filter(o -> o.getType().getAccrual()).toList().size() == 1);
+            Assertions.assertTrue(transactions.stream().filter(o -> o.getType().getAccrual()).toList().size() == 2);
         });
 
         runAt("05 June 2024", () -> {
@@ -78,7 +78,7 @@ public class LoanChargeOffAccrualTest extends BaseLoanIntegrationTest {
 
             final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
             final List<GetLoansLoanIdTransactions> transactions = loanDetails.getTransactions();
-            Assertions.assertTrue(transactions.stream().filter(o -> o.getType().getAccrual()).toList().size() == 2);
+            Assertions.assertTrue(transactions.stream().filter(o -> o.getType().getAccrual()).toList().size() == 3);
         });
     }
 }
