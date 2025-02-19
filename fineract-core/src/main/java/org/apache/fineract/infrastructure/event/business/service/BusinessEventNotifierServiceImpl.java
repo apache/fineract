@@ -34,7 +34,6 @@ import org.apache.fineract.infrastructure.event.business.BusinessEventListener;
 import org.apache.fineract.infrastructure.event.business.domain.BulkBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.NoExternalEvent;
-import org.apache.fineract.infrastructure.event.external.repository.ExternalEventConfigurationRepository;
 import org.apache.fineract.infrastructure.event.external.service.ExternalEventService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
@@ -56,10 +55,10 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
     private final ThreadLocal<List<BusinessEvent<?>>> recordedEvents = ThreadLocal.withInitial(ArrayList::new);
 
     private final ExternalEventService externalEventService;
-    private final ExternalEventConfigurationRepository eventConfigurationRepository;
     private final FineractProperties fineractProperties;
     private final ThreadLocal<Stack<List<BusinessEventWithContext>>> transactionBusinessEvents = ThreadLocal.withInitial(Stack::new);
     private final TransactionHelper transactionHelper;
+    private final ExternalBusinessEventConfigurationService externalBusinessEventConfigurationService;
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -100,7 +99,7 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
         }
         if (isExternalEvent && isExternalEventPostingEnabled()) {
             // we only want to create external events for operations that were successful, hence the post listener
-            if (isExternalEventConfiguredForPosting(businessEvent.getType())) {
+            if (externalBusinessEventConfigurationService.isExternalEventConfiguredForPosting(businessEvent)) {
                 if (isExternalEventRecordingEnabled()) {
                     recordedEvents.get().add(businessEvent);
                 } else {
@@ -141,10 +140,6 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
 
     private boolean isExternalEventPostingEnabled() {
         return fineractProperties.getEvents().getExternal().isEnabled();
-    }
-
-    private boolean isExternalEventConfiguredForPosting(String eventType) {
-        return eventConfigurationRepository.findExternalEventConfigurationByTypeWithNotFoundDetection(eventType).isEnabled();
     }
 
     private void throwExceptionIfBulkEvent(BusinessEvent<?> businessEvent) {

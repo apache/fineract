@@ -35,8 +35,6 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.BusinessEventListener;
 import org.apache.fineract.infrastructure.event.business.domain.BulkBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
-import org.apache.fineract.infrastructure.event.external.repository.ExternalEventConfigurationRepository;
-import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventConfiguration;
 import org.apache.fineract.infrastructure.event.external.service.ExternalEventService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,7 +56,7 @@ class BusinessEventNotifierServiceImplTest {
     private ExternalEventService externalEventService;
 
     @Mock
-    private ExternalEventConfigurationRepository externalEventConfigurationRepository;
+    private ExternalBusinessEventConfigurationService externalBusinessEventConfigurationService;
 
     @Mock
     private FineractProperties fineractProperties;
@@ -80,8 +78,7 @@ class BusinessEventNotifierServiceImplTest {
         TransactionExecution mockTransaction = mock(TransactionExecution.class);
         underTest.afterBegin(mockTransaction, null);
         // when
-        when(externalEventConfigurationRepository.findExternalEventConfigurationByTypeWithNotFoundDetection(Mockito.any()))
-                .thenReturn(new ExternalEventConfiguration("aType", true));
+        when(externalBusinessEventConfigurationService.isExternalEventConfiguredForPosting(Mockito.any())).thenReturn(true);
         when(transactionHelper.hasTransaction()).thenReturn(true);
         underTest.notifyPostBusinessEvent(event);
         // then
@@ -112,8 +109,7 @@ class BusinessEventNotifierServiceImplTest {
         underTest.addPostBusinessEventListener(MockBusinessEvent.class, postListener);
         TransactionExecution mockTransaction = mock(TransactionExecution.class);
         // when
-        when(externalEventConfigurationRepository.findExternalEventConfigurationByTypeWithNotFoundDetection(Mockito.any()))
-                .thenReturn(new ExternalEventConfiguration("aType", true));
+        when(externalBusinessEventConfigurationService.isExternalEventConfiguredForPosting(Mockito.any())).thenReturn(true);
         when(transactionHelper.hasTransaction()).thenReturn(true);
 
         // simulate outer transaction
@@ -148,8 +144,7 @@ class BusinessEventNotifierServiceImplTest {
         underTest.addPostBusinessEventListener(MockBusinessEvent.class, postListener);
         TransactionExecution mockTransaction = mock(TransactionExecution.class);
         // when
-        when(externalEventConfigurationRepository.findExternalEventConfigurationByTypeWithNotFoundDetection(Mockito.any()))
-                .thenReturn(new ExternalEventConfiguration("aType", true));
+        when(externalBusinessEventConfigurationService.isExternalEventConfiguredForPosting(Mockito.any())).thenReturn(true);
         when(transactionHelper.hasTransaction()).thenReturn(true);
 
         // simulate outer transaction
@@ -183,8 +178,7 @@ class BusinessEventNotifierServiceImplTest {
         TransactionExecution mockTransaction = mock(TransactionExecution.class);
         underTest.afterBegin(mockTransaction, null);
         // when
-        when(externalEventConfigurationRepository.findExternalEventConfigurationByTypeWithNotFoundDetection(Mockito.any()))
-                .thenReturn(new ExternalEventConfiguration("aType", true));
+        when(externalBusinessEventConfigurationService.isExternalEventConfiguredForPosting(Mockito.any())).thenReturn(true);
         when(transactionHelper.hasTransaction()).thenReturn(true);
         underTest.notifyPostBusinessEvent(event);
         // then
@@ -222,8 +216,7 @@ class BusinessEventNotifierServiceImplTest {
         underTest.addPostBusinessEventListener(MockBusinessEvent.class, postListener);
 
         when(transactionHelper.hasTransaction()).thenReturn(false);
-        when(externalEventConfigurationRepository.findExternalEventConfigurationByTypeWithNotFoundDetection(Mockito.any()))
-                .thenReturn(new ExternalEventConfiguration("aType", true));
+        when(externalBusinessEventConfigurationService.isExternalEventConfiguredForPosting(Mockito.any())).thenReturn(true);
         // when
         underTest.notifyPostBusinessEvent(event);
         // then
@@ -235,8 +228,7 @@ class BusinessEventNotifierServiceImplTest {
     public void testNotifyPostBusinessEventShouldNotPostAnythingWhenNoEventWasRaisedExternalEventWhenRecordingEnabled() {
         // given
         configureExternalEventsProperties(true);
-        when(externalEventConfigurationRepository.findExternalEventConfigurationByTypeWithNotFoundDetection(Mockito.any()))
-                .thenReturn(new ExternalEventConfiguration("aType", true));
+        when(externalBusinessEventConfigurationService.isExternalEventConfiguredForPosting(Mockito.any())).thenReturn(true);
         underTest.startExternalEventRecording();
         // when
         underTest.stopExternalEventRecording();
@@ -248,8 +240,7 @@ class BusinessEventNotifierServiceImplTest {
     public void testNotifyPostBusinessEventShouldNotifyPostListenersAndPostARegularExternalEventWhenRecordingEnabled() {
         // given
         configureExternalEventsProperties(true);
-        when(externalEventConfigurationRepository.findExternalEventConfigurationByTypeWithNotFoundDetection(Mockito.any()))
-                .thenReturn(new ExternalEventConfiguration("aType", true));
+        when(externalBusinessEventConfigurationService.isExternalEventConfiguredForPosting(Mockito.any())).thenReturn(true);
         MockBusinessEvent event = new MockBusinessEvent();
         BusinessEventListener<MockBusinessEvent> postListener = mockListener();
         underTest.addPostBusinessEventListener(MockBusinessEvent.class, postListener);
@@ -266,8 +257,7 @@ class BusinessEventNotifierServiceImplTest {
     public void testNotifyPostBusinessEventShouldNotifyPostListenersAndPostAnBulkExternalEventWhenRecordingEnabled() {
         // given
         configureExternalEventsProperties(true);
-        when(externalEventConfigurationRepository.findExternalEventConfigurationByTypeWithNotFoundDetection(Mockito.any()))
-                .thenReturn(new ExternalEventConfiguration("aType", true));
+        when(externalBusinessEventConfigurationService.isExternalEventConfiguredForPosting(Mockito.any())).thenReturn(true);
         MockBusinessEvent event = new MockBusinessEvent();
         MockBusinessEvent event2 = new MockBusinessEvent();
         BusinessEventListener<MockBusinessEvent> postListener = mockListener();
@@ -323,8 +313,7 @@ class BusinessEventNotifierServiceImplTest {
     public void testNotifyPostBusinessEventShouldNotifyPostListenersAndShouldNotPostAnExternalEventIfNotConfiguredForPosting() {
         // given
         configureExternalEventsProperties(true);
-        when(externalEventConfigurationRepository.findExternalEventConfigurationByTypeWithNotFoundDetection(Mockito.any()))
-                .thenReturn(new ExternalEventConfiguration("aType", false));
+        when(externalBusinessEventConfigurationService.isExternalEventConfiguredForPosting(Mockito.any())).thenReturn(false);
         MockBusinessEvent event = new MockBusinessEvent();
         BusinessEventListener<MockBusinessEvent> postListener = mockListener();
         underTest.addPostBusinessEventListener(MockBusinessEvent.class, postListener);
