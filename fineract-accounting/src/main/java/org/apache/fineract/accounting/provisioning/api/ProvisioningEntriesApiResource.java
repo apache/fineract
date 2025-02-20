@@ -25,7 +25,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -60,9 +59,15 @@ import org.springframework.stereotype.Component;
 
 @Path("/v1/provisioningentries")
 @Component
-@Tag(name = "Provisioning Entries", description = "This defines the Provisioning Entries for all active loan products\n" + "\n"
-        + "Field Descriptions\n" + "date\n" + "Date on which day provisioning entries should be created\n" + "createjournalentries\n"
-        + "Boolean variable whether to add journal entries for generated provisioning entries\n")
+@Tag(name = "Provisioning Entries", description = """
+        This defines the Provisioning Entries for all active loan products
+
+        Field Descriptions
+        date
+        Date on which day provisioning entries should be created
+        createjournalentries
+        Boolean variable whether to add journal entries for generated provisioning entries
+        """)
 @RequiredArgsConstructor
 public class ProvisioningEntriesApiResource {
 
@@ -81,11 +86,17 @@ public class ProvisioningEntriesApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Create new Provisioning Entries", description = "Creates a new Provisioning Entries\n" + "\n"
-            + "Mandatory Fields\n" + "date\n" + "dateFormat\n" + "locale\n" + "Optional Fields\n" + "createjournalentries")
+    @Operation(summary = "Create new Provisioning Entries", description = """
+            Creates a new Provisioning Entries
+
+            Mandatory Fields
+            date
+            dateFormat
+            locale
+            Optional Fields
+            createjournalentries""")
     @RequestBody(content = @Content(schema = @Schema(implementation = ProvisioningEntriesApiResourceSwagger.PostProvisioningEntriesRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ProvisioningEntriesApiResourceSwagger.PostProvisioningEntriesResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ProvisioningEntriesApiResourceSwagger.PostProvisioningEntriesResponse.class)))
     public String createProvisioningEntries(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
         CommandWrapper commandWrapper = null;
         this.platformSecurityContext.authenticatedUser();
@@ -100,8 +111,7 @@ public class ProvisioningEntriesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Recreates Provisioning Entry", description = "Recreates Provisioning Entry | createjournalentry.")
     @RequestBody(content = @Content(schema = @Schema(implementation = ProvisioningEntriesApiResourceSwagger.PutProvisioningEntriesRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ProvisioningEntriesApiResourceSwagger.PutProvisioningEntriesResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ProvisioningEntriesApiResourceSwagger.PutProvisioningEntriesResponse.class)))
     public String modifyProvisioningEntry(@PathParam("entryId") @Parameter(description = "entryId") final Long entryId,
             @QueryParam("command") @Parameter(description = "command=createjournalentry\ncommand=recreateprovisioningentry") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
@@ -126,8 +136,7 @@ public class ProvisioningEntriesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieves a Provisioning Entry", description = "Returns the details of a generated Provisioning Entry.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ProvisioningEntryData.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ProvisioningEntryData.class)))
     public String retrieveProvisioningEntry(@PathParam("entryId") @Parameter(description = "entryId") final Long entryId,
             @Context final UriInfo uriInfo) {
         platformSecurityContext.authenticatedUser();
@@ -140,8 +149,7 @@ public class ProvisioningEntriesApiResource {
     @Path("entries")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanProductProvisioningEntryData.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanProductProvisioningEntryData.class)))
     public String retrieveProviioningEntries(@QueryParam("entryId") final Long entryId, @QueryParam("offset") final Integer offset,
             @QueryParam("limit") final Integer limit, @QueryParam("officeId") final Long officeId,
             @QueryParam("productId") final Long productId, @QueryParam("categoryId") final Long categoryId,
@@ -158,8 +166,7 @@ public class ProvisioningEntriesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List all Provisioning Entries")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ProvisioningEntryData.class)))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ProvisioningEntryData.class))))
     public String retrieveAllProvisioningEntries(@QueryParam("offset") @Parameter(description = "offset") final Integer offset,
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit, @Context final UriInfo uriInfo) {
         platformSecurityContext.authenticatedUser();
