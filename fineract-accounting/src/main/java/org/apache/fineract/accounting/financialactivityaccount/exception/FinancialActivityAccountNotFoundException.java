@@ -26,17 +26,19 @@ import org.springframework.dao.EmptyResultDataAccessException;
  */
 public class FinancialActivityAccountNotFoundException extends AbstractPlatformResourceNotFoundException {
 
+    private static final String DOES_NOT_EXIST = " does not exist";
+    private static final String ERROR_CODE = "error.msg.financialActivityAccount.not.found";
+
     public FinancialActivityAccountNotFoundException(final Long id) {
-        super("error.msg.financialActivityAccount.not.found", "Financial Activity account with Id " + id + " does not exist", id);
+        super(ERROR_CODE, "Financial Activity account with Id " + id + DOES_NOT_EXIST, id);
     }
 
     public FinancialActivityAccountNotFoundException(final Long id, EmptyResultDataAccessException e) {
-        super("error.msg.financialActivityAccount.not.found", "Financial Activity account with Id " + id + " does not exist", id, e);
+        super(ERROR_CODE, "Financial Activity account with Id " + id + DOES_NOT_EXIST, id, e);
     }
 
     public FinancialActivityAccountNotFoundException(final Integer financialActivityType) {
-        super("error.msg.financialActivityAccount.not.found",
-                "Financial Activity account with for the financial Activity with Id " + financialActivityType + " does not exist",
+        super(ERROR_CODE, "Financial Activity account with for the financial Activity with Id " + financialActivityType + DOES_NOT_EXIST,
                 financialActivityType);
     }
 
