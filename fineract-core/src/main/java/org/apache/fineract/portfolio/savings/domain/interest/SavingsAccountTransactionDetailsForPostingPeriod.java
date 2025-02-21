@@ -64,8 +64,9 @@ public class SavingsAccountTransactionDetailsForPostingPeriod {
         if (isDeposit() || isDividendPayoutAndNotReversed()) {
             endOfDayBalance = openingBalance.plus(getAmount(currency));
         } else if (isWithdrawal() || isChargeTransactionAndNotReversed()) {
-
-            if (openingBalance.isGreaterThanZero() || isAllowOverdraft()) {
+            if (isWithdrawal()){
+                endOfDayBalance = Money.of(currency, this.runningBalance);
+            }else if (openingBalance.isGreaterThanZero() || isAllowOverdraft()) {
                 endOfDayBalance = openingBalance.minus(getAmount(currency));
             } else {
                 endOfDayBalance = Money.of(currency, this.runningBalance);

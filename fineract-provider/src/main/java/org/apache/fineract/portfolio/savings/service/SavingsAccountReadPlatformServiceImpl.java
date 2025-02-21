@@ -607,7 +607,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     savingsAccountData.setClientData(clientData);
                     savingsAccountData.setGroupGeneralData(groupGeneralData);
                     savingsAccountData.setSavingsProduct(savingsProductData);
-                    savingsAccountData.setGlAccountIdForInterestOnSavings(MathUtil.isLessThanZero(accountBalance) ? glAccountIdForInterestOnSavings2 :glAccountIdForInterestOnSavings);
+                    savingsAccountData.setGlAccountIdForInterestOnSavings((MathUtil.isLessThanZero(accountBalance) && MathUtil.isGreaterThanZero(glAccountIdForInterestOnSavings2))  ? glAccountIdForInterestOnSavings2 :glAccountIdForInterestOnSavings);
                     savingsAccountData.setGlAccountIdForSavingsControl(glAccountIdForSavingsControl);
                 }
 

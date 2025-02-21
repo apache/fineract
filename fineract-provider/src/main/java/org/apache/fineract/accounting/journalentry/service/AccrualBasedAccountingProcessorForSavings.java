@@ -188,8 +188,8 @@ public class AccrualBasedAccountingProcessorForSavings implements AccountingProc
                                 savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate, amount, isReversal);
                     } else if(savingsTransactionDTO.getIsNegativeBalance()){//GENERA OPERATION WITH BALANCE NEGATIVE
                         this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
-                                AccrualAccountsForSavings.SAVINGS_CONTROL.getValue(),
-                                AccrualAccountsForSavings.INTEREST_RECEIVABLE.getValue(), savingsProductId, paymentTypeId, savingsId,
+                                AccrualAccountsForSavings.INTEREST_RECEIVABLE.getValue(),
+                                AccrualAccountsForSavings.SAVINGS_CONTROL.getValue(), savingsProductId, paymentTypeId, savingsId,
                                 transactionId, transactionDate, amount, isReversal);
                     } else {
                         this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
