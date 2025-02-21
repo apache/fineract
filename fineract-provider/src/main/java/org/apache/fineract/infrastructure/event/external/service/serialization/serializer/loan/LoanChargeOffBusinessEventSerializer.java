@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.event.external.service.serialization.serializer.loan;
 
 import java.util.List;
-import org.apache.avro.generic.GenericContainer;
 import org.apache.fineract.avro.generator.ByteBufferSerializable;
 import org.apache.fineract.avro.loan.v1.LoanTransactionDataV1;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
@@ -27,6 +26,7 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.transaction
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan.LoanTransactionDataMapper;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan.UnpaidChargeDataMapper;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.ExternalEventCustomDataSerializer;
 import org.apache.fineract.portfolio.loanaccount.data.UnpaidChargeData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargePaidByReadService;
@@ -44,8 +44,9 @@ public class LoanChargeOffBusinessEventSerializer extends LoanTransactionBusines
 
     public LoanChargeOffBusinessEventSerializer(LoanReadPlatformService loanReadPlatformService,
             LoanTransactionDataMapper loanTransactionMapper, LoanChargePaidByReadService loanChargePaidByReadService,
-            UnpaidChargeDataMapper unpaidChargeDataMapper, LoanTransactionRepository loanTransactionRepository) {
-        super(loanReadPlatformService, loanTransactionMapper, loanChargePaidByReadService);
+            UnpaidChargeDataMapper unpaidChargeDataMapper, LoanTransactionRepository loanTransactionRepository,
+            List<ExternalEventCustomDataSerializer<LoanTransactionBusinessEvent>> externalEventCustomDataSerializers) {
+        super(loanReadPlatformService, loanTransactionMapper, loanChargePaidByReadService, externalEventCustomDataSerializers);
         this.unpaidChargeDataMapper = unpaidChargeDataMapper;
         this.loanTransactionRepository = loanTransactionRepository;
     }
@@ -61,11 +62,8 @@ public class LoanChargeOffBusinessEventSerializer extends LoanTransactionBusines
         LoanTransactionBusinessEvent event = (LoanTransactionBusinessEvent) rawEvent;
         List<UnpaidChargeData> unpaidChargeDataList = loanTransactionRepository.fetchTotalUnpaidChargesForLoan(event.get().getLoan());
         transactionDataV1.setUnpaidCharges(unpaidChargeDataMapper.map(unpaidChargeDataList));
+        transactionDataV1.setCustomData(collectCustomData(event));
         return transactionDataV1;
     }
 
-    @Override
-    public Class<? extends GenericContainer> getSupportedSchema() {
-        return LoanTransactionDataV1.class;
-    }
 }

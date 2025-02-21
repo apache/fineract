@@ -30,5 +30,6 @@ public interface LoanTransactionDataMapper {
     // unpaidCharges are calculated and set explicitly based on if needed (only for charge-off transaction yet)
     @Mapping(target = "unpaidCharges", ignore = true)
     @Mapping(target = "externalOwnerId", ignore = true)
+    @Mapping(target = "customData", ignore = true)
     LoanTransactionDataV1 map(LoanTransactionData source);
 }

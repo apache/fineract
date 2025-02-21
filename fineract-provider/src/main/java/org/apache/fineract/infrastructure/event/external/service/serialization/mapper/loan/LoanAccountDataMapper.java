@@ -37,6 +37,7 @@ public interface LoanAccountDataMapper {
     @Mapping(target = "settlementDate", ignore = true)
     @Mapping(target = "purchasePriceRatio", ignore = true)
     @Mapping(target = "delinquent.installmentDelinquencyBuckets", ignore = true)
+    @Mapping(target = "customData", ignore = true)
     LoanAccountDataV1 map(LoanAccountData source);
 
 }

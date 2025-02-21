@@ -18,8 +18,11 @@
  */
 package org.apache.fineract.infrastructure.event.external.service.serialization.serializer.loan;
 
+import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.generic.GenericContainer;
 import org.apache.commons.collections4.CollectionUtils;
@@ -30,6 +33,7 @@ import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan.LoanAccountDataMapper;
 import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.ExternalEventCustomDataSerializer;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
@@ -56,6 +60,7 @@ public class LoanBusinessEventSerializer implements BusinessEventSerializer {
     private final LoanSummaryBalancesRepository loanSummaryBalancesRepository;
     @Lazy
     private final LoanSummaryProviderDelegate loanSummaryProviderDelegate;
+    private final List<ExternalEventCustomDataSerializer<LoanBusinessEvent>> externalEventCustomDataSerializers;
 
     @Override
     public <T> boolean canSerialize(BusinessEvent<T> event) {
@@ -98,8 +103,11 @@ public class LoanBusinessEventSerializer implements BusinessEventSerializer {
             data.setLoanTermVariations(activeLoanTermVariations.stream().map(LoanTermVariations::toData).toList());
         }
 
-        LoanAccountDataV1 result = mapper.map(data);
+        final LoanAccountDataV1 result = mapper.map(data);
         result.getDelinquent().setInstallmentDelinquencyBuckets(installmentsDelinquencyData);
+
+        result.setCustomData(collectCustomData(event));
+
         return result;
     }
 
@@ -107,4 +115,10 @@ public class LoanBusinessEventSerializer implements BusinessEventSerializer {
     public Class<? extends GenericContainer> getSupportedSchema() {
         return LoanAccountDataV1.class;
     }
+
+    private Map<String, ByteBuffer> collectCustomData(final LoanBusinessEvent event) {
+        return externalEventCustomDataSerializers.stream().collect(Collectors.toMap(ExternalEventCustomDataSerializer::key,
+                serializer -> serializer.serialize(event), (existing, replacement) -> replacement));
+    }
+
 }
