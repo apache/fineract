@@ -3584,4 +3584,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     public boolean hasChargeOffTransaction() {
         return getLoanTransactions().stream().anyMatch(LoanTransaction::isChargeOff);
     }
+
+    public boolean hasAccelerateChargeOffStrategy() {
+        return LoanChargeOffBehaviour.ACCELERATE_MATURITY.equals(getLoanProductRelatedDetail().getChargeOffBehaviour());
+    }
 }

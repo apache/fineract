@@ -84,7 +84,7 @@ public class ProgressiveLoanInterestRefundServiceImpl implements InterestRefundS
         List<LoanRepaymentScheduleInstallment> installmentsToReprocess = new ArrayList<>(
                 loan.getRepaymentScheduleInstallments().stream().filter(i -> !i.isReAged() && !i.isAdditional()).toList());
 
-        if (loan.isProgressiveSchedule() && loan.hasChargeOffTransaction()) {
+        if (loan.isProgressiveSchedule() && loan.hasChargeOffTransaction() && loan.hasAccelerateChargeOffStrategy()) {
             final ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, null);
             loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
         }
