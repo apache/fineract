@@ -19,6 +19,8 @@
 package org.apache.fineract.portfolio.loanproduct.calc.data;
 
 import static org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper.isInPeriod;
+import static org.apache.fineract.portfolio.loanproduct.calc.data.LoanInterestScheduleModelModifiers.COPY;
+import static org.apache.fineract.portfolio.loanproduct.calc.data.LoanInterestScheduleModelModifiers.EMI_RECALCULATION;
 
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -56,7 +58,7 @@ public class ProgressiveLoanInterestScheduleModel {
     private final Integer installmentAmountInMultiplesOf;
     private final MathContext mc;
     private final Money zero;
-    private final boolean isCopiedForCalculation;
+    private final Map<LoanInterestScheduleModelModifiers, Boolean> modifiers;
 
     public ProgressiveLoanInterestScheduleModel(final List<RepaymentPeriod> repaymentPeriods,
             final LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail,
@@ -68,7 +70,7 @@ public class ProgressiveLoanInterestScheduleModel {
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
         this.mc = mc;
         this.zero = Money.zero(loanProductRelatedDetail.getCurrencyData(), mc);
-        this.isCopiedForCalculation = false;
+        modifiers = new HashMap<>(Map.of(EMI_RECALCULATION, true, COPY, false));
     }
 
     private ProgressiveLoanInterestScheduleModel(final List<RepaymentPeriod> repaymentPeriods, final TreeSet<InterestRate> interestRates,
@@ -83,7 +85,7 @@ public class ProgressiveLoanInterestScheduleModel {
         this.loanTermVariations = loanTermVariations;
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
         this.zero = Money.zero(loanProductRelatedDetail.getCurrencyData(), mc);
-        this.isCopiedForCalculation = isCopiedForCalculation;
+        modifiers = new HashMap<>(Map.of(EMI_RECALCULATION, true, COPY, isCopiedForCalculation));
     }
 
     public ProgressiveLoanInterestScheduleModel deepCopy(MathContext mc) {
@@ -404,5 +406,17 @@ public class ProgressiveLoanInterestScheduleModel {
         }
         return loanTermVariationsData.stream()
                 .collect(Collectors.groupingBy(ltvd -> LoanTermVariationType.fromInt(ltvd.getTermType().getId().intValue())));
+    }
+
+    public void disableEMIRecalculation() {
+        this.modifiers.put(EMI_RECALCULATION, false);
+    }
+
+    public boolean isEMIRecalculationEnabled() {
+        return this.modifiers.get(EMI_RECALCULATION);
+    }
+
+    public boolean isCopy() {
+        return this.modifiers.get(COPY);
     }
 }

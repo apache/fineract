@@ -2250,6 +2250,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         lastPeriod.setEmi(lastPeriod.getDuePrincipal().add(totalPrincipal).add(newInterest));
 
         emiCalculator.calculateRateFactorForRepaymentPeriod(lastPeriod, transactionCtx.getModel());
+        transactionCtx.getModel().disableEMIRecalculation();
 
         for (LoanTransaction processTransaction : transactionsToBeReprocessed) {
             emiCalculator.addBalanceCorrection(transactionCtx.getModel(), processTransaction.getTransactionDate(),

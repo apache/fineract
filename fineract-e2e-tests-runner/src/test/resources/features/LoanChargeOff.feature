@@ -3586,7 +3586,7 @@ Feature: Charge-off
     And Global configuration "is-principal-compounding-disabled-for-overdue-loans" is disabled
 
   @Skip @TestRailId:C3360 @AdvancedPaymentAllocation
-  Scenario: Verify accelerate maturity to charge-off date when interest recalculation is enabled - case when charge-off occurs with adjustment to last installment
+  Scenario: SKIPPED-Verify accelerate maturity to charge-off date when interest recalculation is enabled - case when charge-off occurs with adjustment to last installment
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
