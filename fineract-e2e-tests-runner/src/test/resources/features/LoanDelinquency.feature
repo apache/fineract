@@ -237,7 +237,7 @@ Feature: LoanDelinquency
     When Admin sets the business date to "20 October 2023"
     Then Initiating a DELINQUENCY RESUME with an endDate results an error - startDate: "20 October 2023", endDate: "30 October 2023"
 
-  @Skip @TestRailId:C2992
+  @TestRailId:C2992
   Scenario: Verify Loan level loan delinquency - loan goes into delinquency pause then will be resumed
     When Admin sets the business date to "01 October 2023"
     When Admin creates a client with random data
@@ -1253,31 +1253,6 @@ Feature: LoanDelinquency
     Then Admin checks that delinquency range is: "NO_DELINQUENCY" and has delinquentDate ""
     And Admin successfully approves the loan on "01 March 2024" with "1000" amount and expected disbursement date on "01 March 2024"
     Then Admin checks that delinquency range is: "NO_DELINQUENCY" and has delinquentDate ""
-
-#    TODO unskip and check when PS-1827 is done
-  @Skip @TestRailId:C3093
-  Scenario: Verify that LoanDelinquencyRangeChangeBusinessEvent has the correct Delinquency range, date and amount on both loan- and installment-level
-    When Admin sets the business date to "01 January 2024"
-    When Admin creates a client with random data
-    When Admin creates a fully customized loan with the following data:
-      | LoanProduct                                                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | LP2_DOWNPAYMENT_ADV_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL_INSTALLMENT_LEVEL_DELINQUENCY | 01 January 2024   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 90                | DAYS                  | 30             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
-    And Admin successfully approves the loan on "01 January 2024" with "1000" amount and expected disbursement date on "01 January 2024"
-    When Admin successfully disburse the loan on "01 January 2024" with "1000" EUR transaction amount
-    When Admin runs inline COB job for Loan
-    When Admin sets the business date to "01 February 2024"
-    When Admin runs inline COB job for Loan
-    When Admin sets the business date to "05 March 2024"
-    When Admin runs inline COB job for Loan
-    Then Loan has the following LOAN level delinquency data:
-      | classification | delinquentAmount | delinquentDate  | delinquentDays | pastDueDays |
-      | RANGE_60       | 750.0            | 04 January 2024 | 61             | 64          |
-    Then Loan has the following INSTALLMENT level delinquency data:
-      | rangeId | Range    | Amount |
-      | 2       | RANGE_3  | 250.00 |
-      | 3       | RANGE_30 | 250.00 |
-      | 4       | RANGE_60 | 250.00 |
-    Then LoanDelinquencyRangeChangeBusinessEvent has the same Delinquency range, date and amount as in LoanDetails on both loan- and installment-level
 
   @TestRailId:C3135
   Scenario: Verify that the delinquency is not applied on Loan with Rejected status

@@ -136,7 +136,6 @@ Feature: LoanReAging
       | 20 February 2024 | Re-age           | 750.0  | 750.0     | 0.0      | 0.0  | 0.0       | 0.0          | true     |
     Then Admin checks that delinquency range is: "RANGE_30" and has delinquentDate "2024-01-19"
 
-
   @TestRailId:C3053 @AdvancedPaymentAllocation
   Scenario: Verify that Loan re-aging transaction works properly when chargeback happens after re-aging
     When Admin sets the business date to "01 January 2024"

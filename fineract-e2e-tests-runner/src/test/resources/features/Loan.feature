@@ -6078,6 +6078,7 @@ Feature: Loan
       | 15 February 2024 | Accrual          | 0.82   |   0.0     | 0.82     | 0.0  | 0.0       | 0.0          | false    |
     Then Loan's all installments have obligations met
 
+  @TestRailId:C3483
   Scenario: Early pay-off loan with interest, TILL_REST_FREQUENCY_DATE product
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
@@ -6140,6 +6141,7 @@ Feature: Loan
     Then Loan's all installments have obligations met
     When Admin set "LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_TILL_REST_FREQUENCY_DATE" loan product "DEFAULT" transaction type to "LAST_INSTALLMENT" future installment allocation rule
 
+  @TestRailId:C3484
   Scenario: Interest recalculation - S1 daily for overdue loan
     Given Global configuration "enable-business-date" is enabled
     When Admin sets the business date to "1 January 2024"
@@ -6161,6 +6163,7 @@ Feature: Loan
       | 5  | 31   | 01 June 2024     |           | 17.85           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
       | 6  | 30   | 01 July 2024     |           | 0.0             | 17.85         | 0.58     | 0.0  | 0.0       | 18.43 | 0.0  | 0.0        | 0.0  | 18.43       |
 
+  @TestRailId:C3485
   Scenario: Interest recalculation - S2 2 overdue
     Given Global configuration "enable-business-date" is enabled
     When Admin sets the business date to "1 January 2024"
@@ -6182,6 +6185,7 @@ Feature: Loan
       | 5  | 31   | 01 June 2024     |           | 17.06           | 16.81         | 0.2      | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
       | 6  | 30   | 01 July 2024     |           | 0.0             | 17.06         | 0.1      | 0.0  | 0.0       | 17.16 | 0.0  | 0.0        | 0.0  | 17.16       |
 
+  @TestRailId:C3486
   Scenario: Interest recalculation - S3 1 paid, 1 overdue
     Given Global configuration "enable-business-date" is enabled
     When Admin sets the business date to "1 January 2024"
@@ -6205,6 +6209,7 @@ Feature: Loan
       | 5  | 31   | 01 June 2024     |                  | 16.93           | 16.81         | 0.2      | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
       | 6  | 30   | 01 July 2024     |                  | 0.0             | 16.93         | 0.1      | 0.0  | 0.0       | 17.03 | 0.0   | 0.0        | 0.0  | 17.03       |
 
+  @TestRailId:C3487
   Scenario: Loan Details Emi Amount Variations - AssociationsAll
     Given Global configuration "is-interest-to-be-recovered-first-when-greater-than-emi" is enabled
     Given Global configuration "enable-business-date" is enabled
@@ -6219,6 +6224,7 @@ Feature: Loan
       | Term Type Id | Term Type Code         | Term Type Value | Applicable From | Decimal Value | Date Value      | Is Specific To Installment | Is Processed |
       | 1            | loanTermType.emiAmount | emiAmount       | 01 January 2023 | 50.0          |                 | false                      |              |
 
+  @TestRailId:C3488
   Scenario: Loan Details Loan Term Variations
     Given Global configuration "is-interest-to-be-recovered-first-when-greater-than-emi" is enabled
     Given Global configuration "enable-business-date" is enabled
@@ -6234,6 +6240,7 @@ Feature: Loan
       | 1            | loanTermType.emiAmount | emiAmount       | 01 January 2023  | 50.0          |                 | false                      |              |
       | 4            | loanTermType.dueDate   | dueDate         | 01 February 2023 | 50.0          | 15 January 2023 | false                      |              |
 
+  @TestRailId:C3489
   Scenario: EMI calculation with 360/30 Early repayment - Last installment strategy - UC1: Multiple early repayment
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data

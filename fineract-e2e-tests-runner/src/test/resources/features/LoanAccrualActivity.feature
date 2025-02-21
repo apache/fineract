@@ -2213,7 +2213,7 @@ Feature: LoanAccrualActivity
       | 26 January 2024  | Accrual          | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 27 January 2024  | Accrual          | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
 
-    #  PS-2245
+  @TestRailId:C3494
   Scenario: Verify non negative amount for Accrual Activity on backdated repayment
     When Admin sets the business date to "09 December 2024"
     When Admin creates a client with random data
@@ -2386,7 +2386,7 @@ Feature: LoanAccrualActivity
       | 10 January 2025  | Repayment        | 676.22 | 675.62    | 0.6      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 10 January 2025  | Accrual Activity | 0.6    | 0.0       | 0.6      | 0.0  | 0.0       | 0.0          | false    | false    |
 
-    #  PS-2245
+  @TestRailId:C3495
   Scenario: Verify non negative amount for Accrual Activity on backdated repayment and accrual adjustment
     When Admin sets the business date to "09 December 2024"
     When Admin creates a client with random data
@@ -2469,7 +2469,7 @@ Feature: LoanAccrualActivity
       | 10 January 2025  | Accrual            | 0.6    | 0.0       | 0.6      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2025  | Accrual Adjustment | 0.6    | 0.0       | 0.6      | 0.0  | 0.0       | 0.0          | false    | false    |
 
-#  PS-2245
+  @TestRailId:C3496
   Scenario: Verify non negative amount for Accrual Activity on backdated repayment, accrual adjustment and revert activity
     When Admin sets the business date to "09 December 2024"
     When Admin creates a client with random data
@@ -4395,7 +4395,6 @@ Feature: LoanAccrualActivity
       | 19 March 2025    | Accrual          | 0.18   | 0.0       | 0.18     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 20 March 2025    | Accrual          | 0.18   | 0.0       | 0.18     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 21 March 2025    | Accrual          | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
-
 
   @TestRailId:C3400
   Scenario: Verify Interest Payment Waiver isn't reversed and replayed after one accrual is created

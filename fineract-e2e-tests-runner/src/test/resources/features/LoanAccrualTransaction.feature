@@ -843,7 +843,7 @@ Feature: LoanAccrualTransaction
       | 1000          | 0        | 10   | 10        | 1020 | 0    | 0          | 0    | 1020        |
     When Global config "charge-accrual-date" value set to "due-date"
 
-  @Skip @TestRailId:C3128
+  @TestRailId:C3128
   Scenario: Verify that the final accrual calculation is correct when multiple Charges are added and waived
     When Admin sets the business date to "17 April 2024"
     When Admin creates a client with random data

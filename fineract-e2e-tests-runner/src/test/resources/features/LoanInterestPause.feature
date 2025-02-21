@@ -1,6 +1,7 @@
 @InterestPauseFeature
 Feature: Loan interest pause on repayment schedule
 
+  @TestRailId:C3475
   Scenario: S1 - pause calculation within same period, interestRecalculation = true
     When Admin sets the business date to "1 January 2024"
     And Admin creates a client with random data
@@ -37,6 +38,7 @@ Feature: Loan interest pause on repayment schedule
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 100           | 1.95     | 0    | 0         | 101.95 | 17.01 | 0          | 0    | 84.94       |
 
+  @TestRailId:C3476
   Scenario: S2 - pause calculation between two periods, interestRecalculation = true
     When Admin sets the business date to "1 January 2024"
     And Admin creates a client with random data
@@ -73,6 +75,7 @@ Feature: Loan interest pause on repayment schedule
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 100           | 1.57     | 0    | 0         | 101.57 | 17.01 | 0          | 0    | 84.56       |
 
+  @TestRailId:C3477
   Scenario: Backdated pause after the repayment
     When Admin sets the business date to "1 January 2024"
     And Admin creates a client with random data
@@ -132,6 +135,7 @@ Feature: Loan interest pause on repayment schedule
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
       | 01 March 2024    | Repayment        | 17.01  | 16.62     | 0.39     | 0.0  | 0.0       | 66.95        | false    | true     |
 
+  @TestRailId:C3478
   Scenario: Multiple pause
     When Admin sets the business date to "1 January 2024"
     And Admin creates a client with random data
@@ -209,6 +213,7 @@ Feature: Loan interest pause on repayment schedule
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
       | 01 March 2024    | Repayment        | 17.01  | 16.62     | 0.39     | 0.0  | 0.0       | 66.95        | false    | true     |
 
+  @TestRailId:C3479
   Scenario: Interest accrual pause between two periods - UC2
     When Admin sets the business date to "2 January 2024"
     And Admin creates a client with random data
@@ -318,6 +323,7 @@ Feature: Loan interest pause on repayment schedule
       | 03 April 2024    | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 04 April 2024    | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
 
+  @TestRailId:C3480
   Scenario: Early repayment and interest pause
     When Admin sets the business date to "1 January 2024"
     And Admin creates a client with random data

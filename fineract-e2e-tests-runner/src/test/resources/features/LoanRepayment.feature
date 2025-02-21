@@ -857,7 +857,7 @@ Feature: LoanRepayment
       | INCOME  | 404001       | Interest Income Charge Off | 10.0  |        |
       | INCOME  | 404008       | Fee Charge Off             | 13.0  |        |
 
-  @Skip @TestRailId:C2626 @chargeoffOnLoanWithInterest
+  @TestRailId:C2626 @chargeoffOnLoanWithInterest
   Scenario: Verify that the accounting treatment is correct for Goodwill Credit transaction after Charge-off
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -948,7 +948,7 @@ Feature: LoanRepayment
       | INCOME  | 404001       | Interest Income Charge Off |       | 10.0   |
       | INCOME  | 404008       | Fee Charge Off             |       | 13.0   |
 
-  @Skip @TestRailId:C2628 @chargeoffOnLoanWithInterest
+  @TestRailId:C2628 @chargeoffOnLoanWithInterest
   Scenario: Verify that the accounting treatment is correct for Goodwill Credit transaction when the loan was Charged-off and undo happened for Goodwill
     When Admin sets the business date to "1 January 2023"
     And Admin creates a client with random data
@@ -966,11 +966,11 @@ Feature: LoanRepayment
     When Customer makes "GOODWILL_CREDIT" transaction with "AUTOPAY" payment type on "11 January 2023" with 300 EUR transaction amount and system-generated Idempotency key
     When Customer undo "1"th transaction made on "11 January 2023"
     Then Loan Repayment schedule has 3 periods, with the following data for periods:
-      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees  | Penalties | Due    | Paid  | In advance | Late | Outstanding |
-      |    |      | 01 January 2023  |           | 1000.0          |               |          | 0.0   |           | 0.0    | 0.0   |            |      |             |
-      | 1  | 31   | 01 February 2023 |           | 666.67          | 333.33        | 10.0     | 103.0 | 10.0      | 456.33 | 100.0 | 100.0      | 0.0  | 356.33      |
-      | 2  | 28   | 01 March 2023    |           | 333.34          | 333.33        | 10.0     | 0.0   | 0.0       | 343.33 | 0.0   | 0.0        | 0.0  | 343.33      |
-      | 3  | 31   | 01 April 2023    |           | 0.0             | 333.34        | 10.0     | 0.0   | 0.0       | 343.34 | 0.0   | 0.0        | 0.0  | 343.34      |
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees  | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 January 2023  |           | 1000.0          |               |          | 0.0   |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 01 February 2023 |           | 667.0           | 333.0         | 10.0     | 103.0 | 10.0      | 456.0 | 100.0 | 100.0      | 0.0  | 356.0       |
+      | 2  | 28   | 01 March 2023    |           | 334.0           | 333.0         | 10.0     | 0.0   | 0.0       | 343.0 | 0.0   | 0.0        | 0.0  | 343.0       |
+      | 3  | 31   | 01 April 2023    |           | 0.0             | 334.0         | 10.0     | 0.0   | 0.0       | 344.0 | 0.0   | 0.0        | 0.0  | 344.0       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 1000          | 30       | 103  | 10        | 1143 | 100  | 100        | 0    | 1043        |
@@ -1261,7 +1261,7 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 1000          | 0        | 0    | 60        | 1060 | 700  | 700        | 0    | 360         |
 
-  @Skip @TestRailId:C2639 @PaymentStrategyDueInAdvance
+  @TestRailId:C2639 @PaymentStrategyDueInAdvance
   Scenario: Verify the due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy payment strategy - adding charge due in the future, then repayment before due date with full amount
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -1288,10 +1288,10 @@ Feature: LoanRepayment
     Then Loan Repayment schedule has 1 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
       |    |      | 01 January 2023  |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
-      | 1  | 31   | 01 February 2023 | 17 January 2023 | 0.0             | 1000.0        | 0.0      | 0.0  | 50.0      | 1050.0 | 1050.0 | 1000.0     | 0.0  | 0.0         |
+      | 1  | 31   | 01 February 2023 | 17 January 2023 | 0.0             | 1000.0        | 0.0      | 0.0  | 50.0      | 1050.0 | 1050.0 | 1050.0     | 0.0  | 0.0         |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
-      | 1000          | 0        | 0    | 50        | 1050 | 1050 | 1000       | 0    | 0           |
+      | 1000          | 0        | 0    | 50        | 1050 | 1050 | 1050       | 0    | 0           |
 
   @TestRailId:C2655 @PaymentStrategyDueInAdvance
   Scenario: Verify the due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy payment strategy - due principal
@@ -1870,7 +1870,7 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 1500          | 0        | 10   | 25        | 1535 | 1000 | 1000       | 0    | 535         |
 
-  @Skip @TestRailId:C2799 @PaymentStrategyDueInAdvance
+  @TestRailId:C2799 @PaymentStrategyDueInAdvance
   Scenario: Verify the due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy payment strategy: Same day transaction
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
@@ -2813,8 +2813,8 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 1000          | 10       | 20   | 20        | 1050 | 1050 | 0          | 0    | 0           |
 
-  @Skip @TestRailId:C2800 @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
-  Scenario: Verify the due-penalty-interest-principal-fee-in-advance-penalty-interest-principal-fee-strategy payment strategy: Same day transaction
+  @TestRailId:C2800 @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
+  Scenario: Verify the due-penalty-interest-principal-fee-in-advance-penalty-interest-principal-fee-strategy payment strategy: Same day transaction - UC2
     When Admin sets the business date to "01 January 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:

@@ -4236,6 +4236,7 @@ Feature: LoanChargeback
       | 15 July 2024     | Chargeback       | 17.01  | 16.81     | 0.2      | 0.0  | 0.0       | 16.81        | false    | false    |
       | 30 July 2024     | Chargeback       | 17.0   | 16.9      | 0.1      | 0.0  | 0.0       | 33.71        | false    | false    |
 
+  @TestRailId:C3490
   Scenario: Full chargeback with no interest recalculation, interest allocation first, before maturity date
     When Admin sets the business date to "1 January 2024"
     And Admin creates a client with random data
@@ -4296,6 +4297,7 @@ Feature: LoanChargeback
       | 01 March 2024    | Repayment        | 17.01  | 16.52     | 0.49     | 0.0  | 0.0       | 67.05        | false    | false    |
       | 01 March 2024    | Chargeback       | 17.01  | 16.52     | 0.49     | 0.0  | 0.0       | 83.57        | false    | false    |
 
+  @TestRailId:C3491
   Scenario: Partial chargeback with no interest recalculation, interest allocation first, before maturity date
     When Admin sets the business date to "1 January 2024"
     And Admin creates a client with random data
@@ -4356,6 +4358,7 @@ Feature: LoanChargeback
       | 01 March 2024    | Repayment        | 17.01  | 16.52     | 0.49     | 0.0  | 0.0       | 67.05        | false    | false    |
       | 01 March 2024    | Chargeback       | 15.0   | 14.51     | 0.49     | 0.0  | 0.0       | 81.56        | false    | false    |
 
+  @TestRailId:C3492
   Scenario: Partial chargeback with disabled interest recalculation, allocation principal first, before maturity date
     When Admin sets the business date to "1 January 2024"
     And Admin creates a client with random data
@@ -4416,6 +4419,7 @@ Feature: LoanChargeback
       | 01 March 2024    | Repayment        | 17.01  | 16.52     | 0.49     | 0.0  | 0.0       | 67.05        | false    | false    |
       | 01 March 2024    | Chargeback       | 15.0   | 15.0      | 0.0      | 0.0  | 0.0       | 82.05        | false    | false    |
 
+  @TestRailId:C3493
   Scenario: Two chargebacks with disabled interest recalculation, allocation principal first
     When Admin sets the business date to "1 January 2024"
     And Admin creates a client with random data

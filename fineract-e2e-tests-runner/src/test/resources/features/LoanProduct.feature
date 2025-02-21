@@ -182,6 +182,7 @@ Feature: LoanProduct
     When Refund undo happens on "1 July 2022"
     Then Loan has 1000 outstanding amount
 
+  @TestRailId:C3481
   Scenario: As a user I would like to verify Charge-Off reasons options in loan product template response
     When Admin sets the business date to "12 December 2021"
     When Admin creates a client with random data
@@ -194,6 +195,7 @@ Feature: LoanProduct
       | Delinquent             |             | 3        | true      | false        |
       | Other                  |             | 4        | true      | false        |
 
+  @TestRailId:C3482
   Scenario: As a user I would like to verify Charge-Off reasons options in specific loan product response
     When Admin sets the business date to "12 December 2021"
     When Admin creates a client with random data

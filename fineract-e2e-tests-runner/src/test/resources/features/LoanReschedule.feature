@@ -222,38 +222,39 @@ Feature: LoanReschedule
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 3000          | 0        | 0    | 0         | 3000 | 0    | 0          | 0    | 3000        |
 
-#  TODO unskip and check when PS-1543 is done (periods back to 3 or 5)
-  @Skip @TestRailId:C2808
+  @TestRailId:C2808
   Scenario: Verify that loan is rescheduled properly in case of: multiple installments, mid-term grace period on interest
     When Admin sets the business date to "01 July 2023"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
-      | LP1_INTEREST_FLAT | 01 July 2023      | 3000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 10                | MONTHS                | 1              | MONTHS                 | 10                 | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
-    And Admin successfully approves the loan on "01 July 2023" with "3000" amount and expected disbursement date on "01 July 2023"
-    And Admin successfully disburse the loan on "01 July 2023" with "3000" EUR transaction amount
-#    Then Loan Repayment schedule has 3 periods, with the following data for periods:
-#      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
-#      |    |      | 01 July 2023      |           | 3000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
-#      | 1  | 31   | 01 August 2023    |           | 2000.0          | 1000.0        | 30.0     | 0.0  | 0.0       | 1030.0 | 0.0  | 0.0        | 0.0  | 1030.0      |
-#      | 2  | 31   | 01 September 2023 |           | 1000.0          | 1000.0        | 30.0     | 0.0  | 0.0       | 1030.0 | 0.0  | 0.0        | 0.0  | 1030.0      |
-#      | 3  | 30   | 01 October 2023   |           | 0.0             | 1000.0        | 30.0     | 0.0  | 0.0       | 1030.0 | 0.0  | 0.0        | 0.0  | 1030.0      |
-#    Then Loan Repayment schedule has the following data in Total row:
-#      | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
-#      | 3000          | 90       | 0    | 0         | 3090 | 0    | 0          | 0    | 3090        |
+      | LP1_INTEREST_FLAT | 01 July 2023      | 4000           | 12                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 4                 | MONTHS                | 1              | MONTHS                 | 4                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+    And Admin successfully approves the loan on "01 July 2023" with "4000" amount and expected disbursement date on "01 July 2023"
+    And Admin successfully disburse the loan on "01 July 2023" with "4000" EUR transaction amount
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 01 July 2023      |           | 4000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 31   | 01 August 2023    |           | 3000.0          | 1000.0        | 40.0     | 0.0  | 0.0       | 1040.0 | 0.0  | 0.0        | 0.0  | 1040.0      |
+      | 2  | 31   | 01 September 2023 |           | 2000.0          | 1000.0        | 40.0     | 0.0  | 0.0       | 1040.0 | 0.0  | 0.0        | 0.0  | 1040.0      |
+      | 3  | 30   | 01 October 2023   |           | 1000.0          | 1000.0        | 40.0     | 0.0  | 0.0       | 1040.0 | 0.0  | 0.0        | 0.0  | 1040.0      |
+      | 4  | 31   | 01 November 2023  |           | 0.0             | 1000.0        | 40.0     | 0.0  | 0.0       | 1040.0 | 0.0  | 0.0        | 0.0  | 1040.0      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
+      | 4000          | 160      | 0    | 0         | 4160 | 0    | 0          | 0    | 4160        |
     When Admin sets the business date to "05 July 2023"
     When Admin creates and approves Loan reschedule with the following data:
       | rescheduleFromDate | submittedOnDate | adjustedDueDate | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
       | 01 September 2023  | 05 July 2023    |                 |                  | 2               |            |                 |
-#    Then Loan Repayment schedule has 3 periods, with the following data for periods:
-#      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
-#      |    |      | 01 July 2023      |           | 3000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
-#      | 1  | 31   | 01 August 2023    |           | 2000.0          | 1000.0        | 30.0     | 0.0  | 0.0       | 1030.0 | 0.0  | 0.0        | 0.0  | 1030.0      |
-#      | 2  | 31   | 01 September 2023 |           | 1000.0          | 1000.0        | 0.0      | 0.0  | 0.0       | 1000.0 | 0.0  | 0.0        | 0.0  | 1000.0      |
-#      | 3  | 30   | 01 October 2023   |           | 0.0             | 1000.0        | 0.0      | 0.0  | 0.0       | 1000.0 | 0.0  | 0.0        | 0.0  | 1000.0      |
-#    Then Loan Repayment schedule has the following data in Total row:
-#      | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
-#      | 3000          | 30       | 0    | 0         | 3030 | 0    | 0          | 0    | 3030        |
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 01 July 2023      |           | 4000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 31   | 01 August 2023    |           | 3000.0          | 1000.0        | 40.0     | 0.0  | 0.0       | 1040.0 | 0.0  | 0.0        | 0.0  | 1040.0      |
+      | 2  | 31   | 01 September 2023 |           | 2000.0          | 1000.0        | 0.0      | 0.0  | 0.0       | 1000.0 | 0.0  | 0.0        | 0.0  | 1000.0      |
+      | 3  | 30   | 01 October 2023   |           | 1000.0          | 1000.0        | 0.0      | 0.0  | 0.0       | 1000.0 | 0.0  | 0.0        | 0.0  | 1000.0      |
+      | 4  | 31   | 01 November 2023  |           | 0.0             | 1000.0        | 120.0    | 0.0  | 0.0       | 1120.0 | 0.0  | 0.0        | 0.0  | 1120.0      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
+      | 4000          | 160      | 0    | 0         | 4160 | 0    | 0          | 0    | 4160        |
 
   @TestRailId:C2809
   Scenario: Verify that loan is rescheduled properly in case of: multiple installments, new interest rate
