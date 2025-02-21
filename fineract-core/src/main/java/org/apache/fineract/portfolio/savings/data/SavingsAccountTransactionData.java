@@ -398,8 +398,9 @@ public final class SavingsAccountTransactionData implements Serializable {
         if (isDeposit() || isDividendPayoutAndNotReversed()) {
             endOfDayBalance = openingBalance.plus(getAmount());
         } else if (isWithdrawal() || isChargeTransactionAndNotReversed()) {
-
-            if (openingBalance.isGreaterThanZero()) {
+            if (isWithdrawal()){
+                endOfDayBalance = Money.of(currency, this.runningBalance);
+            }else if (openingBalance.isGreaterThanZero()) {
                 endOfDayBalance = openingBalance.minus(getAmount());
             } else {
                 endOfDayBalance = Money.of(currency, this.runningBalance);
@@ -436,7 +437,9 @@ public final class SavingsAccountTransactionData implements Serializable {
             if (isDeposit() || isDividendPayoutAndNotReversed()) {
                 endOfDayBalance = endOfDayBalance.plus(getAmount());
             } else if (isWithdrawal() || isChargeTransactionAndNotReversed()) {
-                if (endOfDayBalance.isGreaterThanZero() || isAllowOverdraft) {
+                if (isWithdrawal()){
+                    endOfDayBalance = Money.of(currency, this.runningBalance);
+                } else if (endOfDayBalance.isGreaterThanZero() || isAllowOverdraft) {
                     endOfDayBalance = endOfDayBalance.minus(getAmount());
                 } else {
                     endOfDayBalance = Money.of(currency, this.runningBalance);
