@@ -48,7 +48,7 @@ public enum GLClosureJsonInputParams {
 
     @Override
     public String toString() {
-        return name().toString().replaceAll("_", " ");
+        return name().replace("_", " ");
     }
 
     public String getValue() {
