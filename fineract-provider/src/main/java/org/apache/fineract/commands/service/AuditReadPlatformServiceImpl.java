@@ -47,6 +47,7 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.infrastructure.security.utils.SQLBuilder;
 import org.apache.fineract.organisation.office.data.OfficeData;
@@ -92,6 +93,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
     private final SavingsProductReadPlatformService savingsProductReadPlatformService;
     private final DepositProductReadPlatformService depositProductReadPlatformService;
     private final ColumnValidator columnValidator;
+    private final SqlValidator sqlValidator;
 
     private static final class AuditMapper implements RowMapper<AuditData> {
 
@@ -167,7 +169,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
     }
 
     @Override
-    public Collection<AuditData> retrieveAuditEntries(final SQLBuilder extraCriteria, final boolean includeJson) {
+    public List<AuditData> retrieveAuditEntries(final SQLBuilder extraCriteria, final boolean includeJson) {
         return retrieveEntries("audit", extraCriteria, " order by aud.id DESC limit " + PaginationParameters.DEFAULT_MAX_LIMIT,
                 includeJson);
     }
@@ -176,6 +178,8 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
     public Page<AuditData> retrievePaginatedAuditEntries(final SQLBuilder extraCriteria, final boolean includeJson,
             final PaginationParameters parameters) {
 
+        sqlValidator.validate(parameters.getOrderBy());
+        sqlValidator.validate(parameters.getSortOrder());
         this.paginationParametersDataValidator.validateParameterValues(parameters, supportedOrderByValues, "audits");
         final AppUser currentUser = this.context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
@@ -203,12 +207,12 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
     }
 
     @Override
-    public Collection<AuditData> retrieveAllEntriesToBeChecked(final SQLBuilder extraCriteria, final boolean includeJson) {
+    public List<AuditData> retrieveAllEntriesToBeChecked(final SQLBuilder extraCriteria, final boolean includeJson) {
         extraCriteria.addCriteria("aud.status = ", 2);
         return retrieveEntries("makerchecker", extraCriteria, " order by aud.id, mk.username", includeJson);
     }
 
-    private Collection<AuditData> retrieveEntries(final String useType, final SQLBuilder extraCriteria, final String groupAndOrderBySQL,
+    private List<AuditData> retrieveEntries(final String useType, final SQLBuilder extraCriteria, final String groupAndOrderBySQL,
             final boolean includeJson) {
 
         if ((!useType.equals("audit") && !useType.equals("makerchecker"))) {

@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.commands.data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,7 +30,10 @@ import lombok.Setter;
  */
 @AllArgsConstructor
 @Getter
-public final class AuditData {
+public final class AuditData implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private final Long id;
     private final String actionName;
