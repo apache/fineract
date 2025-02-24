@@ -1427,6 +1427,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
 
         public static final String LAST_INSTALLMENT = "LAST_INSTALLMENT";
         public static final String NEXT_INSTALLMENT = "NEXT_INSTALLMENT";
+        public static final String NEXT_LAST_INSTALLMENT = "NEXT_LAST_INSTALLMENT";
 
     }
 

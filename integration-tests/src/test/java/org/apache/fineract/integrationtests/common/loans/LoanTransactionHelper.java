@@ -871,12 +871,13 @@ public class LoanTransactionHelper {
     @Deprecated(forRemoval = true)
     public PostLoansLoanIdTransactionsResponse makeLoanRepayment(final String repaymentTypeCommand, final String date,
             final Float amountToBePaid, final Integer loanID) {
-        log.info("Repayment with amount {} in {} for Loan {}", amountToBePaid, date, loanID);
+        log.info("{} with amount {} in {} for Loan {}", repaymentTypeCommand, amountToBePaid, date, loanID);
         return postLoanTransaction(createLoanTransactionURL(repaymentTypeCommand, loanID), getRepaymentBodyAsJSON(date, amountToBePaid));
     }
 
     public PostLoansLoanIdTransactionsResponse makeLoanRepayment(final Long loanId, final String command, final String date,
             final Double amountToBePaid) {
+        log.info("Make loan transaction. Command - {} with amount {} in {} for Loan {}", command, amountToBePaid, date, loanId);
         return Calls.ok(FineractClientHelper.getFineractClient().loanTransactions.executeLoanTransaction(loanId,
                 new PostLoansLoanIdTransactionsRequest().transactionAmount(amountToBePaid).transactionDate(date).dateFormat("dd MMMM yyyy")
                         .locale("en"),
@@ -2790,6 +2791,22 @@ public class LoanTransactionHelper {
 
     public PostLoansLoanIdResponse disburseLoan(Long loanId, PostLoansLoanIdRequest request) {
         return Calls.ok(FineractClientHelper.getFineractClient().loans.stateTransitions(loanId, request, "disburse"));
+    }
+
+    /**
+     * Disburse loan on provided date and amount.
+     *
+     * @param loanId
+     *            loan Id
+     * @param date
+     *            formatted to "d MMMM yyyy"
+     * @param amount
+     *            amount to disburse
+     * @return Post Loans Loan Id Response
+     */
+    public PostLoansLoanIdResponse disburseLoan(Long loanId, String date, Double amount) {
+        return disburseLoan(loanId, new PostLoansLoanIdRequest().actualDisbursementDate(date).dateFormat(DATE_FORMAT)
+                .transactionAmount(BigDecimal.valueOf(amount)).locale("en"));
     }
 
     public PostLoansLoanIdResponse disburseToSavingsLoan(String loanExternalId, PostLoansLoanIdRequest request) {

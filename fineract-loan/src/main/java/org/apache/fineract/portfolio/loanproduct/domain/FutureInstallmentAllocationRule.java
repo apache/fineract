@@ -31,6 +31,7 @@ public enum FutureInstallmentAllocationRule {
 
     NEXT_INSTALLMENT("Next installment"), //
     LAST_INSTALLMENT("Last installment"), //
+    NEXT_LAST_INSTALLMENT("Next/Last installment"), //
     REAMORTIZATION("Reamortization"); //
 
     private final String humanReadableName;
