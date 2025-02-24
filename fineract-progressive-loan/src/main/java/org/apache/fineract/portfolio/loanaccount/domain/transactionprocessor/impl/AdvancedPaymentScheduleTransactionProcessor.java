@@ -1764,6 +1764,18 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             inAdvanceInstallments = installments.stream().filter(installment -> installment.getTotalPaid(currency).isGreaterThan(zero))
                     .filter(e -> loanTransaction.isBefore(e.getDueDate()))
                     .max(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).stream().toList();
+        } else if (FutureInstallmentAllocationRule.NEXT_LAST_INSTALLMENT.equals(futureInstallmentAllocationRule)) {
+            // try to resolve as current installment ( not due )
+            inAdvanceInstallments = installments.stream().filter(installment -> installment.getTotalPaid(currency).isGreaterThan(zero))
+                    .filter(e -> loanTransaction.isBefore(e.getDueDate())).filter(f -> loanTransaction.isAfter(f.getFromDate())
+                            || (loanTransaction.isOn(f.getFromDate()) && f.getInstallmentNumber() == 1))
+                    .toList();
+            // if there is no current installment, resolve similar to LAST_INSTALLMENT
+            if (inAdvanceInstallments.isEmpty()) {
+                inAdvanceInstallments = installments.stream().filter(installment -> installment.getTotalPaid(currency).isGreaterThan(zero))
+                        .filter(e -> loanTransaction.isBefore(e.getDueDate()))
+                        .max(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).stream().toList();
+            }
         }
         return inAdvanceInstallments;
     }
@@ -1853,6 +1865,18 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 inAdvanceInstallments = installments.stream().filter(LoanRepaymentScheduleInstallment::isNotFullyPaidOff)
                         .filter(e -> loanTransaction.isBefore(e.getDueDate()))
                         .max(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).stream().toList();
+            } else if (FutureInstallmentAllocationRule.NEXT_LAST_INSTALLMENT.equals(futureInstallmentAllocationRule)) {
+                // try to resolve as current installment ( not due )
+                inAdvanceInstallments = installments.stream().filter(LoanRepaymentScheduleInstallment::isNotFullyPaidOff)
+                        .filter(e -> loanTransaction.isBefore(e.getDueDate())).filter(f -> loanTransaction.isAfter(f.getFromDate())
+                                || (loanTransaction.isOn(f.getFromDate()) && f.getInstallmentNumber() == 1))
+                        .toList();
+                // if there is no current installment, resolve similar to LAST_INSTALLMENT
+                if (inAdvanceInstallments.isEmpty()) {
+                    inAdvanceInstallments = installments.stream().filter(LoanRepaymentScheduleInstallment::isNotFullyPaidOff)
+                            .filter(e -> loanTransaction.isBefore(e.getDueDate()))
+                            .max(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).stream().toList();
+                }
             }
 
             int firstNormalInstallmentNumber = LoanRepaymentScheduleProcessingWrapper.fetchFirstNormalInstallmentNumber(installments);
@@ -2089,6 +2113,21 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                             currentInstallments = installments.stream().filter(predicate)
                                     .filter(e -> loanTransaction.isBefore(e.getDueDate()))
                                     .max(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).stream().toList();
+                        } else if (FutureInstallmentAllocationRule.NEXT_LAST_INSTALLMENT.equals(futureInstallmentAllocationRule)) {
+                            // get current installment where from date < transaction date < to date OR transaction date
+                            // is on first installment's first day ( from day )
+                            currentInstallments = installments.stream().filter(predicate)
+                                    .filter(e -> loanTransaction.isBefore(e.getDueDate()))
+                                    .filter(f -> loanTransaction.isAfter(f.getFromDate())
+                                            || (loanTransaction.isOn(f.getFromDate()) && f.getInstallmentNumber() == 1))
+                                    .toList();
+                            // if there is no current in advance installment resolve similar to LAST_INSTALLMENT
+                            if (currentInstallments.isEmpty()) {
+                                currentInstallments = installments.stream().filter(predicate)
+                                        .filter(e -> loanTransaction.isBefore(e.getDueDate()))
+                                        .max(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).stream()
+                                        .toList();
+                            }
                         }
                         int numberOfInstallments = currentInstallments.size();
                         paidPortion = Money.zero(currency);
