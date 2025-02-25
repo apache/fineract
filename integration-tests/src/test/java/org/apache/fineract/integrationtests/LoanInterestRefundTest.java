@@ -48,6 +48,7 @@ import org.apache.fineract.integrationtests.common.BusinessStepHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -1572,6 +1573,64 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                     transaction(48.94, "Interest Refund", "29 January 2025"), //
                     transaction(48.94, "Accrual", "29 January 2025") //
             ); //
+        });
+    }
+
+    /**
+     * Goal: test Merchant issued Refund does not cause infinite loop in special case of 2 transaction. * interest
+     * recalculation should be on. * merchant issued refund payment allocation should set to Last installment * default
+     * payment allocation should set to Next Installment Make a repayment to repay first instalment on its due date Make
+     * MerchantIssuedRefund to fully repay almost all the installments. 2nd installment should be fully unpaid and 3rd
+     * installment should have less outstanding principal portion than the total outstanding interest on the loan ( 2nd
+     * installment ). Make a 2nd MerchantIssuedRefund equal to remaining principal. Verify Repayment schedules and
+     * transactions. Verify that the loan become overpaid by the amount of 2nd interest refund.
+     */
+    @Test
+    public void verifyMerchantIssuedRefundInTwoPortion() {
+        runAt("1 February 2025", () -> {
+            Long loanProductId = getOrCreateLoanProduct();
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductId, "1 January 2025", 100.0, 26.0, 6, null);
+            Assertions.assertNotNull(loanId);
+            disburseLoan(loanId, BigDecimal.valueOf(100.0), "1 January 2025");
+            loanTransactionHelper.makeLoanRepayment(loanId, "Repayment", "1 February 2025", 17.94);
+            loanTransactionHelper.makeLoanRepayment(loanId, "MerchantIssuedRefund", "1 February 2025", 66.41);
+            verifyTransactions(loanId, //
+                    transaction(100.0, "Disbursement", "01 January 2025"), //
+                    transaction(17.94, "Repayment", "01 February 2025"), //
+                    transaction(66.41, "Merchant Issued Refund", "01 February 2025"), //
+                    transaction(1.47, "Interest Refund", "01 February 2025") //
+            );
+            verifyRepaymentSchedule(loanId, //
+                    installment(100.0, null, "01 January 2025"), //
+                    installment(15.73, 2.21, 0.0, true, "01 February 2025"), //
+                    installment(17.61, 0.33, 16.47, false, "01 March 2025"), //
+                    installment(12.84, 0.01, 0.26, false, "01 April 2025"), //
+                    installment(17.94, 0.0, 0.0, true, "01 May 2025"), //
+                    installment(17.94, 0.0, 0.0, true, "01 June 2025"), //
+                    installment(17.94, 0.0, 0.0, true, "01 July 2025") //
+            );
+            loanTransactionHelper.makeLoanRepayment(loanId, "MerchantIssuedRefund", "1 February 2025", 16.39);
+            verifyTransactions(loanId, //
+                    transaction(100.0, "Disbursement", "01 January 2025"), //
+                    transaction(17.94, "Repayment", "01 February 2025"), //
+                    transaction(66.41, "Merchant Issued Refund", "01 February 2025"), //
+                    transaction(1.47, "Interest Refund", "01 February 2025"), //
+                    transaction(16.39, "Merchant Issued Refund", "01 February 2025"), //
+                    transaction(0.36, "Interest Refund", "01 February 2025"), //
+                    transaction(2.21, "Accrual", "01 February 2025") //
+            );
+            verifyRepaymentSchedule(loanId, //
+                    installment(100.0, null, "01 January 2025"), //
+                    installment(15.73, 2.21, 0.0, true, "01 February 2025"), //
+                    installment(12.51, 0.0, 0.0, true, "01 March 2025"), //
+                    installment(17.94, 0.0, 0.0, true, "01 April 2025"), //
+                    installment(17.94, 0.0, 0.0, true, "01 May 2025"), //
+                    installment(17.94, 0.0, 0.0, true, "01 June 2025"), //
+                    installment(17.94, 0.0, 0.0, true, "01 July 2025") //
+            );
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            verifyLoanStatus(loanDetails, LoanStatus.OVERPAID);
+            Assertions.assertEquals(0.36, loanDetails.getTotalOverpaid());
         });
     }
 }

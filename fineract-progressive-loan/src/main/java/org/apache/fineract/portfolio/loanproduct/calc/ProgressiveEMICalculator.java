@@ -257,10 +257,23 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         ProgressiveLoanInterestScheduleModel recalculatedScheduleModelTillDate = recalculateScheduleModelTillDate(scheduleModel,
                 periodDueDate, targetDate);
         RepaymentPeriod repaymentPeriod = recalculatedScheduleModelTillDate.findRepaymentPeriodByDueDate(periodDueDate).orElseThrow();
-        boolean multiplePeriodIsUnpaid = recalculatedScheduleModelTillDate.repaymentPeriods().stream().filter(rp -> !rp.isFullyPaid())
-                .count() > 1L;
-        if (multiplePeriodIsUnpaid && !targetDate.isAfter(repaymentPeriod.getFromDate())) {
-            repaymentPeriod.setEmi(repaymentPeriod.getOriginalEmi());
+        long notFullyRepaidRepaymentPeriodCount = recalculatedScheduleModelTillDate.repaymentPeriods().stream()
+                .filter(rp -> !rp.isFullyPaid()).count();
+        boolean multiplePeriodIsUnpaid = notFullyRepaidRepaymentPeriodCount > 1L;
+        boolean onePeriodIsUnpaid = notFullyRepaidRepaymentPeriodCount == 1L;
+        if (!targetDate.isAfter(repaymentPeriod.getFromDate())) {
+            if (multiplePeriodIsUnpaid) {
+                repaymentPeriod.setEmi(repaymentPeriod.getOriginalEmi());
+            } else if (repaymentPeriod.isFullyPaid() && onePeriodIsUnpaid) {
+                repaymentPeriod.setEmi(MathUtil.min(repaymentPeriod.getOriginalEmi(), //
+                        recalculatedScheduleModelTillDate.getTotalDuePrincipal() //
+                                .minus(recalculatedScheduleModelTillDate.getTotalPaidPrincipal()) //
+                                .add(recalculatedScheduleModelTillDate.getTotalDueInterest()) //
+                                .minus(recalculatedScheduleModelTillDate.getTotalPaidInterest()) //
+                                .add(repaymentPeriod.getPaidPrincipal()) //
+                                .add(repaymentPeriod.getPaidInterest()),
+                        false)); //
+            }
         }
 
         return new PeriodDueDetails(repaymentPeriod.getEmi(), //
