@@ -6278,3 +6278,64 @@ Feature: Charge-off
       | 15 February 2024 | Waive loan charges | 10.0   | 0.0       | 0.0      | 0.0  | 0.0       | 83.59        | false    | false    |
       | 15 February 2024 | Charge-off         | 88.81  | 83.59     | 0.22     | 5.0  | 0.0       | 0.0          | false    | true     |
 
+  @TestRailId:C3508
+  Scenario: Verify interest portion on Charge-off transaction in case of backdated full repayment on the same period
+    When Admin sets the business date to "01 January 2023"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                  | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALCULATION_ZERO_INTEREST_CHARGE_OFF | 01 January 2023   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2023" with "1000" amount and expected disbursement date on "01 January 2023"
+    And Admin successfully disburse the loan on "01 January 2023" with "1000" EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2023  |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2023 |           | 835.74          | 164.26        | 5.83     | 0.0  | 0.0       | 170.09 | 0.0  | 0.0        | 0.0  | 170.09      |
+      | 2  | 28   | 01 March 2023    |           | 670.53          | 165.21        | 4.88     | 0.0  | 0.0       | 170.09 | 0.0  | 0.0        | 0.0  | 170.09      |
+      | 3  | 31   | 01 April 2023    |           | 504.35          | 166.18        | 3.91     | 0.0  | 0.0       | 170.09 | 0.0  | 0.0        | 0.0  | 170.09      |
+      | 4  | 30   | 01 May 2023      |           | 337.2           | 167.15        | 2.94     | 0.0  | 0.0       | 170.09 | 0.0  | 0.0        | 0.0  | 170.09      |
+      | 5  | 31   | 01 June 2023     |           | 169.08          | 168.12        | 1.97     | 0.0  | 0.0       | 170.09 | 0.0  | 0.0        | 0.0  | 170.09      |
+      | 6  | 30   | 01 July 2023     |           | 0.0             | 169.08        | 0.99     | 0.0  | 0.0       | 170.07 | 0.0  | 0.0        | 0.0  | 170.07      |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      | 1000          | 20.52    | 0    | 0         | 1020.52 | 0    | 0          | 0    | 1020.52     |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2023  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+    When Admin sets the business date to "15 January 2023"
+    And Customer makes "AUTOPAY" repayment on "15 January 2023" with 170.09 EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      |    |      | 01 January 2023  |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
+      | 1  | 31   | 01 February 2023 | 15 January 2023 | 832.54          | 167.46        | 2.63     | 0.0  | 0.0       | 170.09 | 170.09 | 170.09     | 0.0  | 0.0         |
+      | 2  | 28   | 01 March 2023    |                 | 669.98          | 162.56        | 7.53     | 0.0  | 0.0       | 170.09 | 0.0    | 0.0        | 0.0  | 170.09      |
+      | 3  | 31   | 01 April 2023    |                 | 503.8           | 166.18        | 3.91     | 0.0  | 0.0       | 170.09 | 0.0    | 0.0        | 0.0  | 170.09      |
+      | 4  | 30   | 01 May 2023      |                 | 336.65          | 167.15        | 2.94     | 0.0  | 0.0       | 170.09 | 0.0    | 0.0        | 0.0  | 170.09      |
+      | 5  | 31   | 01 June 2023     |                 | 168.52          | 168.13        | 1.96     | 0.0  | 0.0       | 170.09 | 0.0    | 0.0        | 0.0  | 170.09      |
+      | 6  | 30   | 01 July 2023     |                 | 0.0             | 168.52        | 0.98     | 0.0  | 0.0       | 169.5  | 0.0    | 0.0        | 0.0  | 169.5       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
+      | 1000          | 19.95    | 0    | 0         | 1019.95 | 170.09 | 170.09     | 0    | 849.86      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2023  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 15 January 2023  | Repayment        | 170.09 | 167.46    | 2.63     | 0.0  | 0.0       | 832.54       | false    | false    |
+    When Admin sets the business date to "31 January 2023"
+    And Admin does charge-off the loan on "31 January 2023"
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      |    |      | 01 January 2023  |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
+      | 1  | 31   | 01 February 2023 | 15 January 2023 | 835.05          | 164.95        | 5.14     | 0.0  | 0.0       | 170.09 | 170.09 | 170.09     | 0.0  | 0.0         |
+      | 2  | 28   | 01 March 2023    |                 | 664.96          | 170.09        | 0.0      | 0.0  | 0.0       | 170.09 | 0.0    | 0.0        | 0.0  | 170.09      |
+      | 3  | 31   | 01 April 2023    |                 | 494.87          | 170.09        | 0.0      | 0.0  | 0.0       | 170.09 | 0.0    | 0.0        | 0.0  | 170.09      |
+      | 4  | 30   | 01 May 2023      |                 | 324.78          | 170.09        | 0.0      | 0.0  | 0.0       | 170.09 | 0.0    | 0.0        | 0.0  | 170.09      |
+      | 5  | 31   | 01 June 2023     |                 | 154.69          | 170.09        | 0.0      | 0.0  | 0.0       | 170.09 | 0.0    | 0.0        | 0.0  | 170.09      |
+      | 6  | 30   | 01 July 2023     |                 | 0.0             | 154.69        | 0.0      | 0.0  | 0.0       | 154.69 | 0.0    | 0.0        | 0.0  | 154.69      |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
+      | 1000          | 5.14     | 0    | 0         | 1005.14 | 170.09 | 170.09     | 0    | 835.05      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2023  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 15 January 2023  | Repayment        | 170.09 | 167.46    | 2.63     | 0.0  | 0.0       | 832.54       | false    | false    |
+      | 31 January 2023  | Charge-off       | 835.05 | 832.54    | 2.51     | 0.0  | 0.0       | 0.0          | false    | false    |
