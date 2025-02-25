@@ -29,7 +29,6 @@ import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -58,8 +57,8 @@ import org.apache.fineract.organisation.staff.domain.Staff;
 @Accessors(chain = true)
 public class Cashier extends AbstractPersistableCustom<Long> {
 
-    // ManyToOne(fetch = FetchType.LAZY)
-    // JoinColumn(name = "office_id", nullable = false)
+    private static final String IS_FULL_DAY_PARAM_NAME = "isFullDay";
+
     @Transient
     private Office office;
 
@@ -91,23 +90,16 @@ public class Cashier extends AbstractPersistableCustom<Long> {
 
     public static Cashier fromJson(final Office cashierOffice, final Teller teller, final Staff staff, final String startTime,
             final String endTime, final JsonCommand command) {
-        // final Long tellerId = teller.getId();
-        // final Long staffId = command.longValueOfParameterNamed("staffId");
         final String description = command.stringValueOfParameterNamed("description");
         final LocalDate startDate = command.localDateValueOfParameterNamed("startDate");
         final LocalDate endDate = command.localDateValueOfParameterNamed("endDate");
-        final Boolean isFullDay = command.booleanObjectValueOfParameterNamed("isFullDay");
-        /*
-         * final String startTime = command.stringValueOfParameterNamed("startTime"); final String endTime =
-         * command.stringValueOfParameterNamed("endTime");
-         */
+        final Boolean isFullDay = command.booleanObjectValueOfParameterNamed(IS_FULL_DAY_PARAM_NAME);
 
         return new Cashier().setOffice(cashierOffice).setTeller(teller).setStaff(staff).setDescription(description).setStartDate(startDate)
                 .setEndDate(endDate).setIsFullDay(isFullDay).setStartTime(startTime).setEndTime(endTime);
     }
 
     public Map<String, Object> update(final JsonCommand command) {
-
         final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
 
         final String dateFormatAsInput = command.dateFormat();
@@ -140,19 +132,14 @@ public class Cashier extends AbstractPersistableCustom<Long> {
             this.endDate = command.localDateValueOfParameterNamed(endDateParamName);
         }
 
-        final Boolean isFullDay = command.booleanObjectValueOfParameterNamed("isFullDay");
-
-        final String isFullDayParamName = "isFullDay";
-        if (command.isChangeInBooleanParameterNamed(isFullDayParamName, this.isFullDay)) {
-            final Boolean newValue = command.booleanObjectValueOfParameterNamed(isFullDayParamName);
-            actualChanges.put(isFullDayParamName, newValue);
-            /*
-             * this.startTime="00"; this.endTime="00";
-             */
+        final Boolean fullDayFlag = command.booleanObjectValueOfParameterNamed(IS_FULL_DAY_PARAM_NAME);
+        if (command.isChangeInBooleanParameterNamed(IS_FULL_DAY_PARAM_NAME, this.isFullDay)) {
+            final Boolean newValue = command.booleanObjectValueOfParameterNamed(IS_FULL_DAY_PARAM_NAME);
+            actualChanges.put(IS_FULL_DAY_PARAM_NAME, newValue);
             this.isFullDay = newValue;
         }
 
-        if (!isFullDay) {
+        if (!fullDayFlag) {
             String newStartHour = "";
             String newStartMin = "";
             String newEndHour = "";
@@ -161,11 +148,12 @@ public class Cashier extends AbstractPersistableCustom<Long> {
             final String minStartTimeParamName = "minStartTime";
             final String hourEndTimeParamName = "hourEndTime";
             final String minEndTimeParamName = "minEndTime";
+
             if (command.isChangeInLongParameterNamed(hourStartTimeParamName, this.getHourFromStartTime())
                     || command.isChangeInLongParameterNamed(minStartTimeParamName, this.getMinFromStartTime())) {
                 newStartHour = command.stringValueOfParameterNamed(hourStartTimeParamName);
-                if (newEndHour.equalsIgnoreCase("0")) {
-                    newEndHour = newEndHour + "0";
+                if (newStartHour.equalsIgnoreCase("0")) {
+                    newStartHour = newStartHour + "0";
                 }
                 actualChanges.put(hourStartTimeParamName, newStartHour);
                 newStartMin = command.stringValueOfParameterNamed(minStartTimeParamName);
@@ -190,45 +178,26 @@ public class Cashier extends AbstractPersistableCustom<Long> {
                 actualChanges.put(minEndTimeParamName, newEndMin);
                 this.endTime = newEndHour + ":" + newEndMin;
             }
-
         }
 
         return actualChanges;
     }
 
     public Long getHourFromStartTime() {
-        if (this.startTime != null && !this.startTime.equalsIgnoreCase("")) {
-            List<String> extractHourFromStartTime = Splitter.on(':').splitToList(this.startTime);
-            Long hour = Long.parseLong(extractHourFromStartTime.get(1));
-            return hour;
-        }
-        return null;
+        return (this.startTime != null && !this.startTime.isEmpty()) ? Long.parseLong(Splitter.on(':').splitToList(this.startTime).get(1))
+                : null;
     }
 
     public Long getMinFromStartTime() {
-        if (this.startTime != null && !this.startTime.equalsIgnoreCase("")) {
-            List<String> extractMinFromStartTime = Splitter.on(':').splitToList(this.startTime);
-            Long min = Long.parseLong(extractMinFromStartTime.get(1));
-            return min;
-        }
-        return null;
+        return (this.startTime != null && !this.startTime.isEmpty()) ? Long.parseLong(Splitter.on(':').splitToList(this.startTime).get(1))
+                : null;
     }
 
     public Long getHourFromEndTime() {
-        if (this.endTime != null && !this.endTime.equalsIgnoreCase("")) {
-            List<String> extractHourFromEndTime = Splitter.on(':').splitToList(this.endTime);
-            Long hour = Long.parseLong(extractHourFromEndTime.get(0));
-            return hour;
-        }
-        return null;
+        return (this.endTime != null && !this.endTime.isEmpty()) ? Long.parseLong(Splitter.on(':').splitToList(this.endTime).get(0)) : null;
     }
 
     public Long getMinFromEndTime() {
-        if (this.endTime != null && !this.endTime.equalsIgnoreCase("")) {
-            List<String> extractMinFromEndTime = Splitter.on(':').splitToList(this.endTime);
-            Long min = Long.parseLong(extractMinFromEndTime.get(1));
-            return min;
-        }
-        return null;
+        return (this.endTime != null && !this.endTime.isEmpty()) ? Long.parseLong(Splitter.on(':').splitToList(this.endTime).get(1)) : null;
     }
 }
