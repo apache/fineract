@@ -27,8 +27,6 @@ import org.apache.fineract.portfolio.client.data.ClientData;
 
 public interface ClientReadPlatformService {
 
-    ClientData retrieveTemplate(Long officeId, boolean staffInSelectedOfficeOnly);
-
     Page<ClientData> retrieveAll(SearchParameters searchParameters);
 
     ClientData retrieveOne(Long clientId);

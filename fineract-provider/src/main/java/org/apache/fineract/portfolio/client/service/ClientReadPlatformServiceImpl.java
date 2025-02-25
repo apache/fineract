@@ -32,54 +32,36 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
-import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
-import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
-import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
-import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
-import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksReadService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
-import org.apache.fineract.organisation.office.data.OfficeData;
-import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
-import org.apache.fineract.organisation.staff.data.StaffData;
-import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
-import org.apache.fineract.portfolio.address.data.AddressData;
-import org.apache.fineract.portfolio.address.service.AddressReadPlatformService;
-import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.data.ClientCollateralManagementData;
 import org.apache.fineract.portfolio.client.data.ClientData;
-import org.apache.fineract.portfolio.client.data.ClientFamilyMembersData;
 import org.apache.fineract.portfolio.client.data.ClientNonPersonData;
 import org.apache.fineract.portfolio.client.data.ClientTimelineData;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientEnumerations;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.ClientStatus;
-import org.apache.fineract.portfolio.client.domain.LegalForm;
 import org.apache.fineract.portfolio.client.exception.ClientNotFoundException;
 import org.apache.fineract.portfolio.client.mapper.ClientMapper;
 import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagement;
 import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagementRepositoryWrapper;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
-import org.apache.fineract.portfolio.savings.data.SavingsProductData;
-import org.apache.fineract.portfolio.savings.service.SavingsProductReadPlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -87,10 +69,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
-    private final OfficeReadPlatformService officeReadPlatformService;
-    private final StaffReadPlatformService staffReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
-    private final SavingsProductReadPlatformService savingsProductReadPlatformService;
     // data mappers
     private final PaginationHelper paginationHelper;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
@@ -99,70 +78,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private final ClientMembersOfGroupMapper membersOfGroupMapper = new ClientMembersOfGroupMapper();
     private final ParentGroupsMapper clientGroupsMapper = new ParentGroupsMapper();
 
-    private final AddressReadPlatformService addressReadPlatformService;
-    private final ClientFamilyMembersReadPlatformService clientFamilyMembersReadPlatformService;
-    private final EntityDatatableChecksReadService entityDatatableChecksReadService;
     private final ColumnValidator columnValidator;
     private final ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper;
-    private final ConfigurationDomainService configurationDomainService;
     private final ClientRepositoryWrapper clientRepositoryWrapper;
     private final ClientMapper clientMapper;
-
-    @Override
-    public ClientData retrieveTemplate(final Long officeId, final boolean staffInSelectedOfficeOnly) {
-        this.context.authenticatedUser();
-
-        final Long defaultOfficeId = defaultToUsersOfficeIfNull(officeId);
-        AddressData address = null;
-
-        final Collection<OfficeData> offices = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
-
-        final Collection<SavingsProductData> savingsProductDatas = this.savingsProductReadPlatformService.retrieveAllForLookupByType(null);
-
-        final Boolean isAddressEnabled = configurationDomainService.isAddressEnabled();
-        if (isAddressEnabled) {
-            address = this.addressReadPlatformService.retrieveTemplate();
-        }
-
-        final ClientFamilyMembersData familyMemberOptions = this.clientFamilyMembersReadPlatformService.retrieveTemplate();
-
-        Collection<StaffData> staffOptions = null;
-
-        final boolean loanOfficersOnly = false;
-        if (staffInSelectedOfficeOnly) {
-            staffOptions = this.staffReadPlatformService.retrieveAllStaffForDropdown(defaultOfficeId);
-        } else {
-            staffOptions = this.staffReadPlatformService.retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(defaultOfficeId,
-                    loanOfficersOnly);
-        }
-        if (CollectionUtils.isEmpty(staffOptions)) {
-            staffOptions = null;
-        }
-        final List<CodeValueData> genderOptions = new ArrayList<>(
-                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.GENDER));
-
-        final List<CodeValueData> clientTypeOptions = new ArrayList<>(
-                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_TYPE));
-
-        final List<CodeValueData> clientClassificationOptions = new ArrayList<>(
-                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_CLASSIFICATION));
-
-        final List<CodeValueData> clientNonPersonConstitutionOptions = new ArrayList<>(
-                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_NON_PERSON_CONSTITUTION));
-
-        final List<CodeValueData> clientNonPersonMainBusinessLineOptions = new ArrayList<>(
-                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_NON_PERSON_MAIN_BUSINESS_LINE));
-
-        final List<EnumOptionData> clientLegalFormOptions = ClientEnumerations.legalForm(LegalForm.values());
-
-        final List<DatatableData> datatableTemplates = this.entityDatatableChecksReadService.retrieveTemplates(StatusEnum.CREATE.getValue(),
-                EntityTables.CLIENT.getName(), null);
-
-        return ClientData.template(defaultOfficeId, LocalDate.now(DateUtils.getDateTimeZoneOfTenant()), offices, staffOptions, null,
-                genderOptions, savingsProductDatas, clientTypeOptions, clientClassificationOptions, clientNonPersonConstitutionOptions,
-                clientNonPersonMainBusinessLineOptions, clientLegalFormOptions, familyMemberOptions,
-                new ArrayList<AddressData>(Arrays.asList(address)), isAddressEnabled, datatableTemplates);
-    }
 
     @Override
     public Page<ClientData> retrieveAll(final SearchParameters searchParameters) {
@@ -641,14 +560,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             return ClientData.clientIdentifier(id, accountNo, firstname, middlename, lastname, fullname, displayName, officeId, officeName);
         }
-    }
-
-    private Long defaultToUsersOfficeIfNull(final Long officeId) {
-        Long defaultOfficeId = officeId;
-        if (defaultOfficeId == null) {
-            defaultOfficeId = this.context.authenticatedUser().getOffice().getId();
-        }
-        return defaultOfficeId;
     }
 
     @Override

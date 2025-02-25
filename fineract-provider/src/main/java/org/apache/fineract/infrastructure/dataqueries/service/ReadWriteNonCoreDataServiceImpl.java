@@ -106,8 +106,12 @@ import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableEntryRequiredException;
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableNotFoundException;
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableSystemErrorException;
+import org.apache.fineract.infrastructure.event.business.domain.datatable.DatatableEntryCreatedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.datatable.DatatableEntryDeletedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.datatable.DatatableEntryDetails;
+import org.apache.fineract.infrastructure.event.business.domain.datatable.DatatableEntryUpdatedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.infrastructure.security.service.SqlInjectionPreventerService;
 import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.portfolio.search.data.AdvancedQueryData;
@@ -156,10 +160,10 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     private final DataTableValidator dataTableValidator;
     private final ColumnValidator columnValidator;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-    private final SqlInjectionPreventerService preventSqlInjectionService;
     private final DatatableKeywordGenerator datatableKeywordGenerator;
     private final SqlValidator sqlValidator;
     private final SearchUtil searchUtil;
+    private final BusinessEventNotifierService businessEventNotifierService;
 
     @Override
     public List<DatatableData> retrieveDatatableNames(final String appTable) {
@@ -1307,8 +1311,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         ArrayList<String> insertColumns = new ArrayList<>(
                 List.of(entityTable.getForeignKeyColumnNameOnDatatable(), CREATEDAT_FIELD_NAME, UPDATEDAT_FIELD_NAME));
-        LocalDateTime auditDateTime = DateUtils.getAuditLocalDateTime();
+        final LocalDateTime auditDateTime = DateUtils.getAuditLocalDateTime();
         ArrayList<Object> params = new ArrayList<>(List.of(appTableId, auditDateTime, auditDateTime));
+        Map<String, Object> dataObjectParams = new HashMap<String, Object>();
         for (Map.Entry<String, String> entry : dataParams.entrySet()) {
             if (isTechnicalParam(entry.getKey())) {
                 continue;
@@ -1318,8 +1323,11 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 continue;
             }
             insertColumns.add(columnHeader.getColumnName());
-            params.add(searchUtil.parseJdbcColumnValue(columnHeader, entry.getValue(), dateFormat, dateTimeFormat, locale, false,
-                    sqlGenerator));
+            Object valueParam = searchUtil.parseJdbcColumnValue(columnHeader, entry.getValue(), dateFormat, dateTimeFormat, locale, false,
+                    sqlGenerator);
+            params.add(valueParam);
+            dataObjectParams.put(entry.getKey(), valueParam);
+
         }
         if (addScore) {
             List<Object> scoreIds = params.stream().filter(e -> e != null && !String.valueOf(e).isBlank()).toList();
@@ -1353,6 +1361,11 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             if (isMultirowDatatable(columnHeaders)) {
                 resourceId = sqlGenerator.fetchPK(keyHolder);
             }
+
+            final DatatableEntryDetails datatableEntryDetails = new DatatableEntryDetails(dataTableName, entityTable, resourceId,
+                    appTableId, dataObjectParams);
+            businessEventNotifierService.notifyPostBusinessEvent(new DatatableEntryCreatedBusinessEvent(datatableEntryDetails));
+
             return CommandProcessingResult.fromCommandProcessingResult(commandProcessingResult, resourceId);
         } catch (final DataAccessException dve) {
             handleDataIntegrityIssues(dataTableName, appTableId, dve.getMostSpecificCause(), dve);
@@ -1422,6 +1435,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         final Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
         final Map<String, String> dataParams = fromJsonHelper.extractDataMap(typeOfMap, command.json());
+        final Map<String, Object> dataObjectParams = new HashMap<String, Object>();
 
         final String dateFormat = dataParams.get(API_PARAM_DATE_FORMAT);
         // fall back to dateFormat to keep backward compatibility
@@ -1445,6 +1459,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             Object existingValue = valuesByHeader.get(columnHeader);
             Object columnValue = searchUtil.parseColumnValue(columnHeader, entry.getValue(), dateFormat, dateTimeFormat, locale, false,
                     sqlGenerator);
+            dataObjectParams.put(entry.getKey(), columnValue);
             if ((columnHeader.getColumnType().isDecimalType() && MathUtil.isEqualTo((BigDecimal) existingValue, (BigDecimal) columnValue))
                     || (existingValue == null ? columnValue == null : existingValue.equals(columnValue))) {
                 log.debug("Ignore change on update {}:{}", dataTableName, columnName);
@@ -1457,16 +1472,23 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         Long primaryKey = datatableId == null ? appTableId : datatableId;
         if (!updateColumns.isEmpty()) {
             ResultsetColumnHeaderData pkColumn = searchUtil.getFiltered(columnHeaders, ResultsetColumnHeaderData::getIsColumnPrimaryKey);
-            params.add(primaryKey);
-            final String sql = sqlGenerator.buildUpdate(dataTableName, updateColumns, headersByName) + " WHERE " + pkColumn.getColumnName()
-                    + " = ?";
-            int updated = jdbcTemplate.update(sql, params.toArray(Object[]::new)); // NOSONAR
-            if (updated != 1) {
-                throw new PlatformDataIntegrityException("error.msg.invalid.update", "Expected one updated row.");
+            if (pkColumn != null) {
+                params.add(primaryKey);
+                final String sql = sqlGenerator.buildUpdate(dataTableName, updateColumns, headersByName) + " WHERE "
+                        + pkColumn.getColumnName() + " = ?";
+                int updated = jdbcTemplate.update(sql, params.toArray(Object[]::new)); // NOSONAR
+                if (updated != 1) {
+                    throw new PlatformDataIntegrityException("error.msg.invalid.update", "Expected one updated row.");
+                }
             }
         } else {
             log.debug("No change on update {}", dataTableName);
         }
+
+        final DatatableEntryDetails datatableEntryDetails = new DatatableEntryDetails(dataTableName, entityTable, datatableId, appTableId,
+                dataObjectParams);
+        businessEventNotifierService.notifyPostBusinessEvent(new DatatableEntryUpdatedBusinessEvent(datatableEntryDetails));
+
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()) //
                 .withEntityId(primaryKey) //
                 .withOfficeId(commandProcessingResult.getOfficeId()) //
@@ -1517,6 +1539,11 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 + whereValue;
 
         this.jdbcTemplate.update(sql); // NOSONAR
+        final Map<String, Object> dataParams = null;
+        final DatatableEntryDetails datatableEntryDetails = new DatatableEntryDetails(dataTableName, entityTable, datatableId, appTableId,
+                dataParams);
+        businessEventNotifierService.notifyPostBusinessEvent(new DatatableEntryDeletedBusinessEvent(datatableEntryDetails));
+
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(whereValue) //

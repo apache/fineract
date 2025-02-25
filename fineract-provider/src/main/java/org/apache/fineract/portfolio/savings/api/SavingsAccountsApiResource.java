@@ -74,6 +74,7 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountNotFoundException;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountChargeReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
+import org.apache.fineract.portfolio.savings.service.SavingsAccountTemplateReadPlatformService;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.stereotype.Component;
@@ -86,6 +87,7 @@ import org.springframework.util.CollectionUtils;
 public class SavingsAccountsApiResource {
 
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
+    private final SavingsAccountTemplateReadPlatformService savingsAccountTemplateReadPlatformService;
     private final PlatformSecurityContext context;
     private final DefaultToApiJsonSerializer<SavingsAccountData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
@@ -112,7 +114,7 @@ public class SavingsAccountsApiResource {
 
         context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
 
-        final SavingsAccountData savingsAccount = savingsAccountReadPlatformService.retrieveTemplate(clientId, groupId, productId,
+        final SavingsAccountData savingsAccount = savingsAccountTemplateReadPlatformService.retrieveTemplate(clientId, groupId, productId,
                 staffInSelectedOfficeOnly);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -662,8 +664,8 @@ public class SavingsAccountsApiResource {
         SavingsAccountData templateData = null;
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if (settings.isTemplate()) {
-            templateData = savingsAccountReadPlatformService.retrieveTemplate(savingsAccount.getClientId(), savingsAccount.getGroupId(),
-                    savingsAccount.getSavingsProductId(), staffInSelectedOfficeOnly);
+            templateData = savingsAccountTemplateReadPlatformService.retrieveTemplate(savingsAccount.getClientId(),
+                    savingsAccount.getGroupId(), savingsAccount.getSavingsProductId(), staffInSelectedOfficeOnly);
         }
 
         return SavingsAccountData.withTemplateOptions(savingsAccount, templateData, transactions, charges);
