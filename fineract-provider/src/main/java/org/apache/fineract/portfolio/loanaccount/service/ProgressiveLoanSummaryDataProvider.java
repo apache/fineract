@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -104,10 +105,18 @@ public class ProgressiveLoanSummaryDataProvider extends CommonLoanSummaryDataPro
                             replayedTransactions);
                 }
                 if (model != null) {
-                    PeriodDueDetails dueAmounts = emiCalculator.getDueAmounts(model, loanRepaymentScheduleInstallment.getDueDate(),
+                    LoanRepaymentScheduleInstallment nextUnpaidInAdvanceInstallment = loanRepaymentScheduleInstallment.isNotFullyPaidOff()
+                            ? loanRepaymentScheduleInstallment
+                            : loan.getRepaymentScheduleInstallments().stream().filter(LoanRepaymentScheduleInstallment::isNotFullyPaidOff)
+                                    .filter(i -> i.getInstallmentNumber() != null)
+                                    .min(Comparator.comparingInt(LoanRepaymentScheduleInstallment::getInstallmentNumber)).orElse(null);
+                    if (nextUnpaidInAdvanceInstallment == null) {
+                        return BigDecimal.ZERO;
+                    }
+                    PeriodDueDetails dueAmounts = emiCalculator.getDueAmounts(model, nextUnpaidInAdvanceInstallment.getDueDate(),
                             businessDate);
                     if (dueAmounts != null) {
-                        BigDecimal interestPaid = loanRepaymentScheduleInstallment.getInterestPaid();
+                        BigDecimal interestPaid = nextUnpaidInAdvanceInstallment.getInterestPaid();
                         BigDecimal dueInterest = dueAmounts.getDueInterest().getAmount();
                         if (interestPaid == null) {
                             return dueInterest;
