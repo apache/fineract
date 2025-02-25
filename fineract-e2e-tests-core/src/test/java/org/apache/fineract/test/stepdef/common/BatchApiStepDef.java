@@ -931,6 +931,71 @@ public class BatchApiStepDef extends AbstractStepDef {
                 .isEqualTo(errorsDeveloperMessageExpected);
     }
 
+    @When("Admin runs Batch API call with chargeOff command on {string}")
+    public void runBatchApiCallWithChargeOffCommand(String chargeOffDate) throws IOException {
+        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.body().getLoanId();
+        String idempotencyKey = UUID.randomUUID().toString();
+
+        List<BatchRequest> requestList = new ArrayList<>();
+
+        requestList.add(createChargeOffRequest(1L, loanId, idempotencyKey, chargeOffDate));
+
+        Response<List<BatchResponse>> batchResponseList = batchApiApi.handleBatchRequests(requestList, false).execute();
+        testContext().set(TestContextKey.BATCH_API_CALL_RESPONSE, batchResponseList);
+        testContext().set(TestContextKey.BATCH_API_CALL_IDEMPOTENCY_KEY, idempotencyKey);
+
+        if (batchResponseList.isSuccessful() && batchResponseList.body() != null && !batchResponseList.body().isEmpty()) {
+            BatchResponse response = batchResponseList.body().get(0);
+            log.info("Batch charge-off API status code: {}", response.getStatusCode());
+            log.info("Batch charge-off API response body: {}", response.getBody());
+        } else {
+            log.info("Batch charge-off API call failed or returned empty response");
+        }
+    }
+
+    private BatchRequest createChargeOffRequest(Long requestId, Long loanId, String idempotencyKey, String chargeOffDate) {
+        // Create a charge-off request with the specified date
+        Map<String, Object> requestMap = new HashMap<>();
+        requestMap.put("transactionDate", chargeOffDate);
+        requestMap.put("dateFormat", DATE_FORMAT);
+        requestMap.put("locale", DEFAULT_LOCALE);
+        requestMap.put("note", "Charge-off due to delinquency");
+
+        String bodyChargeOffRequest = GSON.toJson(requestMap);
+
+        Set<Header> headers = new HashSet<>();
+        headers.add(HEADER);
+        if (idempotencyKey != null) {
+            headers.add(new Header().name("Idempotency-Key").value(idempotencyKey));
+        }
+
+        BatchRequest batchRequest = new BatchRequest();
+        batchRequest.requestId(requestId);
+        batchRequest.relativeUrl("loans/" + loanId + "/transactions?command=charge-off");
+        batchRequest.method(BATCH_API_METHOD_POST);
+        batchRequest.headers(headers);
+        batchRequest.body(bodyChargeOffRequest);
+
+        return batchRequest;
+    }
+
+    @Then("Admin checks the loan has been charged-off on {string}")
+    public void checkLoanChargedOff(String chargeOffDate) throws IOException {
+        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.body().getLoanId();
+
+        Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "all", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetails);
+
+        // Check loan has a CHARGE_OFF transaction on the specified date
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
+        boolean hasChargeOffTransaction = loanDetails.body().getTransactions().stream().anyMatch(
+                t -> t.getType().getCode().equals("loanTransactionType.chargeOff") && formatter.format(t.getDate()).equals(chargeOffDate));
+
+        assertThat(hasChargeOffTransaction).as("Loan should have a CHARGE_OFF transaction on " + chargeOffDate).isTrue();
+    }
+
     private String getHeaderValueByHeaderKey(List<Header> headersList, String headerKey) {
         for (Header header : headersList) {
             if (Objects.requireNonNull(header.getName()).equals(headerKey)) {
