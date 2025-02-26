@@ -80,7 +80,7 @@ public class AsyncLoanCOBExecutorServiceImpl implements AsyncLoanCOBExecutorServ
                     ? loanIdAndLastClosedBusinessDate.get(0).getLastClosedBusinessDate()
                     : cobBusinessDate;
             if (DateUtils.isBefore(oldestCOBProcessedDate, cobBusinessDate)) {
-                executeLoanCOBDayByDayUntilCOBBusinessDate(oldestCOBProcessedDate, cobBusinessDate);
+                executeLoanCOBDayByDayUntilCOBBusinessDate(oldestCOBProcessedDate, cobBusinessDate, context);
             }
         } catch (NoSuchJobException e) {
             // Throwing an error here is useless as it will be swallowed hence it is async method
@@ -94,19 +94,21 @@ public class AsyncLoanCOBExecutorServiceImpl implements AsyncLoanCOBExecutorServ
         }
     }
 
-    private void executeLoanCOBDayByDayUntilCOBBusinessDate(LocalDate oldestCOBProcessedDate, LocalDate cobBusinessDate)
-            throws NoSuchJobException, JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException,
+    private void executeLoanCOBDayByDayUntilCOBBusinessDate(LocalDate oldestCOBProcessedDate, LocalDate cobBusinessDate,
+            FineractContext context) throws NoSuchJobException, JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException,
             JobParametersInvalidException, JobRestartException, JobExecutionException {
         Job job = jobLocator.getJob(LoanCOBConstant.JOB_NAME);
         ScheduledJobDetail scheduledJobDetail = scheduledJobDetailRepository.findByJobName(LoanCOBConstant.JOB_HUMAN_READABLE_NAME);
         LocalDate executingBusinessDate = oldestCOBProcessedDate.plusDays(1);
         while (!DateUtils.isAfter(executingBusinessDate, cobBusinessDate)) {
+            // Need to reinitialize the thread-local tenant info because after running the job, it resets the thread
+            ThreadLocalContextUtil.init(context);
             JobParameterDTO jobParameterDTO = new JobParameterDTO(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME,
                     executingBusinessDate.format(DateTimeFormatter.ISO_DATE));
             JobParameterDTO jobParameterCatchUpDTO = new JobParameterDTO(LoanCOBConstant.IS_CATCH_UP_PARAMETER_NAME, "true");
             Set<JobParameterDTO> jobParameters = new HashSet<>();
             Collections.addAll(jobParameters, jobParameterDTO, jobParameterCatchUpDTO);
-            jobStarter.run(job, scheduledJobDetail, jobParameters);
+            jobStarter.run(job, scheduledJobDetail, jobParameters, ThreadLocalContextUtil.getTenant().getTenantIdentifier());
             executingBusinessDate = executingBusinessDate.plusDays(1);
         }
     }

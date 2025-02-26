@@ -128,6 +128,8 @@ public class ClasspathDuplicatesStepDefinitions implements En {
                 || resourcePath.startsWith("META-INF/terracotta") || resourcePath.startsWith("com/fasterxml/jackson/core/io/doubleparser")
                 // Groovy is groovy
                 || resourcePath.startsWith("META-INF/groovy")
+                || resourcePath.startsWith("org/springframework/batch/core/scope/context/JobSynchronizationManager")
+                || resourcePath.startsWith("org/springframework/batch/core/scope/context/StepSynchronizationManager")
                 // Something doesn't to be a perfectly clean in Maven Surefire:
                 || resourcePath.startsWith("META-INF/maven/") || resourcePath.contains("surefire")
                 // org.slf4j.impl.StaticLoggerBinder.class in testutils for the

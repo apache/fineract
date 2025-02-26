@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.jobs.service;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -27,11 +28,19 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
+import org.apache.fineract.infrastructure.core.domain.ActionContext;
+import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.core.service.tenant.TenantDetailsService;
 import org.apache.fineract.infrastructure.jobs.data.JobParameterDTO;
 import org.apache.fineract.infrastructure.jobs.domain.JobParameterRepository;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.apache.fineract.infrastructure.jobs.service.jobname.JobNameService;
 import org.apache.fineract.infrastructure.jobs.service.jobparameterprovider.JobParameterProvider;
+import org.apache.fineract.useradministration.domain.AppUser;
+import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
 import org.quartz.JobExecutionException;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
@@ -45,6 +54,8 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -57,24 +68,41 @@ public class JobStarter {
     private final JobParameterRepository jobParameterRepository;
     private final List<JobParameterProvider<?>> jobParameterProviders;
     private final JobNameService jobNameService;
+    private final TenantDetailsService tenantDetailsService;
+    private final AppUserRepositoryWrapper userRepository;
+    private final BusinessDateReadPlatformService businessDateReadPlatformService;
 
     public static final List<BatchStatus> FAILED_STATUSES = List.of(BatchStatus.FAILED, BatchStatus.ABANDONED, BatchStatus.STOPPED,
             BatchStatus.STOPPING, BatchStatus.UNKNOWN);
 
-    public JobExecution run(Job job, ScheduledJobDetail scheduledJobDetail, Set<JobParameterDTO> jobParameterDTOSet)
-            throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException,
-            JobRestartException, JobExecutionException {
-        Map<String, JobParameter<?>> jobParameterMap = getJobParameter(scheduledJobDetail);
-        JobParameters jobParameters = new JobParametersBuilder(jobExplorer).getNextJobParameters(job)
-                .addJobParameters(new JobParameters(jobParameterMap))
-                .addJobParameters(new JobParameters(provideCustomJobParameters(
-                        jobNameService.getJobByHumanReadableName(scheduledJobDetail.getJobName()).getEnumStyleName(), jobParameterDTOSet)))
-                .toJobParameters();
-        JobExecution result = jobLauncher.run(job, jobParameters);
-        if (FAILED_STATUSES.contains(result.getStatus())) {
-            throw new JobExecutionException(result.getExitStatus().toString());
+    public JobExecution run(Job job, ScheduledJobDetail scheduledJobDetail, Set<JobParameterDTO> jobParameterDTOSet,
+            String tenantIdentifier) throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException,
+            JobParametersInvalidException, JobRestartException, JobExecutionException {
+        try {
+            FineractPlatformTenant tenant = tenantDetailsService.loadTenantById(tenantIdentifier);
+            ThreadLocalContextUtil.setTenant(tenant);
+            AppUser user = this.userRepository.fetchSystemUser();
+            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, user.getPassword(),
+                    user.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(auth);
+            HashMap<BusinessDateType, LocalDate> businessDates = businessDateReadPlatformService.getBusinessDates();
+            ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
+            ThreadLocalContextUtil.setBusinessDates(businessDates);
+            Map<String, JobParameter<?>> jobParameterMap = getJobParameter(scheduledJobDetail);
+            JobParameters jobParameters = new JobParametersBuilder(jobExplorer).getNextJobParameters(job)
+                    .addJobParameters(new JobParameters(jobParameterMap))
+                    .addJobParameters(new JobParameters(provideCustomJobParameters(
+                            jobNameService.getJobByHumanReadableName(scheduledJobDetail.getJobName()).getEnumStyleName(),
+                            jobParameterDTOSet)))
+                    .toJobParameters();
+            JobExecution result = jobLauncher.run(job, jobParameters);
+            if (FAILED_STATUSES.contains(result.getStatus())) {
+                throw new JobExecutionException(result.getExitStatus().toString());
+            }
+            return result;
+        } finally {
+            ThreadLocalContextUtil.reset();
         }
-        return result;
     }
 
     protected Map<String, org.springframework.batch.core.JobParameter<?>> getJobParameter(ScheduledJobDetail scheduledJobDetail) {
