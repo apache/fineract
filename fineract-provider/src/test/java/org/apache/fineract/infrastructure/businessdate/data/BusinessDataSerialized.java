@@ -28,7 +28,7 @@ import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSer
 import org.apache.fineract.infrastructure.core.serialization.ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson;
 import org.apache.fineract.infrastructure.core.serialization.ExcludeNothingWithPrettyPrintingOnJsonSerializerGoogleGson;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class BusinessDataSerialized {
 

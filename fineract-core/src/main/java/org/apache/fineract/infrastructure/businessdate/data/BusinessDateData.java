@@ -36,7 +36,7 @@ public class BusinessDateData implements Serializable {
     private LocalDate date;
 
     public static BusinessDateData instance(BusinessDateType businessDateType, LocalDate value) {
-        return new BusinessDateData().setType(businessDateType.getName()).setDate(value);
+        return new BusinessDateData().setType(businessDateType.getName()).setDescription(businessDateType.getDescription()).setDate(value);
     }
 
 }
