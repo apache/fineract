@@ -6339,11 +6339,13 @@ Feature: Charge-off
       | 01 January 2023  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
       | 15 January 2023  | Repayment        | 170.09 | 167.46    | 2.63     | 0.0  | 0.0       | 832.54       | false    | false    |
       | 31 January 2023  | Charge-off       | 835.05 | 832.54    | 2.51     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+  @TestRailId:C3511
   Scenario: Backdate charge-off reverse accruals with isInterestRecognitionOnDisbursementDate = true
     When Admin sets the business date to "1 January 2024"
     And Admin creates a client with random data
     And Admin creates a fully customized loan with the following data:
-      | LoanProduct                                                                        | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LoanProduct                                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
       | LP2_ADV_PYMNT_INTEREST_RECOGNITION_DISBURSEMENT_DAILY_EMI_360_30_ACCRUAL_ACTIVITY | 01 January 2024   | 1000           | 26                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 4                 | MONTHS                | 1              | MONTHS                 | 4                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
@@ -6381,10 +6383,11 @@ Feature: Charge-off
       | 13 January 2024  | Accrual          | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 January 2024  | Accrual          | 0.69   | 0.0       | 0.69     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 January 2024  | Repayment        | 263.69 | 253.91    | 9.78     | 0.0  | 0.0       | 746.09       | false    | false    |
-      | 15 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 January 2024  | Accrual          | 0.53   | 0.0       | 0.53     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 17 January 2024  | Charge-off       | 787.63 | 746.09    | 41.54    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 17 January 2024  | Charge-off       | 787.64 | 746.09    | 41.55    | 0.0  | 0.0       | 0.0          | false    | false    |
 
+  @TestRailId:C3512
   Scenario: Backdate charge-off reverse accruals with isInterestRecognitionOnDisbursementDate = false
     When Admin sets the business date to "1 January 2024"
     And Admin creates a client with random data
@@ -6427,6 +6430,6 @@ Feature: Charge-off
       | 14 January 2024  | Accrual          | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 January 2024  | Repayment        | 263.69 | 253.91    | 9.78     | 0.0  | 0.0       | 746.09       | false    | false    |
       | 15 January 2024  | Accrual          | 0.69   | 0.0       | 0.69     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 16 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 16 January 2024  | Accrual          | 0.53   | 0.0       | 0.53     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 17 January 2024  | Accrual          | 0.52   | 0.0       | 0.52     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 17 January 2024  | Charge-off       | 787.63 | 746.09    | 41.54    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 17 January 2024  | Charge-off       | 787.64 | 746.09    | 41.55    | 0.0  | 0.0       | 0.0          | false    | false    |
