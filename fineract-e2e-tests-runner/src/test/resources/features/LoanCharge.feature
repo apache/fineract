@@ -2534,3 +2534,93 @@ Feature: LoanCharge
       | 01 January 2024  | Repayment         | 60.0   | 60.0      | 0.0      | 0.0  | 0.0       | 40.0         |
       | 01 February 2024 | Charge Adjustment | 20.0   | 0.0       | 0.0      | 0.0  | 20.0      | 40.0         |
     And LoanChargeAdjustmentPostBusinessEvent is raised on "01 February 2024"
+
+  @TestRailId:C3501
+  Scenario: Verify repayment schedule amounts after large charge amount added - UC1
+    When Admin sets the business date to "20 February 2025"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                   | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 20 December 2024  | 800            | 0                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 4                 | MONTHS                | 1              | MONTHS                 | 4                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "20 December 2024" with "800" amount and expected disbursement date on "20 December 2024"
+    When Admin successfully disburse the loan on "20 December 2024" with "800" EUR transaction amount
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due      | Paid | In advance | Late | Outstanding |
+      |    |      | 20 December 2024 |           | 800.0           |               |          | 0.0  |           | 0.0      | 0.0  |            |      |             |
+      | 1  | 31   | 20 January 2025  |           | 600.0           | 200.0         | 0.0      | 0.0  | 0.0       | 200.0    | 0.0  | 0.0        | 0.0  | 200.0       |
+      | 2  | 31   | 20 February 2025 |           | 400.0           | 200.0         | 0.0      | 0.0  | 0.0       | 200.0    | 0.0  | 0.0        | 0.0  | 200.0       |
+      | 3  | 28   | 20 March 2025    |           | 200.0           | 200.0         | 0.0      | 0.0  | 0.0       | 200.0    | 0.0  | 0.0        | 0.0  | 200.0       |
+      | 4  | 31   | 20 April 2025    |           | 0.0             | 200.0         | 0.0      | 0.0  | 0.0       | 200.0    | 0.0  | 0.0        | 0.0  | 200.0       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      | 800.0         | 0.0      | 0.0  | 0.0       | 800.0 | 0.0  | 0.0        | 0.0  | 800.0       |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount  | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 20 December 2024 | Disbursement     | 800.0   | 0.0       | 0.0      | 0.0  | 0.0       | 800.0        | false    | false    |
+    And Admin adds "LOAN_NSF_FEE" due date charge with "25 December 2024" due date and 123456789012.12 EUR transaction amount
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties       | Due             | Paid | In advance | Late | Outstanding     |
+      |    |      | 20 December 2024 |           | 800.0           |               |          | 0.0  |                 | 0.0             | 0.0  |            |      |                 |
+      | 1  | 31   | 20 January 2025  |           | 600.0           | 200.0         | 0.0      | 0.0  | 123456789012.12 | 123456789212.12 | 0.0  | 0.0        | 0.0  | 123456789212.12 |
+      | 2  | 31   | 20 February 2025 |           | 400.0           | 200.0         | 0.0      | 0.0  | 0.0             | 200.0           | 0.0  | 0.0        | 0.0  | 200.0           |
+      | 3  | 28   | 20 March 2025    |           | 200.0           | 200.0         | 0.0      | 0.0  | 0.0             | 200.0           | 0.0  | 0.0        | 0.0  | 200.0           |
+      | 4  | 31   | 20 April 2025    |           | 0.0             | 200.0         | 0.0      | 0.0  | 0.0             | 200.0           | 0.0  | 0.0        | 0.0  | 200.0           |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties       | Due             | Paid | In advance | Late | Outstanding     |
+      | 800.0         | 0.0      | 0.0  | 123456789012.12 | 123456789812.12 | 0.0  | 0.0        | 0.0  | 123456789812.12 |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount  | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 20 December 2024 | Disbursement     | 800.0   | 0.0       | 0.0      | 0.0  | 0.0       | 800.0        | false    | false    |
+    Then Loan Charges tab has a given charge with the following data:
+      | Name    | isPenalty | Payment due at     | Due as of        | Calculation type | Due             | Paid | Waived | Outstanding     |
+      | NSF fee | true      | Specified due date | 25 December 2024 | Flat             | 123456789012.12 | 0.0  | 0.0    | 123456789012.12 |
+
+  @TestRailId:C3502
+  Scenario: Verify repayment schedule amounts after a few large charges amount added - UC2
+    When Admin sets the business date to "20 February 2025"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                   | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 20 December 2024  | 800            | 0                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 4                 | MONTHS                | 1              | MONTHS                 | 4                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "20 December 2024" with "800" amount and expected disbursement date on "20 December 2024"
+    When Admin successfully disburse the loan on "20 December 2024" with "800" EUR transaction amount
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due      | Paid | In advance | Late | Outstanding |
+      |    |      | 20 December 2024 |           | 800.0           |               |          | 0.0  |           | 0.0      | 0.0  |            |      |             |
+      | 1  | 31   | 20 January 2025  |           | 600.0           | 200.0         | 0.0      | 0.0  | 0.0       | 200.0    | 0.0  | 0.0        | 0.0  | 200.0       |
+      | 2  | 31   | 20 February 2025 |           | 400.0           | 200.0         | 0.0      | 0.0  | 0.0       | 200.0    | 0.0  | 0.0        | 0.0  | 200.0       |
+      | 3  | 28   | 20 March 2025    |           | 200.0           | 200.0         | 0.0      | 0.0  | 0.0       | 200.0    | 0.0  | 0.0        | 0.0  | 200.0       |
+      | 4  | 31   | 20 April 2025    |           | 0.0             | 200.0         | 0.0      | 0.0  | 0.0       | 200.0    | 0.0  | 0.0        | 0.0  | 200.0       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      | 800.0         | 0.0      | 0.0  | 0.0       | 800.0 | 0.0  | 0.0        | 0.0  | 800.0       |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount  | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 20 December 2024 | Disbursement     | 800.0   | 0.0       | 0.0      | 0.0  | 0.0       | 800.0        | false    | false    |
+    And Admin adds "LOAN_NSF_FEE" due date charge with "25 December 2024" due date and 123456789012.12 EUR transaction amount
+    When Admin adds "LOAN_SNOOZE_FEE" due date charge with "28 December 2024" due date and 1003456789012.12 EUR transaction amount
+    When Admin adds "LOAN_NSF_FEE" due date charge with "31 January 2025" due date and 5503456789012.12 EUR transaction amount
+    When Admin adds "LOAN_NSF_FEE" due date charge with "23 February 2025" due date and 1003456789012.12 EUR transaction amount
+    When Admin adds "LOAN_NSF_FEE" due date charge with "03 April 2025" due date and 1503456789012.12 EUR transaction amount
+    When Admin adds "LOAN_SNOOZE_FEE" due date charge with "09 April 2025" due date and 103456789037.12 EUR transaction amount
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees             | Penalties        | Due              | Paid | In advance | Late | Outstanding      |
+      |    |      | 20 December 2024 |           | 800.0           |               |          | 0.0              |                  | 0.0              | 0.0  |            |      |                  |
+      | 1  | 31   | 20 January 2025  |           | 600.0           | 200.0         | 0.0      | 1003456789012.12 | 123456789012.12  | 1126913578224.24 | 0.0  | 0.0        | 0.0  | 1126913578224.24 |
+      | 2  | 31   | 20 February 2025 |           | 400.0           | 200.0         | 0.0      | 0.0              | 5503456789012.12 | 5503456789212.12 | 0.0  | 0.0        | 0.0  | 5503456789212.12 |
+      | 3  | 28   | 20 March 2025    |           | 200.0           | 200.0         | 0.0      | 0.0              | 1003456789012.12 | 1003456789212.12 | 0.0  | 0.0        | 0.0  | 1003456789212.12 |
+      | 4  | 31   | 20 April 2025    |           | 0.0             | 200.0         | 0.0      | 103456789037.12  | 1503456789012.12 | 1606913578249.24 | 0.0  | 0.0        | 0.0  | 1606913578249.24 |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees             | Penalties        | Due              | Paid | In advance | Late | Outstanding      |
+      | 800.0         | 0.0      | 1106913578049.24 | 8133827156048.48 | 9240740734897.72 | 0.0  | 0.0        | 0.0  | 9240740734897.72 |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount  | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 20 December 2024 | Disbursement     | 800.0   | 0.0       | 0.0      | 0.0  | 0.0       | 800.0        | false    | false    |
+    Then Loan Charges tab has a given charge with the following data:
+      | Name       | isPenalty | Payment due at     | Due as of        | Calculation type | Due              | Paid | Waived | Outstanding      |
+      | NSF fee    | true      | Specified due date | 25 December 2024 | Flat             | 123456789012.12  | 0.0  | 0.0    | 123456789012.12  |
+      | Snooze fee | false     | Specified due date | 28 December 2024 | Flat             | 1003456789012.12 | 0.0  | 0.0    | 1003456789012.12 |
+      | NSF fee    | true      | Specified due date | 31 January 2025  | Flat             | 5503456789012.12 | 0.0  | 0.0    | 5503456789012.12 |
+      | NSF fee    | true      | Specified due date | 23 February 2025 | Flat             | 1003456789012.12 | 0.0  | 0.0    | 1003456789012.12 |
+      | NSF fee    | true      | Specified due date | 03 April 2025    | Flat             | 1503456789012.12 | 0.0  | 0.0    | 1503456789012.12 |
+      | Snooze fee | false     | Specified due date | 09 April 2025    | Flat             | 103456789037.12  | 0.0  | 0.0    | 103456789037.12  |

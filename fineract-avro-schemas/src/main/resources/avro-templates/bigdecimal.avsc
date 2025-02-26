@@ -1,6 +1,6 @@
 {
     "logicalType": "decimal",
-    "precision": 20,
+    "precision": 27,
     "scale": 8,
     "type": "bytes"
 }
