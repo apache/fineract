@@ -115,7 +115,7 @@ public class SavingsSchedularInterestPoster {
                         if (savingsAccountData.getGlAccountIdForSavingsControl() != 0
                                 && savingsAccountData.getGlAccountIdForInterestOnSavings() != 0) {
                             OffsetDateTime auditDatetime = DateUtils.getAuditOffsetDateTime();
-                            paramsForGLInsertion.add(new Object[] { savingsAccountData.getGlAccountIdForSavingsControl(),
+                            paramsForGLInsertion.add(new Object[] {savingsAccountTransactionData.getIsNegativeBalance() ? savingsAccountData.getGlAccountIdForInterestOnSavingsNegative() :savingsAccountData.getGlAccountIdForSavingsControl(),
                                     savingsAccountData.getOfficeId(), null, currencyCode,
                                     SAVINGS_TRANSACTION_IDENTIFIER + savingsAccountTransactionData.getId().toString(),
                                     savingsAccountTransactionData.getId(), null, false, null, false,
@@ -125,7 +125,7 @@ public class SavingsSchedularInterestPoster {
                                     savingsAccountTransactionData.getTransactionDate(), null, userId, userId,
                                     DateUtils.getBusinessLocalDate() });
 
-                            paramsForGLInsertion.add(new Object[] { savingsAccountData.getGlAccountIdForInterestOnSavings(),
+                            paramsForGLInsertion.add(new Object[] {savingsAccountTransactionData.getIsNegativeBalance() ? savingsAccountData.getGlAccountIdForSavingsControlNegative() : savingsAccountData.getGlAccountIdForInterestOnSavings(),
                                     savingsAccountData.getOfficeId(), null, currencyCode,
                                     SAVINGS_TRANSACTION_IDENTIFIER + savingsAccountTransactionData.getId().toString(),
                                     savingsAccountTransactionData.getId(), null, false, null, false,

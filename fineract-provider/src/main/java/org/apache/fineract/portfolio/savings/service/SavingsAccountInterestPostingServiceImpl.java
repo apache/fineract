@@ -100,22 +100,21 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
 
                 if (postingTransaction == null) {
                     SavingsAccountTransactionData newPostingTransaction;
-                    /*if (interestEarnedToBePostedForPeriod.isGreaterThanOrEqualTo(Money.zero(savingsAccountData.getCurrency()))) {
+                    if (interestEarnedToBePostedForPeriod.isGreaterThanOrEqualTo(Money.zero(savingsAccountData.getCurrency()))) {
                         newPostingTransaction = SavingsAccountTransactionData.interestPosting(savingsAccountData,
                                 interestPostingTransactionDate, interestEarnedToBePostedForPeriod, interestPostingPeriod.isUserPosting());
                     } else {
                         newPostingTransaction = SavingsAccountTransactionData.overdraftInterest(savingsAccountData,
                                 interestPostingTransactionDate, interestEarnedToBePostedForPeriod.negated(),
                                 interestPostingPeriod.isUserPosting(), isNegativeBalance);
-                    }*/
-                    BigDecimal bd = new BigDecimal(String.valueOf(interestEarnedToBePostedForPeriod.getAmount())).setScale(2, RoundingMode.DOWN);
+                    }
+                   /* BigDecimal bd = new BigDecimal(String.valueOf(interestEarnedToBePostedForPeriod.getAmount())).setScale(2, RoundingMode.DOWN);
                     if (!MathUtil.isZero(bd) ) {
                         newPostingTransaction = SavingsAccountTransactionData.interestPosting(savingsAccountData,
                                 interestPostingTransactionDate, interestEarnedToBePostedForPeriod, interestPostingPeriod.isUserPosting());
-                        savingsAccountData.updateTransactions(newPostingTransaction);
-                    }
 
-
+                    }*/
+                    savingsAccountData.updateTransactions(newPostingTransaction);
                     if (savingsAccountData.getSavingsProductData().isAccrualBasedAccountingEnabled()) {
                         savingsAccountData.updateTransactions(SavingsAccountTransactionData.accrual(savingsAccountData,
                                 interestPostingTransactionDate, interestEarnedToBePostedForPeriod, interestPostingPeriod.isUserPosting()));
