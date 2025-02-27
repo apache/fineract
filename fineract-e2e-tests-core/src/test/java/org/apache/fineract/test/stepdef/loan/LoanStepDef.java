@@ -122,6 +122,7 @@ import org.apache.fineract.test.messaging.config.EventProperties;
 import org.apache.fineract.test.messaging.event.EventCheckHelper;
 import org.apache.fineract.test.messaging.event.loan.LoanRescheduledDueAdjustScheduleEvent;
 import org.apache.fineract.test.messaging.event.loan.LoanStatusChangedEvent;
+import org.apache.fineract.test.messaging.event.loan.transaction.LoanAccrualAdjustmentTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanAccrualTransactionCreatedBusinessEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanChargeAdjustmentPostBusinessEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanChargeOffEvent;
@@ -2333,6 +2334,23 @@ public class LoanStepDef extends AbstractStepDef {
         Long accrualTransactionId = accrualTransaction.getId();
 
         eventAssertion.assertEventRaised(LoanAccrualTransactionCreatedBusinessEvent.class, accrualTransactionId);
+    }
+
+    @Then("LoanAccrualAdjustmentTransactionBusinessEvent is raised on {string}")
+    public void checkLoanAccrualAdjustmentTransactionBusinessEvent(String date) throws IOException {
+        Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanCreateResponse.body().getLoanId();
+
+        Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.body().getTransactions();
+        GetLoansLoanIdTransactions accrualAdjustmentTransaction = transactions.stream()
+                .filter(t -> date.equals(FORMATTER.format(t.getDate())) && "Accrual Adjustment".equals(t.getType().getValue())).findFirst()
+                .orElseThrow(() -> new IllegalStateException(String.format("No Accrual Adjustment transaction found on %s", date)));
+        Long accrualAdjustmentTransactionId = accrualAdjustmentTransaction.getId();
+
+        eventAssertion.assertEventRaised(LoanAccrualAdjustmentTransactionBusinessEvent.class, accrualAdjustmentTransactionId);
     }
 
     @Then("LoanChargeAdjustmentPostBusinessEvent is raised on {string}")

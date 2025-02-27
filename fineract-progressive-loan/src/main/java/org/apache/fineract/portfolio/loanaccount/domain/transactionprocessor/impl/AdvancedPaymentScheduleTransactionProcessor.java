@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.im
 import static java.math.BigDecimal.ZERO;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
+import static org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction.accrualAdjustment;
 import static org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction.accrueTransaction;
 import static org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum.CHARGEBACK;
 import static org.apache.fineract.portfolio.loanproduct.domain.AllocationType.FEE;
@@ -63,6 +64,9 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualAdjustmentTransactionBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualTransactionCreatedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
@@ -117,6 +121,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     private final InterestRefundService interestRefundService;
     private final LoanTransactionRepository loanTransactionRepository;
     private final ExternalIdFactory externalIdFactory;
+    private final BusinessEventNotifierService businessEventNotifierService;
 
     @Override
     public String getCode() {
@@ -2376,11 +2381,27 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
         final BigDecimal missingAccrualAmount = newInterest.subtract(sumOfAccrualsTillChargeOff);
 
+        if (missingAccrualAmount.compareTo(BigDecimal.ZERO) == 0) {
+            return;
+        }
+
+        final LoanTransaction newAccrualTransaction;
+
         if (missingAccrualAmount.compareTo(BigDecimal.ZERO) > 0) {
-            final LoanTransaction newAccrualTransaction = accrueTransaction(loan, loan.getOffice(), chargeOffDate, missingAccrualAmount,
-                    missingAccrualAmount, ZERO, ZERO, externalIdFactory.create());
-            loan.addLoanTransaction(newAccrualTransaction);
-            loanTransactionRepository.saveAndFlush(newAccrualTransaction);
+            newAccrualTransaction = accrueTransaction(loan, loan.getOffice(), chargeOffDate, missingAccrualAmount, missingAccrualAmount,
+                    ZERO, ZERO, externalIdFactory.create());
+        } else {
+            newAccrualTransaction = accrualAdjustment(loan, loan.getOffice(), chargeOffDate, missingAccrualAmount.abs(),
+                    missingAccrualAmount.abs(), ZERO, ZERO, externalIdFactory.create());
+        }
+
+        loan.addLoanTransaction(newAccrualTransaction);
+        loanTransactionRepository.saveAndFlush(newAccrualTransaction);
+
+        if (newAccrualTransaction.isAccrual()) {
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanAccrualTransactionCreatedBusinessEvent(newAccrualTransaction));
+        } else {
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanAccrualAdjustmentTransactionBusinessEvent(newAccrualTransaction));
         }
     }
 }
