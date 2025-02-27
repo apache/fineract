@@ -377,7 +377,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append(
                     "msac.id as chargeId, msac.amount as chargeAmount, msac.charge_time_enum as chargeTimeType, msac.is_penalty as isPenaltyCharge, ");
             sqlBuilder.append("txd.id as taxDetailsId, txd.amount as taxAmount, ");
-            sqlBuilder.append("apm2.gl_account_id as glAccountIdForInterestOnSavings2, apm1.gl_account_id as glAccountIdForInterestOnSavings, apm.gl_account_id as glAccountIdForSavingsControl, ");
+            sqlBuilder.append("apm2.gl_account_id as glAccountIdForInterestOnSavingsNegative, apm1.gl_account_id as glAccountIdForInterestOnSavings, apm.gl_account_id as glAccountIdForSavingsControl, apm3.gl_account_id as glAccountIdForSavingsControlNegative, ");
             sqlBuilder.append(
                     "mtc.id as taxComponentId, mtc.debit_account_id as debitAccountId, mtc.credit_account_id as creditAccountId, mtc.percentage as taxPercentage ");
             sqlBuilder.append("from m_savings_account sa ");
@@ -396,6 +396,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("left join acc_product_mapping apm on apm.product_id = sp.id and apm.financial_account_type=2 ");
             sqlBuilder.append("left join acc_product_mapping apm1 on apm1.product_id = sp.id and apm1.financial_account_type=17 ");
             sqlBuilder.append("left join acc_product_mapping apm2 on apm2.product_id = sp.id and apm2.financial_account_type=18 ");
+            sqlBuilder.append("left join acc_product_mapping apm3 on apm3.product_id = sp.id and apm3.financial_account_type = 11 ");
 
             this.schemaSql = sqlBuilder.toString();
         }
@@ -447,8 +448,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     final ClientData clientData = ClientData.createClientForInterestPosting(clientId, clientOfficeId);
 
                     final Long glAccountIdForInterestOnSavings = rs.getLong("glAccountIdForInterestOnSavings");
-                    final Long glAccountIdForInterestOnSavings2 = rs.getLong("glAccountIdForInterestOnSavings2");
+                    final Long glAccountIdForInterestOnSavingsNegative = rs.getLong("glAccountIdForInterestOnSavingsNegative");
                     final Long glAccountIdForSavingsControl = rs.getLong("glAccountIdForSavingsControl");
+                    final Long glAccountIdForSavingsControlNegative = rs.getLong("glAccountIdForSavingsControlNegative");
 
                     final Long productId = rs.getLong("productId");
                     final String productName = rs.getString("productName");
@@ -607,7 +609,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     savingsAccountData.setClientData(clientData);
                     savingsAccountData.setGroupGeneralData(groupGeneralData);
                     savingsAccountData.setSavingsProduct(savingsProductData);
-                    savingsAccountData.setGlAccountIdForInterestOnSavings((MathUtil.isLessThanZero(accountBalance) && MathUtil.isGreaterThanZero(glAccountIdForInterestOnSavings2))  ? glAccountIdForInterestOnSavings2 :glAccountIdForInterestOnSavings);
+                    savingsAccountData.setGlAccountIdForInterestOnSavingsNegative(glAccountIdForInterestOnSavingsNegative);
+                    savingsAccountData.setGlAccountIdForSavingsControlNegative(glAccountIdForSavingsControlNegative);
+                    savingsAccountData.setGlAccountIdForInterestOnSavings(glAccountIdForInterestOnSavings);
                     savingsAccountData.setGlAccountIdForSavingsControl(glAccountIdForSavingsControl);
                 }
 

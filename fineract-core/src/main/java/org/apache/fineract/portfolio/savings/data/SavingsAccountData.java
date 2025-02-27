@@ -141,6 +141,8 @@ public final class SavingsAccountData implements Serializable {
     private transient Set<Long> existingReversedTransactionIds = new HashSet<>();
     private transient Long glAccountIdForSavingsControl;
     private transient Long glAccountIdForInterestOnSavings;
+    private transient Long glAccountIdForSavingsControlNegative;
+    private transient Long glAccountIdForInterestOnSavingsNegative;
 
     public static SavingsAccountData importInstanceIndividual(Long clientId, Long productId, Long fieldOfficerId, LocalDate submittedOnDate,
             BigDecimal nominalAnnualInterestRate, EnumOptionData interestCompoundingPeriodTypeEnum,
@@ -295,8 +297,24 @@ public final class SavingsAccountData implements Serializable {
         this.glAccountIdForInterestOnSavings = glAccountIdForInterestOnSavings;
     }
 
+    public Long getGlAccountIdForSavingsControlNegative() {
+        return glAccountIdForSavingsControlNegative;
+    }
+
+    public void setGlAccountIdForSavingsControlNegative(Long glAccountIdForSavingsControlNegative) {
+        this.glAccountIdForSavingsControlNegative = glAccountIdForSavingsControlNegative;
+    }
+
+    public Long getGlAccountIdForInterestOnSavingsNegative() {
+        return glAccountIdForInterestOnSavingsNegative;
+    }
+
+    public void setGlAccountIdForInterestOnSavingsNegative(Long glAccountIdForInterestOnSavingsNegative) {
+        this.glAccountIdForInterestOnSavingsNegative = glAccountIdForInterestOnSavingsNegative;
+    }
+
     public void setHelpers(final SavingsAccountTransactionDataSummaryWrapper savingsAccountTransactionSummaryWrapper,
-            final SavingsHelper savingsHelper) {
+                           final SavingsHelper savingsHelper) {
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.savingsHelper = savingsHelper;
     }
