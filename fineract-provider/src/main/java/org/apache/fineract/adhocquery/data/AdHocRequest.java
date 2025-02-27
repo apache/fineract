@@ -16,19 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.adhocquery.service;
+package org.apache.fineract.adhocquery.data;
 
-import java.util.List;
-import org.apache.fineract.adhocquery.data.AdHocData;
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public interface AdHocReadPlatformService {
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class AdHocRequest implements Serializable {
 
-    List<AdHocData> retrieveAllAdHocQuery();
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    List<AdHocData> retrieveAllActiveAdHocQuery();
-
-    AdHocData retrieveOne(Long adHocId);
-
-    AdHocData retrieveNewAdHocDetails();
-
+    private Long id;
+    private String name;
+    private String query;
+    private String tableName;
+    private String tableFields;
+    private String email;
+    private Long reportRunFrequency;
+    private Long reportRunEvery;
+    private Boolean isActive;
 }
