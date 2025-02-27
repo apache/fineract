@@ -33,26 +33,39 @@ class BulkBusinessEventTest {
     @Test
     public void testConstructorWorksForSameAggregateId() {
         // given
+        List<BusinessEvent<?>> events = List.of(new ClientCreateBusinessEvent(client(1L)), new ClientActivateBusinessEvent(client(1L)));
+
         // when
-        new BulkBusinessEvent(List.of(new ClientCreateBusinessEvent(client(1L)), new ClientActivateBusinessEvent(client(1L))));
-        // then no exception thrown
+        BulkBusinessEvent bulkEvent = new BulkBusinessEvent(events);
+
+        // then
+        Assertions.assertEquals(1L, bulkEvent.getAggregateRootId());
+        Assertions.assertEquals(events, bulkEvent.get());
+        Assertions.assertEquals(BulkBusinessEvent.TYPE, bulkEvent.getType());
+        Assertions.assertEquals("Bulk", bulkEvent.getCategory());
     }
 
     @Test
     public void testConstructorThrowsExceptionForDifferentAggregateId() {
         // given
-        // when
-        Assertions.assertThrows(IllegalArgumentException.class, () -> new BulkBusinessEvent(
-                List.of(new ClientCreateBusinessEvent(client(1L)), new ClientActivateBusinessEvent(client(2L)))));
-        // then no exception thrown
+        List<BusinessEvent<?>> events = List.of(new ClientCreateBusinessEvent(client(1L)), new ClientActivateBusinessEvent(client(2L)));
+
+        // when/then
+        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> new BulkBusinessEvent(events));
+        Assertions.assertEquals("The business events are related to multiple aggregate roots which is not allowed", exception.getMessage());
     }
 
     @Test
     public void testConstructorWorksForNullAggregateId() {
         // given
+        List<BusinessEvent<?>> events = List.of(new ClientCreateBusinessEvent(client(1L)), new ClientActivateBusinessEvent(client(null)));
+
         // when
-        new BulkBusinessEvent(List.of(new ClientCreateBusinessEvent(client(1L)), new ClientActivateBusinessEvent(client(null))));
-        // then no exception thrown
+        BulkBusinessEvent bulkEvent = new BulkBusinessEvent(events);
+
+        // then
+        Assertions.assertEquals(1L, bulkEvent.getAggregateRootId());
+        Assertions.assertEquals(events, bulkEvent.get());
     }
 
     private Client client(Long id) {
@@ -60,5 +73,4 @@ class BulkBusinessEventTest {
         given(client.getId()).willReturn(id);
         return client;
     }
-
 }
