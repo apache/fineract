@@ -28,19 +28,26 @@ import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 
+@Getter
 public class DateFormat {
 
-    @Getter
+    private static final String INVALID_DATE_FORMAT_MESSAGE = "validation.msg.invalid.dateFormat.format";
+    private static final String VALIDATION_ERROR_MESSAGE = "Validation errors exist.";
+    private static final String DATE_FORMAT_NULL_MESSAGE = "Dateformat is null";
+    private static final String INVALID_DATE_FORMAT_PREFIX = "Invalid dateFormat: `";
+    private static final String TIME_PATTERN = " HH:mm:ss";
+    private static final String YEAR_PATTERN_OLD = "yyyy";
+    private static final String YEAR_PATTERN_NEW = "uuuu";
+
     private final String dateFormat;
 
     public DateFormat(String rawDateFormat) {
         if (StringUtils.isBlank(rawDateFormat)) {
-            final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.dateFormat.format",
-                    "Dateformat is null", rawDateFormat);
-            throw new PlatformApiDataValidationException("validation.msg.invalid.dateFormat.format", "Validation errors exist.",
-                    List.of(error));
+            final ApiParameterError error = ApiParameterError.parameterError(INVALID_DATE_FORMAT_MESSAGE, DATE_FORMAT_NULL_MESSAGE,
+                    rawDateFormat);
+            throw new PlatformApiDataValidationException(INVALID_DATE_FORMAT_MESSAGE, VALIDATION_ERROR_MESSAGE, List.of(error));
         } else {
-            String compatibleDateFormat = rawDateFormat.replace("yyyy", "uuuu");
+            String compatibleDateFormat = rawDateFormat.replace(YEAR_PATTERN_OLD, YEAR_PATTERN_NEW);
             validate(compatibleDateFormat);
             dateFormat = compatibleDateFormat;
         }
@@ -49,14 +56,13 @@ public class DateFormat {
     private void validate(String dateTimeFormat) {
         try {
             DateTimeFormatter formatter = new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient().appendPattern(dateTimeFormat)
-                    .optionalStart().appendPattern(" HH:mm:ss").optionalEnd().parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+                    .optionalStart().appendPattern(TIME_PATTERN).optionalEnd().parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
                     .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0).parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0).toFormatter()
                     .withResolverStyle(ResolverStyle.STRICT);
         } catch (final IllegalArgumentException | DateTimeParseException e) {
-            final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.dateFormat.format",
-                    "Invalid dateFormat: `" + dateTimeFormat, dateTimeFormat);
-            throw new PlatformApiDataValidationException("validation.msg.invalid.dateFormat.format", "Validation errors exist.",
-                    List.of(error), e);
+            final ApiParameterError error = ApiParameterError.parameterError(INVALID_DATE_FORMAT_MESSAGE,
+                    INVALID_DATE_FORMAT_PREFIX + dateTimeFormat, dateTimeFormat);
+            throw new PlatformApiDataValidationException(INVALID_DATE_FORMAT_MESSAGE, VALIDATION_ERROR_MESSAGE, List.of(error), e);
         }
     }
 }
