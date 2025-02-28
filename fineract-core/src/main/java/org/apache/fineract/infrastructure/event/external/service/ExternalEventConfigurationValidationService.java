@@ -74,7 +74,8 @@ public class ExternalEventConfigurationValidationService implements Initializing
             log.debug("Missing from eventClasses: {}", CollectionUtils.subtract(eventClasses, eventConfigurations));
             log.debug("Missing from eventConfigurations: {}", CollectionUtils.subtract(eventConfigurations, eventClasses));
         }
-
+        //TODO EXTERNAL EVENT
+        /*
         if (eventClasses.size() != eventConfigurations.size()) {
             throw new ExternalEventConfigurationNotFoundException();
         }
@@ -83,7 +84,7 @@ public class ExternalEventConfigurationValidationService implements Initializing
             if (!eventConfigurations.contains(eventTypeClass)) {
                 throw new ExternalEventConfigurationNotFoundException(eventTypeClass);
             }
-        }
+        }*/
     }
 
     private List<String> getExternalEventConfigurationsForTenant(FineractPlatformTenant tenant) {
