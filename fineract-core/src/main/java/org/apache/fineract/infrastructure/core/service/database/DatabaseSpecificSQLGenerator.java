@@ -161,7 +161,7 @@ public class DatabaseSpecificSQLGenerator {
 
     public String castChar(String sql) {
         if (databaseTypeResolver.isMySQL()) {
-            return format("CAST(%s AS CHAR)", sql);
+            return format("CAST(%s AS CHAR) COLLATE utf8mb4_unicode_ci", sql);
         } else if (databaseTypeResolver.isPostgreSQL()) {
             return format("%s::CHAR", sql);
         } else {
