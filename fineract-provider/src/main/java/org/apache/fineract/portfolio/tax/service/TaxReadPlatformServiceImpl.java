@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformService;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
@@ -49,7 +50,7 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
     private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
 
     @Override
-    public Collection<TaxComponentData> retrieveAllTaxComponents() {
+    public List<TaxComponentData> retrieveAllTaxComponents() {
         String sql = "select " + TAX_COMPONENT_MAPPER.getSchema();
         return this.jdbcTemplate.query(sql, TAX_COMPONENT_MAPPER); // NOSONAR
     }
@@ -67,7 +68,7 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
     }
 
     @Override
-    public Collection<TaxGroupData> retrieveAllTaxGroups() {
+    public List<TaxGroupData> retrieveAllTaxGroups() {
         String sql = "select " + TAX_GROUP_MAPPER.getSchema();
         return this.jdbcTemplate.query(sql, TAX_GROUP_MAPPER); // NOSONAR
     }
@@ -96,7 +97,7 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
     }
 
     @Override
-    public Collection<TaxGroupData> retrieveTaxGroupsForLookUp() {
+    public List<TaxGroupData> retrieveTaxGroupsForLookUp() {
         String sql = "select " + TAX_GROUP_LOOK_UP_MAPPER.getSchema();
         return this.jdbcTemplate.query(sql, TAX_GROUP_LOOK_UP_MAPPER); // NOSONAR
     }

@@ -16,28 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.tax.service;
+package org.apache.fineract.portfolio.tax.request;
 
-import java.util.List;
-import org.apache.fineract.portfolio.tax.data.TaxComponentData;
-import org.apache.fineract.portfolio.tax.data.TaxGroupData;
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-public interface TaxReadPlatformService {
+@Setter
+@Getter
+@NoArgsConstructor
+public class TaxGroupComponent implements Serializable {
 
-    TaxComponentData retrieveTaxComponentData(Long id);
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    TaxComponentData retrieveTaxComponentTemplate();
-
-    TaxGroupData retrieveTaxGroupData(Long id);
-
-    TaxGroupData retrieveTaxGroupWithTemplate(Long id);
-
-    TaxGroupData retrieveTaxGroupTemplate();
-
-    List<TaxComponentData> retrieveAllTaxComponents();
-
-    List<TaxGroupData> retrieveAllTaxGroups();
-
-    List<TaxGroupData> retrieveTaxGroupsForLookUp();
-
+    private Long taxComponentId;
+    private String startDate;
 }
