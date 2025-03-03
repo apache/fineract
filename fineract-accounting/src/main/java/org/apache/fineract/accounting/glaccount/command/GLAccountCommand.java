@@ -20,8 +20,6 @@ package org.apache.fineract.accounting.glaccount.command;
 
 import java.util.ArrayList;
 import java.util.List;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.glaccount.api.GLAccountJsonInputParams;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountUsage;
@@ -32,20 +30,9 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 /**
  * Immutable command for adding a general Ledger Account
  */
-@RequiredArgsConstructor
-@Getter
-public class GLAccountCommand {
 
-    private final Long id;
-    private final String name;
-    private final Long parentId;
-    private final String glCode;
-    private final Boolean disabled;
-    private final Boolean manualEntriesAllowed;
-    private final Integer type;
-    private final Integer usage;
-    private final String description;
-    private final Long tagId;
+public record GLAccountCommand(Long id, String name, Long parentId, String glCode, Boolean disabled, Boolean manualEntriesAllowed,
+        Integer type, Integer usage, String description, Long tagId) {
 
     public void validateForCreate() {
 
