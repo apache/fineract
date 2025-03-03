@@ -109,6 +109,7 @@ import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.collateralmanagement.data.LoanCollateralResponseData;
 import org.apache.fineract.portfolio.collateralmanagement.service.LoanCollateralManagementReadPlatformService;
+import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.delinquency.api.DelinquencyApiResourceSwagger;
 import org.apache.fineract.portfolio.delinquency.data.LoanDelinquencyTagHistoryData;
@@ -244,7 +245,8 @@ public class LoansApiResource {
             LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose, LoanApiConstants.topupAmount,
             LoanApiConstants.clientActiveLoanOptions, LoanApiConstants.datatables, LoanProductConstants.RATES_PARAM_NAME,
             LoanApiConstants.MULTIDISBURSE_DETAILS_PARAMNAME, LoanApiConstants.EMI_AMOUNT_VARIATIONS_PARAMNAME,
-            LoanApiConstants.COLLECTION_PARAMNAME, LoanApiConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE));
+            LoanApiConstants.COLLECTION_PARAMNAME, LoanApiConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE,
+            LoanApiConstants.daysInYearCustomStrategyParameterName));
 
     private static final Set<String> LOAN_APPROVAL_DATA_PARAMETERS = new HashSet<>(Arrays.asList("approvalDate", "approvalAmount"));
     private static final Set<String> GLIM_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(Arrays.asList("glimId", "groupId", "clientId",
@@ -1133,7 +1135,7 @@ public class LoansApiResource {
                 loanCollateralOptions, calendarOptions, notes, accountLinkingOptions, linkedAccount, disbursementData, emiAmountVariations,
                 overdueCharges, paidInAdvanceTemplate, interestRatesPeriods, clientActiveLoanOptions, rates, isRatesEnabled, collectionData,
                 LoanScheduleType.getValuesAsEnumOptionDataList(), LoanScheduleProcessingType.getValuesAsEnumOptionDataList(),
-                loanTermVariations);
+                loanTermVariations, DaysInYearCustomStrategyType.getValuesAsStringEnumOptionDataList());
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);

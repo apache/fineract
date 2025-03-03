@@ -171,6 +171,7 @@ public class LoanAccountData {
     private Collection<CalendarData> calendarOptions;
     private List<EnumOptionData> loanScheduleTypeOptions;
     private List<EnumOptionData> loanScheduleProcessingTypeOptions;
+    private List<StringEnumOptionData> daysInYearCustomStrategyOptions;
 
     @Transient
     private BigDecimal feeChargesAtDisbursementCharged;
@@ -216,6 +217,7 @@ public class LoanAccountData {
 
     private EnumOptionData daysInMonthType;
     private EnumOptionData daysInYearType;
+    private StringEnumOptionData daysInYearCustomStrategy;
     // TODO: avoid prefix "is"
     private boolean isInterestRecalculationEnabled;
 
@@ -282,7 +284,7 @@ public class LoanAccountData {
             Integer graceOnInterestPayment, Integer graceOnInterestCharged, LocalDate interestChargedFromDate,
             LocalDate repaymentsStartingFromDate, Integer rowIndex, ExternalId externalId, Long groupId, Collection<LoanChargeData> charges,
             String linkAccountId, String locale, String dateFormat, List<LoanCollateralManagementData> loanCollateralManagementData,
-            Integer fixedLength) {
+            Integer fixedLength, StringEnumOptionData daysInYearCustomStrategy) {
 
         return new LoanAccountData().setLoanType(loanTypeEnumOption).setClientId(clientId).setProductId(productId)
                 .setLoanOfficerId(loanOfficerId).setSubmittedOnDate(submittedOnDate).setFundId(fundId).setPrincipal(principal)
@@ -296,7 +298,8 @@ public class LoanAccountData {
                 .setGraceOnInterestCharged(graceOnInterestCharged).setInterestChargedFromDate(interestChargedFromDate)
                 .setRepaymentsStartingFromDate(repaymentsStartingFromDate).setRowIndex(rowIndex).setExternalId(externalId)
                 .setGroupId(groupId).setCharges(charges).setLinkAccountId(linkAccountId).setLocale(locale).setDateFormat(dateFormat)
-                .setCollateral(loanCollateralManagementData).setFixedLength(fixedLength);
+                .setCollateral(loanCollateralManagementData).setFixedLength(fixedLength)
+                .setDaysInYearCustomStrategy(daysInYearCustomStrategy);
     }
 
     public static LoanAccountData importInstanceGroup(EnumOptionData loanTypeEnumOption, Long groupIdforGroupLoan, Long productId,
@@ -421,7 +424,9 @@ public class LoanAccountData {
                 .setFixedPrincipalPercentagePerInstallment(product.getFixedPrincipalPercentagePerInstallment())
                 .setDelinquent(CollectionData.template()).setDisallowExpectedDisbursements(product.getDisallowExpectedDisbursements())
                 .setLoanScheduleType(product.getLoanScheduleType()).setLoanScheduleProcessingType(product.getLoanScheduleProcessingType())
-                .setInterestRecognitionOnDisbursementDate(product.isInterestRecognitionOnDisbursementDate());
+                .setInterestRecognitionOnDisbursementDate(product.isInterestRecognitionOnDisbursementDate())
+                .setDaysInYearCustomStrategyOptions(product.getDaysInYearCustomStrategyOptions())
+                .setDaysInYearCustomStrategy(product.getDaysInYearCustomStrategy());
     }
 
     /*
@@ -459,7 +464,7 @@ public class LoanAccountData {
             final BigDecimal disbursedAmountPercentageForDownPayment, final boolean enableAutoRepaymentForDownPayment,
             final boolean enableInstallmentLevelDelinquency, final EnumOptionData loanScheduleType,
             final EnumOptionData loanScheduleProcessingType, final Integer fixedLength, final StringEnumOptionData chargeOffBehaviour,
-            final boolean isInterestRecognitionOnDisbursementDate) {
+            final boolean isInterestRecognitionOnDisbursementDate, final StringEnumOptionData daysInYearCustomStrategy) {
 
         final CollectionData delinquent = CollectionData.template();
 
@@ -504,8 +509,8 @@ public class LoanAccountData {
                 .setEnableAutoRepaymentForDownPayment(enableAutoRepaymentForDownPayment)
                 .setEnableInstallmentLevelDelinquency(enableInstallmentLevelDelinquency).setLoanScheduleType(loanScheduleType)
                 .setLoanScheduleProcessingType(loanScheduleProcessingType).setFixedLength(fixedLength)
-                .setChargeOffBehaviour(chargeOffBehaviour)
-                .setInterestRecognitionOnDisbursementDate(isInterestRecognitionOnDisbursementDate);
+                .setChargeOffBehaviour(chargeOffBehaviour).setInterestRecognitionOnDisbursementDate(isInterestRecognitionOnDisbursementDate)
+                .setDaysInYearCustomStrategy(daysInYearCustomStrategy);
     }
 
     /*
@@ -530,7 +535,8 @@ public class LoanAccountData {
             final PaidInAdvanceData paidInAdvance, Collection<InterestRatePeriodData> interestRatesPeriods,
             final Collection<LoanAccountSummaryData> clientActiveLoanOptions, final List<RateData> rates, final Boolean isRatesEnabled,
             final CollectionData delinquent, final List<EnumOptionData> loanScheduleTypeOptions,
-            final List<EnumOptionData> loanScheduleProcessingTypeOptions, final List<LoanTermVariationsData> loanTermVariations) {
+            final List<EnumOptionData> loanScheduleProcessingTypeOptions, final List<LoanTermVariationsData> loanTermVariations,
+            final List<StringEnumOptionData> daysInYearCustomStrategyOptions) {
 
         // TODO: why are these variables 'calendarData', 'chargeTemplate' never used (see original private constructor)
 
@@ -550,7 +556,8 @@ public class LoanAccountData {
                 .setOverdueCharges(overdueCharges).setPaidInAdvance(paidInAdvance).setInterestRatesPeriods(interestRatesPeriods)
                 .setClientActiveLoanOptions(clientActiveLoanOptions).setRates(rates).setIsRatesEnabled(isRatesEnabled)
                 .setDelinquent(delinquent).setLoanScheduleTypeOptions(loanScheduleTypeOptions)
-                .setLoanScheduleProcessingTypeOptions(loanScheduleProcessingTypeOptions).setLoanTermVariations(loanTermVariations);
+                .setLoanScheduleProcessingTypeOptions(loanScheduleProcessingTypeOptions).setLoanTermVariations(loanTermVariations)
+                .setDaysInYearCustomStrategyOptions(daysInYearCustomStrategyOptions);
     }
 
     public LoanAccountData associationsAndTemplate(final Collection<LoanProductData> productOptions,

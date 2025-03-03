@@ -1500,4 +1500,10 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
         return advancedPaymentData;
     }
 
+    protected static class DaysInYearCustomStrategy {
+
+        public static String FEB_29_PERIOD_ONLY = "FEB_29_PERIOD_ONLY";
+        public static String FULL_LEAP_YEAR = "FULL_LEAP_YEAR";
+    }
+
 }

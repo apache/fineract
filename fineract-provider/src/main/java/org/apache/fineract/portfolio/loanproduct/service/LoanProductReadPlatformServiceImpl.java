@@ -41,6 +41,7 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
+import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.service.CommonEnumerations;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
@@ -270,6 +271,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lp.fixed_principal_percentage_per_installment fixedPrincipalPercentagePerInstallment, "
                     + "lp.sync_expected_with_disbursement_date as syncExpectedWithDisbursementDate, "
                     + "lpg.id as lpgId, lpg.mandatory_guarantee as mandatoryGuarantee, "
+                    + "lp.days_in_year_custom_strategy as daysInYearCustomStrategy, "
                     + "lpg.minimum_guarantee_from_own_funds as minimumGuaranteeFromOwnFunds, lpg.minimum_guarantee_from_guarantor_funds as minimumGuaranteeFromGuarantor, "
                     + "lp.account_moves_out_of_npa_only_on_arrears_completion as accountMovesOutOfNPAOnlyOnArrearsCompletion, "
                     + "curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol, lp.external_id as externalId, "
@@ -428,6 +430,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final int daysInMonth = JdbcSupport.getInteger(rs, "daysInMonth");
             final EnumOptionData daysInMonthType = CommonEnumerations.daysInMonthType(daysInMonth);
             final int daysInYear = JdbcSupport.getInteger(rs, "daysInYear");
+            final StringEnumOptionData daysInYearCustomStrategy = DaysInYearCustomStrategyType
+                    .getStringEnumOptionData(rs.getString("daysInYearCustomStrategy"));
             final EnumOptionData daysInYearType = CommonEnumerations.daysInYearType(daysInYear);
             final Integer installmentAmountInMultiplesOf = JdbcSupport.getInteger(rs, "installmentAmountInMultiplesOf");
             final boolean canDefineInstallmentAmount = rs.getBoolean("canDefineInstallmentAmount");
@@ -571,7 +575,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     enableAutoRepaymentForDownPayment, advancedPaymentData, creditAllocationData, repaymentStartDateType,
                     enableInstallmentLevelDelinquency, loanScheduleType.asEnumOptionData(), loanScheduleProcessingType.asEnumOptionData(),
                     fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes,
-                    loanChargeOffBehaviour.getValueAsStringEnumOptionData(), interestRecognitionOnDisbursementDate);
+                    loanChargeOffBehaviour.getValueAsStringEnumOptionData(), interestRecognitionOnDisbursementDate,
+                    daysInYearCustomStrategy);
         }
     }
 

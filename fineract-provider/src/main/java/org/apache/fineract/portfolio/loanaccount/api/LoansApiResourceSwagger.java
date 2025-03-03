@@ -1273,6 +1273,8 @@ final class LoansApiResourceSwagger {
         public String transactionProcessingStrategyCode;
         @Schema(example = "360", allowableValues = "1, 360, 364, 36")
         public Integer daysInYearType;
+        @Schema(example = "FULL_LEAP_YEAR", allowableValues = "FULL_LEAP_YEAR, FEB_29_PERIOD_ONLY")
+        public String daysInYearCustomStrategy;
         @Schema(example = "individual")
         public String loanType;
         @Schema(example = "20 September 2011")

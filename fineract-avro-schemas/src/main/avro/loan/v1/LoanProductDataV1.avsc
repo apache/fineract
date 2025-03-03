@@ -421,6 +421,14 @@
         },
         {
             "default": null,
+            "name": "daysInYearCustomStrategy",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.StringEnumOptionDataV1"
+            ]
+        },
+        {
+            "default": null,
             "name": "isInterestRecalculationEnabled",
             "type": [
                 "null",

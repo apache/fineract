@@ -7728,3 +7728,111 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 10 February 2025 | Repayment        | 900.0  | 900.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     Then Loan closedon_date is "10 February 2025"
+
+  @TestRailId:C3538
+  Scenario: Verify leap year calculation with Feb month split between periods - UC1
+    When Admin sets the business date to "12 December 2023"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                           | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_LEAP_YEAR_INTEREST_RECALCULATION_DAILY | 12 December 2023  | 10000          | 9.482                  | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "12 December 2023" with "10000" amount and expected disbursement date on "12 December 2023"
+    When Admin successfully disburse the loan on "12 December 2023" with "10000" EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      |    |      | 12 December 2023 |           | 10000.0         |               |          | 0.0  |           | 0.0     | 0.0  |            |      |             |
+      | 1  | 31   | 12 January 2024  |           | 8367.32         | 1632.68       | 80.53    | 0.0  | 0.0       | 1713.21 | 0.0  | 0.0        | 0.0  | 1713.21     |
+      | 2  | 31   | 12 February 2024 |           | 6721.49         | 1645.83       | 67.38    | 0.0  | 0.0       | 1713.21 | 0.0  | 0.0        | 0.0  | 1713.21     |
+      | 3  | 29   | 12 March 2024    |           | 5058.78         | 1662.71       | 50.5     | 0.0  | 0.0       | 1713.21 | 0.0  | 0.0        | 0.0  | 1713.21     |
+      | 4  | 31   | 12 April 2024    |           | 3386.31         | 1672.47       | 40.74    | 0.0  | 0.0       | 1713.21 | 0.0  | 0.0        | 0.0  | 1713.21     |
+      | 5  | 30   | 12 May 2024      |           | 1699.49         | 1686.82       | 26.39    | 0.0  | 0.0       | 1713.21 | 0.0  | 0.0        | 0.0  | 1713.21     |
+      | 6  | 31   | 12 June 2024     |           | 0.0             | 1699.49       | 13.69    | 0.0  | 0.0       | 1713.18 | 0.0  | 0.0        | 0.0  | 1713.18     |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due      | Paid | In advance | Late | Outstanding |
+      | 10000.0       | 279.23   | 0.0  | 0.0       | 10279.23 | 0.0  | 0.0        | 0.0  | 10279.23    |
+
+  @TestRailId:C3539
+  Scenario: Verify leap year calculation with no February month but leap year - UC2
+    When Admin sets the business date to "23 July 2024"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                           | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_LEAP_YEAR_INTEREST_RECALCULATION_DAILY | 23 July 2024      | 15000          | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 4                 | MONTHS                | 1              | MONTHS                 | 4                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "23 July 2024" with "15000" amount and expected disbursement date on "23 July 2024"
+    When Admin successfully disburse the loan on "23 July 2024" with "15000" EUR transaction amount
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      |    |      | 23 July 2024     |           | 15000.0         |               |          | 0.0  |           | 0.0     | 0.0  |            |      |             |
+      | 1  | 31   | 23 August 2024   |           | 11307.47        | 3692.53       | 152.88   | 0.0  | 0.0       | 3845.41 | 0.0  | 0.0        | 0.0  | 3845.41     |
+      | 2  | 31   | 23 September 2024|           | 7577.3          | 3730.17       | 115.24   | 0.0  | 0.0       | 3845.41 | 0.0  | 0.0        | 0.0  | 3845.41     |
+      | 3  | 30   | 23 October 2024  |           | 3806.63         | 3770.67       | 74.74    | 0.0  | 0.0       | 3845.41 | 0.0  | 0.0        | 0.0  | 3845.41     |
+      | 4  | 31   | 23 November 2024 |           | 0.0             | 3806.63       | 38.8     | 0.0  | 0.0       | 3845.43 | 0.0  | 0.0        | 0.0  | 3845.43     |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due      | Paid | In advance | Late | Outstanding |
+      | 15000.0       | 381.66   | 0.0  | 0.0       | 15381.66 | 0.0  | 0.0        | 0.0  | 15381.66    |
+
+  @TestRailId:C3540
+  Scenario: Verify leap year calculation with February in one period - UC3
+    When Admin sets the business date to "31 October 2023"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                           | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_LEAP_YEAR_INTEREST_RECALCULATION_DAILY | 31 October 2023   | 245000         | 45                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "31 October 2023" with "245000" amount and expected disbursement date on "31 October 2023"
+    When Admin successfully disburse the loan on "31 October 2023" with "245000" EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due      | Paid | In advance | Late | Outstanding |
+      |    |      | 31 October 2023  |           | 245000.0        |               |          | 0.0  |           | 0.0      | 0.0  |            |      |             |
+      | 1  | 30   | 30 November 2023 |           | 207713.25       | 37286.75      | 9061.64  | 0.0  | 0.0       | 46348.39 | 0.0  | 0.0        | 0.0  | 46348.39    |
+      | 2  | 31   | 31 December 2023 |           | 169303.49       | 38409.76      | 7938.63  | 0.0  | 0.0       | 46348.39 | 0.0  | 0.0        | 0.0  | 46348.39    |
+      | 3  | 31   | 31 January 2024  |           | 129425.74       | 39877.75      | 6470.64  | 0.0  | 0.0       | 46348.39 | 0.0  | 0.0        | 0.0  | 46348.39    |
+      | 4  | 29   | 29 February 2024 |           | 87692.12        | 41733.62      | 4614.77  | 0.0  | 0.0       | 46348.39 | 0.0  | 0.0        | 0.0  | 46348.39    |
+      | 5  | 31   | 31 March 2024    |           | 44695.25        | 42996.87      | 3351.52  | 0.0  | 0.0       | 46348.39 | 0.0  | 0.0        | 0.0  | 46348.39    |
+      | 6  | 30   | 30 April 2024    |           | 0.0             | 44695.25      | 1653.11  | 0.0  | 0.0       | 46348.36 | 0.0  | 0.0        | 0.0  | 46348.36    |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due       | Paid | In advance | Late | Outstanding |
+      | 245000.0      | 33090.31 | 0.0  | 0.0       | 278090.31 | 0.0  | 0.0        | 0.0  | 278090.31   |
+
+  @TestRailId:C3541
+  Scenario: Verify leap year calculation with no February month - leap and non-leap year split - UC4
+    When Admin sets the business date to "31 October 2024"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                           | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_LEAP_YEAR_INTEREST_RECALCULATION_DAILY | 31 October 2024   | 2450           | 9.99                   | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "31 October 2024" with "2450" amount and expected disbursement date on "31 October 2024"
+    When Admin successfully disburse the loan on "31 October 2024" with "2450" EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 31 October 2024  |           | 2450.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 30   | 30 November 2024 |           | 2049.88         | 400.12        | 20.12    | 0.0  | 0.0       | 420.24 | 0.0  | 0.0        | 0.0  | 420.24      |
+      | 2  | 31   | 31 December 2024 |           | 1647.03         | 402.85        | 17.39    | 0.0  | 0.0       | 420.24 | 0.0  | 0.0        | 0.0  | 420.24      |
+      | 3  | 31   | 31 January 2025  |           | 1240.76         | 406.27        | 13.97    | 0.0  | 0.0       | 420.24 | 0.0  | 0.0        | 0.0  | 420.24      |
+      | 4  | 28   | 28 February 2025 |           | 830.03          | 410.73        | 9.51     | 0.0  | 0.0       | 420.24 | 0.0  | 0.0        | 0.0  | 420.24      |
+      | 5  | 31   | 31 March 2025    |           | 416.83          | 413.2         | 7.04     | 0.0  | 0.0       | 420.24 | 0.0  | 0.0        | 0.0  | 420.24      |
+      | 6  | 30   | 30 April 2025    |           | 0.0             | 416.83        | 3.42     | 0.0  | 0.0       | 420.25 | 0.0  | 0.0        | 0.0  | 420.25      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      | 2450.0        | 71.45    | 0.0  | 0.0       | 2521.45 | 0.0  | 0.0        | 0.0  | 2521.45     |
+
+  @TestRailId:C3542
+  Scenario: Verify leap year calculation with no leap year - UC5
+    When Admin sets the business date to "29 October 2022"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_RECALCULATION_DAILY | 29 October 2022   | 5000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 12                | MONTHS                | 2              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "29 October 2022" with "5000" amount and expected disbursement date on "29 October 2022"
+    When Admin successfully disburse the loan on "29 October 2022" with "5000" EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 29 October 2022  |           | 5000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 61   | 29 December 2022 |           | 4190.81         | 809.19        | 58.49    | 0.0  | 0.0       | 867.68 | 0.0  | 0.0        | 0.0  | 867.68      |
+      | 2  | 61   | 28 February 2023 |           | 3372.16         | 818.65        | 49.03    | 0.0  | 0.0       | 867.68 | 0.0  | 0.0        | 0.0  | 867.68      |
+      | 3  | 60   | 29 April 2023    |           | 2543.28         | 828.88        | 38.8     | 0.0  | 0.0       | 867.68 | 0.0  | 0.0        | 0.0  | 867.68      |
+      | 4  | 61   | 29 June 2023     |           | 1705.35         | 837.93        | 29.75    | 0.0  | 0.0       | 867.68 | 0.0  | 0.0        | 0.0  | 867.68      |
+      | 5  | 61   | 29 August 2023   |           | 857.62          | 847.73        | 19.95    | 0.0  | 0.0       | 867.68 | 0.0  | 0.0        | 0.0  | 867.68      |
+      | 6  | 61   | 29 October 2023  |           | 0.0             | 857.62        | 10.03    | 0.0  | 0.0       | 867.65 | 0.0  | 0.0        | 0.0  | 867.65      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      | 5000.0        | 206.05   | 0.0  | 0.0       | 5206.05 | 0.0  | 0.0        | 0.0  | 5206.05     |

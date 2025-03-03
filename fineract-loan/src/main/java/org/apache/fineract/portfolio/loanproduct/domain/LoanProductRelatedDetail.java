@@ -35,6 +35,7 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
+import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -168,6 +169,10 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     @Column(name = "interest_recognition_on_disbursement_date", nullable = false)
     private boolean interestRecognitionOnDisbursementDate = false;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "days_in_year_custom_strategy")
+    private DaysInYearCustomStrategyType daysInYearCustomStrategy;
+
     public static LoanProductRelatedDetail createFrom(final CurrencyData currencyData, final BigDecimal principal,
             final BigDecimal nominalInterestRatePerPeriod, final PeriodFrequencyType interestRatePeriodFrequencyType,
             final BigDecimal nominalAnnualInterestRate, final InterestMethod interestMethod,
@@ -181,7 +186,8 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final boolean enableAutoRepaymentForDownPayment, final LoanScheduleType loanScheduleType,
             final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength,
             final boolean enableAccrualActivityPosting, final List<LoanSupportedInterestRefundTypes> supportedInterestRefundTypes,
-            final LoanChargeOffBehaviour chargeOffBehaviour, final boolean interestRecognitionOnDisbursementDate) {
+            final LoanChargeOffBehaviour chargeOffBehaviour, final boolean interestRecognitionOnDisbursementDate,
+            final DaysInYearCustomStrategyType daysInYearCustomStrategy) {
 
         final MonetaryCurrency currency = MonetaryCurrency.fromCurrencyData(currencyData);
         return new LoanProductRelatedDetail(currency, principal, nominalInterestRatePerPeriod, interestRatePeriodFrequencyType,
@@ -191,7 +197,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
                 inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
                 isEqualAmortization, enableDownPayment, disbursedAmountPercentageForDownPayment, enableAutoRepaymentForDownPayment,
                 loanScheduleType, loanScheduleProcessingType, fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes,
-                chargeOffBehaviour, interestRecognitionOnDisbursementDate);
+                chargeOffBehaviour, interestRecognitionOnDisbursementDate, daysInYearCustomStrategy);
     }
 
     protected LoanProductRelatedDetail() {
@@ -211,7 +217,8 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final boolean enableAutoRepaymentForDownPayment, final LoanScheduleType loanScheduleType,
             final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength,
             final boolean enableAccrualActivityPosting, List<LoanSupportedInterestRefundTypes> supportedInterestRefundTypes,
-            final LoanChargeOffBehaviour chargeOffBehaviour, final boolean interestRecognitionOnDisbursementDate) {
+            final LoanChargeOffBehaviour chargeOffBehaviour, final boolean interestRecognitionOnDisbursementDate,
+            final DaysInYearCustomStrategyType daysInYearCustomStrategy) {
         this.currency = currency;
         this.principal = defaultPrincipal;
         this.nominalInterestRatePerPeriod = defaultNominalInterestRatePerPeriod;
@@ -248,6 +255,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         this.supportedInterestRefundTypes = supportedInterestRefundTypes;
         this.chargeOffBehaviour = chargeOffBehaviour;
         this.interestRecognitionOnDisbursementDate = interestRecognitionOnDisbursementDate;
+        this.daysInYearCustomStrategy = daysInYearCustomStrategy;
     }
 
     private Integer defaultToNullIfZero(final Integer value) {
@@ -293,6 +301,11 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     public BigDecimal getAnnualNominalInterestRate() {
         return this.annualNominalInterestRate == null ? null
                 : BigDecimal.valueOf(Double.parseDouble(this.annualNominalInterestRate.stripTrailingZeros().toString()));
+    }
+
+    @Override
+    public DaysInYearCustomStrategyType getDaysInYearCustomStrategy() {
+        return daysInYearCustomStrategy;
     }
 
     // TODO: Move into assembler

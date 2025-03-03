@@ -1139,7 +1139,7 @@ Feature: LoanAccrualTransaction
       | 20 February 2025 | Accrual                 | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 21 February 2025 | Accrual                 | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
 
-  @TestRailId:C3532
+  @TestRailId:C3535
   Scenario: Verify the accrual activity creation in case of full repayment on maturity date - absence of negative numbers with low interest rate and small principal
     When Admin sets the business date to "19 February 2025"
     And Admin creates a client with random data
@@ -1280,7 +1280,7 @@ Feature: LoanAccrualTransaction
       | 19 February 2025 | Repayment              | 0.67   | 0.6       | 0.07     | 0.0  | 0.0       | 6.91         | false    | false    |
       | 20 February 2025 | Merchant Issued Refund | 3.35   | 3.35      | 0.0      | 0.0  | 0.0       | 3.56         | false    | false    |
 
-  @TestRailId:C3533
+  @TestRailId:C3536
   Scenario: Verify the accrual activity creation in case of full repayment on maturity date - absence of negative numbers with high interest rate and large principal
     When Admin sets the business date to "19 February 2025"
     And Admin creates a client with random data
@@ -1424,7 +1424,7 @@ Feature: LoanAccrualTransaction
       | 20 February 2025 | Accrual                | 12.33   | 0.0       | 12.33    | 0.0  | 0.0       | 0.0          | false    | false    |
       | 20 February 2025 | Accrual                | 12.33   | 0.0       | 12.33    | 0.0  | 0.0       | 0.0          | false    | false    |
 
-  @TestRailId:C3534
+  @TestRailId:C3537
   Scenario: Verify the accrual activity creation in case of full repayment on maturity date - absence of negative numbers with mid-range interest rate and mid-range principal
     When Admin sets the business date to "19 February 2025"
     And Admin creates a client with random data

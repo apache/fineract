@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.test.initializer.global;
 
+import static org.apache.fineract.client.models.LoanProductRelatedDetail.DaysInYearCustomStrategyEnum.FEB_29_PERIOD_ONLY;
 import static org.apache.fineract.test.data.TransactionProcessingStrategyCode.ADVANCED_PAYMENT_ALLOCATION;
 import static org.apache.fineract.test.factory.LoanProductsRequestFactory.INTEREST_CALCULATION_PERIOD_TYPE_SAME_AS_REPAYMENT;
 import static org.apache.fineract.test.factory.LoanProductsRequestFactory.INTEREST_RATE_FREQUENCY_TYPE_MONTH;
@@ -1919,6 +1920,34 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_INT_RECALCULATION_ZERO_INT_CHARGE_OFF_INT_RECOGNITION_FROM_DISB_DATE,
                 responseLoanProductsRequestLP2AdvPaymentInterestRecalcDailyZeroIntChargeOffIntRecognitionFromDisbDate);
+
+        // LP2 with progressive loan schedule + horizontal + interest EMI + actual/actual + leap year
+        // + interest recalculation, preClosureInterestCalculationStrategy= till preclose,
+        // Frequency for recalculate Outstanding Principal: Daily, Frequency Interval for recalculation: 1
+        // (LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_RECALCULATION_DAILY)
+        String name80 = DefaultLoanProduct.LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_LEAP_YEAR_INTEREST_RECALCULATION_DAILY.getName();
+        PostLoanProductsRequest loanProductsRequestLP2AdvancedPaymentInterestEmiActualActualLeapYearInterestRecalculationDaily = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2Emi()//
+                .name(name80)//
+                .maxPrincipal(1000000.0)//
+                .isInterestRecalculationEnabled(true)//
+                .preClosureInterestCalculationStrategy(1)//
+                .rescheduleStrategyMethod(4)//
+                .interestRecalculationCompoundingMethod(0)//
+                .recalculationRestFrequencyType(2)//
+                .recalculationRestFrequencyInterval(1)//
+                .daysInYearType(DaysInYearType.ACTUAL.value)//
+                .daysInYearCustomStrategy(FEB_29_PERIOD_ONLY.getValue()).paymentAllocation(List.of(//
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                        createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                        createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                        createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")));//
+        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedPaymentInterestEmiActualActualLeapYearInterestRecalculationDaily = loanProductsApi
+                .createLoanProduct(loanProductsRequestLP2AdvancedPaymentInterestEmiActualActualLeapYearInterestRecalculationDaily)
+                .execute();
+        TestContext.INSTANCE.set(
+                TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_LEAP_YEAR_INTEREST_RECALCULATION_DAILY,
+                responseLoanProductsRequestLP2AdvancedPaymentInterestEmiActualActualLeapYearInterestRecalculationDaily);
     }
 
     public static AdvancedPaymentData createPaymentAllocation(String transactionType, String futureInstallmentAllocationRule,

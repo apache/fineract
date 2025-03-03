@@ -134,6 +134,8 @@ final class LoanProductsApiResourceSwagger {
         public Integer daysInMonthType;
         @Schema(example = "1")
         public Integer daysInYearType;
+        @Schema(example = "FULL_LEAP_YEAR")
+        public String daysInYearCustomStrategy;
         @Schema(example = "true")
         public Boolean allowPartialPeriodInterestCalcualtion;
         @Schema(example = "179")
@@ -457,6 +459,18 @@ final class LoanProductsApiResourceSwagger {
             public String description;
         }
 
+        static final class GetLoanProductsDaysInYearCustomStrategy {
+
+            private GetLoanProductsDaysInYearCustomStrategy() {}
+
+            @Schema(example = "FULL_LEAP_YEAR")
+            public String id;
+            @Schema(example = "DaysInYearCustomStrategyType.fullLeapYear")
+            public String code;
+            @Schema(example = "Full Leap Year")
+            public String description;
+        }
+
         static final class GetLoanProductsRepaymentStartDateType {
 
             private GetLoanProductsRepaymentStartDateType() {}
@@ -614,6 +628,7 @@ final class LoanProductsApiResourceSwagger {
         public List<Integer> numberOfRepaymentVariationsForBorrowerCycle;
         public GetLoansProductsDaysInMonthType daysInMonthType;
         public GetLoansProductsDaysInYearType daysInYearType;
+        public GetLoanProductsDaysInYearCustomStrategy daysInYearCustomStrategy;
         @Schema(example = "true")
         public Boolean isInterestRecalculationEnabled;
         public GetLoanProductsInterestRecalculationData interestRecalculationData;
@@ -719,6 +734,18 @@ final class LoanProductsApiResourceSwagger {
             @Schema(example = "DaysInYearType.actual")
             public String code;
             @Schema(example = "Actual")
+            public String description;
+        }
+
+        static final class GetLoanProductsDaysInYearCustomStrategyTemplateType {
+
+            private GetLoanProductsDaysInYearCustomStrategyTemplateType() {}
+
+            @Schema(example = "FULL_LEAP_YEAR")
+            public String id;
+            @Schema(example = "DaysInYearCustomStrategyType.fullLeapYear")
+            public String code;
+            @Schema(example = "Full Leap Year")
             public String description;
         }
 
@@ -1073,6 +1100,7 @@ final class LoanProductsApiResourceSwagger {
         public GetLoanProductsTemplateResponse.GetLoanProductsAccountingRule accountingRule;
         public GetLoansProductsDaysInMonthTemplateType daysInMonthType;
         public GetLoanProductsDaysInYearTemplateType daysInYearType;
+        public GetLoanProductsDaysInYearCustomStrategyTemplateType daysInYearCustomStrategy;
         @Schema(example = "false")
         public Boolean isInterestRecalculationEnabled;
         public GetLoanProductsInterestRecalculationTemplateData interestRecalculationData;
@@ -1091,6 +1119,7 @@ final class LoanProductsApiResourceSwagger {
         public Set<GetLoanProductsValueConditionTypeOptions> valueConditionTypeOptions;
         public Set<GetLoansProductsDaysInMonthTemplateType> daysInMonthTypeOptions;
         public Set<GetLoanProductsInterestTemplateType> daysInYearTypeOptions;
+        public Set<GetLoanProductsDaysInYearCustomStrategyTemplateType> daysInYearTypeCustomStrategyOptions;
         public Set<GetLoanProductsResponse.GetLoanProductsInterestRecalculationData.GetLoanProductsInterestRecalculationCompoundingType> interestRecalculationCompoundingTypeOptions;
         public Set<GetLoanProductsResponse.GetLoanProductsInterestRecalculationData.GetLoanProductsRescheduleStrategyType> rescheduleStrategyTypeOptions;
         public Set<GetLoanProductsResponse.GetLoanProductsInterestRecalculationData.GetLoanProductsInterestRecalculationCompoundingFrequencyType> interestRecalculationFrequencyTypeOptions;

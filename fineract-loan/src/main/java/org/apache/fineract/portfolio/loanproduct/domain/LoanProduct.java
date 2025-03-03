@@ -56,6 +56,7 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
+import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
@@ -366,6 +367,9 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
         final DaysInYearType daysInYearType = DaysInYearType
                 .fromInt(command.integerValueOfParameterNamed(LoanProductConstants.DAYS_IN_YEAR_TYPE_PARAMETER_NAME));
 
+        final DaysInYearCustomStrategyType daysInYearCustomStrategy = command.enumValueOfParameterNamed(
+                LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME, DaysInYearCustomStrategyType.class);
+
         LoanProductInterestRecalculationDetails interestRecalculationSettings = null;
 
         if (isInterestRecalculationEnabled) {
@@ -486,7 +490,8 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
                 allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber, dueDaysForRepaymentEvent,
                 overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageDownPayment, enableAutoRepaymentForDownPayment,
                 repaymentStartDateType, enableInstallmentLevelDelinquency, loanScheduleType, loanScheduleProcessingType, fixedLength,
-                enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour, interestRecognitionOnDisbursementDate);
+                enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour, interestRecognitionOnDisbursementDate,
+                daysInYearCustomStrategy);
 
     }
 
@@ -705,7 +710,8 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
             final boolean enableInstallmentLevelDelinquency, final LoanScheduleType loanScheduleType,
             final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength,
             final boolean enableAccrualActivityPosting, final List<LoanSupportedInterestRefundTypes> supportedInterestRefundTypes,
-            final LoanChargeOffBehaviour chargeOffBehaviour, final boolean isInterestRecognitionOnDisbursementDate) {
+            final LoanChargeOffBehaviour chargeOffBehaviour, final boolean isInterestRecognitionOnDisbursementDate,
+            final DaysInYearCustomStrategyType daysInYearCustomStrategy) {
         this.fund = fund;
         this.transactionProcessingStrategyCode = transactionProcessingStrategyCode;
 
@@ -755,7 +761,7 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
                 inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType.getValue(), daysInYearType.getValue(),
                 isInterestRecalculationEnabled, isEqualAmortization, enableDownPayment, disbursedAmountPercentageForDownPayment,
                 enableAutoRepaymentForDownPayment, loanScheduleType, loanScheduleProcessingType, fixedLength, enableAccrualActivityPosting,
-                supportedInterestRefundTypes, chargeOffBehaviour, isInterestRecognitionOnDisbursementDate);
+                supportedInterestRefundTypes, chargeOffBehaviour, isInterestRecognitionOnDisbursementDate, daysInYearCustomStrategy);
 
         this.loanProductMinMaxConstraints = new LoanProductMinMaxConstraints(defaultMinPrincipal, defaultMaxPrincipal,
                 defaultMinNominalInterestRatePerPeriod, defaultMaxNominalInterestRatePerPeriod, defaultMinNumberOfInstallments,
@@ -881,6 +887,18 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
                     "interestRecognitionOnDisbursementDate.is.only.supported.for.progressive.loan.schedule.type",
                     "interestRecognitionOnDisbursementDate is only supported for progressive loan schedule type");
 
+        }
+
+        if (this.getLoanProductRelatedDetail().getDaysInYearCustomStrategy() != null
+                && this.getLoanProductRelatedDetail().getLoanScheduleType().equals(LoanScheduleType.CUMULATIVE)) {
+            throw new LoanProductGeneralRuleException("days.in.year.custom.strategy.is.only.supported.for.progressive.loan.schedule.type",
+                    "daysInYearCustomStrategy is only supported for progressive loan schedule type");
+        }
+
+        if (this.getLoanProductRelatedDetail().getDaysInYearCustomStrategy() != null
+                && !this.getLoanProductRelatedDetail().getDaysInYearType().equals(DaysInYearType.ACTUAL.getValue())) {
+            throw new LoanProductGeneralRuleException("days.in.year.custom.strategy.is.only.applicable.for.actual.days.in.year.type",
+                    "daysInYearCustomStrategy is only applicable for ACTUAL days in year type");
         }
 
     }

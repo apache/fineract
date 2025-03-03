@@ -24,6 +24,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
+import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePlan;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePlanDisbursementPeriod;
@@ -55,10 +56,12 @@ class EmbeddableProgressiveLoanScheduleGeneratorTest {
         final Integer installmentAmountInMultiplesOf = null;
         final Integer fixedLength = null;
         final Boolean interestRecognitionOnDisbursementDate = false;
+        final DaysInYearCustomStrategyType daysInYearCustomStrategy = null;
 
         var config = new LoanRepaymentScheduleModelData(startDate, currency, disbursedAmount, disbursementDate, noRepayments,
                 repaymentFrequency, repaymentFrequencyType, annualNominalInterestRate, isDownPaymentEnabled, daysInMonthType,
-                daysInYearType, downPaymentPercentage, installmentAmountInMultiplesOf, fixedLength, interestRecognitionOnDisbursementDate);
+                daysInYearType, downPaymentPercentage, installmentAmountInMultiplesOf, fixedLength, interestRecognitionOnDisbursementDate,
+                daysInYearCustomStrategy);
 
         final LoanSchedulePlan plan = calculator.generate(mc, config);
 

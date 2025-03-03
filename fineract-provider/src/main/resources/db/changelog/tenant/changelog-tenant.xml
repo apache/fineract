@@ -188,4 +188,5 @@
     <include file="parts/0167_create_m_calendar_instance_index.xml" relativeToChangelogFile="true" />
     <include file="parts/0168_transaction_summary_with_asset_owner_report_add_active_intermediate_filtering.xml" relativeToChangelogFile="true" />
     <include file="parts/0169_add_missing_permissions.xml" relativeToChangelogFile="true" />
+    <include file="parts/0170_days_in_year_custom_strategy.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

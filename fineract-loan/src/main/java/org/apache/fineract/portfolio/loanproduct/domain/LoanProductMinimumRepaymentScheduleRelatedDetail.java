@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanproduct.domain;
 
 import java.math.BigDecimal;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 
 /**
@@ -62,4 +63,6 @@ public interface LoanProductMinimumRepaymentScheduleRelatedDetail {
     Integer getDaysInYearType();
 
     boolean isInterestRecognitionOnDisbursementDate();
+
+    DaysInYearCustomStrategyType getDaysInYearCustomStrategy();
 }

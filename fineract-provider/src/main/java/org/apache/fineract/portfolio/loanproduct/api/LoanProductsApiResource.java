@@ -72,6 +72,7 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
+import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
@@ -126,7 +127,7 @@ public class LoanProductsApiResource {
             LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName, LoanProductConstants.DUE_DAYS_FOR_REPAYMENT_EVENT,
             LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT, LoanProductConstants.ENABLE_DOWN_PAYMENT,
             LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT, LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT,
-            LoanProductConstants.REPAYMENT_START_DATE_TYPE));
+            LoanProductConstants.REPAYMENT_START_DATE_TYPE, LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME));
 
     private static final Set<String> PRODUCT_MIX_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList("productId", "productName", "restrictedProducts", "allowedProducts", "productOptions"));
@@ -436,6 +437,8 @@ public class LoanProductsApiResource {
         final List<StringEnumOptionData> chargeOffBehaviourOptions = LoanChargeOffBehaviour.getValuesAsStringEnumOptionDataList();
         final List<CodeValueData> chargeOffReasonOptions = codeValueReadPlatformService
                 .retrieveCodeValuesByCode(LoanApiConstants.CHARGE_OFF_REASONS);
+        final List<StringEnumOptionData> daysInYearCustomStrategyOptions = DaysInYearCustomStrategyType
+                .getValuesAsStringEnumOptionDataList();
 
         return new LoanProductData(productData, chargeOptions, penaltyOptions, paymentTypeOptions, currencyOptions, amortizationTypeOptions,
                 interestTypeOptions, interestCalculationPeriodTypeOptions, repaymentFrequencyTypeOptions, interestRateFrequencyTypeOptions,
@@ -447,7 +450,8 @@ public class LoanProductsApiResource {
                 advancedPaymentAllocationTransactionTypes, advancedPaymentAllocationFutureInstallmentAllocationRules,
                 advancedPaymentAllocationTypes, LoanScheduleType.getValuesAsEnumOptionDataList(),
                 LoanScheduleProcessingType.getValuesAsEnumOptionDataList(), creditAllocationTransactionTypes,
-                creditAllocationAllocationTypes, supportedInterestRefundTypesOptions, chargeOffBehaviourOptions, chargeOffReasonOptions);
+                creditAllocationAllocationTypes, supportedInterestRefundTypesOptions, chargeOffBehaviourOptions, chargeOffReasonOptions,
+                daysInYearCustomStrategyOptions);
     }
 
 }

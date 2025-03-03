@@ -37,6 +37,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
+import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
@@ -506,6 +507,28 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         repaymentPeriods.forEach(repaymentPeriod -> calculateRateFactorForRepaymentPeriod(repaymentPeriod, scheduleModel));
     }
 
+    private boolean isPeriodContainsFeb29(final LocalDate repaymentPeriodFromDate, final LocalDate repaymentPeriodDueDate) {
+        if (repaymentPeriodFromDate.isLeapYear()) {
+            final LocalDate leapDay = LocalDate.of(repaymentPeriodFromDate.getYear(), 2, 29);
+            return DateUtils.isDateInRangeFromExclusiveToInclusive(leapDay, repaymentPeriodFromDate, repaymentPeriodDueDate);
+        } else {
+            return false;
+        }
+    }
+
+    private Integer numberOfDaysFeb29PeriodOnly(final LocalDate repaymentPeriodFromDate, final LocalDate repaymentPeriodDueDate) {
+        return isPeriodContainsFeb29(repaymentPeriodFromDate, repaymentPeriodDueDate) ? 366 : 365;
+    }
+
+    private BigDecimal getNumberOfDays(DaysInYearType daysInYearType, DaysInYearCustomStrategyType customStrategy,
+            LocalDate interestPeriodFromDate, LocalDate repaymentPeriodFromDate, LocalDate repaymentPeriodDueDate) {
+        Integer numberOfDays = daysInYearType.getNumberOfDays(interestPeriodFromDate);
+        if (numberOfDays == 366 && DaysInYearCustomStrategyType.FEB_29_PERIOD_ONLY.equals(customStrategy)) {
+            numberOfDays = numberOfDaysFeb29PeriodOnly(repaymentPeriodFromDate, repaymentPeriodDueDate);
+        }
+        return BigDecimal.valueOf(numberOfDays);
+    }
+
     BigDecimal calculateRateFactorPerPeriodForInterest(final ProgressiveLoanInterestScheduleModel scheduleModel,
             final RepaymentPeriod repaymentPeriod, final LocalDate interestPeriodFromDate, final LocalDate interestPeriodDueDate) {
         final MathContext mc = scheduleModel.mc();
@@ -515,14 +538,17 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         final DaysInYearType daysInYearType = DaysInYearType.fromInt(loanProductRelatedDetail.getDaysInYearType());
         final DaysInMonthType daysInMonthType = DaysInMonthType.fromInt(loanProductRelatedDetail.getDaysInMonthType());
         final PeriodFrequencyType repaymentFrequency = loanProductRelatedDetail.getRepaymentPeriodFrequencyType();
-
-        BigDecimal daysInYear = BigDecimal.valueOf(daysInYearType.getNumberOfDays(interestPeriodFromDate));
+        DaysInYearCustomStrategyType daysInYearCustomStrategy = loanProductRelatedDetail.getDaysInYearCustomStrategy();
+        BigDecimal daysInYear = getNumberOfDays(daysInYearType, daysInYearCustomStrategy, interestPeriodFromDate,
+                repaymentPeriod.getFromDate(), repaymentPeriod.getDueDate());
         final BigDecimal actualDaysInPeriod = BigDecimal
                 .valueOf(DateUtils.getDifferenceInDays(interestPeriodFromDate, interestPeriodDueDate));
         final BigDecimal calculatedDaysInPeriod = BigDecimal
                 .valueOf(DateUtils.getDifferenceInDays(repaymentPeriod.getFromDate(), repaymentPeriod.getDueDate()));
         final int numberOfYearsDifferenceInPeriod = interestPeriodDueDate.getYear() - interestPeriodFromDate.getYear();
-        final boolean partialPeriodCalculationNeeded = daysInYearType == DaysInYearType.ACTUAL && numberOfYearsDifferenceInPeriod > 0;
+        final boolean partialPeriodCalculationNeeded = daysInYearType == DaysInYearType.ACTUAL && numberOfYearsDifferenceInPeriod > 0
+                && (!DaysInYearCustomStrategyType.FEB_29_PERIOD_ONLY.equals(daysInYearCustomStrategy)
+                        || isPeriodContainsFeb29(repaymentPeriod.getFromDate(), repaymentPeriod.getDueDate()));
 
         // TODO check: loanApplicationTerms.calculatePeriodsBetweenDates(startDate, endDate); // calculate period data
         // TODO review: (repayment frequency: days, weeks, years; validation day is month fix 30)
@@ -628,13 +654,17 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         final PeriodFrequencyType repaymentFrequency = loanProductRelatedDetail.getRepaymentPeriodFrequencyType();
         final BigDecimal repaymentEvery = BigDecimal.valueOf(loanProductRelatedDetail.getRepayEvery());
 
-        BigDecimal daysInYear = BigDecimal.valueOf(daysInYearType.getNumberOfDays(interestPeriodFromDate));
+        DaysInYearCustomStrategyType daysInYearCustomStrategy = loanProductRelatedDetail.getDaysInYearCustomStrategy();
+        BigDecimal daysInYear = getNumberOfDays(daysInYearType, daysInYearCustomStrategy, interestPeriodFromDate,
+                repaymentPeriod.getFromDate(), repaymentPeriod.getDueDate());
         final BigDecimal actualDaysInPeriod = BigDecimal
                 .valueOf(DateUtils.getDifferenceInDays(interestPeriodFromDate, interestPeriodDueDate));
         final BigDecimal calculatedDaysInPeriod = BigDecimal
                 .valueOf(DateUtils.getDifferenceInDays(repaymentPeriod.getFromDate(), repaymentPeriod.getDueDate()));
         final int numberOfYearsDifferenceInPeriod = interestPeriodDueDate.getYear() - interestPeriodFromDate.getYear();
-        final boolean partialPeriodCalculationNeeded = daysInYearType == DaysInYearType.ACTUAL && numberOfYearsDifferenceInPeriod > 0;
+        final boolean partialPeriodCalculationNeeded = daysInYearType == DaysInYearType.ACTUAL && numberOfYearsDifferenceInPeriod > 0
+                && (!DaysInYearCustomStrategyType.FEB_29_PERIOD_ONLY.equals(daysInYearCustomStrategy)
+                        || isPeriodContainsFeb29(repaymentPeriod.getFromDate(), repaymentPeriod.getDueDate()));
         final BigDecimal daysInMonth = daysInMonthType.isDaysInMonth_30() ? BigDecimal.valueOf(30) : calculatedDaysInPeriod;
 
         // TODO check: loanApplicationTerms.calculatePeriodsBetweenDates(startDate, endDate); // calculate period data

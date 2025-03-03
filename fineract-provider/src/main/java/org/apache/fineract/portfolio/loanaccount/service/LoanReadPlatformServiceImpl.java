@@ -42,6 +42,7 @@ import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -74,6 +75,7 @@ import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.domain.ClientEnumerations;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
+import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.service.CommonEnumerations;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
@@ -695,6 +697,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                     + " lir.disallow_interest_calc_on_past_due as disallowInterestCalculationOnPastDue, "
                     + " l.is_floating_interest_rate as isFloatingInterestRate, "
                     + " l.interest_rate_differential as interestRateDifferential, "
+                    + " l.days_in_year_custom_strategy as daysInYearCustomStrategy, "
                     + " l.create_standing_instruction_at_disbursement as createStandingInstructionAtDisbursement, "
                     + " lpvi.minimum_gap as minimuminstallmentgap, lpvi.maximum_gap as maximuminstallmentgap, "
                     + " lp.can_use_for_topup as canUseForTopup, l.is_topup as isTopup, topup.closure_loan_id as closureLoanId, "
@@ -1069,6 +1072,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             final Integer fixedLength = JdbcSupport.getInteger(rs, "fixedLength");
             final LoanChargeOffBehaviour chargeOffBehaviour = LoanChargeOffBehaviour.valueOf(rs.getString("chargeOffBehaviour"));
             final boolean interestRecognitionOnDisbursementDate = rs.getBoolean("interestRecognitionOnDisbursementDate");
+            final StringEnumOptionData daysInYearCustomStrategy = DaysInYearCustomStrategyType
+                    .getStringEnumOptionData(rs.getString("daysInYearCustomStrategy"));
 
             return LoanAccountData.basicLoanDetails(id, accountNo, status, externalId, clientId, clientAccountNo, clientName,
                     clientOfficeId, clientExternalId, groupData, loanType, loanProductId, loanProductName, loanProductDescription,
@@ -1088,7 +1093,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                     lastClosedBusinessDate, overpaidOnDate, isChargedOff, enableDownPayment, disbursedAmountPercentageForDownPayment,
                     enableAutoRepaymentForDownPayment, enableInstallmentLevelDelinquency, loanScheduleType.asEnumOptionData(),
                     loanScheduleProcessingType.asEnumOptionData(), fixedLength, chargeOffBehaviour.getValueAsStringEnumOptionData(),
-                    interestRecognitionOnDisbursementDate);
+                    interestRecognitionOnDisbursementDate, daysInYearCustomStrategy);
         }
     }
 

@@ -362,16 +362,7 @@ public final class JsonCommand {
     }
 
     public <T extends Enum<T>> T enumValueOfParameterNamed(String parameterName, Class<T> enumType) {
-        try {
-            String value = stringValueOfParameterNamedAllowingNull(parameterName);
-            if (value != null) {
-                return Enum.valueOf(enumType, value);
-            } else {
-                return null;
-            }
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
+        return this.fromApiJsonHelper.enumValueOfParameterNamed(parameterName, this.parsedCommand, enumType);
     }
 
     public String stringValueOfParameterNamed(final String parameterName) {

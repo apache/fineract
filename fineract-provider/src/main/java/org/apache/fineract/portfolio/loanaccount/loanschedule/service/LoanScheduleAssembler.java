@@ -541,7 +541,8 @@ public class LoanScheduleAssembler {
                 loanScheduleType, loanScheduleProcessingType, fixedLength,
                 loanProduct.getLoanProductRelatedDetail().isEnableAccrualActivityPosting(),
                 loanProduct.getLoanProductRelatedDetail().getSupportedInterestRefundTypes(),
-                loanProduct.getLoanProductRelatedDetail().getChargeOffBehaviour(), interestRecognitionOnDisbursementDate);
+                loanProduct.getLoanProductRelatedDetail().getChargeOffBehaviour(), interestRecognitionOnDisbursementDate,
+                loanProduct.getLoanProductRelatedDetail().getDaysInYearCustomStrategy());
     }
 
     private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,

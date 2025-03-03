@@ -351,7 +351,7 @@ public class LoanImportHandler implements ImportHandler {
                         nominalInterestRate, submittedOnDate, amortizationEnumOption, interestMethodEnum, interestCalculationPeriodEnum,
                         arrearsTolerance, repaymentStrategyCode, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
                         interestChargedFromDate, firstRepaymentOnDate, row.getRowNum(), externalId, null, charges, linkAccountId, locale,
-                        dateFormat, loanCollateralManagementData, null);
+                        dateFormat, loanCollateralManagementData, null, null);
             } else if (loanType.equals("jlg")) {
                 Long clientId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.CLIENT_SHEET_NAME),
                         clientOrGroupName);
@@ -360,7 +360,7 @@ public class LoanImportHandler implements ImportHandler {
                         nominalInterestRate, submittedOnDate, amortizationEnumOption, interestMethodEnum, interestCalculationPeriodEnum,
                         arrearsTolerance, repaymentStrategyCode, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
                         interestChargedFromDate, firstRepaymentOnDate, row.getRowNum(), externalId, groupId, charges, linkAccountId, locale,
-                        dateFormat, null, null);
+                        dateFormat, null, null, null);
             } else {
                 Long groupIdforGroupLoan = ImportHandlerUtils
                         .getIdByName(workbook.getSheet(TemplatePopulateImportConstants.GROUP_SHEET_NAME), clientOrGroupName);

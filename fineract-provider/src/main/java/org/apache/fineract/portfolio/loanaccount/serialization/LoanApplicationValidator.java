@@ -83,6 +83,8 @@ import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollatera
 import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagementRepositoryWrapper;
 import org.apache.fineract.portfolio.collateralmanagement.domain.CollateralManagementDomain;
 import org.apache.fineract.portfolio.collateralmanagement.service.LoanCollateralAssembler;
+import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
+import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
 import org.apache.fineract.portfolio.group.exception.ClientNotInGroupException;
@@ -170,7 +172,7 @@ public final class LoanApplicationValidator {
             LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE, LoanProductConstants.FIXED_LENGTH,
             LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY, LoanProductConstants.ENABLE_DOWN_PAYMENT,
             LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT, LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT,
-            LoanApiConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE));
+            LoanApiConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE, LoanApiConstants.daysInYearCustomStrategyParameterName));
     public static final String LOANAPPLICATION_UNDO = "loanapplication.undo";
 
     private final FromJsonHelper fromApiJsonHelper;
@@ -752,6 +754,26 @@ public final class LoanApplicationValidator {
                 loanProductDataValidator.validateRepaymentPeriodWithGraceSettings(numberOfRepayments, graceOnPrincipalPayment,
                         graceOnInterestPayment, graceOnInterestCharged, recurringMoratoriumOnPrincipalPeriods, baseDataValidator);
             }
+
+            if (fromApiJsonHelper.parameterExists(LoanApiConstants.daysInYearCustomStrategyParameterName, element)) {
+                DaysInYearCustomStrategyType daysInYearCustomStrategy = fromApiJsonHelper
+                        .enumValueOfParameterNamed("daysInYearCustomStrategyParameterName", element, DaysInYearCustomStrategyType.class);
+                if (daysInYearCustomStrategy != null) {
+                    if (!LoanScheduleType.PROGRESSIVE.equals(loanProduct.getLoanProductRelatedDetail().getLoanScheduleType())) {
+                        baseDataValidator.reset().parameter(LoanApiConstants.daysInYearCustomStrategyParameterName).failWithCode(
+                                "days.in.year.custom.strategy.is.only.supported.for.progressive.loan.schedule.type",
+                                "daysInYearCustomStrategy is only supported for progressive loan schedule type");
+                    }
+
+                    if (!DaysInYearType.ACTUAL.getValue().equals(loanProduct.getLoanProductRelatedDetail().getDaysInYearType())) {
+                        baseDataValidator.reset().parameter(LoanApiConstants.daysInYearCustomStrategyParameterName).failWithCode(
+                                "days.in.year.custom.strategy.is.only.applicable.for.actual.days.in.year.type",
+                                "daysInYearCustomStrategy is only applicable for ACTUAL days in year type");
+                    }
+
+                }
+            }
+
         });
 
         validateSubmittedOnDate(element, null, null, loanProduct);
