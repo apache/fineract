@@ -16,17 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.data;
+package org.apache.fineract.investor.service;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.investor.data.ExternalTransferSubStatus;
+import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 
-@AllArgsConstructor
-@Getter
-public class LoanIdAndExternalIdAndStatus {
+public interface LoanTransferabilityService {
 
-    Long id;
-    ExternalId externalId;
-    Integer loanStatus;
+    boolean isTransferable(Loan loan, ExternalAssetOwnerTransfer externalAssetOwnerTransfer);
+
+    ExternalTransferSubStatus getDeclinedSubStatus(Loan loan);
 }

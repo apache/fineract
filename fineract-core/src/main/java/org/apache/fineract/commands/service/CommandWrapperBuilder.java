@@ -3661,6 +3661,14 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder intermediarySaleLoanToExternalAssetOwner(final Long loanId) {
+        this.actionName = "INTERMEDIARYSALE";
+        this.entityName = "LOAN";
+        this.loanId = loanId;
+        this.href = "/external-asset-owners/transfers/loans/" + loanId;
+        return this;
+    }
+
     public CommandWrapperBuilder saleLoanToExternalAssetOwner(final Long loanId) {
         this.actionName = "SALE";
         this.entityName = "LOAN";

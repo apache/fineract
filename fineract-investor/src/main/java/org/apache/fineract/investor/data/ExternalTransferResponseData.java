@@ -25,6 +25,7 @@ public class ExternalTransferResponseData {
 
     private Long resourceId;
     private String resourceExternalId;
+    private String resourceExternalReferenceId;
     private Long subResourceId;
     private String subResourceExternalId;
     private ExternalTransferChangedData changes;

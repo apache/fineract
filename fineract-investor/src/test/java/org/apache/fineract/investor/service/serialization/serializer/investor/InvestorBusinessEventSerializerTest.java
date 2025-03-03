@@ -19,9 +19,13 @@
 package org.apache.fineract.investor.service.serialization.serializer.investor;
 
 import static org.apache.fineract.investor.data.ExternalTransferStatus.ACTIVE;
+import static org.apache.fineract.investor.data.ExternalTransferStatus.ACTIVE_INTERMEDIATE;
 import static org.apache.fineract.investor.data.ExternalTransferStatus.BUYBACK;
+import static org.apache.fineract.investor.data.ExternalTransferStatus.BUYBACK_INTERMEDIATE;
 import static org.apache.fineract.investor.data.ExternalTransferStatus.CANCELLED;
 import static org.apache.fineract.investor.data.ExternalTransferStatus.DECLINED;
+import static org.apache.fineract.investor.data.ExternalTransferStatus.PENDING;
+import static org.apache.fineract.investor.data.ExternalTransferStatus.PENDING_INTERMEDIATE;
 import static org.apache.fineract.investor.data.ExternalTransferSubStatus.BALANCE_NEGATIVE;
 import static org.apache.fineract.investor.data.ExternalTransferSubStatus.BALANCE_ZERO;
 import static org.apache.fineract.investor.data.ExternalTransferSubStatus.SAMEDAY_TRANSFERS;
@@ -67,35 +71,61 @@ public class InvestorBusinessEventSerializerTest {
 
     @Test
     public void testSerializationSellOK() {
-        doTest(ACTIVE, null, "SALE", "EXECUTED", null);
+        doTest(ACTIVE, null, null, "SALE", "EXECUTED", null);
     }
 
     @Test
     public void testSerializationBuybackOK() {
-        doTest(BUYBACK, null, "BUYBACK", "EXECUTED", null);
+        doTest(BUYBACK, null, null, "BUYBACK", "EXECUTED", null);
+    }
+
+    @Test
+    public void testSerializationIntermediarySaleOK() {
+        doTest(ACTIVE_INTERMEDIATE, null, null, "INTERMEDIARYSALE", "EXECUTED", null);
+    }
+
+    @Test
+    public void testSerializationBuybackIntermediateOK() {
+        doTest(BUYBACK_INTERMEDIATE, null, null, "BUYBACK", "EXECUTED", null);
     }
 
     @Test
     public void testSerializationDeclinedNegativeBalance() {
-        doTest(DECLINED, BALANCE_NEGATIVE, "SALE", "DECLINED", "BALANCE_NEGATIVE");
+        doTest(DECLINED, BALANCE_NEGATIVE, PENDING, "SALE", "DECLINED", "BALANCE_NEGATIVE");
     }
 
     @Test
     public void testSerializationDeclinedBalanceZero() {
-        doTest(DECLINED, BALANCE_ZERO, "SALE", "DECLINED", "BALANCE_ZERO");
+        doTest(DECLINED, BALANCE_ZERO, PENDING, "SALE", "DECLINED", "BALANCE_ZERO");
+    }
+
+    @Test
+    public void testSerializationDeclinedPendingIntermediateNegativeBalance() {
+        doTest(DECLINED, BALANCE_NEGATIVE, PENDING_INTERMEDIATE, "INTERMEDIARYSALE", "DECLINED", "BALANCE_NEGATIVE");
+    }
+
+    @Test
+    public void testSerializationDeclinedPendingIntermediateBalanceZero() {
+        doTest(DECLINED, BALANCE_ZERO, PENDING_INTERMEDIATE, "INTERMEDIARYSALE", "DECLINED", "BALANCE_ZERO");
     }
 
     @Test
     public void testSerializationCancelledSameDayTransfer() {
-        doTest(CANCELLED, SAMEDAY_TRANSFERS, "SALE", "CANCELLED", "SAMEDAY_TRANSFERS");
+        doTest(CANCELLED, SAMEDAY_TRANSFERS, PENDING, "SALE", "CANCELLED", "SAMEDAY_TRANSFERS");
     }
 
-    private void doTest(ExternalTransferStatus status, ExternalTransferSubStatus subStatus, String expectedType, String expectedStatus,
-            String expectedReason) {
+    @Test
+    public void testSerializationCancelledPendingIntermediateSameDayTransfer() {
+        doTest(CANCELLED, SAMEDAY_TRANSFERS, PENDING_INTERMEDIATE, "INTERMEDIARYSALE", "CANCELLED", "SAMEDAY_TRANSFERS");
+    }
+
+    private void doTest(ExternalTransferStatus status, ExternalTransferSubStatus subStatus, ExternalTransferStatus firstTransferStatus,
+            String expectedType, String expectedStatus, String expectedReason) {
         // given
         ExternalAssetOwnersReadService mockReadService = Mockito.mock(ExternalAssetOwnersReadService.class);
         when(mockReadService.retrieveTransferData(123L)).thenReturn(createTransferData(status, subStatus));
-        when(mockReadService.retrieveFirstTransferByExternalId(any(ExternalId.class))).thenReturn(createTransferData(ACTIVE, null));
+        when(mockReadService.retrieveFirstTransferByExternalId(any(ExternalId.class)))
+                .thenReturn(createTransferData(firstTransferStatus, null));
         Loan loan = Mockito.mock(Loan.class);
         when(loan.getCurrency()).thenReturn(new MonetaryCurrency("EUR", 2, 1));
         List<LoanCharge> loanCharges = createMockCharges();

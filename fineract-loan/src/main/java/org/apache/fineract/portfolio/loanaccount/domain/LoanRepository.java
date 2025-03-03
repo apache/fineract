@@ -22,8 +22,8 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import org.apache.fineract.cob.data.LoanDataForExternalTransfer;
 import org.apache.fineract.cob.data.LoanIdAndExternalIdAndAccountNo;
-import org.apache.fineract.cob.data.LoanIdAndExternalIdAndStatus;
 import org.apache.fineract.cob.data.LoanIdAndLastClosedBusinessDate;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -80,7 +80,7 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
 
     String FIND_BY_ACCOUNT_NUMBER = "select loan from Loan loan where loan.accountNumber = :accountNumber";
 
-    String FIND_LOAN_ID_AND_EXTERNAL_ID_AND_STATUS = "select new org.apache.fineract.cob.data.LoanIdAndExternalIdAndStatus(loan.id, loan.externalId, loan.loanStatus) from Loan loan where loan.id = :loanId";
+    String FIND_LOAN_DATA_FOR_EXTERNAL_TRANSFER = "select new org.apache.fineract.cob.data.LoanDataForExternalTransfer(loan.id, loan.externalId, loan.loanStatus, loan.loanProduct.id, loan.loanProduct.shortName) from Loan loan where loan.id = :loanId";
     String EXISTS_NON_CLOSED_BY_EXTERNAL_LOAN_ID = "select case when (count (loan) > 0) then 'true' else 'false' end from Loan loan where loan.externalId = :externalLoanId and loan.loanStatus in (100,200,300,303,304)";
 
     String FIND_ID_BY_EXTERNAL_ID = "SELECT loan.id FROM Loan loan WHERE loan.externalId = :externalId";
@@ -205,8 +205,8 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     @Query(FIND_BY_ACCOUNT_NUMBER)
     Loan findLoanAccountByAccountNumber(@Param("accountNumber") String accountNumber);
 
-    @Query(FIND_LOAN_ID_AND_EXTERNAL_ID_AND_STATUS)
-    Optional<LoanIdAndExternalIdAndStatus> findLoanIdAndExternalIdAndStatusByLoanId(@Param("loanId") Long loanId);
+    @Query(FIND_LOAN_DATA_FOR_EXTERNAL_TRANSFER)
+    Optional<LoanDataForExternalTransfer> findLoanDataForExternalTransferByLoanId(@Param("loanId") Long loanId);
 
     @Query(EXISTS_NON_CLOSED_BY_EXTERNAL_LOAN_ID)
     boolean existsNonClosedLoanByExternalLoanId(@Param("externalLoanId") ExternalId externalLoanId);

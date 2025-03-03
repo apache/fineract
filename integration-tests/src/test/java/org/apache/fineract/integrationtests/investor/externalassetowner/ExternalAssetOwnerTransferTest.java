@@ -123,15 +123,17 @@ public class ExternalAssetOwnerTransferTest extends BaseLoanIntegrationTest {
 
     protected PostInitiateTransferResponse createSaleTransfer(Integer loanID, String settlementDate) {
         String transferExternalId = UUID.randomUUID().toString();
+        String transferExternalReferenceId = UUID.randomUUID().toString();
         ownerExternalId = UUID.randomUUID().toString();
-        return createSaleTransfer(loanID, settlementDate, transferExternalId, ownerExternalId, "1.0");
+        return createSaleTransfer(loanID, settlementDate, transferExternalId, transferExternalReferenceId, ownerExternalId, "1.0");
     }
 
     protected PostInitiateTransferResponse createSaleTransfer(Integer loanID, String settlementDate, String transferExternalId,
-            String ownerExternalId, String purchasePriceRatio) {
+            String transferExternalReferenceId, String ownerExternalId, String purchasePriceRatio) {
         PostInitiateTransferResponse saleResponse = EXTERNAL_ASSET_OWNER_HELPER.initiateTransferByLoanId(loanID.longValue(), "sale",
                 new PostInitiateTransferRequest().settlementDate(settlementDate).dateFormat("yyyy-MM-dd").locale("en")
-                        .transferExternalId(transferExternalId).ownerExternalId(ownerExternalId).purchasePriceRatio(purchasePriceRatio));
+                        .transferExternalId(transferExternalId).transferExternalReferenceId(transferExternalReferenceId)
+                        .ownerExternalId(ownerExternalId).purchasePriceRatio(purchasePriceRatio));
         assertEquals(transferExternalId, saleResponse.getResourceExternalId());
         return saleResponse;
     }
@@ -263,6 +265,7 @@ public class ExternalAssetOwnerTransferTest extends BaseLoanIntegrationTest {
             assertTrue(first.isPresent());
             ExternalTransferData etd = first.get();
             assertEquals(expected.transferExternalId, etd.getTransferExternalId());
+            assertEquals(expected.transferExternalReferenceId, etd.getTransferExternalReferenceId());
             assertEquals(expected.status, etd.getStatus());
             assertEquals(LocalDate.parse(expected.settlementDate), etd.getSettlementDate());
             assertEquals(LocalDate.parse(expected.effectiveFrom), etd.getEffectiveFrom());
@@ -306,6 +309,7 @@ public class ExternalAssetOwnerTransferTest extends BaseLoanIntegrationTest {
         assertNotNull(transferResponse);
         assertNotNull(transferResponse.getResourceId());
         assertNotNull(transferResponse.getResourceExternalId());
+        assertNotNull(transferResponse.getResourceExternalReferenceId());
         assertNotNull(transferResponse.getSubResourceId());
         assertEquals((long) loanID, transferResponse.getSubResourceId());
         assertNotNull(transferResponse.getSubResourceExternalId());
@@ -356,6 +360,7 @@ public class ExternalAssetOwnerTransferTest extends BaseLoanIntegrationTest {
         private final ExternalTransferData.StatusEnum status;
 
         private final String transferExternalId;
+        private final String transferExternalReferenceId;
 
         private final String settlementDate;
 
@@ -371,24 +376,26 @@ public class ExternalAssetOwnerTransferTest extends BaseLoanIntegrationTest {
         private final BigDecimal totalOverpaid;
 
         static ExpectedExternalTransferData expected(ExternalTransferData.StatusEnum status, String transferExternalId,
-                String settlementDate, String effectiveFrom, String effectiveTo, boolean detailsExpected, BigDecimal totalOutstanding,
-                BigDecimal totalPrincipalOutstanding, BigDecimal totalInterestOutstanding, BigDecimal totalPenaltyOutstanding,
-                BigDecimal totalFeeOutstanding, BigDecimal totalOverpaid) {
-            return new ExpectedExternalTransferData(status, transferExternalId, settlementDate, effectiveFrom, effectiveTo, null,
-                    detailsExpected, totalOutstanding, totalPrincipalOutstanding, totalInterestOutstanding, totalPenaltyOutstanding,
-                    totalFeeOutstanding, totalOverpaid);
+                String transferExternalReferenceId, String settlementDate, String effectiveFrom, String effectiveTo,
+                boolean detailsExpected, BigDecimal totalOutstanding, BigDecimal totalPrincipalOutstanding,
+                BigDecimal totalInterestOutstanding, BigDecimal totalPenaltyOutstanding, BigDecimal totalFeeOutstanding,
+                BigDecimal totalOverpaid) {
+            return new ExpectedExternalTransferData(status, transferExternalId, transferExternalReferenceId, settlementDate, effectiveFrom,
+                    effectiveTo, null, detailsExpected, totalOutstanding, totalPrincipalOutstanding, totalInterestOutstanding,
+                    totalPenaltyOutstanding, totalFeeOutstanding, totalOverpaid);
         }
 
         static ExpectedExternalTransferData expected(ExternalTransferData.StatusEnum status, String transferExternalId,
-                String settlementDate, String effectiveFrom, String effectiveTo) {
-            return new ExpectedExternalTransferData(status, transferExternalId, settlementDate, effectiveFrom, effectiveTo, null, false,
-                    null, null, null, null, null, null);
+                String transferExternalReferenceId, String settlementDate, String effectiveFrom, String effectiveTo) {
+            return new ExpectedExternalTransferData(status, transferExternalId, transferExternalReferenceId, settlementDate, effectiveFrom,
+                    effectiveTo, null, false, null, null, null, null, null, null);
         }
 
         static ExpectedExternalTransferData expected(ExternalTransferData.StatusEnum status, String transferExternalId,
-                String settlementDate, String effectiveFrom, String effectiveTo, ExternalTransferData.SubStatusEnum subStatus) {
-            return new ExpectedExternalTransferData(status, transferExternalId, settlementDate, effectiveFrom, effectiveTo, subStatus,
-                    false, null, null, null, null, null, null);
+                String transferExternalReferenceId, String settlementDate, String effectiveFrom, String effectiveTo,
+                ExternalTransferData.SubStatusEnum subStatus) {
+            return new ExpectedExternalTransferData(status, transferExternalId, transferExternalReferenceId, settlementDate, effectiveFrom,
+                    effectiveTo, subStatus, false, null, null, null, null, null, null);
         }
     }
 

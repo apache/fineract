@@ -60,20 +60,20 @@ public class SearchExternalAssetOwnerTransferTest extends ExternalAssetOwnerTran
             PageExternalTransferData response = EXTERNAL_ASSET_OWNER_HELPER.searchExternalAssetOwnerTransfer(searchRequest);
 
             validateExternalAssetOwnerTransfer(response,
-                    ExpectedExternalTransferData.expected(PENDING, saleTransferResponse.getResourceExternalId(), baseDate, baseDate,
-                            "9999-12-31", false, new BigDecimal("15767.420000"), new BigDecimal("15000.000000"),
-                            new BigDecimal("757.420000"), new BigDecimal("10.000000"), new BigDecimal("0.000000"),
-                            new BigDecimal("0.000000")));
+                    ExpectedExternalTransferData.expected(PENDING, saleTransferResponse.getResourceExternalId(),
+                            saleTransferResponse.getResourceExternalReferenceId(), baseDate, baseDate, "9999-12-31", false,
+                            new BigDecimal("15767.420000"), new BigDecimal("15000.000000"), new BigDecimal("757.420000"),
+                            new BigDecimal("10.000000"), new BigDecimal("0.000000"), new BigDecimal("0.000000")));
             // LookUp by Effective Date
             searchRequest = EXTERNAL_ASSET_OWNER_HELPER.buildExternalAssetOwnerSearchRequest("", "settlement", baseLocalDate, null, null,
                     null);
             response = EXTERNAL_ASSET_OWNER_HELPER.searchExternalAssetOwnerTransfer(searchRequest);
 
             validateExternalAssetOwnerTransfer(response,
-                    ExpectedExternalTransferData.expected(PENDING, saleTransferResponse.getResourceExternalId(), baseDate, baseDate,
-                            "9999-12-31", false, new BigDecimal("15767.420000"), new BigDecimal("15000.000000"),
-                            new BigDecimal("757.420000"), new BigDecimal("10.000000"), new BigDecimal("0.000000"),
-                            new BigDecimal("0.000000")));
+                    ExpectedExternalTransferData.expected(PENDING, saleTransferResponse.getResourceExternalId(),
+                            saleTransferResponse.getResourceExternalReferenceId(), baseDate, baseDate, "9999-12-31", false,
+                            new BigDecimal("15767.420000"), new BigDecimal("15000.000000"), new BigDecimal("757.420000"),
+                            new BigDecimal("10.000000"), new BigDecimal("0.000000"), new BigDecimal("0.000000")));
 
             // Cancel the External Asset Transfer
             EXTERNAL_ASSET_OWNER_HELPER.cancelTransferByTransferExternalId(saleTransferResponse.getResourceExternalId());
@@ -81,11 +81,13 @@ public class SearchExternalAssetOwnerTransferTest extends ExternalAssetOwnerTran
             response = EXTERNAL_ASSET_OWNER_HELPER.searchExternalAssetOwnerTransfer(searchRequest);
 
             validateExternalAssetOwnerTransfer(response,
-                    ExpectedExternalTransferData.expected(PENDING, saleTransferResponse.getResourceExternalId(), baseDate, baseDate,
-                            baseDate, false, new BigDecimal("15767.420000"), new BigDecimal("15000.000000"), new BigDecimal("757.420000"),
+                    ExpectedExternalTransferData.expected(PENDING, saleTransferResponse.getResourceExternalId(),
+                            saleTransferResponse.getResourceExternalReferenceId(), baseDate, baseDate, baseDate, false,
+                            new BigDecimal("15767.420000"), new BigDecimal("15000.000000"), new BigDecimal("757.420000"),
                             new BigDecimal("10.000000"), new BigDecimal("0.000000"), new BigDecimal("0.000000")),
-                    ExpectedExternalTransferData.expected(CANCELLED, saleTransferResponse.getResourceExternalId(), baseDate, baseDate,
-                            baseDate, false, new BigDecimal("15767.420000"), new BigDecimal("15000.000000"), new BigDecimal("757.420000"),
+                    ExpectedExternalTransferData.expected(CANCELLED, saleTransferResponse.getResourceExternalId(),
+                            saleTransferResponse.getResourceExternalReferenceId(), baseDate, baseDate, baseDate, false,
+                            new BigDecimal("15767.420000"), new BigDecimal("15000.000000"), new BigDecimal("757.420000"),
                             new BigDecimal("10.000000"), new BigDecimal("0.000000"), new BigDecimal("0.000000")));
 
             // LookUp by Effective Date
@@ -95,11 +97,13 @@ public class SearchExternalAssetOwnerTransferTest extends ExternalAssetOwnerTran
             response = EXTERNAL_ASSET_OWNER_HELPER.searchExternalAssetOwnerTransfer(searchRequest);
 
             validateExternalAssetOwnerTransfer(response,
-                    ExpectedExternalTransferData.expected(PENDING, saleTransferResponse.getResourceExternalId(), baseDate, baseDate,
-                            baseDate, false, new BigDecimal("15767.420000"), new BigDecimal("15000.000000"), new BigDecimal("757.420000"),
+                    ExpectedExternalTransferData.expected(PENDING, saleTransferResponse.getResourceExternalId(),
+                            saleTransferResponse.getResourceExternalReferenceId(), baseDate, baseDate, baseDate, false,
+                            new BigDecimal("15767.420000"), new BigDecimal("15000.000000"), new BigDecimal("757.420000"),
                             new BigDecimal("10.000000"), new BigDecimal("0.000000"), new BigDecimal("0.000000")),
-                    ExpectedExternalTransferData.expected(CANCELLED, saleTransferResponse.getResourceExternalId(), baseDate, baseDate,
-                            baseDate, false, new BigDecimal("15767.420000"), new BigDecimal("15000.000000"), new BigDecimal("757.420000"),
+                    ExpectedExternalTransferData.expected(CANCELLED, saleTransferResponse.getResourceExternalId(),
+                            saleTransferResponse.getResourceExternalReferenceId(), baseDate, baseDate, baseDate, false,
+                            new BigDecimal("15767.420000"), new BigDecimal("15000.000000"), new BigDecimal("757.420000"),
                             new BigDecimal("10.000000"), new BigDecimal("0.000000"), new BigDecimal("0.000000")));
 
         } finally {

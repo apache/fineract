@@ -220,7 +220,9 @@ public class ExternalAssetOwnersApiResource {
     private String getResult(Long loanId, String apiRequestBodyAsJson, String commandParam) {
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
         CommandWrapper commandRequest = null;
-        if (CommandParameterUtil.is(commandParam, "sale")) {
+        if (CommandParameterUtil.is(commandParam, "intermediarySale")) {
+            commandRequest = builder.intermediarySaleLoanToExternalAssetOwner(loanId).build();
+        } else if (CommandParameterUtil.is(commandParam, "sale")) {
             commandRequest = builder.saleLoanToExternalAssetOwner(loanId).build();
         } else if (CommandParameterUtil.is(commandParam, "buyback")) {
             commandRequest = builder.buybackLoanToExternalAssetOwner(loanId).build();

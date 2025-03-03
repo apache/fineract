@@ -61,6 +61,9 @@ final class ExternalAssetOwnersApiResourceSwagger {
         @Schema(example = "e1156fbe-38bb-42f8-b491-fca02075f40e")
         public String transferExternalId;
 
+        @Schema(example = "e1156fbe-38bb-42f8-b491-fca02075f40e")
+        public String transferExternalReferenceId;
+
         @Schema(example = "1")
         public String purchasePriceRatio;
 
@@ -101,6 +104,9 @@ final class ExternalAssetOwnersApiResourceSwagger {
         @Schema(example = "36efeb06-d835-48a1-99eb-09bd1d348c1e")
         public String transferExternalId;
 
+        @Schema(example = "e1156fbe-38bb-42f8-b491-fca02075f40e")
+        public String transferExternalReferenceId;
+
         @Schema(example = "1.2345678")
         public String purchasePriceRatio;
 
@@ -121,6 +127,9 @@ final class ExternalAssetOwnersApiResourceSwagger {
 
         @Schema(example = "36efeb06-d835-48a1-99eb-09bd1d348c1e", description = "transfer external ID")
         public String resourceExternalId;
+
+        @Schema(example = "36efeb06-d835-48a1-99eb-09bd1d348c1e", description = "transfer external reference ID")
+        public String resourceExternalReferenceId;
 
         @Schema(example = "2", description = "loan ID")
         public Long subResourceId;
@@ -147,6 +156,9 @@ final class ExternalAssetOwnersApiResourceSwagger {
 
             @Schema(example = "36efeb06-d835-48a1-99eb-09bd1d348c1e")
             public String transferExternalId;
+
+            @Schema(example = "e1156fbe-38bb-42f8-b491-fca02075f40e")
+            public String transferExternalReferenceId;
 
             @Schema(example = "1.23456789")
             public String purchasePriceRatio;

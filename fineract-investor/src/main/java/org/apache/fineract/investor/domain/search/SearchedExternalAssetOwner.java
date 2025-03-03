@@ -36,6 +36,7 @@ public class SearchedExternalAssetOwner {
 
     private final ExternalId owner;
     private final ExternalId transferExternalId;
+    private final ExternalId transferExternalReferenceId;
 
     private final ExternalTransferStatus status;
     private final ExternalTransferSubStatus subStatus;

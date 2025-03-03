@@ -36,4 +36,6 @@
   <include relativeToChangelogFile="true" file="parts/0012_add_external_asset_owner_transfer_index.xml"/>
   <include relativeToChangelogFile="true" file="parts/0013_add_additional_asset_owner_indices.xml"/>
   <include relativeToChangelogFile="true" file="parts/0014_add_external_asset_owner_loan_product_configurable_attributes.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0015_add_intermediary_sale_command.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0016_add_external_reference_id.xml"/>
 </databaseChangeLog>
