@@ -21,8 +21,6 @@ package org.apache.fineract.accounting.closure.command;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.closure.api.GLClosureJsonInputParams;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -31,14 +29,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 /**
  * Immutable command for adding an accounting closure
  */
-@RequiredArgsConstructor
-@Getter
-public class GLClosureCommand {
-
-    private final Long id;
-    private final Long officeId;
-    private final LocalDate closingDate;
-    private final String comments;
+public record GLClosureCommand(Long id, Long officeId, LocalDate closingDate, String comments) {
 
     public void validateForCreate() {
 
