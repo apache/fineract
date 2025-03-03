@@ -18,12 +18,12 @@
  */
 package org.apache.fineract.portfolio.fund.service;
 
-import java.util.Collection;
+import java.util.List;
 import org.apache.fineract.portfolio.fund.data.FundData;
 
 public interface FundReadPlatformService {
 
-    Collection<FundData> retrieveAllFunds();
+    List<FundData> retrieveAllFunds();
 
     FundData retrieveFund(Long fundId);
 }

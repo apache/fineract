@@ -18,29 +18,18 @@
  */
 package org.apache.fineract.portfolio.fund.data;
 
+import java.io.Serial;
 import java.io.Serializable;
-import lombok.Getter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-/**
- * Immutable data object to represent fund data.
- */
-@Getter
-public final class FundData implements Serializable {
+@Data
+@NoArgsConstructor
+public class FundRequest implements Serializable {
 
-    @SuppressWarnings("unused")
-    private final Long id;
-    @SuppressWarnings("unused")
-    private final String name;
-    @SuppressWarnings("unused")
-    private final String externalId;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    public static FundData instance(final Long id, final String name, final String externalId) {
-        return new FundData(id, name, externalId);
-    }
-
-    private FundData(final Long id, final String name, final String externalId) {
-        this.id = id;
-        this.name = name;
-        this.externalId = externalId;
-    }
+    private String name;
+    private String externalId;
 }

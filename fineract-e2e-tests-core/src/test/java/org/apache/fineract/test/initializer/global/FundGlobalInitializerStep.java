@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.client.models.PostFundsRequest;
+import org.apache.fineract.client.models.FundRequest;
 import org.apache.fineract.client.services.FundsApi;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -44,7 +44,7 @@ public class FundGlobalInitializerStep implements FineractGlobalInitializerStep 
         fundNames.add(FUNDS_LENDER_A);
         fundNames.add(FUNDS_LENDER_B);
         fundNames.forEach(name -> {
-            PostFundsRequest postFundsRequest = new PostFundsRequest();
+            FundRequest postFundsRequest = new FundRequest();
             postFundsRequest.name(name);
             try {
                 fundsApi.createFund(postFundsRequest).execute();
