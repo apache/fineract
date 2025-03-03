@@ -16,15 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.investor.service;
+package org.apache.fineract.cob.data;
 
-import org.apache.fineract.investor.domain.ExternalAssetOwner;
-import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 
-public interface AccountingService {
+@AllArgsConstructor
+@Getter
+public class LoanDataForExternalTransfer {
 
-    void createJournalEntriesForSaleAssetTransfer(Loan loan, ExternalAssetOwnerTransfer transfer, ExternalAssetOwner previousOwner);
-
-    void createJournalEntriesForBuybackAssetTransfer(Loan loan, ExternalAssetOwnerTransfer transfer);
+    Long id;
+    ExternalId externalId;
+    Integer loanStatus;
+    Long loanProductId;
+    String loanProductShortName;
 }

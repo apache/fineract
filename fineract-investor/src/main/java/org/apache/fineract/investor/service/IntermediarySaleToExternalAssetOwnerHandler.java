@@ -18,13 +18,23 @@
  */
 package org.apache.fineract.investor.service;
 
-import org.apache.fineract.investor.domain.ExternalAssetOwner;
-import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.commands.annotation.CommandType;
+import org.apache.fineract.commands.handler.NewCommandSourceHandler;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.springframework.stereotype.Service;
 
-public interface AccountingService {
+@RequiredArgsConstructor
+@Service
+@CommandType(entity = "LOAN", action = "INTERMEDIARYSALE")
+public class IntermediarySaleToExternalAssetOwnerHandler implements NewCommandSourceHandler {
 
-    void createJournalEntriesForSaleAssetTransfer(Loan loan, ExternalAssetOwnerTransfer transfer, ExternalAssetOwner previousOwner);
+    private final ExternalAssetOwnersWriteService externalAssetOwnersWriteService;
 
-    void createJournalEntriesForBuybackAssetTransfer(Loan loan, ExternalAssetOwnerTransfer transfer);
+    @Override
+    public CommandProcessingResult processCommand(JsonCommand command) {
+        return externalAssetOwnersWriteService.intermediarySaleLoanByLoanId(command);
+    }
+
 }

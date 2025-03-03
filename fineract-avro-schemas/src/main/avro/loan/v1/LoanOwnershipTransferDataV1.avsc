@@ -33,6 +33,14 @@
         },
         {
             "default": null,
+            "name": "transferExternalGroupId",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
             "name": "submittedDate",
             "type": [
                 "null",

@@ -79,4 +79,6 @@ public class ExternalAssetOwnerTransfer extends AbstractAuditableWithUTCDateTime
     @Column(name = "external_loan_id", length = 100)
     private ExternalId externalLoanId;
 
+    @Column(name = "external_group_id", length = 100)
+    private ExternalId externalGroupId;
 }

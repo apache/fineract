@@ -19,10 +19,14 @@
 package org.apache.fineract.investor.service;
 
 import static org.apache.fineract.infrastructure.core.service.DateUtils.getBusinessLocalDate;
+import static org.apache.fineract.investor.data.ExternalTransferStatus.ACTIVE;
+import static org.apache.fineract.investor.data.ExternalTransferStatus.ACTIVE_INTERMEDIATE;
 import static org.apache.fineract.investor.data.ExternalTransferStatus.BUYBACK;
+import static org.apache.fineract.investor.data.ExternalTransferStatus.BUYBACK_INTERMEDIATE;
 import static org.apache.fineract.investor.data.ExternalTransferStatus.CANCELLED;
 import static org.apache.fineract.investor.data.ExternalTransferStatus.DECLINED;
 import static org.apache.fineract.investor.data.ExternalTransferStatus.PENDING;
+import static org.apache.fineract.investor.data.ExternalTransferStatus.PENDING_INTERMEDIATE;
 import static org.apache.fineract.investor.data.ExternalTransferSubStatus.BALANCE_NEGATIVE;
 import static org.apache.fineract.investor.data.ExternalTransferSubStatus.BALANCE_ZERO;
 import static org.apache.fineract.investor.data.ExternalTransferSubStatus.SAMEDAY_TRANSFERS;
@@ -37,7 +41,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAccountSnapshotBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
-import org.apache.fineract.investor.data.ExternalTransferStatus;
 import org.apache.fineract.investor.data.ExternalTransferSubStatus;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferDetails;
@@ -64,25 +67,21 @@ public class LoanAccountOwnerTransferServiceImpl implements LoanAccountOwnerTran
     @Override
     public void handleLoanClosedOrOverpaid(Loan loan) {
         Long loanId = loan.getId();
-        List<ExternalAssetOwnerTransfer> transferDataList = findAllPendingOrBuybackTransfers(loanId);
+        List<ExternalAssetOwnerTransfer> transferDataList = findAllPendingOrBuybackOrIntermediateTransfers(loanId);
 
-        if (transferDataList.size() == 2) {
-            ExternalTransferSubStatus subStatus;
-            ExternalAssetOwnerTransfer pendingSaleTransfer = transferDataList.get(0);
-            ExternalAssetOwnerTransfer pendingBuybackTransfer = transferDataList.get(1);
+        if (transferDataList.size() > 1) {
             if (isSameDayTransfers(transferDataList)) {
-                subStatus = SAMEDAY_TRANSFERS;
-                cancelTransfer(loan, pendingSaleTransfer, subStatus);
-                cancelTransfer(loan, pendingBuybackTransfer, subStatus);
+                transferDataList.forEach(externalAssetOwnerTransfer -> cancelTransfer(loan, externalAssetOwnerTransfer, SAMEDAY_TRANSFERS));
             } else {
-                declineTransfer(loan, pendingSaleTransfer);
-                cancelTransfer(loan, pendingBuybackTransfer, UNSOLD);
+                // decline first and cancel the rest
+                declineTransfer(loan, transferDataList.get(0));
+                transferDataList.stream().skip(1).forEach(assetOwnerTransfer -> cancelTransfer(loan, assetOwnerTransfer, UNSOLD));
             }
         } else if (transferDataList.size() == 1) {
             ExternalAssetOwnerTransfer transfer = transferDataList.get(0);
-            if (PENDING.equals(transfer.getStatus())) {
+            if (PENDING.equals(transfer.getStatus()) || PENDING_INTERMEDIATE.equals(transfer.getStatus())) {
                 declineTransfer(loan, transfer);
-            } else if (BUYBACK.equals(transfer.getStatus())) {
+            } else if (BUYBACK.equals(transfer.getStatus()) || BUYBACK_INTERMEDIATE.equals(transfer.getStatus())) {
                 executePendingBuybackTransfer(loan, transfer);
             }
         }
@@ -103,7 +102,7 @@ public class LoanAccountOwnerTransferServiceImpl implements LoanAccountOwnerTran
     }
 
     private void executePendingBuybackTransfer(final Loan loan, ExternalAssetOwnerTransfer buybackTransfer) {
-        ExternalAssetOwnerTransfer activeTransfer = findActiveTransfer(loan, buybackTransfer);
+        ExternalAssetOwnerTransfer activeTransfer = findActiveOrActiveIntermediateTransfer(loan, buybackTransfer);
         updateActiveTransfer(activeTransfer);
         buybackTransfer = updatePendingBuybackTransfer(loan, buybackTransfer);
 
@@ -119,6 +118,7 @@ public class LoanAccountOwnerTransferServiceImpl implements LoanAccountOwnerTran
         ExternalAssetOwnerTransfer cancelledTransfer = new ExternalAssetOwnerTransfer();
         cancelledTransfer.setOwner(pendingTransfer.getOwner());
         cancelledTransfer.setExternalId(pendingTransfer.getExternalId());
+        cancelledTransfer.setExternalGroupId(pendingTransfer.getExternalGroupId());
         cancelledTransfer.setStatus(CANCELLED);
         cancelledTransfer.setSubStatus(subStatus);
         cancelledTransfer.setSettlementDate(pendingTransfer.getSettlementDate());
@@ -134,6 +134,7 @@ public class LoanAccountOwnerTransferServiceImpl implements LoanAccountOwnerTran
         ExternalAssetOwnerTransfer declinedTransfer = new ExternalAssetOwnerTransfer();
         declinedTransfer.setOwner(pendingSaleTransfer.getOwner());
         declinedTransfer.setExternalId(pendingSaleTransfer.getExternalId());
+        declinedTransfer.setExternalGroupId(pendingSaleTransfer.getExternalGroupId());
         declinedTransfer.setStatus(DECLINED);
         declinedTransfer.setSubStatus(isBiggerThanZero(loan.getTotalOverpaid()) ? BALANCE_NEGATIVE : BALANCE_ZERO);
         declinedTransfer.setSettlementDate(pendingSaleTransfer.getSettlementDate());
@@ -176,20 +177,20 @@ public class LoanAccountOwnerTransferServiceImpl implements LoanAccountOwnerTran
         return details;
     }
 
-    private ExternalAssetOwnerTransfer findActiveTransfer(Loan loan, ExternalAssetOwnerTransfer buybackTransfer) {
+    private ExternalAssetOwnerTransfer findActiveOrActiveIntermediateTransfer(Loan loan, ExternalAssetOwnerTransfer buybackTransfer) {
         return externalAssetOwnerTransferRepository
                 .findOne((root, query, criteriaBuilder) -> criteriaBuilder.and(criteriaBuilder.equal(root.get("loanId"), loan.getId()),
                         criteriaBuilder.equal(root.get("owner"), buybackTransfer.getOwner()),
-                        criteriaBuilder.equal(root.get("status"), ExternalTransferStatus.ACTIVE),
+                        root.get("status").in(List.of(ACTIVE, ACTIVE_INTERMEDIATE)),
                         criteriaBuilder.equal(root.get("effectiveDateTo"), FUTURE_DATE_9999_12_31)))
                 .orElseThrow();
     }
 
-    private List<ExternalAssetOwnerTransfer> findAllPendingOrBuybackTransfers(Long loanId) {
+    private List<ExternalAssetOwnerTransfer> findAllPendingOrBuybackOrIntermediateTransfers(Long loanId) {
         return externalAssetOwnerTransferRepository
                 .findAll(
                         (root, query, criteriaBuilder) -> criteriaBuilder.and(criteriaBuilder.equal(root.get("loanId"), loanId),
-                                root.get("status").in(List.of(PENDING, BUYBACK)),
+                                root.get("status").in(List.of(PENDING, BUYBACK, PENDING_INTERMEDIATE, BUYBACK_INTERMEDIATE)),
                                 criteriaBuilder.equal(root.get("effectiveDateTo"), FUTURE_DATE_9999_12_31)),
                         Sort.by(Sort.Direction.ASC, "id"));
     }
@@ -199,6 +200,6 @@ public class LoanAccountOwnerTransferServiceImpl implements LoanAccountOwnerTran
     }
 
     private static boolean isSameDayTransfers(List<ExternalAssetOwnerTransfer> transferDataList) {
-        return Objects.equals(transferDataList.get(0).getSettlementDate(), transferDataList.get(1).getSettlementDate());
+        return (transferDataList.stream().map(ExternalAssetOwnerTransfer::getSettlementDate).distinct().count() == 1);
     }
 }

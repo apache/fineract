@@ -31,8 +31,8 @@ import org.apache.fineract.accounting.financialactivityaccount.domain.FinancialA
 import org.apache.fineract.accounting.financialactivityaccount.domain.FinancialActivityAccountRepositoryWrapper;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
-import org.apache.fineract.accounting.journalentry.domain.JournalEntryType;
 import org.apache.fineract.investor.accounting.journalentry.service.InvestorAccountingHelper;
+import org.apache.fineract.investor.domain.ExternalAssetOwner;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerJournalEntryMapping;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerJournalEntryMappingRepository;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
@@ -53,25 +53,44 @@ public class AccountingServiceImpl implements AccountingService {
     private final ExternalAssetOwnerJournalEntryMappingRepository externalAssetOwnerJournalEntryMappingRepository;
     private final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepository;
 
-    private static boolean participateInTransfer(FinancialActivityAccount financialActivityAccount, JournalEntry journalEntry,
-            JournalEntryType filterType) {
-        return filterType.getValue().equals(journalEntry.getType())
-                && !Objects.equals(financialActivityAccount.getGlAccount().getId(), journalEntry.getGlAccount().getId());
-    }
-
     @Override
-    public void createJournalEntriesForSaleAssetTransfer(final Loan loan, final ExternalAssetOwnerTransfer transfer) {
+    public void createJournalEntriesForSaleAssetTransfer(final Loan loan, final ExternalAssetOwnerTransfer transfer,
+            final ExternalAssetOwner previousOwner) {
+
+        final ExternalAssetOwner newOwner = transfer.getOwner();
         List<JournalEntry> journalEntryList = createJournalEntries(loan, transfer, true);
         createMappingToTransfer(transfer, journalEntryList);
-        createMappingToOwner(transfer, journalEntryList, JournalEntryType.DEBIT);
+
+        FinancialActivityAccount financialActivityAccount = this.financialActivityAccountRepository
+                .findByFinancialActivityTypeWithNotFoundDetection(AccountingConstants.FinancialActivity.ASSET_TRANSFER.getValue());
+        journalEntryList.forEach(journalEntry -> {
+            if (isOwnedByFinancialActivityAccount(journalEntry, financialActivityAccount)) {
+                createMappingToOwner(null, journalEntry);
+                return;
+            }
+
+            ExternalAssetOwner owner = determineOwnerForSale(journalEntry, loan, previousOwner, newOwner);
+            createMappingToOwner(owner, journalEntry);
+        });
     }
 
     @Override
     public void createJournalEntriesForBuybackAssetTransfer(final Loan loan, final ExternalAssetOwnerTransfer transfer) {
+        final ExternalAssetOwner previousOwner = transfer.getOwner();
         List<JournalEntry> journalEntryList = createJournalEntries(loan, transfer, false);
         createMappingToTransfer(transfer, journalEntryList);
-        createMappingToOwner(transfer, journalEntryList,
-                LoanStatus.OVERPAID.equals(loan.getStatus()) ? JournalEntryType.DEBIT : JournalEntryType.CREDIT);
+
+        FinancialActivityAccount financialActivityAccount = this.financialActivityAccountRepository
+                .findByFinancialActivityTypeWithNotFoundDetection(AccountingConstants.FinancialActivity.ASSET_TRANSFER.getValue());
+        journalEntryList.forEach(journalEntry -> {
+            if (isOwnedByFinancialActivityAccount(journalEntry, financialActivityAccount)) {
+                createMappingToOwner(null, journalEntry);
+                return;
+            }
+
+            ExternalAssetOwner owner = determineOwnerForBuyback(journalEntry, loan, previousOwner);
+            createMappingToOwner(owner, journalEntry);
+        });
     }
 
     @NotNull
@@ -95,18 +114,52 @@ public class AccountingServiceImpl implements AccountingService {
         return journalEntryList;
     }
 
-    private void createMappingToOwner(ExternalAssetOwnerTransfer transfer, List<JournalEntry> journalEntryList,
-            JournalEntryType filterType) {
-        FinancialActivityAccount financialActivityAccount = this.financialActivityAccountRepository
-                .findByFinancialActivityTypeWithNotFoundDetection(AccountingConstants.FinancialActivity.ASSET_TRANSFER.getValue());
-        journalEntryList.forEach(journalEntry -> {
-            if (participateInTransfer(financialActivityAccount, journalEntry, filterType)) {
-                ExternalAssetOwnerJournalEntryMapping mapping = new ExternalAssetOwnerJournalEntryMapping();
-                mapping.setJournalEntry(journalEntry);
-                mapping.setOwner(transfer.getOwner());
-                externalAssetOwnerJournalEntryMappingRepository.saveAndFlush(mapping);
+    private void createMappingToOwner(final ExternalAssetOwner owner, final JournalEntry journalEntry) {
+        if (owner == null) {
+            return;
+        }
+
+        ExternalAssetOwnerJournalEntryMapping mapping = new ExternalAssetOwnerJournalEntryMapping();
+        mapping.setJournalEntry(journalEntry);
+        mapping.setOwner(owner);
+        externalAssetOwnerJournalEntryMappingRepository.saveAndFlush(mapping);
+    }
+
+    private ExternalAssetOwner determineOwnerForSale(final JournalEntry journalEntry, final Loan loan,
+            final ExternalAssetOwner previousOwner, final ExternalAssetOwner newOwner) {
+        final boolean isOverpaid = LoanStatus.OVERPAID.equals(loan.getStatus());
+
+        if (isOverpaid) {
+            if (journalEntry.isCreditEntry()) {
+                return newOwner;
             }
-        });
+            if (journalEntry.isDebitEntry()) {
+                return previousOwner;
+            }
+        } else {
+            if (journalEntry.isCreditEntry()) {
+                return previousOwner;
+            }
+            if (journalEntry.isDebitEntry()) {
+                return newOwner;
+            }
+        }
+
+        throw new IllegalArgumentException("Given journalEntry has invalid type: " + journalEntry.getType());
+    }
+
+    private ExternalAssetOwner determineOwnerForBuyback(final JournalEntry journalEntry, final Loan loan,
+            final ExternalAssetOwner previousOwner) {
+        final boolean isOverpaid = LoanStatus.OVERPAID.equals(loan.getStatus());
+        if (isOverpaid && journalEntry.isDebitEntry()) {
+            return previousOwner;
+        }
+
+        if (!isOverpaid && journalEntry.isCreditEntry()) {
+            return previousOwner;
+        }
+
+        return null;
     }
 
     private void createMappingToTransfer(ExternalAssetOwnerTransfer transfer, List<JournalEntry> journalEntryList) {
@@ -210,5 +263,9 @@ public class AccountingServiceImpl implements AccountingService {
                     totalDebitAmount, isReversalOrder));
         }
         return journalEntryList;
+    }
+
+    private boolean isOwnedByFinancialActivityAccount(JournalEntry journalEntry, FinancialActivityAccount financialActivityAccount) {
+        return Objects.equals(financialActivityAccount.getGlAccount().getId(), journalEntry.getGlAccount().getId());
     }
 }

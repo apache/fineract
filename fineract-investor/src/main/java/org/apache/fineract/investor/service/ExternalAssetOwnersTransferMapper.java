@@ -37,6 +37,7 @@ public interface ExternalAssetOwnersTransferMapper {
     @Mapping(target = "loan.loanId", source = "loanId")
     @Mapping(target = "loan.externalId", source = "externalLoanId")
     @Mapping(target = "transferExternalId", source = "externalId")
+    @Mapping(target = "transferExternalGroupId", source = "externalGroupId")
     @Mapping(target = "effectiveFrom", source = "effectiveDateFrom")
     @Mapping(target = "effectiveTo", source = "effectiveDateTo")
     @Mapping(target = "purchasePriceRatio", source = "purchasePriceRatio")

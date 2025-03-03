@@ -123,15 +123,17 @@ public class ExternalAssetOwnerTransferTest extends BaseLoanIntegrationTest {
 
     protected PostInitiateTransferResponse createSaleTransfer(Integer loanID, String settlementDate) {
         String transferExternalId = UUID.randomUUID().toString();
+        String transferExternalGroupId = UUID.randomUUID().toString();
         ownerExternalId = UUID.randomUUID().toString();
-        return createSaleTransfer(loanID, settlementDate, transferExternalId, ownerExternalId, "1.0");
+        return createSaleTransfer(loanID, settlementDate, transferExternalId, transferExternalGroupId, ownerExternalId, "1.0");
     }
 
     protected PostInitiateTransferResponse createSaleTransfer(Integer loanID, String settlementDate, String transferExternalId,
-            String ownerExternalId, String purchasePriceRatio) {
+            String transferExternalGroupId, String ownerExternalId, String purchasePriceRatio) {
         PostInitiateTransferResponse saleResponse = EXTERNAL_ASSET_OWNER_HELPER.initiateTransferByLoanId(loanID.longValue(), "sale",
                 new PostInitiateTransferRequest().settlementDate(settlementDate).dateFormat("yyyy-MM-dd").locale("en")
-                        .transferExternalId(transferExternalId).ownerExternalId(ownerExternalId).purchasePriceRatio(purchasePriceRatio));
+                        .transferExternalId(transferExternalId).transferExternalGroupId(transferExternalGroupId)
+                        .ownerExternalId(ownerExternalId).purchasePriceRatio(purchasePriceRatio));
         assertEquals(transferExternalId, saleResponse.getResourceExternalId());
         return saleResponse;
     }

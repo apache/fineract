@@ -19,8 +19,6 @@
 package org.apache.fineract.investor.service;
 
 import static org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType.BUSINESS_DATE;
-import static org.apache.fineract.investor.data.ExternalTransferStatus.BUYBACK;
-import static org.apache.fineract.investor.data.ExternalTransferStatus.PENDING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,10 +34,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAccountSnapshotBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
+import org.apache.fineract.investor.data.ExternalTransferStatus;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferLoanMappingRepository;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferRepository;
@@ -50,6 +50,9 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -80,38 +83,88 @@ public class LoanAccountOwnerTransferServiceTest {
     }
 
     @Test
-    public void verifyWhenCancelPendingSaleAndBuybackTransferThenBusinessEventsAreSent() {
+    public void verifyWhenCancelPendingAndIntermediateSaleAndBuybackTransferThenBusinessEventsAreSent() {
         // given
         final Loan loanForProcessing = Mockito.mock(Loan.class);
         when(loanForProcessing.getId()).thenReturn(1L);
 
         ExternalAssetOwnerTransfer pendingSaleTransfer = Mockito.mock(ExternalAssetOwnerTransfer.class);
         ExternalAssetOwnerTransfer pendingBuybackTransfer = Mockito.mock(ExternalAssetOwnerTransfer.class);
+        ExternalAssetOwnerTransfer pendingIntermediateTransfer = Mockito.mock(ExternalAssetOwnerTransfer.class);
+        ExternalAssetOwnerTransfer pendingBuyBackIntermediateTransfer = Mockito.mock(ExternalAssetOwnerTransfer.class);
         ExternalAssetOwnerTransfer cancelledSaleTransfer = Mockito.mock(ExternalAssetOwnerTransfer.class);
         ExternalAssetOwnerTransfer cancelledBuybackTransfer = Mockito.mock(ExternalAssetOwnerTransfer.class);
+        ExternalAssetOwnerTransfer cancelledIntermediateTransfer = Mockito.mock(ExternalAssetOwnerTransfer.class);
+        ExternalAssetOwnerTransfer cancelledBuyBackIntermediateSaleTransfer = Mockito.mock(ExternalAssetOwnerTransfer.class);
 
-        List<ExternalAssetOwnerTransfer> response = List.of(pendingSaleTransfer, pendingBuybackTransfer);
+        List<ExternalAssetOwnerTransfer> response = List.of(pendingSaleTransfer, pendingBuybackTransfer, pendingIntermediateTransfer,
+                pendingBuyBackIntermediateTransfer);
         when(externalAssetOwnerTransferRepository.findAll(any(Specification.class), eq(Sort.by(ASC, "id")))).thenReturn(response);
         when(externalAssetOwnerTransferRepository.save(any(ExternalAssetOwnerTransfer.class))).thenReturn(pendingSaleTransfer)
-                .thenReturn(cancelledSaleTransfer).thenReturn(pendingBuybackTransfer).thenReturn(cancelledBuybackTransfer);
+                .thenReturn(cancelledSaleTransfer).thenReturn(pendingBuybackTransfer).thenReturn(cancelledBuybackTransfer)
+                .thenReturn(pendingIntermediateTransfer).thenReturn(cancelledIntermediateTransfer)
+                .thenReturn(pendingBuyBackIntermediateTransfer).thenReturn(cancelledBuyBackIntermediateSaleTransfer);
 
         // when
         underTest.handleLoanClosedOrOverpaid(loanForProcessing);
 
         // then
-        ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor = verifyBusinessEvents(2);
+        ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor = verifyBusinessEvents(4);
         verifyLoanTransferBusinessEvent(businessEventArgumentCaptor, 0, loanForProcessing, cancelledSaleTransfer);
         verifyLoanTransferBusinessEvent(businessEventArgumentCaptor, 1, loanForProcessing, cancelledBuybackTransfer);
+        verifyLoanTransferBusinessEvent(businessEventArgumentCaptor, 2, loanForProcessing, cancelledIntermediateTransfer);
+        verifyLoanTransferBusinessEvent(businessEventArgumentCaptor, 3, loanForProcessing, cancelledBuyBackIntermediateSaleTransfer);
     }
 
     @Test
-    public void verifyWhenDeclinePendingSaleTransferThenBusinessEventIsSent() {
+    public void verifyWhenDeclineCancelPendingAndIntermediateSaleAndBuybackTransferThenBusinessEventsAreSent() {
         // given
         final Loan loanForProcessing = Mockito.mock(Loan.class);
         when(loanForProcessing.getId()).thenReturn(1L);
 
         ExternalAssetOwnerTransfer pendingSaleTransfer = Mockito.mock(ExternalAssetOwnerTransfer.class);
-        when(pendingSaleTransfer.getStatus()).thenReturn(PENDING);
+        when(pendingSaleTransfer.getSettlementDate()).thenReturn(actualDate.minusDays(1));
+        ExternalAssetOwnerTransfer pendingBuybackTransfer = Mockito.mock(ExternalAssetOwnerTransfer.class);
+        ExternalAssetOwnerTransfer pendingIntermediateTransfer = Mockito.mock(ExternalAssetOwnerTransfer.class);
+        ExternalAssetOwnerTransfer pendingBuyBackIntermediateTransfer = Mockito.mock(ExternalAssetOwnerTransfer.class);
+
+        when(pendingSaleTransfer.getSettlementDate()).thenReturn(actualDate.minusDays(1));
+        when(pendingBuybackTransfer.getSettlementDate()).thenReturn(actualDate.minusDays(1));
+        when(pendingIntermediateTransfer.getSettlementDate()).thenReturn(actualDate);
+
+        ExternalAssetOwnerTransfer declinedSaleTransfer = Mockito.mock(ExternalAssetOwnerTransfer.class);
+        ExternalAssetOwnerTransfer cancelledBuybackTransfer = Mockito.mock(ExternalAssetOwnerTransfer.class);
+        ExternalAssetOwnerTransfer cancelledIntermediateTransfer = Mockito.mock(ExternalAssetOwnerTransfer.class);
+        ExternalAssetOwnerTransfer cancelledBuyBackIntermediateSaleTransfer = Mockito.mock(ExternalAssetOwnerTransfer.class);
+
+        List<ExternalAssetOwnerTransfer> response = List.of(pendingSaleTransfer, pendingBuybackTransfer, pendingIntermediateTransfer,
+                pendingBuyBackIntermediateTransfer);
+        when(externalAssetOwnerTransferRepository.findAll(any(Specification.class), eq(Sort.by(ASC, "id")))).thenReturn(response);
+        when(externalAssetOwnerTransferRepository.save(any(ExternalAssetOwnerTransfer.class))).thenReturn(pendingSaleTransfer)
+                .thenReturn(declinedSaleTransfer).thenReturn(pendingBuybackTransfer).thenReturn(cancelledBuybackTransfer)
+                .thenReturn(pendingIntermediateTransfer).thenReturn(cancelledIntermediateTransfer)
+                .thenReturn(pendingBuyBackIntermediateTransfer).thenReturn(cancelledBuyBackIntermediateSaleTransfer);
+
+        // when
+        underTest.handleLoanClosedOrOverpaid(loanForProcessing);
+
+        // then
+        ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor = verifyBusinessEvents(4);
+        verifyLoanTransferBusinessEvent(businessEventArgumentCaptor, 0, loanForProcessing, pendingSaleTransfer);
+        verifyLoanTransferBusinessEvent(businessEventArgumentCaptor, 1, loanForProcessing, cancelledBuybackTransfer);
+        verifyLoanTransferBusinessEvent(businessEventArgumentCaptor, 2, loanForProcessing, cancelledIntermediateTransfer);
+        verifyLoanTransferBusinessEvent(businessEventArgumentCaptor, 3, loanForProcessing, cancelledBuyBackIntermediateSaleTransfer);
+    }
+
+    @ParameterizedTest
+    @MethodSource("pendingStatusDataProvider")
+    public void verifyWhenDeclinePendingSaleTransferThenBusinessEventIsSent(final ExternalTransferStatus pendingStatus) {
+        // given
+        final Loan loanForProcessing = Mockito.mock(Loan.class);
+        when(loanForProcessing.getId()).thenReturn(1L);
+
+        ExternalAssetOwnerTransfer pendingSaleTransfer = Mockito.mock(ExternalAssetOwnerTransfer.class);
+        when(pendingSaleTransfer.getStatus()).thenReturn(pendingStatus);
         ExternalAssetOwnerTransfer declineTransfer = Mockito.mock(ExternalAssetOwnerTransfer.class);
         List<ExternalAssetOwnerTransfer> response = List.of(pendingSaleTransfer);
 
@@ -127,8 +180,9 @@ public class LoanAccountOwnerTransferServiceTest {
         verifyLoanTransferBusinessEvent(businessEventArgumentCaptor, 0, loanForProcessing, declineTransfer);
     }
 
-    @Test
-    public void verifyWhenExecutePendingBuybackTransferThenBusinessEventIsSent() {
+    @ParameterizedTest
+    @MethodSource("buybackStatusDataProvider")
+    public void verifyWhenExecutePendingBuybackTransferThenBusinessEventIsSent(final ExternalTransferStatus buybackStatus) {
         // given
         final Loan loanForProcessing = Mockito.mock(Loan.class);
         when(loanForProcessing.getId()).thenReturn(1L);
@@ -136,7 +190,7 @@ public class LoanAccountOwnerTransferServiceTest {
         when(loanForProcessing.getSummary()).thenReturn(loanSummary);
 
         ExternalAssetOwnerTransfer pendingBuybackTransfer = Mockito.mock(ExternalAssetOwnerTransfer.class);
-        when(pendingBuybackTransfer.getStatus()).thenReturn(BUYBACK);
+        when(pendingBuybackTransfer.getStatus()).thenReturn(buybackStatus);
         ExternalAssetOwnerTransfer activeTransfer = Mockito.mock(ExternalAssetOwnerTransfer.class);
         List<ExternalAssetOwnerTransfer> response = List.of(pendingBuybackTransfer);
 
@@ -152,6 +206,14 @@ public class LoanAccountOwnerTransferServiceTest {
         ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor = verifyBusinessEvents(2);
         verifyLoanTransferBusinessEvent(businessEventArgumentCaptor, 0, loanForProcessing, pendingBuybackTransfer);
         verifyLoanAccountSnapshotBusinessEvent(businessEventArgumentCaptor, 1, loanForProcessing);
+    }
+
+    private static Stream<Arguments> pendingStatusDataProvider() {
+        return Stream.of(Arguments.of(ExternalTransferStatus.PENDING_INTERMEDIATE), Arguments.of(ExternalTransferStatus.PENDING));
+    }
+
+    private static Stream<Arguments> buybackStatusDataProvider() {
+        return Stream.of(Arguments.of(ExternalTransferStatus.BUYBACK_INTERMEDIATE), Arguments.of(ExternalTransferStatus.BUYBACK));
     }
 
     @NotNull
