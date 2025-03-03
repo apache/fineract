@@ -25,6 +25,8 @@ import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationData;
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
+import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationProperty;
+import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationRepositoryWrapper;
 import org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,12 +39,15 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
+    private final GlobalConfigurationRepositoryWrapper configurationRepositoryWrapper;
     private final RowMapper<GlobalConfigurationPropertyData> rm;
 
     @Autowired
-    public ConfigurationReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
+    public ConfigurationReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
+            final GlobalConfigurationRepositoryWrapper configurationRepositoryWrapper) {
         this.context = context;
         this.jdbcTemplate = jdbcTemplate;
+        this.configurationRepositoryWrapper = configurationRepositoryWrapper;
 
         this.rm = new GlobalConfigurationRowMapper();
     }
@@ -72,11 +77,9 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
 
         this.context.authenticatedUser();
 
-        final String sql = "SELECT c.id, c.name, c.enabled, c.value, c.date_value, c.string_value, c.description, c.is_trap_door FROM "
-                + "c_configuration c where c.name=? order by c.id";
-        final GlobalConfigurationPropertyData globalConfiguration = this.jdbcTemplate.queryForObject(sql, this.rm, new Object[] { name });
+        GlobalConfigurationProperty globalConfigurationProperty = configurationRepositoryWrapper.findOneByNameWithNotFoundDetection(name);
 
-        return globalConfiguration;
+        return globalConfigurationProperty.toData();
     }
 
     @Override
@@ -84,12 +87,9 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
 
         this.context.authenticatedUser();
 
-        final String sql = "SELECT c.id, c.name, c.enabled, c.value, c.date_value, c.string_value ,c.description, c.is_trap_door FROM "
-                + "c_configuration c where c.id=? order by c.id";
-        final GlobalConfigurationPropertyData globalConfiguration = this.jdbcTemplate.queryForObject(sql, this.rm,
-                new Object[] { configId });
+        GlobalConfigurationProperty globalConfigurationProperty = configurationRepositoryWrapper.findOneWithNotFoundDetection(configId);
 
-        return globalConfiguration;
+        return globalConfigurationProperty.toData();
     }
 
     private static final class GlobalConfigurationRowMapper implements RowMapper<GlobalConfigurationPropertyData> {
