@@ -56,6 +56,7 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
+import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
@@ -366,6 +367,9 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
         final DaysInYearType daysInYearType = DaysInYearType
                 .fromInt(command.integerValueOfParameterNamed(LoanProductConstants.DAYS_IN_YEAR_TYPE_PARAMETER_NAME));
 
+        final DaysInYearCustomStrategyType daysInYearCustomStrategy = DaysInYearCustomStrategyType
+                .fromInt(command.integerValueOfParameterNamed(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME));
+
         LoanProductInterestRecalculationDetails interestRecalculationSettings = null;
 
         if (isInterestRecalculationEnabled) {
@@ -486,7 +490,7 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
                 allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber, dueDaysForRepaymentEvent,
                 overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageDownPayment, enableAutoRepaymentForDownPayment,
                 repaymentStartDateType, enableInstallmentLevelDelinquency, loanScheduleType, loanScheduleProcessingType, fixedLength,
-                enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour, interestRecognitionOnDisbursementDate);
+                enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour, interestRecognitionOnDisbursementDate, daysInYearCustomStrategy);
 
     }
 
@@ -669,43 +673,43 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
     }
 
     public LoanProduct(final Fund fund, final String transactionProcessingStrategyCode,
-            final List<LoanProductPaymentAllocationRule> paymentAllocationRules,
-            final List<LoanProductCreditAllocationRule> creditAllocationRules, final String name, final String shortName,
-            final String description, final MonetaryCurrency currency, final BigDecimal defaultPrincipal,
-            final BigDecimal defaultMinPrincipal, final BigDecimal defaultMaxPrincipal,
-            final BigDecimal defaultNominalInterestRatePerPeriod, final BigDecimal defaultMinNominalInterestRatePerPeriod,
-            final BigDecimal defaultMaxNominalInterestRatePerPeriod, final PeriodFrequencyType interestPeriodFrequencyType,
-            final BigDecimal defaultAnnualNominalInterestRate, final InterestMethod interestMethod,
-            final InterestCalculationPeriodMethod interestCalculationPeriodMethod, final boolean considerPartialPeriodInterest,
-            final Integer repayEvery, final PeriodFrequencyType repaymentFrequencyType, final Integer defaultNumberOfInstallments,
-            final Integer defaultMinNumberOfInstallments, final Integer defaultMaxNumberOfInstallments,
-            final Integer graceOnPrincipalPayment, final Integer recurringMoratoriumOnPrincipalPeriods,
-            final Integer graceOnInterestPayment, final Integer graceOnInterestCharged, final AmortizationMethod amortizationMethod,
-            final BigDecimal inArrearsTolerance, final List<Charge> charges, final AccountingRuleType accountingRuleType,
-            final boolean includeInBorrowerCycle, final LocalDate startDate, final LocalDate closeDate, final ExternalId externalId,
-            final boolean useBorrowerCycle, final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations,
-            final boolean multiDisburseLoan, final Integer maxTrancheCount, final BigDecimal outstandingLoanBalance,
-            final Integer graceOnArrearsAgeing, final Integer overdueDaysForNPA, final DaysInMonthType daysInMonthType,
-            final DaysInYearType daysInYearType, final boolean isInterestRecalculationEnabled,
-            final LoanProductInterestRecalculationDetails productInterestRecalculationDetails,
-            final Integer minimumDaysBetweenDisbursalAndFirstRepayment, final boolean holdGuarantorFunds,
-            final LoanProductGuaranteeDetails loanProductGuaranteeDetails, final BigDecimal principalThresholdForLastInstallment,
-            final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion, final boolean canDefineEmiAmount,
-            final Integer installmentAmountInMultiplesOf, final LoanProductConfigurableAttributes loanProductConfigurableAttributes,
-            Boolean isLinkedToFloatingInterestRates, FloatingRate floatingRate, BigDecimal interestRateDifferential,
-            BigDecimal minDifferentialLendingRate, BigDecimal maxDifferentialLendingRate, BigDecimal defaultDifferentialLendingRate,
-            Boolean isFloatingInterestRateCalculationAllowed, final Boolean isVariableInstallmentsAllowed,
-            final Integer minimumGapBetweenInstallments, final Integer maximumGapBetweenInstallments,
-            final boolean syncExpectedWithDisbursementDate, final boolean canUseForTopup, final boolean isEqualAmortization,
-            final List<Rate> rates, final BigDecimal fixedPrincipalPercentagePerInstallment, final boolean disallowExpectedDisbursements,
-            final boolean allowApprovedDisbursedAmountsOverApplied, final String overAppliedCalculationType,
-            final Integer overAppliedNumber, final Integer dueDaysForRepaymentEvent, final Integer overDueDaysForRepaymentEvent,
-            final boolean enableDownPayment, final BigDecimal disbursedAmountPercentageForDownPayment,
-            final boolean enableAutoRepaymentForDownPayment, final RepaymentStartDateType repaymentStartDateType,
-            final boolean enableInstallmentLevelDelinquency, final LoanScheduleType loanScheduleType,
-            final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength,
-            final boolean enableAccrualActivityPosting, final List<LoanSupportedInterestRefundTypes> supportedInterestRefundTypes,
-            final LoanChargeOffBehaviour chargeOffBehaviour, final boolean isInterestRecognitionOnDisbursementDate) {
+                       final List<LoanProductPaymentAllocationRule> paymentAllocationRules,
+                       final List<LoanProductCreditAllocationRule> creditAllocationRules, final String name, final String shortName,
+                       final String description, final MonetaryCurrency currency, final BigDecimal defaultPrincipal,
+                       final BigDecimal defaultMinPrincipal, final BigDecimal defaultMaxPrincipal,
+                       final BigDecimal defaultNominalInterestRatePerPeriod, final BigDecimal defaultMinNominalInterestRatePerPeriod,
+                       final BigDecimal defaultMaxNominalInterestRatePerPeriod, final PeriodFrequencyType interestPeriodFrequencyType,
+                       final BigDecimal defaultAnnualNominalInterestRate, final InterestMethod interestMethod,
+                       final InterestCalculationPeriodMethod interestCalculationPeriodMethod, final boolean considerPartialPeriodInterest,
+                       final Integer repayEvery, final PeriodFrequencyType repaymentFrequencyType, final Integer defaultNumberOfInstallments,
+                       final Integer defaultMinNumberOfInstallments, final Integer defaultMaxNumberOfInstallments,
+                       final Integer graceOnPrincipalPayment, final Integer recurringMoratoriumOnPrincipalPeriods,
+                       final Integer graceOnInterestPayment, final Integer graceOnInterestCharged, final AmortizationMethod amortizationMethod,
+                       final BigDecimal inArrearsTolerance, final List<Charge> charges, final AccountingRuleType accountingRuleType,
+                       final boolean includeInBorrowerCycle, final LocalDate startDate, final LocalDate closeDate, final ExternalId externalId,
+                       final boolean useBorrowerCycle, final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations,
+                       final boolean multiDisburseLoan, final Integer maxTrancheCount, final BigDecimal outstandingLoanBalance,
+                       final Integer graceOnArrearsAgeing, final Integer overdueDaysForNPA, final DaysInMonthType daysInMonthType,
+                       final DaysInYearType daysInYearType, final boolean isInterestRecalculationEnabled,
+                       final LoanProductInterestRecalculationDetails productInterestRecalculationDetails,
+                       final Integer minimumDaysBetweenDisbursalAndFirstRepayment, final boolean holdGuarantorFunds,
+                       final LoanProductGuaranteeDetails loanProductGuaranteeDetails, final BigDecimal principalThresholdForLastInstallment,
+                       final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion, final boolean canDefineEmiAmount,
+                       final Integer installmentAmountInMultiplesOf, final LoanProductConfigurableAttributes loanProductConfigurableAttributes,
+                       Boolean isLinkedToFloatingInterestRates, FloatingRate floatingRate, BigDecimal interestRateDifferential,
+                       BigDecimal minDifferentialLendingRate, BigDecimal maxDifferentialLendingRate, BigDecimal defaultDifferentialLendingRate,
+                       Boolean isFloatingInterestRateCalculationAllowed, final Boolean isVariableInstallmentsAllowed,
+                       final Integer minimumGapBetweenInstallments, final Integer maximumGapBetweenInstallments,
+                       final boolean syncExpectedWithDisbursementDate, final boolean canUseForTopup, final boolean isEqualAmortization,
+                       final List<Rate> rates, final BigDecimal fixedPrincipalPercentagePerInstallment, final boolean disallowExpectedDisbursements,
+                       final boolean allowApprovedDisbursedAmountsOverApplied, final String overAppliedCalculationType,
+                       final Integer overAppliedNumber, final Integer dueDaysForRepaymentEvent, final Integer overDueDaysForRepaymentEvent,
+                       final boolean enableDownPayment, final BigDecimal disbursedAmountPercentageForDownPayment,
+                       final boolean enableAutoRepaymentForDownPayment, final RepaymentStartDateType repaymentStartDateType,
+                       final boolean enableInstallmentLevelDelinquency, final LoanScheduleType loanScheduleType,
+                       final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength,
+                       final boolean enableAccrualActivityPosting, final List<LoanSupportedInterestRefundTypes> supportedInterestRefundTypes,
+                       final LoanChargeOffBehaviour chargeOffBehaviour, final boolean isInterestRecognitionOnDisbursementDate, final DaysInYearCustomStrategyType daysInYearCustomStrategy) {
         this.fund = fund;
         this.transactionProcessingStrategyCode = transactionProcessingStrategyCode;
 
@@ -755,7 +759,7 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
                 inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType.getValue(), daysInYearType.getValue(),
                 isInterestRecalculationEnabled, isEqualAmortization, enableDownPayment, disbursedAmountPercentageForDownPayment,
                 enableAutoRepaymentForDownPayment, loanScheduleType, loanScheduleProcessingType, fixedLength, enableAccrualActivityPosting,
-                supportedInterestRefundTypes, chargeOffBehaviour, isInterestRecognitionOnDisbursementDate);
+                supportedInterestRefundTypes, chargeOffBehaviour, isInterestRecognitionOnDisbursementDate, daysInYearCustomStrategy);
 
         this.loanProductMinMaxConstraints = new LoanProductMinMaxConstraints(defaultMinPrincipal, defaultMaxPrincipal,
                 defaultMinNominalInterestRatePerPeriod, defaultMaxNominalInterestRatePerPeriod, defaultMinNumberOfInstallments,
