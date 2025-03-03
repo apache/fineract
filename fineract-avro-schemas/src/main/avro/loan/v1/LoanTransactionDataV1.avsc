@@ -255,6 +255,14 @@
                     "type": "map"
                 }
             ]
+        },
+        {
+            "default": null,
+            "name": "reversed",
+            "type": [
+                "null",
+                "boolean"
+            ]
         }
     ]
 }
