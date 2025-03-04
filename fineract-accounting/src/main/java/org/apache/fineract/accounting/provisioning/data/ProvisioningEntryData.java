@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.accounting.provisioning.data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -29,7 +31,10 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @Accessors(chain = true)
 @SuppressWarnings("unused")
-public class ProvisioningEntryData {
+public class ProvisioningEntryData implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private Long id;
 
@@ -39,9 +44,9 @@ public class ProvisioningEntryData {
 
     private String createdUser;
 
-    LocalDate createdDate;
+    private LocalDate createdDate;
 
-    Long modifiedById;
+    private Long modifiedById;
 
     private String modifiedUser;
 

@@ -16,23 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.accounting.provisioning.constant;
+package org.apache.fineract.accounting.provisioning.data.request;
 
-public interface ProvisioningEntriesApiConstants {
+import java.io.Serial;
+import java.io.Serializable;
 
-    String JSON_DATE_PARAM = "date";
+public record ProvisionEntryRequest(String date, Boolean createjournalentries, String locale, String dateFormat) implements Serializable {
 
-    String JSON_DATEFORMAT_PARAM = "dateFormat";
-
-    String JSON_LOCALE_PARAM = "locale";
-
-    String JSON_CREATEJOURNALENTRIES_PARAM = "createjournalentries";
-
-    String PROVISIONINGENTRY_PARAM = "provisioningentry";
-
-    String ENTRIES_PARAM = "entries";
-
-    String CREATE_JOURNAL_ENTRY = "createjournalentry";
-    String RECREATE_PROVISION_IN_ENTRY = "recreateprovisioningentry";
-
+    @Serial
+    private static final long serialVersionUID = 1L;
 }

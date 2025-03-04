@@ -132,7 +132,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
         try {
             Collection<ProvisioningCriteriaData> criteriaCollection = this.provisioningCriteriaReadPlatformService
                     .retrieveAllProvisioningCriterias();
-            if (criteriaCollection == null || criteriaCollection.size() == 0) {
+            if (criteriaCollection == null || criteriaCollection.isEmpty()) {
                 throw new NoProvisioningCriteriaDefinitionFound();
             }
             ProvisioningEntry requestedEntry = createProvisioningEntry(createdDate, addJournalEntries);
