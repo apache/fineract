@@ -16,26 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.api;
+package org.apache.fineract.infrastructure.core.api.jersey;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.List;
-import org.apache.fineract.cob.domain.LoanAccountLock;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import org.springframework.core.annotation.AliasFor;
 
-final class LoanAccountLockApiResourceSwagger {
+@Target(ElementType.PARAMETER)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Pagination {
 
-    private LoanAccountLockApiResourceSwagger() {
+    @AliasFor("size")
+    int value() default 50;
 
-    }
+    @AliasFor("value")
+    int size() default 50;
 
-    @Schema(description = "GetLoanAccountLockResponse")
-    public static final class GetLoanAccountLockResponse {
-
-        private GetLoanAccountLockResponse() {}
-
-        public int page;
-        public int size;
-        public List<LoanAccountLock> content;
-
-    }
+    int maximumSize() default 10000;
 }

@@ -69,7 +69,7 @@ public class LoanCOBStepDef extends AbstractStepDef {
 
     @Then("There are no locked loan accounts")
     public void listOfLockedLoansEmpty() throws IOException {
-        Response<GetLoanAccountLockResponse> response = loanAccountLockApi.retrieveLockedAccounts(0, 1000).execute();
+        Response<GetLoanAccountLockResponse> response = loanAccountLockApi.retrieveLockedAccounts(0, 1000, null).execute();
         ErrorHelper.checkSuccessfulApiCall(response);
 
         int size = response.body().getContent().size();
@@ -82,7 +82,7 @@ public class LoanCOBStepDef extends AbstractStepDef {
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         Long targetLoanId = loanResponse.body().getLoanId();
 
-        Response<GetLoanAccountLockResponse> response = loanAccountLockApi.retrieveLockedAccounts(0, 1000).execute();
+        Response<GetLoanAccountLockResponse> response = loanAccountLockApi.retrieveLockedAccounts(0, 1000, null).execute();
         ErrorHelper.checkSuccessfulApiCall(response);
 
         List<LoanAccountLock> content = response.body().getContent();

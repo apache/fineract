@@ -24,7 +24,6 @@ import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -37,9 +36,8 @@ public class LoanAccountLockServiceImpl implements LoanAccountLockService {
     private final LoanAccountLockRepository loanAccountLockRepository;
 
     @Override
-    public List<LoanAccountLock> getLockedLoanAccountByPage(int page, int limit) {
-        Pageable loanAccountLockPage = PageRequest.of(page, limit);
-        Page<LoanAccountLock> loanAccountLocks = loanAccountLockRepository.findAll(loanAccountLockPage);
+    public List<LoanAccountLock> getLockedLoanAccountByPage(Pageable pageable) {
+        Page<LoanAccountLock> loanAccountLocks = loanAccountLockRepository.findAll(pageable);
         return loanAccountLocks.getContent();
     }
 

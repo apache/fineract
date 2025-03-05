@@ -16,26 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.api;
+package org.apache.fineract.portfolio.loanaccount.service;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.List;
-import org.apache.fineract.cob.domain.LoanAccountLock;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
-final class LoanAccountLockApiResourceSwagger {
+@FunctionalInterface
+public interface QueryParamToPredicate<E, T> {
 
-    private LoanAccountLockApiResourceSwagger() {
-
-    }
-
-    @Schema(description = "GetLoanAccountLockResponse")
-    public static final class GetLoanAccountLockResponse {
-
-        private GetLoanAccountLockResponse() {}
-
-        public int page;
-        public int size;
-        public List<LoanAccountLock> content;
-
-    }
+    Predicate toPredicate(Root<E> root, CriteriaQuery<?> query, CriteriaBuilder builder, String field, T queryParam);
 }

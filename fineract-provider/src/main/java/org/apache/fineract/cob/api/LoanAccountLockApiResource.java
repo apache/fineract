@@ -19,6 +19,7 @@
 package org.apache.fineract.cob.api;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -35,15 +36,13 @@ import jakarta.ws.rs.core.UriInfo;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.cob.data.LoanAccountLockResponseDTO;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.service.LoanAccountLockService;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.api.jersey.Pagination;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/loans")
@@ -52,11 +51,9 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class LoanAccountLockApiResource {
 
-    private static final Set<String> LOAN_ACCOUNT_LOCK_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("page", "limit", "content"));
+    private static final Set<String> LOAN_ACCOUNT_LOCK_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("page", "size", "content"));
 
     private final LoanAccountLockService loanAccountLockService;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final DefaultToApiJsonSerializer<LoanAccountLockResponseDTO> businessStepConfigSerializeService;
 
     @GET
     @Path("locked")
@@ -65,19 +62,17 @@ public class LoanAccountLockApiResource {
     @Operation(summary = "List locked loan accounts", description = "Returns the locked loan IDs")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanAccountLockApiResourceSwagger.GetLoanAccountLockResponse.class))) })
-    public String retrieveLockedAccounts(@Context final UriInfo uriInfo, @QueryParam("page") Integer pageParam,
-            @QueryParam("limit") Integer limitParam) {
-        int page = Objects.requireNonNullElse(pageParam, 0);
-        int limit = Objects.requireNonNullElse(limitParam, 50);
-
-        List<LoanAccountLock> lockedLoanAccounts = loanAccountLockService.getLockedLoanAccountByPage(page, limit);
+    public LoanAccountLockResponseDTO retrieveLockedAccounts(@Context final UriInfo uriInfo,
+            @QueryParam("page") @Parameter(description = "page") final Integer page,
+            @QueryParam("size") @Parameter(description = "size") final Integer size,
+            @QueryParam("sort") @Parameter(description = "sort") final String sort,
+            @Parameter(hidden = true) @Pagination Pageable pageable) {
+        List<LoanAccountLock> lockedLoanAccounts = loanAccountLockService.getLockedLoanAccountByPage(pageable);
         LoanAccountLockResponseDTO response = new LoanAccountLockResponseDTO();
-        response.setPage(page);
-        response.setLimit(limit);
+        response.setPage(pageable.getPageNumber());
+        response.setSize(pageable.getPageSize());
         response.setContent(lockedLoanAccounts);
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-
-        return businessStepConfigSerializeService.serialize(settings, response, LOAN_ACCOUNT_LOCK_RESPONSE_DATA_PARAMETERS);
+        return response;
     }
 }

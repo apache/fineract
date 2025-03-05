@@ -1216,7 +1216,11 @@ public class ClientHelper {
     }
 
     public GetLoanAccountLockResponse retrieveLockedAccounts(int page, int limit) {
-        return Calls.ok(FineractClientHelper.getFineractClient().loanAccountLockApi.retrieveLockedAccounts(page, limit));
+        return retrieveLockedAccounts(page, limit, null);
+    }
+
+    public GetLoanAccountLockResponse retrieveLockedAccounts(int page, int limit, String sort) {
+        return Calls.ok(FineractClientHelper.getFineractClient().loanAccountLockApi.retrieveLockedAccounts(page, limit, sort));
     }
 
     public static PostClientsClientIdIdentifiersRequest createClientIdentifer(final Long documentType) {

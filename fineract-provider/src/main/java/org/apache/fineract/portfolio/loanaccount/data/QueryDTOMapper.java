@@ -16,26 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.api;
+package org.apache.fineract.portfolio.loanaccount.data;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.List;
-import org.apache.fineract.cob.domain.LoanAccountLock;
+import java.util.Map;
 
-final class LoanAccountLockApiResourceSwagger {
+public interface QueryDTOMapper<E, D> {
 
-    private LoanAccountLockApiResourceSwagger() {
-
-    }
-
-    @Schema(description = "GetLoanAccountLockResponse")
-    public static final class GetLoanAccountLockResponse {
-
-        private GetLoanAccountLockResponse() {}
-
-        public int page;
-        public int size;
-        public List<LoanAccountLock> content;
-
-    }
+    Map<String, QueryMapping<E, D, ?>> getQueryMapping();
 }

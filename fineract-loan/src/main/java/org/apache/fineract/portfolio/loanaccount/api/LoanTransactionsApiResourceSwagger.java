@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -273,6 +274,31 @@ final class LoanTransactionsApiResourceSwagger {
             @Schema(example = "true")
             public Boolean isSystemDefined;
         }
+    }
+
+    @Schema(description = "PostLoansLoanIdTransactionsQueryRequest")
+    public static final class PostLoansLoanIdTransactionsQueryRequest {
+
+        private PostLoansLoanIdTransactionsQueryRequest() {}
+
+        @Schema(example = "[\"accrual\",\"repayment\"]") // TODO enum list
+        public List<String> excludedTypes;
+    }
+
+    @Schema(description = "GetLoansLoanIdTransactionsResponse")
+    public static final class GetLoansLoanIdTransactionsResponse {
+
+        private GetLoansLoanIdTransactionsResponse() {}
+
+        @Schema(example = "0")
+        public int page;
+        @Schema(example = "50")
+        public int size;
+        @Schema(example = "2")
+        public int totalPages;
+        @Schema(example = "70")
+        public long totalElements;
+        public List<GetLoansLoanIdTransactionsTransactionIdResponse> content;
     }
 
     @Schema(description = "PostLoansLoanIdTransactionsRequest")

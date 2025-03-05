@@ -29,8 +29,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.CreditAllocationData;
 import org.apache.fineract.client.models.CreditAllocationOrder;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsQueryRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.junit.jupiter.api.Assertions;
@@ -619,6 +621,13 @@ public class LoanCOBCreateAccrualsTest extends BaseLoanIntegrationTest {
                     transaction(0.26, "Accrual", "20 February 2025", 0.0, 0.0, 0.26, 0.0, 0.0, 0.0, 0.0), //
                     transaction(0.23, "Accrual", "21 February 2025", 0.0, 0.0, 0.23, 0.0, 0.0, 0.0, 0.0), //
                     transaction(0.22, "Accrual", "22 February 2025", 0.0, 0.0, 0.22, 0.0, 0.0, 0.0, 0.0)); //
+
+            final GetLoansLoanIdResponse loanDetails1 = loanTransactionHelper.getLoanDetails(loanId, "accrual");
+            loanDetails1.getId();
+
+            final GetLoansLoanIdTransactionsResponse loanTransactions = loanTransactionHelper.getLoanTransactions(loanId,
+                    new PostLoansLoanIdTransactionsQueryRequest().excludedTypes(new ArrayList<>(List.of("accrual"))));
+            loanTransactions.getSize();
         });
     }
 

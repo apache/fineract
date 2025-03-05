@@ -16,26 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.api;
+package org.apache.fineract.portfolio.loanaccount.data;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.List;
-import org.apache.fineract.cob.domain.LoanAccountLock;
+import java.util.Set;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 
-final class LoanAccountLockApiResourceSwagger {
+@Data
+@RequiredArgsConstructor
+@AllArgsConstructor
+public class LoanTransactionsQueryDTO {
 
-    private LoanAccountLockApiResourceSwagger() {
-
-    }
-
-    @Schema(description = "GetLoanAccountLockResponse")
-    public static final class GetLoanAccountLockResponse {
-
-        private GetLoanAccountLockResponse() {}
-
-        public int page;
-        public int size;
-        public List<LoanAccountLock> content;
-
-    }
+    private Long loanId;
+    private String externalLoanId;
+    private final Set<LoanTransactionType> excludedTransactionTypes;
 }

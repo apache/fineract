@@ -27,6 +27,8 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -39,6 +41,7 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -51,6 +54,7 @@ import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.api.DateParam;
+import org.apache.fineract.infrastructure.core.api.jersey.Pagination;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.DateFormat;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -60,9 +64,16 @@ import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSer
 import org.apache.fineract.infrastructure.core.service.CommandParameterUtil;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
+import org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentScheduleInstallmentData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionsQueryDTO;
+import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionsQueryDTOMapper;
+import org.apache.fineract.portfolio.loanaccount.data.QueryHelper;
+import org.apache.fineract.portfolio.loanaccount.data.QueryResponseDTO;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
@@ -70,6 +81,8 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanChargePaidByReadSer
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/loans")
@@ -94,9 +107,11 @@ public class LoanTransactionsApiResource {
     private final LoanReadPlatformService loanReadPlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final DefaultToApiJsonSerializer<LoanTransactionData> toApiJsonSerializer;
+    private final DefaultToApiJsonSerializer<QueryResponseDTO<LoanTransactionData>> loanTransactionsResponseDTOSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
     private final LoanChargePaidByReadService loanChargePaidByReadService;
+    private final LoanTransactionRepository loanTransactionRepository;
 
     @GET
     @Path("{loanId}/transactions/template")
@@ -222,6 +237,24 @@ public class LoanTransactionsApiResource {
             @Context final UriInfo uriInfo) {
 
         return retrieveTransaction(null, loanExternalId, null, externalTransactionId, uriInfo);
+    }
+
+    @POST
+    @Path("{loanId}/transactions/query")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve a Transactions", description = "Retrieves transactions of a loan")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.PostLoansLoanIdTransactionsQueryRequest.class)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.GetLoansLoanIdTransactionsResponse.class))) })
+    public QueryResponseDTO<LoanTransactionData> retrieveTransactionsByLoanId(
+            @PathParam("loanId") @Parameter(description = "loanId", required = true) final Long loanId,
+            @QueryParam("page") @Parameter(description = "page") final Integer page,
+            @QueryParam("size") @Parameter(description = "size") final Integer size,
+            @QueryParam("sort") @Parameter(description = "sort") final String sort,
+            @Parameter(hidden = true) @org.springframework.web.bind.annotation.RequestBody final LoanTransactionsApiResourceSwagger.PostLoansLoanIdTransactionsQueryRequest request,
+            @Parameter(hidden = true) @Pagination Pageable pageable, @Context final UriInfo uriInfo) {
+        return retrieveTransactions(loanId, null, request, pageable, uriInfo);
     }
 
     @POST
@@ -437,6 +470,71 @@ public class LoanTransactionsApiResource {
         }
 
         return this.toApiJsonSerializer.serialize(settings, transactionData, this.responseDataParameters);
+    }
+
+    private QueryResponseDTO<LoanTransactionData> retrieveTransactions(final Long loanId, final String loanExternalIdStr,
+            final LoanTransactionsApiResourceSwagger.PostLoansLoanIdTransactionsQueryRequest request, Pageable pageable,
+            final UriInfo uriInfo) {
+
+        final Set<LoanTransactionType> excludedTransactionTypes = transactionTypesFromParam(request.excludedTypes);
+        final Page<LoanTransaction> transactionPage = loanTransactionRepository.findAll((root, query, builder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            final Join<Object, Object> loanjoin = root.join("loan");
+            if (loanId != null) {
+                predicates.add(builder.equal(loanjoin.get("id"), loanId));
+            }
+            if (loanExternalIdStr != null) {
+                predicates.add(builder.equal(loanjoin.get("externalId"), loanExternalIdStr));
+            }
+
+            if (excludedTransactionTypes != null && !excludedTransactionTypes.isEmpty()) {
+                final List<Integer> excludedTransactionTypeValues = excludedTransactionTypes.stream().map(LoanTransactionType::getValue)
+                        .toList();
+                predicates.add(builder.not(root.get("typeOf").in(excludedTransactionTypeValues)));
+            }
+            return builder.and(predicates.toArray(new Predicate[] {}));
+        }, pageable);
+
+        List<LoanTransactionData> transactionDataPage = transactionPage.get().map(x -> x.toData(x.getLoan().getCurrency().toData(), null))
+                .toList();
+
+        QueryResponseDTO<LoanTransactionData> responseDTO = new QueryResponseDTO<>();
+        responseDTO.setPage(transactionPage.getNumber());
+        responseDTO.setSize(transactionPage.getSize());
+        responseDTO.setTotalPages(transactionPage.getTotalPages());
+        responseDTO.setTotalElements(transactionPage.getTotalElements());
+        responseDTO.setContent(transactionDataPage);
+
+        // ----------------------------- Query helper version
+        LoanTransactionsQueryDTO queryDTO = new LoanTransactionsQueryDTO(loanId, loanExternalIdStr, excludedTransactionTypes);
+
+        final Page<LoanTransaction> transactions = QueryHelper.query(loanTransactionRepository, queryDTO,
+                LoanTransactionsQueryDTOMapper.getInstance(), pageable);
+        final int number = transactions.getNumber();
+
+        return responseDTO;
+        // TODO?
+        // final ApiRequestJsonSerializationSettings settings =
+        // this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        // return this.loanTransactionsResponseDTOSerializer.serialize(responseDTO);
+    }
+
+    private Set<LoanTransactionType> transactionTypesFromParam(Collection<String> transactionsParam) {
+        if (transactionsParam == null) {
+            return null;
+        }
+        Set<LoanTransactionType> transactionTypes = new HashSet<>();
+        transactionsParam.forEach(t -> transactionTypes.add(transactionTypeFromParam(t)));
+        return transactionTypes;
+    }
+
+    private LoanTransactionType transactionTypeFromParam(String transactionTypeParam) {
+        return switch (transactionTypeParam) {
+            case DataTableApiConstant.disbursement -> LoanTransactionType.DISBURSEMENT;
+            case DataTableApiConstant.repayment -> LoanTransactionType.REPAYMENT;
+            case DataTableApiConstant.accrual -> LoanTransactionType.ACCRUAL;
+            default -> throw new IllegalStateException("Unexpected value: " + transactionTypeParam);
+        };
     }
 
     private String executeTransaction(final Long loanId, final String loanExternalIdStr, final String commandParam,

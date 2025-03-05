@@ -20,10 +20,11 @@ package org.apache.fineract.cob.service;
 
 import java.util.List;
 import org.apache.fineract.cob.domain.LoanAccountLock;
+import org.springframework.data.domain.Pageable;
 
 public interface LoanAccountLockService {
 
-    List<LoanAccountLock> getLockedLoanAccountByPage(int page, int limit);
+    List<LoanAccountLock> getLockedLoanAccountByPage(Pageable pageable);
 
     boolean isLoanHardLocked(Long loanId);
 

@@ -26,6 +26,8 @@ import org.apache.fineract.cob.domain.LoanAccountLock;
 public class LoanAccountLockResponseDTO {
 
     private int page;
+    private int size;
+    @Deprecated
     private int limit;
     private List<LoanAccountLock> content;
 }

@@ -60,6 +60,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdSummary;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.GetPaymentTypesResponse;
@@ -73,6 +74,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsQueryRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
@@ -1568,11 +1570,31 @@ public class LoanTransactionHelper {
     }
 
     public GetLoansLoanIdResponse getLoanDetails(final Long loanId) {
-        return Calls.ok(FineractClientHelper.getFineractClient().loans.retrieveLoan(loanId, false, "all", null, null));
+        return Calls.ok(FineractClientHelper.getFineractClient().loans.retrieveLoan(loanId, false, "all", null, null, null));
+    }
+
+    public GetLoansLoanIdResponse getLoanDetails(final Long loanId, String excludedTransactions) {
+        return Calls
+                .ok(FineractClientHelper.getFineractClient().loans.retrieveLoan(loanId, false, "all", null, null, excludedTransactions));
     }
 
     public GetLoansLoanIdResponse getLoanDetails(final String loanExternalId) {
-        return Calls.ok(FineractClientHelper.getFineractClient().loans.retrieveLoan1(loanExternalId, false, "all", null, null));
+        return Calls.ok(FineractClientHelper.getFineractClient().loans.retrieveLoan1(loanExternalId, false, "all", null, null, null));
+    }
+
+    public GetLoansLoanIdResponse getLoanDetails(final String loanExternalId, String excludedTransactions) {
+        return Calls.ok(FineractClientHelper.getFineractClient().loans.retrieveLoan1(loanExternalId, false, "all", null, null,
+                excludedTransactions));
+    }
+
+    public GetLoansLoanIdTransactionsResponse getLoanTransactions(final Long loanId, PostLoansLoanIdTransactionsQueryRequest request) {
+        return getLoanTransactions(loanId, request, null, null, null);
+    }
+
+    public GetLoansLoanIdTransactionsResponse getLoanTransactions(final Long loanId, PostLoansLoanIdTransactionsQueryRequest request,
+            Integer page, Integer size, String sort) {
+        return Calls.ok(
+                FineractClientHelper.getFineractClient().loanTransactions.retrieveTransactionsByLoanId(loanId, request, page, size, sort));
     }
 
     // TODO: Rewrite to use fineract-client instead!
