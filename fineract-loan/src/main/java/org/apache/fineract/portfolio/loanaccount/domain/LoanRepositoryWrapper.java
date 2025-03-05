@@ -288,4 +288,8 @@ public class LoanRepositoryWrapper {
     public List<Long> findIdByExternalIds(List<ExternalId> externalIds) {
         return repository.findIdsByExternalIds(externalIds);
     }
+
+    public boolean existsByLoanId(Long loanId) {
+        return repository.existsById(loanId);
+    }
 }

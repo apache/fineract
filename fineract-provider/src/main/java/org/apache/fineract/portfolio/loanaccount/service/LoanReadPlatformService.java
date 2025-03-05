@@ -18,9 +18,11 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
@@ -39,6 +41,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
+import org.springframework.data.domain.Pageable;
 
 public interface LoanReadPlatformService {
 
@@ -50,6 +53,9 @@ public interface LoanReadPlatformService {
             Collection<DisbursementData> disbursementData, boolean isInterestRecalculationEnabled, LoanScheduleType loanScheduleType);
 
     Collection<LoanTransactionData> retrieveLoanTransactions(Long loanId);
+
+    org.springframework.data.domain.Page<LoanTransactionData> retrieveLoanTransactions(@NotNull Long loanId,
+            Set<LoanTransactionType> excludedTransactionTypes, Pageable pageable);
 
     LoanAccountData retrieveTemplateWithClientAndProductDetails(Long clientId, Long productId);
 
@@ -143,4 +149,6 @@ public interface LoanReadPlatformService {
     Long retrieveLoanIdByExternalId(ExternalId externalId);
 
     List<Long> retrieveLoanIdsByExternalIds(List<ExternalId> externalIds);
+
+    boolean existsByLoanId(Long loanId);
 }

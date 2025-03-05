@@ -896,4 +896,8 @@ public final class ErrorMessageHelper {
     public static String wrongExternalID(String actual, String expected) {
         return String.format("Wrong transaction External ID - %nActual value is: %s %nExpected value is: %s", actual, expected);
     }
+
+    public static String wrongValueInTotalPages(Integer actual, Integer expected) {
+        return String.format("Wrong value for Total pages. %nActual value is: %s %nExpected value is: %s", actual, expected);
+    }
 }

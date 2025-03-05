@@ -44,6 +44,8 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -74,6 +76,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTimeline;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.InterestPauseRequestDto;
 import org.apache.fineract.client.models.IsCatchUpRunningResponse;
@@ -3441,5 +3444,164 @@ public class LoanStepDef extends AbstractStepDef {
             }
         }
         return actualValues;
+    }
+
+    @Then("Log out transaction list by loanId, filtered out the following transaction types: {string}")
+    public void transactionsExcluded(String excludedTypes) throws IOException {
+        Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanCreateResponse.body().getLoanId();
+        Response<GetLoansLoanIdTransactionsResponse> transactionsByLoanIdFiltered = getTransactionsByLoanIdFiltered(loanId, excludedTypes);
+        ErrorHelper.checkSuccessfulApiCall(transactionsByLoanIdFiltered);
+
+        List<GetLoansLoanIdTransactionsTransactionIdResponse> transactions = transactionsByLoanIdFiltered.body().getContent();
+        log.info("Filtered transactions: {}", transactions);
+
+        List<String> excludedTypesList = Arrays.stream(excludedTypes.toLowerCase().split(",")).map(String::trim)
+                .collect(Collectors.toList());
+
+        // Verify no transaction with excluded types exists in the filtered list
+        for (GetLoansLoanIdTransactionsTransactionIdResponse transaction : transactions) {
+            String transactionType = transaction.getType().getCode();
+            assertThat(excludedTypesList.contains(transactionType))
+                    .as(String.format("Transaction type '%s' should be excluded but was found in the filtered results", transactionType))
+                    .isFalse();
+        }
+    }
+
+    @Then("Log out transaction list by loanExternalId, filtered out the following transaction types: {string}")
+    public void transactionsExcludedByExternalId(String excludedTypes) throws IOException {
+        Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        String loanExternalId = loanCreateResponse.body().getResourceExternalId();
+        Response<GetLoansLoanIdTransactionsResponse> transactionsByLoanExternalIdFiltered = getTransactionsByLoanIExternalIdFiltered(
+                loanExternalId, excludedTypes);
+        ErrorHelper.checkSuccessfulApiCall(transactionsByLoanExternalIdFiltered);
+
+        List<GetLoansLoanIdTransactionsTransactionIdResponse> transactions = transactionsByLoanExternalIdFiltered.body().getContent();
+        log.info("Filtered transactions: {}", transactions);
+
+        List<String> excludedTypesList = Arrays.stream(excludedTypes.toLowerCase().split(",")).map(String::trim)
+                .collect(Collectors.toList());
+
+        // Verify no transaction with excluded types exists in the filtered list
+        for (GetLoansLoanIdTransactionsTransactionIdResponse transaction : transactions) {
+            String transactionType = transaction.getType().getCode();
+            assertThat(excludedTypesList.contains(transactionType))
+                    .as(String.format("Transaction type '%s' should be excluded but was found in the filtered results", transactionType))
+                    .isFalse();
+        }
+    }
+
+    @Then("Filtered out transactions list contains the the following entries when filtered out by loanId for transaction types: {string}")
+    public void transactionsExcludedCheck(String excludedTypes, DataTable table) throws IOException {
+        Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanCreateResponse.body().getLoanId();
+        String resourceId = String.valueOf(loanId);
+
+        Response<GetLoansLoanIdTransactionsResponse> transactionsByLoanIdFiltered = getTransactionsByLoanIdFiltered(loanId, excludedTypes);
+        ErrorHelper.checkSuccessfulApiCall(transactionsByLoanIdFiltered);
+        List<GetLoansLoanIdTransactionsTransactionIdResponse> transactions = transactionsByLoanIdFiltered.body().getContent();
+        List<List<String>> data = table.asLists();
+        for (int i = 1; i < data.size(); i++) {
+            List<String> expectedValues = data.get(i);
+            String transactionDateExpected = expectedValues.get(0);
+            List<List<String>> actualValuesList = transactions.stream()//
+                    .filter(t -> transactionDateExpected.equals(FORMATTER.format(t.getDate())))//
+                    .map(t -> fetchValuesOfFilteredTransaction(table.row(0), t))//
+                    .collect(Collectors.toList());//
+            boolean containsExpectedValues = actualValuesList.stream()//
+                    .anyMatch(actualValues -> actualValues.equals(expectedValues));//
+            assertThat(containsExpectedValues)
+                    .as(ErrorMessageHelper.wrongValueInLineInTransactionsTab(resourceId, i, actualValuesList, expectedValues)).isTrue();
+        }
+        assertThat(transactions.size())
+                .as(ErrorMessageHelper.nrOfLinesWrongInTransactionsTab(resourceId, transactions.size(), data.size() - 1))
+                .isEqualTo(data.size() - 1);
+    }
+
+    @Then("Filtered out transactions list contains the the following entries when filtered out by loanExternalId for transaction types: {string}")
+    public void transactionsExcludedByLoanExternalIdCheck(String excludedTypes, DataTable table) throws IOException {
+        Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        String loanExternalId = loanCreateResponse.body().getResourceExternalId();
+        long loanId = loanCreateResponse.body().getLoanId();
+        String resourceId = String.valueOf(loanId);
+
+        Response<GetLoansLoanIdTransactionsResponse> transactionsByLoanExternalIdFiltered = getTransactionsByLoanIExternalIdFiltered(
+                loanExternalId, excludedTypes);
+        ErrorHelper.checkSuccessfulApiCall(transactionsByLoanExternalIdFiltered);
+
+        List<GetLoansLoanIdTransactionsTransactionIdResponse> transactions = transactionsByLoanExternalIdFiltered.body().getContent();
+        List<List<String>> data = table.asLists();
+        for (int i = 1; i < data.size(); i++) {
+            List<String> expectedValues = data.get(i);
+            String transactionDateExpected = expectedValues.get(0);
+            List<List<String>> actualValuesList = transactions.stream()//
+                    .filter(t -> transactionDateExpected.equals(FORMATTER.format(t.getDate())))//
+                    .map(t -> fetchValuesOfFilteredTransaction(table.row(0), t))//
+                    .collect(Collectors.toList());//
+            boolean containsExpectedValues = actualValuesList.stream()//
+                    .anyMatch(actualValues -> actualValues.equals(expectedValues));//
+            assertThat(containsExpectedValues)
+                    .as(ErrorMessageHelper.wrongValueInLineInTransactionsTab(resourceId, i, actualValuesList, expectedValues)).isTrue();
+        }
+        assertThat(transactions.size())
+                .as(ErrorMessageHelper.nrOfLinesWrongInTransactionsTab(resourceId, transactions.size(), data.size() - 1))
+                .isEqualTo(data.size() - 1);
+    }
+
+    private Response<GetLoansLoanIdTransactionsResponse> getTransactionsByLoanIdFiltered(Long loanId, String excludedTypes)
+            throws IOException {
+        return loanTransactionsApi.retrieveTransactionsByLoanId(loanId, parseExcludedTypes(excludedTypes), null, null, null).execute();
+    }
+
+    private Response<GetLoansLoanIdTransactionsResponse> getTransactionsByLoanIExternalIdFiltered(String loanExternalId,
+            String excludedTypes) throws IOException {
+
+        return loanTransactionsApi.retrieveTransactionsByExternalLoanId(loanExternalId, parseExcludedTypes(excludedTypes), null, null, null)
+                .execute();
+    }
+
+    public static List<org.apache.fineract.client.models.TransactionType> parseExcludedTypes(String excludedTypes) {
+        if (excludedTypes == null || excludedTypes.trim().isEmpty()) {
+            return Collections.emptyList();
+        } else {
+            return Arrays.stream(excludedTypes.split(",")).map(String::trim).map(String::toUpperCase)
+                    .map(org.apache.fineract.client.models.TransactionType::valueOf).collect(Collectors.toList());
+        }
+    }
+
+    private List<String> fetchValuesOfFilteredTransaction(List<String> header, GetLoansLoanIdTransactionsTransactionIdResponse t) {
+        List<String> actualValues = new ArrayList<>();
+        for (String headerName : header) {
+            switch (headerName) {
+                case "Transaction date" -> actualValues.add(t.getDate() == null ? null : FORMATTER.format(t.getDate()));
+                case "Transaction Type" -> actualValues.add(t.getType().getCode() == null ? null : t.getType().getCode().substring(20));
+                case "Amount" -> actualValues.add(t.getAmount() == null ? null : String.valueOf(t.getAmount()));
+                case "Principal" -> actualValues.add(t.getPrincipalPortion() == null ? null : String.valueOf(t.getPrincipalPortion()));
+                case "Interest" -> actualValues.add(t.getInterestPortion() == null ? null : String.valueOf(t.getInterestPortion()));
+                case "Fees" -> actualValues.add(t.getFeeChargesPortion() == null ? null : String.valueOf(t.getFeeChargesPortion()));
+                case "Penalties" ->
+                    actualValues.add(t.getPenaltyChargesPortion() == null ? null : String.valueOf(t.getPenaltyChargesPortion()));
+                case "Loan Balance" ->
+                    actualValues.add(t.getOutstandingLoanBalance() == null ? null : String.valueOf(t.getOutstandingLoanBalance()));
+                case "Overpayment" ->
+                    actualValues.add(t.getOverpaymentPortion() == null ? null : String.valueOf(t.getOverpaymentPortion()));
+                default -> throw new IllegalStateException(String.format("Header name %s cannot be found", headerName));
+            }
+        }
+        return actualValues;
+    }
+
+    @Then("Filtered out transactions list has {int} pages in case of size set to {int} and transactions are filtered out for transaction types: {string}")
+    public void checkPagination(Integer totalPagesExpected, Integer size, String excludedTypes) throws IOException {
+        Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanCreateResponse.body().getLoanId();
+
+        Response<GetLoansLoanIdTransactionsResponse> transactionsByLoanIdFiltered = loanTransactionsApi
+                .retrieveTransactionsByLoanId(loanId, parseExcludedTypes(excludedTypes), null, size, null).execute();
+
+        Integer totalPagesActual = transactionsByLoanIdFiltered.body().getTotalPages();
+
+        assertThat(totalPagesActual).as(ErrorMessageHelper.wrongValueInTotalPages(totalPagesActual, totalPagesExpected))
+                .isEqualTo(totalPagesExpected);
     }
 }

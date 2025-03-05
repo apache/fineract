@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.api;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.Set;
+import org.springframework.data.domain.Page;
 
 /**
  * Created by Chirag Gupta on 12/30/17.
@@ -273,6 +274,12 @@ final class LoanTransactionsApiResourceSwagger {
             @Schema(example = "true")
             public Boolean isSystemDefined;
         }
+    }
+
+    @Schema(description = "GetLoansLoanIdTransactionsResponse")
+    public abstract static class GetLoansLoanIdTransactionsResponse implements Page<GetLoansLoanIdTransactionsTransactionIdResponse> {
+
+        private GetLoansLoanIdTransactionsResponse() {}
     }
 
     @Schema(description = "PostLoansLoanIdTransactionsRequest")

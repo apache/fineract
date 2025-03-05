@@ -21,6 +21,8 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import static java.lang.Boolean.TRUE;
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.interestType;
 
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -120,6 +122,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleP
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
+import org.apache.fineract.portfolio.loanaccount.mapper.LoanTransactionMapper;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanForeclosureValidator;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrategyData;
@@ -134,6 +137,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
@@ -174,6 +178,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     private final LoanChargePaidByReadService loanChargePaidByReadService;
     private final LoanTransactionRelationReadService loanTransactionRelationReadService;
     private final LoanForeclosureValidator loanForeclosureValidator;
+    private final LoanTransactionMapper loanTransactionMapper;
 
     @Override
     public LoanAccountData retrieveOne(final Long loanId) {
@@ -596,6 +601,27 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         } catch (final EmptyResultDataAccessException e) {
             throw new LoanTransactionNotFoundException(transactionId, e);
         }
+    }
+
+    @Override
+    public org.springframework.data.domain.Page<LoanTransactionData> retrieveLoanTransactions(
+            @jakarta.validation.constraints.NotNull Long loanId, Set<LoanTransactionType> excludedTransactionTypes, Pageable pageable) {
+        final org.springframework.data.domain.Page<LoanTransaction> transactionPage = loanTransactionRepository
+                .findAll((root, query, builder) -> {
+                    List<Predicate> predicates = new ArrayList<>();
+
+                    final Join<Object, Object> loanjoin = root.join("loan");
+                    predicates.add(builder.equal(loanjoin.get("id"), loanId));
+
+                    if (excludedTransactionTypes != null && !excludedTransactionTypes.isEmpty()) {
+                        final List<Integer> excludedTransactionTypeValues = excludedTransactionTypes.stream()
+                                .map(LoanTransactionType::getValue).toList();
+                        predicates.add(builder.not(root.get("typeOf").in(excludedTransactionTypeValues)));
+                    }
+                    return builder.and(predicates.toArray(new Predicate[] {}));
+                }, pageable);
+
+        return transactionPage.map(loanTransactionMapper::mapLoanTransaction);
     }
 
     @Override
@@ -2182,4 +2208,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         return loanRepositoryWrapper.findIdByExternalIds(externalIds);
     }
 
+    @Override
+    public boolean existsByLoanId(Long loanId) {
+        return loanRepositoryWrapper.existsByLoanId(loanId);
+    }
 }

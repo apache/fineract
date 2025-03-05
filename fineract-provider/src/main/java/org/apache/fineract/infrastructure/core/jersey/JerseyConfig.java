@@ -20,11 +20,15 @@
 package org.apache.fineract.infrastructure.core.jersey;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.inject.Singleton;
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.ext.Provider;
+import org.apache.fineract.infrastructure.core.api.jersey.PageableParamProvider;
+import org.glassfish.jersey.internal.inject.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
+import org.glassfish.jersey.server.spi.internal.ValueParamProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
@@ -35,6 +39,13 @@ public class JerseyConfig extends ResourceConfig {
 
     JerseyConfig() {
         register(org.glassfish.jersey.media.multipart.MultiPartFeature.class);
+        register(new AbstractBinder() {
+
+            @Override
+            protected void configure() {
+                bind(PageableParamProvider.class).to(ValueParamProvider.class).in(Singleton.class);
+            }
+        });
         property(ServerProperties.WADL_FEATURE_DISABLE, true);
     }
 
