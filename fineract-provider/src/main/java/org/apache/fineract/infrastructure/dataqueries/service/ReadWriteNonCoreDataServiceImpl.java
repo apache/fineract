@@ -106,8 +106,11 @@ import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableEntryRequiredException;
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableNotFoundException;
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableSystemErrorException;
+import org.apache.fineract.infrastructure.event.business.domain.datatable.DatatableEntryCreatedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.datatable.DatatableEntryDeletedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.datatable.DatatableEntryUpdatedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.infrastructure.security.service.SqlInjectionPreventerService;
 import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.portfolio.search.data.AdvancedQueryData;
@@ -156,10 +159,10 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     private final DataTableValidator dataTableValidator;
     private final ColumnValidator columnValidator;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-    private final SqlInjectionPreventerService preventSqlInjectionService;
     private final DatatableKeywordGenerator datatableKeywordGenerator;
     private final SqlValidator sqlValidator;
     private final SearchUtil searchUtil;
+    private final BusinessEventNotifierService businessEventNotifierService;
 
     @Override
     public List<DatatableData> retrieveDatatableNames(final String appTable) {
@@ -1309,6 +1312,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 List.of(entityTable.getForeignKeyColumnNameOnDatatable(), CREATEDAT_FIELD_NAME, UPDATEDAT_FIELD_NAME));
         LocalDateTime auditDateTime = DateUtils.getAuditLocalDateTime();
         ArrayList<Object> params = new ArrayList<>(List.of(appTableId, auditDateTime, auditDateTime));
+
+        final Map<String, Object> columnValues = new HashMap<>();
+
         for (Map.Entry<String, String> entry : dataParams.entrySet()) {
             if (isTechnicalParam(entry.getKey())) {
                 continue;
@@ -1318,8 +1324,11 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 continue;
             }
             insertColumns.add(columnHeader.getColumnName());
-            params.add(searchUtil.parseJdbcColumnValue(columnHeader, entry.getValue(), dateFormat, dateTimeFormat, locale, false,
-                    sqlGenerator));
+            final Object columnValue = searchUtil.parseJdbcColumnValue(columnHeader, entry.getValue(), dateFormat, dateTimeFormat, locale,
+                    false, sqlGenerator);
+            params.add(columnValue);
+
+            columnValues.put(columnHeader.getColumnName(), columnValue);
         }
         if (addScore) {
             List<Object> scoreIds = params.stream().filter(e -> e != null && !String.valueOf(e).isBlank()).toList();
@@ -1335,6 +1344,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             }
             insertColumns.add("score");
             params.add(scoreValue);
+
+            columnValues.put("score", scoreValue);
         }
 
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
@@ -1353,6 +1364,12 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             if (isMultirowDatatable(columnHeaders)) {
                 resourceId = sqlGenerator.fetchPK(keyHolder);
             }
+
+            columnValues.put(entityTable.getForeignKeyColumnNameOnDatatable(), appTableId);
+
+            businessEventNotifierService.notifyPostBusinessEvent(
+                    new DatatableEntryCreatedBusinessEvent(columnValues, entityTable, appTableId, dataTableName, resourceId));
+
             return CommandProcessingResult.fromCommandProcessingResult(commandProcessingResult, resourceId);
         } catch (final DataAccessException dve) {
             handleDataIntegrityIssues(dataTableName, appTableId, dve.getMostSpecificCause(), dve);
@@ -1433,6 +1450,13 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         ArrayList<String> updateColumns = new ArrayList<>(List.of(UPDATEDAT_FIELD_NAME));
         ArrayList<Object> params = new ArrayList<>(List.of(DateUtils.getAuditLocalDateTime()));
         final HashMap<String, Object> changes = new HashMap<>();
+
+        final Map<String, Object> columnValues = new HashMap<>();
+        for (int i = 0; i < columnHeaders.size(); i++) {
+            final ResultsetColumnHeaderData header = columnHeaders.get(i);
+            columnValues.put(header.getColumnName(), existingValues.get(i));
+        }
+
         for (Map.Entry<String, String> entry : dataParams.entrySet()) {
             if (isTechnicalParam(entry.getKey())) {
                 continue;
@@ -1453,6 +1477,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             updateColumns.add(columnName);
             params.add(columnHeader.getColumnType().toJdbcValue(dialect, columnValue, false));
             changes.put(columnName, columnValue);
+
+            columnValues.put(columnName, columnValue);
         }
         Long primaryKey = datatableId == null ? appTableId : datatableId;
         if (!updateColumns.isEmpty()) {
@@ -1464,6 +1490,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             if (updated != 1) {
                 throw new PlatformDataIntegrityException("error.msg.invalid.update", "Expected one updated row.");
             }
+
+            businessEventNotifierService.notifyPostBusinessEvent(
+                    new DatatableEntryUpdatedBusinessEvent(columnValues, entityTable, appTableId, dataTableName, primaryKey));
         } else {
             log.debug("No change on update {}", dataTableName);
         }
@@ -1513,10 +1542,41 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             whereColumn = TABLE_FIELD_ID;
             whereValue = datatableId;
         }
+
+        final Map<String, Object> dataBeforeDeletion = new HashMap<>();
+        if (datatableId != null) {
+            // for one-to-many datatable
+            final GenericResultsetData existingData = retrieveDataTableGenericResultSet(entityTable, dataTableName, appTableId, null,
+                    datatableId);
+            if (!existingData.hasNoEntries()) {
+                List<ResultsetColumnHeaderData> columnHeaders = existingData.getColumnHeaders();
+                final List<Object> rowValues = existingData.getData().get(0).getRow();
+
+                for (int i = 0; i < columnHeaders.size(); i++) {
+                    dataBeforeDeletion.put(columnHeaders.get(i).getColumnName(), rowValues.get(i));
+                }
+            }
+        } else {
+            // for one-to-one datatable
+            final GenericResultsetData existingData = retrieveDataTableGenericResultSet(entityTable, dataTableName, appTableId, null, null);
+            if (!existingData.hasNoEntries()) {
+                final List<ResultsetColumnHeaderData> columnHeaders = existingData.getColumnHeaders();
+                final List<Object> rowValues = existingData.getData().get(0).getRow();
+
+                for (int i = 0; i < columnHeaders.size(); i++) {
+                    dataBeforeDeletion.put(columnHeaders.get(i).getColumnName(), rowValues.get(i));
+                }
+            }
+        }
+
         String sql = "DELETE FROM " + sqlGenerator.escape(dataTableName) + " WHERE " + sqlGenerator.escape(whereColumn) + " = "
                 + whereValue;
 
         this.jdbcTemplate.update(sql); // NOSONAR
+
+        businessEventNotifierService.notifyPostBusinessEvent(
+                new DatatableEntryDeletedBusinessEvent(dataBeforeDeletion, entityTable, appTableId, dataTableName, whereValue));
+
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(whereValue) //
