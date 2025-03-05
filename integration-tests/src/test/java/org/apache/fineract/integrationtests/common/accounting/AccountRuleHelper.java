@@ -24,7 +24,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import org.apache.fineract.client.models.GetAccountRulesResponse;
+import org.apache.fineract.client.models.AccountingRuleData;
 import org.apache.fineract.client.models.PostAccountingRulesResponse;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -51,9 +51,9 @@ public class AccountRuleHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public ArrayList<GetAccountRulesResponse> getAccountingRules() {
+    public ArrayList<AccountingRuleData> getAccountingRules() {
         final String response = Utils.performServerGet(this.requestSpec, this.responseSpec, ACCOUNTINGRULES_URL);
-        Type accountRuleListType = new TypeToken<ArrayList<GetAccountRulesResponse>>() {}.getType();
+        Type accountRuleListType = new TypeToken<ArrayList<AccountingRuleData>>() {}.getType();
         return GSON.fromJson(response, accountRuleListType);
     }
 
