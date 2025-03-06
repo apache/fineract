@@ -42,10 +42,8 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
-import org.apache.fineract.batch.serialization.BatchRequestJsonHelper;
 import org.apache.fineract.batch.service.BatchApiService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
-import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.exception.InvalidInstanceTypeMethodException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.stereotype.Component;
@@ -76,15 +74,13 @@ import org.springframework.stereotype.Component;
 public class BatchApiResource {
 
     private final PlatformSecurityContext context;
-    private final ToApiJsonSerializer<BatchResponse> toApiJsonSerializer;
     private final BatchApiService service;
-    private final BatchRequestJsonHelper batchRequestJsonHelper;
     private final FineractProperties fineractProperties;
 
     /**
      * Rest assured POST method to get {@link BatchRequest} and returns back the consolidated {@link BatchResponse}
      *
-     * @param jsonRequestString
+     * @param requestList
      * @param enclosingTransaction
      * @param uriInfo
      * @return serialized JSON
@@ -98,30 +94,16 @@ public class BatchApiResource {
     @RequestBody(required = true, content = @Content(array = @ArraySchema(schema = @Schema(implementation = BatchRequest.class, description = "request body"))))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Success", content = @Content(array = @ArraySchema(schema = @Schema(implementation = BatchResponse.class)))) })
-    public String handleBatchRequests(
+    public List<BatchResponse> handleBatchRequests(
             @DefaultValue("false") @QueryParam("enclosingTransaction") @Parameter(description = "enclosingTransaction", required = false) final boolean enclosingTransaction,
-            @Parameter(hidden = true) final String jsonRequestString, @Context UriInfo uriInfo) {
-
-        // Handles user authentication
+            @Parameter(hidden = true) List<BatchRequest> requestList, @Context UriInfo uriInfo) {
         this.context.authenticatedUser();
-
         // Converts request array into BatchRequest List
-        final List<BatchRequest> requestList = this.batchRequestJsonHelper.extractList(jsonRequestString);
-
         validateRequestMethodsAllowedOnInstanceType(requestList);
-
-        // Gets back the consolidated BatchResponse from BatchApiservice
-        List<BatchResponse> result;
-
         // If the request is to be handled as a Transaction. All requests will
         // be rolled back on error
-        if (enclosingTransaction) {
-            result = service.handleBatchRequestsWithEnclosingTransaction(requestList, uriInfo);
-        } else {
-            result = service.handleBatchRequestsWithoutEnclosingTransaction(requestList, uriInfo);
-        }
-
-        return this.toApiJsonSerializer.serialize(result);
+        return enclosingTransaction ? service.handleBatchRequestsWithEnclosingTransaction(requestList, uriInfo)
+                : service.handleBatchRequestsWithoutEnclosingTransaction(requestList, uriInfo);
 
     }
 
