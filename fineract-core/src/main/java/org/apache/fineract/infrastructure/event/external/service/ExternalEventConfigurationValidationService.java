@@ -68,9 +68,6 @@ public class ExternalEventConfigurationValidationService implements Initializing
 
     private void validateEventConfigurationForIndividualTenant(FineractPlatformTenant tenant, List<String> eventClasses)
             throws ExternalEventConfigurationNotFoundException {
-        for (String eventClass : eventClasses) {
-            log.info("EVENTO "+eventClass);
-        }
         log.info("Validating external event configuration for {}", tenant.getTenantIdentifier());
         List<String> eventConfigurations = getExternalEventConfigurationsForTenant(tenant);
         if (log.isDebugEnabled()) {
@@ -100,9 +97,9 @@ public class ExternalEventConfigurationValidationService implements Initializing
 
     private List<String> getAllEventClasses() {
         List<String> sourcePackages = externalEventSourceService.getSourcePackages();
-        //if (log.isDebugEnabled()) {
-        log.debug("Packages {}", sourcePackages);
-        //}
+        if (log.isDebugEnabled()) {
+            log.debug("Packages {}", sourcePackages);
+        }
         String[] sourcePackagesForScan = new String[sourcePackages.size()];
         try (ScanResult scanResult = new ClassGraph().enableAllInfo().acceptPackages(sourcePackages.toArray(sourcePackagesForScan))
                 .scan()) {
