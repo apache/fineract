@@ -207,14 +207,21 @@ public class LoanAccrualActivityProcessingServiceImpl implements LoanAccrualActi
             newLoanTransaction.copyLoanTransactionRelations(loanTransaction.getLoanTransactionRelations());
             newLoanTransaction.getLoanTransactionRelations().add(LoanTransactionRelation.linkToTransaction(newLoanTransaction,
                     loanTransaction, LoanTransactionRelationTypeEnum.REPLAYED));
+
+            newLoanTransaction.updateExternalId(loanTransaction.getExternalId());
+            loanTransaction.reverse();
+            loanTransaction.updateExternalId(null);
+            loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(loanTransaction);
+
             loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(newLoanTransaction);
             loan.addLoanTransaction(newLoanTransaction);
 
             LoanAdjustTransactionBusinessEvent.Data data = new LoanAdjustTransactionBusinessEvent.Data(loanTransaction);
             data.setNewTransactionDetail(newLoanTransaction);
             businessEventNotifierService.notifyPostBusinessEvent(new LoanAdjustTransactionBusinessEvent(data));
+        } else {
+            reverseAccrualActivityTransaction(loanTransaction);
         }
-        reverseAccrualActivityTransaction(loanTransaction);
         return newLoanTransaction;
     }
 

@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.gson.Gson;
@@ -49,6 +50,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -124,6 +126,7 @@ import org.apache.fineract.test.messaging.event.loan.LoanRescheduledDueAdjustSch
 import org.apache.fineract.test.messaging.event.loan.LoanStatusChangedEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanAccrualAdjustmentTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanAccrualTransactionCreatedBusinessEvent;
+import org.apache.fineract.test.messaging.event.loan.transaction.LoanAdjustTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanChargeAdjustmentPostBusinessEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanChargeOffEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanChargeOffUndoEvent;
@@ -2382,6 +2385,73 @@ public class LoanStepDef extends AbstractStepDef {
 
         assertThat(transactions).as("Unexpected Accrual activity transaction found on %s", date)
                 .noneMatch(t -> date.equals(FORMATTER.format(t.getDate())) && "Accrual Activity".equals(t.getType().getValue()));
+    }
+
+    @Then("LoanAdjustTransactionBusinessEvent is raised for the origin of Accrual Activity on {string} but not raised for the replayed one")
+    public void checkLoanAdjustTransactionBusinessEvent(String date) throws IOException {
+        Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanCreateResponse.body().getLoanId();
+
+        Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.body().getTransactions();
+
+        GetLoansLoanIdTransactions loadTransaction = transactions.stream()
+                .filter(t -> date.equals(FORMATTER.format(t.getDate())) && "Accrual Activity".equals(t.getType().getValue())).findFirst()
+                .orElseThrow(() -> new IllegalStateException(String.format("No Accrual Activity transaction found on %s", date)));
+        Long replayedTransactionId = loadTransaction.getId();
+
+        Set<GetLoansLoanIdLoanTransactionRelation> transactionRelations = loadTransaction.getTransactionRelations();
+        Long originalTransactionId = transactionRelations.stream().map(GetLoansLoanIdLoanTransactionRelation::getToLoanTransaction)
+                .filter(Objects::nonNull).findFirst().get();
+
+        eventAssertion.assertEventRaised(LoanAdjustTransactionBusinessEvent.class, originalTransactionId);
+        eventAssertion.assertEventNotRaised(LoanAdjustTransactionBusinessEvent.class, replayedTransactionId);
+    }
+
+    @Then("LoanAdjustTransactionBusinessEvent is not raised on {string}")
+    public void checkLoanAdjustTransactionBusinessEventNotCreated(String date) throws IOException {
+        Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanCreateResponse.body().getLoanId();
+
+        Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.body().getTransactions();
+
+        assertThat(transactions).as("Unexpected Accrual Adjustment transaction found on %s", date)
+                .noneMatch(t -> date.equals(FORMATTER.format(t.getDate())) && "Accrual Adjustment".equals(t.getType().getValue()));
+    }
+
+    @Then("External ID for the replayed Accrual Activity on {string} is present but is null for the original transaction")
+    public void checkExternalIdForReplayedAccrualActivity(String date) throws IOException {
+        Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanCreateResponse.body().getLoanId();
+
+        Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.body().getTransactions();
+
+        GetLoansLoanIdTransactions loadTransaction = transactions.stream()
+                .filter(t -> date.equals(FORMATTER.format(t.getDate())) && "Accrual Activity".equals(t.getType().getValue())).findFirst()
+                .orElseThrow(() -> new IllegalStateException(String.format("No Accrual Activity transaction found on %s", date)));
+        Long replayedTransactionId = loadTransaction.getId();
+
+        Set<GetLoansLoanIdLoanTransactionRelation> transactionRelations = loadTransaction.getTransactionRelations();
+        Long originalTransactionId = transactionRelations.stream().map(GetLoansLoanIdLoanTransactionRelation::getToLoanTransaction)
+                .filter(Objects::nonNull).findFirst().get();
+
+        Response<GetLoansLoanIdTransactionsTransactionIdResponse> replayedTransaction = loanTransactionsApi
+                .retrieveTransaction(loanId, replayedTransactionId, "").execute();
+        assertNotNull(String.format("Replayed transaction external id is null %n%s", replayedTransaction.body()),
+                replayedTransaction.body().getExternalId());
+
+        Response<GetLoansLoanIdTransactionsTransactionIdResponse> originalTransaction = loanTransactionsApi
+                .retrieveTransaction(loanId, originalTransactionId, "").execute();
+        assertNull(String.format("Original transaction external id is not null %n%s", originalTransaction.body()),
+                originalTransaction.body().getExternalId());
     }
 
     @Then("LoanTransactionAccrualActivityPostBusinessEvent is raised on {string}")
