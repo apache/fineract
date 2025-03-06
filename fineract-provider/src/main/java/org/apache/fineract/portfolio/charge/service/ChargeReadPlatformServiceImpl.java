@@ -71,7 +71,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
     @Override
     @Cacheable(value = "charges", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('ch')")
-    public Collection<ChargeData> retrieveAllCharges() {
+    public List<ChargeData> retrieveAllCharges() {
         final ChargeMapper rm = new ChargeMapper();
 
         String sql = "select " + rm.chargeSchema() + " where c.is_deleted=false ";
@@ -84,7 +84,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     }
 
     @Override
-    public Collection<ChargeData> retrieveAllChargesForCurrency(String currencyCode) {
+    public List<ChargeData> retrieveAllChargesForCurrency(String currencyCode) {
         final ChargeMapper rm = new ChargeMapper();
 
         String sql = "select " + rm.chargeSchema() + " where c.is_deleted=false and c.currency_code= ? ";
@@ -155,7 +155,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     }
 
     @Override
-    public Collection<ChargeData> retrieveLoanProductCharges(final Long loanProductId) {
+    public List<ChargeData> retrieveLoanProductCharges(final Long loanProductId) {
         final ChargeMapper rm = new ChargeMapper();
 
         String sql = "select " + rm.loanProductChargeSchema() + " where c.is_deleted=false and c.is_active=true and plc.product_loan_id=? ";
@@ -166,7 +166,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     }
 
     @Override
-    public Collection<ChargeData> retrieveLoanProductCharges(final Long loanProductId, final ChargeTimeType chargeTime) {
+    public List<ChargeData> retrieveLoanProductCharges(final Long loanProductId, final ChargeTimeType chargeTime) {
 
         final ChargeMapper rm = new ChargeMapper();
 
@@ -178,7 +178,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     }
 
     @Override
-    public Collection<ChargeData> retrieveLoanApplicableFees() {
+    public List<ChargeData> retrieveLoanApplicableFees() {
         final ChargeMapper rm = new ChargeMapper();
         Object[] params = new Object[] { ChargeAppliesTo.LOAN.getValue() };
         String sql = "select " + rm.chargeSchema()
@@ -225,7 +225,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     }
 
     @Override
-    public Collection<ChargeData> retrieveLoanProductApplicableCharges(final Long loanProductId, ChargeTimeType[] excludeChargeTimes) {
+    public List<ChargeData> retrieveLoanProductApplicableCharges(final Long loanProductId, ChargeTimeType[] excludeChargeTimes) {
         final ChargeMapper rm = new ChargeMapper();
         StringBuilder excludeClause = new StringBuilder("");
         Map<String, Object> paramMap = new HashMap<>();
@@ -242,7 +242,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     }
 
     @Override
-    public Collection<ChargeData> retrieveLoanApplicablePenalties() {
+    public List<ChargeData> retrieveLoanApplicablePenalties() {
         final ChargeMapper rm = new ChargeMapper();
 
         String sql = "select " + rm.chargeSchema()
@@ -386,7 +386,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     }
 
     @Override
-    public Collection<ChargeData> retrieveSavingsProductApplicableCharges(final boolean feeChargesOnly) {
+    public List<ChargeData> retrieveSavingsProductApplicableCharges(final boolean feeChargesOnly) {
         final ChargeMapper rm = new ChargeMapper();
 
         String sql = "select " + rm.chargeSchema() + " where c.is_deleted=false and c.is_active=true and c.charge_applies_to_enum=? ";
@@ -401,7 +401,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     }
 
     @Override
-    public Collection<ChargeData> retrieveSavingsApplicablePenalties() {
+    public List<ChargeData> retrieveSavingsApplicablePenalties() {
         final ChargeMapper rm = new ChargeMapper();
 
         String sql = "select " + rm.chargeSchema()
@@ -412,7 +412,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     }
 
     @Override
-    public Collection<ChargeData> retrieveSavingsProductCharges(final Long savingsProductId) {
+    public List<ChargeData> retrieveSavingsProductCharges(final Long savingsProductId) {
         final ChargeMapper rm = new ChargeMapper();
 
         String sql = "select " + rm.savingsProductChargeSchema()
@@ -423,7 +423,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     }
 
     @Override
-    public Collection<ChargeData> retrieveShareProductCharges(final Long shareProductId) {
+    public List<ChargeData> retrieveShareProductCharges(final Long shareProductId) {
         final ChargeMapper rm = new ChargeMapper();
 
         String sql = "select " + rm.shareProductChargeSchema() + " where c.is_deleted=false and c.is_active=true and mspc.product_id=? ";
@@ -433,7 +433,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     }
 
     @Override
-    public Collection<ChargeData> retrieveSavingsAccountApplicableCharges(Long savingsAccountId) {
+    public List<ChargeData> retrieveSavingsAccountApplicableCharges(Long savingsAccountId) {
 
         final ChargeMapper rm = new ChargeMapper();
 
@@ -446,7 +446,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     }
 
     @Override
-    public Collection<ChargeData> retrieveAllChargesApplicableToClients() {
+    public List<ChargeData> retrieveAllChargesApplicableToClients() {
         final ChargeMapper rm = new ChargeMapper();
         String sql = "select " + rm.chargeSchema() + " where c.is_deleted=false and c.is_active=true and c.charge_applies_to_enum=? ";
         sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
@@ -456,7 +456,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     }
 
     @Override
-    public Collection<ChargeData> retrieveSharesApplicableCharges() {
+    public List<ChargeData> retrieveSharesApplicableCharges() {
         final ChargeMapper rm = new ChargeMapper();
         String sql = "select " + rm.chargeSchema() + " where c.is_deleted=false and c.is_active=true and c.charge_applies_to_enum=? ";
         sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();

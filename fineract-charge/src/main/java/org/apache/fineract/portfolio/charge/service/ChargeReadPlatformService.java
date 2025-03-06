@@ -18,16 +18,15 @@
  */
 package org.apache.fineract.portfolio.charge.service;
 
-import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 
 public interface ChargeReadPlatformService {
 
-    Collection<ChargeData> retrieveAllCharges();
+    List<ChargeData> retrieveAllCharges();
 
-    Collection<ChargeData> retrieveAllChargesForCurrency(String currencyCode);
+    List<ChargeData> retrieveAllChargesForCurrency(String currencyCode);
 
     ChargeData retrieveCharge(Long chargeId);
 
@@ -38,14 +37,14 @@ public interface ChargeReadPlatformService {
      *
      * @return
      */
-    Collection<ChargeData> retrieveAllChargesApplicableToClients();
+    List<ChargeData> retrieveAllChargesApplicableToClients();
 
     /**
      * Returns all Fees (excluding penalties) applicable for loans
      *
      * @return
      */
-    Collection<ChargeData> retrieveLoanApplicableFees();
+    List<ChargeData> retrieveLoanApplicableFees();
 
     /**
      * Returns all charges applicable for a given loan account
@@ -63,14 +62,14 @@ public interface ChargeReadPlatformService {
      *            Excludes Given List of Charge Types from the response
      * @return
      */
-    Collection<ChargeData> retrieveLoanProductApplicableCharges(Long loanProductId, ChargeTimeType[] excludeChargeTimes);
+    List<ChargeData> retrieveLoanProductApplicableCharges(Long loanProductId, ChargeTimeType[] excludeChargeTimes);
 
     /**
      * Returns all Penalties applicable for loans
      *
      * @return
      */
-    Collection<ChargeData> retrieveLoanApplicablePenalties();
+    List<ChargeData> retrieveLoanApplicablePenalties();
 
     /**
      * Returns all Charges associated with a given Loan Product
@@ -78,7 +77,7 @@ public interface ChargeReadPlatformService {
      * @param loanProductId
      * @return
      */
-    Collection<ChargeData> retrieveLoanProductCharges(Long loanProductId);
+    List<ChargeData> retrieveLoanProductCharges(Long loanProductId);
 
     /**
      * Returns all charges applicable for a given loan product
@@ -88,7 +87,7 @@ public interface ChargeReadPlatformService {
      *            Filters based on the type of the charge to be returned
      * @return
      */
-    Collection<ChargeData> retrieveLoanProductCharges(Long loanProductId, ChargeTimeType chargeTime);
+    List<ChargeData> retrieveLoanProductCharges(Long loanProductId, ChargeTimeType chargeTime);
 
     /**
      * Returns all charges applicable for savings
@@ -96,14 +95,14 @@ public interface ChargeReadPlatformService {
      * @param feeChargesOnly
      * @return
      */
-    Collection<ChargeData> retrieveSavingsProductApplicableCharges(boolean feeChargesOnly);
+    List<ChargeData> retrieveSavingsProductApplicableCharges(boolean feeChargesOnly);
 
     /**
      * Returns all penalties applicable for savings
      *
      * @return
      */
-    Collection<ChargeData> retrieveSavingsApplicablePenalties();
+    List<ChargeData> retrieveSavingsApplicablePenalties();
 
     /**
      * Returns all charges applicable for a given savings product
@@ -111,15 +110,15 @@ public interface ChargeReadPlatformService {
      * @param savingsProductId
      * @return
      */
-    Collection<ChargeData> retrieveSavingsProductCharges(Long savingsProductId);
+    List<ChargeData> retrieveSavingsProductCharges(Long savingsProductId);
 
     /** Retrieve savings account charges **/
-    Collection<ChargeData> retrieveSavingsAccountApplicableCharges(Long savingsId);
+    List<ChargeData> retrieveSavingsAccountApplicableCharges(Long savingsId);
 
     /**
      * Returns charge definitions which are applicable for shares
      */
-    Collection<ChargeData> retrieveSharesApplicableCharges();
+    List<ChargeData> retrieveSharesApplicableCharges();
 
-    Collection<ChargeData> retrieveShareProductCharges(Long shareProductId);
+    List<ChargeData> retrieveShareProductCharges(Long shareProductId);
 }

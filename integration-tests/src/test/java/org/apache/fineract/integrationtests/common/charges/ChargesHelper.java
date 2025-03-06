@@ -23,7 +23,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
-import org.apache.fineract.client.models.PostChargesRequest;
+import org.apache.fineract.client.models.ChargeRequest;
 import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.JSON;
@@ -788,7 +788,7 @@ public final class ChargesHelper {
 
     }
 
-    public PostChargesResponse createCharges(PostChargesRequest request) {
+    public PostChargesResponse createCharges(ChargeRequest request) {
         return Calls.ok(FineractClientHelper.getFineractClient().charges.createCharge(request));
     }
 }
