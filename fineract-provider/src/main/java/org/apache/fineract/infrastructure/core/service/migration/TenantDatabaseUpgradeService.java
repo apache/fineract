@@ -148,16 +148,23 @@ public class TenantDatabaseUpgradeService implements InitializingBean {
             }
         }
 
+        List<Exception> exceptions = new ArrayList<>();
         try {
             for (Future<String> future : futures) {
                 future.get();
             }
         } catch (InterruptedException | ExecutionException exception) {
-            throw new RuntimeException(exception);
+            exceptions.add(exception);
         } finally {
             tenantUpgradeThreadPoolTaskExecutor.shutdown();
         }
-        log.info("Tenant upgrades have finished");
+
+        if (exceptions.isEmpty()) {
+            log.info("Tenant upgrades have successfully finished");
+        } else {
+            exceptions.forEach(e -> log.error("Exception: ", e));
+            throw new RuntimeException("Tenant upgrades had exceptions");
+        }
     }
 
     private ThreadPoolTaskExecutor createTenantUpgradeThreadPoolTaskExecutor() {
@@ -193,6 +200,8 @@ public class TenantDatabaseUpgradeService implements InitializingBean {
                     tenant.getTenantIdentifier());
             tenantLiquibase.afterPropertiesSet();
             log.info("Upgrade for tenant {} has finished", tenant.getTenantIdentifier());
+        } catch (Exception e) {
+            throw new RuntimeException("Exception while upgrading tenant " + tenant.getTenantIdentifier(), e);
         }
     }
 
