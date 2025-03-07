@@ -22,7 +22,6 @@ package org.apache.fineract.portfolio.rate.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -44,7 +43,7 @@ public class RateReadServiceImpl implements RateReadService {
     private final PlatformSecurityContext context;
 
     @Override
-    public Collection<RateData> retrieveAllRates() {
+    public List<RateData> retrieveAllRates() {
         this.context.authenticatedUser();
         final RateMapper rm = new RateMapper();
         final String sql = "select " + rm.rateSchema();
@@ -80,7 +79,7 @@ public class RateReadServiceImpl implements RateReadService {
     }
 
     @Override
-    public Collection<RateData> retrieveLoanApplicableRates() {
+    public List<RateData> retrieveLoanApplicableRates() {
         this.context.authenticatedUser();
         final RateMapper rm = new RateMapper();
         final String sql = "select " + rm.rateSchema() + " where r.active = ? and product_apply=?";

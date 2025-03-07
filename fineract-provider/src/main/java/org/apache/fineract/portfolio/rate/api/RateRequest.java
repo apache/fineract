@@ -16,26 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.rate.service;
+package org.apache.fineract.portfolio.rate.api;
 
-import java.util.List;
-import org.apache.fineract.portfolio.rate.data.RateData;
+import java.io.Serial;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-/**
- * Bowpi GT Created by Jose on 19/07/2017.
- */
-public interface RateReadService {
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class RateRequest implements Serializable {
 
-    List<RateData> retrieveAllRates();
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    List<RateData> retrieveLoanApplicableRates();
-
-    RateData retrieveOne(Long rateId);
-
-    RateData retrieveByName(String name);
-
-    List<RateData> retrieveProductLoanRates(Long loanId);
-
-    List<RateData> retrieveLoanRates(Long loanId);
-
+    private String name;
+    private BigDecimal percentage;
+    private Integer productApply;
+    private Boolean active;
+    private String locale;
 }
