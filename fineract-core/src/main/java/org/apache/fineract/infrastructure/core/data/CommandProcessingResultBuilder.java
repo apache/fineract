@@ -43,9 +43,7 @@ public class CommandProcessingResultBuilder {
     private Long productId;
     private boolean rollbackTransaction = false;
     private ExternalId entityExternalId = ExternalId.empty();
-
     private ExternalId subEntityExternalId = ExternalId.empty();
-
     private ExternalId loanExternalId = ExternalId.empty();
 
     public CommandProcessingResult build() {

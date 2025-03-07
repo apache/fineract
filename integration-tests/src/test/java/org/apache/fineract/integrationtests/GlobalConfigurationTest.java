@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -27,6 +28,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.client.models.GetGlobalConfigurationsResponse;
 import org.apache.fineract.client.models.GlobalConfigurationPropertyData;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
@@ -94,6 +96,22 @@ public class GlobalConfigurationTest {
             globalConfigurationHelper.updateGlobalConfiguration(config.getName(),
                     new PutGlobalConfigurationsRequest().value(config.getValue()).enabled(config.getEnabled()));
         }
+    }
+
+    @Test
+    public void testGetConfigurationPropertyById() {
+        Long configId = 1L;
+        GlobalConfigurationPropertyData configuration = assertDoesNotThrow(
+                () -> globalConfigurationHelper.getGlobalConfigurationById(configId));
+        assertTrue(StringUtils.isNotBlank(configuration.getName()));
+    }
+
+    @Test
+    public void testNotExistingConfigurationProperty() {
+        String notExistingConfigName = "not-existing-configuration";
+        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                () -> globalConfigurationHelper.getGlobalConfigurationByName(notExistingConfigName));
+        assertEquals(404, exception.getResponse().code());
     }
 
     @Test

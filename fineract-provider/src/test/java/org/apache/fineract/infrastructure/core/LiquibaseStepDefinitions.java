@@ -40,7 +40,6 @@ import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.migration.ExtendedSpringLiquibase;
 import org.apache.fineract.infrastructure.core.service.migration.ExtendedSpringLiquibaseFactory;
-import org.apache.fineract.infrastructure.core.service.migration.SchemaUpgradeNeededException;
 import org.apache.fineract.infrastructure.core.service.migration.TenantDataSourceFactory;
 import org.apache.fineract.infrastructure.core.service.migration.TenantDatabaseStateVerifier;
 import org.apache.fineract.infrastructure.core.service.migration.TenantDatabaseUpgradeService;
@@ -66,7 +65,7 @@ public class LiquibaseStepDefinitions implements En {
     private DataSource tenantStoreDataSource;
     private TenantDatabaseUpgradeService tenantDatabaseUpgradeService;
     private List<FineractPlatformTenant> allTenants;
-    private SchemaUpgradeNeededException executionException;
+    private RuntimeException executionException;
     private HikariDataSource defaultTenantDataSource;
     private Environment environment;
 
@@ -103,10 +102,8 @@ public class LiquibaseStepDefinitions implements En {
         When("The database migration process is executed", () -> {
             try {
                 tenantDatabaseUpgradeService.afterPropertiesSet();
-            } catch (SchemaUpgradeNeededException e) {
-                executionException = e;
             } catch (RuntimeException e) {
-                executionException = (SchemaUpgradeNeededException) e.getCause().getCause();
+                executionException = e;
             }
         });
 

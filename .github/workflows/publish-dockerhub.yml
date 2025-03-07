@@ -17,17 +17,36 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
+
       - name: Set up JDK 17
         uses: actions/setup-java@3a4f6e1af504cf6a31855fa899c6aa5355ba6c12 # v4
         with:
           java-version: '17'
           distribution: 'zulu'
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@94baf225fe0a508e581a564467443d0e2379123b # v4.3.0
+
       - name: Extract branch name
         shell: bash
         run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
         id: extract_branch
+
+      - name: Get Git Hashes
+        run: |
+          echo "short_hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "long_hash=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+        id: git_hashes
+
       - name: Build the Apache Fineract image
         run:  |
-          ./gradlew --no-daemon --console=plain :fineract-provider:jib -x test -x cucumber -Djib.to.auth.username=${{secrets.DOCKERHUB_USER}} -Djib.to.auth.password=${{secrets.DOCKERHUB_TOKEN}} -Djib.from.platforms=linux/amd64,linux/arm64 -Djib.to.image=apache/fineract -Djib.to.tags=${{ steps.extract_branch.outputs.branch }}
+          TAGS=${{ steps.extract_branch.outputs.branch }}
+          if [ "${{ steps.extract_branch.outputs.branch }}" == "develop" ]; then
+            TAGS="$TAGS,${{ steps.git_hashes.outputs.short_hash }},${{ steps.git_hashes.outputs.long_hash }}"
+          fi
+          ./gradlew --no-daemon --console=plain :fineract-provider:jib -x test -x cucumber \
+            -Djib.to.auth.username=${{secrets.DOCKERHUB_USER}} \
+            -Djib.to.auth.password=${{secrets.DOCKERHUB_TOKEN}} \
+            -Djib.from.platforms=linux/amd64,linux/arm64 \
+            -Djib.to.image=apache/fineract \
+            -Djib.to.tags=$TAGS

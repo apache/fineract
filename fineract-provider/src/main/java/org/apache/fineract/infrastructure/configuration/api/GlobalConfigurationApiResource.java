@@ -106,7 +106,7 @@ public class GlobalConfigurationApiResource {
     @Operation(summary = "Retrieve Global Configuration", description = "Returns a global enable/disable configurations.\n" + "\n"
             + "Example Requests:\n" + "\n" + "configurations/1")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GlobalConfigurationApiResourceSwagger.GetGlobalConfigurationsResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GlobalConfigurationPropertyData.class))) })
     public String retrieveOne(@PathParam("configId") @Parameter(description = "configId") final Long configId,
             @Context final UriInfo uriInfo) {
 

@@ -266,6 +266,7 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             Assertions.assertEquals(42.0D, chargePaidBy.get("amount"));
             Assertions.assertEquals(chargeId.doubleValue(), chargePaidBy.get("chargeId"));
             Assertions.assertEquals(transactionId.doubleValue(), chargePaidBy.get("transactionId"));
+            Assertions.assertFalse((Boolean) event.getPayLoad().get("reversed"));
 
             // check that third part cannot post for that charge, because it already fully adjusted
             Assertions.assertThrows(RuntimeException.class, () -> loanTransactionHelper.chargeAdjustment(loanId, chargeId,
@@ -780,6 +781,8 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
                             && x.getPayLoad().get("transactionToAdjust") != null) //
                     .toList(); //
             Assertions.assertEquals(2, list.size());
+            Assertions.assertTrue((Boolean) ((Map) list.get(0).getPayLoad().get("transactionToAdjust")).get("reversed"));
+            Assertions.assertTrue((Boolean) ((Map) list.get(1).getPayLoad().get("transactionToAdjust")).get("reversed"));
 
             loanDetails = loanTransactionHelper.getLoanDetails(loanId);
             verifyLoanStatus(loanDetails, GetLoansLoanIdStatus::getActive);

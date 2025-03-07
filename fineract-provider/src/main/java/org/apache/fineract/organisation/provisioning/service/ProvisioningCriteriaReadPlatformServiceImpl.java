@@ -77,7 +77,7 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
     }
 
     @Override
-    public Collection<ProvisioningCriteriaData> retrieveAllProvisioningCriterias() {
+    public List<ProvisioningCriteriaData> retrieveAllProvisioningCriterias() {
         ProvisioningCriteriaRowMapper mapper = new ProvisioningCriteriaRowMapper();
         final String sql = "select " + mapper.schema();
         return this.jdbcTemplate.query(sql, mapper); // NOSONAR

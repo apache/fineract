@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.portfolio.tax.service;
 
-import java.util.Collection;
+import java.util.List;
 import org.apache.fineract.portfolio.tax.data.TaxComponentData;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 
@@ -34,10 +34,10 @@ public interface TaxReadPlatformService {
 
     TaxGroupData retrieveTaxGroupTemplate();
 
-    Collection<TaxComponentData> retrieveAllTaxComponents();
+    List<TaxComponentData> retrieveAllTaxComponents();
 
-    Collection<TaxGroupData> retrieveAllTaxGroups();
+    List<TaxGroupData> retrieveAllTaxGroups();
 
-    Collection<TaxGroupData> retrieveTaxGroupsForLookUp();
+    List<TaxGroupData> retrieveTaxGroupsForLookUp();
 
 }

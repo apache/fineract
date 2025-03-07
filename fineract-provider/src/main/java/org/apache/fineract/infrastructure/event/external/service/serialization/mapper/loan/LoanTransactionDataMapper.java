@@ -31,5 +31,10 @@ public interface LoanTransactionDataMapper {
     @Mapping(target = "unpaidCharges", ignore = true)
     @Mapping(target = "externalOwnerId", ignore = true)
     @Mapping(target = "customData", ignore = true)
+    @Mapping(target = "reversed", expression = "java(isReversed(source))")
     LoanTransactionDataV1 map(LoanTransactionData source);
+
+    default boolean isReversed(LoanTransactionData source) {
+        return source.isManuallyReversed() || source.getReversedOnDate() != null;
+    }
 }

@@ -262,7 +262,7 @@ Feature: Asset Externalization
     When Admin sets the business date to "10 May 2023"
     And Customer makes "AUTOPAY" repayment on "10 May 2023" with 1000 EUR transaction amount
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
-    Then Asset externalization transaction with the following data results a 403 error and "LOAN_NOT_ACTIVE" error message
+    Then Asset externalization transaction with the following data results a 403 error and "LOAN_CLOSED_OBLIGATIONS_MET_INVALID" error message
       | Transaction type | settlementDate | purchasePriceRatio |
       | sale             | 2023-05-21     | 1                  |
 
@@ -276,7 +276,7 @@ Feature: Asset Externalization
     When Admin sets the business date to "10 May 2023"
     And Customer makes "AUTOPAY" repayment on "10 May 2023" with 1200 EUR transaction amount
     Then Loan status will be "OVERPAID"
-    Then Asset externalization transaction with the following data results a 403 error and "LOAN_NOT_ACTIVE" error message
+    Then Asset externalization transaction with the following data results a 403 error and "LOAN_OVERPAID_INVALID" error message
       | Transaction type | settlementDate | purchasePriceRatio |
       | sale             | 2023-05-21     | 1                  |
 
@@ -396,7 +396,7 @@ Feature: Asset Externalization
     When Admin creates a client with random data
     When Admin creates a new default Loan with date: "1 May 2023"
     Then Loan status will be "SUBMITTED_AND_PENDING_APPROVAL"
-    Then Asset externalization transaction with the following data results a 403 error and "LOAN_NOT_ACTIVE" error message
+    Then Asset externalization transaction with the following data results a 403 error and "LOAN_SUBMITTED_AND_PENDING_APPROVAL_INVALID" error message
       | Transaction type | settlementDate | purchasePriceRatio |
       | sale             | 2023-05-30     | 1                  |
 
@@ -407,7 +407,7 @@ Feature: Asset Externalization
     When Admin creates a new default Loan with date: "1 May 2023"
     And Admin successfully approves the loan on "1 May 2023" with "1000" amount and expected disbursement date on "1 May 2023"
     Then Loan status will be "APPROVED"
-    Then Asset externalization transaction with the following data results a 403 error and "LOAN_NOT_ACTIVE" error message
+    Then Asset externalization transaction with the following data results a 403 error and "LOAN_APPROVED_INVALID" error message
       | Transaction type | settlementDate | purchasePriceRatio |
       | sale             | 2023-05-30     | 1                  |
 

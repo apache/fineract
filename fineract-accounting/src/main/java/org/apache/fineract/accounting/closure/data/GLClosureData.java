@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.accounting.closure.data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,7 +32,10 @@ import org.apache.fineract.organisation.office.data.OfficeData;
  * Note: no getter/setters required as google-gson will produce json from fields of object.
  */
 @Data
-public class GLClosureData {
+public class GLClosureData implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private final Long id;
     private final Long officeId;

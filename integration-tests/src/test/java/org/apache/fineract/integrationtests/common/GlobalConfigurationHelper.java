@@ -52,6 +52,11 @@ public class GlobalConfigurationHelper {
         return Calls.ok(FineractClientHelper.getFineractClient().globalConfigurations.retrieveOneByName(configName));
     }
 
+    public GlobalConfigurationPropertyData getGlobalConfigurationById(final Long configId) {
+        log.info("------------------------ RETRIEVING GLOBAL CONFIGURATION BY ID -------------------------");
+        return Calls.ok(FineractClientHelper.getFineractClient().globalConfigurations.retrieveOne3(configId));
+    }
+
     // TODO: This is quite a bad pattern and adds a lot of time to individual test executions
     public void resetAllDefaultGlobalConfigurations() {
 

@@ -18,12 +18,13 @@
  */
 package org.apache.fineract.investor.service;
 
+import org.apache.fineract.investor.domain.ExternalAssetOwner;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 
 public interface AccountingService {
 
-    void createJournalEntriesForSaleAssetTransfer(Loan loan, ExternalAssetOwnerTransfer transfer);
+    void createJournalEntriesForSaleAssetTransfer(Loan loan, ExternalAssetOwnerTransfer transfer, ExternalAssetOwner previousOwner);
 
     void createJournalEntriesForBuybackAssetTransfer(Loan loan, ExternalAssetOwnerTransfer transfer);
 }

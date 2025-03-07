@@ -52,8 +52,10 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanSchedul
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
+@Order(1)
 public class LoanCatchUpIntegrationTest extends BaseLoanIntegrationTest {
 
     private static final String REPAYMENT_LOAN_PERMISSION = "REPAYMENT_LOAN";

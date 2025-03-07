@@ -39,12 +39,10 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.closure.data.GLClosureData;
+import org.apache.fineract.accounting.closure.data.request.GLClosureRequest;
 import org.apache.fineract.accounting.closure.service.GLClosureReadPlatformService;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -66,10 +64,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class GLClosuresApiResource {
 
-    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList("id", "officeId", "officeName", "closingDate", "deleted", "createdDate", "lastUpdatedDate", "createdByUserId",
-                    "createdByUsername", "lastUpdatedByUserId", "lastUpdatedByUsername"));
-
     private static final String RESOURCE_NAME_FOR_PERMISSION = "GLCLOSURE";
 
     private final PlatformSecurityContext context;
@@ -85,14 +79,10 @@ public class GLClosuresApiResource {
     @Operation(summary = "List Accounting closures", description = "Example Requests:\n" + "\n" + "glclosures")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = GLClosuresApiResourceSwagger.GetGlClosureResponse.class)))) })
-    public String retrieveAllClosures(@Context final UriInfo uriInfo,
-            @QueryParam("officeId") @Parameter(name = "officeId") final Long officeId) {
+    public List<GLClosureData> retrieveAllClosures(@QueryParam("officeId") @Parameter(name = "officeId") final Long officeId) {
 
-        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
-        final List<GLClosureData> glClosureDatas = this.glClosureReadPlatformService.retrieveAllGLClosures(officeId);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.apiJsonSerializerService.serialize(settings, glClosureDatas, RESPONSE_DATA_PARAMETERS);
+        context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
+        return glClosureReadPlatformService.retrieveAllGLClosures(officeId);
     }
 
     @GET
@@ -103,19 +93,17 @@ public class GLClosuresApiResource {
             + "/glclosures/1?fields=officeName,closingDate")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GLClosuresApiResourceSwagger.GetGlClosureResponse.class))) })
-    public String retreiveClosure(@PathParam("glClosureId") @Parameter(description = "glClosureId") final Long glClosureId,
+    public GLClosureData retreiveClosure(@PathParam("glClosureId") @Parameter(description = "glClosureId") final Long glClosureId,
             @Context final UriInfo uriInfo) {
+        context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
 
-        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-
-        final GLClosureData glClosureData = this.glClosureReadPlatformService.retrieveGLClosureById(glClosureId);
+        final GLClosureData glClosureData = glClosureReadPlatformService.retrieveGLClosureById(glClosureId);
         if (settings.isTemplate()) {
-            glClosureData.setAllowedOffices(this.officeReadPlatformService.retrieveAllOfficesForDropdown());
+            glClosureData.setAllowedOffices(officeReadPlatformService.retrieveAllOfficesForDropdown());
         }
-
-        return this.apiJsonSerializerService.serialize(settings, glClosureData, RESPONSE_DATA_PARAMETERS);
+        return glClosureData;
     }
 
     // NOTE: proposal slight changes @Aleks
@@ -126,13 +114,11 @@ public class GLClosuresApiResource {
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = GLClosuresApiResourceSwagger.PostGlClosuresRequest.class, description = "Request Body")))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GLClosuresApiResourceSwagger.PostGlClosuresResponse.class))) })
-    public String createGLClosure(@Parameter(hidden = true) final String jsonRequestBody) {
+    public CommandProcessingResult createGLClosure(@Parameter(hidden = true) GLClosureRequest glClosureRequest) {
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createGLClosure()
+                .withJson(apiJsonSerializerService.serialize(glClosureRequest)).build();
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createGLClosure().withJson(jsonRequestBody).build();
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.apiJsonSerializerService.serialize(result);
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @PUT
@@ -143,13 +129,11 @@ public class GLClosuresApiResource {
     @RequestBody(content = @Content(schema = @Schema(implementation = GLClosuresApiResourceSwagger.PutGlClosuresRequest.class, required = true)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GLClosuresApiResourceSwagger.PutGlClosuresResponse.class))) })
-    public String updateGLClosure(@PathParam("glClosureId") @Parameter(description = "glClosureId") final Long glClosureId,
-            @Parameter(hidden = true) final String jsonRequestBody) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateGLClosure(glClosureId).withJson(jsonRequestBody).build();
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.apiJsonSerializerService.serialize(result);
+    public CommandProcessingResult updateGLClosure(@PathParam("glClosureId") @Parameter(description = "glClosureId") final Long glClosureId,
+            @Parameter(hidden = true) GLClosureRequest glClosureRequest) {
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateGLClosure(glClosureId)
+                .withJson(apiJsonSerializerService.serialize(glClosureRequest)).build();
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @DELETE
@@ -159,12 +143,9 @@ public class GLClosuresApiResource {
     @Operation(summary = "Delete an accounting closure", description = "Note: Only the latest accounting closure associated with a branch may be deleted.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GLClosuresApiResourceSwagger.DeleteGlClosuresResponse.class))) })
-    public String deleteGLClosure(@PathParam("glClosureId") @Parameter(description = "glclosureId") final Long glClosureId) {
-
+    public CommandProcessingResult deleteGLClosure(
+            @PathParam("glClosureId") @Parameter(description = "glclosureId") final Long glClosureId) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteGLClosure(glClosureId).build();
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.apiJsonSerializerService.serialize(result);
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 }

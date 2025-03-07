@@ -147,6 +147,10 @@ public class JournalEntry extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return JournalEntryType.DEBIT.getValue().equals(this.type);
     }
 
+    public boolean isCreditEntry() {
+        return JournalEntryType.CREDIT.getValue().equals(this.type);
+    }
+
     public void setReversalJournalEntry(final JournalEntry reversalJournalEntry) {
         this.reversalJournalEntry = reversalJournalEntry;
     }

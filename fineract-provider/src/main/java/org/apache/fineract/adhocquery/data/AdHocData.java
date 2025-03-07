@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.adhocquery.data;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -43,6 +44,7 @@ public class AdHocData {
     private String tableName;
     private String tableFields;
     private String email;
+    @JsonProperty("isActive")
     private boolean isActive;
     private ZonedDateTime createdOn;
     private Long createdById;

@@ -26,6 +26,9 @@
          and https://github.com/spring-projects/spring-boot/tree/master/spring-boot-project/spring-boot/src/main/resources/org/springframework/boot/logging/logback -->
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
+    <conversionRule conversionWord="tenantId"
+                    converterClass="org.apache.fineract.infrastructure.core.logging.TenantIdentifierLoggingConverter" />
+
     <appender name="CONSOLE" target="System.out" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>${CONSOLE_LOG_PATTERN}</pattern>

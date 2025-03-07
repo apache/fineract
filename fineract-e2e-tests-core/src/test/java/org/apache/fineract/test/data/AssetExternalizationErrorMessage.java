@@ -20,13 +20,18 @@ package org.apache.fineract.test.data;
 
 public enum AssetExternalizationErrorMessage {
 
-    LOAN_NOT_ACTIVE("Loan is not in active status"), ASSET_OWNED_CANNOT_BE_SOLD(
-            "This loan cannot be sold, because it is owned by an external asset owner"), ASSET_NOT_OWNED_CANNOT_BE_BOUGHT(
-                    "This loan cannot be bought back, it is not owned by an external asset owner"), BUYBACK_ALREADY_IN_PROGRESS_CANNOT_BE_BOUGHT(
-                            "This loan cannot be bought back, external asset owner buyback transfer is already in progress"), ALREADY_PENDING(
-                                    "External asset owner transfer is already in PENDING state for this loan"), SETTLEMENT_DATE_IN_THE_PAST(
-                                            "Settlement date cannot be in the past"), INVALID_REQUEST(
-                                                    "The request was invalid. This typically will happen due to validation errors which are provided.");
+    LOAN_NOT_ACTIVE("Loan is not in active status"), //
+    ASSET_OWNED_CANNOT_BE_SOLD("This loan cannot be sold, because it is owned by an external asset owner"), //
+    ASSET_NOT_OWNED_CANNOT_BE_BOUGHT("This loan cannot be bought back, it is not owned by an external asset owner"), //
+    BUYBACK_ALREADY_IN_PROGRESS_CANNOT_BE_BOUGHT(
+            "This loan cannot be bought back, external asset owner buyback transfer is already in progress"), //
+    ALREADY_PENDING("External asset owner transfer is already in PENDING state for this loan"), //
+    SETTLEMENT_DATE_IN_THE_PAST("Settlement date cannot be in the past"), //
+    LOAN_OVERPAID_INVALID("Loan status OVERPAID is not valid for transfer."), //
+    LOAN_CLOSED_OBLIGATIONS_MET_INVALID("Loan status CLOSED_OBLIGATIONS_MET is not valid for transfer."), //
+    LOAN_SUBMITTED_AND_PENDING_APPROVAL_INVALID("Loan status SUBMITTED_AND_PENDING_APPROVAL is not valid for transfer."), //
+    LOAN_APPROVED_INVALID("Loan status APPROVED is not valid for transfer."), //
+    INVALID_REQUEST("The request was invalid. This typically will happen due to validation errors which are provided."); //
 
     public final String value;
 
