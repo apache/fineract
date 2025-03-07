@@ -141,8 +141,12 @@ public final class SavingsAccountData implements Serializable {
     private transient Set<Long> existingReversedTransactionIds = new HashSet<>();
     private transient Long glAccountIdForSavingsControl;
     private transient Long glAccountIdForInterestOnSavings;
-    private transient Long glAccountIdForSavingsControlNegative;
-    private transient Long glAccountIdForInterestOnSavingsNegative;
+
+    private transient Long glAccountIdForSavingsControlAcountPositiveInterestNegative;
+    private transient Long glAccountIdForInterestReceivablePositiveInterestNegative;
+
+    private transient Long glAccountIdForOverdraftPorfolioNegative;
+    private transient Long glAccountIdForInterestReceivableNegative;
 
     public static SavingsAccountData importInstanceIndividual(Long clientId, Long productId, Long fieldOfficerId, LocalDate submittedOnDate,
             BigDecimal nominalAnnualInterestRate, EnumOptionData interestCompoundingPeriodTypeEnum,
@@ -297,20 +301,40 @@ public final class SavingsAccountData implements Serializable {
         this.glAccountIdForInterestOnSavings = glAccountIdForInterestOnSavings;
     }
 
-    public Long getGlAccountIdForSavingsControlNegative() {
-        return glAccountIdForSavingsControlNegative;
+    public Long getId() {
+        return id;
     }
 
-    public void setGlAccountIdForSavingsControlNegative(Long glAccountIdForSavingsControlNegative) {
-        this.glAccountIdForSavingsControlNegative = glAccountIdForSavingsControlNegative;
+    public Long getGlAccountIdForSavingsControlAcountPositiveInterestNegative() {
+        return glAccountIdForSavingsControlAcountPositiveInterestNegative;
     }
 
-    public Long getGlAccountIdForInterestOnSavingsNegative() {
-        return glAccountIdForInterestOnSavingsNegative;
+    public void setGlAccountIdForSavingsControlAcountPositiveInterestNegative(Long glAccountIdForSavingsControlAcountPositiveInterestNegative) {
+        this.glAccountIdForSavingsControlAcountPositiveInterestNegative = glAccountIdForSavingsControlAcountPositiveInterestNegative;
     }
 
-    public void setGlAccountIdForInterestOnSavingsNegative(Long glAccountIdForInterestOnSavingsNegative) {
-        this.glAccountIdForInterestOnSavingsNegative = glAccountIdForInterestOnSavingsNegative;
+    public Long getGlAccountIdForInterestReceivablePositiveInterestNegative() {
+        return glAccountIdForInterestReceivablePositiveInterestNegative;
+    }
+
+    public void setGlAccountIdForInterestReceivablePositiveInterestNegative(Long glAccountIdForInterestReceivablePositiveInterestNegative) {
+        this.glAccountIdForInterestReceivablePositiveInterestNegative = glAccountIdForInterestReceivablePositiveInterestNegative;
+    }
+
+    public Long getGlAccountIdForOverdraftPorfolioNegative() {
+        return glAccountIdForOverdraftPorfolioNegative;
+    }
+
+    public void setGlAccountIdForOverdraftPorfolioNegative(Long glAccountIdForOverdraftPorfolioNegative) {
+        this.glAccountIdForOverdraftPorfolioNegative = glAccountIdForOverdraftPorfolioNegative;
+    }
+
+    public Long getGlAccountIdForInterestReceivableNegative() {
+        return glAccountIdForInterestReceivableNegative;
+    }
+
+    public void setGlAccountIdForInterestReceivableNegative(Long glAccountIdForInterestReceivableNegative) {
+        this.glAccountIdForInterestReceivableNegative = glAccountIdForInterestReceivableNegative;
     }
 
     public void setHelpers(final SavingsAccountTransactionDataSummaryWrapper savingsAccountTransactionSummaryWrapper,

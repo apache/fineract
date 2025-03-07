@@ -586,7 +586,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             if (!backdatedTxnsAllowedTill) {
                 List<SavingsAccountTransactionData> transactions = savingsAccountData.getSavingsAccountTransactionData();
                 for (SavingsAccountTransactionData accountTransaction : transactions) {
-                    if (accountTransaction.getId() == null) {
+                    if (accountTransaction.getId() == null && !MathUtil.isZero(accountTransaction.getAmount())) {
                         savingsAccountData.setNewSavingsAccountTransactionData(accountTransaction);
                     }
                 }

@@ -377,8 +377,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append(
                     "msac.id as chargeId, msac.amount as chargeAmount, msac.charge_time_enum as chargeTimeType, msac.is_penalty as isPenaltyCharge, ");
             sqlBuilder.append("txd.id as taxDetailsId, txd.amount as taxAmount, ");
-            sqlBuilder.append("apm2.gl_account_id as glAccountIdForInterestOnSavingsNegative, apm1.gl_account_id as glAccountIdForInterestOnSavings, apm.gl_account_id as glAccountIdForSavingsControl, apm3.gl_account_id as glAccountIdForSavingsControlNegative, ");
-            sqlBuilder.append("apm4.gl_account_id as glAccountIdForSavingsControlAcountPositiveInterestNegative, apm5.gl_account_id as glAccountIdForInterestOnSavingsAcountPositiveInterestNegative, ");
+            sqlBuilder.append("apm2.gl_account_id as glAccountIdForInterestReceivableNegative, apm1.gl_account_id as glAccountIdForInterestOnSavings, apm.gl_account_id as glAccountIdForSavingsControl, apm3.gl_account_id as glAccountIdForOverdraftPorfolioNegative, ");
+            sqlBuilder.append("apm4.gl_account_id as glAccountIdForSavingsControlAcountPositiveInterestNegative, apm5.gl_account_id as glAccountIdForInterestReceivablePositiveInterestNegative, ");
             sqlBuilder.append(
                     "mtc.id as taxComponentId, mtc.debit_account_id as debitAccountId, mtc.credit_account_id as creditAccountId, mtc.percentage as taxPercentage ");
             sqlBuilder.append("from m_savings_account sa ");
@@ -451,11 +451,14 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     final ClientData clientData = ClientData.createClientForInterestPosting(clientId, clientOfficeId);
 
                     final Long glAccountIdForInterestOnSavings = rs.getLong("glAccountIdForInterestOnSavings");
-                    final Long glAccountIdForInterestOnSavingsNegative = rs.getLong("glAccountIdForInterestOnSavingsNegative");
-                    final Long glAccountIdForInterestOnSavingsAcountPositiveInterestNegative = rs.getLong("glAccountIdForInterestOnSavingsAcountPositiveInterestNegative");
                     final Long glAccountIdForSavingsControl = rs.getLong("glAccountIdForSavingsControl");
-                    final Long glAccountIdForSavingsControlNegative = rs.getLong("glAccountIdForSavingsControlNegative");
+
+                    final Long glAccountIdForOverdraftPorfolioNegative = rs.getLong("glAccountIdForOverdraftPorfolioNegative");
+                    final Long glAccountIdForInterestReceivableNegative = rs.getLong("glAccountIdForInterestReceivableNegative");
+
+
                     final Long glAccountIdForSavingsControlAcountPositiveInterestNegative = rs.getLong("glAccountIdForSavingsControlAcountPositiveInterestNegative");
+                    final Long glAccountIdForInterestReceivablePositiveInterestNegative = rs.getLong("glAccountIdForInterestReceivablePositiveInterestNegative");
 
                     final Long productId = rs.getLong("productId");
                     final String productName = rs.getString("productName");
@@ -615,8 +618,11 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     savingsAccountData.setGroupGeneralData(groupGeneralData);
                     savingsAccountData.setSavingsProduct(savingsProductData);
 
-                    savingsAccountData.setGlAccountIdForInterestOnSavingsNegative(MathUtil.isGreaterThanZero(accountBalance) ? glAccountIdForInterestOnSavingsAcountPositiveInterestNegative  : glAccountIdForInterestOnSavingsNegative);
-                    savingsAccountData.setGlAccountIdForSavingsControlNegative(MathUtil.isGreaterThanZero(accountBalance) ? glAccountIdForSavingsControlAcountPositiveInterestNegative : glAccountIdForSavingsControlNegative);
+                    savingsAccountData.setGlAccountIdForInterestReceivableNegative(glAccountIdForInterestReceivableNegative);
+                    savingsAccountData.setGlAccountIdForOverdraftPorfolioNegative(glAccountIdForOverdraftPorfolioNegative);
+
+                    savingsAccountData.setGlAccountIdForSavingsControlAcountPositiveInterestNegative(glAccountIdForSavingsControlAcountPositiveInterestNegative);
+                    savingsAccountData.setGlAccountIdForInterestReceivablePositiveInterestNegative(glAccountIdForInterestReceivablePositiveInterestNegative);
 
                     savingsAccountData.setGlAccountIdForInterestOnSavings(glAccountIdForInterestOnSavings);
                     savingsAccountData.setGlAccountIdForSavingsControl(glAccountIdForSavingsControl);
