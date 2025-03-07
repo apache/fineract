@@ -29,6 +29,9 @@ import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.poi.hssf.usermodel.HSSFDataValidationHelper;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.ss.SpreadsheetVersion;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.DataValidation;
 import org.apache.poi.ss.usermodel.DataValidationConstraint;
 import org.apache.poi.ss.usermodel.DataValidationHelper;
@@ -72,7 +75,32 @@ public class ClientPersonWorkbookPopulator extends AbstractWorkbookPopulator {
         setOfficeDateLookupTable(clientSheet, officeSheetPopulator.getOffices(), ClientPersonConstants.RELATIONAL_OFFICE_NAME_COL,
                 ClientPersonConstants.RELATIONAL_OFFICE_OPENING_DATE_COL, dateFormat);
         setClientDataLookupTable(clientSheet);
+        setFormatStyle(workbook, clientSheet);
         setRules(clientSheet, dateFormat);
+    }
+
+    private void setFormatStyle(Workbook workbook, Sheet worksheet) {
+        CellStyle dateCellStyle = workbook.createCellStyle();
+        CreationHelper createHelper = workbook.getCreationHelper();
+        dateCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("yyyy-MM-dd"));
+
+        for (int rowIndex = 1; rowIndex < SpreadsheetVersion.EXCEL97.getMaxRows(); rowIndex++) {
+            Row row = worksheet.getRow(rowIndex);
+            if (row == null) {
+                row = worksheet.createRow(rowIndex);
+            }
+
+            setFormatActivationAndSubmittedDate(row, ClientPersonConstants.ACTIVATION_DATE_COL, dateCellStyle);
+            setFormatActivationAndSubmittedDate(row, ClientPersonConstants.SUBMITTED_ON_COL, dateCellStyle);
+        }
+    }
+
+    private void setFormatActivationAndSubmittedDate(Row row, int columnIndex, CellStyle cellStyle) {
+        Cell cell = row.getCell(columnIndex);
+        if (cell == null) {
+            cell = row.createCell(columnIndex);
+        }
+        cell.setCellStyle(cellStyle);
     }
 
     private void setClientDataLookupTable(Sheet clientSheet) {

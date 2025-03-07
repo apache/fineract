@@ -317,7 +317,7 @@ public final class ImportHandlerUtils {
                             return 0L;
                         }
                     } else {
-                        return 0L;
+                        return null;
                     }
                 }
             }
