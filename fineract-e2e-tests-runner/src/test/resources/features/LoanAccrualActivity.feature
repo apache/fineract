@@ -5761,7 +5761,7 @@ Feature: LoanAccrualActivity
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 2000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 2000.0       | false    | false    |
-      | 01 January 2024  | Repayment        | 340.17 | 340.17    | 0.0      | 0.0  | 0.0       | 1659.83       | false    | false    |
+      | 01 January 2024  | Repayment        | 340.17 | 340.17    | 0.0      | 0.0  | 0.0       | 1659.83      | false    | false    |
      #move date to first period due - beginning of Feb 2024
     When Admin sets the business date to "01 February 2024"
     And Admin runs inline COB job for Loan
@@ -5810,7 +5810,7 @@ Feature: LoanAccrualActivity
       | 6  | 30   | 01 July 2024     |                 | 0.0             | 336.11        | 1.96     | 0.0  | 0.0       | 338.07 | 0.0    | 0.0        | 0.0  | 338.07      |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid    | In advance | Late | Outstanding |
-      | 2000.0        | 38.92    | 0.0  | 0.0       | 2038.92 | 1360.68 | 340.17     | 0.0  | 678.24     |
+      | 2000.0        | 38.92    | 0.0  | 0.0       | 2038.92 | 1360.68 | 340.17     | 0.0  | 678.24      |
     When Admin sets the business date to "01 June 2024"
     And Admin runs inline COB job for Loan
     And Customer makes "AUTOPAY" repayment on "01 June 2024" with 340.17 EUR transaction amount
@@ -6037,3 +6037,365 @@ Feature: LoanAccrualActivity
       | 30 June 2024     | Accrual          | 0.06   | 0.0       | 0.06     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 July 2024     | Repayment        | 340.17 | 336.11    | 1.96     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 July 2024     | Accrual Activity | 1.96   | 0.0       | 1.96     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+  @TestRailId:C3525
+  Scenario: Verify accrual activity behavior in case of backdated repayment - UC1
+    When Admin sets the business date to "01 January 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_ACCRUAL_ACTIVITY | 01 January 2025   | 800            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2025" with "800" amount and expected disbursement date on "01 January 2025"
+    And Admin successfully disburse the loan on "01 January 2025" with "800" EUR transaction amount
+    And Admin sets the business date to "02 February 2025"
+    And Admin runs inline COB job for Loan
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2025  |           | 800.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2025 |           | 668.6           | 131.4         | 4.67     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 2  | 28   | 01 March 2025    |           | 536.46          | 132.14        | 3.93     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 3  | 31   | 01 April 2025    |           | 403.52          | 132.94        | 3.13     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 4  | 30   | 01 May 2025      |           | 269.8           | 133.72        | 2.35     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 5  | 31   | 01 June 2025     |           | 135.3           | 134.5         | 1.57     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 6  | 30   | 01 July 2025     |           | 0.0             | 135.3         | 0.79     | 0.0  | 0.0       | 136.09 | 0.0  | 0.0        | 0.0  | 136.09      |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 800.00        | 16.44    | 0.0  | 0.0       | 816.44 | 0.0  | 0.0        | 0.0  | 816.44      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 800.0  | 0.0       | 0.0      | 0.0  | 0.0       | 800.0        | false    | false    |
+      | 01 February 2025 | Accrual          | 4.67   | 0.0       | 4.67     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 February 2025 | Accrual Activity | 4.67   | 0.0       | 4.67     | 0.0  | 0.0       | 0.0          | false    | false    |
+    When Save external ID of "Accrual Activity" transaction made on "01 February 2025" as "saved-external-id"
+    When Customer makes "AUTOPAY" repayment on "31 January 2025" with 900 EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      |    |      | 01 January 2025  |                 | 800.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
+      | 1  | 31   | 01 February 2025 | 31 January 2025 | 668.45          | 131.55        | 4.52     | 0.0  | 0.0       | 136.07 | 136.07 | 136.07     | 0.0  | 0.0         |
+      | 2  | 28   | 01 March 2025    | 31 January 2025 | 532.38          | 136.07        | 0.0      | 0.0  | 0.0       | 136.07 | 136.07 | 136.07     | 0.0  | 0.0         |
+      | 3  | 31   | 01 April 2025    | 31 January 2025 | 396.31          | 136.07        | 0.0      | 0.0  | 0.0       | 136.07 | 136.07 | 136.07     | 0.0  | 0.0         |
+      | 4  | 30   | 01 May 2025      | 31 January 2025 | 260.24          | 136.07        | 0.0      | 0.0  | 0.0       | 136.07 | 136.07 | 136.07     | 0.0  | 0.0         |
+      | 5  | 31   | 01 June 2025     | 31 January 2025 | 124.17          | 136.07        | 0.0      | 0.0  | 0.0       | 136.07 | 136.07 | 136.07     | 0.0  | 0.0         |
+      | 6  | 30   | 01 July 2025     | 31 January 2025 | 0.0             | 124.17        | 0.0      | 0.0  | 0.0       | 124.17 | 124.17 | 124.17     | 0.0  | 0.0         |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      | 800.00        | 4.52     | 0.0  | 0.0       | 804.52 | 804.52 | 804.52     | 0.0  | 0.0         |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement       | 800.0  | 0.0       | 0.0      | 0.0  | 0.0       | 800.0        | false    | false    |
+      | 31 January 2025  | Accrual Activity   | 4.52   | 0.0       | 4.52     | 0.0  | 0.0       | 0.0          | false    | true     |
+      | 31 January 2025  | Repayment          | 900.0  | 800.0     | 4.52     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 February 2025 | Accrual            | 4.67   | 0.0       | 4.67     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 02 February 2025 | Accrual Adjustment | 0.15   | 0.0       | 0.15     | 0.0  | 0.0       | 0.0          | false    | false    |
+    And "Accrual Activity" transaction on "31 January 2025" got reverse-replayed on "02 February 2025"
+    And LoanAccrualAdjustmentTransactionBusinessEvent is raised on "02 February 2025"
+    And External ID of replayed "Accrual Activity" on "31 January 2025" is matching with "saved-external-id"
+
+  @TestRailId:C3526
+  Scenario: Verify accrual activity behavior in case of repayment reversal on an overpaid loan - UC2
+    When Admin sets the business date to "25 February 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_ACCRUAL_ACTIVITY | 25 February 2025  | 75.71          | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "25 February 2025" with "75.71" amount and expected disbursement date on "25 February 2025"
+    And Admin successfully disburse the loan on "25 February 2025" with "75.71" EUR transaction amount
+    And Admin sets the business date to "10 March 2025"
+    And Admin runs inline COB job for Loan
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 25 February 2025 |           | 75.71           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 28   | 25 March 2025    |           | 63.27           | 12.44         | 0.44     | 0.0  | 0.0       | 12.88 | 0.0  | 0.0        | 0.0  | 12.88       |
+      | 2  | 31   | 25 April 2025    |           | 50.76           | 12.51         | 0.37     | 0.0  | 0.0       | 12.88 | 0.0  | 0.0        | 0.0  | 12.88       |
+      | 3  | 30   | 25 May 2025      |           | 38.18           | 12.58         | 0.3      | 0.0  | 0.0       | 12.88 | 0.0  | 0.0        | 0.0  | 12.88       |
+      | 4  | 31   | 25 June 2025     |           | 25.52           | 12.66         | 0.22     | 0.0  | 0.0       | 12.88 | 0.0  | 0.0        | 0.0  | 12.88       |
+      | 5  | 30   | 25 July 2025     |           | 12.79           | 12.73         | 0.15     | 0.0  | 0.0       | 12.88 | 0.0  | 0.0        | 0.0  | 12.88       |
+      | 6  | 31   | 25 August 2025   |           | 0.0             | 12.79         | 0.07     | 0.0  | 0.0       | 12.86 | 0.0  | 0.0        | 0.0  | 12.86       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      | 75.71         | 1.55     | 0.0  | 0.0       | 77.26 | 0.0  | 0.0        | 0.0  | 77.26       |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 25 February 2025 | Disbursement     | 75.71  | 0.0       | 0.0      | 0.0  | 0.0       | 75.71        | false    | false    |
+      | 09 March 2025    | Accrual          | 0.19   | 0.0       | 0.19     | 0.0  | 0.0       | 0.0          | false    | false    |
+    When Customer makes "AUTOPAY" repayment on "10 March 2025" with 80 EUR transaction amount
+    And Admin sets the business date to "28 March 2025"
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 25 February 2025 |               | 75.71           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 28   | 25 March 2025    | 10 March 2025 | 63.04           | 12.67         | 0.21     | 0.0  | 0.0       | 12.88 | 12.88 | 12.88      | 0.0  | 0.0         |
+      | 2  | 31   | 25 April 2025    | 10 March 2025 | 50.16           | 12.88         | 0.0      | 0.0  | 0.0       | 12.88 | 12.88 | 12.88      | 0.0  | 0.0         |
+      | 3  | 30   | 25 May 2025      | 10 March 2025 | 37.28           | 12.88         | 0.0      | 0.0  | 0.0       | 12.88 | 12.88 | 12.88      | 0.0  | 0.0         |
+      | 4  | 31   | 25 June 2025     | 10 March 2025 | 24.4            | 12.88         | 0.0      | 0.0  | 0.0       | 12.88 | 12.88 | 12.88      | 0.0  | 0.0         |
+      | 5  | 30   | 25 July 2025     | 10 March 2025 | 11.52           | 12.88         | 0.0      | 0.0  | 0.0       | 12.88 | 12.88 | 12.88      | 0.0  | 0.0         |
+      | 6  | 31   | 25 August 2025   | 10 March 2025 | 0.0             | 11.52         | 0.0      | 0.0  | 0.0       | 11.52 | 11.52 | 11.52      | 0.0  | 0.0         |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      | 75.71         | 0.21     | 0.0  | 0.0       | 75.92 | 75.92 | 75.92      | 0.0  | 0.0         |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 25 February 2025 | Disbursement     | 75.71  | 0.0       | 0.0      | 0.0  | 0.0       | 75.71        | false    | false    |
+      | 09 March 2025    | Accrual          | 0.19   | 0.0       | 0.19     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 March 2025    | Repayment        | 80.0   | 75.71     | 0.21     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 March 2025    | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 March 2025    | Accrual Activity | 0.21   | 0.0       | 0.21     | 0.0  | 0.0       | 0.0          | false    | false    |
+    When Save external ID of "Accrual Activity" transaction made on "10 March 2025" as "saved-external-id"
+    When Customer undo "1"th "Repayment" transaction made on "10 March 2025"
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 25 February 2025 |           | 75.71           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 28   | 25 March 2025    |           | 63.27           | 12.44         | 0.44     | 0.0  | 0.0       | 12.88 | 0.0  | 0.0        | 0.0  | 12.88       |
+      | 2  | 31   | 25 April 2025    |           | 50.77           | 12.5          | 0.38     | 0.0  | 0.0       | 12.88 | 0.0  | 0.0        | 0.0  | 12.88       |
+      | 3  | 30   | 25 May 2025      |           | 38.19           | 12.58         | 0.3      | 0.0  | 0.0       | 12.88 | 0.0  | 0.0        | 0.0  | 12.88       |
+      | 4  | 31   | 25 June 2025     |           | 25.53           | 12.66         | 0.22     | 0.0  | 0.0       | 12.88 | 0.0  | 0.0        | 0.0  | 12.88       |
+      | 5  | 30   | 25 July 2025     |           | 12.8            | 12.73         | 0.15     | 0.0  | 0.0       | 12.88 | 0.0  | 0.0        | 0.0  | 12.88       |
+      | 6  | 31   | 25 August 2025   |           | 0.0             | 12.8          | 0.07     | 0.0  | 0.0       | 12.87 | 0.0  | 0.0        | 0.0  | 12.87       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      | 75.71         | 1.56     | 0.0  | 0.0       | 77.27 | 0.0  | 0.0        | 0.0  | 77.27       |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 25 February 2025 | Disbursement     | 75.71  | 0.0       | 0.0      | 0.0  | 0.0       | 75.71        | false    | false    |
+      | 09 March 2025    | Accrual          | 0.19   | 0.0       | 0.19     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 March 2025    | Repayment        | 80.0   | 75.71     | 0.21     | 0.0  | 0.0       | 0.0          | true     | false    |
+      | 10 March 2025    | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 25 March 2025    | Accrual Activity | 0.44   | 0.0       | 0.44     | 0.0  | 0.0       | 0.0          | false    | true     |
+    And "Accrual Activity" transaction on "25 March 2025" got reverse-replayed on "28 March 2025"
+    And External ID of replayed "Accrual Activity" on "25 March 2025" is matching with "saved-external-id"
+
+  @TestRailId:C3527
+  Scenario: Verify accrual activity behavior in case repayment reversal before the installment date - UC3
+    When Admin sets the business date to "01 January 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_ACCRUAL_ACTIVITY | 01 January 2025   | 800            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2025" with "800" amount and expected disbursement date on "01 January 2025"
+    And Admin successfully disburse the loan on "01 January 2025" with "800" EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2025  |           | 800.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2025 |           | 668.6           | 131.4         | 4.67     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 2  | 28   | 01 March 2025    |           | 536.43          | 132.17        | 3.9      | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 3  | 31   | 01 April 2025    |           | 403.49          | 132.94        | 3.13     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 4  | 30   | 01 May 2025      |           | 269.77          | 133.72        | 2.35     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 5  | 31   | 01 June 2025     |           | 135.27          | 134.5         | 1.57     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 6  | 30   | 01 July 2025     |           | 0.0             | 135.27        | 0.79     | 0.0  | 0.0       | 136.06 | 0.0  | 0.0        | 0.0  | 136.06      |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 800.00        | 16.41    | 0.0  | 0.0       | 816.41 | 0.0  | 0.0        | 0.0  | 816.41      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 800.0  | 0.0       | 0.0      | 0.0  | 0.0       | 800.0        | false    | false    |
+    When Admin sets the business date to "27 January 2025"
+    And Customer makes "AUTOPAY" repayment on "27 January 2025" with 803.91 EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      |    |      | 01 January 2025  |                 | 800.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
+      | 1  | 31   | 01 February 2025 | 27 January 2025 | 667.84          | 132.16        | 3.91     | 0.0  | 0.0       | 136.07 | 136.07 | 136.07     | 0.0  | 0.0         |
+      | 2  | 28   | 01 March 2025    | 27 January 2025 | 531.77          | 136.07        | 0.0      | 0.0  | 0.0       | 136.07 | 136.07 | 136.07     | 0.0  | 0.0         |
+      | 3  | 31   | 01 April 2025    | 27 January 2025 | 395.7           | 136.07        | 0.0      | 0.0  | 0.0       | 136.07 | 136.07 | 136.07     | 0.0  | 0.0         |
+      | 4  | 30   | 01 May 2025      | 27 January 2025 | 259.63          | 136.07        | 0.0      | 0.0  | 0.0       | 136.07 | 136.07 | 136.07     | 0.0  | 0.0         |
+      | 5  | 31   | 01 June 2025     | 27 January 2025 | 123.56          | 136.07        | 0.0      | 0.0  | 0.0       | 136.07 | 136.07 | 136.07     | 0.0  | 0.0         |
+      | 6  | 30   | 01 July 2025     | 27 January 2025 | 0.0             | 123.56        | 0.0      | 0.0  | 0.0       | 123.56 | 123.56 | 123.56     | 0.0  | 0.0         |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      | 800.00        | 3.91     | 0.0  | 0.0       | 803.91 | 803.91 | 803.91     | 0.0  | 0.0         |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 800.0  | 0.0       | 0.0      | 0.0  | 0.0       | 800.0        | false    | false    |
+      | 27 January 2025  | Repayment        | 803.91 | 800.0     | 3.91     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 27 January 2025  | Accrual          | 3.91   | 0.0       | 3.91     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 27 January 2025  | Accrual Activity | 3.91   | 0.0       | 3.91     | 0.0  | 0.0       | 0.0          | false    | false    |
+    When Admin sets the business date to "28 January 2025"
+    And Customer undo "1"th "Repayment" transaction made on "27 January 2025"
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2025  |           | 800.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2025 |           | 668.6           | 131.4         | 4.67     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 2  | 28   | 01 March 2025    |           | 536.43          | 132.17        | 3.9      | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 3  | 31   | 01 April 2025    |           | 403.49          | 132.94        | 3.13     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 4  | 30   | 01 May 2025      |           | 269.77          | 133.72        | 2.35     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 5  | 31   | 01 June 2025     |           | 135.27          | 134.5         | 1.57     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 6  | 30   | 01 July 2025     |           | 0.0             | 135.27        | 0.79     | 0.0  | 0.0       | 136.06 | 0.0  | 0.0        | 0.0  | 136.06      |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 800.00        | 16.41    | 0.0  | 0.0       | 816.41 | 0.0  | 0.0        | 0.0  | 816.41      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 800.0  | 0.0       | 0.0      | 0.0  | 0.0       | 800.0        | false    | false    |
+      | 27 January 2025  | Repayment        | 803.91 | 800.0     | 3.91     | 0.0  | 0.0       | 0.0          | true     | false    |
+      | 27 January 2025  | Accrual          | 3.91   | 0.0       | 3.91     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+  @TestRailId:C3528
+  Scenario: Verify accrual activity behavior in case repayment reversal after the installment date - UC4
+    When Admin sets the business date to "01 January 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_ACCRUAL_ACTIVITY | 01 January 2025   | 800            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2025" with "800" amount and expected disbursement date on "01 January 2025"
+    And Admin successfully disburse the loan on "01 January 2025" with "800" EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2025  |           | 800.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2025 |           | 668.6           | 131.4         | 4.67     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 2  | 28   | 01 March 2025    |           | 536.43          | 132.17        | 3.9      | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 3  | 31   | 01 April 2025    |           | 403.49          | 132.94        | 3.13     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 4  | 30   | 01 May 2025      |           | 269.77          | 133.72        | 2.35     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 5  | 31   | 01 June 2025     |           | 135.27          | 134.5         | 1.57     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 6  | 30   | 01 July 2025     |           | 0.0             | 135.27        | 0.79     | 0.0  | 0.0       | 136.06 | 0.0  | 0.0        | 0.0  | 136.06      |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 800.00        | 16.41    | 0.0  | 0.0       | 816.41 | 0.0  | 0.0        | 0.0  | 816.41      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 800.0  | 0.0       | 0.0      | 0.0  | 0.0       | 800.0        | false    | false    |
+    When Admin sets the business date to "27 January 2025"
+    And Customer makes "AUTOPAY" repayment on "27 January 2025" with 816.46 EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      |    |      | 01 January 2025  |                 | 800.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
+      | 1  | 31   | 01 February 2025 | 27 January 2025 | 667.84          | 132.16        | 3.91     | 0.0  | 0.0       | 136.07 | 136.07 | 136.07     | 0.0  | 0.0         |
+      | 2  | 28   | 01 March 2025    | 27 January 2025 | 531.77          | 136.07        | 0.0      | 0.0  | 0.0       | 136.07 | 136.07 | 136.07     | 0.0  | 0.0         |
+      | 3  | 31   | 01 April 2025    | 27 January 2025 | 395.7           | 136.07        | 0.0      | 0.0  | 0.0       | 136.07 | 136.07 | 136.07     | 0.0  | 0.0         |
+      | 4  | 30   | 01 May 2025      | 27 January 2025 | 259.63          | 136.07        | 0.0      | 0.0  | 0.0       | 136.07 | 136.07 | 136.07     | 0.0  | 0.0         |
+      | 5  | 31   | 01 June 2025     | 27 January 2025 | 123.56          | 136.07        | 0.0      | 0.0  | 0.0       | 136.07 | 136.07 | 136.07     | 0.0  | 0.0         |
+      | 6  | 30   | 01 July 2025     | 27 January 2025 | 0.0             | 123.56        | 0.0      | 0.0  | 0.0       | 123.56 | 123.56 | 123.56     | 0.0  | 0.0         |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      | 800.00        | 3.91     | 0.0  | 0.0       | 803.91 | 803.91 | 803.91     | 0.0  | 0.0         |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 800.0  | 0.0       | 0.0      | 0.0  | 0.0       | 800.0        | false    | false    |
+      | 27 January 2025  | Repayment        | 816.46 | 800.0     | 3.91     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 27 January 2025  | Accrual          | 3.91   | 0.0       | 3.91     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 27 January 2025  | Accrual Activity | 3.91   | 0.0       | 3.91     | 0.0  | 0.0       | 0.0          | false    | false    |
+    When Save external ID of "Accrual Activity" transaction made on "27 January 2025" as "saved-external-id"
+    When Admin sets the business date to "03 February 2025"
+    And Customer undo "1"th "Repayment" transaction made on "27 January 2025"
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2025  |           | 800.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2025 |           | 668.6           | 131.4         | 4.67     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 2  | 28   | 01 March 2025    |           | 536.48          | 132.12        | 3.95     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 3  | 31   | 01 April 2025    |           | 403.54          | 132.94        | 3.13     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 4  | 30   | 01 May 2025      |           | 269.82          | 133.72        | 2.35     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 5  | 31   | 01 June 2025     |           | 135.32          | 134.5         | 1.57     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 6  | 30   | 01 July 2025     |           | 0.0             | 135.32        | 0.79     | 0.0  | 0.0       | 136.11 | 0.0  | 0.0        | 0.0  | 136.11      |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 800.00        | 16.46    | 0.0  | 0.0       | 816.46 | 0.0  | 0.0        | 0.0  | 816.46      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 800.0  | 0.0       | 0.0      | 0.0  | 0.0       | 800.0        | false    | false    |
+      | 27 January 2025  | Repayment        | 816.46 | 800.0     | 3.91     | 0.0  | 0.0       | 0.0          | true     | false    |
+      | 27 January 2025  | Accrual          | 3.91   | 0.0       | 3.91     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 February 2025 | Accrual Activity | 4.67   | 0.0       | 4.67     | 0.0  | 0.0       | 0.0          | false    | true     |
+    And "Accrual Activity" transaction on "01 February 2025" got reverse-replayed on "03 February 2025"
+    And External ID of replayed "Accrual Activity" on "01 February 2025" is matching with "saved-external-id"
+
+  @TestRailId:C3529
+  Scenario: Verify accrual activity behavior when COB runs on installment date and backdated repayment happens - UC5
+    When Admin sets the business date to "01 January 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_ACCRUAL_ACTIVITY | 01 January 2025   | 800            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2025" with "800" amount and expected disbursement date on "01 January 2025"
+    And Admin successfully disburse the loan on "01 January 2025" with "800" EUR transaction amount
+    When Admin sets the business date to "02 February 2025"
+    And Admin runs inline COB job for Loan
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2025  |           | 800.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2025 |           | 668.6           | 131.4         | 4.67     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 2  | 28   | 01 March 2025    |           | 536.46          | 132.14        | 3.93     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 3  | 31   | 01 April 2025    |           | 403.52          | 132.94        | 3.13     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 4  | 30   | 01 May 2025      |           | 269.8           | 133.72        | 2.35     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 5  | 31   | 01 June 2025     |           | 135.3           | 134.5         | 1.57     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 6  | 30   | 01 July 2025     |           | 0.0             | 135.3         | 0.79     | 0.0  | 0.0       | 136.09 | 0.0  | 0.0        | 0.0  | 136.09      |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 800.00        | 16.44    | 0.0  | 0.0       | 816.44 | 0.0  | 0.0        | 0.0  | 816.44      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 800.0  | 0.0       | 0.0      | 0.0  | 0.0       | 800.0        | false    | false    |
+      | 01 February 2025 | Accrual          | 4.67   | 0.0       | 4.67     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 February 2025 | Accrual Activity | 4.67   | 0.0       | 4.67     | 0.0  | 0.0       | 0.0          | false    | false    |
+    When Save external ID of "Accrual Activity" transaction made on "01 February 2025" as "saved-external-id"
+    When Customer makes "AUTOPAY" repayment on "27 January 2025" with 800 EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      |    |      | 01 January 2025  |                 | 800.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
+      | 1  | 31   | 01 February 2025 | 27 January 2025 | 667.84          | 132.16        | 3.91     | 0.0  | 0.0       | 136.07 | 136.07 | 136.07     | 0.0  | 0.0         |
+      | 2  | 28   | 01 March 2025    | 27 January 2025 | 531.77          | 136.07        | 0.0      | 0.0  | 0.0       | 136.07 | 136.07 | 136.07     | 0.0  | 0.0         |
+      | 3  | 31   | 01 April 2025    | 27 January 2025 | 395.7           | 136.07        | 0.0      | 0.0  | 0.0       | 136.07 | 136.07 | 136.07     | 0.0  | 0.0         |
+      | 4  | 30   | 01 May 2025      | 27 January 2025 | 259.63          | 136.07        | 0.0      | 0.0  | 0.0       | 136.07 | 136.07 | 136.07     | 0.0  | 0.0         |
+      | 5  | 31   | 01 June 2025     | 27 January 2025 | 123.56          | 136.07        | 0.0      | 0.0  | 0.0       | 136.07 | 136.07 | 136.07     | 0.0  | 0.0         |
+      | 6  | 30   | 01 July 2025     |                 | 0.0             | 123.56        | 0.11     | 0.0  | 0.0       | 123.67 | 119.65 | 119.65     | 0.0  | 4.02        |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 800.00        | 4.02     | 0.0  | 0.0       | 804.02 | 800.0 | 800.0      | 0.0  | 4.02        |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 800.0  | 0.0       | 0.0      | 0.0  | 0.0       | 800.0        | false    | false    |
+      | 27 January 2025  | Repayment        | 800.0  | 796.09    | 3.91     | 0.0  | 0.0       | 3.91         | false    | false    |
+      | 01 February 2025 | Accrual          | 4.67   | 0.0       | 4.67     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 February 2025 | Accrual Activity | 3.91   | 0.0       | 3.91     | 0.0  | 0.0       | 0.0          | false    | true     |
+    And "Accrual Activity" transaction on "01 February 2025" got reverse-replayed on "02 February 2025"
+    And External ID of replayed "Accrual Activity" on "01 February 2025" is matching with "saved-external-id"
+
+  @TestRailId:C3530
+  Scenario: Verify accrual activity behavior in case of partial payment which is reversed after the installment date - UC6
+    When Admin sets the business date to "01 January 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_ACCRUAL_ACTIVITY | 01 January 2025   | 800            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2025" with "800" amount and expected disbursement date on "01 January 2025"
+    And Admin successfully disburse the loan on "01 January 2025" with "800" EUR transaction amount
+    And Admin sets the business date to "15 January 2025"
+    And Customer makes "AUTOPAY" repayment on "15 January 2025" with 100 EUR transaction amount
+    And Admin sets the business date to "02 February 2025"
+    And Admin runs inline COB job for Loan
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 January 2025  |           | 800.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 31   | 01 February 2025 |           | 668.28          | 131.72        | 4.35     | 0.0  | 0.0       | 136.07 | 100.0 | 100.0      | 0.0  | 36.07       |
+      | 2  | 28   | 01 March 2025    |           | 536.11          | 132.17        | 3.9      | 0.0  | 0.0       | 136.07 | 0.0   | 0.0        | 0.0  | 136.07      |
+      | 3  | 31   | 01 April 2025    |           | 403.17          | 132.94        | 3.13     | 0.0  | 0.0       | 136.07 | 0.0   | 0.0        | 0.0  | 136.07      |
+      | 4  | 30   | 01 May 2025      |           | 269.45          | 133.72        | 2.35     | 0.0  | 0.0       | 136.07 | 0.0   | 0.0        | 0.0  | 136.07      |
+      | 5  | 31   | 01 June 2025     |           | 134.95          | 134.5         | 1.57     | 0.0  | 0.0       | 136.07 | 0.0   | 0.0        | 0.0  | 136.07      |
+      | 6  | 30   | 01 July 2025     |           | 0.0             | 134.95        | 0.79     | 0.0  | 0.0       | 135.74 | 0.0   | 0.0        | 0.0  | 135.74      |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 800.00        | 16.09    | 0.0  | 0.0       | 816.09 | 100.0 | 100.0      | 0.0  | 716.09      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 800.0  | 0.0       | 0.0      | 0.0  | 0.0       | 800.0        | false    | false    |
+      | 15 January 2025  | Repayment        | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 700.0        | false    | false    |
+      | 01 February 2025 | Accrual          | 4.35   | 0.0       | 4.35     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 February 2025 | Accrual Activity | 4.35   | 0.0       | 4.35     | 0.0  | 0.0       | 0.0          | false    | false    |
+    When Save external ID of "Accrual Activity" transaction made on "01 February 2025" as "saved-external-id"
+    When Customer undo "1"th "Repayment" transaction made on "15 January 2025"
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2025  |           | 800.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2025 |           | 668.6           | 131.4         | 4.67     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 2  | 28   | 01 March 2025    |           | 536.46          | 132.14        | 3.93     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 3  | 31   | 01 April 2025    |           | 403.52          | 132.94        | 3.13     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 4  | 30   | 01 May 2025      |           | 269.8           | 133.72        | 2.35     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 5  | 31   | 01 June 2025     |           | 135.3           | 134.5         | 1.57     | 0.0  | 0.0       | 136.07 | 0.0  | 0.0        | 0.0  | 136.07      |
+      | 6  | 30   | 01 July 2025     |           | 0.0             | 135.3         | 0.79     | 0.0  | 0.0       | 136.09 | 0.0  | 0.0        | 0.0  | 136.09      |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 800.00        | 16.44    | 0.0  | 0.0       | 816.44 | 0.0  | 0.0        | 0.0  | 816.44      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 800.0  | 0.0       | 0.0      | 0.0  | 0.0       | 800.0        | false    | false    |
+      | 15 January 2025  | Repayment        | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 700.0        | true     | false    |
+      | 01 February 2025 | Accrual          | 4.35   | 0.0       | 4.35     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 February 2025 | Accrual Activity | 4.67   | 0.0       | 4.67     | 0.0  | 0.0       | 0.0          | false    | true     |
+    And "Accrual Activity" transaction on "01 February 2025" got reverse-replayed on "02 February 2025"
+    And External ID of replayed "Accrual Activity" on "01 February 2025" is matching with "saved-external-id"

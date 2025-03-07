@@ -24,7 +24,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -199,8 +198,7 @@ public class EventCheckHelper {
                     Long clientIdExpected = body.getClientId();
                     BigDecimal principalDisbursedActual = loanAccountDataV1.getSummary().getPrincipalDisbursed();
                     Double principalDisbursedExpectedDouble = body.getSummary().getPrincipalDisbursed();
-                    BigDecimal principalDisbursedExpected = new BigDecimal(principalDisbursedExpectedDouble, MathContext.DECIMAL64)
-                            .setScale(8, RoundingMode.HALF_DOWN);
+                    BigDecimal principalDisbursedExpected = BigDecimal.valueOf(principalDisbursedExpectedDouble);
                     String actualDisbursementDateActual = loanAccountDataV1.getTimeline().getActualDisbursementDate();
                     String actualDisbursementDateExpected = FORMATTER_EVENTS.format(body.getTimeline().getActualDisbursementDate());
                     String currencyCodeActual = loanAccountDataV1.getSummary().getCurrency().getCode();

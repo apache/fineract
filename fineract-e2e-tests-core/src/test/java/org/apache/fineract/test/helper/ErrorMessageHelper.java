@@ -892,4 +892,8 @@ public final class ErrorMessageHelper {
                 "Number of lines in loan charge-off reason options is not correct. Actual value is: %d - Expected value is: %d", actual,
                 expected);
     }
+
+    public static String wrongExternalID(String actual, String expected) {
+        return String.format("Wrong transaction External ID - %nActual value is: %s %nExpected value is: %s", actual, expected);
+    }
 }
