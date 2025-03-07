@@ -20,7 +20,6 @@ package org.apache.fineract.infrastructure.businessdate.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -33,19 +32,16 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.UriInfo;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.businessdate.data.BusinessDateData;
+import org.apache.fineract.infrastructure.businessdate.data.request.BusinessDateRequest;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.stereotype.Component;
@@ -56,7 +52,8 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Business Date Management", description = "Business date management enables you to set up, fetch and adjust organisation business dates")
 public class BusinessDateApiResource {
 
-    private final ApiRequestParameterHelper parameterHelper;
+    private static final String BUSINESS_DATE = "BUSINESS_DATE";
+
     private final PlatformSecurityContext securityContext;
     private final DefaultToApiJsonSerializer<BusinessDateData> jsonSerializer;
     private final BusinessDateReadPlatformService readPlatformService;
@@ -66,13 +63,9 @@ public class BusinessDateApiResource {
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "List all business dates", description = "")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = BusinessDateApiResourceSwagger.BusinessDateResponse.class)))) })
-    public String getBusinessDates(@Context final UriInfo uriInfo) {
-        securityContext.authenticatedUser().validateHasReadPermission("BUSINESS_DATE");
-        final List<BusinessDateData> foundBusinessDates = this.readPlatformService.findAll();
-        ApiRequestJsonSerializationSettings settings = parameterHelper.process(uriInfo.getQueryParameters());
-        return this.jsonSerializer.serialize(settings, foundBusinessDates);
+    public List<BusinessDateData> getBusinessDates() {
+        securityContext.authenticatedUser().validateHasReadPermission(BUSINESS_DATE);
+        return this.readPlatformService.findAll();
     }
 
     @GET
@@ -80,28 +73,23 @@ public class BusinessDateApiResource {
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Retrieve a specific Business date", description = "")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = BusinessDateApiResourceSwagger.BusinessDateResponse.class))) })
-    public String getBusinessDate(@PathParam("type") @Parameter(description = "type") final String type, @Context final UriInfo uriInfo) {
-        securityContext.authenticatedUser().validateHasReadPermission("BUSINESS_DATE");
-        final BusinessDateData businessDate = this.readPlatformService.findByType(type);
-        ApiRequestJsonSerializationSettings settings = parameterHelper.process(uriInfo.getQueryParameters());
-        return this.jsonSerializer.serialize(settings, businessDate);
+    public BusinessDateData getBusinessDate(@PathParam("type") @Parameter(description = "type") final String type) {
+        securityContext.authenticatedUser().validateHasReadPermission(BUSINESS_DATE);
+        return this.readPlatformService.findByType(type);
     }
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update Business Date", description = "")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = BusinessDateApiResourceSwagger.BusinessDateRequest.class)))
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = BusinessDateRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = BusinessDateApiResourceSwagger.BusinessDateResponse.class))) })
-    public String updateBusinessDate(final String jsonRequestBody, @Context UriInfo uriInfo) {
-        securityContext.authenticatedUser().validateHasUpdatePermission("BUSINESS_DATE");
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateBusinessDate().withJson(jsonRequestBody).build();
-
-        CommandProcessingResult result = commandWritePlatformService.logCommandSource(commandRequest);
-        return jsonSerializer.serialize(result);
+    public CommandProcessingResult updateBusinessDate(BusinessDateRequest businessDateRequest) {
+        securityContext.authenticatedUser().validateHasUpdatePermission(BUSINESS_DATE);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateBusinessDate()
+                .withJson(jsonSerializer.serialize(businessDateRequest)).build();
+        return commandWritePlatformService.logCommandSource(commandRequest);
     }
 
 }

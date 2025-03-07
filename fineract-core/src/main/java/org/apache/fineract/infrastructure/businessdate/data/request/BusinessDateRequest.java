@@ -16,26 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.businessdate.api;
+package org.apache.fineract.infrastructure.businessdate.data.request;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.Map;
+import java.io.Serial;
+import java.io.Serializable;
 
-final class BusinessDateApiResourceSwagger {
+public record BusinessDateRequest(String dateFormat, String type, String date, String locale) implements Serializable {
 
-    private BusinessDateApiResourceSwagger() {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    }
-
-    @Schema(description = "BusinessDateResponse")
-    public static final class BusinessDateResponse {
-
-        @Schema(example = "1")
-        public Long commandId;
-        public Map<String, Object> changes;
-
-        private BusinessDateResponse() {
-
-        }
+    public static BusinessDateRequest ofNull() {
+        return new BusinessDateRequest(null, null, null, null);
     }
 }

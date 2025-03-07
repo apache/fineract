@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.BusinessDateData;
 import org.apache.fineract.client.models.BusinessDateRequest;
 import org.apache.fineract.client.models.BusinessDateResponse;
 import org.apache.fineract.client.util.Calls;
@@ -60,19 +61,19 @@ public final class BusinessDateHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public BusinessDateResponse getBusinessDateByType(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+    public BusinessDateData getBusinessDateByType(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final BusinessDateType type) {
         final String BUSINESS_DATE_API = "/fineract-provider/api/v1/businessdate/" + type.name() + "?" + Utils.TENANT_IDENTIFIER;
         final String response = Utils.performServerGet(requestSpec, responseSpec, BUSINESS_DATE_API);
         log.info("{}", response);
-        return GSON.fromJson(response, BusinessDateResponse.class);
+        return GSON.fromJson(response, BusinessDateData.class);
     }
 
-    public BusinessDateResponse getBusinessDate(final String type) {
+    public BusinessDateData getBusinessDate(final String type) {
         return Calls.ok(FineractClientHelper.getFineractClient().businessDateManagement.getBusinessDate(type));
     }
 
-    public List<BusinessDateResponse> getBusinessDates() {
+    public List<BusinessDateData> getBusinessDates() {
         return Calls.ok(FineractClientHelper.getFineractClient().businessDateManagement.getBusinessDates());
     }
 
