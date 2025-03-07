@@ -102,7 +102,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             final Set<Role> allRoles = assembleSetOfRoles(roles);
 
             final String staffIdParamName = "staffId";
-            final Long staffId = command.longValueOfParameterNamed(staffIdParamName);
+            final Long staffId = command.longValueOfParameterNamed(staffIdParamName) != 0 ? command.longValueOfParameterNamed(staffIdParamName) : null;
 
             Staff linkedStaff;
             if (staffId != null) {

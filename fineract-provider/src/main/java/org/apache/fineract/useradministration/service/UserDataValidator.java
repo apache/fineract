@@ -124,10 +124,10 @@ public final class UserDataValidator {
         final Long officeId = this.fromApiJsonHelper.extractLongNamed(OFFICE_ID, element);
         baseDataValidator.reset().parameter(OFFICE_ID).value(officeId).notNull().integerGreaterThanZero();
 
-        if (this.fromApiJsonHelper.parameterExists(STAFF_ID, element)) {
+        /*if (this.fromApiJsonHelper.parameterExists(STAFF_ID, element)) {
             final Long staffId = this.fromApiJsonHelper.extractLongNamed(STAFF_ID, element);
             baseDataValidator.reset().parameter(STAFF_ID).value(staffId).notNull().integerGreaterThanZero();
-        }
+        }*/
 
         if (this.fromApiJsonHelper.parameterExists(AppUserConstants.PASSWORD_NEVER_EXPIRES, element)) {
             final boolean passwordNeverExpire = this.fromApiJsonHelper.extractBooleanNamed(AppUserConstants.PASSWORD_NEVER_EXPIRES,
