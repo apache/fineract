@@ -86,6 +86,41 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
 
         withholdTransactions.addAll(findWithHoldSavingsTransactionsWithPivotConfig(savingsAccountData));
 
+        Boolean flagValidationInterest = false;
+        Boolean flagValidationOverdraft = false;
+        for (final PostingPeriod interestPostingPeriod : postingPeriods) {
+            final LocalDate interestPostingTransactionDate = interestPostingPeriod.dateOfPostingTransaction();
+            final Money interestEarnedToBePostedForPeriod = interestPostingPeriod.getInterestEarned();
+
+            if (!DateUtils.isAfter(interestPostingTransactionDate, interestPostingUpToDate)) {
+                interestPostedToDate = interestPostedToDate.plus(interestEarnedToBePostedForPeriod);
+                final SavingsAccountTransactionData postingTransaction = findInterestPostingTransactionFor(interestPostingTransactionDate,
+                        savingsAccountData);
+
+                if (postingTransaction == null) {
+                    SavingsAccountTransactionData newPostingTransaction;
+                    if (interestEarnedToBePostedForPeriod.isGreaterThanOrEqualTo(Money.zero(savingsAccountData.getCurrency()))) {
+                        flagValidationInterest = true;
+                    } else {
+                        flagValidationOverdraft = true;
+                    }
+                } else {
+                    boolean correctionRequired = false;
+                    if (postingTransaction.isInterestPostingAndNotReversed()) {
+                        correctionRequired = postingTransaction.hasNotAmount(interestEarnedToBePostedForPeriod);
+                    } else {
+                        correctionRequired = postingTransaction.hasNotAmount(interestEarnedToBePostedForPeriod.negated());
+                    }
+                    if (correctionRequired) {
+                        if (interestEarnedToBePostedForPeriod.isGreaterThanZero() || interestEarnedToBePostedForPeriod.isLessThanZero()) {
+                            flagValidationInterest = true;
+                        }
+                    }
+                }
+            }
+        }
+
+
         for (final PostingPeriod interestPostingPeriod : postingPeriods) {
             final LocalDate interestPostingTransactionDate = interestPostingPeriod.dateOfPostingTransaction();
             final Money interestEarnedToBePostedForPeriod = interestPostingPeriod.getInterestEarned();
@@ -103,10 +138,15 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                     if (interestEarnedToBePostedForPeriod.isGreaterThanOrEqualTo(Money.zero(savingsAccountData.getCurrency()))) {
                         newPostingTransaction = SavingsAccountTransactionData.interestPosting(savingsAccountData,
                                 interestPostingTransactionDate, interestEarnedToBePostedForPeriod, interestPostingPeriod.isUserPosting());
+                        newPostingTransaction.setFlagValidationInterest(flagValidationInterest);
+                        newPostingTransaction.setFlagValidationOverdraft(flagValidationOverdraft);
                     } else {
                         newPostingTransaction = SavingsAccountTransactionData.overdraftInterest(savingsAccountData,
                                 interestPostingTransactionDate, interestEarnedToBePostedForPeriod.negated(),
                                 interestPostingPeriod.isUserPosting(), isNegativeBalance);
+
+                        newPostingTransaction.setFlagValidationOverdraft(flagValidationOverdraft);
+                        newPostingTransaction.setFlagValidationInterest(flagValidationInterest);
                     }
                    /* BigDecimal bd = new BigDecimal(String.valueOf(interestEarnedToBePostedForPeriod.getAmount())).setScale(2, RoundingMode.DOWN);
                     if (!MathUtil.isZero(bd) ) {
@@ -147,6 +187,9 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                             newPostingTransaction = SavingsAccountTransactionData.interestPosting(savingsAccountData,
                                     interestPostingTransactionDate, interestEarnedToBePostedForPeriod,
                                     interestPostingPeriod.isUserPosting());
+
+                            newPostingTransaction.setFlagValidationOverdraft(flagValidationOverdraft);
+                            newPostingTransaction.setFlagValidationInterest(flagValidationInterest);
                             savingsAccountData.updateTransactions(newPostingTransaction);
                         } /*else {
                             newPostingTransaction = SavingsAccountTransactionData.overdraftInterest(savingsAccountData,
@@ -320,7 +363,11 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
 
                 periodStartingBalance = postingPeriod.closingBalance();
                 log.debug("  postingPeriod {} {}", postingPeriod.dateOfPostingTransaction(), postingPeriod.getInterestEarned().getAmount());
-                allPostingPeriods.add(postingPeriod);
+                if (MathUtil.isZero(postingPeriod.getOpeningBalance().getAmount()) && MathUtil.isZero( postingPeriod.closingBalance().getAmount())){
+
+                }else{
+                    allPostingPeriods.add(postingPeriod);
+                }
 
             }
             if(!listOfTransactionsPositive.isEmpty()){
@@ -333,7 +380,11 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
 
                 periodStartingBalance = postingPeriod.closingBalance();
                 log.debug("  postingPeriod {} {}", postingPeriod.dateOfPostingTransaction(), postingPeriod.getInterestEarned().getAmount());
-                allPostingPeriods.add(postingPeriod);
+                if (MathUtil.isZero(postingPeriod.getOpeningBalance().getAmount()) && MathUtil.isZero( postingPeriod.closingBalance().getAmount())){
+
+                }else{
+                    allPostingPeriods.add(postingPeriod);
+                }
 
             }
 
@@ -531,7 +582,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                         transaction.updateOverdraftAmount(overdraftAmount.getAmount());
                     }
                     transaction.updateRunningBalance(runningBalance);
-                    //addTransactionToExisting(accountTransaction, savingsAccountData);
+                    addTransactionToExisting(accountTransaction, savingsAccountData);
 
                     isTransactionsModified = true;
                 }

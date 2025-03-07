@@ -36,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryType;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
@@ -109,13 +110,22 @@ public class SavingsSchedularInterestPoster {
                 if (savingsAccountTransactionData.getId() == null) {
                     final String key = savingsAccountTransactionData.getRefNo();
                     final Boolean isNegativeBalance = savingsAccountTransactionData.getIsNegativeBalance();
-                    if (savingsAccountTransactionDataHashMap.containsKey(key)) {
+                    if (savingsAccountTransactionDataHashMap.containsKey(key) && isNegativeBalance && (savingsAccountTransactionData.getFlagValidationInterest() && savingsAccountTransactionData.getFlagValidationOverdraft())) {
+                        paramsForGLInsertion = accuntNegative(savingsAccountData, userId,savingsAccountTransactionData,key,savingsAccountTransactionDataHashMap);
+                    }else{
                         final SavingsAccountTransactionData dataFromFetch = savingsAccountTransactionDataHashMap.get(key);
                         savingsAccountTransactionData.setId(dataFromFetch.getId());
                         if (savingsAccountData.getGlAccountIdForSavingsControl() != 0
                                 && savingsAccountData.getGlAccountIdForInterestOnSavings() != 0) {
                             OffsetDateTime auditDatetime = DateUtils.getAuditOffsetDateTime();
-                            paramsForGLInsertion.add(new Object[] {savingsAccountTransactionData.getIsNegativeBalance() ? savingsAccountData.getGlAccountIdForInterestOnSavingsNegative() :savingsAccountData.getGlAccountIdForSavingsControl(),
+                            paramsForGLInsertion.add(new Object[] {
+                                    isNegativeBalance
+                                            ?
+                                            MathUtil.isLessThanZero(savingsAccountTransactionData.getRunningBalance()) ?
+                                                    savingsAccountData.getGlAccountIdForInterestReceivableNegative() : savingsAccountData.getGlAccountIdForInterestReceivableNegative()
+                                            : savingsAccountData.getGlAccountIdForSavingsControl(),
+
+
                                     savingsAccountData.getOfficeId(), null, currencyCode,
                                     SAVINGS_TRANSACTION_IDENTIFIER + savingsAccountTransactionData.getId().toString(),
                                     savingsAccountTransactionData.getId(), null, false, null, false,
@@ -125,7 +135,11 @@ public class SavingsSchedularInterestPoster {
                                     savingsAccountTransactionData.getTransactionDate(), null, userId, userId,
                                     DateUtils.getBusinessLocalDate() });
 
-                            paramsForGLInsertion.add(new Object[] {savingsAccountTransactionData.getIsNegativeBalance() ? savingsAccountData.getGlAccountIdForSavingsControlNegative() : savingsAccountData.getGlAccountIdForInterestOnSavings(),
+                            paramsForGLInsertion.add(new Object[] {isNegativeBalance ?
+                                    MathUtil.isLessThanZero(savingsAccountTransactionData.getRunningBalance())
+                                            ?
+                                            savingsAccountData.getGlAccountIdForOverdraftPorfolioNegative() : savingsAccountData.getGlAccountIdForSavingsControlAcountPositiveInterestNegative()
+                                    : savingsAccountData.getGlAccountIdForInterestOnSavings(),
                                     savingsAccountData.getOfficeId(), null, currencyCode,
                                     SAVINGS_TRANSACTION_IDENTIFIER + savingsAccountTransactionData.getId().toString(),
                                     savingsAccountTransactionData.getId(), null, false, null, false,
@@ -135,6 +149,7 @@ public class SavingsSchedularInterestPoster {
                                     savingsAccountTransactionData.getTransactionDate(), null, userId, userId,
                                     DateUtils.getBusinessLocalDate() });
                         }
+
                     }
                 }
             }
@@ -152,6 +167,69 @@ public class SavingsSchedularInterestPoster {
                 + "last_modified_on_utc,is_running_balance_calculated,office_running_balance,organization_running_balance,"
                 + "payment_details_id,transaction_date,share_transaction_id, created_by, last_modified_by, submitted_on_date) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    }
+    public List<Object[]> accuntNegative(SavingsAccountData savingsAccountData,Long userId,
+                                         SavingsAccountTransactionData savingsAccountTransactionData,
+                                         final String key, final HashMap<String, SavingsAccountTransactionData> savingsAccountTransactionDataHashMap){
+
+        final Boolean isNegativeBalance = savingsAccountTransactionData.getIsNegativeBalance();
+        List<Object[]> paramsForGLInsertion = new ArrayList<>();
+        String currencyCode = savingsAccountData.getCurrency().getCode();
+
+        BigDecimal amountCreditFirst = savingsAccountTransactionData.getRunningBalance().abs().subtract(savingsAccountTransactionData.getAmount().abs());
+        BigDecimal amountCreditsecond = savingsAccountTransactionData.getRunningBalance();
+
+        final SavingsAccountTransactionData dataFromFetch = savingsAccountTransactionDataHashMap.get(key);
+        savingsAccountTransactionData.setId(dataFromFetch.getId());
+
+        //5 y 144 credit > 0
+
+        //2 y 144 credit <= 0
+            OffsetDateTime auditDatetime = DateUtils.getAuditOffsetDateTime();
+            paramsForGLInsertion.add(new Object[] {savingsAccountData.getGlAccountIdForInterestReceivablePositiveInterestNegative(),
+                    savingsAccountData.getOfficeId(), null, currencyCode,
+                    SAVINGS_TRANSACTION_IDENTIFIER + savingsAccountTransactionData.getId().toString(),
+                    savingsAccountTransactionData.getId(), null, false, null, false,
+                    savingsAccountTransactionData.getTransactionDate(), JournalEntryType.CREDIT.getValue().longValue(),
+                    amountCreditFirst.abs(), null, JournalEntryType.CREDIT.getValue().longValue(),
+                    savingsAccountData.getId(), auditDatetime, auditDatetime, false, BigDecimal.ZERO, BigDecimal.ZERO, null,
+                    savingsAccountTransactionData.getTransactionDate(), null, userId, userId,
+                    DateUtils.getBusinessLocalDate() });
+
+
+            paramsForGLInsertion.add(new Object[] {savingsAccountData.getGlAccountIdForSavingsControlAcountPositiveInterestNegative(),
+                    savingsAccountData.getOfficeId(), null, currencyCode,
+                    SAVINGS_TRANSACTION_IDENTIFIER + savingsAccountTransactionData.getId().toString(),
+                    savingsAccountTransactionData.getId(), null, false, null, false,
+                    savingsAccountTransactionData.getTransactionDate(), JournalEntryType.DEBIT.getValue().longValue(),
+                    amountCreditFirst.abs(), null, JournalEntryType.DEBIT.getValue().longValue(),
+                    savingsAccountData.getId(), auditDatetime, auditDatetime, false, BigDecimal.ZERO, BigDecimal.ZERO, null,
+                    savingsAccountTransactionData.getTransactionDate(), null, userId, userId,
+                    DateUtils.getBusinessLocalDate() });
+
+        paramsForGLInsertion.add(new Object[] {savingsAccountData.getGlAccountIdForInterestReceivablePositiveInterestNegative(),
+                savingsAccountData.getOfficeId(), null, currencyCode,
+                SAVINGS_TRANSACTION_IDENTIFIER + savingsAccountTransactionData.getId().toString(),
+                savingsAccountTransactionData.getId(), null, false, null, false,
+                savingsAccountTransactionData.getTransactionDate(), JournalEntryType.CREDIT.getValue().longValue(),
+                amountCreditsecond.abs(), null, JournalEntryType.CREDIT.getValue().longValue(),
+                savingsAccountData.getId(), auditDatetime, auditDatetime, false, BigDecimal.ZERO, BigDecimal.ZERO, null,
+                savingsAccountTransactionData.getTransactionDate(), null, userId, userId,
+                DateUtils.getBusinessLocalDate() });
+
+
+        paramsForGLInsertion.add(new Object[] {savingsAccountData.getGlAccountIdForOverdraftPorfolioNegative(),
+                savingsAccountData.getOfficeId(), null, currencyCode,
+                SAVINGS_TRANSACTION_IDENTIFIER + savingsAccountTransactionData.getId().toString(),
+                savingsAccountTransactionData.getId(), null, false, null, false,
+                savingsAccountTransactionData.getTransactionDate(), JournalEntryType.DEBIT.getValue().longValue(),
+                amountCreditsecond.abs(), null, JournalEntryType.DEBIT.getValue().longValue(),
+                savingsAccountData.getId(), auditDatetime, auditDatetime, false, BigDecimal.ZERO, BigDecimal.ZERO, null,
+                savingsAccountTransactionData.getTransactionDate(), null, userId, userId,
+                DateUtils.getBusinessLocalDate() });
+
+
+        return paramsForGLInsertion;
     }
 
     private List<SavingsAccountTransactionData> fetchTransactionsFromIds(final List<String> refNo) throws DataAccessException {

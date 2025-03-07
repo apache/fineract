@@ -104,6 +104,8 @@ public final class SavingsAccountTransactionData implements Serializable {
     private transient Long modifiedId;
     private transient String refNo;
     private Boolean isNegativeBalance;
+    private Boolean flagValidationInterest;
+    private Boolean flagValidationOverdraft;
 
     private SavingsAccountTransactionData(final Long id, final SavingsAccountTransactionEnumData transactionType,
             final PaymentDetailData paymentDetailData, final Long savingsId, final String savingsAccountNo, final LocalDate transactionDate,
@@ -330,6 +332,22 @@ public final class SavingsAccountTransactionData implements Serializable {
 
     public boolean isOverdraftInterestAndNotReversed() {
         return this.transactionType.isIncomeFromInterest() && isNotReversed();
+    }
+
+    public Boolean getFlagValidationInterest() {
+        return flagValidationInterest;
+    }
+
+    public void setFlagValidationInterest(Boolean flagValidationInterest) {
+        this.flagValidationInterest = flagValidationInterest;
+    }
+
+    public Boolean getFlagValidationOverdraft() {
+        return flagValidationOverdraft;
+    }
+
+    public void setFlagValidationOverdraft(Boolean flagValidationOverdraft) {
+        this.flagValidationOverdraft = flagValidationOverdraft;
     }
 
     public boolean isCredit() {

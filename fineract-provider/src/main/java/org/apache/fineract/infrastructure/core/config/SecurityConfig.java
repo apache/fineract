@@ -32,11 +32,9 @@ import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadP
 import org.apache.fineract.infrastructure.cache.service.CacheWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
-import org.apache.fineract.infrastructure.core.filters.CorrelationHeaderFilter;
-import org.apache.fineract.infrastructure.core.filters.IdempotencyStoreFilter;
-import org.apache.fineract.infrastructure.core.filters.IdempotencyStoreHelper;
-import org.apache.fineract.infrastructure.core.filters.RequestResponseFilter;
+import org.apache.fineract.infrastructure.core.filters.*;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.filters.GeolocationHeaderFilter;
 import org.apache.fineract.infrastructure.core.service.MDCWrapper;
 import org.apache.fineract.infrastructure.instancemode.filter.FineractInstanceModeApiFilter;
 import org.apache.fineract.infrastructure.jobs.filter.LoanCOBApiFilter;
@@ -141,7 +139,8 @@ public class SecurityConfig {
                 .addFilterBefore(tenantAwareBasicAuthenticationFilter(), SecurityContextHolderFilter.class) //
                 .addFilterAfter(requestResponseFilter(), ExceptionTranslationFilter.class) //
                 .addFilterAfter(correlationHeaderFilter(), RequestResponseFilter.class) //
-                .addFilterAfter(fineractInstanceModeApiFilter(), CorrelationHeaderFilter.class); //
+                .addFilterAfter(fineractInstanceModeApiFilter(), CorrelationHeaderFilter.class) //
+                .addFilterAfter(geolocationHeaderFilter(), RequestResponseFilter.class);
         if (!Objects.isNull(loanCOBFilterHelper)) {
             http.addFilterAfter(loanCOBApiFilter(), FineractInstanceModeApiFilter.class) //
                     .addFilterAfter(idempotencyStoreFilter(), LoanCOBApiFilter.class); //
@@ -196,6 +195,9 @@ public class SecurityConfig {
                 userNotificationService, basicAuthTenantDetailsService, businessDateReadPlatformService);
         filter.setRequestMatcher(antMatcher("/api/**"));
         return filter;
+    }
+    public GeolocationHeaderFilter geolocationHeaderFilter() {
+        return new GeolocationHeaderFilter(fineractProperties);
     }
 
     @Bean

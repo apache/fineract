@@ -123,6 +123,9 @@ public class CommandSource extends AbstractPersistableCustom<Long> {
     @Column(name = "result_status_code")
     private Integer resultStatusCode;
 
+    @Column(name = "client_ip", nullable = true)
+    private String clientIp;
+
     private CommandSource(final String actionName, final String entityName, final String href, final Long resourceId,
             final Long subResourceId, final String commandSerializedAsJson, final AppUser maker, final String idempotencyKey,
             final Integer status) {
@@ -136,6 +139,7 @@ public class CommandSource extends AbstractPersistableCustom<Long> {
         this.madeOnDate = DateUtils.getAuditOffsetDateTime();
         this.status = status;
         this.idempotencyKey = idempotencyKey;
+        this.clientIp = "127.0.0.1";
     }
 
     public static CommandSource fullEntryFrom(final CommandWrapper wrapper, final JsonCommand command, final AppUser maker,

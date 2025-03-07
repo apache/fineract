@@ -51,4 +51,5 @@ public final class AuditData {
     private final Long clientId;
     private final Long loanId;
     private final String url;
+    private final String ip;
 }
