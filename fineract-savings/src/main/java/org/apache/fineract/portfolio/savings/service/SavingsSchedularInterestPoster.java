@@ -43,7 +43,6 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountSummaryData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -62,7 +61,7 @@ public class SavingsSchedularInterestPoster {
     private Collection<SavingsAccountData> savingAccounts;
     private boolean backdatedTxnsAllowedTill;
 
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED, rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class)
     public void postInterest() throws JobExecutionException {
         if (!savingAccounts.isEmpty()) {
             List<Throwable> errors = new ArrayList<>();
