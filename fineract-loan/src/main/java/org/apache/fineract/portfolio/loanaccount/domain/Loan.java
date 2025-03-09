@@ -1585,10 +1585,16 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     }
 
     public boolean doPostLoanTransactionChecks(final LocalDate transactionDate, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+        boolean statusChanged = checkAndHandleLoanStatus(transactionDate, loanLifecycleStateMachine);
+        resetOverpaidDateIfNeeded();
+        return statusChanged;
+    }
+
+    private boolean checkAndHandleLoanStatus(final LocalDate transactionDate, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
         boolean statusChanged = false;
         boolean isOverpaid = MathUtil.isGreaterThanZero(totalOverpaid);
+
         if (isOverpaid) {
-            // FIXME - kw - update account balance to negative amount.
             handleLoanOverpayment(transactionDate, loanLifecycleStateMachine);
             statusChanged = true;
         } else if (this.summary.isRepaidInFull(getCurrency())) {
@@ -1597,10 +1603,14 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         } else {
             loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT_OR_WAIVER, this);
         }
+
+        return statusChanged;
+    }
+
+    private void resetOverpaidDateIfNeeded() {
         if (MathUtil.isEmpty(totalOverpaid)) {
             this.overpaidOnDate = null;
         }
-        return statusChanged;
     }
 
     private void handleLoanRepaymentInFull(final LocalDate transactionDate, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
@@ -2453,14 +2463,12 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     }
 
     public LocalDate getLastUserTransactionDate() {
-        LocalDate currentTransactionDate = getDisbursementDate();
-        for (final LoanTransaction previousTransaction : this.loanTransactions) {
-            if (!(previousTransaction.isReversed() || previousTransaction.isAccrualRelated() || previousTransaction.isIncomePosting())
-                    && DateUtils.isBefore(currentTransactionDate, previousTransaction.getTransactionDate())) {
-                currentTransactionDate = previousTransaction.getTransactionDate();
-            }
-        }
-        return currentTransactionDate;
+        return this.loanTransactions.stream().filter(this::isUserTransaction).map(LoanTransaction::getTransactionDate)
+                .filter(date -> DateUtils.isBefore(getDisbursementDate(), date)).max(LocalDate::compareTo).orElse(getDisbursementDate());
+    }
+
+    private boolean isUserTransaction(LoanTransaction transaction) {
+        return !(transaction.isReversed() || transaction.isAccrualRelated() || transaction.isIncomePosting());
     }
 
     public LocalDate getLastRepaymentDate() {
@@ -3564,7 +3572,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     public boolean isChargeOffOnDate(final LocalDate onDate) {
         final LoanTransaction chargeOffTransaction = findChargedOffTransaction();
-        return (chargeOffTransaction == null) ? false : (chargeOffTransaction.getDateOf().compareTo(onDate) <= 0);
+        return chargeOffTransaction != null && chargeOffTransaction.getDateOf().compareTo(onDate) <= 0;
     }
 
     public boolean hasMonetaryActivityAfter(final LocalDate transactionDate) {
