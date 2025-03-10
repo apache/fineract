@@ -3099,14 +3099,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 final ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, null, null);
                 loanScheduleService.regenerateRepaymentScheduleWithInterestRecalculation(loan, scheduleGeneratorDTO);
             }
+            final List<LoanTransaction> loanTransactions = loan.retrieveListOfTransactionsForReprocessing();
+            loanTransactions.add(chargeOffTransaction);
+            reprocessLoanTransactionsService.reprocessTransactions(loan, loanTransactions);
             loan.addLoanTransaction(chargeOffTransaction);
-            reprocessLoanTransactionsService.reprocessTransactions(loan);
         } else {
+            reprocessLoanTransactionsService.processLatestTransaction(chargeOffTransaction, loan);
             loan.addLoanTransaction(chargeOffTransaction);
-            loan.getTransactionProcessor().processLatestTransaction(chargeOffTransaction,
-                    new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
-                            new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
-            loan.updateLoanSummaryDerivedFields();
         }
         loanTransactionRepository.saveAndFlush(chargeOffTransaction);
 

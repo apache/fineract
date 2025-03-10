@@ -20,10 +20,8 @@ package org.apache.fineract.portfolio.loanaccount.starter;
 
 import java.util.List;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
-import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.CreocoreLoanRepaymentScheduleTransactionProcessor;
@@ -112,10 +110,8 @@ public class LoanAccountAutoStarter {
     @Conditional(AdvancedPaymentScheduleTransactionProcessorCondition.class)
     public AdvancedPaymentScheduleTransactionProcessor advancedPaymentScheduleTransactionProcessor(EMICalculator emiCalculator,
             LoanRepositoryWrapper loanRepositoryWrapper,
-            @Lazy ProgressiveLoanInterestRefundServiceImpl progressiveLoanInterestRefundService,
-            LoanTransactionRepository loanTransactionRepository, ExternalIdFactory externalIdFactory,
-            @Lazy BusinessEventNotifierService businessEventNotifierService) {
+            @Lazy ProgressiveLoanInterestRefundServiceImpl progressiveLoanInterestRefundService, ExternalIdFactory externalIdFactory) {
         return new AdvancedPaymentScheduleTransactionProcessor(emiCalculator, loanRepositoryWrapper, progressiveLoanInterestRefundService,
-                loanTransactionRepository, externalIdFactory, businessEventNotifierService);
+                externalIdFactory);
     }
 }

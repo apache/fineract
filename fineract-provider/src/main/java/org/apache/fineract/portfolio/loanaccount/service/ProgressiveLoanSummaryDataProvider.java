@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -96,11 +97,11 @@ public class ProgressiveLoanSummaryDataProvider extends CommonLoanSummaryDataPro
                         .reprocessProgressiveLoanTransactions(loan.getDisbursementDate(), businessDate, transactionsToReprocess,
                                 loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges());
                 ProgressiveLoanInterestScheduleModel model = changedTransactionDetailProgressiveLoanInterestScheduleModelPair.getRight();
-                if (!changedTransactionDetailProgressiveLoanInterestScheduleModelPair.getLeft().getCurrentTransactionToOldId().isEmpty()
-                        || !changedTransactionDetailProgressiveLoanInterestScheduleModelPair.getLeft().getNewTransactionMappings()
-                                .isEmpty()) {
-                    List<Long> replayedTransactions = changedTransactionDetailProgressiveLoanInterestScheduleModelPair.getLeft()
-                            .getNewTransactionMappings().keySet().stream().toList();
+                final List<Long> replayedTransactions = changedTransactionDetailProgressiveLoanInterestScheduleModelPair.getLeft()
+                        .getTransactionChanges().stream().filter(change -> change.getOldTransaction() != null)
+                        .map(change -> change.getNewTransaction().getId()).filter(Objects::nonNull).toList();
+
+                if (!replayedTransactions.isEmpty()) {
                     log.warn("Reprocessed transactions show differences: There are unsaved changes of the following transactions: {}",
                             replayedTransactions);
                 }

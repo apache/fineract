@@ -37,7 +37,6 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -64,13 +63,11 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
-import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualAdjustmentTransactionBusinessEvent;
-import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualTransactionCreatedBusinessEvent;
-import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
+import org.apache.fineract.portfolio.loanaccount.data.TransactionChangeData;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
@@ -87,7 +84,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionComparator;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionToRepaymentScheduleMapping;
 import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParameter;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.AbstractLoanRepaymentScheduleTransactionProcessor;
@@ -119,9 +115,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     private final EMICalculator emiCalculator;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final InterestRefundService interestRefundService;
-    private final LoanTransactionRepository loanTransactionRepository;
     private final ExternalIdFactory externalIdFactory;
-    private final BusinessEventNotifierService businessEventNotifierService;
 
     @Override
     public String getCode() {
@@ -226,11 +220,15 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 }
             }
         }
-        Map<Long, LoanTransaction> newTransactionMappings = changedTransactionDetail.getNewTransactionMappings();
-        for (Long oldTransactionId : newTransactionMappings.keySet()) {
-            LoanTransaction oldTransaction = loanTransactions.stream().filter(e -> oldTransactionId.equals(e.getId())).findFirst().get();
-            LoanTransaction newTransaction = newTransactionMappings.get(oldTransactionId);
-            createNewTransaction(oldTransaction, newTransaction, ctx);
+        final List<TransactionChangeData> transactionChanges = changedTransactionDetail.getTransactionChanges();
+
+        for (TransactionChangeData change : transactionChanges) {
+            LoanTransaction oldTransaction = change.getOldTransaction();
+            LoanTransaction newTransaction = change.getNewTransaction();
+
+            if (oldTransaction != null) {
+                createNewTransaction(oldTransaction, newTransaction, ctx);
+            }
         }
         recalculateInterestForDate(targetDate, ctx);
         List<LoanTransaction> txs = changeOperations.stream() //
@@ -262,9 +260,12 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     }
 
     @NotNull
-    private static LoanTransaction getProcessedTransaction(ChangedTransactionDetail changedTransactionDetail, LoanTransaction transaction) {
-        LoanTransaction newTransaction = changedTransactionDetail.getNewTransactionMappings().get(transaction.getId());
-        return newTransaction == null ? transaction : newTransaction;
+    private static LoanTransaction getProcessedTransaction(final ChangedTransactionDetail changedTransactionDetail,
+            final LoanTransaction transaction) {
+        return changedTransactionDetail.getTransactionChanges().stream()
+                .filter(change -> change.getOldTransaction() != null && change.getOldTransaction().getId() != null
+                        && change.getOldTransaction().getId().equals(transaction.getId()))
+                .map(TransactionChangeData::getNewTransaction).findFirst().orElse(transaction);
     }
 
     private void processInterestRateChange(final List<LoanRepaymentScheduleInstallment> installments,
@@ -297,7 +298,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     }
 
     @Override
-    public void processLatestTransaction(LoanTransaction loanTransaction, TransactionCtx ctx) {
+    public ChangedTransactionDetail processLatestTransaction(LoanTransaction loanTransaction, TransactionCtx ctx) {
         // If we are behind, we might need to first recalculate interest
         if (ctx instanceof ProgressiveTransactionCtx progressiveTransactionCtx) {
             recalculateInterestForDate(loanTransaction.getTransactionDate(), progressiveTransactionCtx);
@@ -319,10 +320,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             case REAGE -> handleReAge(loanTransaction, ctx);
             case ACCRUAL_ACTIVITY -> calculateAccrualActivity(loanTransaction, ctx);
             // TODO: Cover rest of the transaction types
-            default -> {
-                log.warn("Unhandled transaction processing for transaction type: {}", loanTransaction.getTypeOf());
-            }
+            default -> log.warn("Unhandled transaction processing for transaction type: {}", loanTransaction.getTypeOf());
         }
+        return ctx.getChangedTransactionDetail();
     }
 
     private void handleInterestRefund(LoanTransaction loanTransaction, TransactionCtx ctx) {
@@ -407,14 +407,17 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         ChangedTransactionDetail changedTransactionDetail = ctx.getChangedTransactionDetail();
         Long chargebackId = chargebackTransaction.getId(); // this the normal case without reverse-replay
         if (changedTransactionDetail != null) {
+            final List<TransactionChangeData> transactionChanges = changedTransactionDetail.getTransactionChanges();
             if (chargebackId == null) {
                 // the chargeback transaction was changed, so we need to look it up from the ctx.
-                chargebackId = changedTransactionDetail.getCurrentTransactionToOldId().get(chargebackTransaction);
+                chargebackId = transactionChanges.stream().filter(change -> change.getNewTransaction().equals(chargebackTransaction))
+                        .flatMap(change -> Optional.ofNullable(change.getOldTransaction()).map(AbstractPersistableCustom::getId).stream())
+                        .findFirst().orElse(null);
             }
 
             Long toId = chargebackId;
-            Collection<LoanTransaction> updatedTransactions = changedTransactionDetail.getNewTransactionMappings().values();
-            Optional<LoanTransaction> fromTransaction = updatedTransactions.stream()
+            Optional<LoanTransaction> fromTransaction = changedTransactionDetail.getTransactionChanges().stream()
+                    .map(TransactionChangeData::getNewTransaction)
                     .filter(tr -> tr.getLoanTransactionRelations().stream().anyMatch(hasMatchingToLoanTransaction(toId, CHARGEBACK))
                             || tr.getLoanTransactionRelations().stream()
                                     .anyMatch(this.hasMatchingToLoanTransaction(chargebackTransaction, CHARGEBACK)))
@@ -655,16 +658,22 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
         // Remove the current chargeback from the list
         allTransactions.remove(chargebackTransaction);
-        if (ctx.getChangedTransactionDetail() != null) {
-            Long oldId = ctx.getChangedTransactionDetail().getCurrentTransactionToOldId().get(chargebackTransaction);
-            allTransactions.stream().filter(tr -> Objects.equals(tr.getId(), oldId)).findFirst().ifPresent(allTransactions::remove);
-        }
+        final ChangedTransactionDetail changedTransactionDetail = ctx.getChangedTransactionDetail();
+        if (changedTransactionDetail != null) {
+            final List<TransactionChangeData> transactionChanges = changedTransactionDetail.getTransactionChanges();
 
-        // Add the replayed transactions and remove their old version before the replay
-        if (ctx.getChangedTransactionDetail() != null && ctx.getChangedTransactionDetail().getNewTransactionMappings() != null) {
-            for (Long id : ctx.getChangedTransactionDetail().getNewTransactionMappings().keySet()) {
-                allTransactions.stream().filter(tr -> Objects.equals(tr.getId(), id)).findFirst().ifPresent(allTransactions::remove);
-                allTransactions.add(ctx.getChangedTransactionDetail().getNewTransactionMappings().get(id));
+            transactionChanges.stream().filter(change -> change.getNewTransaction().equals(chargebackTransaction))
+                    .map(TransactionChangeData::getOldTransaction).filter(Objects::nonNull).findFirst().ifPresent(allTransactions::remove);
+
+            // Add the replayed transactions and remove their old version before the replay
+            for (TransactionChangeData change : transactionChanges) {
+                LoanTransaction oldTransaction = change.getOldTransaction();
+                LoanTransaction newTransaction = change.getNewTransaction();
+
+                if (oldTransaction != null) {
+                    allTransactions.removeIf(tr -> Objects.equals(tr.getId(), oldTransaction.getId()));
+                }
+                allTransactions.add(newTransaction);
             }
         }
 
@@ -822,7 +831,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             // For existing transactions, check if the re-payment breakup (principal, interest, fees, penalties) has
             // changed.
             processTransaction = LoanTransaction.copyTransactionProperties(loanTransaction);
-            ctx.getChangedTransactionDetail().getCurrentTransactionToOldId().put(processTransaction, loanTransaction.getId());
+            ctx.getChangedTransactionDetail().addTransactionChange(new TransactionChangeData(loanTransaction, processTransaction));
         }
         // Reset derived component of new loan transaction and re-process transaction
         processLatestTransaction(processTransaction, ctx);
@@ -854,7 +863,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             boolean isNew = transaction.getId() == null;
             if (!isNew) {
                 processTransaction = transaction.copyTransactionPropertiesAndMappings();
-                ctx.getChangedTransactionDetail().getCurrentTransactionToOldId().put(processTransaction, transaction.getId());
+                ctx.getChangedTransactionDetail().addTransactionChange(new TransactionChangeData(transaction, processTransaction));
             }
             processTransaction.setOverPayments(overpayment = MathUtil.minus(overpayment, processAmount));
             overpaymentHolder.setMoneyObject(ctxOverpayment = MathUtil.minus(ctxOverpayment, processAmount));
@@ -890,9 +899,11 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
     private LoanTransaction checkRegisteredNewTransaction(LoanTransaction newTransaction, TransactionCtx ctx) {
         ChangedTransactionDetail changedTransactionDetail = ctx.getChangedTransactionDetail();
-        Long oldTransactionId = changedTransactionDetail.getCurrentTransactionToOldId().get(newTransaction);
-        if (oldTransactionId != null) {
-            LoanTransaction oldTransaction = newTransaction.getLoan().getLoanTransaction(e -> oldTransactionId.equals(e.getId()));
+        Optional<TransactionChangeData> transactionChange = changedTransactionDetail.getTransactionChanges().stream()
+                .filter(change -> change.getNewTransaction().equals(newTransaction)).findFirst();
+
+        if (transactionChange.isPresent()) {
+            LoanTransaction oldTransaction = transactionChange.get().getOldTransaction();
             LoanTransaction applicableTransaction = useOldTransactionIfApplicable(oldTransaction, newTransaction, ctx);
             if (applicableTransaction != null) {
                 return applicableTransaction;
@@ -910,9 +921,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
         newTransaction.copyLoanTransactionRelations(oldTransaction.getLoanTransactionRelations());
 
-        ChangedTransactionDetail changedTransactionDetail = ctx.getChangedTransactionDetail();
-        changedTransactionDetail.getNewTransactionMappings().put(oldTransaction.getId(), newTransaction);
-        changedTransactionDetail.getCurrentTransactionToOldId().put(newTransaction, oldTransaction.getId());
+        ctx.getChangedTransactionDetail().addTransactionChange(new TransactionChangeData(oldTransaction, newTransaction));
         return newTransaction;
     }
 
@@ -921,13 +930,12 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             TransactionCtx ctx) {
         MonetaryCurrency currency = ctx.getCurrency();
         ChangedTransactionDetail changedTransactionDetail = ctx.getChangedTransactionDetail();
-        Map<Long, LoanTransaction> newTransactionMappings = changedTransactionDetail.getNewTransactionMappings();
         /*
          * Check if the transaction amounts have changed or was there any transaction for the same date which was
          * reverse-replayed. If so, reverse the original transaction and update changedTransactionDetail accordingly to
          * keep the original order of the transactions.
          */
-        boolean alreadyProcessed = newTransactionMappings.values().stream()
+        boolean alreadyProcessed = changedTransactionDetail.getTransactionChanges().stream().map(TransactionChangeData::getNewTransaction)
                 .anyMatch(lt -> !lt.equals(newTransaction) && lt.getTransactionDate().equals(oldTransaction.getTransactionDate()));
         boolean amountMatch = LoanTransaction.transactionAmountsMatch(currency, oldTransaction, newTransaction);
         if (!alreadyProcessed && amountMatch) {
@@ -936,8 +944,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                         .updateLoanTransactionToRepaymentScheduleMappings(newTransaction.getLoanTransactionToRepaymentScheduleMappings());
                 oldTransaction.updateLoanChargePaidMappings(newTransaction.getLoanChargesPaid());
             }
-            changedTransactionDetail.getCurrentTransactionToOldId().remove(newTransaction);
-            newTransactionMappings.remove(oldTransaction.getId());
+            changedTransactionDetail.removeTransactionChange(newTransaction);
             return oldTransaction;
         }
         return null;
@@ -955,8 +962,11 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                     .forEach(newRelation -> oldTransaction.getLoanTransactionRelations().stream()
                             .filter(oldRelation -> LoanTransactionRelationTypeEnum.RELATED.equals(oldRelation.getRelationType()))
                             .findFirst().map(oldRelation -> oldRelation.getToTransaction().getId())
-                            .ifPresent(oldToTransactionId -> newRelation.setToTransaction(
-                                    ctx.getChangedTransactionDetail().getNewTransactionMappings().get(oldToTransactionId))));
+                            .flatMap(oldToTransactionId -> ctx.getChangedTransactionDetail().getTransactionChanges().stream()
+                                    .filter(change -> change.getOldTransaction().getId() != null
+                                            && change.getOldTransaction().getId().equals(oldToTransactionId))
+                                    .map(TransactionChangeData::getNewTransaction).findFirst())
+                            .ifPresent(newRelation::setToTransaction));
         }
 
         // Adding Replayed relation from newly created transaction to reversed transaction
@@ -1354,8 +1364,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
         final BigDecimal newInterest = getInterestTillChargeOffForPeriod(loanTransaction.getLoan(), loanTransaction.getTransactionDate(),
                 transactionCtx);
-        createMissingAccrualTransactionDuringChargeOffIfNeeded(newInterest, loanTransaction.getLoan(),
-                loanTransaction.getTransactionDate());
+        createMissingAccrualTransactionDuringChargeOffIfNeeded(newInterest, loanTransaction, loanTransaction.getTransactionDate(),
+                transactionCtx);
 
         loanTransaction.resetDerivedComponents();
         // determine how much is outstanding total and breakdown for principal, interest and charges
@@ -2366,8 +2376,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         return interestTillChargeOff;
     }
 
-    private void createMissingAccrualTransactionDuringChargeOffIfNeeded(final BigDecimal newInterest, final Loan loan,
-            final LocalDate chargeOffDate) {
+    private void createMissingAccrualTransactionDuringChargeOffIfNeeded(final BigDecimal newInterest,
+            final LoanTransaction chargeOffTransaction, final LocalDate chargeOffDate, final TransactionCtx ctx) {
+        final Loan loan = chargeOffTransaction.getLoan();
         final List<LoanRepaymentScheduleInstallment> relevantInstallments = loan.getRepaymentScheduleInstallments().stream()
                 .filter(i -> !i.getFromDate().isAfter(chargeOffDate)).toList();
 
@@ -2376,10 +2387,14 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         }
 
         final BigDecimal sumOfAccrualsTillChargeOff = loan.getLoanTransactions().stream()
-                .filter(lt -> lt.isAccrual() && !lt.getTransactionDate().isAfter(chargeOffDate))
+                .filter(lt -> lt.isAccrual() && !lt.getTransactionDate().isAfter(chargeOffDate) && lt.isNotReversed())
                 .map(lt -> Optional.ofNullable(lt.getInterestPortion()).orElse(BigDecimal.ZERO)).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        final BigDecimal missingAccrualAmount = newInterest.subtract(sumOfAccrualsTillChargeOff);
+        final BigDecimal sumOfAccrualAdjustmentsTillChargeOff = loan.getLoanTransactions().stream()
+                .filter(lt -> lt.isAccrualAdjustment() && !lt.getTransactionDate().isAfter(chargeOffDate) && lt.isNotReversed())
+                .map(lt -> Optional.ofNullable(lt.getInterestPortion()).orElse(BigDecimal.ZERO)).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        final BigDecimal missingAccrualAmount = newInterest.subtract(sumOfAccrualsTillChargeOff).add(sumOfAccrualAdjustmentsTillChargeOff);
 
         if (missingAccrualAmount.compareTo(BigDecimal.ZERO) == 0) {
             return;
@@ -2395,13 +2410,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                     missingAccrualAmount.abs(), ZERO, ZERO, externalIdFactory.create());
         }
 
-        loan.addLoanTransaction(newAccrualTransaction);
-        loanTransactionRepository.saveAndFlush(newAccrualTransaction);
-
-        if (newAccrualTransaction.isAccrual()) {
-            businessEventNotifierService.notifyPostBusinessEvent(new LoanAccrualTransactionCreatedBusinessEvent(newAccrualTransaction));
-        } else {
-            businessEventNotifierService.notifyPostBusinessEvent(new LoanAccrualAdjustmentTransactionBusinessEvent(newAccrualTransaction));
-        }
+        ctx.getChangedTransactionDetail().addNewTransactionChangeBeforeExistingOne(new TransactionChangeData(null, newAccrualTransaction),
+                chargeOffTransaction);
     }
 }

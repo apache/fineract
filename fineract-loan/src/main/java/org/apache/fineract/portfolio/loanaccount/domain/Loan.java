@@ -107,6 +107,7 @@ import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.OutstandingAmountsDTO;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
+import org.apache.fineract.portfolio.loanaccount.data.TransactionChangeData;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
@@ -719,10 +720,12 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         ChangedTransactionDetail changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(
                 getDisbursementDate(), allNonContraTransactionsPostDisbursement, getCurrency(), getRepaymentScheduleInstallments(),
                 getActiveCharges());
-        for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
-            mapEntry.getValue().updateLoan(this);
+        for (TransactionChangeData change : changedTransactionDetail.getTransactionChanges()) {
+            change.getNewTransaction().updateLoan(this);
         }
-        this.loanTransactions.addAll(changedTransactionDetail.getNewTransactionMappings().values());
+        final List<LoanTransaction> newTransactions = changedTransactionDetail.getTransactionChanges().stream()
+                .map(TransactionChangeData::getNewTransaction).toList();
+        this.loanTransactions.addAll(newTransactions);
         updateLoanSummaryDerivedFields();
         return changedTransactionDetail;
     }
@@ -2648,14 +2651,16 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         ChangedTransactionDetail changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(
                 getDisbursementDate(), allNonContraTransactionsPostDisbursement, getCurrency(), getRepaymentScheduleInstallments(),
                 getActiveCharges());
-        for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
-            mapEntry.getValue().updateLoan(this);
+        for (TransactionChangeData change : changedTransactionDetail.getTransactionChanges()) {
+            change.getNewTransaction().updateLoan(this);
         }
         /*
          * Commented since throwing exception if external id present for one of the transactions. for this need to save
          * the reversed transactions first and then new transactions.
          */
-        this.loanTransactions.addAll(changedTransactionDetail.getNewTransactionMappings().values());
+        final List<LoanTransaction> newTransactions = changedTransactionDetail.getTransactionChanges().stream()
+                .map(TransactionChangeData::getNewTransaction).toList();
+        this.loanTransactions.addAll(newTransactions);
         updateLoanSummaryDerivedFields();
 
         return changedTransactionDetail;

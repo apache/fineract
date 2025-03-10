@@ -18,9 +18,12 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import lombok.Getter;
+import org.apache.fineract.portfolio.loanaccount.data.TransactionChangeData;
 
 /**
  * Stores details of {@link LoanTransaction}'s that were reversed or newly created
@@ -28,8 +31,41 @@ import lombok.Getter;
 @Getter
 public class ChangedTransactionDetail {
 
-    private final Map<Long, LoanTransaction> newTransactionMappings = new LinkedHashMap<>();
+    private final List<TransactionChangeData> transactionChanges = new ArrayList<>();
 
-    private final Map<LoanTransaction, Long> currentTransactionToOldId = new LinkedHashMap<>();
+    public void addTransactionChange(final TransactionChangeData transactionChangeData) {
+        for (TransactionChangeData change : transactionChanges) {
+            if (transactionChangeData.getOldTransaction() != null && change.getOldTransaction() != null
+                    && Objects.equals(change.getOldTransaction().getId(), transactionChangeData.getOldTransaction().getId())) {
+                change.setOldTransaction(transactionChangeData.getOldTransaction());
+                change.setNewTransaction(transactionChangeData.getNewTransaction());
+                return;
+            } else if (transactionChangeData.getOldTransaction() == null && change.getOldTransaction() == null
+                    && change.getNewTransaction() != null
+                    && Objects.equals(change.getNewTransaction().getId(), transactionChangeData.getNewTransaction().getId())) {
+                change.setNewTransaction(transactionChangeData.getNewTransaction());
+                return;
+            }
+        }
+        transactionChanges.add(transactionChangeData);
+    }
 
+    public void addNewTransactionChangeBeforeExistingOne(final TransactionChangeData newTransactionChange,
+            final LoanTransaction existingLoanTransaction) {
+        if (existingLoanTransaction != null) {
+            final Optional<TransactionChangeData> existingChange = transactionChanges.stream().filter(
+                    change -> change.getNewTransaction() != null && Objects.equals(change.getNewTransaction(), existingLoanTransaction))
+                    .findFirst();
+
+            if (existingChange.isPresent()) {
+                transactionChanges.add(transactionChanges.indexOf(existingChange.get()), newTransactionChange);
+                return;
+            }
+        }
+        transactionChanges.add(newTransactionChange);
+    }
+
+    public void removeTransactionChange(final LoanTransaction newTransaction) {
+        transactionChanges.removeIf(change -> change.getNewTransaction().equals(newTransaction));
+    }
 }

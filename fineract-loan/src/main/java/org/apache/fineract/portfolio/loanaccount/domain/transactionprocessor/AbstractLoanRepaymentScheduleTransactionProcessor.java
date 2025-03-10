@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -34,6 +33,7 @@ import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidDetail;
+import org.apache.fineract.portfolio.loanaccount.data.TransactionChangeData;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
@@ -187,7 +187,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                      **/
                     if (newLoanTransaction.isReversed()) {
                         loanTransaction.reverse();
-                        changedTransactionDetail.getNewTransactionMappings().put(loanTransaction.getId(), loanTransaction);
+                        changedTransactionDetail.addTransactionChange(new TransactionChangeData(loanTransaction, loanTransaction));
                     } else if (LoanTransaction.transactionAmountsMatch(currency, loanTransaction, newLoanTransaction)) {
                         loanTransaction.updateLoanTransactionToRepaymentScheduleMappings(
                                 newLoanTransaction.getLoanTransactionToRepaymentScheduleMappings());
@@ -264,7 +264,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
     }
 
     @Override
-    public void processLatestTransaction(final LoanTransaction loanTransaction, final TransactionCtx ctx) {
+    public ChangedTransactionDetail processLatestTransaction(final LoanTransaction loanTransaction, final TransactionCtx ctx) {
         switch (loanTransaction.getTypeOf()) {
             case WRITEOFF -> handleWriteOff(loanTransaction, ctx.getCurrency(), ctx.getInstallments());
             case REFUND_FOR_ACTIVE_LOAN -> handleRefund(loanTransaction, ctx.getCurrency(), ctx.getInstallments(), ctx.getCharges());
@@ -288,6 +288,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 }
             }
         }
+        return ctx.getChangedTransactionDetail();
     }
 
     @Override
@@ -421,10 +422,12 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
     private void reprocessChargebackTransactionRelation(ChangedTransactionDetail changedTransactionDetail,
             List<LoanTransaction> transactionsToBeProcessed) {
-
         List<LoanTransaction> mergedTransactionList = getMergedTransactionList(transactionsToBeProcessed, changedTransactionDetail);
-        for (Map.Entry<Long, LoanTransaction> entry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
-            if (entry.getValue().isChargeback()) {
+        for (TransactionChangeData change : changedTransactionDetail.getTransactionChanges()) {
+            LoanTransaction newTransaction = change.getNewTransaction();
+            LoanTransaction oldTransaction = change.getOldTransaction();
+
+            if (newTransaction.isChargeback()) {
                 for (LoanTransaction loanTransaction : mergedTransactionList) {
                     if (loanTransaction.isReversed()) {
                         continue;
@@ -433,8 +436,9 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                     LoanTransactionRelation oldLoanTransactionRelation = null;
                     for (LoanTransactionRelation transactionRelation : loanTransaction.getLoanTransactionRelations()) {
                         if (LoanTransactionRelationTypeEnum.CHARGEBACK.equals(transactionRelation.getRelationType())
-                                && entry.getKey().equals(transactionRelation.getToTransaction().getId())) {
-                            newLoanTransactionRelation = LoanTransactionRelation.linkToTransaction(loanTransaction, entry.getValue(),
+                                && oldTransaction != null && oldTransaction.getId() != null
+                                && oldTransaction.getId().equals(transactionRelation.getToTransaction().getId())) {
+                            newLoanTransactionRelation = LoanTransactionRelation.linkToTransaction(loanTransaction, newTransaction,
                                     LoanTransactionRelationTypeEnum.CHARGEBACK);
                             oldLoanTransactionRelation = transactionRelation;
                             break;
@@ -511,8 +515,9 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
     private List<LoanTransaction> getMergedTransactionList(List<LoanTransaction> transactionList,
             ChangedTransactionDetail changedTransactionDetail) {
-        List<LoanTransaction> mergedList = new ArrayList<>(changedTransactionDetail.getNewTransactionMappings().values());
-        mergedList.addAll(new ArrayList<>(transactionList));
+        List<LoanTransaction> mergedList = new ArrayList<>(
+                changedTransactionDetail.getTransactionChanges().stream().map(TransactionChangeData::getNewTransaction).toList());
+        mergedList.addAll(transactionList);
         return mergedList;
     }
 
@@ -525,7 +530,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         // Adding Replayed relation from newly created transaction to reversed transaction
         newLoanTransaction.getLoanTransactionRelations().add(
                 LoanTransactionRelation.linkToTransaction(newLoanTransaction, loanTransaction, LoanTransactionRelationTypeEnum.REPLAYED));
-        changedTransactionDetail.getNewTransactionMappings().put(loanTransaction.getId(), newLoanTransaction);
+        changedTransactionDetail.addTransactionChange(new TransactionChangeData(loanTransaction, newLoanTransaction));
     }
 
     protected void processCreditTransaction(LoanTransaction loanTransaction, MoneyHolder overpaymentHolder, MonetaryCurrency currency,

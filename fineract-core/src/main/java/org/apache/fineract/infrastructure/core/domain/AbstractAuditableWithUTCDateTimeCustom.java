@@ -52,11 +52,11 @@ public abstract class AbstractAuditableWithUTCDateTimeCustom<T extends Serializa
 
     private static final long serialVersionUID = 141481953116476081L;
 
-    @Column(name = CREATED_BY_DB_FIELD, nullable = false)
+    @Column(name = CREATED_BY_DB_FIELD, updatable = false, nullable = false)
     @Setter(onMethod = @__(@Override))
     private Long createdBy;
 
-    @Column(name = CREATED_DATE_DB_FIELD, nullable = false)
+    @Column(name = CREATED_DATE_DB_FIELD, updatable = false, nullable = false)
     @Setter(onMethod = @__(@Override))
     private OffsetDateTime createdDate;
 

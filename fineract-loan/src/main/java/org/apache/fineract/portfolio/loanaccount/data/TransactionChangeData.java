@@ -16,26 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
+package org.apache.fineract.portfolio.loanaccount.data;
 
-import java.time.LocalDate;
-import java.util.List;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 
-public interface ReprocessLoanTransactionsService {
+/**
+ * Represents a transaction change, storing both the old reversed transaction (if any) and the new transaction.
+ */
+@Getter
+@Setter
+@AllArgsConstructor
+public class TransactionChangeData {
 
-    void reprocessTransactions(Loan loan);
-
-    void reprocessTransactions(Loan loan, List<LoanTransaction> loanTransactions);
-
-    void reprocessTransactionsWithPostTransactionChecks(Loan loan, LocalDate transactionDate);
-
-    void processPostDisbursementTransactions(Loan loan);
-
-    void removeLoanCharge(Loan loan, LoanCharge loanCharge);
-
-    void processLatestTransaction(LoanTransaction loanTransaction, Loan loan);
-
+    private LoanTransaction oldTransaction;
+    private LoanTransaction newTransaction;
 }

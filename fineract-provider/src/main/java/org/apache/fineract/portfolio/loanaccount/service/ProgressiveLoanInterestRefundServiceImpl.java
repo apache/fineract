@@ -34,6 +34,7 @@ import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
+import org.apache.fineract.portfolio.loanaccount.data.TransactionChangeData;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -92,7 +93,9 @@ public class ProgressiveLoanInterestRefundServiceImpl implements InterestRefundS
         Pair<ChangedTransactionDetail, ProgressiveLoanInterestScheduleModel> reprocessResult = processor
                 .reprocessProgressiveLoanTransactions(loan.getDisbursementDate(), relatedRefundTransactionDate, transactionsToReprocess,
                         loan.getCurrency(), installmentsToReprocess, loan.getActiveCharges());
-        loan.getLoanTransactions().addAll(reprocessResult.getLeft().getCurrentTransactionToOldId().keySet());
+        final List<LoanTransaction> newTransactions = reprocessResult.getLeft().getTransactionChanges().stream()
+                .map(TransactionChangeData::getNewTransaction).toList();
+        loan.getLoanTransactions().addAll(newTransactions);
         ProgressiveLoanInterestScheduleModel modelAfter = reprocessResult.getRight();
 
         return emiCalculator.getSumOfDueInterestsOnDate(modelAfter, relatedRefundTransactionDate);

@@ -19,14 +19,18 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.time.LocalDate;
-import java.util.Map;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.interestpauses.service.LoanAccountTransfersService;
+import org.apache.fineract.portfolio.loanaccount.data.TransactionChangeData;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -43,6 +47,22 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
         if (changedTransactionDetail != null) {
             handleChangedDetail(changedTransactionDetail);
         }
+    }
+
+    @Override
+    public void reprocessTransactions(final Loan loan, final List<LoanTransaction> loanTransactions) {
+        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loan.getTransactionProcessor();
+        final ChangedTransactionDetail changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(
+                loan.getDisbursementDate(), loanTransactions, loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
+                loan.getActiveCharges());
+        for (TransactionChangeData change : changedTransactionDetail.getTransactionChanges()) {
+            change.getNewTransaction().updateLoan(loan);
+        }
+        final List<LoanTransaction> newTransactions = changedTransactionDetail.getTransactionChanges().stream()
+                .map(TransactionChangeData::getNewTransaction).toList();
+        loan.getLoanTransactions().addAll(newTransactions);
+        loan.updateLoanSummaryDerivedFields();
+        handleChangedDetail(changedTransactionDetail);
     }
 
     @Override
@@ -63,12 +83,30 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
         loan.removeLoanCharge(loanCharge).ifPresent(this::handleChangedDetail);
     }
 
+    @Override
+    public void processLatestTransaction(final LoanTransaction loanTransaction, final Loan loan) {
+        final ChangedTransactionDetail changedTransactionDetail = loan.getTransactionProcessor().processLatestTransaction(loanTransaction,
+                new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
+                        new MoneyHolder(loan.getTotalOverpaidAsMoney()), new ChangedTransactionDetail()));
+        final List<LoanTransaction> newTransactions = changedTransactionDetail.getTransactionChanges().stream()
+                .map(TransactionChangeData::getNewTransaction).peek(transaction -> transaction.updateLoan(loan)).toList();
+        loan.getLoanTransactions().addAll(newTransactions);
+
+        loan.updateLoanSummaryDerivedFields();
+        handleChangedDetail(changedTransactionDetail);
+    }
+
     private void handleChangedDetail(final ChangedTransactionDetail changedTransactionDetail) {
-        for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
-            loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(mapEntry.getValue());
-            loanAccountTransfersService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
+        for (TransactionChangeData change : changedTransactionDetail.getTransactionChanges()) {
+            final LoanTransaction newTransaction = change.getNewTransaction();
+            final LoanTransaction oldTransaction = change.getOldTransaction();
+
+            loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(newTransaction);
+
+            if (oldTransaction != null) {
+                loanAccountTransfersService.updateLoanTransaction(oldTransaction.getId(), newTransaction);
+            }
         }
         replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
     }
-
 }
