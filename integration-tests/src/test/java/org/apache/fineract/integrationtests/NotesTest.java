@@ -28,7 +28,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import org.apache.fineract.client.models.GetResourceTypeResourceIdNotesNoteIdResponse;
+import org.apache.fineract.client.models.NoteData;
 import org.apache.fineract.client.models.PostResourceTypeResourceIdNotesResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
@@ -222,8 +222,7 @@ public class NotesTest {
         Assertions.assertNotNull(postNoteResponse);
         Assertions.assertNotNull(postNoteResponse.getResourceId());
 
-        final GetResourceTypeResourceIdNotesNoteIdResponse getNoteResponse = NotesHelper.getSavingsNote(requestSpec, responseSpec,
-                savingsId, postNoteResponse.getResourceId());
+        NoteData getNoteResponse = NotesHelper.retrieveSavingsNote(requestSpec, responseSpec, savingsId, postNoteResponse.getResourceId());
         Assertions.assertNotNull(getNoteResponse);
         Assertions.assertEquals(noteText, getNoteResponse.getNote());
     }

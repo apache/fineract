@@ -21,7 +21,7 @@ package org.apache.fineract.integrationtests.common;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import org.apache.fineract.client.models.GetResourceTypeResourceIdNotesNoteIdResponse;
+import org.apache.fineract.client.models.NoteData;
 import org.apache.fineract.client.models.PostResourceTypeResourceIdNotesResponse;
 import org.apache.fineract.client.util.JSON;
 
@@ -217,15 +217,11 @@ public final class NotesHelper {
         return GSON.fromJson(response, PostResourceTypeResourceIdNotesResponse.class);
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static GetResourceTypeResourceIdNotesNoteIdResponse getSavingsNote(RequestSpecification requestSpec,
-            ResponseSpecification responseSpec, Integer savingsId, Integer noteId) {
+    public static NoteData retrieveSavingsNote(RequestSpecification requestSpec, ResponseSpecification responseSpec, Integer savingsId,
+            Integer noteId) {
         final String noteURL = SAVINGS_URL + "/" + savingsId + "/notes/" + noteId + "?" + Utils.TENANT_IDENTIFIER;
         final String response = Utils.performServerGet(requestSpec, responseSpec, noteURL);
-        return GSON.fromJson(response, GetResourceTypeResourceIdNotesNoteIdResponse.class);
+        return GSON.fromJson(response, NoteData.class);
     }
 
 }

@@ -23,7 +23,6 @@ import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -101,7 +100,7 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
     }
 
     @Override
-    public Collection<NoteData> retrieveNotesByResource(final Long resourceId, final Integer noteTypeId) {
+    public List<NoteData> retrieveNotesByResource(final Long resourceId, final Integer noteTypeId) {
         final NoteType noteType = NoteType.fromInt(noteTypeId);
         final NoteMapper rm = new NoteMapper();
         List<Object> paramList = new ArrayList<>(Arrays.asList(resourceId));

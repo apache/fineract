@@ -23,7 +23,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.organisation.monetary.api.CurrenciesApiResourceSwagger.CurrencyItem;
-import org.apache.fineract.portfolio.note.api.NotesApiResourceSwagger.GetResourceTypeResourceIdNotesResponse;
+import org.apache.fineract.portfolio.note.data.NoteData;
 import org.apache.fineract.portfolio.paymenttype.api.PaymentTypeApiResourceSwagger.GetPaymentTypesResponse;
 
 /**
@@ -111,7 +111,7 @@ final class JournalEntriesApiResourceSwagger {
             @Schema(example = "2")
             public Long transactionId;
             public EnumOptionType transactionType;
-            public GetResourceTypeResourceIdNotesResponse noteData;
+            public NoteData noteData;
             public PaymentDetailData paymentDetails;
         }
 

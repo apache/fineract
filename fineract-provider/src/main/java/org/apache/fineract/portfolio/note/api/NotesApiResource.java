@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.note.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -35,12 +34,10 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.UriInfo;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -48,10 +45,10 @@ import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.note.data.NoteData;
+import org.apache.fineract.portfolio.note.data.NoteRequest;
 import org.apache.fineract.portfolio.note.domain.NoteType;
 import org.apache.fineract.portfolio.note.exception.NoteResourceNotSupportedException;
 import org.apache.fineract.portfolio.note.service.NoteReadPlatformService;
@@ -84,10 +81,9 @@ public class NotesApiResource {
     @Operation(summary = "Retrieve a Resource's description", description = "Retrieves a Resource's Notes\n\n"
             + "Note: Notes are returned in descending createOn order.\n" + "\n" + "Example Requests:\n" + "\n" + "clients/2/notes\n" + "\n"
             + "\n" + "groups/2/notes?fields=note,createdOn,createdByUsername")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = NotesApiResourceSwagger.GetResourceTypeResourceIdNotesResponse.class)))) })
-    public String retrieveNotesByResource(@PathParam("resourceType") @Parameter(description = "resourceType") final String resourceType,
-            @PathParam("resourceId") @Parameter(description = "resourceId") final Long resourceId, @Context final UriInfo uriInfo) {
+    public List<NoteData> retrieveNotesByResource(
+            @PathParam("resourceType") @Parameter(description = "resourceType") final String resourceType,
+            @PathParam("resourceId") @Parameter(description = "resourceId") final Long resourceId) {
 
         final NoteType noteType = NoteType.fromApiUrl(resourceType);
 
@@ -99,10 +95,7 @@ public class NotesApiResource {
 
         final Integer noteTypeId = noteType.getValue();
 
-        final Collection<NoteData> notes = this.readPlatformService.retrieveNotesByResource(resourceId, noteTypeId);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, notes, NOTE_DATA_PARAMETERS);
+        return readPlatformService.retrieveNotesByResource(resourceId, noteTypeId);
     }
 
     @GET
@@ -113,11 +106,9 @@ public class NotesApiResource {
             + "clients/1/notes/76\n" + "\n" + "\n" + "groups/1/notes/20\n" + "\n" + "\n"
             + "clients/1/notes/76?fields=note,createdOn,createdByUsername\n" + "\n" + "\n"
             + "groups/1/notes/20?fields=note,createdOn,createdByUsername")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = NotesApiResourceSwagger.GetResourceTypeResourceIdNotesNoteIdResponse.class))) })
-    public String retrieveNote(@PathParam("resourceType") @Parameter(description = "resourceType") final String resourceType,
+    public NoteData retrieveNote(@PathParam("resourceType") @Parameter(description = "resourceType") final String resourceType,
             @PathParam("resourceId") @Parameter(description = "resourceId") final Long resourceId,
-            @PathParam("noteId") @Parameter(description = "noteId") final Long noteId, @Context final UriInfo uriInfo) {
+            @PathParam("noteId") @Parameter(description = "noteId") final Long noteId) {
 
         final NoteType noteType = NoteType.fromApiUrl(resourceType);
 
@@ -130,9 +121,7 @@ public class NotesApiResource {
         final Integer noteTypeId = noteType.getValue();
 
         final NoteData note = this.readPlatformService.retrieveNote(noteId, resourceId, noteTypeId);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, note, NOTE_DATA_PARAMETERS);
+        return note;
     }
 
     @POST
@@ -140,12 +129,12 @@ public class NotesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Add a Resource Note", description = "Adds a new note to a supported resource.\n\n" + "Example Requests:\n" + "\n"
             + "clients/1/notes\n" + "\n" + "\n" + "groups/1/notes")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = NotesApiResourceSwagger.PostResourceTypeResourceIdNotesRequest.class)))
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = NoteRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = NotesApiResourceSwagger.PostResourceTypeResourceIdNotesResponse.class))) })
-    public String addNewNote(@PathParam("resourceType") @Parameter(description = "resourceType") final String resourceType,
+    public CommandProcessingResult addNewNote(@PathParam("resourceType") @Parameter(description = "resourceType") final String resourceType,
             @PathParam("resourceId") @Parameter(description = "resourceId") final Long resourceId,
-            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
+            @Parameter(hidden = true) final NoteRequest noteRequest) {
 
         final NoteType noteType = NoteType.fromApiUrl(resourceType);
 
@@ -155,11 +144,9 @@ public class NotesApiResource {
 
         final CommandWrapper resourceDetails = getResourceDetails(noteType, resourceId);
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createNote(resourceDetails, resourceType, resourceId)
-                .withJson(apiRequestBodyAsJson).build();
+                .withJson(toApiJsonSerializer.serialize(noteRequest)).build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @PUT
@@ -167,13 +154,13 @@ public class NotesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Resource Note", description = "Updates a Resource Note")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = NotesApiResourceSwagger.PutResourceTypeResourceIdNotesNoteIdRequest.class)))
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = NoteRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = NotesApiResourceSwagger.PutResourceTypeResourceIdNotesNoteIdResponse.class))) })
-    public String updateNote(@PathParam("resourceType") @Parameter(description = "resourceType") final String resourceType,
+    public CommandProcessingResult updateNote(@PathParam("resourceType") @Parameter(description = "resourceType") final String resourceType,
             @PathParam("resourceId") @Parameter(description = "resourceId") final Long resourceId,
             @PathParam("noteId") @Parameter(description = "noteId") final Long noteId,
-            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
+            @Parameter(hidden = true) final NoteRequest noteRequest) {
 
         final NoteType noteType = NoteType.fromApiUrl(resourceType);
 
@@ -184,11 +171,9 @@ public class NotesApiResource {
         final CommandWrapper resourceDetails = getResourceDetails(noteType, resourceId);
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateNote(resourceDetails, resourceType, resourceId, noteId)
-                .withJson(apiRequestBodyAsJson).build();
+                .withJson(toApiJsonSerializer.serialize(noteRequest)).build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @DELETE
@@ -198,7 +183,7 @@ public class NotesApiResource {
     @Operation(summary = "Delete a Resource Note", description = "Deletes a Resource Note")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = NotesApiResourceSwagger.DeleteResourceTypeResourceIdNotesNoteIdResponse.class))) })
-    public String deleteNote(@PathParam("resourceType") @Parameter(description = "resourceType") final String resourceType,
+    public CommandProcessingResult deleteNote(@PathParam("resourceType") @Parameter(description = "resourceType") final String resourceType,
             @PathParam("resourceId") @Parameter(description = "resourceId") final Long resourceId,
             @PathParam("noteId") @Parameter(description = "noteId") final Long noteId) {
 
@@ -213,9 +198,7 @@ public class NotesApiResource {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteNote(resourceDetails, resourceType, resourceId, noteId)
                 .build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     private CommandWrapper getResourceDetails(final NoteType type, final Long resourceId) {
