@@ -344,6 +344,8 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
 
             List<SavingsAccountTransactionData> listOfTransactionsNegative = new ArrayList<>();
             List<SavingsAccountTransactionData> listOfTransactionsPositive = new ArrayList<>();
+            Money balancePositive = Money.zero(savingsAccountData.getCurrency());
+            Money balanceNegative = Money.zero(savingsAccountData.getCurrency());
 
             for (SavingsAccountTransactionData lists : listOfTransactions){
                 if(MathUtil.isLessThanZero(lists.getRunningBalance())){
@@ -361,7 +363,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                         isSavingsInterestPostingAtCurrentPeriodEnd, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation,
                         isUserPosting, financialYearBeginningMonth, savingsAccountData.isAllowOverdraft());
 
-                periodStartingBalance = postingPeriod.closingBalance();
+                balanceNegative = postingPeriod.closingBalance();
                 log.debug("  postingPeriod {} {}", postingPeriod.dateOfPostingTransaction(), postingPeriod.getInterestEarned().getAmount());
                 if (MathUtil.isZero(postingPeriod.getOpeningBalance().getAmount()) && MathUtil.isZero( postingPeriod.closingBalance().getAmount())){
 
@@ -378,7 +380,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                         isSavingsInterestPostingAtCurrentPeriodEnd, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation,
                         isUserPosting, financialYearBeginningMonth, savingsAccountData.isAllowOverdraft());
 
-                periodStartingBalance = postingPeriod.closingBalance();
+                balancePositive = postingPeriod.closingBalance();
                 log.debug("  postingPeriod {} {}", postingPeriod.dateOfPostingTransaction(), postingPeriod.getInterestEarned().getAmount());
                 if (MathUtil.isZero(postingPeriod.getOpeningBalance().getAmount()) && MathUtil.isZero( postingPeriod.closingBalance().getAmount())){
 
@@ -582,7 +584,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                         transaction.updateOverdraftAmount(overdraftAmount.getAmount());
                     }
                     transaction.updateRunningBalance(runningBalance);
-                    addTransactionToExisting(accountTransaction, savingsAccountData);
+                    //addTransactionToExisting(accountTransaction, savingsAccountData);
 
                     isTransactionsModified = true;
                 }
