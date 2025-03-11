@@ -110,8 +110,8 @@ public class SavingsSchedularInterestPoster {
                 if (savingsAccountTransactionData.getId() == null) {
                     final String key = savingsAccountTransactionData.getRefNo();
                     final Boolean isNegativeBalance = savingsAccountTransactionData.getIsNegativeBalance();
-                    if (savingsAccountTransactionDataHashMap.containsKey(key) && isNegativeBalance && (savingsAccountTransactionData.getFlagValidationInterest() && savingsAccountTransactionData.getFlagValidationOverdraft())) {
-                        paramsForGLInsertion = accuntNegative(savingsAccountData, userId,savingsAccountTransactionData,key,savingsAccountTransactionDataHashMap);
+                    if (MathUtil.isLessThanZero(savingsAccountTransactionData.getRunningBalance()) && isNegativeBalance && (savingsAccountTransactionData.getFlagValidationInterest() && savingsAccountTransactionData.getFlagValidationOverdraft())) {
+                        paramsForGLInsertion.addAll(accuntNegative(savingsAccountData, userId,savingsAccountTransactionData,key,savingsAccountTransactionDataHashMap));
                     }else{
                         final SavingsAccountTransactionData dataFromFetch = savingsAccountTransactionDataHashMap.get(key);
                         savingsAccountTransactionData.setId(dataFromFetch.getId());
