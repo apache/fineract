@@ -1063,4 +1063,9 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         return DateUtils.isAfter(referenceDate, getFromDate()) && !DateUtils.isAfter(referenceDate, getDueDate());
     }
 
+    public boolean isDueBalanceZero() {
+        return MathUtil.isZero(
+                MathUtil.nullToZero(MathUtil.add(getPrincipal(), getInterestCharged(), getFeeChargesCharged(), getPenaltyCharges())));
+    }
+
 }

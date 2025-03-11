@@ -1860,27 +1860,42 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             // allocation rule is NEXT_INSTALLMENT or LAST_INSTALLMENT hence the list has only one element.
             List<LoanRepaymentScheduleInstallment> inAdvanceInstallments = new ArrayList<>();
             if (FutureInstallmentAllocationRule.REAMORTIZATION.equals(futureInstallmentAllocationRule)) {
-                inAdvanceInstallments = installments.stream().filter(LoanRepaymentScheduleInstallment::isNotFullyPaidOff)
-                        .filter(e -> loanTransaction.isBefore(e.getDueDate())).toList();
+                inAdvanceInstallments = installments.stream().filter(LoanRepaymentScheduleInstallment::isNotFullyPaidOff) //
+                        .filter(e -> loanTransaction.isBefore(e.getDueDate())) //
+                        .toList(); //
             } else if (FutureInstallmentAllocationRule.NEXT_INSTALLMENT.equals(futureInstallmentAllocationRule)) {
-                inAdvanceInstallments = installments.stream().filter(LoanRepaymentScheduleInstallment::isNotFullyPaidOff)
-                        .filter(e -> loanTransaction.isBefore(e.getDueDate()))
-                        .min(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).stream().toList();
+                inAdvanceInstallments = installments.stream().filter(LoanRepaymentScheduleInstallment::isNotFullyPaidOff) //
+                        .filter(e -> loanTransaction.isBefore(e.getDueDate())) //
+                        .min(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).stream() //
+                        .toList(); //
             } else if (FutureInstallmentAllocationRule.LAST_INSTALLMENT.equals(futureInstallmentAllocationRule)) {
-                inAdvanceInstallments = installments.stream().filter(LoanRepaymentScheduleInstallment::isNotFullyPaidOff)
-                        .filter(e -> loanTransaction.isBefore(e.getDueDate()))
-                        .max(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).stream().toList();
+                inAdvanceInstallments = installments.stream()
+                        // In case of Last installment strategy it could occur the projected EMI of an installment is
+                        // zero,
+                        // but we should still involve this period to allocated further amounts and pushing this till we
+                        // run ouf of unallocated amounts
+                        .filter(i -> i.isNotFullyPaidOff() || i.isDueBalanceZero()) //
+                        .filter(e -> loanTransaction.isBefore(e.getDueDate())) //
+                        .max(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).stream() //
+                        .toList(); //
             } else if (FutureInstallmentAllocationRule.NEXT_LAST_INSTALLMENT.equals(futureInstallmentAllocationRule)) {
                 // try to resolve as current installment ( not due )
-                inAdvanceInstallments = installments.stream().filter(LoanRepaymentScheduleInstallment::isNotFullyPaidOff)
-                        .filter(e -> loanTransaction.isBefore(e.getDueDate())).filter(f -> loanTransaction.isAfter(f.getFromDate())
-                                || (loanTransaction.isOn(f.getFromDate()) && f.getInstallmentNumber() == 1))
-                        .toList();
+                inAdvanceInstallments = installments.stream().filter(LoanRepaymentScheduleInstallment::isNotFullyPaidOff) //
+                        .filter(e -> loanTransaction.isBefore(e.getDueDate())) //
+                        .filter(f -> loanTransaction.isAfter(f.getFromDate())
+                                || (loanTransaction.isOn(f.getFromDate()) && f.getInstallmentNumber() == 1)) //
+                        .toList(); //
                 // if there is no current installment, resolve similar to LAST_INSTALLMENT
                 if (inAdvanceInstallments.isEmpty()) {
-                    inAdvanceInstallments = installments.stream().filter(LoanRepaymentScheduleInstallment::isNotFullyPaidOff)
-                            .filter(e -> loanTransaction.isBefore(e.getDueDate()))
-                            .max(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).stream().toList();
+                    inAdvanceInstallments = installments.stream()
+                            // In case of Last installment strategy it could occur the projected EMI of an installment
+                            // is zero,
+                            // but we should still involve this period to allocated further amounts and pushing this
+                            // till we run ouf of unallocated amounts
+                            .filter(i -> i.isNotFullyPaidOff() || i.isDueBalanceZero()) //
+                            .filter(e -> loanTransaction.isBefore(e.getDueDate())) //
+                            .max(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).stream() //
+                            .toList(); //
                 }
             }
 
