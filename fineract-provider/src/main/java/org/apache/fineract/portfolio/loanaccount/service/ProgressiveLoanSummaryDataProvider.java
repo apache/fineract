@@ -26,6 +26,7 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanSummaryData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionBalance;
@@ -118,10 +119,7 @@ public class ProgressiveLoanSummaryDataProvider extends CommonLoanSummaryDataPro
                     if (dueAmounts != null) {
                         BigDecimal interestPaid = nextUnpaidInAdvanceInstallment.getInterestPaid();
                         BigDecimal dueInterest = dueAmounts.getDueInterest().getAmount();
-                        if (interestPaid == null) {
-                            return dueInterest;
-                        }
-                        return dueInterest.subtract(interestPaid);
+                        return MathUtil.subtractToZero(dueInterest, interestPaid);
                     }
                 }
             }

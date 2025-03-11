@@ -33,6 +33,7 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -1940,6 +1941,14 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                             Money evenPortion = transactionAmountUnprocessed.dividedBy(numberOfInstallments, MoneyHelper.getMathContext());
                             // Adjustment might be needed due to the divide operation and the rounding mode
                             Money balanceAdjustment = transactionAmountUnprocessed.minus(evenPortion.multipliedBy(numberOfInstallments));
+                            if (evenPortion.add(balanceAdjustment).isLessThanZero()) {
+                                // Note: Rounding mode DOWN grants that evenPortion cant pay more than unprocessed
+                                // transaction amount.
+                                evenPortion = transactionAmountUnprocessed.dividedBy(numberOfInstallments,
+                                        new MathContext(MoneyHelper.getMathContext().getPrecision(), RoundingMode.DOWN));
+                                balanceAdjustment = transactionAmountUnprocessed.minus(evenPortion.multipliedBy(numberOfInstallments));
+                            }
+
                             for (LoanRepaymentScheduleInstallment inAdvanceInstallment : inAdvanceInstallments) {
                                 Set<LoanCharge> inAdvanceInstallmentCharges = getLoanChargesOfInstallment(charges, inAdvanceInstallment,
                                         firstNormalInstallmentNumber);
