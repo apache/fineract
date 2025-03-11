@@ -302,6 +302,10 @@ public final class DateUtils {
         return isAfterBusinessDate(localDate);
     }
 
+    public static boolean isDateInThePast(final LocalDate localDate) {
+        return isBeforeBusinessDate(localDate);
+    }
+
     public static int compare(LocalDate first, LocalDate second) {
         return compare(first, second, true);
     }
@@ -332,6 +336,10 @@ public final class DateUtils {
 
     public static boolean isAfter(LocalDate first, LocalDate second) {
         return first != null && (second == null || first.isAfter(second));
+    }
+
+    public static boolean isAfterInclusive(LocalDate first, LocalDate second) {
+        return isAfter(first, second) || isEqual(first, second);
     }
 
     public static long getDifference(LocalDate first, LocalDate second, @NotNull ChronoUnit unit) {

@@ -78,6 +78,7 @@ import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationVa
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanTransactionValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanUpdateCommandFromApiJsonDeserializer;
+import org.apache.fineract.portfolio.loanaccount.service.adjustment.LoanAdjustmentServiceImpl;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecksRepository;
@@ -90,10 +91,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class LoanWritePlatformServiceJpaRepositoryImplTest {
+class LoanAdjustmentServiceImplTest {
 
     @InjectMocks
-    private LoanWritePlatformServiceJpaRepositoryImpl loanWritePlatformService;
+    private LoanAdjustmentServiceImpl underTest;
 
     @Mock
     private LoanRepaymentScheduleTransactionProcessorFactory transactionProcessorFactory;
@@ -240,7 +241,7 @@ class LoanWritePlatformServiceJpaRepositoryImplTest {
         when(newTransactionDetail.isRepaymentLikeType()).thenReturn(true);
 
         // Act
-        loanWritePlatformService.adjustExistingTransaction(loan, newTransactionDetail, loanLifecycleStateMachine, transactionForAdjustment,
+        underTest.adjustExistingTransaction(loan, newTransactionDetail, loanLifecycleStateMachine, transactionForAdjustment,
                 existingTransactionIds, existingReversedTransactionIds, scheduleGeneratorDTO, reversalExternalId);
 
         // Assert
@@ -285,7 +286,7 @@ class LoanWritePlatformServiceJpaRepositoryImplTest {
         when(newTransactionDetail.isRepaymentLikeType()).thenReturn(true);
 
         // Act
-        loanWritePlatformService.adjustExistingTransaction(loan, newTransactionDetail, loanLifecycleStateMachine, transactionForAdjustment,
+        underTest.adjustExistingTransaction(loan, newTransactionDetail, loanLifecycleStateMachine, transactionForAdjustment,
                 existingTransactionIds, existingReversedTransactionIds, scheduleGeneratorDTO, reversalExternalId);
 
         // Assert

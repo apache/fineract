@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+import java.time.LocalDate;
+import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -30,4 +32,11 @@ public interface LoanChargeRepository extends JpaRepository<LoanCharge, Long>, J
 
     @Query(FIND_ID_BY_EXTERNAL_ID)
     Long findIdByExternalId(@Param("externalId") ExternalId externalId);
+
+    @Query("""
+            SELECT lc FROM LoanCharge lc
+            WHERE lc.loan.id = :loanId
+            AND lc.dueDate >= :fromDate
+            """)
+    List<LoanCharge> findByLoanIdAndFromDueDate(@Param("loanId") Long loanId, @Param("fromDate") LocalDate fromDate);
 }

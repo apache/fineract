@@ -61,6 +61,7 @@ import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.AllowAttributeOverrides;
 import org.apache.fineract.client.models.BusinessDateRequest;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdStatus;
@@ -71,6 +72,7 @@ import org.apache.fineract.client.models.LoanPointInTimeData;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
+import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
@@ -796,6 +798,14 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
         return chargeId.longValue();
     }
 
+    protected Long createOverduePenaltyPercentageCharge(double percentageAmount, Integer feeFrequency, int feeInterval) {
+        Integer chargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
+                ChargesHelper.getLoanOverdueFeeJSONWithCalculationTypePercentageWithFeeInterval(String.valueOf(percentageAmount),
+                        feeFrequency, feeInterval));
+        assertNotNull(chargeId);
+        return chargeId.longValue();
+    }
+
     protected void verifyRepaymentSchedule(GetLoansLoanIdResponse savedLoanResponse, GetLoansLoanIdResponse actualLoanResponse,
             int totalPeriods, int identicalPeriods) {
         List<GetLoansLoanIdRepaymentPeriod> savedPeriods = savedLoanResponse.getRepaymentSchedule().getPeriods();
@@ -931,6 +941,18 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
             }
             Assertions.assertEquals(installments[i].completed, period.getComplete());
             Assertions.assertEquals(LocalDate.parse(installments[i].dueDate, dateTimeFormatter), period.getDueDate());
+        }
+    }
+
+    protected void runFromToInclusive(String fromDate, String toDate, Runnable runnable) {
+        DateTimeFormatter format = DateTimeFormatter.ofPattern(DATETIME_PATTERN);
+        LocalDate startDate = LocalDate.parse(fromDate, format);
+        LocalDate endDate = LocalDate.parse(toDate, format);
+
+        LocalDate currentDate = startDate;
+        while (currentDate.isBefore(endDate) || currentDate.isEqual(endDate)) {
+            runAt(format.format(currentDate), runnable);
+            currentDate = currentDate.plusDays(1);
         }
     }
 
@@ -1090,6 +1112,17 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     protected PostLoansLoanIdChargesResponse addLoanCharge(Long loanId, Long chargeId, String date, Double amount) {
         String payload = LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(chargeId.toString(), date, amount.toString());
         return loanTransactionHelper.addChargeForLoan(loanId.intValue(), payload, responseSpec);
+    }
+
+    protected List<GetLoansLoanIdChargesChargeIdResponse> getOverdueInstallmentLoanCharges(Long loanId) {
+        return ok(fineractClient().loanCharges.retrieveAllLoanCharges(loanId)).stream() //
+                .filter(ch -> ch.getChargeTimeType().getId().intValue() == ChargesHelper.CHARGE_OVERDUE_INSTALLMENT_FEE) //
+                .toList(); //
+    }
+
+    protected void deactivateOverdueLoanCharges(Long loanId, String fromDueDate) {
+        ok(fineractClient().loanCharges.executeLoanCharge(loanId,
+                new PostLoansLoanIdChargesRequest().dueDate(fromDueDate).dateFormat(DATETIME_PATTERN).locale("en"), "deactivateOverdue"));
     }
 
     protected void waiveLoanCharge(Long loanId, Long chargeId, Integer installmentNumber) {

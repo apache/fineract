@@ -294,6 +294,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
                 || !loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
             return;
         }
+
         LoanInterestRecalculationDetails recalculationDetails = loan.getLoanInterestRecalculationDetails();
         if (recalculationDetails != null && recalculationDetails.isCompoundingToBePostedAsTransaction()) {
             return;
@@ -523,7 +524,9 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
         loanCharges = loan.getLoanCharges(lc -> !lc.isDueAtDisbursement() && (lc.isInstalmentFee() ? !DateUtils.isBefore(tillDate, dueDate)
                 : isChargeDue(lc, tillDate, chargeOnDueDate, installment, period.isFirstPeriod())));
         for (LoanCharge loanCharge : loanCharges) {
-            addChargeAccrual(loanCharge, tillDate, chargeOnDueDate, installment, accrualPeriods);
+            if (loanCharge.isActive()) {
+                addChargeAccrual(loanCharge, tillDate, chargeOnDueDate, installment, accrualPeriods);
+            }
         }
     }
 

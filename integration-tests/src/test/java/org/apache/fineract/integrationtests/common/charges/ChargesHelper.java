@@ -50,19 +50,19 @@ public final class ChargesHelper {
     private static final Integer CHARGE_APPLIES_TO_CLIENT = 3;
     private static final Integer CHARGE_APPLIES_TO_SHARES = 4;
 
-    private static final Integer CHARGE_DISBURSEMENT_FEE = 1;
-    private static final Integer CHARGE_SPECIFIED_DUE_DATE = 2;
-    private static final Integer CHARGE_SAVINGS_ACTIVATION_FEE = 3;
-    private static final Integer CHARGE_WITHDRAWAL_FEE = 5;
-    private static final Integer CHARGE_ANNUAL_FEE = 6;
-    private static final Integer CHARGE_MONTHLY_FEE = 7;
-    private static final Integer CHARGE_INSTALLMENT_FEE = 8;
-    private static final Integer CHARGE_OVERDUE_INSTALLMENT_FEE = 9;
-    private static final Integer CHARGE_OVERDRAFT_FEE = 10;
-    private static final Integer WEEKLY_FEE = 11;
-    private static final Integer SHAREACCOUNT_ACTIVATION = 13;
-    private static final Integer SHARE_PURCHASE = 14;
-    private static final Integer SHARE_REDEEM = 15;
+    public static final Integer CHARGE_DISBURSEMENT_FEE = 1;
+    public static final Integer CHARGE_SPECIFIED_DUE_DATE = 2;
+    public static final Integer CHARGE_SAVINGS_ACTIVATION_FEE = 3;
+    public static final Integer CHARGE_WITHDRAWAL_FEE = 5;
+    public static final Integer CHARGE_ANNUAL_FEE = 6;
+    public static final Integer CHARGE_MONTHLY_FEE = 7;
+    public static final Integer CHARGE_INSTALLMENT_FEE = 8;
+    public static final Integer CHARGE_OVERDUE_INSTALLMENT_FEE = 9;
+    public static final Integer CHARGE_OVERDRAFT_FEE = 10;
+    public static final Integer WEEKLY_FEE = 11;
+    public static final Integer SHAREACCOUNT_ACTIVATION = 13;
+    public static final Integer SHARE_PURCHASE = 14;
+    public static final Integer SHARE_REDEEM = 15;
 
     private static final Integer CHARGE_SAVINGS_NO_ACTIVITY_FEE = 16;
 
@@ -76,10 +76,10 @@ public final class ChargesHelper {
     private static final Integer CHARGE_PAYMENT_MODE_REGULAR = 0;
     private static final Integer CHARGE_PAYMENT_MODE_ACCOUNT_TRANSFER = 1;
 
-    private static final Integer CHARGE_FEE_FREQUENCY_DAYS = 0;
-    private static final Integer CHARGE_FEE_FREQUENCY_WEEKS = 1;
-    private static final Integer CHARGE_FEE_FREQUENCY_MONTHS = 2;
-    private static final Integer CHARGE_FEE_FREQUENCY_YEARS = 3;
+    public static final Integer CHARGE_FEE_FREQUENCY_DAYS = 0;
+    public static final Integer CHARGE_FEE_FREQUENCY_WEEKS = 1;
+    public static final Integer CHARGE_FEE_FREQUENCY_MONTHS = 2;
+    public static final Integer CHARGE_FEE_FREQUENCY_YEARS = 3;
 
     private static final boolean ACTIVE = true;
     private static final boolean PENALTY = true;
@@ -486,6 +486,25 @@ public final class ChargesHelper {
         map.put("chargePaymentMode", ChargesHelper.CHARGE_PAYMENT_MODE_REGULAR);
         map.put("chargeTimeType", CHARGE_OVERDUE_INSTALLMENT_FEE);
         map.put("chargeCalculationType", ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT_AND_INTEREST);
+        String chargesCreateJson = new Gson().toJson(map);
+        LOG.info("{}", chargesCreateJson);
+        return chargesCreateJson;
+    }
+
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
+    public static String getLoanOverdueFeeJSONWithCalculationTypePercentageWithFeeInterval(String penaltyPercentageAmount,
+            Integer feeFrequency, int feeInterval) {
+        final HashMap<String, Object> map = populateDefaultsForLoan();
+        map.put("penalty", ChargesHelper.PENALTY);
+        map.put("amount", penaltyPercentageAmount);
+        map.put("chargePaymentMode", ChargesHelper.CHARGE_PAYMENT_MODE_REGULAR);
+        map.put("chargeTimeType", CHARGE_OVERDUE_INSTALLMENT_FEE);
+        map.put("chargeCalculationType", ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT_AND_INTEREST);
+        map.put("feeFrequency", feeFrequency);
+        map.put("feeInterval", feeInterval);
         String chargesCreateJson = new Gson().toJson(map);
         LOG.info("{}", chargesCreateJson);
         return chargesCreateJson;
