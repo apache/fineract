@@ -16,38 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.cache.api;
+package org.apache.fineract.infrastructure.cache.data.request;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.io.Serial;
+import java.io.Serializable;
 
-/**
- * Created by sanyam on 28/7/17.
- */
-final class CacheApiResourceSwagger {
+public record CacheRequest(Long cacheType) implements Serializable {
 
-    private CacheApiResourceSwagger() {
-
-    }
-
-    @Schema(description = "PutCachesResponse")
-    public static final class PutCachesResponse {
-
-        private PutCachesResponse() {
-
-        }
-
-        public static final class PutCachechangesSwagger {
-
-            private PutCachechangesSwagger() {
-
-            }
-
-            @Schema(example = "2")
-            public Long cacheType;
-
-        }
-
-        public PutCachechangesSwagger cacheType;
-
-    }
+    @Serial
+    private static final long serialVersionUID = 1L;
 }
