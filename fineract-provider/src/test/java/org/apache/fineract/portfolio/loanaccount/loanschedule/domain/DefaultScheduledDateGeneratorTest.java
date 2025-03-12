@@ -105,19 +105,28 @@ public class DefaultScheduledDateGeneratorTest {
                 loanApplicationTerms, holidayDetailDTO);
 
         // then
-        assertThat(result.size()).isEqualTo(4);
-        assertThat(result.get(0).periodNumber()).isEqualTo(1);
-        assertThat(result.get(0).periodFromDate().toString()).isEqualTo("2024-01-01");
-        assertThat(result.get(0).periodDueDate().toString()).isEqualTo("2024-02-01");
-        assertThat(result.get(1).periodNumber()).isEqualTo(2);
-        assertThat(result.get(1).periodFromDate().toString()).isEqualTo("2024-02-01");
-        assertThat(result.get(1).periodDueDate().toString()).isEqualTo("2024-03-01");
-        assertThat(result.get(2).periodNumber()).isEqualTo(3);
-        assertThat(result.get(2).periodFromDate().toString()).isEqualTo("2024-03-01");
-        assertThat(result.get(2).periodDueDate().toString()).isEqualTo("2024-04-01");
-        assertThat(result.get(3).periodNumber()).isEqualTo(4);
-        assertThat(result.get(3).periodFromDate().toString()).isEqualTo("2024-04-01");
-        assertThat(result.get(3).periodDueDate().toString()).isEqualTo("2024-05-01");
+        assertThat(result).hasSize(4);
+        assertThat(result).satisfies(periods -> {
+            LoanScheduleModelPeriod firstPeriod = periods.get(0);
+            assertThat(firstPeriod.periodNumber()).isEqualTo(1);
+            assertThat(firstPeriod.periodFromDate()).hasToString("2024-01-01");
+            assertThat(firstPeriod.periodDueDate()).hasToString("2024-02-01");
+
+            LoanScheduleModelPeriod secondPeriod = periods.get(1);
+            assertThat(secondPeriod.periodNumber()).isEqualTo(2);
+            assertThat(secondPeriod.periodFromDate()).hasToString("2024-02-01");
+            assertThat(secondPeriod.periodDueDate()).hasToString("2024-03-01");
+
+            LoanScheduleModelPeriod thirdPeriod = periods.get(2);
+            assertThat(thirdPeriod.periodNumber()).isEqualTo(3);
+            assertThat(thirdPeriod.periodFromDate()).hasToString("2024-03-01");
+            assertThat(thirdPeriod.periodDueDate()).hasToString("2024-04-01");
+
+            LoanScheduleModelPeriod fourthPeriod = periods.get(3);
+            assertThat(fourthPeriod.periodNumber()).isEqualTo(4);
+            assertThat(fourthPeriod.periodFromDate()).hasToString("2024-04-01");
+            assertThat(fourthPeriod.periodDueDate()).hasToString("2024-05-01");
+        });
     }
 
     @Test
@@ -126,17 +135,17 @@ public class DefaultScheduledDateGeneratorTest {
     @WithSystemProperty(key = FLOATING_TIMEZONE_PROPERTY_KEY, value = "true")
     public void test_AdjustRepaymentDate_Works_WithSameTenant_And_SystemTimeZone() {
         // given
-        HolidayDetailDTO holidayDetailDTO = createHolidayDTO();
-
         LocalDate dueRepaymentPeriodDate = LocalDate.of(2023, 11, 26);
 
-        LoanApplicationTerms loanApplicationTerms = createLoanApplicationTerms(dueRepaymentPeriodDate, holidayDetailDTO);
+        LoanApplicationTerms loanApplicationTerms = createLoanApplicationTerms(dueRepaymentPeriodDate, createHolidayDTO());
         // when
-        AdjustedDateDetailsDTO result = underTest.adjustRepaymentDate(dueRepaymentPeriodDate, loanApplicationTerms, holidayDetailDTO);
+        AdjustedDateDetailsDTO result = underTest.adjustRepaymentDate(dueRepaymentPeriodDate, loanApplicationTerms, createHolidayDTO());
         // then
-        assertThat(result.getChangedScheduleDate()).isEqualTo(LocalDate.of(2023, 11, 26));
-        assertThat(result.getChangedActualRepaymentDate()).isEqualTo(LocalDate.of(2023, 11, 26));
-        assertThat(result.getNextRepaymentPeriodDueDate()).isEqualTo(LocalDate.of(2023, 12, 26));
+        assertThat(result).satisfies(r -> {
+            assertThat(r.getChangedScheduleDate()).isEqualTo(LocalDate.of(2023, 11, 26));
+            assertThat(r.getChangedActualRepaymentDate()).isEqualTo(LocalDate.of(2023, 11, 26));
+            assertThat(r.getNextRepaymentPeriodDueDate()).isEqualTo(LocalDate.of(2023, 12, 26));
+        });
     }
 
     @Test
@@ -145,17 +154,17 @@ public class DefaultScheduledDateGeneratorTest {
     @WithSystemProperty(key = FLOATING_TIMEZONE_PROPERTY_KEY, value = "true")
     public void test_AdjustRepaymentDate_Works_WithDifferentTenant_And_SystemTimeZone() {
         // given
-        HolidayDetailDTO holidayDetailDTO = createHolidayDTO();
-
         LocalDate dueRepaymentPeriodDate = LocalDate.of(2023, 11, 26);
 
-        LoanApplicationTerms loanApplicationTerms = createLoanApplicationTerms(dueRepaymentPeriodDate, holidayDetailDTO);
+        LoanApplicationTerms loanApplicationTerms = createLoanApplicationTerms(dueRepaymentPeriodDate, createHolidayDTO());
         // when
-        AdjustedDateDetailsDTO result = underTest.adjustRepaymentDate(dueRepaymentPeriodDate, loanApplicationTerms, holidayDetailDTO);
+        AdjustedDateDetailsDTO result = underTest.adjustRepaymentDate(dueRepaymentPeriodDate, loanApplicationTerms, createHolidayDTO());
         // then
-        assertThat(result.getChangedScheduleDate()).isEqualTo(LocalDate.of(2023, 11, 26));
-        assertThat(result.getChangedActualRepaymentDate()).isEqualTo(LocalDate.of(2023, 11, 26));
-        assertThat(result.getNextRepaymentPeriodDueDate()).isEqualTo(LocalDate.of(2023, 12, 26));
+        assertThat(result).satisfies(r -> {
+            assertThat(r.getChangedScheduleDate()).isEqualTo(LocalDate.of(2023, 11, 26));
+            assertThat(r.getChangedActualRepaymentDate()).isEqualTo(LocalDate.of(2023, 11, 26));
+            assertThat(r.getNextRepaymentPeriodDueDate()).isEqualTo(LocalDate.of(2023, 12, 26));
+        });
     }
 
     private LoanApplicationTerms createLoanApplicationTerms(LocalDate dueRepaymentPeriodDate, HolidayDetailDTO holidayDetailDTO) {
@@ -174,10 +183,8 @@ public class DefaultScheduledDateGeneratorTest {
     }
 
     private HolidayDetailDTO createHolidayDTO() {
-        WorkingDays workingDays = new WorkingDays("FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR,SA,SU", MOVE_TO_NEXT_WORKING_DAY.getValue(),
+        return new HolidayDetailDTO(false, EMPTY_LIST,
+                new WorkingDays("FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR,SA,SU", MOVE_TO_NEXT_WORKING_DAY.getValue(), false, false),
                 false, false);
-        HolidayDetailDTO holidayDetailDTO = new HolidayDetailDTO(false, EMPTY_LIST, workingDays, false, false);
-        return holidayDetailDTO;
     }
-
 }

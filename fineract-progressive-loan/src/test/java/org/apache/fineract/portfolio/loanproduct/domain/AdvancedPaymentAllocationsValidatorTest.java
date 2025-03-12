@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.jetbrains.annotations.NotNull;
@@ -214,8 +213,13 @@ class AdvancedPaymentAllocationsValidatorTest {
 
     @NotNull
     private static List<Pair<Integer, PaymentAllocationType>> createPaymentAllocationTypeList() {
-        AtomicInteger i = new AtomicInteger(1);
-        return EnumSet.allOf(PaymentAllocationType.class).stream().map(p -> Pair.of(i.getAndIncrement(), p)).toList();
+        return EnumSet.allOf(PaymentAllocationType.class).stream().map(p -> {
+            try {
+                return Pair.of(Integer.parseInt(String.valueOf(Integer.parseInt(String.valueOf(p.ordinal())) + 1)), p);
+            } catch (NumberFormatException e) {
+                throw new RuntimeException("Failed to create payment allocation type list", e);
+            }
+        }).toList();
     }
 
     private void assertPlatformException(String expectedMessage, String expectedCode,

@@ -24,6 +24,7 @@ import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
@@ -33,6 +34,9 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
@@ -57,10 +61,10 @@ public class ChangeOperationTest {
         ChangeOperation interestChange = createInterestRateChange("2023-10-17");
         ChangeOperation charge = createCharge("2023-10-17", "2023-10-17", "2023-10-17T10:15:30+01:00");
         ChangeOperation transaction = createTransaction("2023-10-17", "2023-10-17", "2023-10-17T10:15:30+01:00");
-        Assertions.assertTrue(interestChange.compareTo(transaction) < 0);
-        Assertions.assertTrue(interestChange.compareTo(charge) < 0);
-        Assertions.assertTrue(charge.compareTo(transaction) == 0);
-        Assertions.assertTrue(transaction.compareTo(charge) == 0);
+        Assertions.assertEquals(-1, interestChange.compareTo(transaction));
+        Assertions.assertEquals(-1, interestChange.compareTo(charge));
+        Assertions.assertEquals(0, charge.compareTo(transaction));
+        Assertions.assertEquals(0, transaction.compareTo(charge));
     }
 
     @Test
@@ -68,34 +72,37 @@ public class ChangeOperationTest {
         ChangeOperation interestChange = createInterestRateChange("2023-10-17");
         ChangeOperation charge = createCharge("2023-10-16", "2023-10-17", "2023-10-17T10:15:30+01:00");
         ChangeOperation transaction = createTransaction("2023-10-16", "2023-10-17", "2023-10-17T10:15:30+01:00");
-        Assertions.assertTrue(interestChange.compareTo(transaction) > 0);
-        Assertions.assertTrue(interestChange.compareTo(charge) > 0);
-        Assertions.assertTrue(charge.compareTo(transaction) == 0);
-        Assertions.assertTrue(transaction.compareTo(charge) == 0);
+        Assertions.assertEquals(1, interestChange.compareTo(transaction));
+        Assertions.assertEquals(1, interestChange.compareTo(charge));
+        Assertions.assertEquals(0, charge.compareTo(transaction));
+        Assertions.assertEquals(0, transaction.compareTo(charge));
     }
 
-    @Test
-    public void testCompareToCreatedDateTime() {
-        ChangeOperation charge = createCharge("2023-10-17", "2023-10-17", "2023-10-17T10:15:31+01:00");
-        ChangeOperation transaction = createTransaction("2023-10-17", "2023-10-17", "2023-10-17T10:15:30+01:00");
-        Assertions.assertTrue(charge.compareTo(transaction) > 0);
-        Assertions.assertTrue(transaction.compareTo(charge) < 0);
+    @ParameterizedTest
+    @MethodSource("provideComparisonTestData")
+    public void testComparison(String chargeEffectiveDate, String chargeSubmittedDate, String chargeCreationDateTime,
+            String transactionDate, String transactionSubmittedDate, String transactionCreationDateTime, int expectedChargeVsTransaction,
+            int expectedTransactionVsCharge) {
+        ChangeOperation charge = createCharge(chargeEffectiveDate, chargeSubmittedDate, chargeCreationDateTime);
+        ChangeOperation transaction = createTransaction(transactionDate, transactionSubmittedDate, transactionCreationDateTime);
+
+        Assertions.assertEquals(expectedChargeVsTransaction, charge.compareTo(transaction));
+        Assertions.assertEquals(expectedTransactionVsCharge, transaction.compareTo(charge));
     }
 
-    @Test
-    public void testCompareToSubmittedOnDate() {
-        ChangeOperation charge = createCharge("2023-10-17", "2023-10-17", "2023-10-17T10:15:30+01:00");
-        ChangeOperation transaction = createTransaction("2023-10-17", "2023-10-16", "2023-10-17T10:15:30+01:00");
-        Assertions.assertTrue(charge.compareTo(transaction) > 0);
-        Assertions.assertTrue(transaction.compareTo(charge) < 0);
-    }
+    private static Stream<Arguments> provideComparisonTestData() {
+        return Stream.of(
+                // Test case for createdDateTime comparison
+                Arguments.of("2023-10-17", "2023-10-17", "2023-10-17T10:15:31+01:00", "2023-10-17", "2023-10-17",
+                        "2023-10-17T10:15:30+01:00", 1, -1),
 
-    @Test
-    public void testComparatorEffectiveDate() {
-        ChangeOperation charge = createCharge("2023-10-17", "2023-10-17", "2023-10-17T10:15:30+01:00");
-        ChangeOperation transaction = createTransaction("2023-10-16", "2023-10-17", "2023-10-17T10:15:30+01:00");
-        Assertions.assertTrue(charge.compareTo(transaction) > 0);
-        Assertions.assertTrue(transaction.compareTo(charge) < 0);
+                // Test case for submittedOnDate comparison
+                Arguments.of("2023-10-17", "2023-10-17", "2023-10-17T10:15:30+01:00", "2023-10-17", "2023-10-16",
+                        "2023-10-17T10:15:30+01:00", 1, -1),
+
+                // Test case for effectiveDate comparison
+                Arguments.of("2023-10-17", "2023-10-17", "2023-10-17T10:15:30+01:00", "2023-10-16", "2023-10-17",
+                        "2023-10-17T10:15:30+01:00", 1, -1));
     }
 
     @Test
@@ -155,5 +162,4 @@ public class ChangeOperationTest {
         Mockito.when(transaction.getCreatedDate()).thenReturn(Optional.of(OffsetDateTime.parse(creationDateTime)));
         return new ChangeOperation(transaction);
     }
-
 }

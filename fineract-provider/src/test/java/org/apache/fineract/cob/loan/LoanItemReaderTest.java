@@ -160,7 +160,7 @@ class LoanItemReaderTest {
         }
         executorService.shutdown();
         boolean b = executorService.awaitTermination(5L, TimeUnit.SECONDS);
-        Assertions.assertTrue(b, "Executor did not terminate successfully");
+        Assertions.assertEquals(true, b, "Executor did not terminate successfully");
 
         // verify that this was called 100times, and for each loan it was called exactly once
         for (long i = 1; i <= 100; i++) {
