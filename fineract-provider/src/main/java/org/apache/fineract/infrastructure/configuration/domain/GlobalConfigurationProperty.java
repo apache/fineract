@@ -22,18 +22,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
-import org.apache.fineract.infrastructure.configuration.exception.GlobalConfigurationPropertyCannotBeModfied;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.security.exception.ForcePasswordResetException;
 
 @Entity
 @Table(name = "c_configuration")
@@ -63,53 +57,6 @@ public class GlobalConfigurationProperty extends AbstractPersistableCustom<Long>
 
     @Column(name = "is_trap_door", nullable = false)
     private boolean isTrapDoor;
-
-    public Map<String, Object> update(final JsonCommand command) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
-
-        if (this.isTrapDoor) {
-            throw new GlobalConfigurationPropertyCannotBeModfied(this.getId());
-        }
-
-        final String enabledParamName = "enabled";
-        if (command.isChangeInBooleanParameterNamed(enabledParamName, this.enabled)) {
-            final Boolean newValue = command.booleanPrimitiveValueOfParameterNamed(enabledParamName);
-            actualChanges.put(enabledParamName, newValue);
-            this.enabled = newValue;
-        }
-
-        final String valueParamName = "value";
-        final Long previousValue = this.value;
-        if (command.isChangeInLongParameterNamed(valueParamName, this.value)) {
-            final Long newValue = command.longValueOfParameterNamed(valueParamName);
-            actualChanges.put(valueParamName, newValue);
-            this.value = newValue;
-        }
-
-        final String dateValueParamName = "dateValue";
-        if (command.isChangeInDateParameterNamed(dateValueParamName, this.dateValue)) {
-            final LocalDate newDateValue = command.localDateValueOfParameterNamed(dateValueParamName);
-            actualChanges.put(dateValueParamName, newDateValue);
-            this.dateValue = newDateValue;
-        }
-
-        final String stringValueParamName = "stringValue";
-        if (command.isChangeInStringParameterNamed(stringValueParamName, this.stringValue)) {
-            final String newStringValue = command.stringValueOfParameterNamed(stringValueParamName);
-            actualChanges.put(stringValueParamName, newStringValue);
-            this.stringValue = newStringValue;
-        }
-
-        final String passwordPropertyName = GlobalConfigurationConstants.FORCE_PASSWORD_RESET_DAYS;
-        if (this.name.equalsIgnoreCase(passwordPropertyName)) {
-            if ((this.enabled == true && command.hasParameter(valueParamName) && (this.value == 0))
-                    || (this.enabled == true && !command.hasParameter(valueParamName) && (previousValue == 0))) {
-                throw new ForcePasswordResetException();
-            }
-        }
-
-        return actualChanges;
-    }
 
     public static GlobalConfigurationProperty newSurveyConfiguration(final String name) {
         return new GlobalConfigurationProperty().setName(name);

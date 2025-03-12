@@ -217,7 +217,7 @@
         <insert tableName="c_configuration">
             <column name="id" valueNumeric="23"/>
             <column name="name" value="rounding-mode"/>
-            <column name="value" valueNumeric="6"/>
+            <column name="value" valueNumeric="${fineract.tenant.rounding-mode}"/>
             <column name="date_value"/>
             <column name="string_value"/>
             <column name="enabled" valueBoolean="true"/>
