@@ -1527,29 +1527,27 @@ Feature: Loan DownPayment
       | 01 February 2022 | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1750.0       |
       | 01 February 2022 | Repayment        | 250.0  | 250.0     | 0.0      | 0.0  | 0.0       | 1500.0       |
 
-# TODO unskip and check when PS-2345 is done
-  @Skip @TestRailId:C2852
+  @TestRailId:C2852
   Scenario: Single disbursement with interest - auto disabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
       | LoanProduct              | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                                                             |
-      | LP2_DOWNPAYMENT_INTEREST | 01 January 2022   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
+      | LP2_DOWNPAYMENT_INTEREST | 01 January 2022   | 1000           | 10                     | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE |
     And Admin successfully approves the loan on "01 January 2022" with "1000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2022" with "1000" EUR transaction amount
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2022  |           | 1000.0          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
       | 1  | 0    | 01 January 2022  |           | 750.0           | 250.0         | 0.0      | 0.0  | 0.0       | 250.0 | 0.0  | 0.0        | 0.0  | 250.0       |
-      | 2  | 31   | 01 February 2022 |           | 500.0           | 250.0         | 10.0     | 0.0  | 0.0       | 260.0 | 0.0  | 0.0        | 0.0  | 260.0       |
-      | 3  | 28   | 01 March 2022    |           | 250.0           | 250.0         | 10.0     | 0.0  | 0.0       | 260.0 | 0.0  | 0.0        | 0.0  | 260.0       |
-      | 4  | 31   | 01 April 2022    |           | 0.0             | 250.0         | 10.0     | 0.0  | 0.0       | 260.0 | 0.0  | 0.0        | 0.0  | 260.0       |
+      | 2  | 31   | 01 February 2022 |           | 500.33          | 249.67        | 8.33     | 0.0  | 0.0       | 258.0 | 0.0  | 0.0        | 0.0  | 258.0       |
+      | 3  | 28   | 01 March 2022    |           | 250.66          | 249.67        | 8.33     | 0.0  | 0.0       | 258.0 | 0.0  | 0.0        | 0.0  | 258.0       |
+      | 4  | 31   | 01 April 2022    |           | 0.0             | 250.66        | 8.34     | 0.0  | 0.0       | 259.0 | 0.0  | 0.0        | 0.0  | 259.0       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
-      | 1000.0        | 30       | 0    | 0         | 1030.0 | 0.0  | 0          | 0    | 1030        |
+      | 1000.0        | 25       | 0    | 0         | 1025.0 | 0.0  | 0          | 0    | 1025        |
 
-# TODO unskip and check when PS-2345 is done
-  @Skip @TestRailId:C2853
+  @TestRailId:C2853
   Scenario: Single disbursement delinquency - auto disabled
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data

@@ -1086,7 +1086,7 @@ public final class LoanApplicationTerms {
     private Money calculateTotalPrincipalPerPeriodWithoutGrace(final MathContext mc, final int periodNumber,
             Money interestForThisInstallment) {
         final int totalRepaymentsWithCapitalPayment = calculateNumberOfRepaymentsWithPrincipalPayment();
-        Money principalPerPeriod = null;
+        Money principalPerPeriod;
         if (getFixedEmiAmount() == null) {
             if (this.fixedPrincipalPercentagePerInstallment != null) {
                 principalPerPeriod = this.principal.minus(totalPrincipalAccounted)

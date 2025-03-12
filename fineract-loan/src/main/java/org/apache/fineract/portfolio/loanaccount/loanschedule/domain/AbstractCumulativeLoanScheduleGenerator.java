@@ -157,6 +157,14 @@ public abstract class AbstractCumulativeLoanScheduleGenerator implements LoanSch
                 scheduleParams.setOutstandingBalance(remainingPrincipalAmt);
                 scheduleParams.setOutstandingBalanceAsPerRest(remainingPrincipalAmt);
                 loanApplicationTerms.setPrincipal(remainingPrincipalAmt);
+            } else if (loanApplicationTerms.isDownPaymentEnabled()) {
+                Money downPaymentAmt = Money.of(currency, MathUtil.percentageOf(loanApplicationTerms.getPrincipal().getAmount(),
+                        loanApplicationTerms.getDisbursedAmountPercentageForDownPayment(), 19));
+                if (loanApplicationTerms.getInstallmentAmountInMultiplesOf() != null) {
+                    downPaymentAmt = Money.roundToMultiplesOf(downPaymentAmt, loanApplicationTerms.getInstallmentAmountInMultiplesOf());
+                }
+                final Money remainingPrincipalAmt = loanApplicationTerms.getPrincipal().minus(downPaymentAmt);
+                loanApplicationTerms.setPrincipal(remainingPrincipalAmt);
             }
         }
 
