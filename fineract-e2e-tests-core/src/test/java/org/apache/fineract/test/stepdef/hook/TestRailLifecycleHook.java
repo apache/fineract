@@ -20,20 +20,19 @@ package org.apache.fineract.test.stepdef.hook;
 
 import io.cucumber.java.After;
 import io.cucumber.java.Scenario;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.test.testrail.TestRailClient;
 import org.apache.fineract.test.testrail.TestRailProperties;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 @Slf4j
+@RequiredArgsConstructor
 public class TestRailLifecycleHook {
 
-    @Autowired
-    private TestRailProperties testRailProperties;
+    private final TestRailProperties testRailProperties;
 
-    @Autowired
-    private ApplicationContext applicationContext;
+    private final ApplicationContext applicationContext;
 
     @After
     public void tearDown(Scenario scenario) {

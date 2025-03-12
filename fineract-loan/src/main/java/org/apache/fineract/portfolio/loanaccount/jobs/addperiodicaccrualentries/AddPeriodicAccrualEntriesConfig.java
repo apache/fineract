@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.jobs.addperiodicaccrualentries;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualsProcessingService;
 import org.springframework.batch.core.Job;
@@ -26,20 +27,17 @@ import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
+@RequiredArgsConstructor
 public class AddPeriodicAccrualEntriesConfig {
 
-    @Autowired
-    private JobRepository jobRepository;
-    @Autowired
-    private PlatformTransactionManager transactionManager;
-    @Autowired
-    private LoanAccrualsProcessingService loanAccrualsProcessingService;
+    private final JobRepository jobRepository;
+    private final PlatformTransactionManager transactionManager;
+    private final LoanAccrualsProcessingService loanAccrualsProcessingService;
 
     @Bean
     protected Step addPeriodicAccrualEntriesStep() {
