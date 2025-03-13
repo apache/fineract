@@ -108,12 +108,11 @@ public class EmailApiResource {
 
     @GET
     @Path("messageByStatus")
-    public String retrieveAllEmailByStatus(@QueryParam("sqlSearch") final String sqlSearch, @QueryParam("offset") final Integer offset,
-            @QueryParam("limit") final Integer limit, @QueryParam("status") final Integer status,
-            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder,
-            @QueryParam("fromDate") final DateParam fromDateParam, @QueryParam("toDate") final DateParam toDateParam,
-            @QueryParam("locale") final String locale, @QueryParam("dateFormat") final String rawDateFormat,
-            @Context final UriInfo uriInfo) {
+    public String retrieveAllEmailByStatus(@QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
+            @QueryParam("status") final Integer status, @QueryParam("orderBy") final String orderBy,
+            @QueryParam("sortOrder") final String sortOrder, @QueryParam("fromDate") final DateParam fromDateParam,
+            @QueryParam("toDate") final DateParam toDateParam, @QueryParam("locale") final String locale,
+            @QueryParam("dateFormat") final String rawDateFormat, @Context final UriInfo uriInfo) {
 
         final DateFormat dateFormat = StringUtils.isBlank(rawDateFormat) ? null : new DateFormat(rawDateFormat);
 
@@ -133,9 +132,8 @@ public class EmailApiResource {
 
     @GET
     @Path("failedEmail")
-    public String retrieveFailedEmail(@QueryParam("sqlSearch") final String sqlSearch, @QueryParam("offset") final Integer offset,
-            @QueryParam("limit") final Integer limit, @QueryParam("orderBy") final String orderBy,
-            @QueryParam("sortOrder") final String sortOrder, @Context final UriInfo uriInfo) {
+    public String retrieveFailedEmail(@QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
+            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder, @Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 

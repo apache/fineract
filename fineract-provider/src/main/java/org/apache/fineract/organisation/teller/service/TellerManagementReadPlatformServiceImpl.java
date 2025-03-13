@@ -26,16 +26,13 @@ import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Iterator;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.SqlValidator;
-import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.organisation.office.data.OfficeData;
@@ -64,13 +61,11 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
-    private final TellerLookupMapper lookupMapper = new TellerLookupMapper();
     private final OfficeReadPlatformService officeReadPlatformService;
     private final StaffReadPlatformService staffReadPlatformService;
     private final CurrencyReadPlatformService currencyReadPlatformService;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final PaginationHelper paginationHelper;
-    private final ColumnValidator columnValidator;
     private final SqlValidator sqlValidator;
 
     private static final class TellerMapper implements RowMapper<TellerData> {
@@ -112,42 +107,6 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         }
     }
 
-    private static final class TellerLookupMapper implements RowMapper<TellerData> {
-
-        private final String schemaSql;
-
-        TellerLookupMapper() {
-
-            final StringBuilder sqlBuilder = new StringBuilder(100);
-            sqlBuilder.append("t.id as id, t.name as teller_name ");
-            sqlBuilder.append("from m_tellers t ");
-
-            this.schemaSql = sqlBuilder.toString();
-        }
-
-        public String schema() {
-            return this.schemaSql;
-        }
-
-        @Override
-        public TellerData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
-
-            final Long id = rs.getLong("id");
-            final String tellerName = rs.getString("teller_name");
-            return TellerData.lookup(id, tellerName);
-        }
-    }
-
-    @Override
-    public Collection<TellerData> retrieveAllTellersForDropdown(final Long officeId) {
-
-        final Long defaultOfficeId = defaultToUsersOfficeIfNull(officeId);
-
-        final String sql = "select " + this.lookupMapper.schema() + " where s.office_id = ? and s.is_active=true ";
-
-        return this.jdbcTemplate.query(sql, this.lookupMapper, new Object[] { defaultOfficeId }); // NOSONAR
-    }
-
     private Long defaultToUsersOfficeIfNull(final Long officeId) {
         Long defaultOfficeId = officeId;
         if (defaultOfficeId == null) {
@@ -170,104 +129,20 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
     }
 
     @Override
-    public Collection<TellerData> retrieveAllTellers(final String sqlSearch, final Long officeId, final String status) {
-        final String extraCriteria = getTellerCriteria(sqlSearch, officeId, status);
-        return retrieveAllTeller(extraCriteria, officeId);
-    }
-
-    private Collection<TellerData> retrieveAllTeller(final String extraCriteria, final Long officeId) {
-
-        final TellerMapper tm = new TellerMapper();
-        String sql = "select " + tm.schema();
-        if (StringUtils.isNotBlank(extraCriteria)) {
-            sql += " where " + extraCriteria;
-        }
-        sql = sql + " order by t.teller_name";
-        if (officeId != null) {
-            return this.jdbcTemplate.query(sql, tm, new Object[] { officeId }); // NOSONAR
-        }
-        return this.jdbcTemplate.query(sql, tm); // NOSONAR
-    }
-
-    private String getTellerCriteria(final String sqlSearch, final Long officeId, final String status) {
-
-        final StringBuilder extraCriteria = new StringBuilder(200);
-
-        if (sqlSearch != null) {
-            extraCriteria.append(" and (").append(sqlSearch).append(")");
-            final TellerMapper tm = new TellerMapper();
-            this.columnValidator.validateSqlInjection(tm.schema(), sqlSearch);
-        }
-        if (officeId != null) {
-            extraCriteria.append(" and office_id = ? ");
-        }
-        // Passing status parameter to get ACTIVE (By Default), INACTIVE or ALL
-        // (Both active and Inactive) employees
-        if (status.equalsIgnoreCase("active")) {
-            extraCriteria.append(" and status = 300 ");
-        } else if (status.equalsIgnoreCase("inActive")) {
-            extraCriteria.append(" and status = 0 ");
-        } else {
-            if (!status.equalsIgnoreCase("all")) {
-                throw new UnrecognizedQueryParamException("status", status, new Object[] { "all", "active", "inactive" });
-            }
-        }
-
-        if (StringUtils.isNotBlank(extraCriteria.toString())) {
-            extraCriteria.delete(0, 4);
-        }
-
-        // remove begin four letter including a space from the string.
-        return extraCriteria.toString();
-    }
-
-    @Override
     public Collection<TellerData> getTellers(Long officeId) {
         return retrieveAllTellers(false);
     }
 
     @Override
     public Collection<CashierData> getCashiersForTeller(Long tellerId, LocalDate fromDate, LocalDate toDate) {
-        return retrieveCashiersForTellers(null, tellerId);
+        return retrieveCashiersForTellers(tellerId);
     }
 
     @Override
-    public Collection<CashierData> retrieveCashiersForTellers(final String sqlSearch, final Long tellerId) {
-        final String extraCriteria = getTellerCriteria(sqlSearch, tellerId);
-        return fetchCashiers(extraCriteria);
-    }
-
-    private String getTellerCriteria(final String sqlSearch, final Long tellerId) {
-
-        final StringBuilder extraCriteria = new StringBuilder(200);
-
-        if (sqlSearch != null) {
-            extraCriteria.append(" and (").append(sqlSearch).append(")");
-            final CashierMapper cm = new CashierMapper();
-            this.columnValidator.validateSqlInjection(cm.schema(), sqlSearch);
-
-        }
-        if (tellerId != null) {
-            extraCriteria.append(" and teller_id = ").append(tellerId).append(" ");
-        }
-
-        // remove begin four letter including a space from the string.
-        if (StringUtils.isNotBlank(extraCriteria.toString())) {
-            extraCriteria.delete(0, 4);
-        }
-
-        return extraCriteria.toString();
-    }
-
-    private Collection<CashierData> fetchCashiers(final String extraCriteria) {
-
+    public Collection<CashierData> retrieveCashiersForTellers(final Long tellerId) {
         final CashierMapper cm = new CashierMapper();
-        String sql = "select " + cm.schema();
-        if (StringUtils.isNotBlank(extraCriteria)) {
-            sql += " where " + extraCriteria;
-        }
-        sql = sql + " order by teller_name";
-        return this.jdbcTemplate.query(sql, cm); // NOSONAR
+        String sql = "select " + cm.schema() + " where teller_id = ?";
+        return this.jdbcTemplate.query(sql, cm, tellerId); // NOSONAR
     }
 
     @Override
@@ -284,12 +159,6 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
     @Override
     public Collection<CashierData> getCashierData(Long officeId, Long tellerId, Long staffId, LocalDate date) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Collection<CashierData> getTellerCashiers(Long tellerId, LocalDate date) {
         // TODO Auto-generated method stub
         return null;
     }

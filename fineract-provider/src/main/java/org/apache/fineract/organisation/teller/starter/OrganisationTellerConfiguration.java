@@ -24,7 +24,6 @@ import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.SqlValidator;
-import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
@@ -52,10 +51,9 @@ public class OrganisationTellerConfiguration {
     public TellerManagementReadPlatformService tellerManagementReadPlatformService(JdbcTemplate jdbcTemplate,
             PlatformSecurityContext context, OfficeReadPlatformService officeReadPlatformService,
             StaffReadPlatformService staffReadPlatformService, CurrencyReadPlatformService currencyReadPlatformService,
-            DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper, ColumnValidator columnValidator,
-            SqlValidator sqlValidator) {
+            DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper, SqlValidator sqlValidator) {
         return new TellerManagementReadPlatformServiceImpl(jdbcTemplate, context, officeReadPlatformService, staffReadPlatformService,
-                currencyReadPlatformService, sqlGenerator, paginationHelper, columnValidator, sqlValidator);
+                currencyReadPlatformService, sqlGenerator, paginationHelper, sqlValidator);
     }
 
     @Bean
