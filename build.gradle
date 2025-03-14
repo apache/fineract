@@ -325,7 +325,9 @@ allprojects  {
             '**/images/diag-*.svg',
             '**/*.avsc',
             "**/generated/**/*MapperImpl.java",
-            '**/META-INF/fineract-test.config'
+            '**/META-INF/fineract-test.config',
+            // Apache-specific GitHub metadata settings file
+            '/.asf.yaml'
         ]
     }
 }
