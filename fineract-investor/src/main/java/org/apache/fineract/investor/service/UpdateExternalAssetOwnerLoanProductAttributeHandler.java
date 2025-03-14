@@ -18,11 +18,14 @@
  */
 package org.apache.fineract.investor.service;
 
+import com.google.gson.JsonElement;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.investor.data.ExternalAssetOwnerLoanProductAttributeRequestParameters;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -30,10 +33,17 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "EXTERNAL_ASSET_OWNER_LOAN_PRODUCT_ATTRIBUTE", action = "UPDATE")
 public class UpdateExternalAssetOwnerLoanProductAttributeHandler implements NewCommandSourceHandler {
 
+    private final FromJsonHelper fromApiJsonHelper;
     private final ExternalAssetOwnerLoanProductAttributesWriteService externalAssetOwnerLoanProductAttributesWriteService;
 
     @Override
     public CommandProcessingResult processCommand(JsonCommand command) {
-        return externalAssetOwnerLoanProductAttributesWriteService.updateExternalAssetOwnerLoanProductAttribute(command);
+        final JsonElement json = fromApiJsonHelper.parse(command.json());
+        String attributeKey = fromApiJsonHelper.extractStringNamed(ExternalAssetOwnerLoanProductAttributeRequestParameters.ATTRIBUTE_KEY,
+                json);
+        String attributeValue = fromApiJsonHelper
+                .extractStringNamed(ExternalAssetOwnerLoanProductAttributeRequestParameters.ATTRIBUTE_VALUE, json);
+        return externalAssetOwnerLoanProductAttributesWriteService.updateExternalAssetOwnerLoanProductAttribute(command, attributeKey,
+                attributeValue);
     }
 }

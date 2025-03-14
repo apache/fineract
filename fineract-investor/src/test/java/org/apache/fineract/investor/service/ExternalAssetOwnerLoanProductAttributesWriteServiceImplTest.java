@@ -55,8 +55,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
 
     @Test
@@ -99,7 +102,8 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
         when(testContext.externalAssetOwnerLoanProductAttributesRepository.findById(command.entityId()))
                 .thenReturn(Optional.of(attributeInDB));
 
-        testContext.externalAssetOwnerLoanProductAttributesWriteService.updateExternalAssetOwnerLoanProductAttribute(command);
+        testContext.externalAssetOwnerLoanProductAttributesWriteService.updateExternalAssetOwnerLoanProductAttribute(command,
+                testContext.attributeKey, testContext.attributeValue);
 
         // then
         verify(testContext.loanProductRepository).existsById(testContext.loanProductId);
@@ -125,7 +129,8 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
         when(testContext.externalAssetOwnerLoanProductAttributesRepository.findById(command.entityId()))
                 .thenReturn(Optional.of(attributeInDB));
 
-        testContext.externalAssetOwnerLoanProductAttributesWriteService.updateExternalAssetOwnerLoanProductAttribute(command);
+        testContext.externalAssetOwnerLoanProductAttributesWriteService.updateExternalAssetOwnerLoanProductAttribute(command,
+                testContext.attributeKey, testContext.attributeValue);
 
         // then
         verify(testContext.loanProductRepository).existsById(testContext.loanProductId);
@@ -147,8 +152,8 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
 
         ExternalAssetOwnerLoanProductAttributeNotFoundException thrownException = Assert.assertThrows(
                 ExternalAssetOwnerLoanProductAttributeNotFoundException.class,
-                () -> testContext.externalAssetOwnerLoanProductAttributesWriteService
-                        .updateExternalAssetOwnerLoanProductAttribute(command));
+                () -> testContext.externalAssetOwnerLoanProductAttributesWriteService.updateExternalAssetOwnerLoanProductAttribute(command,
+                        testContext.attributeKey, testContext.attributeValue));
 
         // then
         verify(testContext.loanProductRepository).existsById(testContext.loanProductId);
@@ -178,8 +183,8 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
 
         ExternalAssetOwnerLoanProductAttributesException thrownException = Assert.assertThrows(
                 ExternalAssetOwnerLoanProductAttributesException.class,
-                () -> testContext.externalAssetOwnerLoanProductAttributesWriteService
-                        .updateExternalAssetOwnerLoanProductAttribute(command));
+                () -> testContext.externalAssetOwnerLoanProductAttributesWriteService.updateExternalAssetOwnerLoanProductAttribute(command,
+                        testContext.attributeKey, testContext.attributeValue));
 
         // then
         verify(testContext.loanProductRepository).existsById(testContext.loanProductId);

@@ -85,13 +85,8 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImpl implements 
 
     @Override
     @CacheEvict(cacheNames = "externalAssetOwnerLoanProductAttributes", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#command.getProductId().toString() + #attributeKey)")
-    public CommandProcessingResult updateExternalAssetOwnerLoanProductAttribute(JsonCommand command) {
-        final JsonElement json = fromApiJsonHelper.parse(command.json());
-        String attributeKey = fromApiJsonHelper.extractStringNamed(ExternalAssetOwnerLoanProductAttributeRequestParameters.ATTRIBUTE_KEY,
-                json);
-        String attributeValue = fromApiJsonHelper
-                .extractStringNamed(ExternalAssetOwnerLoanProductAttributeRequestParameters.ATTRIBUTE_VALUE, json);
-
+    public CommandProcessingResult updateExternalAssetOwnerLoanProductAttribute(JsonCommand command, String attributeKey,
+            String attributeValue) {
         Long loanProductId = command.getProductId();
         Long attributeId = command.entityId();
         validateLoanProductAttributeRequest(command.json(), attributeKey, attributeValue);

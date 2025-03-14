@@ -25,6 +25,6 @@ public interface ExternalAssetOwnerLoanProductAttributesWriteService {
 
     CommandProcessingResult createExternalAssetOwnerLoanProductAttribute(JsonCommand command);
 
-    CommandProcessingResult updateExternalAssetOwnerLoanProductAttribute(JsonCommand command);
+    CommandProcessingResult updateExternalAssetOwnerLoanProductAttribute(JsonCommand command, String attributeKey, String attributeValue);
 
 }
