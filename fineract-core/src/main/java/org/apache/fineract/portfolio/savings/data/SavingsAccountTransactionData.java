@@ -427,6 +427,12 @@ public final class SavingsAccountTransactionData implements Serializable {
 
         return EndOfDayBalance.from(getTransactionDate(), openingBalance, endOfDayBalance, this.balanceNumberOfDays);
     }
+    public EndOfDayBalance toEndOfDayBalanceDates(final Money openingBalance, LocalDateInterval date) {
+        final MonetaryCurrency currency = openingBalance.getCurrency();
+        Money endOfDayBalance = Money.of(currency, this.runningBalance);
+
+        return EndOfDayBalance.from(getTransactionDate(), openingBalance, endOfDayBalance, this.balanceNumberOfDays != null ? this.balanceNumberOfDays: date.endDate().getDayOfMonth());
+    }
 
     public boolean isChargeTransactionAndNotReversed() {
         return this.transactionType.isChargeTransaction() && isNotReversed();
