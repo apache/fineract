@@ -48,46 +48,6 @@ public final class PaymentTypeApiResourceSwagger {
         public Boolean isSystemDefined;
     }
 
-    @Schema(description = "GetPaymentTypesPaymentTypeIdResponse")
-    public static final class GetPaymentTypesPaymentTypeIdResponse {
-
-        private GetPaymentTypesPaymentTypeIdResponse() {}
-
-        @Schema(example = "13")
-        public Long id;
-        @Schema(example = "cash")
-        public String name;
-        @Schema(example = "cash Payment")
-        public String description;
-        @Schema(example = "true")
-        public Boolean isCashPayment;
-        @Schema(example = "1")
-        public Integer position;
-        @Schema(example = "REPAYMENT_REFUND")
-        public String codeName;
-        @Schema(example = "false")
-        public Boolean isSystemDefined;
-    }
-
-    @Schema(description = "PostPaymentTypesRequest")
-    public static final class PostPaymentTypesRequest {
-
-        private PostPaymentTypesRequest() {}
-
-        @Schema(example = "cash")
-        public String name;
-        @Schema(example = "cash payment type")
-        public String description;
-        @Schema(example = "true")
-        public Boolean isCashPayment;
-        @Schema(example = "1")
-        public Integer position;
-        @Schema(example = "REPAYMENT_REFUND")
-        public String codeName;
-        @Schema(example = "false")
-        public Boolean isSystemDefined;
-    }
-
     @Schema(description = "PostPaymentTypesResponse")
     public static final class PostPaymentTypesResponse {
 

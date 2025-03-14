@@ -40,7 +40,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import org.apache.fineract.client.models.PostPaymentTypesRequest;
+import org.apache.fineract.client.models.PaymentTypeRequest;
 import org.apache.fineract.client.models.PostPaymentTypesResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
@@ -2664,7 +2664,7 @@ public class ClientSavingsIntegrationTest {
         Integer position = 1;
 
         PostPaymentTypesResponse paymentTypesResponse = paymentTypeHelper.createPaymentType(
-                new PostPaymentTypesRequest().name(name).description(description).isCashPayment(isCashPayment).position(position));
+                new PaymentTypeRequest().name(name).description(description).isCashPayment(isCashPayment).position(position));
         Long paymentTypeIdOne = paymentTypesResponse.getResourceId();
         Assertions.assertNotNull(paymentTypeIdOne);
 
@@ -2685,8 +2685,8 @@ public class ClientSavingsIntegrationTest {
 
         String paymentTypeNameTwo = PaymentTypeHelper.randomNameGenerator("P_T", 5);
 
-        PostPaymentTypesResponse paymentTypesResponseTwo = paymentTypeHelper.createPaymentType(new PostPaymentTypesRequest()
-                .name(paymentTypeNameTwo).description(description).isCashPayment(isCashPayment).position(position));
+        PostPaymentTypesResponse paymentTypesResponseTwo = paymentTypeHelper.createPaymentType(
+                new PaymentTypeRequest().name(paymentTypeNameTwo).description(description).isCashPayment(isCashPayment).position(position));
         Long paymentTypeIdTwo = paymentTypesResponseTwo.getResourceId();
         Assertions.assertNotNull(paymentTypeIdTwo);
 

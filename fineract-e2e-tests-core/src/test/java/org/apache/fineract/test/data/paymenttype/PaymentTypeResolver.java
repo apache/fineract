@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.client.models.GetPaymentTypesResponse;
+import org.apache.fineract.client.models.PaymentTypeData;
 import org.apache.fineract.client.services.PaymentTypeApi;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
@@ -40,13 +40,13 @@ public class PaymentTypeResolver {
         try {
             String paymentTypeName = paymentType.getName();
             log.debug("Resolving payment type by name [{}]", paymentTypeName);
-            Response<List<GetPaymentTypesResponse>> response = paymentTypeApi.getAllPaymentTypes(false).execute();
+            Response<List<PaymentTypeData>> response = paymentTypeApi.getAllPaymentTypes(false).execute();
             if (!response.isSuccessful()) {
                 throw new IllegalStateException("Unable to get payment types. Status code was HTTP " + response.code());
             }
 
-            List<GetPaymentTypesResponse> paymentTypesResponses = response.body();
-            GetPaymentTypesResponse foundPtr = paymentTypesResponses.stream().filter(ptr -> paymentTypeName.equals(ptr.getName())).findAny()
+            List<PaymentTypeData> paymentTypesResponses = response.body();
+            PaymentTypeData foundPtr = paymentTypesResponses.stream().filter(ptr -> paymentTypeName.equals(ptr.getName())).findAny()
                     .orElseThrow(() -> new IllegalArgumentException("Payment type [%s] not found".formatted(paymentTypeName)));
 
             return foundPtr.getId();

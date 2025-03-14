@@ -16,17 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.paymenttype.service;
+package org.apache.fineract.portfolio.paymenttype.data.request;
 
-import java.util.List;
-import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
+import java.io.Serial;
+import java.io.Serializable;
 
-public interface PaymentTypeReadPlatformService {
+public record PaymentTypeRequest(String name, String description, Boolean isCashPayment, Integer position, String codeName,
+        Boolean isSystemDefined) implements Serializable {
 
-    List<PaymentTypeData> retrieveAllPaymentTypes();
-
-    List<PaymentTypeData> retrieveAllPaymentTypesWithCode();
-
-    PaymentTypeData retrieveOne(Long paymentTypeId);
+    @Serial
+    private static final long serialVersionUID = 1L;
 
 }

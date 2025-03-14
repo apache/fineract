@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.client.models.PostPaymentTypesRequest;
+import org.apache.fineract.client.models.PaymentTypeRequest;
 import org.apache.fineract.client.services.PaymentTypeApi;
 import org.apache.fineract.test.factory.PaymentTypesRequestFactory;
 import org.springframework.core.Ordered;
@@ -59,7 +59,7 @@ public class PaymentTypeGlobalInitializerStep implements FineractGlobalInitializ
 
         paymentTypes.forEach(paymentType -> {
             Integer position = paymentTypes.indexOf(paymentType) + 2;
-            PostPaymentTypesRequest postPaymentTypesRequest = PaymentTypesRequestFactory.defaultPaymentTypeRequest(paymentType, paymentType,
+            PaymentTypeRequest postPaymentTypesRequest = PaymentTypesRequestFactory.defaultPaymentTypeRequest(paymentType, paymentType,
                     false, position);
 
             try {

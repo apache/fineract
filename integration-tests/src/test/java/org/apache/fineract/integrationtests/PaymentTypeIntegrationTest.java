@@ -24,8 +24,8 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import org.apache.fineract.client.models.DeletePaymentTypesPaymentTypeIdResponse;
-import org.apache.fineract.client.models.GetPaymentTypesPaymentTypeIdResponse;
-import org.apache.fineract.client.models.PostPaymentTypesRequest;
+import org.apache.fineract.client.models.PaymentTypeData;
+import org.apache.fineract.client.models.PaymentTypeRequest;
 import org.apache.fineract.client.models.PostPaymentTypesResponse;
 import org.apache.fineract.client.models.PutPaymentTypesPaymentTypeIdRequest;
 import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
@@ -58,11 +58,11 @@ public class PaymentTypeIntegrationTest {
         Integer position = 1;
 
         PostPaymentTypesResponse paymentTypesResponse = paymentTypeHelper.createPaymentType(
-                new PostPaymentTypesRequest().name(name).description(description).isCashPayment(isCashPayment).position(position));
+                new PaymentTypeRequest().name(name).description(description).isCashPayment(isCashPayment).position(position));
         Long paymentTypeId = paymentTypesResponse.getResourceId();
         Assertions.assertNotNull(paymentTypeId);
         paymentTypeHelper.verifyPaymentTypeCreatedOnServer(paymentTypeId);
-        GetPaymentTypesPaymentTypeIdResponse paymentTypeResponse = paymentTypeHelper.retrieveById(paymentTypeId);
+        PaymentTypeData paymentTypeResponse = paymentTypeHelper.retrieveById(paymentTypeId);
         Assertions.assertEquals(name, paymentTypeResponse.getName());
         Assertions.assertEquals(description, paymentTypeResponse.getDescription());
         Assertions.assertEquals(isCashPayment, paymentTypeResponse.getIsCashPayment());
@@ -76,7 +76,7 @@ public class PaymentTypeIntegrationTest {
 
         paymentTypeHelper.updatePaymentType(paymentTypeId, new PutPaymentTypesPaymentTypeIdRequest().name(newName)
                 .description(newDescription).isCashPayment(isCashPaymentUpdatedValue).position(newPosition));
-        GetPaymentTypesPaymentTypeIdResponse paymentTypeUpdatedResponse = paymentTypeHelper.retrieveById(paymentTypeId);
+        PaymentTypeData paymentTypeUpdatedResponse = paymentTypeHelper.retrieveById(paymentTypeId);
         Assertions.assertEquals(newName, paymentTypeUpdatedResponse.getName());
         Assertions.assertEquals(newDescription, paymentTypeUpdatedResponse.getDescription());
         Assertions.assertEquals(isCashPaymentUpdatedValue, paymentTypeUpdatedResponse.getIsCashPayment());

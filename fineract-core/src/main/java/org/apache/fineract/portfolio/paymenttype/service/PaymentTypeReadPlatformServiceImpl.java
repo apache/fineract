@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.paymenttype.service;
 
-import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -37,7 +36,7 @@ public class PaymentTypeReadPlatformServiceImpl implements PaymentTypeReadPlatfo
 
     @Override
     @Cacheable(value = "payment_types", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('payment_types')")
-    public Collection<PaymentTypeData> retrieveAllPaymentTypes() {
+    public List<PaymentTypeData> retrieveAllPaymentTypes() {
         // TODO Auto-generated method stub
         this.context.authenticatedUser();
 
@@ -47,7 +46,7 @@ public class PaymentTypeReadPlatformServiceImpl implements PaymentTypeReadPlatfo
 
     @Override
     @Cacheable(value = "paymentTypesWithCode", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('payment_types')")
-    public Collection<PaymentTypeData> retrieveAllPaymentTypesWithCode() {
+    public List<PaymentTypeData> retrieveAllPaymentTypesWithCode() {
         // TODO Auto-generated method stub
         this.context.authenticatedUser();
 

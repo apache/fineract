@@ -43,11 +43,11 @@ import org.apache.fineract.client.models.GetLoanTransactionRelation;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
+import org.apache.fineract.client.models.PaymentTypeRequest;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
-import org.apache.fineract.client.models.PostPaymentTypesRequest;
 import org.apache.fineract.client.models.PostPaymentTypesResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
@@ -1137,8 +1137,8 @@ public class LoanPostChargeOffScenariosTest extends BaseLoanIntegrationTest {
         Boolean isCashPayment = false;
         Integer position = 1;
 
-        PostPaymentTypesResponse paymentTypesResponse = paymentTypeHelper.createPaymentType(new PostPaymentTypesRequest()
-                .name(paymentTypeName).description(description).isCashPayment(isCashPayment).position(position));
+        PostPaymentTypesResponse paymentTypesResponse = paymentTypeHelper.createPaymentType(
+                new PaymentTypeRequest().name(paymentTypeName).description(description).isCashPayment(isCashPayment).position(position));
         Long paymentTypeIdOne = paymentTypesResponse.getResourceId();
         Assertions.assertNotNull(paymentTypeIdOne);
 

@@ -27,9 +27,8 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.DeletePaymentTypesPaymentTypeIdResponse;
-import org.apache.fineract.client.models.GetPaymentTypesPaymentTypeIdResponse;
-import org.apache.fineract.client.models.GetPaymentTypesResponse;
-import org.apache.fineract.client.models.PostPaymentTypesRequest;
+import org.apache.fineract.client.models.PaymentTypeData;
+import org.apache.fineract.client.models.PaymentTypeRequest;
 import org.apache.fineract.client.models.PostPaymentTypesResponse;
 import org.apache.fineract.client.models.PutPaymentTypesPaymentTypeIdRequest;
 import org.apache.fineract.client.models.PutPaymentTypesPaymentTypeIdResponse;
@@ -46,25 +45,25 @@ public final class PaymentTypeHelper {
     private static final String PAYMENTTYPE_URL = "/fineract-provider/api/v1/paymenttypes";
     private static final String CREATE_PAYMENTTYPE_URL = PAYMENTTYPE_URL + "?" + Utils.TENANT_IDENTIFIER;
 
-    public List<GetPaymentTypesResponse> getAllPaymentTypes(final Boolean onlyWithCode) {
+    public List<PaymentTypeData> getAllPaymentTypes(final Boolean onlyWithCode) {
         log.info("-------------------------------GETTING ALL PAYMENT TYPES-------------------------------------------");
         return Calls.ok(FineractClientHelper.getFineractClient().paymentTypes.getAllPaymentTypes(onlyWithCode));
     }
 
-    public PostPaymentTypesResponse createPaymentType(final PostPaymentTypesRequest postPaymentTypesRequest) {
+    public PostPaymentTypesResponse createPaymentType(final PaymentTypeRequest paymentTypeRequest) {
         log.info("---------------------------------CREATING A PAYMENT TYPE---------------------------------------------");
-        return Calls.ok(FineractClientHelper.getFineractClient().paymentTypes.createPaymentType(postPaymentTypesRequest));
+        return Calls.ok(FineractClientHelper.getFineractClient().paymentTypes.createPaymentType(paymentTypeRequest));
     }
 
     public void verifyPaymentTypeCreatedOnServer(final Long generatedPaymentTypeID) {
         log.info("-------------------------------CHECK PAYMENT DETAILS-------------------------------------------");
-        GetPaymentTypesPaymentTypeIdResponse response = Calls
+        PaymentTypeData response = Calls
                 .ok(FineractClientHelper.getFineractClient().paymentTypes.retrieveOnePaymentType(generatedPaymentTypeID));
         Long responsePaymentTypeID = response.getId();
         assertEquals(generatedPaymentTypeID, responsePaymentTypeID, "ERROR IN CREATING THE PAYMENT TYPE");
     }
 
-    public GetPaymentTypesPaymentTypeIdResponse retrieveById(final Long paymentTypeId) {
+    public PaymentTypeData retrieveById(final Long paymentTypeId) {
         log.info("-------------------------------GETTING PAYMENT TYPE-------------------------------------------");
         return Calls.ok(FineractClientHelper.getFineractClient().paymentTypes.retrieveOnePaymentType(paymentTypeId));
     }

@@ -62,7 +62,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdSummary;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
-import org.apache.fineract.client.models.GetPaymentTypesResponse;
+import org.apache.fineract.client.models.PaymentTypeData;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansDelinquencyActionRequest;
@@ -2687,7 +2687,7 @@ public class LoanTransactionHelper {
     @Deprecated(forRemoval = true)
     public Long applyChargebackTransaction(final Integer loanId, final Long transactionId, final String amount,
             final Integer paymentTypeIdx, ResponseSpecification responseSpec) {
-        List<GetPaymentTypesResponse> paymentTypeList = paymentTypeHelper.getAllPaymentTypes(false);
+        List<PaymentTypeData> paymentTypeList = paymentTypeHelper.getAllPaymentTypes(false);
         assertTrue(!paymentTypeList.isEmpty());
 
         final String payload = createChargebackPayload(amount, paymentTypeList.get(paymentTypeIdx).getId());

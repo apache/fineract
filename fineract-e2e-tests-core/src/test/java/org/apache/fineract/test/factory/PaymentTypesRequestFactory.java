@@ -18,15 +18,14 @@
  */
 package org.apache.fineract.test.factory;
 
-import org.apache.fineract.client.models.PostPaymentTypesRequest;
+import org.apache.fineract.client.models.PaymentTypeRequest;
 
 public final class PaymentTypesRequestFactory {
 
     private PaymentTypesRequestFactory() {}
 
-    public static PostPaymentTypesRequest defaultPaymentTypeRequest(String name, String description, Boolean isCashPayment,
-            Integer position) {
-        PostPaymentTypesRequest request = new PostPaymentTypesRequest();
+    public static PaymentTypeRequest defaultPaymentTypeRequest(String name, String description, Boolean isCashPayment, Integer position) {
+        PaymentTypeRequest request = new PaymentTypeRequest();
 
         request.name(name).description(description).isCashPayment(isCashPayment).position(position);
 
