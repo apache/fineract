@@ -88,68 +88,6 @@ final class FloatingRatesApiResourceSwagger {
         public String modifiedOn;
     }
 
-    @Schema(description = "GetFloatingRatesFloatingRateIdResponse")
-    public static final class GetFloatingRatesFloatingRateIdResponse {
-
-        private GetFloatingRatesFloatingRateIdResponse() {}
-
-        static final class GetFloatingRatesRatePeriods {
-
-            private GetFloatingRatesRatePeriods() {}
-
-            @Schema(example = "1")
-            public Long id;
-            @Schema(example = "Dec 15, 2015")
-            public String fromDate;
-            @Schema(example = "11")
-            public Double interestRate;
-            @Schema(example = "false")
-            public Boolean isDifferentialToBaseLendingRate;
-            @Schema(example = "true")
-            public Boolean isActive;
-            @Schema(example = "mifos")
-            public String createdBy;
-            @Schema(example = "Nov 18, 2015")
-            public String createdOn;
-            @Schema(example = "mifos")
-            public String modifiedBy;
-            @Schema(example = "Nov 18, 2015")
-            public String modifiedOn;
-        }
-
-        @Schema(example = "1")
-        public Long id;
-        @Schema(example = "Floating Rate 1")
-        public String name;
-        @Schema(example = "true")
-        public Boolean isBaseLendingRate;
-        @Schema(example = "true")
-        public Boolean isActive;
-        @Schema(example = "mifos")
-        public String createdBy;
-        @Schema(example = "Nov 18, 2015")
-        public String createdOn;
-        @Schema(example = "mifos")
-        public String modifiedBy;
-        @Schema(example = "Nov 18, 2015")
-        public String modifiedOn;
-        public Set<GetFloatingRatesRatePeriods> ratePeriods;
-    }
-
-    @Schema(description = "PutFloatingRatesFloatingRateIdRequest")
-    public static final class PutFloatingRatesFloatingRateIdRequest {
-
-        private PutFloatingRatesFloatingRateIdRequest() {}
-
-        @Schema(example = "Floating Rate 1")
-        public String name;
-        @Schema(example = "true")
-        public Boolean isBaseLendingRate;
-        @Schema(example = "true")
-        public Boolean isActive;
-        public Set<PostFloatingRatesRequest.PostFloatingRatesRatePeriods> ratePeriods;
-    }
-
     @Schema(description = "PutFloatingRatesFloatingRateIdResponse")
     public static final class PutFloatingRatesFloatingRateIdResponse {
 

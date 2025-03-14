@@ -18,33 +18,33 @@
  */
 package org.apache.fineract.portfolio.floatingrates.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import lombok.Getter;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+@Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class FloatingRatePeriodData implements Comparable<FloatingRatePeriodData>, Serializable {
 
     private Long id;
     private LocalDate fromDate;
     private BigDecimal interestRate;
-    @JsonProperty("isDifferentialToBaseLendingRate")
-    private boolean isDifferentialToBaseLendingRate;
-    @JsonProperty("isActive")
-    private boolean isActive;
+    private Boolean isDifferentialToBaseLendingRate;
+    private Boolean isActive;
     private String createdBy;
     private OffsetDateTime createdOn;
     private String modifiedBy;
     private OffsetDateTime modifiedOn;
 
-    public FloatingRatePeriodData(Long id, LocalDate fromDate, BigDecimal interestRate, boolean isDifferentialToBaseLendingRate,
-            boolean isActive, String createdBy, OffsetDateTime createdOn, String modifiedBy, OffsetDateTime modifiedOn) {
+    public FloatingRatePeriodData(Long id, LocalDate fromDate, BigDecimal interestRate, Boolean isDifferentialToBaseLendingRate,
+            Boolean isActive, String createdBy, OffsetDateTime createdOn, String modifiedBy, OffsetDateTime modifiedOn) {
         this.id = id;
         this.fromDate = fromDate;
         this.interestRate = interestRate;
@@ -56,8 +56,8 @@ public class FloatingRatePeriodData implements Comparable<FloatingRatePeriodData
         this.modifiedOn = modifiedOn;
     }
 
-    public FloatingRatePeriodData(Long id, LocalDate fromDate, BigDecimal interestRate, boolean isDifferentialToBaseLendingRate,
-            boolean isActive) {
+    public FloatingRatePeriodData(Long id, LocalDate fromDate, BigDecimal interestRate, Boolean isDifferentialToBaseLendingRate,
+            Boolean isActive) {
         this.id = id;
         this.fromDate = fromDate;
         this.interestRate = interestRate;
@@ -65,44 +65,9 @@ public class FloatingRatePeriodData implements Comparable<FloatingRatePeriodData
         this.isActive = isActive;
     }
 
-    public Long getId() {
-        return this.id;
-    }
-
-    public LocalDate getFromDate() {
-        return this.fromDate;
-    }
-
+    @JsonIgnore
     public LocalDate getFromDateAsLocalDate() {
         return this.fromDate;
-    }
-
-    public BigDecimal getInterestRate() {
-        return this.interestRate;
-    }
-
-    public boolean isDifferentialToBaseLendingRate() {
-        return this.isDifferentialToBaseLendingRate;
-    }
-
-    public boolean isActive() {
-        return this.isActive;
-    }
-
-    public String getCreatedBy() {
-        return this.createdBy;
-    }
-
-    public OffsetDateTime getCreatedOn() {
-        return this.createdOn;
-    }
-
-    public String getModifiedBy() {
-        return this.modifiedBy;
-    }
-
-    public OffsetDateTime getModifiedOn() {
-        return this.modifiedOn;
     }
 
     @Override
