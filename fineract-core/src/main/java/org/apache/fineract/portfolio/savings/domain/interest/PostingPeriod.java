@@ -29,6 +29,7 @@ import java.util.TreeSet;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.savings.SavingsCompoundingInterestPeriodType;
@@ -67,6 +68,7 @@ public final class PostingPeriod {
     private Integer financialYearBeginningMonth;
 
     private Boolean isAcrual = false;
+    private Boolean isEndTransacction = false;
 
     public void setAcrual(Boolean acrual) {
         isAcrual = acrual;
@@ -165,7 +167,7 @@ public final class PostingPeriod {
         return new PostingPeriod(periodInterval, currency, periodStartingBalance, openingDayBalance, interestCompoundingPeriodType,
                 interestCalculationType, interestRateAsFraction, daysInYear, compoundingPeriods, interestTransfered,
                 minBalanceForInterestCalculation, isSavingsInterestPostingAtCurrentPeriodEnd, overdraftInterestRateAsFraction,
-                minOverdraftForInterestCalculation, isUserPosting, financialYearBeginningMonth);
+                minOverdraftForInterestCalculation, isUserPosting, financialYearBeginningMonth, false);
     }
 
     public static PostingPeriod createFromDTO(final LocalDateInterval periodInterval, final Money periodStartingBalance,
@@ -175,12 +177,13 @@ public final class PostingPeriod {
             final LocalDate upToInterestCalculationDate, Collection<Long> interestPostTransactions, boolean isInterestTransfer,
             final Money minBalanceForInterestCalculation, final boolean isSavingsInterestPostingAtCurrentPeriodEnd,
             final BigDecimal overdraftInterestRateAsFraction, final Money minOverdraftForInterestCalculation, boolean isUserPosting,
-            int financialYearBeginningMonth, final boolean isAllowOverdraft) {
+            int financialYearBeginningMonth, final boolean isAllowOverdraft, final boolean isEntraceNewValidation) {
 
         final List<EndOfDayBalance> accountEndOfDayBalances = new ArrayList<>();
         boolean interestTransfered = false;
         Money openingDayBalance = periodStartingBalance;
         Money closeOfDayBalance = openingDayBalance;
+        Boolean isEndTrasaccion = false;
 
         for (final SavingsAccountTransactionData transaction : orderedListOfTransactions) {
 
@@ -199,6 +202,11 @@ public final class PostingPeriod {
 
                 closeOfDayBalance = endOfDayBalance.closingBalance();
                 openingDayBalance = closeOfDayBalance;
+            } else if(!isEntraceNewValidation && !isEndTrasaccion && MathUtil.isLessThanZero(transaction.getRunningBalance()) && (DateUtils.isEqual(periodInterval.startDate(), transaction.getDate()) /* DateUtils.isEqual(periodInterval.endDate(), transaction.getDate())*/) ){
+                final EndOfDayBalance endOfDayBalance = transaction.toEndOfDayBalanceDates(openingDayBalance, periodInterval);
+                accountEndOfDayBalances.add(endOfDayBalance);
+                openingDayBalance = endOfDayBalance.closingBalance();
+                isEndTrasaccion = true;
             }
 
             // this check is to make sure to add interest if withdrawal is
@@ -239,7 +247,7 @@ public final class PostingPeriod {
         return new PostingPeriod(periodInterval, currency, periodStartingBalance, openingDayBalance, interestCompoundingPeriodType,
                 interestCalculationType, interestRateAsFraction, daysInYear, compoundingPeriods, interestTransfered,
                 minBalanceForInterestCalculation, isSavingsInterestPostingAtCurrentPeriodEnd, overdraftInterestRateAsFraction,
-                minOverdraftForInterestCalculation, isUserPosting, financialYearBeginningMonth);
+                minOverdraftForInterestCalculation, isUserPosting, financialYearBeginningMonth, isEndTrasaccion);
     }
 
     private PostingPeriod(final LocalDateInterval periodInterval, final MonetaryCurrency currency, final Money openingBalance,
@@ -247,7 +255,7 @@ public final class PostingPeriod {
             final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear,
             final List<CompoundingPeriod> compoundingPeriods, boolean interestTransfered, final Money minBalanceForInterestCalculation,
             final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final BigDecimal overdraftInterestRateAsFraction,
-            final Money minOverdraftForInterestCalculation, boolean isUserPosting, Integer financialYearBeginningMonth) {
+            final Money minOverdraftForInterestCalculation, boolean isUserPosting, Integer financialYearBeginningMonth, Boolean flag) {
         this.periodInterval = periodInterval;
         this.currency = currency;
         this.openingBalance = openingBalance;
@@ -269,6 +277,7 @@ public final class PostingPeriod {
         this.minOverdraftForInterestCalculation = minOverdraftForInterestCalculation;
         this.isUserPosting = isUserPosting;
         this.financialYearBeginningMonth = financialYearBeginningMonth;
+        this.isEndTransacction = flag;
     }
 
     public Money interest() {
@@ -568,5 +577,9 @@ public final class PostingPeriod {
 
     public Money getOpeningBalance() {
         return openingBalance;
+    }
+
+    public Boolean getEndTransacction() {
+        return isEndTransacction;
     }
 }
