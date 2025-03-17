@@ -26,7 +26,6 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.serialization.CommandProcessingResultJsonSerializer;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.serialization.ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson;
-import org.apache.fineract.infrastructure.core.serialization.ExcludeNothingWithPrettyPrintingOnJsonSerializerGoogleGson;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.junit.jupiter.api.Test;
 
@@ -35,8 +34,7 @@ public class BusinessDataSerialized {
     @Test
     public void serializeBusinessDateData() {
         DefaultToApiJsonSerializer<BusinessDateData> jsonSerializer = new DefaultToApiJsonSerializer<>(
-                new ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson(),
-                new ExcludeNothingWithPrettyPrintingOnJsonSerializerGoogleGson(), new CommandProcessingResultJsonSerializer(),
+                new ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson(), new CommandProcessingResultJsonSerializer(),
                 new GoogleGsonSerializerHelper());
 
         LocalDate now = LocalDate.now(ZoneId.systemDefault());
@@ -49,8 +47,7 @@ public class BusinessDataSerialized {
     @Test
     public void serializeBusinessDateData_COB() {
         DefaultToApiJsonSerializer<BusinessDateData> jsonSerializer = new DefaultToApiJsonSerializer<>(
-                new ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson(),
-                new ExcludeNothingWithPrettyPrintingOnJsonSerializerGoogleGson(), new CommandProcessingResultJsonSerializer(),
+                new ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson(), new CommandProcessingResultJsonSerializer(),
                 new GoogleGsonSerializerHelper());
 
         LocalDate now = LocalDate.now(ZoneId.systemDefault());

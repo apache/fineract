@@ -26,8 +26,6 @@ public interface ToApiJsonSerializer<T> {
 
     String serialize(Object object);
 
-    String serializePretty(boolean prettyOn, Object object);
-
     String serializeResult(Object object);
 
     String serialize(ApiRequestJsonSerializationSettings settings, Collection<T> collection);

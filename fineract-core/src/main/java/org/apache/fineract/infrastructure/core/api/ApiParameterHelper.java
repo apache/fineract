@@ -79,15 +79,6 @@ public final class ApiParameterHelper {
         }
     }
 
-    public static boolean prettyPrint(final MultivaluedMap<String, String> queryParams) {
-        boolean prettyPrint = false;
-        if (queryParams.getFirst("pretty") != null) {
-            final String prettyPrintValue = queryParams.getFirst("pretty");
-            prettyPrint = "true".equalsIgnoreCase(prettyPrintValue);
-        }
-        return prettyPrint;
-    }
-
     public static Locale extractLocale(final MultivaluedMap<String, String> queryParams) {
         Locale locale = null;
         if (queryParams.getFirst("locale") != null) {

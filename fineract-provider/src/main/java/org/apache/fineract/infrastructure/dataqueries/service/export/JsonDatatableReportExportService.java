@@ -46,19 +46,17 @@ public class JsonDatatableReportExportService implements DatatableReportExportSe
 
         final GenericResultsetData result = this.readExtraDataAndReportingService.retrieveGenericResultset(reportName, parameterTypeValue,
                 reportParams, isSelfServiceUserReport);
-        DatatableExportTargetParameter exportMode = DatatableExportTargetParameter.resolverExportTarget(queryParams);
-        boolean prettyPrint = exportMode == DatatableExportTargetParameter.PRETTY_JSON;
         String json;
         final boolean genericResultSetIsPassed = ApiParameterHelper.genericResultSetPassed(queryParams);
         final boolean genericResultSet = ApiParameterHelper.genericResultSet(queryParams);
         if (genericResultSetIsPassed) {
             if (genericResultSet) {
-                json = this.toApiJsonSerializer.serializePretty(prettyPrint, result);
+                json = this.toApiJsonSerializer.serialize(result);
             } else {
                 json = this.genericDataService.generateJsonFromGenericResultsetData(result);
             }
         } else {
-            json = this.toApiJsonSerializer.serializePretty(prettyPrint, result);
+            json = this.toApiJsonSerializer.serialize(result);
         }
         return new ResponseHolder(Response.Status.OK).entity(json).contentType(MediaType.APPLICATION_JSON);
 

@@ -33,16 +33,13 @@ import org.springframework.stereotype.Component;
 public class DefaultToApiJsonSerializer<T> implements ToApiJsonSerializer<T> {
 
     private final ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson excludeNothingWithPrettyPrintingOff;
-    private final ExcludeNothingWithPrettyPrintingOnJsonSerializerGoogleGson excludeNothingWithPrettyPrintingOn;
     private final CommandProcessingResultJsonSerializer commandProcessingResultSerializer;
     private final GoogleGsonSerializerHelper helper;
 
     @Autowired
     public DefaultToApiJsonSerializer(final ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson excludeNothingWithPrettyPrintingOff,
-            final ExcludeNothingWithPrettyPrintingOnJsonSerializerGoogleGson excludeNothingWithPrettyPrintingOn,
             final CommandProcessingResultJsonSerializer commandProcessingResultSerializer, final GoogleGsonSerializerHelper helper) {
         this.excludeNothingWithPrettyPrintingOff = excludeNothingWithPrettyPrintingOff;
-        this.excludeNothingWithPrettyPrintingOn = excludeNothingWithPrettyPrintingOn;
         this.commandProcessingResultSerializer = commandProcessingResultSerializer;
         this.helper = helper;
     }
@@ -55,18 +52,6 @@ public class DefaultToApiJsonSerializer<T> implements ToApiJsonSerializer<T> {
     @Override
     public String serialize(final Object object) {
         return this.excludeNothingWithPrettyPrintingOff.serialize(object);
-    }
-
-    @Override
-    public String serializePretty(final boolean prettyOn, final Object object) {
-        String json = "";
-
-        if (prettyOn) {
-            json = this.excludeNothingWithPrettyPrintingOn.serialize(object);
-        } else {
-            json = serialize(object);
-        }
-        return json;
     }
 
     @Override
@@ -109,49 +94,23 @@ public class DefaultToApiJsonSerializer<T> implements ToApiJsonSerializer<T> {
     }
 
     private String serializeWithSettings(final Gson gson, final ApiRequestJsonSerializationSettings settings, final Object[] dataObject) {
-        String json = null;
-        if (gson != null) {
-            json = this.helper.serializedJsonFrom(gson, dataObject);
-        } else {
-            if (settings.isPrettyPrint()) {
-                json = this.excludeNothingWithPrettyPrintingOn.serialize(dataObject);
-            } else {
-                json = serialize(dataObject);
-            }
-        }
-        return json;
+        return gson != null ? this.helper.serializedJsonFrom(gson, dataObject) : serialize(dataObject);
     }
 
     private String serializeWithSettings(final Gson gson, final ApiRequestJsonSerializationSettings settings, final Object dataObject) {
-        String json = null;
-        if (gson != null) {
-            json = this.helper.serializedJsonFrom(gson, dataObject);
-        } else {
-            if (settings.isPrettyPrint()) {
-                json = this.excludeNothingWithPrettyPrintingOn.serialize(dataObject);
-            } else {
-                json = serialize(dataObject);
-            }
-        }
-        return json;
+        return gson != null ? this.helper.serializedJsonFrom(gson, dataObject) : serialize(dataObject);
     }
 
     private Gson findAppropriateSerializer(final ApiRequestJsonSerializationSettings settings,
             final Set<String> supportedResponseParameters) {
-        Gson gson = null;
-        if (settings.isPartialResponseRequired()) {
-            gson = this.helper.createGsonBuilderWithParameterExclusionSerializationStrategy(supportedResponseParameters,
-                    settings.isPrettyPrint(), settings.getParametersForPartialResponse());
-        }
-        return gson;
+
+        return settings.isPartialResponseRequired() ? this.helper.createGsonBuilderWithParameterExclusionSerializationStrategy(
+                supportedResponseParameters, settings.getParametersForPartialResponse()) : null;
     }
 
     private Gson findAppropriateSerializer(final ApiRequestJsonSerializationSettings settings) {
-        Gson gson = null;
-        if (settings.isPartialResponseRequired()) {
-            gson = this.helper.createGsonBuilderForPartialResponseFiltering(settings.isPrettyPrint(),
-                    settings.getParametersForPartialResponse());
-        }
-        return gson;
+        return settings.isPartialResponseRequired()
+                ? helper.createGsonBuilderForPartialResponseFiltering(settings.getParametersForPartialResponse())
+                : null;
     }
 }

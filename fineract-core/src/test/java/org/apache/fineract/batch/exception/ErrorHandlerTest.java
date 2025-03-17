@@ -77,7 +77,7 @@ class ErrorHandlerTest {
 
         // then
         Assertions.assertEquals(1234, errorInfo.getErrorCode());
-        Assertions.assertEquals("{\n  \"Exception\": \"message body\"\n}", errorInfo.getMessage());
+        Assertions.assertEquals("{\"Exception\":\"message body\"}", errorInfo.getMessage());
         Assertions.assertEquals(406, errorInfo.getStatusCode());
         Mockito.verifyNoMoreInteractions(exceptionMapper);
         Mockito.verifyNoInteractions(defaultExceptionMapper);
@@ -104,7 +104,7 @@ class ErrorHandlerTest {
 
         // then
         Assertions.assertEquals(1234, errorInfo.getErrorCode());
-        Assertions.assertEquals("{\n  \"Exception\": \"message body\"\n}", errorInfo.getMessage());
+        Assertions.assertEquals("{\"Exception\":\"message body\"}", errorInfo.getMessage());
         Assertions.assertEquals(406, errorInfo.getStatusCode());
         Mockito.verifyNoMoreInteractions(inputMismatchMapper);
         Mockito.verifyNoInteractions(exceptionMapper);
@@ -129,7 +129,7 @@ class ErrorHandlerTest {
 
         // then
         Assertions.assertEquals(1234, errorInfo.getErrorCode());
-        Assertions.assertEquals("{\n  \"Exception\": \"message body\"\n}", errorInfo.getMessage());
+        Assertions.assertEquals("{\"Exception\":\"message body\"}", errorInfo.getMessage());
         Assertions.assertEquals(406, errorInfo.getStatusCode());
         Mockito.verifyNoInteractions(exceptionMapper);
         Mockito.verifyNoMoreInteractions(defaultExceptionMapper);

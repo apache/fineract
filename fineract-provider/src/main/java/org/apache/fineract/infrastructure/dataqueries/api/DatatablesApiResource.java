@@ -89,8 +89,7 @@ public class DatatablesApiResource {
 
         final List<DatatableData> result = this.readWriteNonCoreDataService.retrieveDatatableNames(apptable);
 
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serializePretty(prettyPrint, result);
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @POST
@@ -201,9 +200,7 @@ public class DatatablesApiResource {
             @Context final UriInfo uriInfo) {
 
         final DatatableData result = this.readWriteNonCoreDataService.retrieveDatatable(datatable);
-
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serializePretty(prettyPrint, result);
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @GET
@@ -222,7 +219,7 @@ public class DatatablesApiResource {
         final List<JsonObject> result = this.readWriteNonCoreDataService.queryDataTable(datatable, columnFilter, valueFilter,
                 resultColumns);
 
-        return this.toApiJsonSerializer.serializePretty(ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters()), result);
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @POST
@@ -235,7 +232,7 @@ public class DatatablesApiResource {
     public String advancedQuery(@PathParam("datatable") @Parameter(description = "datatable") final String datatable,
             PagedLocalRequest<AdvancedQueryData> queryRequest, @Context final UriInfo uriInfo) {
         final Page<JsonObject> result = this.readWriteNonCoreDataService.queryDataTableAdvanced(datatable, queryRequest);
-        return this.toApiJsonSerializer.serializePretty(ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters()), result);
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @GET
@@ -263,8 +260,8 @@ public class DatatablesApiResource {
         String json = "";
         final boolean genericResultSet = ApiParameterHelper.genericResultSet(uriInfo.getQueryParameters());
         if (genericResultSet) {
-            final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-            json = this.toApiJsonSerializer.serializePretty(prettyPrint, results);
+
+            json = toApiJsonSerializer.serialize(results);
         } else {
             json = this.genericDataService.generateJsonFromGenericResultsetData(results);
         }
@@ -288,8 +285,7 @@ public class DatatablesApiResource {
 
         String json = "";
         if (genericResultSet) {
-            final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-            json = this.toApiJsonSerializer.serializePretty(prettyPrint, results);
+            json = toApiJsonSerializer.serialize(results);
         } else {
             json = this.genericDataService.generateJsonFromGenericResultsetData(results);
         }

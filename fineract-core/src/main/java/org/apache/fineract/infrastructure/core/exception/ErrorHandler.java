@@ -66,7 +66,7 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 public final class ErrorHandler {
 
-    private static final Gson JSON_HELPER = GoogleGsonSerializerHelper.createGsonBuilder(true).create();
+    private static final Gson JSON_HELPER = GoogleGsonSerializerHelper.createGsonBuilder().create();
 
     private enum PessimisticLockingFailureCode {
 
