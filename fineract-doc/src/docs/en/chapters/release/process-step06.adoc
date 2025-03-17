@@ -2,33 +2,31 @@
 
 == Description
 
-Create source and binary artifacts. Make sure to do some sanity checks. The tar and the release branch should match.
+Create source and binary tarballs.
 
-[source,bash,subs="attributes+,+macros"]
+[source,bash,subs="attributes+"]
 ----
-% cd /fineract-release-preparations <1>
-% tar -xvf apache-fineract-{revnumber}-src.tar.gz
-% git clone https://git-wip-us.apache.org/repos/asf/fineract.git
+% ./gradlew build -x test
+----
+
+Look in `fineract-war/build/distributions/` for the tarballs.
+
+Make sure to do some sanity checks. The source tarball and the code in the release branch (at the commit with the release tag) should match.
+
+[source,bash,subs="attributes+"]
+----
+% cd /fineract-release-preparations
+% tar -xvf path/to/apache-fineract-{revnumber}-src.tar.gz
+% git clone git@github.com:apache/fineract.git
 % cd fineract/
 % git checkout tags/{revnumber}
 % cd ..
-% diff -r fineract apache-fineract-{revnumber}-src
+% diff -r fineract apache-fineract-{revnumber}
 ----
-<1> Do a fresh clone of the tag.
 
-Make sure code compiles and tests pass on the uncompressed source.
+Make sure the code compiles and tests pass on the uncompressed source. Do as much testing as you can and share what you did. Ideally you'd build code and docs and run every possible test and check, but https://github.com/apache/fineract/actions[running everything has complex dependencies, caches, and takes many hours]. It is rarely done in practice offline / local / on developer machines. But please, go ahead and run the test and doc tasks, and more! Grab a cup of coffee and run everything you can. See the various builds in `.github/workflows/` and try the same things on your own. We should all hammer on a release candidate as much as we can to see if it breaks and fix it if so. All that of course improves our final release.
 
-[source,bash,subs="attributes+,+macros"]
-----
-% cd apache-fineract-{revnumber}-src/fineract-provider <1>
-% gradlew clean integrationTest <2>
-% gradlew clean build <3>
-% gradlew rat <4>
-----
-<1> Make sure prerequisites are met before running these commands.
-<2> For running integration tests
-<3> For building deploy able war
-<4> For RAT checks
+Finally, inspect `apache-fineract-{revnumber}-binary.tar.gz`. Make sure the `fineract-provider-{revnumber}.jar` can be run directly, and the `fineract-provider.war` can be run with Tomcat.
 
 == Gradle Task
 

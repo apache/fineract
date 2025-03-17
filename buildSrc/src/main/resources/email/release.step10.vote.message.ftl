@@ -20,15 +20,15 @@
 -->
 Hello everyone,
 
-... we have created Apache Fineract ${project['fineract.release.version']} release, with the artifacts below up for a vote.
+We are proud to present Apache Fineract ${project['fineract.release.version']}, with the artifacts below up for a vote. Releases are important for a number of reasons: They put a stamp of approval on a set of code changes and they build momentum for future improvements.
 
-It fixes the following issues: https://cwiki.apache.org/confluence/display/FINERACT/${project['fineract.release.version']}+-+Apache+Fineract
+Release notes and ChangeLog: https://cwiki.apache.org/confluence/display/FINERACT/${project['fineract.release.version']}+-+Apache+Fineract
 
-Source & Binary files : https://dist.apache.org/repos/dist/dev/fineract/${project['fineract.release.version']}/
+Source and binary artifacts: https://dist.apache.org/repos/dist/dev/fineract/${project['fineract.release.version']}/
 
-Tag to be voted on (rc#): https://gitbox.apache.org/repos/asf?p=fineract.git;a=commit;h=refs/heads/${project['fineract.release.version']}
+Tagged as ${project['fineract.release.version']}
 
-Fineract's KEYS containing the PGP key we used to sign the release: https://dist.apache.org/repos/dist/dev/fineract/KEYS
+Committer PGP keys, including the release signing key: https://dist.apache.org/repos/dist/dev/fineract/KEYS
 
 Note that this release contains source and binary artifacts.
 
@@ -37,6 +37,16 @@ This vote will be open for 72 hours:
 [ ] +1 approve
 [ ] +0 no opinion
 [ ] -1 disapprove (and reason why)
+
+Please indicate if you are a binding vote (member of the PMC).
+
+Please also indicate with "Tested: YES/NO/PARTIAL" if you have locally built and/or tested these artifacts and/or a clone of the code checked out to the release commit, following the form:
+
+Tested: YES ... Verified integrity and signatures of release artifacts locally, built from source, ran jar/war: Did everything mentioned in the current release candidate verification guidance ( https://lists.apache.org/thread/hym94pdy3nk9gjspkz4qonv2v15n5dpo ). If you did more than that, please specify.
+
+Tested: NO ... No testing performed on release candidate, e.g. relying on testing performed by other contributors ( https://lists.apache.org/thread/q4xvombgzk99lpow23bdpvd7n0dx49lt , https://lists.apache.org/thread/42p54kfx69olcopdg4lojgpj1drmbmtw ) and/or output of GitHub Actions, while exercising my right to vote.
+
+Tested: PARTIAL ... Please specify.
 
 Cheers,
 

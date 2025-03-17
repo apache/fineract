@@ -9,7 +9,7 @@ Next, you create a git tag from the HEAD of the release's git branch.
 % git checkout {revnumber}
 % ./gradlew clean integrationTests <1>
 % git tag -a {revnumber} -m "Fineract {revnumber} release"
-% git push origin {revnumber}
+% git push origin tag {revnumber}
 ----
 <1> Run additonally manual tests with the community app.
 

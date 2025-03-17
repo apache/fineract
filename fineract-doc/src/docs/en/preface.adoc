@@ -1,6 +1,5 @@
 [preface]
 = Preface
-(C) {years}
 
 :hardbreaks:
 

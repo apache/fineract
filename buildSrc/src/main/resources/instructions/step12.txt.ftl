@@ -22,17 +22,8 @@
 
 [INSTRUCTIONS:START]
 
-Following are the typical things we need to verify before voting on a release candidate. And the release manager should verify them too before calling out a vote.
+Move the release candidate from the dev area to the release area using a Subversion server-side copy:
 
-Make sure release artifacts are hosted at https://dist.apache.org/repos/dist/dev/fineract
-
-* Release candidates should be in format apache-fineract-${project['fineract.release.version']}-binary.tar.gz
-* Verify signatures and hashes. You may have to import the public key of the release manager to verify the signatures. (gpg --import KEYS or gpg --recv-key <key id>)
-* Git tag matches the released bits (diff -rf)
-* Can compile docs and code successfully from source
-* Verify DISCLAIMER, NOTICE and LICENSE (year etc)
-* All files have correct headers (Rat check should be clean - gradlew rat)
-* No jar files in the source artifacts
-* Integration tests should work
+svn mv https://dist.apache.org/repos/dist/dev/fineract/${project['fineract.release.version']} https://dist.apache.org/repos/dist/release  /fineract/
 
 [INSTRUCTIONS:END]

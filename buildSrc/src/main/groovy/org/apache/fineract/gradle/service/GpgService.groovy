@@ -116,15 +116,6 @@ class GpgService {
         return generator.generate();
     }
 
-
-    void md5(FineractPluginExtension.FineractPluginGpgParams params) {
-        params.files.findAll {
-            def result = calc(new FileInputStream(it), MessageDigest.getInstance("MD5", BouncyCastleProvider.PROVIDER_NAME))
-            def file = new File("${it}.md5")
-            file.write result
-        }
-    }
-
     void sha512(FineractPluginExtension.FineractPluginGpgParams params) {
         params.files.findAll {
             def result = calc(new FileInputStream(it), MessageDigest.getInstance("SHA-512", BouncyCastleProvider.PROVIDER_NAME))
