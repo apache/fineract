@@ -26,15 +26,15 @@ If you are interested in contributing to this project, but perhaps don't quite k
 REQUIREMENTS
 ============
 * `Java >= 17` (Azul Zulu JVM is tested by our CI on GitHub Actions)
-* MariaDB `11.4`
+* MariaDB `11.5.2`
 
 You can run the required version of the database server in a container, instead of having to install it, like this:
 
-    docker run --name mariadb-11.4 -p 3306:3306 -e MARIADB_ROOT_PASSWORD=mysql -d mariadb:11.4
+    docker run --name mariadb-11.5 -p 3306:3306 -e MARIADB_ROOT_PASSWORD=mysql -d mariadb:11.5.2
 
 and stop and destroy it like this:
 
-    docker rm -f mariadb-11.4
+    docker rm -f mariadb-11.5
 
 <br>Beware that this database container database keeps its state inside the container and not on the host filesystem.  It is lost when you destroy (rm) this container.  This is typically fine for development.  See [Caveats: Where to Store Data on the database container documentation](https://hub.docker.com/_/mariadb) re. how to make it persistent instead of ephemeral.<br>
 
@@ -79,10 +79,8 @@ Run the following commands:
 ============
 1. Clone the repository or download and extract the archive file to your local directory.
 2. Run `./gradlew clean bootJar` to build a modern cloud native fully self contained JAR file which will be created at `fineract-provider/build/libs` directory.
-3. As we are not allowed to include a JDBC driver in the built JAR, download a JDBC driver of your choice. For example: `wget https://downloads.mariadb.com/Connectors/java/connector-java-3.3.2/mariadb-java-client-3.3.2.jar`
+3. As we are not allowed to include a JDBC driver in the built JAR, download a JDBC driver of your choice. For example: `wget https://dlm.mariadb.com/4174416/Connectors/java/connector-java-3.5.2/mariadb-java-client-3.5.2.jar`
 4. Start the jar and pass the directory where you have downloaded the JDBC driver as loader.path, for example: `java -Dloader.path=. -jar fineract-provider/build/libs/fineract-provider.jar` (does not require external Tomcat)
-
-NOTE: we cannot upgrade to version 3.0.x of the MariaDB driver just yet; have to wait until 3.0.4 is out for a bug fix.
 
 The tenants database connection details are configured [via environment variables (as with Docker container)](#instructions-to-run-using-docker-and-docker-compose), e.g. like this:
 

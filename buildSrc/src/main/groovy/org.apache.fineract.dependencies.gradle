@@ -44,8 +44,8 @@ dependencyManagement {
         // We do not use :+ to get the latest available version available on Maven Central, as that could suddenly break things.
         // We use the Renovate Bot to automatically propose Pull Requests (PRs) when upgrades for all of these versions are available.
 
-        dependency 'ch.qos.logback:logback-core:1.5.12'
-        dependency 'ch.qos.logback:logback-classic:1.5.12'
+        dependency 'ch.qos.logback:logback-core:1.5.17'
+        dependency 'ch.qos.logback:logback-classic:1.5.17'
         dependency 'ch.qos.logback.contrib:logback-json-classic:0.1.5'
         dependency 'ch.qos.logback.contrib:logback-jackson:0.1.5'
         dependency 'org.codehaus.janino:janino:3.1.12'
@@ -169,7 +169,7 @@ dependencyManagement {
             exclude 'io.swagger.core.v3:swagger-core'
         }
 
-        dependency 'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.21.0'
+        dependency 'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.23.1'
 
         dependency ('org.apache.activemq:activemq-client:6.1.3') {
             exclude 'javax.annotation:javax.annotation-api'
@@ -227,12 +227,12 @@ dependencyManagement {
 
         dependency "org.apache.avro:avro:1.12.0"
 
-        dependency ('org.mariadb.jdbc:mariadb-java-client:3.5.0') {
+        dependency ('org.mariadb.jdbc:mariadb-java-client:3.5.2') {
             exclude 'org.slf4j:jcl-over-slf4j'
             exclude 'org.slf4j:slf4j-api'
         }
 
-        dependency 'org.postgresql:postgresql:42.7.4'
+        dependency 'org.postgresql:postgresql:42.7.5'
 
         dependency 'org.assertj:assertj-core:3.26.3'
 
