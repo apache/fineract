@@ -18,13 +18,13 @@
  */
 package org.apache.fineract.infrastructure.event.external.command;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Map;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
-@AllArgsConstructor
-@Getter
-public class ExternalEventConfigurationCommand {
+public record ExternalEventConfigurationCommand(Map<String, Boolean> externalEventConfigurations) implements Serializable {
 
-    private final Map<String, Boolean> externalEventConfigurations;
+    @Serial
+    private static final long serialVersionUID = 1L;
+
 }

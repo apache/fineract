@@ -27,7 +27,7 @@ import java.util.Map;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.CommandProcessingResult;
-import org.apache.fineract.client.models.PutExternalEventConfigurationsRequest;
+import org.apache.fineract.client.models.ExternalEventConfigurationCommand;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.infrastructure.event.external.service.validation.ExternalEventDTO;
@@ -124,7 +124,7 @@ public final class ExternalEventHelper {
     public void configureBusinessEvent(String eventName, boolean enabled) {
         CommandProcessingResult result = Calls
                 .ok(FineractClientHelper.getFineractClient().externalEventConfigurationApi.updateExternalEventConfigurationsDetails(
-                        new PutExternalEventConfigurationsRequest().putExternalEventConfigurationsItem(eventName, enabled)));
+                        new ExternalEventConfigurationCommand().putExternalEventConfigurationsItem(eventName, enabled)));
         Map<String, Object> changes = result.getChanges();
         Assertions.assertNotNull(changes);
         Assertions.assertInstanceOf(Map.class, changes);

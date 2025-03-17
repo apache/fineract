@@ -44,7 +44,7 @@ public class ExternalEventConfigurationWritePlatformServiceImpl implements Exter
     @Override
     public CommandProcessingResult updateConfigurations(final JsonCommand command) {
         final ExternalEventConfigurationCommand configurationCommand = fromApiJsonDeserializer.commandFromApiJson(command.json());
-        final Map<String, Boolean> commandConfigurations = configurationCommand.getExternalEventConfigurations();
+        final Map<String, Boolean> commandConfigurations = configurationCommand.externalEventConfigurations();
         final Map<String, Object> changes = new HashMap<>();
         final Map<String, Boolean> changedConfigurations = new HashMap<>();
         final List<ExternalEventConfiguration> modifiedConfigurations = new ArrayList<>();
