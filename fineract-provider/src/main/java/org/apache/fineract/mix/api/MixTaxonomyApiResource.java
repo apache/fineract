@@ -23,17 +23,9 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.UriInfo;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.mix.data.MixTaxonomyData;
 import org.apache.fineract.mix.service.MixTaxonomyReadPlatformService;
@@ -45,25 +37,17 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class MixTaxonomyApiResource {
 
-    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList("taxonomyId", "name", "namespace", "dimension", "description"));
-
     private final PlatformSecurityContext context;
-    private final ToApiJsonSerializer<MixTaxonomyData> toApiJsonSerializer;
     private final MixTaxonomyReadPlatformService readTaxonomyService;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAll(@Context final UriInfo uriInfo) {
+    public List<MixTaxonomyData> retrieveAll() {
 
         // FIXME - KW - no check for permission to read mix taxonomy data.
         this.context.authenticatedUser();
 
-        final List<MixTaxonomyData> taxonomyDatas = this.readTaxonomyService.retrieveAll();
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-
-        return this.toApiJsonSerializer.serialize(settings, taxonomyDatas, RESPONSE_DATA_PARAMETERS);
+        return readTaxonomyService.retrieveAll();
     }
 }

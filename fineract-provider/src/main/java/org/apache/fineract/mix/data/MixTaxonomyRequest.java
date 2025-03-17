@@ -18,32 +18,20 @@
  */
 package org.apache.fineract.mix.data;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
 
 @Data
 @NoArgsConstructor
-@Accessors(chain = true)
-public class MixTaxonomyData {
+@AllArgsConstructor
+public class MixTaxonomyRequest implements Serializable {
 
-    public static final Integer PORTFOLIO = 0;
-    public static final Integer BALANCESHEET = 1;
-    public static final Integer INCOME = 2;
-    public static final Integer EXPENSE = 3;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    @SuppressWarnings("unused")
-    private Long id;
-    private String name;
-    private String namespace;
-    private String dimension;
-    private Integer type;
-    @SuppressWarnings("unused")
-    private String description;
-
-    @JsonIgnore
-    public boolean isPortfolio() {
-        return this.type == 5;
-    }
+    private String identifier;
+    private String config;
 }
