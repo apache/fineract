@@ -33,9 +33,9 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.client.models.AdvancedPaymentData;
-import org.apache.fineract.client.models.ChargeData;
 import org.apache.fineract.client.models.CreditAllocationData;
 import org.apache.fineract.client.models.CreditAllocationOrder;
+import org.apache.fineract.client.models.LoanProductChargeData;
 import org.apache.fineract.client.models.LoanProductPaymentAllocationRule;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
@@ -262,8 +262,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         // LP1 with 12% FLAT interest with % overdue fee for amount
         // (LP1_INTEREST_FLAT_OVERDUE_FROM_AMOUNT)
         String name13 = DefaultLoanProduct.LP1_INTEREST_FLAT_OVERDUE_FROM_AMOUNT.getName();
-        List<ChargeData> charges = new ArrayList<>();
-        charges.add(new ChargeData().id(ChargeProductType.LOAN_PERCENTAGE_LATE_FEE.value));
+        List<LoanProductChargeData> charges = new ArrayList<>();
+        charges.add(new LoanProductChargeData().id(ChargeProductType.LOAN_PERCENTAGE_LATE_FEE.value));
         PostLoanProductsRequest loanProductsRequestInterestFlatOverdueFeeAmount = loanProductsRequestFactory
                 .defaultLoanProductsRequestLP1InterestFlat()//
                 .name(name13)//
@@ -276,8 +276,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         // LP1 with 12% FLAT interest with % overdue fee for amount+interest
         // (LP1_INTEREST_FLAT_OVERDUE_FROM_AMOUNT_INTEREST)
         String name14 = DefaultLoanProduct.LP1_INTEREST_FLAT_OVERDUE_FROM_AMOUNT_INTEREST.getName();
-        List<ChargeData> chargesInterest = new ArrayList<>();
-        chargesInterest.add(new ChargeData().id(ChargeProductType.LOAN_PERCENTAGE_LATE_FEE_AMOUNT_PLUS_INTEREST.value));
+        List<LoanProductChargeData> chargesInterest = new ArrayList<>();
+        chargesInterest.add(new LoanProductChargeData().id(ChargeProductType.LOAN_PERCENTAGE_LATE_FEE_AMOUNT_PLUS_INTEREST.value));
         PostLoanProductsRequest loanProductsRequestInterestFlatOverdueFeeAmountInterest = loanProductsRequestFactory
                 .defaultLoanProductsRequestLP1InterestFlat()//
                 .name(name14)//

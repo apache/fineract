@@ -23,8 +23,8 @@ import static org.apache.fineract.integrationtests.BaseLoanIntegrationTest.Trans
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.fineract.client.models.ChargeData;
 import org.apache.fineract.client.models.LoanPointInTimeData;
+import org.apache.fineract.client.models.LoanProductChargeData;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
@@ -74,7 +74,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .overAppliedNumber(null)//
                     .overAppliedCalculationType(null)//
                     .multiDisburseLoan(null)//
-                    .charges(List.of(new ChargeData().id(charge1Id), new ChargeData().id(charge2Id)));//
+                    .charges(List.of(new LoanProductChargeData().id(charge1Id), new LoanProductChargeData().id(charge2Id)));//
 
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
             Long loanProductId = loanProductResponse.getResourceId();
@@ -549,7 +549,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .overAppliedNumber(null)//
                     .overAppliedCalculationType(null)//
                     .multiDisburseLoan(null)//
-                    .charges(List.of(new ChargeData().id(charge1Id), new ChargeData().id(charge2Id)));//
+                    .charges(List.of(new LoanProductChargeData().id(charge1Id), new LoanProductChargeData().id(charge2Id)));//
 
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
             Long loanProductId = loanProductResponse.getResourceId();

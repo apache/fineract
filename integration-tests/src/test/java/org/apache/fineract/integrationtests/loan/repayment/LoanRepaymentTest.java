@@ -20,7 +20,7 @@ package org.apache.fineract.integrationtests.loan.repayment;
 
 import java.math.BigDecimal;
 import java.util.List;
-import org.apache.fineract.client.models.ChargeData;
+import org.apache.fineract.client.models.LoanProductChargeData;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
@@ -69,7 +69,7 @@ public class LoanRepaymentTest extends BaseLoanIntegrationTest {
                     .overAppliedNumber(null)//
                     .overAppliedCalculationType(null)//
                     .multiDisburseLoan(null)//
-                    .charges(List.of(new ChargeData().id(charge1Id), new ChargeData().id(charge2Id)));//
+                    .charges(List.of(new LoanProductChargeData().id(charge1Id), new LoanProductChargeData().id(charge2Id)));//
 
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
             Long loanProductId = loanProductResponse.getResourceId();

@@ -267,7 +267,7 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "36000.00")
         public Double outstandingLoanBalance;
 
-        public List<ChargeData> charges;
+        public List<LoanProductChargeData> charges;
         @Schema(example = "en_GB")
         public String locale;
         @Schema(example = "dd MMMM yyyy")
@@ -302,9 +302,9 @@ final class LoanProductsApiResourceSwagger {
             public boolean graceOnArrearsAgeing;
         }
 
-        static final class ChargeData {
+        static final class LoanProductChargeData {
 
-            private ChargeData() {}
+            private LoanProductChargeData() {}
 
             @Schema(example = "1")
             public Long id;
@@ -1688,7 +1688,7 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "36000.00")
         public Double outstandingLoanBalance;
 
-        public List<PostLoanProductsRequest.ChargeData> charges;
+        public List<PostLoanProductsRequest.LoanProductChargeData> charges;
         @Schema(example = "en_GB")
         public String locale;
         @Schema(example = "dd MMMM yyyy")
@@ -1701,52 +1701,6 @@ final class LoanProductsApiResourceSwagger {
 
         public PostLoanProductsRequest.AllowAttributeOverrides allowAttributeOverrides;
         public List<PostLoanProductsRequest.RateData> rates;
-
-        static final class AllowAttributeOverrides {
-
-            private AllowAttributeOverrides() {}
-
-            @Schema(example = "true")
-            public boolean amortizationType;
-            @Schema(example = "true")
-            public boolean interestType;
-            @Schema(example = "true")
-            public boolean transactionProcessingStrategyCode;
-            @Schema(example = "true")
-            public boolean interestCalculationPeriodType;
-            @Schema(example = "true")
-            public boolean inArrearsTolerance;
-            @Schema(example = "true")
-            public boolean repaymentEvery;
-            @Schema(example = "true")
-            public boolean graceOnPrincipalAndInterestPayment;
-            @Schema(example = "true")
-            public boolean graceOnArrearsAgeing;
-        }
-
-        static final class ChargeData {
-
-            private ChargeData() {}
-
-            @Schema(example = "1")
-            public Long id;
-        }
-
-        static final class RateData {
-
-            private RateData() {}
-
-            @Schema(example = "1")
-            public Long id;
-            @Schema(example = "some name")
-            public String name;
-            @Schema(example = "20")
-            public BigDecimal percentage;
-            @Schema(description = "Apply specific product using its id, code, and value.")
-            public EnumOptionData productApply;
-            @Schema(example = "false")
-            public boolean active;
-        }
 
         public List<String> supportedInterestRefundTypes;
         @Schema(example = "REGULAR")

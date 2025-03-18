@@ -25,10 +25,10 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.client.models.AllowAttributeOverrides;
-import org.apache.fineract.client.models.ChargeData;
 import org.apache.fineract.client.models.ChargeToGLAccountMapper;
 import org.apache.fineract.client.models.GetLoanFeeToIncomeAccountMappings;
 import org.apache.fineract.client.models.GetLoanPaymentChannelToFundSourceMappings;
+import org.apache.fineract.client.models.LoanProductChargeData;
 import org.apache.fineract.client.models.PostChargeOffReasonToExpenseAccountMappings;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.test.data.AccountingRule;
@@ -131,7 +131,7 @@ public class LoanProductsRequestFactory {
         List<Integer> principalVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> interestRateVariationsForBorrowerCycle = new ArrayList<>();
-        List<ChargeData> charges = new ArrayList<>();
+        List<LoanProductChargeData> charges = new ArrayList<>();
         List<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
         List<GetLoanFeeToIncomeAccountMappings> feeToIncomeAccountMappings = new ArrayList<>();
 
@@ -241,7 +241,7 @@ public class LoanProductsRequestFactory {
         List<Integer> principalVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> interestRateVariationsForBorrowerCycle = new ArrayList<>();
-        List<ChargeData> charges = new ArrayList<>();
+        List<LoanProductChargeData> charges = new ArrayList<>();
         List<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
         List<GetLoanFeeToIncomeAccountMappings> feeToIncomeAccountMappings = new ArrayList<>();
 
@@ -349,7 +349,7 @@ public class LoanProductsRequestFactory {
         List<Integer> principalVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> interestRateVariationsForBorrowerCycle = new ArrayList<>();
-        List<ChargeData> charges = new ArrayList<>();
+        List<LoanProductChargeData> charges = new ArrayList<>();
         List<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
         List<GetLoanFeeToIncomeAccountMappings> feeToIncomeAccountMappings = new ArrayList<>();
 
@@ -457,7 +457,7 @@ public class LoanProductsRequestFactory {
         List<Integer> principalVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> interestRateVariationsForBorrowerCycle = new ArrayList<>();
-        List<ChargeData> charges = new ArrayList<>();
+        List<LoanProductChargeData> charges = new ArrayList<>();
         List<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
         List<GetLoanFeeToIncomeAccountMappings> feeToIncomeAccountMappings = new ArrayList<>();
 
@@ -570,7 +570,7 @@ public class LoanProductsRequestFactory {
         List<Integer> principalVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> interestRateVariationsForBorrowerCycle = new ArrayList<>();
-        List<ChargeData> charges = new ArrayList<>();
+        List<LoanProductChargeData> charges = new ArrayList<>();
         List<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
         List<GetLoanFeeToIncomeAccountMappings> feeToIncomeAccountMappings = new ArrayList<>();
 
@@ -795,7 +795,7 @@ public class LoanProductsRequestFactory {
         List<Integer> principalVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> interestRateVariationsForBorrowerCycle = new ArrayList<>();
-        List<ChargeData> charges = new ArrayList<>();
+        List<LoanProductChargeData> charges = new ArrayList<>();
         List<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
         List<GetLoanFeeToIncomeAccountMappings> feeToIncomeAccountMappings = new ArrayList<>();
 
@@ -908,7 +908,7 @@ public class LoanProductsRequestFactory {
         List<Integer> principalVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> interestRateVariationsForBorrowerCycle = new ArrayList<>();
-        List<ChargeData> charges = new ArrayList<>();
+        List<LoanProductChargeData> charges = new ArrayList<>();
         List<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
         List<GetLoanFeeToIncomeAccountMappings> feeToIncomeAccountMappings = new ArrayList<>();
 
@@ -1019,7 +1019,7 @@ public class LoanProductsRequestFactory {
         List<Integer> principalVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> interestRateVariationsForBorrowerCycle = new ArrayList<>();
-        List<ChargeData> charges = new ArrayList<>();
+        List<LoanProductChargeData> charges = new ArrayList<>();
         List<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
         List<GetLoanFeeToIncomeAccountMappings> feeToIncomeAccountMappings = new ArrayList<>();
 
@@ -1129,7 +1129,7 @@ public class LoanProductsRequestFactory {
         List<Integer> principalVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> interestRateVariationsForBorrowerCycle = new ArrayList<>();
-        List<ChargeData> charges = new ArrayList<>();
+        List<LoanProductChargeData> charges = new ArrayList<>();
         List<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
         List<GetLoanFeeToIncomeAccountMappings> feeToIncomeAccountMappings = new ArrayList<>();
 

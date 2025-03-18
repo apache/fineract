@@ -21,7 +21,7 @@ package org.apache.fineract.integrationtests.loan.penalty;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.fineract.client.models.ChargeData;
+import org.apache.fineract.client.models.LoanProductChargeData;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
@@ -86,7 +86,7 @@ public class LoanPenaltyBackdatedTransactionTest extends BaseLoanIntegrationTest
                     .overAppliedNumber(null)//
                     .overAppliedCalculationType(null)//
                     .multiDisburseLoan(null)//
-                    .charges(List.of(new ChargeData().id(chargeId)));//
+                    .charges(List.of(new LoanProductChargeData().id(chargeId)));//
 
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
             Long loanProductId = loanProductResponse.getResourceId();
@@ -199,7 +199,7 @@ public class LoanPenaltyBackdatedTransactionTest extends BaseLoanIntegrationTest
                     .overAppliedNumber(null)//
                     .overAppliedCalculationType(null)//
                     .multiDisburseLoan(null)//
-                    .charges(List.of(new ChargeData().id(chargeId)));//
+                    .charges(List.of(new LoanProductChargeData().id(chargeId)));//
 
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
             Long loanProductId = loanProductResponse.getResourceId();
@@ -313,7 +313,7 @@ public class LoanPenaltyBackdatedTransactionTest extends BaseLoanIntegrationTest
                     .overAppliedNumber(null)//
                     .overAppliedCalculationType(null)//
                     .multiDisburseLoan(null)//
-                    .charges(List.of(new ChargeData().id(chargeId)));//
+                    .charges(List.of(new LoanProductChargeData().id(chargeId)));//
 
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
             Long loanProductId = loanProductResponse.getResourceId();
