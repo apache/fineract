@@ -16,28 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.api;
+package org.apache.fineract.infrastructure.core.jersey;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
-import java.lang.reflect.Type;
-import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import java.io.IOException;
+import java.io.OutputStream;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpOutputMessage;
 
-/**
- * GSON Serializer for ExternalId
- *
- */
-public class ExternalIdAdapter implements JsonSerializer<ExternalId> {
+@RequiredArgsConstructor
+public final class SimpleHttpOutputMessage implements HttpOutputMessage {
+
+    private final OutputStream outputStream;
+    private final HttpHeaders headers;
 
     @Override
-    @SuppressWarnings("unused")
-    public JsonElement serialize(ExternalId src, Type typeOfSrc, JsonSerializationContext context) {
-        if (src == null || src.isEmpty()) {
-            return JsonNull.INSTANCE;
-        }
-        return new JsonPrimitive(src.getValue());
+    public OutputStream getBody() throws IOException {
+        return outputStream;
+    }
+
+    @Override
+    public HttpHeaders getHeaders() {
+        return headers;
     }
 }

@@ -31,7 +31,7 @@ import org.apache.fineract.infrastructure.core.domain.ExternalId;
 @Getter
 public class CommandProcessingResult implements Serializable {
 
-    private Long commandId;
+    private final Long commandId;
     private Long officeId;
     private final Long groupId;
     private final Long clientId;
@@ -72,9 +72,9 @@ public class CommandProcessingResult implements Serializable {
         this.creditBureauReportData = creditBureauReportData;
         this.rollbackTransaction = rollbackTransaction;
         this.subResourceId = subResourceId;
-        this.resourceExternalId = resourceExternalId;
-        this.subResourceExternalId = subResourceExternalId;
-        this.loanExternalId = loanExternalId;
+        this.resourceExternalId = setExternalIdOrNull(resourceExternalId);
+        this.subResourceExternalId = setExternalIdOrNull(subResourceExternalId);
+        this.loanExternalId = setExternalIdOrNull(loanExternalId);
     }
 
     protected CommandProcessingResult(final Long resourceId, final Long officeId, final Long commandId, final Map<String, Object> changes,
@@ -160,5 +160,9 @@ public class CommandProcessingResult implements Serializable {
 
     public void setRollbackTransaction(Boolean rollbackTransaction) {
         this.rollbackTransaction = rollbackTransaction;
+    }
+
+    private ExternalId setExternalIdOrNull(ExternalId externalId) {
+        return externalId == null || externalId.isEmpty() ? null : externalId;
     }
 }
