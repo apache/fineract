@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.im
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
@@ -45,6 +46,10 @@ public class FineractStyleLoanRepaymentScheduleTransactionProcessor extends Abst
     public static final String STRATEGY_CODE = "mifos-standard-strategy";
 
     public static final String STRATEGY_NAME = "Penalties, Fees, Interest, Principal order";
+
+    public FineractStyleLoanRepaymentScheduleTransactionProcessor(ExternalIdFactory externalIdFactory) {
+        super(externalIdFactory);
+    }
 
     @Override
     public String getCode() {

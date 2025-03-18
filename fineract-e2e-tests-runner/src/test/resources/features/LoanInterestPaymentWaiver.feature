@@ -606,6 +606,7 @@ Feature: LoanInterestWaiver
       | Transaction date | Transaction Type        | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 01 January 2024  | Disbursement            | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
       | 01 February 2024 | Interest Payment Waiver | 260.0  | 250.0     | 10.0     | 0.0  | 0.0       | 750.0        |
+      | 02 February 2024 | Accrual                 | 10.34  | 0.0       | 10.34    | 0.0  | 0.0       | 0.0          |
       | 02 February 2024 | Charge-off              | 780.0  | 750.0     | 30.0     | 0.0  | 0.0       | 0.0          |
     Then Loan Transactions tab has a "DISBURSEMENT" transaction with date "01 January 2024" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit  | Credit |
@@ -647,6 +648,7 @@ Feature: LoanInterestWaiver
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 01 January 2024  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
+      | 15 January 2024  | Accrual          | 4.52   | 0.0       | 4.52     | 0.0  | 0.0       | 0.0          |
       | 15 January 2024  | Charge-off       | 1040.0 | 1000.0    | 40.0     | 0.0  | 0.0       | 0.0          |
     Then Loan Transactions tab has a "DISBURSEMENT" transaction with date "01 January 2024" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit  | Credit |
@@ -673,6 +675,7 @@ Feature: LoanInterestWaiver
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type        | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 01 January 2024  | Disbursement            | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
+      | 15 January 2024  | Accrual                 | 4.52   | 0.0       | 4.52     | 0.0  | 0.0       | 0.0          |
       | 15 January 2024  | Charge-off              | 1040.0 | 1000.0    | 40.0     | 0.0  | 0.0       | 0.0          |
       | 01 February 2024 | Interest Payment Waiver | 260.0  | 250.0     | 10.0     | 0.0  | 0.0       | 750.0        |
     Then Loan Transactions tab has a "DISBURSEMENT" transaction with date "01 January 2024" which has the following Journal entries:
