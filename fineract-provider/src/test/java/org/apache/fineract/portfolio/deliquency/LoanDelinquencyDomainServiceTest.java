@@ -154,7 +154,7 @@ public class LoanDelinquencyDomainServiceTest {
         when(loanProductRelatedDetail.getGraceOnArrearsAgeing()).thenReturn(0);
         when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
         when(loan.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
-        when(loanTransactionReadService.fetchLoanTransactionsByType(loan.getId(), null, LoanTransactionType.CHARGEBACK.getValue()))
+        when(loanTransactionReadService.fetchLoanTransactionsByType(loan.getId(), null, LoanTransactionType.CHARGEBACK))
                 .thenReturn(Collections.emptyList());
         when(loan.getLastLoanRepaymentScheduleInstallment()).thenReturn(repaymentScheduleInstallments.get(0));
         when(loan.getCurrency()).thenReturn(currency);
@@ -223,7 +223,7 @@ public class LoanDelinquencyDomainServiceTest {
         when(loanProductRelatedDetail.getGraceOnArrearsAgeing()).thenReturn(0);
         when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
         when(loan.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
-        when(loanTransactionReadService.fetchLoanTransactionsByType(loan.getId(), null, LoanTransactionType.CHARGEBACK.getValue()))
+        when(loanTransactionReadService.fetchLoanTransactionsByType(loan.getId(), null, LoanTransactionType.CHARGEBACK))
                 .thenReturn(Collections.emptyList());
         when(loan.getLastLoanRepaymentScheduleInstallment()).thenReturn(repaymentScheduleInstallments.get(0));
         when(loan.getCurrency()).thenReturn(currency);
@@ -279,7 +279,7 @@ public class LoanDelinquencyDomainServiceTest {
         when(loan.isEnableInstallmentLevelDelinquency()).thenReturn(true);
         when(loan.getCurrency()).thenReturn(currency);
         when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
-        when(loanTransactionReadService.fetchLoanTransactionsByType(loan.getId(), null, LoanTransactionType.CHARGEBACK.getValue()))
+        when(loanTransactionReadService.fetchLoanTransactionsByType(loan.getId(), null, LoanTransactionType.CHARGEBACK))
                 .thenReturn(Arrays.asList(loanTransaction));
         when(delinquencyEffectivePauseHelper.getPausedDaysBeforeDate(effectiveDelinquencyList, businessDate)).thenReturn(0L);
 

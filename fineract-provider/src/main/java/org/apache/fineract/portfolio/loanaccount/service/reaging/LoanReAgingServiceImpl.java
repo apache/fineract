@@ -176,8 +176,8 @@ public class LoanReAgingServiceImpl {
         Money txPrincipal = loan.getTotalPrincipalOutstandingUntil(transactionDate);
         BigDecimal txPrincipalAmount = txPrincipal.getAmount();
 
-        return new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.REAGE.getValue(), transactionDate, txPrincipalAmount,
-                txPrincipalAmount, ZERO, ZERO, ZERO, null, false, null, txExternalId);
+        return new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.REAGE, transactionDate, txPrincipalAmount, txPrincipalAmount,
+                ZERO, ZERO, ZERO, null, false, null, txExternalId);
     }
 
     private LoanReAgeParameter createReAgeParameter(LoanTransaction reAgeTransaction, JsonCommand command) {

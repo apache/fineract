@@ -210,7 +210,7 @@ public final class LoanApplicationValidator {
                     expectedFirstRepaymentOnDate);
         }
 
-        validateLoanTermAndRepaidEveryValues(loan.getTermFrequency(), loan.getTermPeriodFrequencyType(),
+        validateLoanTermAndRepaidEveryValues(loan.getTermFrequency(), loan.getTermPeriodFrequencyType().getValue(),
                 loan.repaymentScheduleDetail().getNumberOfRepayments(), loan.repaymentScheduleDetail().getRepayEvery(),
                 loan.repaymentScheduleDetail().getRepaymentPeriodFrequencyType().getValue(), loan);
     }
@@ -224,7 +224,7 @@ public final class LoanApplicationValidator {
                     expectedFirstRepaymentOnDate);
         }
 
-        validateLoanTermAndRepaidEveryValues(loan.getTermFrequency(), loan.getTermPeriodFrequencyType(),
+        validateLoanTermAndRepaidEveryValues(loan.getTermFrequency(), loan.getTermPeriodFrequencyType().getValue(),
                 loan.repaymentScheduleDetail().getNumberOfRepayments(), loan.repaymentScheduleDetail().getRepayEvery(),
                 loan.repaymentScheduleDetail().getRepaymentPeriodFrequencyType().getValue(), loan);
     }
@@ -1850,11 +1850,9 @@ public final class LoanApplicationValidator {
         final Long clientId = this.fromApiJsonHelper.extractLongNamed(LoanApiConstants.clientIdParameterName, element);
 
         if (groupId != null) {
-            activeLoansLoanProductIds = this.loanRepositoryWrapper.findActiveLoansLoanProductIdsByGroup(groupId,
-                    LoanStatus.ACTIVE.getValue());
+            activeLoansLoanProductIds = this.loanRepositoryWrapper.findActiveLoansLoanProductIdsByGroup(groupId, LoanStatus.ACTIVE);
         } else {
-            activeLoansLoanProductIds = this.loanRepositoryWrapper.findActiveLoansLoanProductIdsByClient(clientId,
-                    LoanStatus.ACTIVE.getValue());
+            activeLoansLoanProductIds = this.loanRepositoryWrapper.findActiveLoansLoanProductIdsByClient(clientId, LoanStatus.ACTIVE);
         }
         checkForProductMixRestrictions(activeLoansLoanProductIds, productId);
     }

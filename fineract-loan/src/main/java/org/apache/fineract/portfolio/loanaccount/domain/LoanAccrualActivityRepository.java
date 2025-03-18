@@ -26,7 +26,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface LoanAccrualActivityRepository extends Repository<Loan, Long> {
 
-    @Query("select loan.id from Loan loan left join LoanTransaction lt on lt.loan = loan and lt.typeOf = 32 and lt.reversed = false and lt.dateOf = :currentDate inner join LoanRepaymentScheduleInstallment rs on rs.loan = loan and rs.isDownPayment = false and rs.additional = false and rs.dueDate = :currentDate where loan.loanRepaymentScheduleDetail.enableAccrualActivityPosting = true and loan.loanStatus = 300 and lt.id is null ")
-    Set<Long> fetchLoanIdsForAccrualActivityPosting(@Param("currentDate") LocalDate currentDate);
+    @Query("select loan.id from Loan loan left join LoanTransaction lt on lt.loan = loan and lt.typeOf = :loanType and lt.reversed = false and lt.dateOf = :currentDate inner join LoanRepaymentScheduleInstallment rs on rs.loan = loan and rs.isDownPayment = false and rs.additional = false and rs.dueDate = :currentDate where loan.loanRepaymentScheduleDetail.enableAccrualActivityPosting = true and loan.loanStatus = :loanStatus and lt.id is null ")
+    Set<Long> fetchLoanIdsForAccrualActivityPosting(@Param("currentDate") LocalDate currentDate,
+            @Param("loanType") LoanTransactionType loanTransactionType, @Param("loanStatus") LoanStatus loanStatus);
 
 }

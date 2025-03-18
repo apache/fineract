@@ -1065,7 +1065,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
     private void handleForeClosureTransactions(final Loan loan, final LoanTransaction repaymentTransaction,
             final LoanLifecycleStateMachine loanLifecycleStateMachine, final ScheduleGeneratorDTO scheduleGeneratorDTO) {
-        loan.setLoanSubStatus(LoanSubStatus.FORECLOSED.getValue());
+        loan.setLoanSubStatus(LoanSubStatus.FORECLOSED);
         loanDownPaymentHandlerService.handleRepaymentOrRecoveryOrWaiverTransaction(loan, repaymentTransaction, loanLifecycleStateMachine,
                 null, scheduleGeneratorDTO);
     }

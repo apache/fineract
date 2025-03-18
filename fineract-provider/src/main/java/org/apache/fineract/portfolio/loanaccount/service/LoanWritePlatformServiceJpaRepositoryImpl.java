@@ -1003,7 +1003,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             loan.setClosedOnDate(transactionDate);
             loan.setActualMaturityDate(transactionDate);
             loanLifecycleStateMachine.transition(LoanEvent.REPAID_IN_FULL, loan);
-        } else if (LoanStatus.fromInt(loan.getLoanStatus()).isOverpaid()) {
+        } else if (loan.getLoanStatus().isOverpaid()) {
             if (loan.getTotalOverpaid() == null || BigDecimal.ZERO.compareTo(loan.getTotalOverpaid()) == 0) {
                 loan.setOverpaidOnDate(null);
             }
@@ -1306,8 +1306,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .orElseThrow(() -> new LoanTransactionNotFoundException(command.entityId(), command.getLoanId()));
 
         Loan loan = this.loanAssembler.assembleFrom(loanId);
-        if (loan.getStatus().isClosed() && loan.getLoanSubStatus() != null
-                && loan.getLoanSubStatus().equals(LoanSubStatus.FORECLOSED.getValue())) {
+        if (loan.getStatus().isClosed() && loan.getLoanSubStatus() != null && loan.getLoanSubStatus().equals(LoanSubStatus.FORECLOSED)) {
             final String defaultUserMessage = "The loan cannot reopened as it is foreclosed.";
             throw new LoanForeclosureException("loan.cannot.be.reopened.as.it.is.foreclosured", defaultUserMessage, loanId);
         }
@@ -2067,9 +2066,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         final List<Long> existingTransactionIds = new ArrayList<>();
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
-        final Collection<Integer> loanStatuses = new ArrayList<>(Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(),
-                LoanStatus.APPROVED.getValue(), LoanStatus.ACTIVE.getValue()));
-        final Collection<Integer> loanTypes = new ArrayList<>(Arrays.asList(AccountType.GROUP.getValue(), AccountType.JLG.getValue()));
+        final Collection<LoanStatus> loanStatuses = new ArrayList<>(
+                Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL, LoanStatus.APPROVED, LoanStatus.ACTIVE));
+        final Collection<AccountType> loanTypes = new ArrayList<>(Arrays.asList(AccountType.GROUP, AccountType.JLG));
         final Collection<Long> loanIds = new ArrayList<>(loanCalendarInstances.size());
         // loop through loanCalendarInstances to get loan ids
         for (final CalendarInstance calendarInstance : loanCalendarInstances) {
@@ -2134,10 +2133,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (loan.isGroupLoan()) {
             if (loan.loanProduct().isIncludeInBorrowerCycle()) {
                 loansToUpdate = this.loanRepositoryWrapper.getGroupLoansToUpdateLoanCounter(loan.getCurrentLoanCounter(), loan.getGroupId(),
-                        AccountType.GROUP.getValue());
+                        AccountType.GROUP);
             } else {
                 loansToUpdate = this.loanRepositoryWrapper.getGroupLoansToUpdateLoanProductCounter(loan.getLoanProductLoanCounter(),
-                        loan.getGroupId(), AccountType.GROUP.getValue());
+                        loan.getGroupId(), AccountType.GROUP);
             }
 
         } else {
@@ -2162,7 +2161,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         if (loan.isGroupLoan()) {
             final List<Loan> loansToUpdateForLoanCounter = this.loanRepositoryWrapper.getGroupLoansDisbursedAfter(actualDisbursementDate,
-                    loan.getGroupId(), AccountType.GROUP.getValue());
+                    loan.getGroupId(), AccountType.GROUP);
             final Integer newLoanCounter = getNewGroupLoanCounter(loan);
             final Integer newLoanProductCounter = getNewGroupLoanProductCounter(loan);
             updateLoanCounter(loan, loansToUpdateForLoanCounter, newLoanCounter, newLoanProductCounter);
@@ -2177,7 +2176,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     private Integer getNewGroupLoanCounter(final Loan loan) {
 
-        Integer maxClientLoanCounter = this.loanRepositoryWrapper.getMaxGroupLoanCounter(loan.getGroupId(), AccountType.GROUP.getValue());
+        Integer maxClientLoanCounter = this.loanRepositoryWrapper.getMaxGroupLoanCounter(loan.getGroupId(), AccountType.GROUP);
         if (maxClientLoanCounter == null) {
             maxClientLoanCounter = 1;
         } else {
@@ -2189,7 +2188,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private Integer getNewGroupLoanProductCounter(final Loan loan) {
 
         Integer maxLoanProductLoanCounter = this.loanRepositoryWrapper.getMaxGroupLoanProductCounter(loan.loanProduct().getId(),
-                loan.getGroupId(), AccountType.GROUP.getValue());
+                loan.getGroupId(), AccountType.GROUP);
         if (maxLoanProductLoanCounter == null) {
             maxLoanProductLoanCounter = 1;
         } else {

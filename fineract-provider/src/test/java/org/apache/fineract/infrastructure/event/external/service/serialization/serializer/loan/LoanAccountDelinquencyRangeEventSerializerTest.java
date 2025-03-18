@@ -337,7 +337,7 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
                 delinquencyEffectivePauseHelper, configurationDomainService);
 
         Loan loan = Mockito.spy(Loan.class);
-        ReflectionTestUtils.setField(loan, "loanStatus", 300);
+        ReflectionTestUtils.setField(loan, "loanStatus", LoanStatus.ACTIVE);
         LoanTransaction transaction1 = Mockito.mock(LoanTransaction.class);
         LoanTransaction transaction2 = Mockito.mock(LoanTransaction.class);
         CollectionData collectionData = Mockito.mock(CollectionData.class);

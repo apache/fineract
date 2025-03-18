@@ -132,7 +132,7 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
     private LoanProductMinMaxConstraints loanProductMinMaxConstraints;
 
     @Column(name = "accounting_type", nullable = false)
-    private Integer accountingRule;
+    private AccountingRuleType accountingRule;
 
     @Column(name = "include_in_borrower_cycle")
     private boolean includeInBorrowerCycle;
@@ -767,9 +767,7 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
                 defaultMinNominalInterestRatePerPeriod, defaultMaxNominalInterestRatePerPeriod, defaultMinNumberOfInstallments,
                 defaultMaxNumberOfInstallments);
 
-        if (accountingRuleType != null) {
-            this.accountingRule = accountingRuleType.getValue();
-        }
+        this.accountingRule = accountingRuleType;
         this.includeInBorrowerCycle = includeInBorrowerCycle;
         this.useBorrowerCycle = useBorrowerCycle;
 
@@ -994,10 +992,11 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
         }
 
         final String accountingTypeParamName = "accountingRule";
-        if (command.isChangeInIntegerParameterNamed(accountingTypeParamName, this.accountingRule)) {
+        Integer currentValue = this.accountingRule == null ? null : this.accountingRule.getValue();
+        if (command.isChangeInIntegerParameterNamed(accountingTypeParamName, currentValue)) {
             final Integer newValue = command.integerValueOfParameterNamed(accountingTypeParamName);
             actualChanges.put(accountingTypeParamName, newValue);
-            this.accountingRule = newValue;
+            this.accountingRule = AccountingRuleType.fromInt(newValue);
         }
 
         final String nameParamName = "name";
@@ -1414,19 +1413,19 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
     }
 
     public boolean isAccountingDisabled() {
-        return AccountingRuleType.NONE.getValue().equals(this.accountingRule);
+        return AccountingRuleType.NONE.equals(this.accountingRule);
     }
 
     public boolean isCashBasedAccountingEnabled() {
-        return AccountingRuleType.CASH_BASED.getValue().equals(this.accountingRule);
+        return AccountingRuleType.CASH_BASED.equals(this.accountingRule);
     }
 
     public boolean isUpfrontAccrualAccountingEnabled() {
-        return AccountingRuleType.ACCRUAL_UPFRONT.getValue().equals(this.accountingRule);
+        return AccountingRuleType.ACCRUAL_UPFRONT.equals(this.accountingRule);
     }
 
     public boolean isPeriodicAccrualAccountingEnabled() {
-        return AccountingRuleType.ACCRUAL_PERIODIC.getValue().equals(this.accountingRule);
+        return AccountingRuleType.ACCRUAL_PERIODIC.equals(this.accountingRule);
     }
 
     public Money getPrincipalAmount() {

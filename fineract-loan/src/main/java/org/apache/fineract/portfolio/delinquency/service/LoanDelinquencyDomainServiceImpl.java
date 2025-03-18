@@ -266,7 +266,7 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
         final MonetaryCurrency loanCurrency = loan.getCurrency();
         LoanRepaymentScheduleInstallment latestInstallment = loan.getLastLoanRepaymentScheduleInstallment();
         List<LoanTransaction> chargebackTransactions = loanTransactionReadService.fetchLoanTransactionsByType(loan.getId(), null,
-                LoanTransactionType.CHARGEBACK.getValue());
+                LoanTransactionType.CHARGEBACK);
         LocalDate overdueSinceDate = null;
         CollectionData collectionData = CollectionData.template();
         BigDecimal outstandingAmount = BigDecimal.ZERO;
@@ -324,7 +324,7 @@ public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainSe
         BigDecimal delinquentPenalty = BigDecimal.ZERO;
 
         List<LoanTransaction> chargebackTransactions = loanTransactionReadService.fetchLoanTransactionsByType(loan.getId(), null,
-                LoanTransactionType.CHARGEBACK.getValue());
+                LoanTransactionType.CHARGEBACK);
         BigDecimal amountAvailable = installment.getTotalPaid(loanCurrency).getAmount();
         for (LoanTransaction loanTransaction : chargebackTransactions) {
 

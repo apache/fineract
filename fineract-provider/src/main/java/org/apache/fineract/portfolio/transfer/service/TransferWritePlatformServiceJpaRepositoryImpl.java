@@ -22,6 +22,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -52,6 +54,7 @@ import org.apache.fineract.portfolio.group.exception.ClientNotInGroupException;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.service.LoanOfficerService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
 import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
@@ -151,8 +154,10 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         final CalendarInstance sourceGroupCalendarInstance = this.calendarInstanceRepository.findByEntityIdAndEntityTypeIdAndCalendarTypeId(
                 sourceGroup.getId(), CalendarEntityType.GROUPS.getValue(), CalendarType.COLLECTION.getValue());
         // get all customer loans synced with this group calendar Instance
+        final Collection<LoanStatus> activeLoanStatuses = new ArrayList<>(
+                Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL, LoanStatus.APPROVED, LoanStatus.ACTIVE));
         final List<CalendarInstance> activeLoanCalendarInstances = this.calendarInstanceRepository
-                .findCalendarInstancesForActiveLoansByGroupIdAndClientId(sourceGroup.getId(), client.getId());
+                .findCalendarInstancesForLoansByGroupIdAndClientIdAndStatuses(sourceGroup.getId(), client.getId(), activeLoanStatuses);
 
         /**
          * if a calendar is present in the source group along with loans synced with it, we should ensure that the

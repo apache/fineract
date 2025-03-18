@@ -61,6 +61,7 @@ import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.collateralmanagement.service.LoanCollateralAssembler;
+import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.fund.domain.Fund;
 import org.apache.fineract.portfolio.fund.domain.FundRepository;
 import org.apache.fineract.portfolio.fund.exception.FundNotFoundException;
@@ -720,10 +721,10 @@ public class LoanAssemblerImpl implements LoanAssembler {
         }
 
         if (command.isChangeInIntegerParameterNamed(LoanApiConstants.loanTermFrequencyTypeParameterName,
-                loan.getTermPeriodFrequencyType())) {
+                loan.getTermPeriodFrequencyType().getValue())) {
             final Integer newValue = command.integerValueOfParameterNamed(LoanApiConstants.loanTermFrequencyTypeParameterName);
             changes.put(LoanApiConstants.loanTermFrequencyTypeParameterName, newValue);
-            loan.setTermPeriodFrequencyType(newValue);
+            loan.setTermPeriodFrequencyType(PeriodFrequencyType.fromInt(newValue));
         }
 
         if (command.isChangeInBigDecimalParameterNamed(LoanApiConstants.principalParameterName, loan.getApprovedPrincipal())) {

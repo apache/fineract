@@ -153,7 +153,7 @@ public final class LoanApplicationTransitionValidator {
         // validate loan state transition
 
         final LoanStatus statusEnum = defaultLoanLifecycleStateMachine.dryTransition(LoanEvent.LOAN_REJECTED, loan);
-        if (!statusEnum.hasStateOf(LoanStatus.fromInt(loan.getLoanStatus()))) {
+        if (!statusEnum.hasStateOf(loan.getLoanStatus())) {
             final LocalDate rejectedOn = command.localDateValueOfParameterNamed(Loan.REJECTED_ON_DATE);
             if (DateUtils.isBefore(rejectedOn, loan.getSubmittedOnDate())) {
                 final String errorMessage = "The date on which a loan is rejected cannot be before its submittal date: "
@@ -214,7 +214,7 @@ public final class LoanApplicationTransitionValidator {
 
         // validate loan state transition
         final LoanStatus statusEnum = defaultLoanLifecycleStateMachine.dryTransition(LoanEvent.LOAN_WITHDRAWN, loan);
-        if (!statusEnum.hasStateOf(LoanStatus.fromInt(loan.getLoanStatus()))) {
+        if (!statusEnum.hasStateOf(loan.getLoanStatus())) {
             LocalDate withdrawnOn = command.localDateValueOfParameterNamed(Loan.WITHDRAWN_ON_DATE);
             if (withdrawnOn == null) {
                 withdrawnOn = command.localDateValueOfParameterNamed(Loan.EVENT_DATE);

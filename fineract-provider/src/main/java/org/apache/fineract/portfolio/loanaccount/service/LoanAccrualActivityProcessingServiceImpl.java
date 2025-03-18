@@ -147,8 +147,8 @@ public class LoanAccrualActivityProcessingServiceImpl implements LoanAccrualActi
         if (MathUtil.isGreaterThanZero(feeChargesPortion) || MathUtil.isGreaterThanZero(penaltyChargesPortion)
                 || MathUtil.isGreaterThanZero(interestPortion)) {
             BigDecimal transactionAmount = MathUtil.add(feeChargesPortion, penaltyChargesPortion, interestPortion);
-            LoanTransaction newActivity = new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.ACCRUAL_ACTIVITY.getValue(),
-                    closureDate, transactionAmount, null, interestPortion, feeChargesPortion, penaltyChargesPortion, null, false, null,
+            LoanTransaction newActivity = new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.ACCRUAL_ACTIVITY, closureDate,
+                    transactionAmount, null, interestPortion, feeChargesPortion, penaltyChargesPortion, null, false, null,
                     externalIdFactory.create());
             makeAccrualActivityTransaction(loan, newActivity);
         }

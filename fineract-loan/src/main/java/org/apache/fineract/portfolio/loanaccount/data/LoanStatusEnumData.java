@@ -59,7 +59,7 @@ public class LoanStatusEnumData {
     public interface Mapper {
 
         default LoanStatusEnumData map(Loan source) {
-            return LoanEnumerations.status(source.getPlainStatus());
+            return LoanEnumerations.status(source.getStatus());
         }
     }
 }

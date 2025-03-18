@@ -196,8 +196,8 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         Boolean areActiveEntitiesSynced = false;
         final Long calendarId = command.entityId();
 
-        final Collection<Integer> loanStatuses = new ArrayList<>(Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(),
-                LoanStatus.APPROVED.getValue(), LoanStatus.ACTIVE.getValue()));
+        final Collection<LoanStatus> loanStatuses = new ArrayList<>(
+                Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL, LoanStatus.APPROVED, LoanStatus.ACTIVE));
 
         final Integer numberOfActiveLoansSyncedWithThisCalendar = this.calendarInstanceRepository.countOfLoansSyncedWithCalendar(calendarId,
                 loanStatuses);

@@ -25,8 +25,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
@@ -40,6 +42,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class LoanRepositoryWrapper {
+
+    private static final Collection<LoanStatus> NON_CLOSED_LOAN_STATUSES = new ArrayList<>(
+            Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL, LoanStatus.APPROVED, LoanStatus.ACTIVE,
+                    LoanStatus.TRANSFER_IN_PROGRESS, LoanStatus.TRANSFER_ON_HOLD));
+    private static final Collection<LoanStatus> NON_CLOSED_AND_OVERPAID_LOAN_STATUSES = new ArrayList<>(
+            Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL, LoanStatus.APPROVED, LoanStatus.ACTIVE,
+                    LoanStatus.TRANSFER_IN_PROGRESS, LoanStatus.TRANSFER_ON_HOLD, LoanStatus.OVERPAID));
 
     private final LoanRepository repository;
     private final FineractProperties fineractProperties;
@@ -74,8 +83,8 @@ public class LoanRepositoryWrapper {
 
     // Root Entities are enough
     public Collection<Loan> findActiveLoansByLoanIdAndGroupId(Long clientId, Long groupId) {
-        final Collection<Integer> loanStatuses = new ArrayList<>(Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(),
-                LoanStatus.APPROVED.getValue(), LoanStatus.ACTIVE.getValue(), LoanStatus.OVERPAID.getValue()));
+        final Collection<LoanStatus> loanStatuses = new ArrayList<>(
+                Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL, LoanStatus.APPROVED, LoanStatus.ACTIVE, LoanStatus.OVERPAID));
         return this.repository.findByClientIdAndGroupIdAndLoanStatus(clientId, groupId, loanStatuses);
     }
 
@@ -102,7 +111,7 @@ public class LoanRepositoryWrapper {
 
     // Only root entities is enough
     public List<Loan> getGroupLoansDisbursedAfter(@Param("disbursementDate") LocalDate disbursementDate, @Param("groupId") Long groupId,
-            @Param("loanType") Integer loanType) {
+            @Param("loanType") AccountType loanType) {
         return this.repository.getGroupLoansDisbursedAfter(disbursementDate, groupId, loanType);
     }
 
@@ -112,12 +121,12 @@ public class LoanRepositoryWrapper {
         return this.repository.getClientOrJLGLoansDisbursedAfter(disbursementDate, clientId);
     }
 
-    public Integer getMaxGroupLoanCounter(@Param("groupId") Long groupId, @Param("loanType") Integer loanType) {
+    public Integer getMaxGroupLoanCounter(@Param("groupId") Long groupId, @Param("loanType") AccountType loanType) {
         return this.repository.getMaxGroupLoanCounter(groupId, loanType);
     }
 
     public Integer getMaxGroupLoanProductCounter(@Param("productId") Long productId, @Param("groupId") Long groupId,
-            @Param("loanType") Integer loanType) {
+            @Param("loanType") AccountType loanType) {
         return this.repository.getMaxGroupLoanProductCounter(productId, groupId, loanType);
     }
 
@@ -140,7 +149,7 @@ public class LoanRepositoryWrapper {
 
     // Only root entities are enough
     public List<Loan> getGroupLoansToUpdateLoanCounter(@Param("loanCounter") Integer loanCounter, @Param("groupId") Long groupId,
-            @Param("groupLoanType") Integer groupLoanType) {
+            @Param("groupLoanType") AccountType groupLoanType) {
         return this.repository.getGroupLoansToUpdateLoanCounter(loanCounter, groupId, groupLoanType);
     }
 
@@ -151,7 +160,7 @@ public class LoanRepositoryWrapper {
 
     // Only root entities are enough
     public List<Loan> getGroupLoansToUpdateLoanProductCounter(@Param("loanProductCounter") Integer loanProductCounter,
-            @Param("groupId") Long groupId, @Param("groupLoanType") Integer groupLoanType) {
+            @Param("groupId") Long groupId, @Param("groupLoanType") AccountType groupLoanType) {
         return this.repository.getGroupLoansToUpdateLoanProductCounter(loanProductCounter, groupId, groupLoanType);
     }
 
@@ -193,7 +202,7 @@ public class LoanRepositoryWrapper {
 
     // Looks like we need complete Data
     public List<Loan> findByIdsAndLoanStatusAndLoanType(@Param("ids") Collection<Long> ids,
-            @Param("loanStatuses") Collection<Integer> loanStatuses, @Param("loanTypes") Collection<Integer> loanTypes) {
+            @Param("loanStatuses") Collection<LoanStatus> loanStatuses, @Param("loanTypes") Collection<AccountType> loanTypes) {
         List<Loan> loans = new ArrayList<>();
         List<List<Long>> partitions = Lists.partition(ids.stream().toList(), fineractProperties.getQuery().getInClauseParameterSizeLimit());
         partitions
@@ -213,7 +222,7 @@ public class LoanRepositoryWrapper {
 
     // Repayments Schedule
     public List<Loan> findByClientOfficeIdsAndLoanStatus(@Param("officeIds") Collection<Long> officeIds,
-            @Param("loanStatuses") Collection<Integer> loanStatuses) {
+            @Param("loanStatuses") Collection<LoanStatus> loanStatuses) {
         List<Loan> loans = this.repository.findByClientOfficeIdsAndLoanStatus(officeIds, loanStatuses);
         if (loans != null && loans.size() > 0) {
             for (Loan loan : loans) {
@@ -225,7 +234,7 @@ public class LoanRepositoryWrapper {
 
     // Repayments Schedule
     public List<Loan> findByGroupOfficeIdsAndLoanStatus(@Param("officeIds") Collection<Long> officeIds,
-            @Param("loanStatuses") Collection<Integer> loanStatuses) {
+            @Param("loanStatuses") Collection<LoanStatus> loanStatuses) {
         List<Loan> loans = this.repository.findByGroupOfficeIdsAndLoanStatus(officeIds, loanStatuses);
         if (loans != null && loans.size() > 0) {
             for (Loan loan : loans) {
@@ -235,34 +244,42 @@ public class LoanRepositoryWrapper {
         return loans;
     }
 
-    public List<Long> findActiveLoansLoanProductIdsByClient(@Param("clientId") Long clientId, @Param("loanStatus") Integer loanStatus) {
+    public List<Long> findActiveLoansLoanProductIdsByClient(@Param("clientId") Long clientId, @Param("loanStatus") LoanStatus loanStatus) {
         return this.repository.findActiveLoansLoanProductIdsByClient(clientId, loanStatus);
     }
 
-    public List<Long> findActiveLoansLoanProductIdsByGroup(@Param("groupId") Long groupId, @Param("loanStatus") Integer loanStatus) {
+    public List<Long> findActiveLoansLoanProductIdsByGroup(@Param("groupId") Long groupId, @Param("loanStatus") LoanStatus loanStatus) {
         return this.repository.findActiveLoansLoanProductIdsByGroup(groupId, loanStatus);
     }
 
     public boolean doNonClosedLoanAccountsExistForClient(@Param("clientId") Long clientId) {
-        return this.repository.doNonClosedLoanAccountsExistForClient(clientId);
+        return this.repository.doLoanAccountsWithLoansInStatusesExistForClient(clientId, NON_CLOSED_AND_OVERPAID_LOAN_STATUSES);
     }
 
     public boolean doNonClosedLoanAccountsExistForProduct(@Param("productId") Long productId) {
-        return this.repository.doNonClosedLoanAccountsExistForProduct(productId);
+        return this.repository.doLoanAccountsWithLoansInStatusesExistForProduct(productId, NON_CLOSED_AND_OVERPAID_LOAN_STATUSES);
     }
 
     public Loan findNonClosedLoanByAccountNumber(@Param("accountNumber") String accountNumber) {
-        return this.repository.findNonClosedLoanByAccountNumber(accountNumber);
+        return this.repository.findLoanByAccountNumberAndStatuses(accountNumber, NON_CLOSED_LOAN_STATUSES);
+    }
+
+    public boolean existsNonClosedLoanByExternalLoanId(final ExternalId externalId) {
+        return this.repository.existsLoanByExternalLoanIdAndStatuses(externalId, NON_CLOSED_LOAN_STATUSES);
     }
 
     public boolean existLoanByExternalId(final ExternalId externalId) {
         return this.repository.existsByExternalId(externalId);
     }
 
+    public List<Long> findAllNonClosedLoanIds() {
+        return this.repository.findAllLoanIdsByStatuses(NON_CLOSED_LOAN_STATUSES);
+    }
+
     // Looks like we need complete entity
     @Transactional(readOnly = true)
     public Loan findNonClosedLoanThatBelongsToClient(@Param("loanId") Long loanId, @Param("clientId") Long clientId) {
-        Loan loan = this.repository.findNonClosedLoanThatBelongsToClient(loanId, clientId);
+        Loan loan = this.repository.findLoanByClientAndStatus(loanId, clientId, LoanStatus.ACTIVE);
         if (loan != null) {
             loan.initializeTransactions();
         }
@@ -274,15 +291,15 @@ public class LoanRepositoryWrapper {
     }
 
     public List<Long> findLoanIdsByStatusId(Integer statusId) {
-        return repository.findLoanIdByStatusId(statusId);
+        return repository.findLoanIdByStatus(LoanStatus.fromInt(statusId));
     }
 
-    public List<Loan> findLoansForPeriodicAccrual(Integer accountingType, LocalDate tillDate, boolean futureCharges) {
-        return repository.findLoansForPeriodicAccrual(accountingType, tillDate, futureCharges);
+    public List<Loan> findLoansForPeriodicAccrual(AccountingRuleType accountingType, LocalDate tillDate, boolean futureCharges) {
+        return repository.findLoansForPeriodicAccrual(accountingType, tillDate, futureCharges, LoanStatus.ACTIVE);
     }
 
-    public List<Loan> findLoansForAddAccrual(Integer accountingType, LocalDate tillDate, boolean futureCharges) {
-        return repository.findLoansForAddAccrual(accountingType, tillDate, futureCharges);
+    public List<Loan> findLoansForAddAccrual(AccountingRuleType accountingType, LocalDate tillDate, boolean futureCharges) {
+        return repository.findLoansForAddAccrual(accountingType, tillDate, futureCharges, LoanStatus.ACTIVE);
     }
 
     public List<Long> findIdByExternalIds(List<ExternalId> externalIds) {

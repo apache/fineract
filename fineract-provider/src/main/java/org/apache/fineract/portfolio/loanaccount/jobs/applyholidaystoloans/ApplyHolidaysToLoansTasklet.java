@@ -68,8 +68,8 @@ public class ApplyHolidaysToLoansTasklet implements Tasklet {
             return RepeatStatus.FINISHED;
         }
 
-        final Collection<Integer> loanStatuses = new ArrayList<>(Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(),
-                LoanStatus.APPROVED.getValue(), LoanStatus.ACTIVE.getValue()));
+        final Collection<LoanStatus> loanStatuses = new ArrayList<>(
+                Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL, LoanStatus.APPROVED, LoanStatus.ACTIVE));
         final List<Holiday> holidays = holidayRepository.findUnprocessed();
 
         for (final Holiday holiday : holidays) {

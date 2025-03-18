@@ -1704,8 +1704,8 @@ public final class LoanProductDataValidator {
         }
         if (actualValue) {
             Integer ruleType = accountingRuleType;
-            if (ruleType == null) {
-                ruleType = loanProduct.getAccountingRule();
+            if (ruleType == null && loanProduct.getAccountingRule() != null) {
+                ruleType = loanProduct.getAccountingRule().getValue();
             }
             if (!AccountingValidations.isAccrualBasedAccounting(ruleType)) {
                 baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_ACCRUAL_ACTIVITY_POSTING)

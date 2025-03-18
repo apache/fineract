@@ -16,18 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.data;
+package org.apache.fineract.portfolio.loanaccount.domain;
 
-import java.math.BigDecimal;
-import lombok.Data;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
+import org.apache.fineract.accounting.common.AccountingRuleType;
 
-@Data
-public class LoanTransactionBalance {
+@Converter(autoApply = true)
+public class AccountingRuleTypeConverter implements AttributeConverter<AccountingRuleType, Integer> {
 
-    private final LoanTransactionType transactionType;
-    private final boolean reversed;
-    private final boolean manuallyAdjustedOrReversed;
-    private final BigDecimal amount;
+    @Override
+    public Integer convertToDatabaseColumn(AccountingRuleType attribute) {
+        return attribute == null ? null : attribute.getValue();
+    }
 
+    @Override
+    public AccountingRuleType convertToEntityAttribute(Integer dbData) {
+        return AccountingRuleType.fromInt(dbData);
+    }
 }

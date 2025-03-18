@@ -50,8 +50,7 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
         LoanStatus oldStatus = loan.getStatus();
         LoanStatus newStatus = getNextStatus(loanEvent, loan);
         if (newStatus != null) {
-            Integer newPlainStatus = newStatus.getValue();
-            loan.setLoanStatus(newPlainStatus);
+            loan.setLoanStatus(newStatus);
 
             if (isNotLoanCreation(loanEvent)) {
                 // in case of Loan creation, a LoanCreatedBusinessEvent is also raised, no need to send a status change
@@ -85,12 +84,11 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
     }
 
     private LoanStatus getNextStatus(LoanEvent loanEvent, Loan loan) {
-        Integer plainFrom = loan.getPlainStatus();
-        if (loanEvent.equals(LoanEvent.LOAN_CREATED) && plainFrom == null) {
+        LoanStatus from = loan.getStatus();
+        if (loanEvent.equals(LoanEvent.LOAN_CREATED) && from == null) {
             return submittedTransition();
         }
 
-        LoanStatus from = loan.getStatus();
         LoanStatus newState = null;
 
         switch (loanEvent) {

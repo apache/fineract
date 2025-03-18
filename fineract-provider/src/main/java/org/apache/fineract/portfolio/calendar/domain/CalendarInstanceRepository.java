@@ -23,6 +23,7 @@ import java.util.List;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -52,15 +53,16 @@ public interface CalendarInstanceRepository extends JpaRepository<CalendarInstan
     Collection<CalendarInstance> findByCalendarIdAndEntityTypeId(Long calendarId, Integer entityTypeId);
 
     /** Should use in clause, can I do it without creating a new class? **/
-    @Query("select ci from CalendarInstance ci where ci.entityId in (select loan.id from Loan loan where loan.client.id = :clientId and loan.group.id = :groupId and (loan.loanStatus = 100 or loan.loanStatus = 200 or loan.loanStatus = 300)) and ci.entityTypeId = 3")
-    List<CalendarInstance> findCalendarInstancesForActiveLoansByGroupIdAndClientId(@Param("groupId") Long groupId,
-            @Param("clientId") Long clientId);
+    @Query("select ci from CalendarInstance ci where ci.entityId in (select loan.id from Loan loan where loan.client.id = :clientId and loan.group.id = :groupId and loan.loanStatus in :loanStatuses) and ci.entityTypeId = 3")
+    List<CalendarInstance> findCalendarInstancesForLoansByGroupIdAndClientIdAndStatuses(@Param("groupId") Long groupId,
+            @Param("clientId") Long clientId, @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
 
     /**
      * EntityType = 3 is for loan
      */
 
     @Query("SELECT COUNT(ci.id) FROM CalendarInstance ci, Loan loan WHERE loan.id = ci.entityId AND ci.entityTypeId = 3 AND ci.calendar.id = :calendarId AND loan.loanStatus IN :loanStatuses ")
-    Integer countOfLoansSyncedWithCalendar(@Param("calendarId") Long calendarId, @Param("loanStatuses") Collection<Integer> loanStatuses);
+    Integer countOfLoansSyncedWithCalendar(@Param("calendarId") Long calendarId,
+            @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
 
 }

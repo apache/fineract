@@ -181,16 +181,16 @@ public interface LoanApiConstants {
     String INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE = "interestRecognitionOnDisbursementDate";
 
     // Loan Summary Transaction Types
-    List<Integer> LOAN_SUMMARY_TRANSACTION_TYPES = List.of(LoanTransactionType.CHARGE_ADJUSTMENT.getValue(), //
-            LoanTransactionType.CHARGEBACK.getValue(), //
-            LoanTransactionType.CREDIT_BALANCE_REFUND.getValue(), //
-            LoanTransactionType.DOWN_PAYMENT.getValue(), //
-            LoanTransactionType.GOODWILL_CREDIT.getValue(), //
-            LoanTransactionType.INTEREST_PAYMENT_WAIVER.getValue(), //
-            LoanTransactionType.INTEREST_REFUND.getValue(), //
-            LoanTransactionType.MERCHANT_ISSUED_REFUND.getValue(), //
-            LoanTransactionType.PAYOUT_REFUND.getValue(), //
-            LoanTransactionType.REPAYMENT.getValue() //
+    List<LoanTransactionType> LOAN_SUMMARY_TRANSACTION_TYPES = List.of(LoanTransactionType.CHARGE_ADJUSTMENT, //
+            LoanTransactionType.CHARGEBACK, //
+            LoanTransactionType.CREDIT_BALANCE_REFUND, //
+            LoanTransactionType.DOWN_PAYMENT, //
+            LoanTransactionType.GOODWILL_CREDIT, //
+            LoanTransactionType.INTEREST_PAYMENT_WAIVER, //
+            LoanTransactionType.INTEREST_REFUND, //
+            LoanTransactionType.MERCHANT_ISSUED_REFUND, //
+            LoanTransactionType.PAYOUT_REFUND, //
+            LoanTransactionType.REPAYMENT //
     );
 
 }

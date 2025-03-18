@@ -62,7 +62,7 @@ public class SetLoanDelinquencyTagsTasklet implements Tasklet {
 
         // Read Loan Ids with Loan Transaction Charge back
         Collection<LoanScheduleDelinquencyData> loanScheduleDelinquencyData = this.loanTransactionRepository
-                .fetchLoanTransactionsByTypeAndLessOrEqualDate(LoanTransactionType.CHARGEBACK.getValue(), businessDate);
+                .fetchLoanTransactionsByTypeAndLessOrEqualDate(LoanTransactionType.CHARGEBACK, businessDate);
         List<Long> processedLoans = applyDelinquencyTagToLoans(loanScheduleDelinquencyData);
         log.debug("{}: Records affected by setLoanDelinquencyTags: {}", ThreadLocalContextUtil.getTenant().getName(),
                 processedLoans.size());
@@ -70,10 +70,10 @@ public class SetLoanDelinquencyTagsTasklet implements Tasklet {
         // Read Loan Ids with overdue installments
         if (processedLoans.isEmpty()) {
             loanScheduleDelinquencyData = this.loanRepaymentScheduleInstallmentRepository
-                    .fetchLoanScheduleDataByDueDateAndObligationsMet(LoanStatus.ACTIVE.getValue(), businessDate, false);
+                    .fetchLoanScheduleDataByDueDateAndObligationsMet(LoanStatus.ACTIVE, businessDate, false);
         } else {
             loanScheduleDelinquencyData = this.loanRepaymentScheduleInstallmentRepository
-                    .fetchLoanScheduleDataByDueDateAndObligationsMet(LoanStatus.ACTIVE.getValue(), businessDate, false, processedLoans);
+                    .fetchLoanScheduleDataByDueDateAndObligationsMet(LoanStatus.ACTIVE, businessDate, false, processedLoans);
         }
         applyDelinquencyTagToLoans(loanScheduleDelinquencyData);
 

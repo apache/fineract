@@ -21,6 +21,7 @@ package org.apache.fineract.cob.data;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 
 @AllArgsConstructor
 @Getter
@@ -28,7 +29,7 @@ public class LoanDataForExternalTransfer {
 
     Long id;
     ExternalId externalId;
-    Integer loanStatus;
+    LoanStatus loanStatus;
     Long loanProductId;
     String loanProductShortName;
 }

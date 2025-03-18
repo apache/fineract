@@ -27,6 +27,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccrualActivityRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualActivityProcessingService;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -46,7 +48,8 @@ public class AccrualActivityPostingTasklet implements Tasklet {
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
         final LocalDate yesterday = DateUtils.getBusinessLocalDate().minusDays(1);
         List<Throwable> errors = new ArrayList<>();
-        Set<Long> loanAccounts = loanAccrualActivityRepository.fetchLoanIdsForAccrualActivityPosting(yesterday);
+        Set<Long> loanAccounts = loanAccrualActivityRepository.fetchLoanIdsForAccrualActivityPosting(yesterday,
+                LoanTransactionType.ACCRUAL_ACTIVITY, LoanStatus.ACTIVE);
         for (Long accountId : loanAccounts) {
             try {
                 loanAccrualActivityProcessingService.makeAccrualActivityTransaction(accountId, yesterday);

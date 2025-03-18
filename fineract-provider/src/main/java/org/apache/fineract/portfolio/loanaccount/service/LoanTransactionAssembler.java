@@ -78,8 +78,8 @@ public class LoanTransactionAssembler {
         BigDecimal penaltyChargesPortion = installment.getPenaltyCharges();
         BigDecimal transactionAmount = MathUtil.add(interestPortion, feeChargesPortion, penaltyChargesPortion);
         return MathUtil.isGreaterThanZero(transactionAmount)
-                ? new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.ACCRUAL_ACTIVITY.getValue(), transactionDate,
-                        transactionAmount, null, interestPortion, feeChargesPortion, penaltyChargesPortion, null, false, null, externalId)
+                ? new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.ACCRUAL_ACTIVITY, transactionDate, transactionAmount,
+                        null, interestPortion, feeChargesPortion, penaltyChargesPortion, null, false, null, externalId)
                 : null;
     }
 }

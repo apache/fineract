@@ -49,8 +49,8 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
             lt.loan.loanProduct.delinquencyBucket is not null
             GROUP BY lt.loan
             """)
-    Collection<LoanScheduleDelinquencyData> fetchLoanTransactionsByTypeAndLessOrEqualDate(@Param("transactionType") Integer transactionType,
-            @Param("businessDate") LocalDate businessDate);
+    Collection<LoanScheduleDelinquencyData> fetchLoanTransactionsByTypeAndLessOrEqualDate(
+            @Param("transactionType") LoanTransactionType transactionType, @Param("businessDate") LocalDate businessDate);
 
     @Query(FIND_ID_BY_EXTERNAL_ID)
     Long findIdByExternalId(@Param("externalId") ExternalId externalId);

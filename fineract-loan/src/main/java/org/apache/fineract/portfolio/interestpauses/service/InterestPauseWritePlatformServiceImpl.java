@@ -207,7 +207,7 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
     }
 
     private void validateActiveLoan(Loan loan) {
-        if (!Objects.equals(loan.getLoanStatus(), ACTIVE.getValue())) {
+        if (!Objects.equals(loan.getLoanStatus(), ACTIVE)) {
             throw new GeneralPlatformDomainRuleException("loan.must.be.active",
                     "Operations on interest pauses are restricted to active loans.");
         }

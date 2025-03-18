@@ -380,14 +380,14 @@ public class ExternalAssetOwnersWriteServiceImpl implements ExternalAssetOwnersW
     }
 
     private void validateLoanStatus(LoanDataForExternalTransfer loanDataForExternalTransfer, boolean isDelayedSettlementEnabled) {
-        LoanStatus loanStatus = LoanStatus.fromInt(loanDataForExternalTransfer.getLoanStatus());
+        LoanStatus loanStatus = loanDataForExternalTransfer.getLoanStatus();
         if (!getValidLoanStatusList(isDelayedSettlementEnabled).contains(loanStatus)) {
             throw new ExternalAssetOwnerInitiateTransferException(String.format("Loan status %s is not valid for transfer.", loanStatus));
         }
     }
 
     private void validateLoanStatusIntermediarySale(LoanDataForExternalTransfer loanDataForExternalTransfer) {
-        LoanStatus loanStatus = LoanStatus.fromInt(loanDataForExternalTransfer.getLoanStatus());
+        LoanStatus loanStatus = loanDataForExternalTransfer.getLoanStatus();
         if (!ACTIVE_LOAN_STATUSES.contains(loanStatus)) {
             throw new ExternalAssetOwnerInitiateTransferException(String.format("Loan status %s is not valid for transfer.", loanStatus));
         }

@@ -106,7 +106,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
     @Override
     @Transactional
     public void addPeriodicAccruals(@NotNull LocalDate tillDate) throws JobExecutionException {
-        List<Loan> loans = loanRepositoryWrapper.findLoansForPeriodicAccrual(AccountingRuleType.ACCRUAL_PERIODIC.getValue(), tillDate,
+        List<Loan> loans = loanRepositoryWrapper.findLoansForPeriodicAccrual(AccountingRuleType.ACCRUAL_PERIODIC, tillDate,
                 !isChargeOnDueDate());
         List<Throwable> errors = new ArrayList<>();
         for (Loan loan : loans) {
@@ -141,7 +141,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
     @Override
     @Transactional
     public void addAccruals(@NotNull LocalDate tillDate) throws JobExecutionException {
-        List<Loan> loans = loanRepositoryWrapper.findLoansForAddAccrual(AccountingRuleType.ACCRUAL_PERIODIC.getValue(), tillDate,
+        List<Loan> loans = loanRepositoryWrapper.findLoansForAddAccrual(AccountingRuleType.ACCRUAL_PERIODIC, tillDate,
                 !isChargeOnDueDate());
         List<Throwable> errors = new ArrayList<>();
         for (Loan loan : loans) {

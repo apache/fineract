@@ -43,7 +43,7 @@ public interface LoanRepaymentScheduleInstallmentRepository
             lrs.loan.loanProduct.delinquencyBucket IS NOT NULL
             GROUP BY lrs.loan
             """)
-    Collection<LoanScheduleDelinquencyData> fetchLoanScheduleDataByDueDateAndObligationsMet(@Param("loanStatus") Integer loanStatus,
+    Collection<LoanScheduleDelinquencyData> fetchLoanScheduleDataByDueDateAndObligationsMet(@Param("loanStatus") LoanStatus loanStatus,
             @Param("businessDate") LocalDate businessDate, @Param("obligationsMet") boolean obligationsMet);
 
     @Query("""
@@ -60,7 +60,7 @@ public interface LoanRepaymentScheduleInstallmentRepository
             lrs.loan.id NOT IN :loanIds
             GROUP BY lrs.loan
             """)
-    Collection<LoanScheduleDelinquencyData> fetchLoanScheduleDataByDueDateAndObligationsMet(@Param("loanStatus") Integer loanStatus,
+    Collection<LoanScheduleDelinquencyData> fetchLoanScheduleDataByDueDateAndObligationsMet(@Param("loanStatus") LoanStatus loanStatus,
             @Param("businessDate") LocalDate businessDate, @Param("obligationsMet") boolean obligationsMet,
             @Param("loanIds") List<Long> loanIds);
 

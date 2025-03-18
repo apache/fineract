@@ -42,7 +42,7 @@ public class LoanSummaryBalancesRepository {
     private final CriteriaQueryFactory criteriaQueryFactory;
 
     public Collection<LoanTransactionBalance> retrieveLoanSummaryBalancesByTransactionType(final Long loanId,
-            final List<Integer> transactionTypes) {
+            final List<LoanTransactionType> transactionTypes) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<LoanTransactionBalance> query = cb.createQuery(LoanTransactionBalance.class);
 

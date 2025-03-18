@@ -19,6 +19,7 @@
 package org.apache.fineract.accounting.producttoaccountmapping.service;
 
 import java.util.Map;
+import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 
@@ -29,7 +30,7 @@ public interface ProductToGLAccountMappingWritePlatformService {
     void createSavingProductToGLAccountMapping(Long savingProductId, JsonCommand command, DepositAccountType accountType);
 
     Map<String, Object> updateLoanProductToGLAccountMapping(Long loanProductId, JsonCommand command, boolean accountingRuleChanged,
-            int accountingRuleTypeId);
+            AccountingRuleType accountingRuleTypeId);
 
     Map<String, Object> updateSavingsProductToGLAccountMapping(Long savingsProductId, JsonCommand command, boolean accountingRuleChanged,
             int accountingRuleTypeId, DepositAccountType accountType);
