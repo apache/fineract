@@ -16,27 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.monetary.data;
+package org.apache.fineract.organisation.monetary.data.request;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Collection;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
 
-/**
- * Immutable data object for application currency.
- */
-
-@Getter
-@RequiredArgsConstructor
-public class ApplicationCurrencyConfigurationData implements Serializable {
+public record CurrencyRequest(List<String> currencies) implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
-
-    @SuppressWarnings("unused")
-    private final Collection<CurrencyData> selectedCurrencyOptions;
-    @SuppressWarnings("unused")
-    private final Collection<CurrencyData> currencyOptions;
 }

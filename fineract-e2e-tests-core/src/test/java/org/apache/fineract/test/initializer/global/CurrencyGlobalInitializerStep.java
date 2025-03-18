@@ -21,7 +21,7 @@ package org.apache.fineract.test.initializer.global;
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.client.models.PutCurrenciesRequest;
+import org.apache.fineract.client.models.CurrencyRequest;
 import org.apache.fineract.client.models.PutCurrenciesResponse;
 import org.apache.fineract.client.services.CurrencyApi;
 import org.apache.fineract.test.support.TestContext;
@@ -42,8 +42,8 @@ public class CurrencyGlobalInitializerStep implements FineractGlobalInitializerS
 
     @Override
     public void initialize() throws Exception {
-        PutCurrenciesRequest putCurrenciesRequest = new PutCurrenciesRequest();
-        Response<PutCurrenciesResponse> putCurrenciesResponse = currencyApi.updateCurrencies(putCurrenciesRequest.currencies(CURRENCIES))
+        CurrencyRequest currencyRequest = new CurrencyRequest();
+        Response<PutCurrenciesResponse> putCurrenciesResponse = currencyApi.updateCurrencies(currencyRequest.currencies(CURRENCIES))
                 .execute();
         TestContext.INSTANCE.set(TestContextKey.PUT_CURRENCIES_RESPONSE, putCurrenciesResponse);
     }

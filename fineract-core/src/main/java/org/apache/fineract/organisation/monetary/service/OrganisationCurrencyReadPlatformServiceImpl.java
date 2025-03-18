@@ -37,6 +37,6 @@ public class OrganisationCurrencyReadPlatformServiceImpl implements Organisation
         // remove selected currency options
         currencyOptions.removeAll(selectedCurrencyOptions);
 
-        return new ApplicationCurrencyConfigurationData(currencyOptions, selectedCurrencyOptions);
+        return new ApplicationCurrencyConfigurationData(selectedCurrencyOptions, currencyOptions);
     }
 }

@@ -31,22 +31,16 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.UriInfo;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.ApplicationCurrencyConfigurationData;
+import org.apache.fineract.organisation.monetary.data.request.CurrencyRequest;
 import org.apache.fineract.organisation.monetary.service.OrganisationCurrencyReadPlatformService;
 import org.springframework.stereotype.Component;
 
@@ -56,14 +50,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CurrenciesApiResource {
 
-    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("selectedCurrencyOptions", "currencyOptions"));
-
     private static final String RESOURCE_NAME_FOR_PERMISSIONS = "CURRENCY";
 
     private final PlatformSecurityContext context;
     private final OrganisationCurrencyReadPlatformService readPlatformService;
     private final DefaultToApiJsonSerializer<ApplicationCurrencyConfigurationData> toApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @GET
@@ -71,34 +62,27 @@ public class CurrenciesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Currency Configuration", description = "Returns the list of currencies permitted for use AND the list of currencies not selected (but available for selection).\n"
             + "\n" + "Example Requests:\n" + "\n" + "currencies\n" + "\n" + "\n" + "currencies?fields=selectedCurrencyOptions")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CurrenciesApiResourceSwagger.GetCurrenciesResponse.class))) })
-    public String retrieveCurrencies(@Context final UriInfo uriInfo) {
+    public ApplicationCurrencyConfigurationData retrieveCurrencies() {
 
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
-        final ApplicationCurrencyConfigurationData configurationData = this.readPlatformService.retrieveCurrencyConfiguration();
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, configurationData, RESPONSE_DATA_PARAMETERS);
+        return this.readPlatformService.retrieveCurrencyConfiguration();
     }
 
     @PUT
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update Currency Configuration", description = "Updates the list of currencies permitted for use.")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CurrenciesApiResourceSwagger.PutCurrenciesRequest.class)))
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CurrencyRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CurrenciesApiResourceSwagger.PutCurrenciesResponse.class))) })
-    public String updateCurrencies(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
+    public CommandProcessingResult updateCurrencies(@Parameter(hidden = true) CurrencyRequest currencyRequest) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .updateCurrencies() //
-                .withJson(apiRequestBodyAsJson) //
+                .withJson(toApiJsonSerializer.serialize(currencyRequest)) //
                 .build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 }
