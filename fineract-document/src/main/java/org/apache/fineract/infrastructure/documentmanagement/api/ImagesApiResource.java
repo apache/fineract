@@ -42,7 +42,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.UploadRequest;
 import org.apache.fineract.infrastructure.core.domain.Base64EncodedImage;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepositoryUtils;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepositoryUtils.ImageFileExtension;
 import org.apache.fineract.infrastructure.documentmanagement.data.FileData;
@@ -52,7 +51,6 @@ import org.apache.fineract.infrastructure.documentmanagement.exception.InvalidEn
 import org.apache.fineract.infrastructure.documentmanagement.service.ImageReadPlatformService;
 import org.apache.fineract.infrastructure.documentmanagement.service.ImageWritePlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.portfolio.client.data.ClientData;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -67,7 +65,6 @@ public class ImagesApiResource {
     private final PlatformSecurityContext context;
     private final ImageReadPlatformService imageReadPlatformService;
     private final ImageWritePlatformService imageWritePlatformService;
-    private final DefaultToApiJsonSerializer<ClientData> toApiJsonSerializer;
     private final FileUploadValidator fileUploadValidator;
     private final ImageResizer imageResizer;
 
@@ -79,9 +76,10 @@ public class ImagesApiResource {
     @Produces(MediaType.APPLICATION_JSON)
     @RequestBody(description = "Upload new client image", content = {
             @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = UploadRequest.class)) })
-    public String addNewClientImage(@PathParam("entity") final String entityName, @PathParam("entityId") final Long entityId,
-            @HeaderParam("Content-Length") final Long fileSize, @FormDataParam("file") final InputStream inputStream,
-            @FormDataParam("file") final FormDataContentDisposition fileDetails, @FormDataParam("file") final FormDataBodyPart bodyPart) {
+    public CommandProcessingResult addNewClientImage(@PathParam("entity") final String entityName,
+            @PathParam("entityId") final Long entityId, @HeaderParam("Content-Length") final Long fileSize,
+            @FormDataParam("file") final InputStream inputStream, @FormDataParam("file") final FormDataContentDisposition fileDetails,
+            @FormDataParam("file") final FormDataBodyPart bodyPart) {
         validateEntityTypeforImage(entityName);
         fileUploadValidator.validate(fileSize, inputStream, fileDetails, bodyPart);
         // TODO: vishwas might need more advances validation (like reading magic
@@ -90,10 +88,7 @@ public class ImagesApiResource {
         ContentRepositoryUtils.validateClientImageNotEmpty(fileDetails.getFileName());
         ContentRepositoryUtils.validateImageMimeType(bodyPart.getMediaType().toString());
 
-        final CommandProcessingResult result = this.imageWritePlatformService.saveOrUpdateImage(entityName, entityId,
-                fileDetails.getFileName(), inputStream, fileSize);
-
-        return this.toApiJsonSerializer.serialize(result);
+        return imageWritePlatformService.saveOrUpdateImage(entityName, entityId, fileDetails.getFileName(), inputStream, fileSize);
     }
 
     /**
@@ -102,15 +97,13 @@ public class ImagesApiResource {
     @POST
     @Consumes({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
-    public String addNewClientImage(@PathParam("entity") final String entityName, @PathParam("entityId") final Long entityId,
-            final String jsonRequestBody) {
+    public CommandProcessingResult addNewClientImage(@PathParam("entity") final String entityName,
+            @PathParam("entityId") final Long entityId, final String jsonRequestBody) {
         validateEntityTypeforImage(entityName);
 
         final Base64EncodedImage base64EncodedImage = ContentRepositoryUtils.extractImageFromDataURL(jsonRequestBody);
 
-        final CommandProcessingResult result = this.imageWritePlatformService.saveOrUpdateImage(entityName, entityId, base64EncodedImage);
-
-        return this.toApiJsonSerializer.serialize(result);
+        return imageWritePlatformService.saveOrUpdateImage(entityName, entityId, base64EncodedImage);
     }
 
     /**
@@ -126,17 +119,17 @@ public class ImagesApiResource {
             @QueryParam("output") final String output, @HeaderParam("Accept") String acceptHeader) {
         validateEntityTypeforImage(entityName);
         if (EntityTypeForImages.CLIENTS.toString().equalsIgnoreCase(entityName)) {
-            this.context.authenticatedUser().validateHasReadPermission("CLIENTIMAGE");
+            context.authenticatedUser().validateHasReadPermission("CLIENTIMAGE");
         } else if (EntityTypeForImages.STAFF.toString().equalsIgnoreCase(entityName)) {
-            this.context.authenticatedUser().validateHasReadPermission("STAFFIMAGE");
+            context.authenticatedUser().validateHasReadPermission("STAFFIMAGE");
         }
 
-        final FileData imageData = this.imageReadPlatformService.retrieveImage(entityName, entityId);
+        final FileData imageData = imageReadPlatformService.retrieveImage(entityName, entityId);
         final FileData resizedImage = imageResizer.resize(imageData, maxWidth, maxHeight);
 
         // If client wants (Accept header) octet-stream, or output="octet" or "inline_octet", then send that instead of
         // text
-        if ("application/octet-stream".equalsIgnoreCase(acceptHeader)
+        if (MediaType.APPLICATION_OCTET_STREAM.equalsIgnoreCase(acceptHeader)
                 || (output != null && (output.equals("octet") || output.equals("inline_octet")))) {
             return ContentResources.fileDataToResponse(resizedImage, resizedImage.name() + ImageFileExtension.JPEG,
                     "inline_octet".equals(output) ? "inline" : "attachment");
@@ -175,9 +168,10 @@ public class ImagesApiResource {
     @Produces(MediaType.APPLICATION_JSON)
     @RequestBody(description = "Update client image", content = {
             @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = UploadRequest.class)) })
-    public String updateClientImage(@PathParam("entity") final String entityName, @PathParam("entityId") final Long entityId,
-            @HeaderParam("Content-Length") final Long fileSize, @FormDataParam("file") final InputStream inputStream,
-            @FormDataParam("file") final FormDataContentDisposition fileDetails, @FormDataParam("file") final FormDataBodyPart bodyPart) {
+    public CommandProcessingResult updateClientImage(@PathParam("entity") final String entityName,
+            @PathParam("entityId") final Long entityId, @HeaderParam("Content-Length") final Long fileSize,
+            @FormDataParam("file") final InputStream inputStream, @FormDataParam("file") final FormDataContentDisposition fileDetails,
+            @FormDataParam("file") final FormDataBodyPart bodyPart) {
         return addNewClientImage(entityName, entityId, fileSize, inputStream, fileDetails, bodyPart);
     }
 
@@ -190,18 +184,19 @@ public class ImagesApiResource {
     @PUT
     @Consumes({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
-    public String updateClientImage(@PathParam("entity") final String entityName, @PathParam("entityId") final Long entityId,
-            final String jsonRequestBody) {
+    public CommandProcessingResult updateClientImage(@PathParam("entity") final String entityName,
+            @PathParam("entityId") final Long entityId, final String jsonRequestBody) {
         return addNewClientImage(entityName, entityId, jsonRequestBody);
     }
 
     @DELETE
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public String deleteClientImage(@PathParam("entity") final String entityName, @PathParam("entityId") final Long entityId) {
+    public CommandProcessingResult deleteClientImage(@PathParam("entity") final String entityName,
+            @PathParam("entityId") final Long entityId) {
         validateEntityTypeforImage(entityName);
-        this.imageWritePlatformService.deleteImage(entityName, entityId);
-        return this.toApiJsonSerializer.serialize(CommandProcessingResult.resourceResult(entityId));
+        imageWritePlatformService.deleteImage(entityName, entityId);
+        return CommandProcessingResult.resourceResult(entityId);
     }
 
     /*** Entities for document Management **/

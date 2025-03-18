@@ -42,6 +42,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import java.io.InputStream;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.UploadRequest;
 import org.apache.fineract.infrastructure.documentmanagement.api.ImagesApiResource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -236,9 +237,9 @@ public class SelfClientsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @RequestBody(description = "Add new client image", content = {
             @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = UploadRequest.class)) })
-    public String addNewClientImage(@PathParam("clientId") final Long clientId, @HeaderParam("Content-Length") final Long fileSize,
-            @FormDataParam("file") final InputStream inputStream, @FormDataParam("file") final FormDataContentDisposition fileDetails,
-            @FormDataParam("file") final FormDataBodyPart bodyPart) {
+    public CommandProcessingResult addNewClientImage(@PathParam("clientId") final Long clientId,
+            @HeaderParam("Content-Length") final Long fileSize, @FormDataParam("file") final InputStream inputStream,
+            @FormDataParam("file") final FormDataContentDisposition fileDetails, @FormDataParam("file") final FormDataBodyPart bodyPart) {
 
         validateAppuserClientsMapping(clientId);
         return this.imagesApiResource.addNewClientImage(ClientApiConstants.clientEntityName, clientId, fileSize, inputStream, fileDetails,
@@ -250,8 +251,8 @@ public class SelfClientsApiResource {
     @Path("{clientId}/images")
     @Consumes({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String addNewClientImage(@PathParam("entity") final String entityName, @PathParam("clientId") final Long clientId,
-            final String jsonRequestBody) {
+    public CommandProcessingResult addNewClientImage(@PathParam("entity") final String entityName,
+            @PathParam("clientId") final Long clientId, final String jsonRequestBody) {
         validateAppuserClientsMapping(clientId);
         return this.imagesApiResource.addNewClientImage(ClientApiConstants.clientEntityName, clientId, jsonRequestBody);
 
@@ -261,7 +262,7 @@ public class SelfClientsApiResource {
     @Path("{clientId}/images")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteClientImage(@PathParam("clientId") final Long clientId) {
+    public CommandProcessingResult deleteClientImage(@PathParam("clientId") final Long clientId) {
 
         validateAppuserClientsMapping(clientId);
         return this.imagesApiResource.deleteClientImage(ClientApiConstants.clientEntityName, clientId);
