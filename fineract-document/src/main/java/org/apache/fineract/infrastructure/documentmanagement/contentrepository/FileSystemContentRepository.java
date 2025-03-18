@@ -104,10 +104,10 @@ public class FileSystemContentRepository implements ContentRepository {
 
     @Override
     public FileData fetchFile(final DocumentData documentData) {
-        String sanitizedPath = pathSanitizer.sanitize(documentData.fileLocation());
+        String sanitizedPath = pathSanitizer.sanitize(documentData.getLocation());
 
         final File file = new File(sanitizedPath);
-        return new FileData(Files.asByteSource(file), documentData.fileName(), documentData.contentType());
+        return new FileData(Files.asByteSource(file), documentData.getFileName(), documentData.getType());
     }
 
     @Override

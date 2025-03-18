@@ -20,7 +20,7 @@ package org.apache.fineract.infrastructure.documentmanagement.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepository;
@@ -43,7 +43,7 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
     private final ContentRepositoryFactory contentRepositoryFactory;
 
     @Override
-    public Collection<DocumentData> retrieveAllDocuments(final String entityType, final Long entityId) {
+    public List<DocumentData> retrieveAllDocuments(final String entityType, final Long entityId) {
 
         this.context.authenticatedUser();
 
@@ -118,7 +118,7 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
             if (!this.hideStorageType) {
                 storageType = rs.getInt("storageType");
             }
-            return new DocumentData(id, parentEntityType, parentEntityId, name, fileName, fileSize, fileType, description, location,
+            return new DocumentData(id, parentEntityType, parentEntityId, name, fileName, fileSize, fileType, location, description,
                     storageType);
         }
     }

@@ -108,9 +108,9 @@ public class S3ContentRepository implements ContentRepository {
             @Override
             public InputStream openStream() throws IOException {
                 return s3Client.getObject(GetObjectRequest.builder().bucket(fineractProperties.getContent().getS3().getBucketName())
-                        .key(documentData.fileLocation()).build(), ResponseTransformer.toBytes()).asInputStream();
+                        .key(documentData.getLocation()).build(), ResponseTransformer.toBytes()).asInputStream();
             }
-        }, documentData.fileName(), documentData.contentType());
+        }, documentData.getFileName(), documentData.getType());
     }
 
     @Override

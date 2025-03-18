@@ -32,35 +32,6 @@ final class DocumentManagementApiResourceSwagger {
 
     }
 
-    @Schema(description = "GetEntityTypeEntityIdDocumentsResponse")
-    public static final class GetEntityTypeEntityIdDocumentsResponse {
-
-        private GetEntityTypeEntityIdDocumentsResponse() {
-
-        }
-
-        @Schema(example = "1")
-        public Long id;
-        @Schema(example = "clients")
-        public String parentEntityType;
-        @Schema(example = "1")
-        public Long parentEntityId;
-        @Schema(example = "Client Details Form")
-        public String name;
-        @Schema(example = "CGAP.pdf")
-        public String fileName;
-        @Schema(example = "5246719")
-        public Long size;
-        @Schema(example = "application/pdf")
-        public String type;
-        @Schema(example = "A signed form signed by new member")
-        public String description;
-        @Schema(example = "")
-        public String location;
-        @Schema(example = "")
-        public Integer storageType;
-    }
-
     @Schema(description = "PostEntityTypeEntityIdDocumentsResponse")
     public static final class PostEntityTypeEntityIdDocumentsResponse {
 
@@ -103,17 +74,8 @@ final class DocumentManagementApiResourceSwagger {
 
         }
 
-        public static final class PutEntityTypeEntityIdDocumentsResponseChangesSwagger {
-
-            private PutEntityTypeEntityIdDocumentsResponseChangesSwagger() {
-
-            }
-
-        }
-
         @Schema(example = "3")
         public Long resourceId;
-        public DeleteEntityTypeEntityIdDocumentsResponse.PutEntityTypeEntityIdDocumentsResponseChangesSwagger changes;
         @Schema(example = "3")
         public String resourceIdentifier;
     }

@@ -26,7 +26,7 @@ import java.io.IOException;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody.Part;
 import okhttp3.ResponseBody;
-import org.apache.fineract.client.models.GetEntityTypeEntityIdDocumentsResponse;
+import org.apache.fineract.client.models.DocumentData;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.client.util.Parts;
 import org.junit.jupiter.api.Order;
@@ -66,7 +66,7 @@ public class DocumentTest extends IntegrationTest {
     @Test
     @Order(3)
     void getDocument() {
-        GetEntityTypeEntityIdDocumentsResponse doc = ok(fineractClient().documents.getDocument("clients", clientId, documentId));
+        DocumentData doc = ok(fineractClient().documents.getDocument("clients", clientId, documentId));
         assertThat(doc.getName()).isEqualTo("Test");
         assertThat(doc.getFileName()).isEqualTo(testFile.getName());
         assertThat(doc.getDescription()).isEqualTo("The Description");
@@ -99,7 +99,7 @@ public class DocumentTest extends IntegrationTest {
         String newDescription = getClass().getName();
         ok(fineractClient().documents.updateDocument("clients", clientId, documentId, null, newName, newDescription));
 
-        GetEntityTypeEntityIdDocumentsResponse doc = ok(fineractClient().documents.getDocument("clients", clientId, documentId));
+        DocumentData doc = ok(fineractClient().documents.getDocument("clients", clientId, documentId));
         assertThat(doc.getName()).isEqualTo(newName);
         assertThat(doc.getDescription()).isEqualTo(newDescription);
         // TODO FINERACT-1251 It's more than uploaded file; seems like a bug - it's including create body, not just file

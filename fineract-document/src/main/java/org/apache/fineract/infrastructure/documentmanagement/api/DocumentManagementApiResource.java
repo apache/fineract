@@ -20,7 +20,6 @@ package org.apache.fineract.infrastructure.documentmanagement.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -36,20 +35,14 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.documentmanagement.command.DocumentCommand;
 import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
 import org.apache.fineract.infrastructure.documentmanagement.data.FileData;
@@ -70,16 +63,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class DocumentManagementApiResource {
 
-    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList("id", "parentEntityType", "parentEntityId", "name", "fileName", "size", "type", "description"));
-
     private static final String SYSTEM_ENTITY_TYPE = "DOCUMENT";
 
     private final PlatformSecurityContext context;
     private final DocumentReadPlatformService documentReadPlatformService;
     private final DocumentWritePlatformService documentWritePlatformService;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final ToApiJsonSerializer<DocumentData> toApiJsonSerializer;
     private final FileUploadValidator fileUploadValidator;
 
     @GET
@@ -87,18 +75,11 @@ public class DocumentManagementApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List documents", description = "Example Requests:\n" + "\n" + "clients/1/documents\n" + "\n"
             + "client_identifiers/1/documents\n" + "\n" + "loans/1/documents?fields=name,description")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = DocumentManagementApiResourceSwagger.GetEntityTypeEntityIdDocumentsResponse.class)))) })
-    public String retrieveAllDocuments(@Context final UriInfo uriInfo,
-            @PathParam("entityType") @Parameter(description = "entityType") final String entityType,
+    public List<DocumentData> retrieveAllDocuments(@PathParam("entityType") @Parameter(description = "entityType") final String entityType,
             @PathParam("entityId") @Parameter(description = "entityId") final Long entityId) {
 
-        this.context.authenticatedUser().validateHasReadPermission(SYSTEM_ENTITY_TYPE);
-
-        final Collection<DocumentData> documentDatas = this.documentReadPlatformService.retrieveAllDocuments(entityType, entityId);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, documentDatas, RESPONSE_DATA_PARAMETERS);
+        context.authenticatedUser().validateHasReadPermission(SYSTEM_ENTITY_TYPE);
+        return documentReadPlatformService.retrieveAllDocuments(entityType, entityId);
     }
 
     @POST
@@ -112,7 +93,7 @@ public class DocumentManagementApiResource {
             + "file and description")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Not Shown (multi-part form data)", content = @Content(schema = @Schema(implementation = DocumentManagementApiResourceSwagger.PostEntityTypeEntityIdDocumentsResponse.class))) })
-    public String createDocument(@PathParam("entityType") @Parameter(description = "entityType") final String entityType,
+    public CommandProcessingResult createDocument(@PathParam("entityType") @Parameter(description = "entityType") final String entityType,
             @PathParam("entityId") @Parameter(description = "entityId") final Long entityId,
             @HeaderParam("Content-Length") @Parameter(description = "Content-Length") final Long fileSize,
             @FormDataParam("file") final InputStream inputStream, @FormDataParam("file") final FormDataContentDisposition fileDetails,
@@ -125,8 +106,8 @@ public class DocumentManagementApiResource {
         fileUploadValidator.validate(fileSize, inputStream, fileDetails, bodyPart);
         final DocumentCommand documentCommand = new DocumentCommand(null, null, entityType, entityId, name, fileDetails.getFileName(),
                 fileSize, bodyPart.getMediaType().toString(), description, null);
-        final Long documentId = this.documentWritePlatformService.createDocument(documentCommand, inputStream);
-        return this.toApiJsonSerializer.serialize(CommandProcessingResult.resourceResult(documentId));
+        final Long documentId = documentWritePlatformService.createDocument(documentCommand, inputStream);
+        return CommandProcessingResult.resourceResult(documentId);
     }
 
     @PUT
@@ -140,7 +121,7 @@ public class DocumentManagementApiResource {
             + "The file to be uploaded")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Not Shown (multi-part form data)", content = @Content(schema = @Schema(implementation = DocumentManagementApiResourceSwagger.PutEntityTypeEntityIdDocumentsResponse.class))) })
-    public String updateDocument(@PathParam("entityType") @Parameter(description = "entityType") final String entityType,
+    public CommandProcessingResult updateDocument(@PathParam("entityType") @Parameter(description = "entityType") final String entityType,
             @PathParam("entityId") @Parameter(description = "entityId") final Long entityId,
             @PathParam("documentId") @Parameter(description = "documentId") final Long documentId,
             @HeaderParam("Content-Length") @Parameter(description = "Content-Length") final Long fileSize,
@@ -155,7 +136,7 @@ public class DocumentManagementApiResource {
         /***
          * Populate Document command based on whether a file has also been passed in as a part of the update
          ***/
-        DocumentCommand documentCommand = null;
+        DocumentCommand documentCommand;
         if (inputStream != null && fileDetails.getFileName() != null) {
             fileUploadValidator.validate(fileSize, inputStream, fileDetails, bodyPart);
             modifiedParams.add("fileName");
@@ -171,9 +152,7 @@ public class DocumentManagementApiResource {
         /***
          * TODO: does not return list of changes, should be done for consistency with rest of API
          **/
-        final CommandProcessingResult identifier = this.documentWritePlatformService.updateDocument(documentCommand, inputStream);
-
-        return this.toApiJsonSerializer.serialize(identifier);
+        return documentWritePlatformService.updateDocument(documentCommand, inputStream);
     }
 
     @GET
@@ -182,18 +161,12 @@ public class DocumentManagementApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Document", description = "Example Requests:\n" + "\n" + "clients/1/documents/1\n" + "\n" + "\n"
             + "loans/1/documents/1\n" + "\n" + "\n" + "client_identifiers/1/documents/1?fields=name,description")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DocumentManagementApiResourceSwagger.GetEntityTypeEntityIdDocumentsResponse.class))) })
-    public String getDocument(@PathParam("entityType") @Parameter(description = "entityType") final String entityType,
+    public DocumentData getDocument(@PathParam("entityType") @Parameter(description = "entityType") final String entityType,
             @PathParam("entityId") @Parameter(description = "entityId") final Long entityId,
-            @PathParam("documentId") @Parameter(description = "documentId") final Long documentId, @Context final UriInfo uriInfo) {
+            @PathParam("documentId") @Parameter(description = "documentId") final Long documentId) {
 
-        this.context.authenticatedUser().validateHasReadPermission(SYSTEM_ENTITY_TYPE);
-
-        final DocumentData documentData = this.documentReadPlatformService.retrieveDocument(entityType, entityId, documentId);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, documentData, RESPONSE_DATA_PARAMETERS);
+        context.authenticatedUser().validateHasReadPermission(SYSTEM_ENTITY_TYPE);
+        return documentReadPlatformService.retrieveDocument(entityType, entityId, documentId);
     }
 
     @GET
@@ -207,8 +180,8 @@ public class DocumentManagementApiResource {
             @PathParam("entityId") @Parameter(description = "entityId") final Long entityId,
             @PathParam("documentId") @Parameter(description = "documentId") final Long documentId) {
 
-        this.context.authenticatedUser().validateHasReadPermission(SYSTEM_ENTITY_TYPE);
-        final FileData fileData = this.documentReadPlatformService.retrieveFileData(entityType, entityId, documentId);
+        context.authenticatedUser().validateHasReadPermission(SYSTEM_ENTITY_TYPE);
+        final FileData fileData = documentReadPlatformService.retrieveFileData(entityType, entityId, documentId);
         return ContentResources.fileDataToResponse(fileData, "attachment");
     }
 
@@ -219,15 +192,13 @@ public class DocumentManagementApiResource {
     @Operation(summary = "Remove a Document", description = "")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DocumentManagementApiResourceSwagger.DeleteEntityTypeEntityIdDocumentsResponse.class))) })
-    public String deleteDocument(@PathParam("entityType") @Parameter(description = "entityType") final String entityType,
+    public CommandProcessingResult deleteDocument(@PathParam("entityType") @Parameter(description = "entityType") final String entityType,
             @PathParam("entityId") @Parameter(description = "entityId") final Long entityId,
             @PathParam("documentId") @Parameter(description = "documentId") final Long documentId) {
 
         final DocumentCommand documentCommand = new DocumentCommand(null, documentId, entityType, entityId, null, null, null, null, null,
                 null);
 
-        final CommandProcessingResult documentIdentifier = this.documentWritePlatformService.deleteDocument(documentCommand);
-
-        return this.toApiJsonSerializer.serialize(documentIdentifier);
+        return documentWritePlatformService.deleteDocument(documentCommand);
     }
 }

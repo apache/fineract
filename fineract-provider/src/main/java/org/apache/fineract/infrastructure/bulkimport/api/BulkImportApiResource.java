@@ -87,7 +87,7 @@ public class BulkImportApiResource {
     public String retriveOutputTemplateLocation(@QueryParam("importDocumentId") final String importDocumentId) {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
         final DocumentData documentData = this.bulkImportWorkbookService.getOutputTemplateLocation(importDocumentId);
-        return this.toApiJsonSerializer.serialize(documentData.fileLocation());
+        return this.toApiJsonSerializer.serialize(documentData.getLocation());
     }
 
     @GET

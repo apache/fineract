@@ -21,7 +21,7 @@ package org.apache.fineract.client.services;
 import java.util.List;
 import okhttp3.ResponseBody;
 import org.apache.fineract.client.models.DeleteEntityTypeEntityIdDocumentsResponse;
-import org.apache.fineract.client.models.GetEntityTypeEntityIdDocumentsResponse;
+import org.apache.fineract.client.models.DocumentData;
 import org.apache.fineract.client.models.PostEntityTypeEntityIdDocumentsResponse;
 import org.apache.fineract.client.models.PutEntityTypeEntityIdDocumentsResponse;
 import retrofit2.Call;
@@ -102,8 +102,8 @@ public interface DocumentsApiFixed {
      * @return Call&lt;GetEntityTypeEntityIdDocumentsResponse&gt;
      */
     @GET("v1/{entityType}/{entityId}/documents/{documentId}")
-    Call<GetEntityTypeEntityIdDocumentsResponse> getDocument(@retrofit2.http.Path("entityType") String entityType,
-            @retrofit2.http.Path("entityId") Long entityId, @retrofit2.http.Path("documentId") Long documentId);
+    Call<DocumentData> getDocument(@retrofit2.http.Path("entityType") String entityType, @retrofit2.http.Path("entityId") Long entityId,
+            @retrofit2.http.Path("documentId") Long documentId);
 
     /**
      * List documents Example Requests: clients/1/documents client_identifiers/1/documents
@@ -116,7 +116,7 @@ public interface DocumentsApiFixed {
      * @return Call&lt;List&lt;GetEntityTypeEntityIdDocumentsResponse&gt;&gt;
      */
     @GET("v1/{entityType}/{entityId}/documents")
-    Call<List<GetEntityTypeEntityIdDocumentsResponse>> retrieveAllDocuments(@retrofit2.http.Path("entityType") String entityType,
+    Call<List<DocumentData>> retrieveAllDocuments(@retrofit2.http.Path("entityType") String entityType,
             @retrofit2.http.Path("entityId") Long entityId);
 
     /**
