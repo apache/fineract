@@ -27,6 +27,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
@@ -43,34 +44,24 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
 
     @Override
     public void reprocessTransactions(final Loan loan) {
-        final ChangedTransactionDetail changedTransactionDetail = loan.reprocessTransactions();
-        if (changedTransactionDetail != null) {
-            handleChangedDetail(changedTransactionDetail);
-        }
+        final List<LoanTransaction> allNonContraTransactionsPostDisbursement = loan.retrieveListOfTransactionsForReprocessing();
+        final ChangedTransactionDetail changedTransactionDetail = reprocessTransactionsAndFetchChangedTransactions(loan,
+                allNonContraTransactionsPostDisbursement);
+        handleChangedDetail(changedTransactionDetail);
     }
 
     @Override
-    public void reprocessTransactions(final Loan loan, final List<LoanTransaction> loanTransactions) {
-        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loan.getTransactionProcessor();
-        final ChangedTransactionDetail changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(
-                loan.getDisbursementDate(), loanTransactions, loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
-                loan.getActiveCharges());
-        for (TransactionChangeData change : changedTransactionDetail.getTransactionChanges()) {
-            change.getNewTransaction().updateLoan(loan);
-        }
-        final List<LoanTransaction> newTransactions = changedTransactionDetail.getTransactionChanges().stream()
-                .map(TransactionChangeData::getNewTransaction).toList();
-        loan.getLoanTransactions().addAll(newTransactions);
-        loan.updateLoanSummaryDerivedFields();
+    public void reprocessParticularTransactions(final Loan loan, final List<LoanTransaction> loanTransactions) {
+        final ChangedTransactionDetail changedTransactionDetail = reprocessTransactionsAndFetchChangedTransactions(loan, loanTransactions);
         handleChangedDetail(changedTransactionDetail);
     }
 
     @Override
     public void reprocessTransactionsWithPostTransactionChecks(final Loan loan, final LocalDate transactionDate) {
-        final ChangedTransactionDetail changedTransactionDetail = loan.reprocessTransactionsWithPostTransactionChecks(transactionDate);
-        if (changedTransactionDetail != null) {
-            handleChangedDetail(changedTransactionDetail);
-        }
+        final ChangedTransactionDetail changedTransactionDetail = reprocessTransactionsAndFetchChangedTransactions(loan,
+                loan.retrieveListOfTransactionsForReprocessing());
+        loan.doPostLoanTransactionChecks(transactionDate, loan.getLoanLifecycleStateMachine());
+        handleChangedDetail(changedTransactionDetail);
     }
 
     @Override
@@ -80,7 +71,30 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
 
     @Override
     public void removeLoanCharge(final Loan loan, final LoanCharge loanCharge) {
-        loan.removeLoanCharge(loanCharge).ifPresent(this::handleChangedDetail);
+        final boolean removed = loanCharge.isActive();
+        if (removed) {
+            loanCharge.setActive(false);
+            final LoanRepaymentScheduleProcessingWrapper wrapper = new LoanRepaymentScheduleProcessingWrapper();
+            wrapper.reprocess(loan.getCurrency(), loan.getDisbursementDate(), loan.getRepaymentScheduleInstallments(),
+                    loan.getActiveCharges());
+            loan.updateSummaryWithTotalFeeChargesDueAtDisbursement(loan.deriveSumTotalOfChargesDueAtDisbursement());
+        }
+
+        loan.removeOrModifyTransactionAssociatedWithLoanChargeIfDueAtDisbursement(loanCharge);
+
+        if (!loanCharge.isDueAtDisbursement() && loanCharge.isPaidOrPartiallyPaid(loan.getCurrency())) {
+            /*
+             * TODO Vishwas Currently we do not allow removing a loan charge after a loan is approved (hence there is no
+             * need to adjust any loan transactions).
+             *
+             * Consider removing this block of code or logically completing it for the future by getting the list of
+             * affected Transactions
+             */
+            reprocessTransactions(loan);
+            return;
+        }
+        loan.getLoanCharges().remove(loanCharge);
+        loan.updateLoanSummaryDerivedFields();
     }
 
     @Override
@@ -108,5 +122,21 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
             }
         }
         replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
+    }
+
+    private ChangedTransactionDetail reprocessTransactionsAndFetchChangedTransactions(final Loan loan,
+            final List<LoanTransaction> loanTransactions) {
+        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loan.getTransactionProcessor();
+        final ChangedTransactionDetail changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(
+                loan.getDisbursementDate(), loanTransactions, loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
+                loan.getActiveCharges());
+        for (TransactionChangeData change : changedTransactionDetail.getTransactionChanges()) {
+            change.getNewTransaction().updateLoan(loan);
+        }
+        final List<LoanTransaction> newTransactions = changedTransactionDetail.getTransactionChanges().stream()
+                .map(TransactionChangeData::getNewTransaction).toList();
+        loan.getLoanTransactions().addAll(newTransactions);
+        loan.updateLoanSummaryDerivedFields();
+        return changedTransactionDetail;
     }
 }

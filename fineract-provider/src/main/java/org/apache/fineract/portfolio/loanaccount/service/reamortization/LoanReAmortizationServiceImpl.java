@@ -130,11 +130,11 @@ public class LoanReAmortizationServiceImpl {
     private void reverseReAmortizeTransaction(LoanTransaction reAmortizeTransaction, JsonCommand command) {
         ExternalId reversalExternalId = externalIdFactory.createFromCommand(command,
                 LoanReAmortizationApiConstants.externalIdParameterName);
-        loanChargeValidator.validateRepaymentTypeTransactionNotBeforeAChargeRefund(reAmortizeTransaction.getLoan(), reAmortizeTransaction,
-                "reversed");
+        final Loan loan = reAmortizeTransaction.getLoan();
+        loanChargeValidator.validateRepaymentTypeTransactionNotBeforeAChargeRefund(loan, reAmortizeTransaction, "reversed");
         reAmortizeTransaction.reverse(reversalExternalId);
         reAmortizeTransaction.manuallyAdjustedOrReversed();
-        reprocessLoanTransactionsService.reprocessTransactions(reAmortizeTransaction.getLoan());
+        reprocessLoanTransactionsService.reprocessTransactions(loan);
     }
 
     private LoanTransaction findLatestNonReversedReAmortizeTransaction(Loan loan) {

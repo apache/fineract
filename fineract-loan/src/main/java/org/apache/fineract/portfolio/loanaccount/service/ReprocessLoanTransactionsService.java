@@ -28,7 +28,7 @@ public interface ReprocessLoanTransactionsService {
 
     void reprocessTransactions(Loan loan);
 
-    void reprocessTransactions(Loan loan, List<LoanTransaction> loanTransactions);
+    void reprocessParticularTransactions(Loan loan, List<LoanTransaction> loanTransactions);
 
     void reprocessTransactionsWithPostTransactionChecks(Loan loan, LocalDate transactionDate);
 

@@ -2918,7 +2918,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             }
             final List<LoanTransaction> loanTransactions = loan.retrieveListOfTransactionsForReprocessing();
             loanTransactions.add(chargeOffTransaction);
-            reprocessLoanTransactionsService.reprocessTransactions(loan, loanTransactions);
+            reprocessLoanTransactionsService.reprocessParticularTransactions(loan, loanTransactions);
             loan.addLoanTransaction(chargeOffTransaction);
         } else {
             reprocessLoanTransactionsService.processLatestTransaction(chargeOffTransaction, loan);

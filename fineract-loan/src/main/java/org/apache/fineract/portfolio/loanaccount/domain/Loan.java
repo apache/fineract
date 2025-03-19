@@ -713,28 +713,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         loanLifecycleStateMachine.transition(LoanEvent.LOAN_CHARGE_ADDED, this);
     }
 
-    public ChangedTransactionDetail reprocessTransactions() {
-        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = getTransactionProcessor();
-        final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retrieveListOfTransactionsForReprocessing();
-        ChangedTransactionDetail changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(
-                getDisbursementDate(), allNonContraTransactionsPostDisbursement, getCurrency(), getRepaymentScheduleInstallments(),
-                getActiveCharges());
-        for (TransactionChangeData change : changedTransactionDetail.getTransactionChanges()) {
-            change.getNewTransaction().updateLoan(this);
-        }
-        final List<LoanTransaction> newTransactions = changedTransactionDetail.getTransactionChanges().stream()
-                .map(TransactionChangeData::getNewTransaction).toList();
-        this.loanTransactions.addAll(newTransactions);
-        updateLoanSummaryDerivedFields();
-        return changedTransactionDetail;
-    }
-
-    public ChangedTransactionDetail reprocessTransactionsWithPostTransactionChecks(LocalDate transactionDate) {
-        ChangedTransactionDetail changedDetail = reprocessTransactions();
-        doPostLoanTransactionChecks(transactionDate, loanLifecycleStateMachine);
-        return changedDetail;
-    }
-
     /**
      * Creates a loanTransaction for "Apply Charge Event" with transaction date set to "suppliedTransactionDate". The
      * newly created transaction is also added to the Loan on which this method is called.
@@ -832,34 +810,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return lastRepaymentDate;
     }
 
-    public Optional<ChangedTransactionDetail> removeLoanCharge(final LoanCharge loanCharge) {
-        final boolean removed = loanCharge.isActive();
-        if (removed) {
-            loanCharge.setActive(false);
-            final LoanRepaymentScheduleProcessingWrapper wrapper = new LoanRepaymentScheduleProcessingWrapper();
-            wrapper.reprocess(getCurrency(), getDisbursementDate(), getRepaymentScheduleInstallments(), getActiveCharges());
-            updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
-        }
-
-        removeOrModifyTransactionAssociatedWithLoanChargeIfDueAtDisbursement(loanCharge);
-
-        if (!loanCharge.isDueAtDisbursement() && loanCharge.isPaidOrPartiallyPaid(getCurrency())) {
-            /*
-             * TODO Vishwas Currently we do not allow removing a loan charge after a loan is approved (hence there is no
-             * need to adjust any loan transactions).
-             *
-             * Consider removing this block of code or logically completing it for the future by getting the list of
-             * affected Transactions
-             */
-            return Optional.ofNullable(reprocessTransactions());
-        }
-        this.charges.remove(loanCharge);
-        updateLoanSummaryDerivedFields();
-
-        return Optional.empty();
-    }
-
-    private void removeOrModifyTransactionAssociatedWithLoanChargeIfDueAtDisbursement(final LoanCharge loanCharge) {
+    public void removeOrModifyTransactionAssociatedWithLoanChargeIfDueAtDisbursement(final LoanCharge loanCharge) {
         if (loanCharge.isDueAtDisbursement()) {
             LoanTransaction transactionToRemove = null;
             List<LoanTransaction> transactions = getLoanTransactions();
