@@ -171,6 +171,11 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                     } else {
                         correctionRequired = postingTransaction.hasNotAmount(interestEarnedToBePostedForPeriod.negated());
                     }
+                    if(DateUtils.isBefore(interestPostingTransactionDate, interestPostingUpToDate)){
+                        correctionRequired = false;
+                    }else{
+                        correctionRequired = correctionRequired;
+                    }
                     if (correctionRequired) {
                         boolean applyWithHoldTaxForOldTransaction = false;
                         //postingTransaction.reverse();
@@ -341,7 +346,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
             if (postedAsOnDates.contains(periodInterval.endDate().plusDays(1))) {
                 isUserPosting = true;
             }
-            List<SavingsAccountTransactionData> listOfTransactions = retreiveOrderedNonInterestPostingTransactions(savingsAccountData);
+            List<SavingsAccountTransactionData> listOfTransactions = savingsAccountData.getSavingsAccountTransactionData();// retreiveOrderedNonInterestPostingTransactions(savingsAccountData);
             log.debug("  listOfTransactions: {} {}", savingsAccountData.getAccountNo(), listOfTransactions.size());
 
             List<SavingsAccountTransactionData> listOfTransactionsNegative = new ArrayList<>();
@@ -350,13 +355,20 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
             boolean firstIsSet = false;
 
             for (SavingsAccountTransactionData lists : listOfTransactions){
-                if(MathUtil.isLessThanZero(lists.getRunningBalance())){
+                if(MathUtil.isLessThanZero(lists.getRunningBalance())
+                        && (!DateUtils.isEqual(periodInterval.startDate(), lists.getDate()) || DateUtils.isEqual(periodInterval.startDate(), lists.getDate()) || DateUtils.isEqual(periodInterval.endDate(), lists.getDate()) || lists.getTransactionType().isAccrual() )){
                     listOfTransactionsNegative.add(lists);
                     if (!firstIsSet) {
                         firstIsNegative = true;
                         firstIsSet = true;
                     }
-                }else{
+                }else if (!DateUtils.isEqual(periodInterval.startDate(), lists.getDate()) || DateUtils.isEqual(periodInterval.startDate(), lists.getDate()) || DateUtils.isEqual(periodInterval.endDate(), lists.getDate()) || lists.getTransactionType().isAccrual() ){
+                    listOfTransactionsPositive.add(lists);
+                    if (!firstIsSet) {
+                        firstIsNegative = false;
+                        firstIsSet = true;
+                    }
+                }else {
                     listOfTransactionsPositive.add(lists);
                     if (!firstIsSet) {
                         firstIsNegative = false;
@@ -375,14 +387,15 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                 firstList = listOfTransactionsPositive;
                 secondList = listOfTransactionsNegative;
             }
+            Boolean flagIntroduce = false;
 
             if (!firstList.isEmpty()) {
                 final PostingPeriod postingPeriod = PostingPeriod.createFromDTO(periodInterval, periodStartingBalance, firstList,
                         monetaryCurrency, compoundingPeriodType, interestCalculationType, interestRateAsFraction, daysInYearType.getValue(),
                         upToInterestCalculationDate, interestPostTransactions, isInterestTransfer, minBalanceForInterestCalculation,
                         isSavingsInterestPostingAtCurrentPeriodEnd, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation,
-                        isUserPosting, financialYearBeginningMonth, savingsAccountData.isAllowOverdraft());
-
+                        isUserPosting, financialYearBeginningMonth, savingsAccountData.isAllowOverdraft(), flagIntroduce);
+                flagIntroduce = postingPeriod.getEndTransacction();
                 periodStartingBalance = postingPeriod.closingBalance();
                 log.debug("  postingPeriod {} {}", postingPeriod.dateOfPostingTransaction(), postingPeriod.getInterestEarned().getAmount());
                 if (MathUtil.isZero(postingPeriod.getOpeningBalance().getAmount()) && MathUtil.isZero( postingPeriod.closingBalance().getAmount())){
@@ -397,7 +410,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                         monetaryCurrency, compoundingPeriodType, interestCalculationType, interestRateAsFraction, daysInYearType.getValue(),
                         upToInterestCalculationDate, interestPostTransactions, isInterestTransfer, minBalanceForInterestCalculation,
                         isSavingsInterestPostingAtCurrentPeriodEnd, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation,
-                        isUserPosting, financialYearBeginningMonth, savingsAccountData.isAllowOverdraft());
+                        isUserPosting, financialYearBeginningMonth, savingsAccountData.isAllowOverdraft(), flagIntroduce);
 
                 periodStartingBalance = postingPeriod.closingBalance();
                 log.debug("  postingPeriod {} {}", postingPeriod.dateOfPostingTransaction(), postingPeriod.getInterestEarned().getAmount());
