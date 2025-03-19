@@ -41,6 +41,7 @@ import org.apache.fineract.portfolio.savings.SavingsCompoundingInterestPeriodTyp
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYearType;
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
 import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccrualData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
@@ -218,21 +219,21 @@ public class SavingsAccrualWritePlatformServiceImpl implements SavingsAccrualWri
         for (PostingPeriod period : allPostingPeriods) {
             if (MathUtil.isGreaterThanZero(period.closingBalance())) {
                 isNegativeBalance = false;
+                period.setAcrual(true);
+                period.setNegative(MathUtil.isLessThanZero(savingsAccount.getSummary().getAccountBalance()));
                 period.calculateInterest(compoundInterestValues);
                 log.debug("  period {} {} : {}", period.getPeriodInterval().startDate(), period.getPeriodInterval().endDate(),
                         period.getInterestEarned());
                 if (!accrualTransactionDates.contains(period.getPeriodInterval().endDate())) {
                     SavingsAccountTransaction savingsAccountTransaction = SavingsAccountTransaction.accrual(savingsAccount,
-                            savingsAccount.office(), period.getPeriodInterval().endDate(), period.getInterestEarned(), false, false);
+                            savingsAccount.office(), period.getPeriodInterval().endDate(), period.getInterestEarned(), false, MathUtil.isLessThanZero(savingsAccount.getSummary().getAccountBalance()));
                     savingsAccount.addTransaction(savingsAccountTransaction);
                 }
             }else {
 
-                BigDecimal bd = new BigDecimal(String.valueOf(period.closingBalance().getAmount())).setScale(2, RoundingMode.DOWN);
-                if (MathUtil.isLessThanZero(bd)) {
-
                 isNegativeBalance = true;
                 period.setAcrual(true);
+                period.setNegative(MathUtil.isLessThanZero(savingsAccount.getSummary().getAccountBalance()));
                 period.calculateInterest(compoundInterestValues);
                 log.debug("  period {} {} : {}", period.getPeriodInterval().startDate(), period.getPeriodInterval().endDate(),
                         period.getInterestEarned());
@@ -241,7 +242,7 @@ public class SavingsAccrualWritePlatformServiceImpl implements SavingsAccrualWri
                             savingsAccount.office(), period.getPeriodInterval().endDate(), period.getInterestEarned(), false, true);
                     savingsAccount.addTransaction(savingsAccountTransaction);
                 }
-            }
+
             }
         }
 

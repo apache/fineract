@@ -21,7 +21,10 @@ package org.apache.fineract.portfolio.savings.domain.interest;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDate;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 
@@ -47,8 +50,13 @@ public class CompoundInterestHelper {
         // total interest earned in previous periods but not yet recognised
         BigDecimal compoundedInterest = BigDecimal.ZERO;
         BigDecimal unCompoundedInterest = BigDecimal.ZERO;
+        LocalDate endDay = DateUtils.getBusinessLocalDate();
         final CompoundInterestValues compoundInterestValues = new CompoundInterestValues(compoundedInterest, unCompoundedInterest);
         for (final PostingPeriod postingPeriod : allPeriods) {
+
+            if (postingPeriod.dateOfPostingTransaction().getMonth() != endDay.getMonth()){
+                compoundInterestValues.setcompoundedInterest(interestEarned.getAmount());
+            }
 
             final BigDecimal interestEarnedThisPeriod = postingPeriod.calculateInterest(compoundInterestValues);
 
@@ -63,6 +71,8 @@ public class CompoundInterestHelper {
                     || (lockUntil != null && !DateUtils.isAfter(postingPeriod.dateOfPostingTransaction(), lockUntil)))) {
                 compoundInterestValues.setcompoundedInterest(BigDecimal.ZERO);
             }
+            endDay = postingPeriod.dateOfPostingTransaction();
+
         }
 
         return interestEarned;

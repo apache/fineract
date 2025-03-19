@@ -111,6 +111,11 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                     } else {
                         correctionRequired = postingTransaction.hasNotAmount(interestEarnedToBePostedForPeriod.negated());
                     }
+                    if(DateUtils.isBefore(interestPostingTransactionDate, interestPostingUpToDate)){
+                        correctionRequired = false;
+                    }else{
+                        correctionRequired = correctionRequired;
+                    }
                     if (correctionRequired) {
                         if (interestEarnedToBePostedForPeriod.isGreaterThanZero() || interestEarnedToBePostedForPeriod.isLessThanZero()) {
                             flagValidationInterest = true;
@@ -124,7 +129,6 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
         for (final PostingPeriod interestPostingPeriod : postingPeriods) {
             final LocalDate interestPostingTransactionDate = interestPostingPeriod.dateOfPostingTransaction();
             final Money interestEarnedToBePostedForPeriod = interestPostingPeriod.getInterestEarned();
-            final Boolean isNegativeBalance2 = MathUtil.isLessThanZero(interestPostingPeriod.getClosingBalance());
             final Boolean isNegativeBalance = MathUtil.isLessThanZero(interestPostingPeriod.getInterestEarned());
 
 
@@ -346,7 +350,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
             if (postedAsOnDates.contains(periodInterval.endDate().plusDays(1))) {
                 isUserPosting = true;
             }
-            List<SavingsAccountTransactionData> listOfTransactions = savingsAccountData.getSavingsAccountTransactionData();// retreiveOrderedNonInterestPostingTransactions(savingsAccountData);
+            List<SavingsAccountTransactionData> listOfTransactions = retreiveOrderedNonInterestPostingTransactions(savingsAccountData);
             log.debug("  listOfTransactions: {} {}", savingsAccountData.getAccountNo(), listOfTransactions.size());
 
             List<SavingsAccountTransactionData> listOfTransactionsNegative = new ArrayList<>();
@@ -355,7 +359,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
             boolean firstIsSet = false;
 
             for (SavingsAccountTransactionData lists : listOfTransactions){
-                if(MathUtil.isLessThanZero(lists.getRunningBalance())
+                /*if(MathUtil.isLessThanZero(lists.getRunningBalance())
                         && (!DateUtils.isEqual(periodInterval.startDate(), lists.getDate()) || DateUtils.isEqual(periodInterval.startDate(), lists.getDate()) || DateUtils.isEqual(periodInterval.endDate(), lists.getDate()) || lists.getTransactionType().isAccrual() )){
                     listOfTransactionsNegative.add(lists);
                     if (!firstIsSet) {
@@ -374,7 +378,22 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                         firstIsNegative = false;
                         firstIsSet = true;
                     }
-                }
+                }*/
+
+               if (MathUtil.isLessThanZero(lists.getRunningBalance()) && periodInterval.startDate().getMonth() == lists.getDate().getMonth()){
+                   listOfTransactionsNegative.add(lists);
+                   if (!firstIsSet) {
+                       firstIsNegative = true;
+                       firstIsSet = true;
+                   }
+               }else if (periodInterval.startDate().getMonth() == lists.getDate().getMonth()){
+                   listOfTransactionsPositive.add(lists);
+                   if (!firstIsSet) {
+                       firstIsNegative = false;
+                       firstIsSet = true;
+                   }
+               }
+
             }
 
             List<SavingsAccountTransactionData> firstList = null;
