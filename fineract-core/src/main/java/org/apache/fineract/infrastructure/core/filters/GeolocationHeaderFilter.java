@@ -81,10 +81,13 @@ public class GeolocationHeaderFilter extends OncePerRequestFilter {
             String clientIpAddress = getClientIpAddress(request);
             if (StringUtils.isNotBlank(clientIpAddress)) {
                 log.info("Found Client IP in header : {}", clientIpAddress);
+                ClientIpHolder.setClientIp(clientIpAddress);
             }
             filterChain.doFilter(request, response);
         } catch(Exception e) {
             e.printStackTrace();
+        }finally {
+            ClientIpHolder.clear();
         }
     }
 
