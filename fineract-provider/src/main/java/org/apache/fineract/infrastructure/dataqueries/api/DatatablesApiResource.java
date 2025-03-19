@@ -55,8 +55,9 @@ import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer
 import org.apache.fineract.infrastructure.core.service.PagedLocalRequest;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
+import org.apache.fineract.infrastructure.dataqueries.service.DatatableReadService;
+import org.apache.fineract.infrastructure.dataqueries.service.DatatableWriteService;
 import org.apache.fineract.infrastructure.dataqueries.service.GenericDataService;
-import org.apache.fineract.infrastructure.dataqueries.service.ReadWriteNonCoreDataService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.search.data.AdvancedQueryData;
 import org.springframework.data.domain.Page;
@@ -72,7 +73,8 @@ public class DatatablesApiResource {
 
     private final PlatformSecurityContext context;
     private final GenericDataService genericDataService;
-    private final ReadWriteNonCoreDataService readWriteNonCoreDataService;
+    private final DatatableReadService datatableReadService;
+    private final DatatableWriteService datatableWriteService;
     private final ToApiJsonSerializer<GenericResultsetData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
@@ -87,7 +89,7 @@ public class DatatablesApiResource {
     public String getDatatables(@QueryParam("apptable") @Parameter(description = "apptable") final String apptable,
             @Context final UriInfo uriInfo) {
 
-        final List<DatatableData> result = this.readWriteNonCoreDataService.retrieveDatatableNames(apptable);
+        final List<DatatableData> result = this.datatableReadService.retrieveDatatableNames(apptable);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -184,7 +186,7 @@ public class DatatablesApiResource {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PutDataTablesResponse.class))) })
     public String deregisterDatatable(@PathParam("datatable") @Parameter(description = "datatable") final String datatable) {
-        this.readWriteNonCoreDataService.deregisterDatatable(datatable);
+        this.datatableWriteService.deregisterDatatable(datatable);
         final CommandProcessingResult result = new CommandProcessingResultBuilder().withResourceIdAsString(datatable).build();
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -199,7 +201,7 @@ public class DatatablesApiResource {
     public String getDatatable(@PathParam("datatable") @Parameter(description = "datatable") final String datatable,
             @Context final UriInfo uriInfo) {
 
-        final DatatableData result = this.readWriteNonCoreDataService.retrieveDatatable(datatable);
+        final DatatableData result = this.datatableReadService.retrieveDatatable(datatable);
         return this.toApiJsonSerializer.serialize(result);
     }
 
@@ -216,8 +218,7 @@ public class DatatablesApiResource {
             @Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasDatatableReadPermission(datatable);
 
-        final List<JsonObject> result = this.readWriteNonCoreDataService.queryDataTable(datatable, columnFilter, valueFilter,
-                resultColumns);
+        final List<JsonObject> result = this.datatableReadService.queryDataTable(datatable, columnFilter, valueFilter, resultColumns);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -231,7 +232,7 @@ public class DatatablesApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = List.class))) })
     public String advancedQuery(@PathParam("datatable") @Parameter(description = "datatable") final String datatable,
             PagedLocalRequest<AdvancedQueryData> queryRequest, @Context final UriInfo uriInfo) {
-        final Page<JsonObject> result = this.readWriteNonCoreDataService.queryDataTableAdvanced(datatable, queryRequest);
+        final Page<JsonObject> result = this.datatableReadService.queryDataTableAdvanced(datatable, queryRequest);
         return this.toApiJsonSerializer.serialize(result);
     }
 
@@ -254,8 +255,8 @@ public class DatatablesApiResource {
 
         this.context.authenticatedUser().validateHasDatatableReadPermission(datatable);
 
-        final GenericResultsetData results = this.readWriteNonCoreDataService.retrieveDataTableGenericResultSet(datatable, apptableId,
-                order, null);
+        final GenericResultsetData results = this.datatableReadService.retrieveDataTableGenericResultSet(datatable, apptableId, order,
+                null);
 
         String json = "";
         final boolean genericResultSet = ApiParameterHelper.genericResultSet(uriInfo.getQueryParameters());
@@ -280,8 +281,8 @@ public class DatatablesApiResource {
 
         this.context.authenticatedUser().validateHasDatatableReadPermission(datatable);
 
-        final GenericResultsetData results = this.readWriteNonCoreDataService.retrieveDataTableGenericResultSet(datatable, apptableId,
-                order, datatableId);
+        final GenericResultsetData results = this.datatableReadService.retrieveDataTableGenericResultSet(datatable, apptableId, order,
+                datatableId);
 
         String json = "";
         if (genericResultSet) {

@@ -18,11 +18,13 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,65 +38,63 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.codes.service.CodeReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
-import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
 import org.apache.fineract.infrastructure.core.serialization.DatatableCommandFromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.dataqueries.data.DataTableValidator;
+import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
+import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
+import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.datatable.DatatableEntryBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
-import org.apache.fineract.infrastructure.security.utils.DefaultSqlValidator;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.search.service.SearchUtil;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 @ExtendWith(MockitoExtension.class)
-public class DatatableBusinessEventTest {
+@MockitoSettings(strictness = Strictness.LENIENT)
+class DatatableBusinessEventTest {
+
+    private static final String DATATABLE_NAME = "test_loan_data";
+    private static final long APP_TABLE_ID = 1L;
+    private static final long DATATABLE_ID = 1L;
 
     @Mock
-    private PlatformSecurityContext context;
-    @Mock
-    private BusinessEventNotifierService businessEventNotifierService;
-    @Mock
     private JdbcTemplate jdbcTemplate;
-    @Mock
-    private GenericDataService genericDataService;
-    @Mock
-    private SearchUtil searchUtil;
     @Mock
     private DatabaseTypeResolver databaseTypeResolver;
     @Mock
     private DatabaseSpecificSQLGenerator sqlGenerator;
     @Mock
-    private FineractPlatformTenantConnection tenantConnection;
-    @Mock
-    private DefaultSqlValidator sqlValidator;
+    private PlatformSecurityContext context;
     @Mock
     private FromJsonHelper fromJsonHelper;
+    @Mock
+    private GenericDataService genericDataService;
     @Mock
     private DatatableCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     @Mock
@@ -104,38 +104,73 @@ public class DatatableBusinessEventTest {
     @Mock
     private DataTableValidator dataTableValidator;
     @Mock
-    private ColumnValidator columnValidator;
-    @Mock
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     @Mock
     private DatatableKeywordGenerator datatableKeywordGenerator;
+    @Mock
+    private SearchUtil searchUtil;
+    @Mock
+    private BusinessEventNotifierService businessEventNotifierService;
+    @Mock
+    private DatatableReadService datatableReadService;
+    @Mock
+    private DatatableUtil datatableUtil;
 
     @InjectMocks
-    private ReadWriteNonCoreDataServiceImpl underTest;
-
-    @Captor
-    private ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor;
-
-    private static String DATATABLE_NAME = "test_loan_data";
+    private DatatableWriteServiceImpl underTest;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
+        setupThreadLocalContext();
+        setupSecurityContext();
+        setupEntityTable();
+        setupCommandProcessingResult();
+    }
+
+    @AfterEach
+    void tearDown() {
+        ThreadLocalContextUtil.reset();
+    }
+
+    @Test
+    void shouldNotifyBusinessEventAfterCreatingNewDatatableEntry() {
+        setupCreateDatatableEntryMocks();
+        JsonCommand command = createJsonCommand("{}", APP_TABLE_ID);
+
+        underTest.createNewDatatableEntry(DATATABLE_NAME, APP_TABLE_ID, command);
+
+        verifyBusinessEvent(APP_TABLE_ID);
+    }
+
+    @Test
+    void shouldNotifyBusinessEventAfterUpdatingDatatableEntry() {
+        setupUpdateDeleteDatatableMocks();
+        JsonCommand command = createJsonCommand("{}", APP_TABLE_ID);
+
+        underTest.updateDatatableEntryOneToMany(DATATABLE_NAME, APP_TABLE_ID, DATATABLE_ID, command);
+
+        verifyBusinessEvent(APP_TABLE_ID);
+    }
+
+    @Test
+    void shouldNotifyBusinessEventAfterDeletingDatatableEntry() {
+        setupUpdateDeleteDatatableMocks();
+        JsonCommand command = createJsonCommand("{}", APP_TABLE_ID);
+
+        underTest.deleteDatatableEntry(DATATABLE_NAME, APP_TABLE_ID, DATATABLE_ID, command);
+
+        verifyBusinessEvent(APP_TABLE_ID);
+    }
+
+    private void setupThreadLocalContext() {
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
-        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.parse("2024-01-16"),
-                BusinessDateType.COB_DATE, LocalDate.parse("2024-01-15"))));
+        Map<BusinessDateType, LocalDate> businessDates = Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.parse("2024-01-16"),
+                BusinessDateType.COB_DATE, LocalDate.parse("2024-01-15"));
+        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(businessDates));
+    }
 
-        SqlRowSet sqlRS = Mockito.mock(SqlRowSet.class);
-        SqlRowSet sqlRSData = Mockito.mock(SqlRowSet.class);
-        doNothing().when(sqlValidator).validate(anyString());
-        when(jdbcTemplate.queryForRowSet(anyString(), anyString())).thenReturn(sqlRS);
-        when(jdbcTemplate.queryForRowSet(anyString())).thenReturn(sqlRSData);
-
-        when(sqlRS.next()).thenReturn(true).thenReturn(false);
-        when(sqlRS.getString("application_table_name")).thenReturn("m_loan");
-        when(sqlRSData.next()).thenReturn(true).thenReturn(false);
-        when(sqlRSData.getObject(anyString())).thenReturn(1L);
-
+    private void setupSecurityContext() {
         AppUser currentUser = Mockito.mock(AppUser.class);
         Office office = Mockito.mock(Office.class);
         when(context.authenticatedUser()).thenReturn(currentUser);
@@ -143,61 +178,57 @@ public class DatatableBusinessEventTest {
         when(office.getHierarchy()).thenReturn(".");
     }
 
-    @AfterEach
-    public void tearDown() {
-        ThreadLocalContextUtil.reset();
+    private void setupEntityTable() {
+        EntityTables entityTable = Mockito.mock(EntityTables.class);
+        when(entityTable.getForeignKeyColumnNameOnDatatable()).thenReturn("loan_id");
+        when(datatableUtil.queryForApplicationEntity(anyString())).thenReturn(entityTable);
     }
 
-    @Test
-    public void businessEventCreateNewDatatableEntryTest() {
+    private void setupCommandProcessingResult() {
+        CommandProcessingResult commandProcessingResult = Mockito.mock(CommandProcessingResult.class);
+        when(commandProcessingResult.getOfficeId()).thenReturn(1L);
+        when(datatableUtil.checkMainResourceExistsWithinScope(any(EntityTables.class), anyLong())).thenReturn(commandProcessingResult);
+    }
+
+    private void setupCreateDatatableEntryMocks() {
+        List<ResultsetColumnHeaderData> columnHeaders = new ArrayList<>();
+        when(genericDataService.fillResultsetColumnHeaders(anyString())).thenReturn(columnHeaders);
+
         when(jdbcTemplate.update(any(PreparedStatementCreator.class), any(KeyHolder.class))).thenReturn(1);
 
-        underTest.createNewDatatableEntry(DATATABLE_NAME, 1L, createJsonCommand("{}", 1L));
+        GeneratedKeyHolder keyHolder = Mockito.mock(GeneratedKeyHolder.class);
+        when(keyHolder.getKeys()).thenReturn(Map.of("id", 1L));
+        when(sqlGenerator.fetchPK(any())).thenReturn(1L);
 
-        ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor = verifyBusinessEvents(1);
-        verifyDatatableBusinessEvent(businessEventArgumentCaptor, 0, 1L);
+        when(fromJsonHelper.extractDataMap(any(), anyString())).thenReturn(new HashMap<>());
     }
 
-    @Test
-    public void businessEventUpdateDatatableEntryTest() {
-        List<Object> values = new ArrayList<>();
-        values.add(1L);
-        List<ResultsetRowData> result = new ArrayList<>();
-        result.add(ResultsetRowData.create(values));
-        when(genericDataService.fillResultsetRowData(anyString(), any())).thenReturn(result);
+    private void setupUpdateDeleteDatatableMocks() {
+        List<ResultsetColumnHeaderData> columnHeaders = new ArrayList<>();
+        List<Object> rowValues = new ArrayList<>();
+        rowValues.add(1L);
 
-        // ResultsetColumnHeaderData resultSet = Mockito.mock(ResultsetColumnHeaderData.class);
-        // when(searchUtil.getFiltered(columnHeaders,
-        // ResultsetColumnHeaderData::getIsColumnPrimaryKey)).thenReturn(resultSet);
+        List<ResultsetRowData> rows = new ArrayList<>();
+        rows.add(ResultsetRowData.create(rowValues));
 
-        underTest.updateDatatableEntryOneToMany(DATATABLE_NAME, 1L, 1L, createJsonCommand("{}", 1L));
+        GenericResultsetData resultData = new GenericResultsetData(columnHeaders, rows);
 
-        ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor = verifyBusinessEvents(1);
-        verifyDatatableBusinessEvent(businessEventArgumentCaptor, 0, 1L);
+        Mockito.doReturn(resultData).when(datatableUtil).retrieveDataTableGenericResultSet(any(EntityTables.class), eq(DATATABLE_NAME),
+                eq(APP_TABLE_ID), isNull(), eq(DATATABLE_ID));
+
+        when(genericDataService.fillResultsetRowData(anyString(), any())).thenReturn(rows);
     }
 
-    @Test
-    public void businessEventDeleteDatatableEntryTest() {
+    private void verifyBusinessEvent(Long expectedEntityId) {
+        ArgumentCaptor<BusinessEvent<?>> eventCaptor = ArgumentCaptor.forClass(BusinessEvent.class);
+        verify(businessEventNotifierService, times(1)).notifyPostBusinessEvent(eventCaptor.capture());
 
-        underTest.deleteDatatableEntry(DATATABLE_NAME, 1L, 1L, createJsonCommand("{}", 1L));
+        BusinessEvent<?> capturedEvent = eventCaptor.getValue();
+        assertInstanceOf(DatatableEntryBusinessEvent.class, capturedEvent);
+        DatatableEntryBusinessEvent event = (DatatableEntryBusinessEvent) capturedEvent;
 
-        ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor = verifyBusinessEvents(1);
-        verifyDatatableBusinessEvent(businessEventArgumentCaptor, 0, 1L);
-    }
-
-    @NotNull
-    private ArgumentCaptor<BusinessEvent<?>> verifyBusinessEvents(int expectedBusinessEvents) {
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor = ArgumentCaptor.forClass(BusinessEvent.class);
-        verify(businessEventNotifierService, times(expectedBusinessEvents)).notifyPostBusinessEvent(businessEventArgumentCaptor.capture());
-        return businessEventArgumentCaptor;
-    }
-
-    private void verifyDatatableBusinessEvent(ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor, int index, Long entityId) {
-        assertTrue(businessEventArgumentCaptor.getAllValues().get(index) instanceof DatatableEntryBusinessEvent);
-        assertEquals(DATATABLE_NAME, ((DatatableEntryBusinessEvent) businessEventArgumentCaptor.getAllValues().get(index))
-                .getDatatableEntryDetails().getDatatableName());
-        assertEquals(entityId, ((DatatableEntryBusinessEvent) businessEventArgumentCaptor.getAllValues().get(index)).getAggregateRootId());
+        assertEquals(DATATABLE_NAME, event.getDatatableEntryDetails().getDatatableName());
+        assertEquals(expectedEntityId, event.getAggregateRootId());
     }
 
     private JsonCommand createJsonCommand(final String jsonCommand, final Long resourceId) {

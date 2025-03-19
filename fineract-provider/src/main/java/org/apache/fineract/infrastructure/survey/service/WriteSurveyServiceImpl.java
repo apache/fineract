@@ -24,7 +24,8 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
-import org.apache.fineract.infrastructure.dataqueries.service.ReadWriteNonCoreDataService;
+import org.apache.fineract.infrastructure.dataqueries.service.DatatableReadService;
+import org.apache.fineract.infrastructure.dataqueries.service.DatatableWriteService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,16 +36,16 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class WriteSurveyServiceImpl implements WriteSurveyService {
 
-    private final ReadWriteNonCoreDataService readWriteNonCoreDataService;
+    private final DatatableReadService datatableReadService;
+    private final DatatableWriteService datatableWriteService;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
 
     @Override
     @Transactional
     public CommandProcessingResult registerSurvey(JsonCommand command) {
-
-        final String dataTableName = this.readWriteNonCoreDataService.getDataTableName(command.getUrl());
+        final String dataTableName = datatableReadService.getDataTableName(command.getUrl());
         final String permissionSql = this.getPermissionSql(dataTableName);
-        this.readWriteNonCoreDataService.registerDatatable(command, permissionSql);
+        datatableWriteService.registerDatatable(command, permissionSql);
 
         return CommandProcessingResult.commandOnlyResult(command.commandId());
 
@@ -73,8 +74,7 @@ public class WriteSurveyServiceImpl implements WriteSurveyService {
     @Transactional
     @Override
     public CommandProcessingResult fullFillSurvey(final String dataTableName, final Long appTableId, final JsonCommand command) {
-
-        return readWriteNonCoreDataService.createPPIEntry(dataTableName, appTableId, command);
+        return datatableWriteService.createPPIEntry(dataTableName, appTableId, command);
     }
 
 }

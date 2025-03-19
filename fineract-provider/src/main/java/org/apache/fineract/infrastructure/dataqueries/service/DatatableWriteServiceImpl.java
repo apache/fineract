@@ -18,11 +18,8 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
-import static java.util.Arrays.asList;
-import static org.apache.fineract.infrastructure.core.serialization.DatatableCommandFromApiJsonDeserializer.DATATABLE_NAME_REGEX_PATTERN;
 import static org.apache.fineract.infrastructure.core.service.database.JdbcJavaType.BIGINT;
 import static org.apache.fineract.infrastructure.core.service.database.JdbcJavaType.DATETIME;
-import static org.apache.fineract.infrastructure.core.service.database.SqlOperator.EQ;
 import static org.apache.fineract.infrastructure.core.service.database.SqlOperator.IN;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_AFTER;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_FIELD_CODE;
@@ -45,13 +42,11 @@ import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiCon
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.API_PARAM_SUBTYPE;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.CREATEDAT_FIELD_NAME;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.TABLE_FIELD_ID;
-import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.TABLE_REGISTERED_TABLE;
 import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.UPDATEDAT_FIELD_NAME;
 import static org.apache.fineract.portfolio.search.SearchConstants.API_PARAM_DATETIME_FORMAT;
 import static org.apache.fineract.portfolio.search.SearchConstants.API_PARAM_DATE_FORMAT;
 import static org.apache.fineract.portfolio.search.SearchConstants.API_PARAM_LOCALE;
 
-import com.google.common.base.Splitter;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -91,53 +86,39 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
-import org.apache.fineract.infrastructure.core.service.PagedLocalRequest;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseType;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.core.service.database.JdbcJavaType;
 import org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant;
 import org.apache.fineract.infrastructure.dataqueries.data.DataTableValidator;
-import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
-import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableEntryRequiredException;
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableNotFoundException;
-import org.apache.fineract.infrastructure.dataqueries.exception.DatatableSystemErrorException;
 import org.apache.fineract.infrastructure.event.business.domain.datatable.DatatableEntryCreatedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.datatable.DatatableEntryDeletedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.datatable.DatatableEntryDetails;
 import org.apache.fineract.infrastructure.event.business.domain.datatable.DatatableEntryUpdatedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.infrastructure.security.service.SqlValidator;
-import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
-import org.apache.fineract.portfolio.search.data.AdvancedQueryData;
-import org.apache.fineract.portfolio.search.data.ColumnFilterData;
 import org.apache.fineract.portfolio.search.service.SearchUtil;
-import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @RequiredArgsConstructor
-public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataService {
+public class DatatableWriteServiceImpl implements DatatableWriteService {
 
     private static final String CODE_VALUES_TABLE = "m_code_value";
-    private static final String APPLICATION_TABLE_NAME = "application_table_name";
+
     private static final String ENTITY_SUB_TYPE = "entity_subtype";
     private static final String ERROR_MSG_DATATABLE_COLUMN_MISSING_UPDATE_PARSE = "error.msg.datatable.column.missing.update.parse";
     private static final String DOES_NOT_EXIST = "does.not.exist";
@@ -158,198 +139,12 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     private final ConfigurationDomainService configurationDomainService;
     private final CodeReadPlatformService codeReadPlatformService;
     private final DataTableValidator dataTableValidator;
-    private final ColumnValidator columnValidator;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final DatatableKeywordGenerator datatableKeywordGenerator;
-    private final SqlValidator sqlValidator;
     private final SearchUtil searchUtil;
     private final BusinessEventNotifierService businessEventNotifierService;
-
-    @Override
-    public List<DatatableData> retrieveDatatableNames(final String appTable) {
-        // PERMITTED datatables
-        String sql = "select application_table_name, registered_table_name, entity_subtype from x_registered_table where exists"
-                + " (select 'f' from m_appuser_role ur join m_role r on r.id = ur.role_id"
-                + " left join m_role_permission rp on rp.role_id = r.id left join m_permission p on p.id = rp.permission_id"
-                + " where ur.appuser_id = ? and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat"
-                + "('READ_', registered_table_name))) ";
-
-        Object[] params;
-        if (appTable != null) {
-            sql = sql + " and application_table_name like ? ";
-            params = new Object[] { this.context.authenticatedUser().getId(), appTable };
-        } else {
-            params = new Object[] { this.context.authenticatedUser().getId() };
-        }
-        sql = sql + " order by application_table_name, registered_table_name";
-
-        final List<DatatableData> datatables = new ArrayList<>();
-
-        final SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, params); // NOSONAR
-        while (rowSet.next()) {
-            final String appTableName = rowSet.getString(APPLICATION_TABLE_NAME);
-            final String registeredDatatableName = rowSet.getString("registered_table_name");
-            final String entitySubType = rowSet.getString("entity_subtype");
-            final List<ResultsetColumnHeaderData> columnHeaderData = genericDataService.fillResultsetColumnHeaders(registeredDatatableName);
-
-            datatables.add(DatatableData.create(appTableName, registeredDatatableName, entitySubType, columnHeaderData));
-        }
-
-        return datatables;
-    }
-
-    @Override
-    public DatatableData retrieveDatatable(final String datatable) {
-        // PERMITTED datatables
-        sqlValidator.validate(datatable);
-        final String sql = "select application_table_name, registered_table_name, entity_subtype from x_registered_table "
-                + " where exists (select 'f' from m_appuser_role ur join m_role r on r.id = ur.role_id"
-                + " left join m_role_permission rp on rp.role_id = r.id left join m_permission p on p.id = rp.permission_id"
-                + " where ur.appuser_id = ? and registered_table_name=? and (p.code in ('ALL_FUNCTIONS', "
-                + "'ALL_FUNCTIONS_READ') or p.code = concat('READ_', registered_table_name))) "
-                + " order by application_table_name, registered_table_name";
-
-        DatatableData datatableData = null;
-
-        final SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, new Object[] { this.context.authenticatedUser().getId(), datatable }); // NOSONAR
-        if (rowSet.next()) {
-            final String appTableName = rowSet.getString(APPLICATION_TABLE_NAME);
-            final String registeredDatatableName = rowSet.getString("registered_table_name");
-            final String entitySubType = rowSet.getString("entity_subtype");
-            final List<ResultsetColumnHeaderData> columnHeaderData = this.genericDataService
-                    .fillResultsetColumnHeaders(registeredDatatableName);
-
-            datatableData = DatatableData.create(appTableName, registeredDatatableName, entitySubType, columnHeaderData);
-        }
-
-        return datatableData;
-    }
-
-    @Override
-    public List<JsonObject> queryDataTable(@NotNull String datatable, @NotNull String columnName, String columnValueString,
-            @NotNull String resultColumnsString) {
-        datatable = validateDatatableRegistered(datatable);
-        Map<String, ResultsetColumnHeaderData> headersByName = searchUtil
-                .mapHeadersToName(genericDataService.fillResultsetColumnHeaders(datatable));
-
-        List<String> resultColumns = asList(resultColumnsString.split(","));
-        List<String> selectColumns = searchUtil.validateToJdbcColumnNames(resultColumns, headersByName, false);
-        ResultsetColumnHeaderData column = searchUtil.validateToJdbcColumn(columnName, headersByName, false);
-
-        Object columnValue = searchUtil.parseJdbcColumnValue(column, columnValueString, null, null, null, false, sqlGenerator);
-        String sql = sqlGenerator.buildSelect(selectColumns, null, false) + " " + sqlGenerator.buildFrom(datatable, null, false) + " WHERE "
-                + EQ.formatPlaceholder(sqlGenerator, column.getColumnName(), 1, null);
-        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, columnValue); // NOSONAR
-
-        List<JsonObject> results = new ArrayList<>();
-        while (rowSet.next()) {
-            searchUtil.extractJsonResult(rowSet, selectColumns, resultColumns, results);
-        }
-        return results;
-    }
-
-    @Override
-    public Page<JsonObject> queryDataTableAdvanced(@NotNull String datatable, @NotNull PagedLocalRequest<AdvancedQueryData> pagedRequest) {
-        datatable = validateDatatableRegistered(datatable);
-        context.authenticatedUser().validateHasDatatableReadPermission(datatable);
-
-        AdvancedQueryData request = pagedRequest.getRequest().orElseThrow();
-        dataTableValidator.validateTableSearch(request);
-
-        Map<String, ResultsetColumnHeaderData> headersByName = searchUtil
-                .mapHeadersToName(genericDataService.fillResultsetColumnHeaders(datatable));
-        String pkColumn = searchUtil.getFiltered(headersByName.values(), ResultsetColumnHeaderData::getIsColumnPrimaryKey).getColumnName();
-
-        List<ColumnFilterData> columnFilters = request.getNonNullFilters();
-        columnFilters.forEach(e -> e.setColumn(searchUtil.validateToJdbcColumnName(e.getColumn(), headersByName, false)));
-
-        List<String> resultColumns = request.getNonNullResultColumns();
-        List<String> selectColumns;
-        if (resultColumns.isEmpty()) {
-            resultColumns.add(pkColumn);
-            selectColumns = new ArrayList<>();
-            selectColumns.add(pkColumn);
-        } else {
-            selectColumns = searchUtil.validateToJdbcColumnNames(resultColumns, headersByName, false);
-        }
-        PageRequest pageable = pagedRequest.toPageable();
-        PageRequest sortPageable;
-        if (pageable.getSort().isSorted()) {
-            List<Sort.Order> orders = pageable.getSort().toList();
-            sortPageable = pageable.withSort(Sort.by(orders.stream()
-                    .map(e -> e.withProperty(searchUtil.validateToJdbcColumnName(e.getProperty(), headersByName, false))).toList()));
-        } else {
-            pageable = pageable.withSort(Sort.Direction.DESC, pkColumn);
-            sortPageable = pageable;
-        }
-
-        String dateFormat = pagedRequest.getDateFormat();
-        String dateTimeFormat = pagedRequest.getDateTimeFormat();
-        Locale locale = pagedRequest.getLocaleObject();
-
-        String select = sqlGenerator.buildSelect(selectColumns, null, false);
-        String from = " " + sqlGenerator.buildFrom(datatable, null, false);
-        StringBuilder where = new StringBuilder();
-        ArrayList<Object> params = new ArrayList<>();
-        searchUtil.buildQueryCondition(columnFilters, where, params, null, headersByName, dateFormat, dateTimeFormat, locale, false,
-                sqlGenerator);
-
-        List<JsonObject> results = new ArrayList<>();
-        Object[] args = params.toArray();
-
-        // Execute the count Query
-        String countQuery = "SELECT COUNT(*)" + from + where;
-        Integer totalElements = jdbcTemplate.queryForObject(countQuery, Integer.class, args); // NOSONAR
-        if (totalElements == null || totalElements == 0) {
-            return PageableExecutionUtils.getPage(results, pageable, () -> 0);
-        }
-
-        StringBuilder query = new StringBuilder().append(select).append(from).append(where);
-        query.append(" ").append(sqlGenerator.buildOrderBy(sortPageable.getSort().toList(), null, false));
-        if (pageable.isPaged()) {
-            query.append(" ").append(sqlGenerator.limit(pageable.getPageSize(), (int) pageable.getOffset()));
-        }
-
-        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(query.toString(), args);
-
-        while (rowSet.next()) {
-            searchUtil.extractJsonResult(rowSet, selectColumns, resultColumns, results);
-        }
-        return PageableExecutionUtils.getPage(results, pageable, () -> totalElements);
-    }
-
-    @Override
-    public boolean buildDataQueryEmbedded(@NotNull EntityTables entityTable, @NotNull String datatable, @NotNull AdvancedQueryData request,
-            @NotNull List<String> selectColumns, @NotNull StringBuilder select, @NotNull StringBuilder from, @NotNull StringBuilder where,
-            @NotNull List<Object> params, String mainAlias, String alias, String dateFormat, String dateTimeFormat, Locale locale) {
-        List<String> resultColumns = request.getResultColumns();
-        List<ColumnFilterData> columnFilters = request.getColumnFilters();
-        if ((resultColumns == null || resultColumns.isEmpty()) && (columnFilters == null || columnFilters.isEmpty())) {
-            return false;
-        }
-        datatable = validateDatatableRegistered(datatable);
-        context.authenticatedUser().validateHasDatatableReadPermission(datatable);
-
-        Map<String, ResultsetColumnHeaderData> headersByName = searchUtil
-                .mapHeadersToName(genericDataService.fillResultsetColumnHeaders(datatable));
-
-        List<String> thisSelectColumns = searchUtil.validateToJdbcColumnNames(resultColumns, headersByName, true);
-        if (columnFilters != null) {
-            columnFilters.forEach(e -> e.setColumn(searchUtil.validateToJdbcColumnName(e.getColumn(), headersByName, false)));
-        }
-
-        select.append(sqlGenerator.buildSelect(thisSelectColumns, alias, true));
-        selectColumns.addAll(thisSelectColumns);
-
-        String joinType = "LEFT";
-        if (searchUtil.buildQueryCondition(columnFilters, where, params, alias, headersByName, dateFormat, dateTimeFormat, locale, true,
-                sqlGenerator)) {
-            joinType = null; // INNER
-        }
-        from.append(sqlGenerator.buildJoin(datatable, alias, entityTable.getForeignKeyColumnNameOnDatatable(), mainAlias,
-                entityTable.getRefColumn(), joinType));
-        return true;
-    }
+    private final DatatableReadService datatableReadService;
+    private final DatatableUtil datatableUtil;
 
     @Transactional
     @Override
@@ -363,8 +158,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     @Transactional
     @Override
     public void registerDatatable(final JsonCommand command) {
-        final String applicationTableName = this.getTableName(command.getUrl());
-        final String dataTableName = this.getDataTableName(command.getUrl());
+        final String applicationTableName = datatableReadService.getTableName(command.getUrl());
+        final String dataTableName = datatableReadService.getDataTableName(command.getUrl());
         final String entitySubType = command.stringValueOfParameterNamed(ENTITY_SUB_TYPE);
 
         Integer category = this.getCategory(command);
@@ -377,8 +172,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     @Transactional
     @Override
     public void registerDatatable(final JsonCommand command, final String permissionSql) {
-        final String applicationTableName = this.getTableName(command.getUrl());
-        final String dataTableName = this.getDataTableName(command.getUrl());
+        final String applicationTableName = datatableReadService.getTableName(command.getUrl());
+        final String dataTableName = datatableReadService.getDataTableName(command.getUrl());
         final String entitySubType = command.stringValueOfParameterNamed(ENTITY_SUB_TYPE);
 
         Integer category = this.getCategory(command);
@@ -388,80 +183,10 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         this.registerDataTable(applicationTableName, dataTableName, entitySubType, category, permissionSql);
     }
 
-    private void registerDataTable(final String entityName, final String dataTableName, final String entitySubType, final Integer category,
-            final String permissionsSql) {
-        resolveEntity(entityName);
-        validateDatatableName(dataTableName);
-        validateDataTableExists(dataTableName);
-
-        Map<String, Object> paramMap = new HashMap<>(3);
-        final String registerDatatableSql = "insert into x_registered_table "
-                + "(registered_table_name, application_table_name, entity_subtype, category) "
-                + "values (:dataTableName, :applicationTableName, :entitySubType, :category)";
-        paramMap.put("dataTableName", dataTableName);
-        paramMap.put("applicationTableName", entityName);
-        paramMap.put("entitySubType", entitySubType);
-        paramMap.put("category", category);
-
-        try {
-            this.namedParameterJdbcTemplate.update(registerDatatableSql, paramMap);
-            this.jdbcTemplate.update(permissionsSql);
-
-            // add the registered table to the config if it is a ppi
-            if (category.equals(DataTableApiConstant.CATEGORY_PPI)) {
-                this.namedParameterJdbcTemplate
-                        .update("insert into c_configuration (name, value, enabled ) values( :dataTableName, '0', false)", paramMap);
-            }
-
-        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(dataTableName, null, dve.getMostSpecificCause(), dve);
-        } catch (final PersistenceException dve) {
-            handleDataIntegrityIssues(dataTableName, null, ExceptionUtils.getRootCause(dve.getCause()), dve);
-
-        }
-    }
-
-    private String getPermissionSql(final String dataTableName) {
-        final String createPermission = "'CREATE_" + dataTableName + "'";
-        final String createPermissionChecker = "'CREATE_" + dataTableName + "_CHECKER'";
-        final String readPermission = "'READ_" + dataTableName + "'";
-        final String updatePermission = "'UPDATE_" + dataTableName + "'";
-        final String updatePermissionChecker = "'UPDATE_" + dataTableName + "_CHECKER'";
-        final String deletePermission = "'DELETE_" + dataTableName + "'";
-        final String deletePermissionChecker = "'DELETE_" + dataTableName + "_CHECKER'";
-        final List<String> escapedColumns = Stream.of("grouping", "code", "action_name", "entity_name", "can_maker_checker")
-                .map(sqlGenerator::escape).toList();
-        final String columns = String.join(", ", escapedColumns);
-
-        return "insert into m_permission (" + columns + ") values " + "('datatable', " + createPermission + ", 'CREATE', '" + dataTableName
-                + "', true)," + "('datatable', " + createPermissionChecker + ", 'CREATE', '" + dataTableName + "', false),"
-                + "('datatable', " + readPermission + ", 'READ', '" + dataTableName + "', false)," + "('datatable', " + updatePermission
-                + ", 'UPDATE', '" + dataTableName + "', true)," + "('datatable', " + updatePermissionChecker + ", 'UPDATE', '"
-                + dataTableName + "', false)," + "('datatable', " + deletePermission + ", 'DELETE', '" + dataTableName + "', true),"
-                + "('datatable', " + deletePermissionChecker + ", 'DELETE', '" + dataTableName + "', false)";
-    }
-
-    private Integer getCategory(final JsonCommand command) {
-        Integer category = command.integerValueOfParameterNamedDefaultToNullIfZero(DataTableApiConstant.categoryParamName);
-        return category == null ? DataTableApiConstant.CATEGORY_DEFAULT : category;
-    }
-
-    @Override
-    public String getDataTableName(String url) {
-        List<String> urlParts = Splitter.on('/').splitToList(url);
-        return urlParts.get(3);
-    }
-
-    @Override
-    public String getTableName(String url) {
-        List<String> urlParts = Splitter.on('/').splitToList(url);
-        return urlParts.get(4);
-    }
-
     @Transactional
     @Override
     public void deregisterDatatable(final String datatable) {
-        validateDatatableRegistered(datatable);
+        datatableUtil.validateDatatableRegistered(datatable);
         final String permissionList = "('CREATE_" + datatable + "', 'CREATE_" + datatable + "_CHECKER', 'READ_" + datatable + "', 'UPDATE_"
                 + datatable + "', 'UPDATE_" + datatable + "_CHECKER', 'DELETE_" + datatable + "', 'DELETE_" + datatable + "_CHECKER')";
 
@@ -479,47 +204,6 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         sqlArray[3] = deleteFromConfigurationSql;
 
         this.jdbcTemplate.batchUpdate(sqlArray); // NOSONAR
-    }
-
-    private void parseDatatableColumnObjectForCreate(final JsonObject column, StringBuilder sqlBuilder,
-            final StringBuilder constrainBuilder, final String dataTableNameAlias, final Map<String, Long> codeMappings,
-            final boolean isConstraintApproach) {
-        String name = column.has(API_FIELD_NAME) ? column.get(API_FIELD_NAME).getAsString() : null;
-        final String type = column.has(API_FIELD_TYPE) ? column.get(API_FIELD_TYPE).getAsString().toLowerCase() : null;
-        final Integer length = column.has(API_FIELD_LENGTH) ? column.get(API_FIELD_LENGTH).getAsInt() : null;
-        final boolean mandatory = column.has(API_FIELD_MANDATORY) && column.get(API_FIELD_MANDATORY).getAsBoolean();
-        final boolean unique = column.has(API_FIELD_UNIQUE) && column.get(API_FIELD_UNIQUE).getAsBoolean();
-        final String code = column.has(API_FIELD_CODE) ? column.get(API_FIELD_CODE).getAsString() : null;
-
-        if (StringUtils.isNotBlank(code)) {
-            if (isConstraintApproach) {
-                codeMappings.put(dataTableNameAlias + "_" + name, this.codeReadPlatformService.retriveCode(code).getId());
-                String fkName = "fk_" + dataTableNameAlias + "_" + name;
-                constrainBuilder.append(", CONSTRAINT ").append(sqlGenerator.escape(fkName)).append(" ").append("FOREIGN KEY (")
-                        .append(sqlGenerator.escape(name)).append(") ").append(REFERENCES_CLAUSE)
-                        .append(sqlGenerator.escape(CODE_VALUES_TABLE)).append(" (id)");
-            } else {
-                name = datatableColumnNameToCodeValueName(name, code);
-            }
-        }
-        sqlBuilder.append(sqlGenerator.escape(name));
-        if (type != null) {
-            sqlBuilder.append(" ").append(mapApiTypeToDbType(type, length));
-        }
-
-        if (unique) {
-            String uniqueKeyName = datatableKeywordGenerator.generateUniqueKeyName(dataTableNameAlias, name);
-            constrainBuilder.append(", CONSTRAINT ").append(sqlGenerator.escape(uniqueKeyName)).append(" ").append("UNIQUE (")
-                    .append(sqlGenerator.escape(name)).append(")");
-        }
-
-        if (mandatory) {
-            sqlBuilder.append(NOT_NULL_CLAUSE);
-        } else {
-            sqlBuilder.append(DEFAULT_NULL);
-        }
-
-        sqlBuilder.append(", ");
     }
 
     @Transactional
@@ -545,10 +229,10 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 multiRow = false;
             }
 
-            validateDatatableName(datatableName);
-            EntityTables entityTable = resolveEntity(entityName);
+            datatableUtil.validateDatatableName(datatableName);
+            EntityTables entityTable = datatableUtil.resolveEntity(entityName);
             final boolean isConstraintApproach = this.configurationDomainService.isConstraintApproachEnabledForDatatables();
-            final String fkColumnName = getFKField(entityTable);
+            final String fkColumnName = datatableUtil.getFKField(entityTable);
             final String dataTableNameAlias = datatableName.toLowerCase().replaceAll("\\s", "_");
             final String fkName = dataTableNameAlias + "_" + fkColumnName;
             StringBuilder sqlBuilder = new StringBuilder();
@@ -637,41 +321,6 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withResourceIdAsString(datatableName).build();
     }
 
-    private JsonElement addColumn(final String name, final JdbcJavaType dataType, final boolean isMandatory, final Integer length,
-            final boolean isUnique, final boolean isIndexed) {
-        JsonObject column = new JsonObject();
-        column.addProperty(API_FIELD_NAME, name);
-        column.addProperty(API_FIELD_TYPE, dataType.formatSql(databaseTypeResolver.databaseType()));
-        if (dataType.isStringType()) {
-            column.addProperty(API_FIELD_LENGTH, length);
-        }
-        column.addProperty(API_FIELD_MANDATORY, Boolean.toString(isMandatory));
-        column.addProperty(API_FIELD_UNIQUE, Boolean.toString(isUnique));
-        column.addProperty(API_FIELD_INDEXED, Boolean.toString(isIndexed));
-        return column;
-    }
-
-    private void createFkIndex(String datatableName, String fkColumnName) {
-        String indexName = datatableKeywordGenerator.generateIndexName(datatableName, fkColumnName);
-        createIndex(indexName, datatableName, fkColumnName);
-    }
-
-    private void createIndexesForTable(String datatableName, JsonArray columns) {
-        for (final JsonElement column : columns) {
-            createIndexForColumn(datatableName, column.getAsJsonObject());
-        }
-    }
-
-    private void createIndexForColumn(String datatableName, JsonObject column) {
-        String name = column.has(API_FIELD_NAME) ? column.get(API_FIELD_NAME).getAsString() : null;
-        final boolean unique = column.has(API_FIELD_UNIQUE) && column.get(API_FIELD_UNIQUE).getAsBoolean();
-        final boolean indexed = column.has(API_FIELD_INDEXED) && column.get(API_FIELD_INDEXED).getAsBoolean();
-        if (!unique && indexed) {
-            String indexName = datatableKeywordGenerator.generateIndexName(datatableName, name);
-            createIndex(indexName, datatableName, name);
-        }
-    }
-
     @Transactional
     @Override
     public void updateDatatable(final String datatableName, final JsonCommand command) {
@@ -686,7 +335,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final String entityName = this.fromJsonHelper.extractStringNamed(API_PARAM_APPTABLE_NAME, element);
             final String entitySubType = this.fromJsonHelper.extractStringNamed(API_PARAM_SUBTYPE, element);
 
-            validateDatatableName(datatableName);
+            datatableUtil.validateDatatableName(datatableName);
             int rowCount = getDatatableRowCount(datatableName);
             final List<ResultsetColumnHeaderData> columnHeaderData = this.genericDataService.fillResultsetColumnHeaders(datatableName);
             final Map<String, ResultsetColumnHeaderData> mapColumnNameDefinition = searchUtil.mapHeadersToName(columnHeaderData);
@@ -699,11 +348,11 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             }
 
             if (!StringUtils.isBlank(entityName)) {
-                EntityTables entityTable = resolveEntity(entityName);
-                EntityTables oldEntityTable = queryForApplicationEntity(datatableName);
+                EntityTables entityTable = datatableUtil.resolveEntity(entityName);
+                EntityTables oldEntityTable = datatableUtil.queryForApplicationEntity(datatableName);
                 if (entityTable != oldEntityTable) {
-                    final String oldFKName = getFKField(oldEntityTable);
-                    final String newFKName = getFKField(entityTable);
+                    final String oldFKName = datatableUtil.getFKField(oldEntityTable);
+                    final String newFKName = datatableUtil.getFKField(entityTable);
                     final String oldConstraintName = datatableName.toLowerCase().replaceAll("\\s", "_") + "_" + oldFKName;
                     final String newConstraintName = datatableName.toLowerCase().replaceAll("\\s", "_") + "_" + newFKName;
                     StringBuilder sqlBuilder = new StringBuilder();
@@ -868,6 +517,216 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 baseDataValidator.reset().parameter("row").failWithCode("size.too.large");
             }
             baseDataValidator.throwValidationErrors();
+        }
+    }
+
+    @Transactional
+    @Override
+    public void deleteDatatable(final String datatableName) {
+        try {
+            this.context.authenticatedUser();
+            datatableUtil.validateDatatableName(datatableName);
+            assertDataTableEmpty(datatableName);
+            deregisterDatatable(datatableName);
+            String[] sqlArray;
+            if (this.configurationDomainService.isConstraintApproachEnabledForDatatables()) {
+                final String deleteColumnCodeSql = "delete from x_table_column_code_mappings where column_alias_name like'"
+                        + datatableName.toLowerCase().replaceAll("\\s", "_") + "_%'";
+                sqlArray = new String[2];
+                sqlArray[1] = deleteColumnCodeSql;
+            } else {
+                sqlArray = new String[1];
+            }
+            final String sql = "DROP TABLE " + sqlGenerator.escape(datatableName);
+            sqlArray[0] = sql;
+            this.jdbcTemplate.batchUpdate(sqlArray);
+        } catch (final JpaSystemException | DataIntegrityViolationException e) {
+            final Throwable realCause = e.getCause();
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+            final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(RESOURCE_DATATABLE);
+            if (realCause.getMessage().contains("Unknown table")) {
+                baseDataValidator.reset().parameter(API_PARAM_DATATABLE_NAME).failWithCode(DOES_NOT_EXIST);
+            }
+            baseDataValidator.throwValidationErrors();
+        }
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult createNewDatatableEntry(final String dataTableName, final Long appTableId, final JsonCommand command) {
+        return createNewDatatableEntry(dataTableName, appTableId, command.json(), false);
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult createNewDatatableEntry(final String dataTableName, final Long appTableId, final String json) {
+        return createNewDatatableEntry(dataTableName, appTableId, json, false);
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult createPPIEntry(final String dataTableName, final Long appTableId, final JsonCommand command) {
+        return createNewDatatableEntry(dataTableName, appTableId, command.json(), true);
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult updateDatatableEntryOneToOne(final String dataTableName, final Long appTableId,
+            final JsonCommand command) {
+        return updateDatatableEntry(dataTableName, appTableId, null, command);
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult updateDatatableEntryOneToMany(final String dataTableName, final Long appTableId, final Long datatableId,
+            final JsonCommand command) {
+        return updateDatatableEntry(dataTableName, appTableId, datatableId, command);
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult deleteDatatableEntries(final String dataTableName, final Long appTableId, JsonCommand command) {
+        return deleteDatatableEntries(dataTableName, appTableId, null, command);
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult deleteDatatableEntry(final String dataTableName, final Long appTableId, final Long datatableId,
+            JsonCommand command) {
+        return deleteDatatableEntries(dataTableName, appTableId, datatableId, command);
+    }
+
+    private void registerDataTable(final String entityName, final String dataTableName, final String entitySubType, final Integer category,
+            final String permissionsSql) {
+        datatableUtil.resolveEntity(entityName);
+        datatableUtil.validateDatatableName(dataTableName);
+        validateDataTableExists(dataTableName);
+
+        Map<String, Object> paramMap = new HashMap<>(3);
+        final String registerDatatableSql = "insert into x_registered_table "
+                + "(registered_table_name, application_table_name, entity_subtype, category) "
+                + "values (:dataTableName, :applicationTableName, :entitySubType, :category)";
+        paramMap.put("dataTableName", dataTableName);
+        paramMap.put("applicationTableName", entityName);
+        paramMap.put("entitySubType", entitySubType);
+        paramMap.put("category", category);
+
+        try {
+            this.namedParameterJdbcTemplate.update(registerDatatableSql, paramMap);
+            this.jdbcTemplate.update(permissionsSql);
+
+            // add the registered table to the config if it is a ppi
+            if (category.equals(DataTableApiConstant.CATEGORY_PPI)) {
+                this.namedParameterJdbcTemplate
+                        .update("insert into c_configuration (name, value, enabled ) values( :dataTableName, '0', false)", paramMap);
+            }
+
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            handleDataIntegrityIssues(dataTableName, null, dve.getMostSpecificCause(), dve);
+        } catch (final PersistenceException dve) {
+            handleDataIntegrityIssues(dataTableName, null, ExceptionUtils.getRootCause(dve.getCause()), dve);
+
+        }
+    }
+
+    private String getPermissionSql(final String dataTableName) {
+        final String createPermission = "'CREATE_" + dataTableName + "'";
+        final String createPermissionChecker = "'CREATE_" + dataTableName + "_CHECKER'";
+        final String readPermission = "'READ_" + dataTableName + "'";
+        final String updatePermission = "'UPDATE_" + dataTableName + "'";
+        final String updatePermissionChecker = "'UPDATE_" + dataTableName + "_CHECKER'";
+        final String deletePermission = "'DELETE_" + dataTableName + "'";
+        final String deletePermissionChecker = "'DELETE_" + dataTableName + "_CHECKER'";
+        final List<String> escapedColumns = Stream.of("grouping", "code", "action_name", "entity_name", "can_maker_checker")
+                .map(sqlGenerator::escape).toList();
+        final String columns = String.join(", ", escapedColumns);
+
+        return "insert into m_permission (" + columns + ") values " + "('datatable', " + createPermission + ", 'CREATE', '" + dataTableName
+                + "', true)," + "('datatable', " + createPermissionChecker + ", 'CREATE', '" + dataTableName + "', false),"
+                + "('datatable', " + readPermission + ", 'READ', '" + dataTableName + "', false)," + "('datatable', " + updatePermission
+                + ", 'UPDATE', '" + dataTableName + "', true)," + "('datatable', " + updatePermissionChecker + ", 'UPDATE', '"
+                + dataTableName + "', false)," + "('datatable', " + deletePermission + ", 'DELETE', '" + dataTableName + "', true),"
+                + "('datatable', " + deletePermissionChecker + ", 'DELETE', '" + dataTableName + "', false)";
+    }
+
+    private Integer getCategory(final JsonCommand command) {
+        Integer category = command.integerValueOfParameterNamedDefaultToNullIfZero(DataTableApiConstant.categoryParamName);
+        return category == null ? DataTableApiConstant.CATEGORY_DEFAULT : category;
+    }
+
+    private JsonElement addColumn(final String name, final JdbcJavaType dataType, final boolean isMandatory, final Integer length,
+            final boolean isUnique, final boolean isIndexed) {
+        JsonObject column = new JsonObject();
+        column.addProperty(API_FIELD_NAME, name);
+        column.addProperty(API_FIELD_TYPE, dataType.formatSql(databaseTypeResolver.databaseType()));
+        if (dataType.isStringType()) {
+            column.addProperty(API_FIELD_LENGTH, length);
+        }
+        column.addProperty(API_FIELD_MANDATORY, Boolean.toString(isMandatory));
+        column.addProperty(API_FIELD_UNIQUE, Boolean.toString(isUnique));
+        column.addProperty(API_FIELD_INDEXED, Boolean.toString(isIndexed));
+        return column;
+    }
+
+    private void parseDatatableColumnObjectForCreate(final JsonObject column, StringBuilder sqlBuilder,
+            final StringBuilder constrainBuilder, final String dataTableNameAlias, final Map<String, Long> codeMappings,
+            final boolean isConstraintApproach) {
+        String name = column.has(API_FIELD_NAME) ? column.get(API_FIELD_NAME).getAsString() : null;
+        final String type = column.has(API_FIELD_TYPE) ? column.get(API_FIELD_TYPE).getAsString().toLowerCase() : null;
+        final Integer length = column.has(API_FIELD_LENGTH) ? column.get(API_FIELD_LENGTH).getAsInt() : null;
+        final boolean mandatory = column.has(API_FIELD_MANDATORY) && column.get(API_FIELD_MANDATORY).getAsBoolean();
+        final boolean unique = column.has(API_FIELD_UNIQUE) && column.get(API_FIELD_UNIQUE).getAsBoolean();
+        final String code = column.has(API_FIELD_CODE) ? column.get(API_FIELD_CODE).getAsString() : null;
+
+        if (StringUtils.isNotBlank(code)) {
+            if (isConstraintApproach) {
+                codeMappings.put(dataTableNameAlias + "_" + name, this.codeReadPlatformService.retriveCode(code).getId());
+                String fkName = "fk_" + dataTableNameAlias + "_" + name;
+                constrainBuilder.append(", CONSTRAINT ").append(sqlGenerator.escape(fkName)).append(" ").append("FOREIGN KEY (")
+                        .append(sqlGenerator.escape(name)).append(") ").append(REFERENCES_CLAUSE)
+                        .append(sqlGenerator.escape(CODE_VALUES_TABLE)).append(" (id)");
+            } else {
+                name = datatableColumnNameToCodeValueName(name, code);
+            }
+        }
+        sqlBuilder.append(sqlGenerator.escape(name));
+        if (type != null) {
+            sqlBuilder.append(" ").append(mapApiTypeToDbType(type, length));
+        }
+
+        if (unique) {
+            String uniqueKeyName = datatableKeywordGenerator.generateUniqueKeyName(dataTableNameAlias, name);
+            constrainBuilder.append(", CONSTRAINT ").append(sqlGenerator.escape(uniqueKeyName)).append(" ").append("UNIQUE (")
+                    .append(sqlGenerator.escape(name)).append(")");
+        }
+
+        if (mandatory) {
+            sqlBuilder.append(NOT_NULL_CLAUSE);
+        } else {
+            sqlBuilder.append(DEFAULT_NULL);
+        }
+
+        sqlBuilder.append(", ");
+    }
+
+    private void createFkIndex(String datatableName, String fkColumnName) {
+        String indexName = datatableKeywordGenerator.generateIndexName(datatableName, fkColumnName);
+        createIndex(indexName, datatableName, fkColumnName);
+    }
+
+    private void createIndexesForTable(String datatableName, JsonArray columns) {
+        for (final JsonElement column : columns) {
+            createIndexForColumn(datatableName, column.getAsJsonObject());
+        }
+    }
+
+    private void createIndexForColumn(String datatableName, JsonObject column) {
+        String name = column.has(API_FIELD_NAME) ? column.get(API_FIELD_NAME).getAsString() : null;
+        final boolean unique = column.has(API_FIELD_UNIQUE) && column.get(API_FIELD_UNIQUE).getAsBoolean();
+        final boolean indexed = column.has(API_FIELD_INDEXED) && column.get(API_FIELD_INDEXED).getAsBoolean();
+        if (!unique && indexed) {
+            String indexName = datatableKeywordGenerator.generateIndexName(datatableName, name);
+            createIndex(indexName, datatableName, name);
         }
     }
 
@@ -1243,59 +1102,10 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         jdbcTemplate.execute(sqlIndexUpdateBuilder.toString());
     }
 
-    @Transactional
-    @Override
-    public void deleteDatatable(final String datatableName) {
-        try {
-            this.context.authenticatedUser();
-            validateDatatableName(datatableName);
-            assertDataTableEmpty(datatableName);
-            deregisterDatatable(datatableName);
-            String[] sqlArray;
-            if (this.configurationDomainService.isConstraintApproachEnabledForDatatables()) {
-                final String deleteColumnCodeSql = "delete from x_table_column_code_mappings where column_alias_name like'"
-                        + datatableName.toLowerCase().replaceAll("\\s", "_") + "_%'";
-                sqlArray = new String[2];
-                sqlArray[1] = deleteColumnCodeSql;
-            } else {
-                sqlArray = new String[1];
-            }
-            final String sql = "DROP TABLE " + sqlGenerator.escape(datatableName);
-            sqlArray[0] = sql;
-            this.jdbcTemplate.batchUpdate(sqlArray);
-        } catch (final JpaSystemException | DataIntegrityViolationException e) {
-            final Throwable realCause = e.getCause();
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-            final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(RESOURCE_DATATABLE);
-            if (realCause.getMessage().contains("Unknown table")) {
-                baseDataValidator.reset().parameter(API_PARAM_DATATABLE_NAME).failWithCode(DOES_NOT_EXIST);
-            }
-            baseDataValidator.throwValidationErrors();
-        }
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult createNewDatatableEntry(final String dataTableName, final Long appTableId, final JsonCommand command) {
-        return createNewDatatableEntry(dataTableName, appTableId, command.json(), false);
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult createNewDatatableEntry(final String dataTableName, final Long appTableId, final String json) {
-        return createNewDatatableEntry(dataTableName, appTableId, json, false);
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult createPPIEntry(final String dataTableName, final Long appTableId, final JsonCommand command) {
-        return createNewDatatableEntry(dataTableName, appTableId, command.json(), true);
-    }
-
     private CommandProcessingResult createNewDatatableEntry(final String dataTableName, final Long appTableId, final String json,
             boolean addScore) {
-        final EntityTables entityTable = queryForApplicationEntity(dataTableName);
-        CommandProcessingResult commandProcessingResult = checkMainResourceExistsWithinScope(entityTable, appTableId);
+        final EntityTables entityTable = datatableUtil.queryForApplicationEntity(dataTableName);
+        CommandProcessingResult commandProcessingResult = datatableUtil.checkMainResourceExistsWithinScope(entityTable, appTableId);
 
         List<ResultsetColumnHeaderData> columnHeaders = genericDataService.fillResultsetColumnHeaders(dataTableName);
         Map<String, ResultsetColumnHeaderData> headersByName = searchUtil.mapHeadersToName(columnHeaders);
@@ -1358,7 +1168,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             }
 
             Long resourceId = appTableId;
-            if (isMultirowDatatable(columnHeaders)) {
+            if (datatableUtil.isMultirowDatatable(columnHeaders)) {
                 resourceId = sqlGenerator.fetchPK(keyHolder);
             }
 
@@ -1393,28 +1203,14 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 && !entityTable.getForeignKeyColumnNameOnDatatable().equals(columnName);
     }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult updateDatatableEntryOneToOne(final String dataTableName, final Long appTableId,
-            final JsonCommand command) {
-        return updateDatatableEntry(dataTableName, appTableId, null, command);
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult updateDatatableEntryOneToMany(final String dataTableName, final Long appTableId, final Long datatableId,
-            final JsonCommand command) {
-        return updateDatatableEntry(dataTableName, appTableId, datatableId, command);
-    }
-
     @SuppressWarnings({ "WhitespaceAround" })
     private CommandProcessingResult updateDatatableEntry(final String dataTableName, final Long appTableId, final Long datatableId,
             final JsonCommand command) {
-        final EntityTables entityTable = queryForApplicationEntity(dataTableName);
-        CommandProcessingResult commandProcessingResult = checkMainResourceExistsWithinScope(entityTable, appTableId);
+        final EntityTables entityTable = datatableUtil.queryForApplicationEntity(dataTableName);
+        CommandProcessingResult commandProcessingResult = datatableUtil.checkMainResourceExistsWithinScope(entityTable, appTableId);
 
-        final GenericResultsetData existingRows = retrieveDataTableGenericResultSet(entityTable, dataTableName, appTableId, null,
-                datatableId);
+        final GenericResultsetData existingRows = datatableUtil.retrieveDataTableGenericResultSet(entityTable, dataTableName, appTableId,
+                null, datatableId);
         if (existingRows.hasNoEntries()) {
             throw new DatatableNotFoundException(dataTableName, appTableId);
         }
@@ -1424,7 +1220,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         }
 
         List<ResultsetColumnHeaderData> columnHeaders = existingRows.getColumnHeaders();
-        if (isMultirowDatatable(columnHeaders) && datatableId == null) {
+        if (datatableUtil.isMultirowDatatable(columnHeaders) && datatableId == null) {
             throw new PlatformDataIntegrityException("error.msg.attempting.multiple.update",
                     "Application table: " + dataTableName + " Foreign key id: " + appTableId);
         }
@@ -1504,32 +1300,19 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         return isUserInsertable(entityTable, columnHeader);
     }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult deleteDatatableEntries(final String dataTableName, final Long appTableId, JsonCommand command) {
-        return deleteDatatableEntries(dataTableName, appTableId, null, command);
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult deleteDatatableEntry(final String dataTableName, final Long appTableId, final Long datatableId,
-            JsonCommand command) {
-        return deleteDatatableEntries(dataTableName, appTableId, datatableId, command);
-    }
-
     private CommandProcessingResult deleteDatatableEntries(final String dataTableName, final Long appTableId, final Long datatableId,
             JsonCommand command) {
-        validateDatatableName(dataTableName);
+        datatableUtil.validateDatatableName(dataTableName);
         if (isDatatableAttachedToEntityDatatableCheck(dataTableName)) {
             throw new DatatableEntryRequiredException(dataTableName, appTableId);
         }
-        final EntityTables entityTable = queryForApplicationEntity(dataTableName);
-        final CommandProcessingResult commandProcessingResult = checkMainResourceExistsWithinScope(entityTable, appTableId);
+        final EntityTables entityTable = datatableUtil.queryForApplicationEntity(dataTableName);
+        final CommandProcessingResult commandProcessingResult = datatableUtil.checkMainResourceExistsWithinScope(entityTable, appTableId);
 
         String whereColumn;
         Long whereValue;
         if (datatableId == null) {
-            whereColumn = getFKField(entityTable);
+            whereColumn = datatableUtil.getFKField(entityTable);
             whereValue = appTableId;
         } else {
             whereColumn = TABLE_FIELD_ID;
@@ -1556,183 +1339,11 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 .build();
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public GenericResultsetData retrieveDataTableGenericResultSet(final String dataTableName, final Long appTableId, final String order,
-            final Long id) {
-        final EntityTables entityTable = queryForApplicationEntity(dataTableName);
-        checkMainResourceExistsWithinScope(entityTable, appTableId);
-        return retrieveDataTableGenericResultSet(entityTable, dataTableName, appTableId, order, id);
-    }
-
-    private GenericResultsetData retrieveDataTableGenericResultSet(final EntityTables entityTable, final String dataTableName,
-            final Long appTableId, final String order, final Long id) {
-        final List<ResultsetColumnHeaderData> columnHeaders = this.genericDataService.fillResultsetColumnHeaders(dataTableName);
-        final boolean multiRow = isMultirowDatatable(columnHeaders);
-
-        String whereClause = getFKField(entityTable) + " = " + appTableId;
-        sqlValidator.validate(whereClause);
-        String sql = "select * from " + sqlGenerator.escape(dataTableName) + " where " + whereClause;
-
-        // id only used for reading a specific entry that belongs to appTableId (in a one to many datatable)
-        if (multiRow && id != null) {
-            sql = sql + " and " + TABLE_FIELD_ID + " = " + id;
-        }
-        if (StringUtils.isNotBlank(order)) {
-            this.columnValidator.validateSqlInjection(sql, order);
-            sql = sql + " order by " + order;
-        }
-
-        final List<ResultsetRowData> result = genericDataService.fillResultsetRowData(sql, columnHeaders);
-        return new GenericResultsetData(columnHeaders, result);
-    }
-
-    private CommandProcessingResult checkMainResourceExistsWithinScope(@NotNull EntityTables entityTable, final Long appTableId) {
-        final String sql = dataScopedSQL(entityTable, appTableId);
-        log.debug("data scoped sql: {}", sql);
-        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
-
-        if (!rs.next()) {
-            throw new DatatableNotFoundException(entityTable, appTableId);
-        }
-        final Long officeId = (Long) rs.getObject("officeId");
-        final Long groupId = (Long) rs.getObject("groupId");
-        final Long clientId = (Long) rs.getObject("clientId");
-        final Long savingsId = (Long) rs.getObject("savingsId");
-        final Long loanId = (Long) rs.getObject("loanId");
-        final Long transactionId = (Long) rs.getObject("transactionId");
-        final Long entityId = (Long) rs.getObject("entityId");
-
-        if (rs.next()) {
-            throw new DatatableSystemErrorException("System Error: More than one row returned from data scoping query");
-        }
-
-        return new CommandProcessingResultBuilder() //
-                .withOfficeId(officeId) //
-                .withGroupId(groupId) //
-                .withClientId(clientId) //
-                .withSavingsId(savingsId) //
-                .withLoanId(loanId).withTransactionId(transactionId == null ? null : String.valueOf(transactionId)).withEntityId(entityId)//
-                .build();
-    }
-
-    private String dataScopedSQL(@NotNull EntityTables entityTable, final Long appTableId) {
-        // unfortunately have to, one way or another, be able to restrict data to the users office hierarchy. Here, a
-        // few key tables are done. But if additional fields are needed on other tables the same pattern applies
-        final AppUser currentUser = this.context.authenticatedUser();
-        String officeHierarchy = currentUser.getOffice().getHierarchy();
-        // m_loan and m_savings_account are connected to an m_office through either an m_client or an m_group If both it
-        // means it relates to an m_client that is in a group (still an m_client account)
-        return switch (entityTable) {
-            case LOAN -> "select distinct x.* from ( "
-                    + "(select o.id as officeId, l.group_id as groupId, l.client_id as clientId, null as savingsId, l.id as loanId, null as transactionId, null as entityId from m_loan l "
-                    + getClientOfficeJoinCondition(officeHierarchy, "l") + " where l.id = " + appTableId + ")" + " union all "
-                    + "(select o.id as officeId, l.group_id as groupId, l.client_id as clientId, null as savingsId, l.id as loanId, null as transactionId, null as entityId from m_loan l "
-                    + getGroupOfficeJoinCondition(officeHierarchy, "l") + " where l.id = " + appTableId + ")" + " ) as x";
-            case SAVINGS -> "select distinct x.* from ( "
-                    + "(select o.id as officeId, s.group_id as groupId, s.client_id as clientId, s.id as savingsId, null as loanId, null as transactionId, null as entityId "
-                    + "from m_savings_account s " + getClientOfficeJoinCondition(officeHierarchy, "s") + " where s.id = " + appTableId + ")"
-                    + " union all "
-                    + "(select o.id as officeId, s.group_id as groupId, s.client_id as clientId, s.id as savingsId, null as loanId, null as transactionId, null as entityId "
-                    + "from m_savings_account s " + getGroupOfficeJoinCondition(officeHierarchy, "s") + " where s.id = " + appTableId + ")"
-                    + " ) as x";
-            case SAVINGS_TRANSACTION -> "select distinct x.* from ( "
-                    + "(select o.id as officeId, s.group_id as groupId, s.client_id as clientId, s.id as savingsId, null as loanId, t.id as transactionId, null as entityId "
-                    + "from m_savings_account_transaction t join m_savings_account s on t.savings_account_id = s.id "
-                    + getClientOfficeJoinCondition(officeHierarchy, "s") + " where t.id = " + appTableId + ")" + " union all "
-                    + "(select o.id as officeId, s.group_id as groupId, s.client_id as clientId, s.id as savingsId, null as loanId, t.id as transactionId, null as entityId "
-                    + "from m_savings_account_transaction t join m_savings_account s on t.savings_account_id = s.id "
-                    + getGroupOfficeJoinCondition(officeHierarchy, "s") + " where t.id = " + appTableId + ")" + " ) as x";
-            case CLIENT ->
-                "select o.id as officeId, null as groupId, c.id as clientId, null as savingsId, null as loanId, null as transactionId, null as entityId from m_client c "
-                        + getOfficeJoinCondition(officeHierarchy, "c") + " where c.id = " + appTableId;
-            case GROUP, CENTER ->
-                "select o.id as officeId, g.id as groupId, null as clientId, null as savingsId, null as loanId, null as transactionId, null as entityId from m_group g "
-                        + getOfficeJoinCondition(officeHierarchy, "g") + " where g.id = " + appTableId;
-            case OFFICE ->
-                "select o.id as officeId, null as groupId, null as clientId, null as savingsId, null as loanId, null as transactionId, null as entityId from m_office o "
-                        + "where o.hierarchy like '" + officeHierarchy + "%'" + " and o.id = " + appTableId;
-            case LOAN_PRODUCT, SAVINGS_PRODUCT, SHARE_PRODUCT ->
-                "select null as officeId, null as groupId, null as clientId, null as savingsId, null as loanId, null as transactionId, p.id as entityId from "
-                        + entityTable.getName() + " as p WHERE p.id = " + appTableId;
-            default -> throw new PlatformDataIntegrityException("error.msg.invalid.dataScopeCriteria",
-                    "Application Table: " + entityTable.getName() + " not catered for in data Scoping");
-        };
-    }
-
-    private String getClientOfficeJoinCondition(String officeHierarchy, String appTableAlias) {
-        return " join m_client c on c.id = " + appTableAlias + ".client_id " + getOfficeJoinCondition(officeHierarchy, "c");
-    }
-
-    private String getGroupOfficeJoinCondition(String officeHierarchy, String appTableAlias) {
-        return " join m_group g on g.id = " + appTableAlias + ".group_id " + getOfficeJoinCondition(officeHierarchy, "g");
-    }
-
-    private String getOfficeJoinCondition(String officeHierarchy, String joinTableAlias) {
-        return " join m_office o on o.id = " + joinTableAlias + ".office_id and o.hierarchy like '" + officeHierarchy + "%' ";
-    }
-
-    @NotNull
-    private EntityTables queryForApplicationEntity(final String datatable) {
-        sqlValidator.validate(datatable);
-        final String sql = "SELECT application_table_name FROM x_registered_table where registered_table_name = ?";
-        final SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, datatable); // NOSONAR
-
-        String applicationTableName;
-        if (rowSet.next()) {
-            applicationTableName = rowSet.getString(APPLICATION_TABLE_NAME);
-        } else {
-            throw new DatatableNotFoundException(datatable);
-        }
-        return resolveEntity(applicationTableName);
-    }
-
-    @Override
-    public Long countDatatableEntries(final String datatableName, final Long appTableId, String foreignKeyColumn) {
-        final String sqlString = "SELECT COUNT(" + sqlGenerator.escape(foreignKeyColumn) + ") FROM " + sqlGenerator.escape(datatableName)
-                + " WHERE " + sqlGenerator.escape(foreignKeyColumn) + " = " + appTableId;
-        return this.jdbcTemplate.queryForObject(sqlString, Long.class); // NOSONAR
-    }
-
-    // --- Validation ---
-
-    public boolean isDatatableAttachedToEntityDatatableCheck(final String datatableName) {
+    private boolean isDatatableAttachedToEntityDatatableCheck(final String datatableName) {
         String sql = "SELECT COUNT(edc.x_registered_table_name) FROM x_registered_table xrt"
                 + " JOIN m_entity_datatable_check edc ON edc.x_registered_table_name = xrt.registered_table_name"
                 + " WHERE edc.x_registered_table_name = '" + datatableName + "'";
         final Long count = this.jdbcTemplate.queryForObject(sql, Long.class); // NOSONAR
-        return count != null && count > 0;
-    }
-
-    private EntityTables resolveEntity(final String entityName) {
-        EntityTables entityTable = EntityTables.fromEntityName(entityName);
-        if (entityTable == null) {
-            throw new PlatformDataIntegrityException("error.msg.invalid.application.table", "Invalid Datatable entity: " + entityName,
-                    API_FIELD_NAME, entityName);
-        }
-        return entityTable;
-    }
-
-    private void validateDatatableName(final String name) {
-        if (name == null || name.isEmpty()) {
-            throw new PlatformDataIntegrityException("error.msg.datatables.datatable.null.name", "Data table name must not be blank.");
-        } else if (!name.matches(DATATABLE_NAME_REGEX_PATTERN)) {
-            throw new PlatformDataIntegrityException("error.msg.datatables.datatable.invalid.name.regex", "Invalid data table name.", name);
-        }
-        sqlValidator.validate(name);
-    }
-
-    private String validateDatatableRegistered(String datatable) {
-        validateDatatableName(datatable);
-        if (!isRegisteredDataTable(datatable)) {
-            throw new DatatableNotFoundException(datatable);
-        }
-        return datatable;
-    }
-
-    private boolean isRegisteredDataTable(final String datatable) {
-        final String sql = "SELECT COUNT(application_table_name) FROM " + TABLE_REGISTERED_TABLE + " WHERE registered_table_name = ?";
-        final Integer count = jdbcTemplate.queryForObject(sql, Integer.class, datatable);
         return count != null && count > 0;
     }
 
@@ -1777,18 +1388,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         return count == null ? 0 : count;
     }
 
-    // --- Utils ---
-
-    private String getFKField(EntityTables entityTable) {
-        return entityTable.getForeignKeyColumnNameOnDatatable();
-    }
-
     private static boolean isTechnicalParam(String param) {
         return API_PARAM_DATE_FORMAT.equals(param) || API_PARAM_DATETIME_FORMAT.equals(param) || API_PARAM_LOCALE.equals(param);
-    }
-
-    private boolean isMultirowDatatable(final List<ResultsetColumnHeaderData> columnHeaders) {
-        return searchUtil.findFiltered(columnHeaders, e -> e.isNamed(TABLE_FIELD_ID)) != null;
     }
 
     private String datatableColumnNameToCodeValueName(final String columnName, final String code) {
@@ -1827,4 +1428,5 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         log.error("Error occured.", e);
         throw ErrorHandler.getMappable(e, msgCode, msg, param, msgArgs);
     }
+
 }

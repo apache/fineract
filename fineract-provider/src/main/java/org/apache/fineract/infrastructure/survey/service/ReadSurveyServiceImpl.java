@@ -26,8 +26,8 @@ import org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
+import org.apache.fineract.infrastructure.dataqueries.service.DatatableReadService;
 import org.apache.fineract.infrastructure.dataqueries.service.GenericDataService;
-import org.apache.fineract.infrastructure.dataqueries.service.ReadWriteNonCoreDataService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.apache.fineract.infrastructure.survey.data.ClientScoresOverview;
@@ -46,7 +46,7 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
     private final JdbcTemplate jdbcTemplate;
     private final SqlValidator sqlValidator;
     private final GenericDataService genericDataService;
-    private final ReadWriteNonCoreDataService readWriteNonCoreDataService;
+    private final DatatableReadService datatableReadService;
 
     @Override
     public List<SurveyDataTableData> retrieveAllSurveys() {
@@ -183,7 +183,7 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
     @Override
     public GenericResultsetData retrieveSurveyEntry(String surveyName, Long clientId, Long entryId) {
 
-        return readWriteNonCoreDataService.retrieveDataTableGenericResultSet(surveyName, clientId, null, entryId);
+        return datatableReadService.retrieveDataTableGenericResultSet(surveyName, clientId, null, entryId);
 
     }
 }

@@ -54,7 +54,7 @@ import org.springframework.test.context.ContextConfiguration;
 @SpringBootTest
 @ContextConfiguration(classes = TestConfiguration.class)
 @SuppressFBWarnings(value = "RV_EXCEPTION_NOT_THROWN", justification = "False positive")
-public class ReadWriteNonCoreDataServiceImplTest {
+public class DatatableReadServiceImplTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -69,7 +69,7 @@ public class ReadWriteNonCoreDataServiceImplTest {
     private DatabaseSpecificSQLGenerator sqlGenerator;
 
     @Autowired
-    private ReadWriteNonCoreDataService underTest;
+    private DatatableReadService underTest;
 
     @Test
     public void testSqlInjectionCaughtQueryDataTable() {

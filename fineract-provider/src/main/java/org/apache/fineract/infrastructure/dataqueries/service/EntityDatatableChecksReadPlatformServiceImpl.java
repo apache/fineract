@@ -30,7 +30,6 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
-import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.core.service.database.JdbcJavaType;
 import org.apache.fineract.infrastructure.core.service.database.SqlOperator;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableCheckStatusData;
@@ -46,7 +45,6 @@ import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
 import org.apache.fineract.portfolio.savings.service.SavingsProductReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -55,33 +53,28 @@ import org.springframework.stereotype.Service;
 public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatatableChecksReadService {
 
     private final JdbcTemplate jdbcTemplate;
-    protected final DatabaseTypeResolver databaseTypeResolver;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final RegisterDataTableMapper registerDataTableMapper;
     private final EntityDataTableChecksMapper entityDataTableChecksMapper;
     private final EntityDatatableChecksRepository entityDatatableChecksRepository;
-    private final ReadWriteNonCoreDataService readWriteNonCoreDataService;
+    private final DatatableReadService datatableReadService;
     private final LoanProductReadPlatformService loanProductReadPlatformService;
     private final SavingsProductReadPlatformService savingsProductReadPlatformService;
     private final PaginationHelper paginationHelper;
 
-    @Autowired
-    public EntityDatatableChecksReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, DatabaseTypeResolver databaseTypeResolver,
-            DatabaseSpecificSQLGenerator sqlGenerator, final LoanProductReadPlatformService loanProductReadPlatformService,
-            final SavingsProductReadPlatformService savingsProductReadPlatformService,
-            final EntityDatatableChecksRepository entityDatatableChecksRepository,
-            final ReadWriteNonCoreDataService readWriteNonCoreDataService, PaginationHelper paginationHelper) {
-
+    public EntityDatatableChecksReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final DatabaseSpecificSQLGenerator sqlGenerator,
+            final EntityDatatableChecksRepository entityDatatableChecksRepository, final DatatableReadService datatableReadService,
+            final LoanProductReadPlatformService loanProductReadPlatformService,
+            final SavingsProductReadPlatformService savingsProductReadPlatformService, final PaginationHelper paginationHelper) {
         this.jdbcTemplate = jdbcTemplate;
-        this.databaseTypeResolver = databaseTypeResolver;
         this.sqlGenerator = sqlGenerator;
-        this.registerDataTableMapper = new RegisterDataTableMapper();
-        this.entityDataTableChecksMapper = new EntityDataTableChecksMapper();
+        this.entityDatatableChecksRepository = entityDatatableChecksRepository;
+        this.datatableReadService = datatableReadService;
         this.loanProductReadPlatformService = loanProductReadPlatformService;
         this.savingsProductReadPlatformService = savingsProductReadPlatformService;
-        this.entityDatatableChecksRepository = entityDatatableChecksRepository;
-        this.readWriteNonCoreDataService = readWriteNonCoreDataService;
         this.paginationHelper = paginationHelper;
+        this.registerDataTableMapper = new RegisterDataTableMapper();
+        this.entityDataTableChecksMapper = new EntityDataTableChecksMapper();
     }
 
     @Override
@@ -134,7 +127,7 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
         if (tableRequiredBeforeAction != null && tableRequiredBeforeAction.size() > 0) {
             List<DatatableData> ret = new ArrayList<>();
             for (EntityDatatableChecks t : tableRequiredBeforeAction) {
-                ret.add(this.readWriteNonCoreDataService.retrieveDatatable(t.getDatatableName()));
+                ret.add(this.datatableReadService.retrieveDatatable(t.getDatatableName()));
             }
             return ret;
         }
