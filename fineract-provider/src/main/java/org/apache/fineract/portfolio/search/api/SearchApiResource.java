@@ -34,15 +34,10 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.UriInfo;
-import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.portfolio.search.SearchConstants.SearchResponseParameters;
 import org.apache.fineract.portfolio.search.data.AdHocQueryDataValidator;
 import org.apache.fineract.portfolio.search.data.AdHocQuerySearchConditions;
@@ -61,8 +56,6 @@ public class SearchApiResource {
     private static final Set<String> SEARCH_RESPONSE_PARAMETERS = SearchResponseParameters.getAllValues();
 
     private final SearchReadPlatformService searchReadPlatformService;
-    private final ToApiJsonSerializer<Object> toApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final AdHocQueryDataValidator fromApiJsonDeserializer;
 
     @GET
@@ -70,14 +63,9 @@ public class SearchApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrive Adhoc Search query template", description = "Mandatory Fields\n" + "\n" + "search?query=000000001\n")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SearchApiResourceSwagger.GetSearchResponse.class))) })
-    public String retrieveAdHocSearchQueryTemplate(@Context final UriInfo uriInfo) {
+    public AdHocSearchQueryData retrieveAdHocSearchQueryTemplate() {
 
-        final AdHocSearchQueryData templateData = this.searchReadPlatformService.retrieveAdHocQueryTemplate();
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, templateData);
+        return this.searchReadPlatformService.retrieveAdHocQueryTemplate();
     }
 
     @GET
@@ -87,16 +75,13 @@ public class SearchApiResource {
             + "search?query=Petra&resource=clients,groups\n" + "\n" + "\n" + "search?query=Petra&resource=clients,groups&exactMatch=true")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SearchApiResourceSwagger.GetSearchResponse.class)))) })
-    public String searchData(@Context final UriInfo uriInfo, @QueryParam("query") @Parameter(description = "query") final String query,
+    public List<SearchData> searchData(@QueryParam("query") @Parameter(description = "query") final String query,
             @QueryParam("resource") @Parameter(description = "resource") final String resource,
             @DefaultValue("false") @QueryParam("exactMatch") @Parameter(description = "exactMatch") Boolean exactMatch) {
 
         final SearchConditions searchConditions = new SearchConditions(query, resource, exactMatch);
 
-        final Collection<SearchData> searchResults = this.searchReadPlatformService.retriveMatchingData(searchConditions);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, searchResults, SEARCH_RESPONSE_PARAMETERS);
+        return this.searchReadPlatformService.retriveMatchingData(searchConditions);
     }
 
     @POST
@@ -111,16 +96,10 @@ public class SearchApiResource {
             + "includeOutstandingAmount, outstandingAmountCondition, \n"
             + "minOutstandingAmount and maxOutstandingAmount OR outstandingAmount")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SearchApiResourceSwagger.PostAdhocQuerySearchRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SearchApiResourceSwagger.PostAdhocQuerySearchResponse.class)))) })
-    public String advancedSearch(@Context final UriInfo uriInfo, final String json) {
+    public List<AdHocSearchQueryData> advancedSearch(final String json) {
 
         final AdHocQuerySearchConditions searchConditions = this.fromApiJsonDeserializer.retrieveSearchConditions(json);
 
-        final Collection<AdHocSearchQueryData> searchResults = this.searchReadPlatformService
-                .retrieveAdHocQueryMatchingData(searchConditions);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, searchResults);
+        return this.searchReadPlatformService.retrieveAdHocQueryMatchingData(searchConditions);
     }
 }

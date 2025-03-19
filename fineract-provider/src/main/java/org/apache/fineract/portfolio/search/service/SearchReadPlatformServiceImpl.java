@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -58,7 +59,7 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
     private final DatabaseSpecificSQLGenerator sqlGenerator;
 
     @Override
-    public Collection<SearchData> retriveMatchingData(final SearchConditions searchConditions) {
+    public List<SearchData> retriveMatchingData(final SearchConditions searchConditions) {
         final AppUser currentUser = context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
 
@@ -194,7 +195,7 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
     }
 
     @Override
-    public Collection<AdHocSearchQueryData> retrieveAdHocQueryMatchingData(final AdHocQuerySearchConditions searchConditions) {
+    public List<AdHocSearchQueryData> retrieveAdHocQueryMatchingData(final AdHocQuerySearchConditions searchConditions) {
 
         context.authenticatedUser();
 
