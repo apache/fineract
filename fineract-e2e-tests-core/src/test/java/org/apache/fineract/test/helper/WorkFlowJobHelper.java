@@ -25,8 +25,8 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.BusinessStep;
-import org.apache.fineract.client.models.GetBusinessStepConfigResponse;
-import org.apache.fineract.client.models.UpdateBusinessStepConfigRequest;
+import org.apache.fineract.client.models.BusinessStepRequest;
+import org.apache.fineract.client.models.JobBusinessStepConfigData;
 import org.apache.fineract.client.services.BusinessStepConfigurationApi;
 import org.springframework.stereotype.Component;
 import retrofit2.Response;
@@ -52,7 +52,7 @@ public class WorkFlowJobHelper {
                 new BusinessStep().stepName("LOAN_INTEREST_RECALCULATION").order(9L), //
                 new BusinessStep().stepName("EXTERNAL_ASSET_OWNER_TRANSFER").order(10L)//
         );
-        UpdateBusinessStepConfigRequest request = new UpdateBusinessStepConfigRequest().businessSteps(businessSteps);
+        BusinessStepRequest request = new BusinessStepRequest().businessSteps(businessSteps);
         Response<Void> response = businessStepConfigurationApi.updateJobBusinessStepConfig(WORKFLOW_NAME_LOAN_CLOSE_OF_BUSINESS, request)
                 .execute();
         ErrorHelper.checkSuccessfulApiCall(response);
@@ -62,7 +62,7 @@ public class WorkFlowJobHelper {
 
     private void logChanges() throws IOException {
         // --- log changes ---
-        Response<GetBusinessStepConfigResponse> changesResponse = businessStepConfigurationApi
+        Response<JobBusinessStepConfigData> changesResponse = businessStepConfigurationApi
                 .retrieveAllConfiguredBusinessStep(WORKFLOW_NAME_LOAN_CLOSE_OF_BUSINESS).execute();
         List<BusinessStep> businessStepsChanged = changesResponse.body().getBusinessSteps();
         List<String> changes = businessStepsChanged//

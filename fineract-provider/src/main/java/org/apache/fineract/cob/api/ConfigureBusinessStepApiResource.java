@@ -32,24 +32,18 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.cob.data.ConfiguredJobNamesDTO;
 import org.apache.fineract.cob.data.JobBusinessStepConfigData;
 import org.apache.fineract.cob.data.JobBusinessStepDetail;
+import org.apache.fineract.cob.data.request.BusinessStepRequest;
 import org.apache.fineract.cob.service.ConfigJobParameterService;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.springframework.stereotype.Component;
 
@@ -59,15 +53,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ConfigureBusinessStepApiResource {
 
-    private static final Set<String> BUSINESS_STEP_CONFIG_RESPONSE_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList("jobName", "businessSteps"));
-    private static final Set<String> BUSINESS_STEP_DETAIL_RESPONSE_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList("jobName", "availableBusinessSteps"));
-
-    private final DefaultToApiJsonSerializer<JobBusinessStepConfigData> businessStepConfigSerializeService;
-    private final DefaultToApiJsonSerializer<JobBusinessStepDetail> businessStepDetailSerializeService;
-    private final DefaultToApiJsonSerializer<ConfiguredJobNamesDTO> configuredJobNamesSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
+    private final DefaultToApiJsonSerializer<String> toApiJsonSerializer;
     private final ConfigJobParameterService configJobParameterService;
     private final PortfolioCommandSourceWritePlatformService commandWritePlatformService;
 
@@ -75,14 +61,9 @@ public class ConfigureBusinessStepApiResource {
     @Path("/names")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Business Jobs", description = "Returns the configured Business Jobs")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ConfigureBusinessStepResourceSwagger.GetBusinessJobConfigResponse.class))) })
-    public String retrieveAllConfiguredBusinessJobs(@Context final UriInfo uriInfo) {
-
+    public ConfiguredJobNamesDTO retrieveAllConfiguredBusinessJobs() {
         List<String> businessJobNames = configJobParameterService.getAllConfiguredJobNames();
-        ConfiguredJobNamesDTO result = new ConfiguredJobNamesDTO(businessJobNames);
-
-        return configuredJobNamesSerializer.serialize(result);
+        return new ConfiguredJobNamesDTO(businessJobNames);
     }
 
     @GET
@@ -90,16 +71,9 @@ public class ConfigureBusinessStepApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Business Step Configurations for a Job", description = "Returns the configured Business Steps for a job")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ConfigureBusinessStepResourceSwagger.GetBusinessStepConfigResponse.class))) })
-    public String retrieveAllConfiguredBusinessStep(@Context final UriInfo uriInfo,
+    public JobBusinessStepConfigData retrieveAllConfiguredBusinessStep(
             @PathParam("jobName") @Parameter(description = "jobName") final String jobName) {
-
-        JobBusinessStepConfigData jobBusinessStepConfigData = configJobParameterService.getBusinessStepConfigByJobName(jobName);
-
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return businessStepConfigSerializeService.serialize(settings, jobBusinessStepConfigData,
-                BUSINESS_STEP_CONFIG_RESPONSE_DATA_PARAMETERS);
+        return configJobParameterService.getBusinessStepConfigByJobName(jobName);
     }
 
     @PUT
@@ -107,13 +81,14 @@ public class ConfigureBusinessStepApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Business Step Configurations for a Job", description = "Updates the Business steps execution order for a job")
-    @RequestBody(content = @Content(schema = @Schema(implementation = ConfigureBusinessStepResourceSwagger.UpdateBusinessStepConfigRequest.class)))
+    @RequestBody(content = @Content(schema = @Schema(implementation = BusinessStepRequest.class)))
     @ApiResponses({ @ApiResponse(responseCode = "204", description = "NO_CONTENT") })
     public Response updateJobBusinessStepConfig(@PathParam("jobName") @Parameter(description = "jobName") final String jobName,
-            @Parameter(hidden = true) final String jsonRequestBody) {
+            @Parameter(hidden = true) BusinessStepRequest businessStepRequest) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateBusinessStepConfig(jobName).withJson(jsonRequestBody)
-                .build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateBusinessStepConfig(jobName)
+                .withJson(toApiJsonSerializer.serialize(businessStepRequest)).build();
+
         commandWritePlatformService.logCommandSource(commandRequest);
         return Response.status(Response.Status.NO_CONTENT).build();
     }
@@ -123,15 +98,8 @@ public class ConfigureBusinessStepApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Business Step Configurations for a Job", description = "Returns the available Business Steps for a job")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ConfigureBusinessStepResourceSwagger.GetBusinessStepConfigResponse.class))) })
-    public String retrieveAllAvailableBusinessStep(@Context final UriInfo uriInfo,
+    public JobBusinessStepDetail retrieveAllAvailableBusinessStep(
             @PathParam("jobName") @Parameter(description = "jobName") final String jobName) {
-
-        JobBusinessStepDetail availableBusinessStepsByJobName = configJobParameterService.getAvailableBusinessStepsByJobName(jobName);
-
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return businessStepDetailSerializeService.serialize(settings, availableBusinessStepsByJobName,
-                BUSINESS_STEP_DETAIL_RESPONSE_DATA_PARAMETERS);
+        return configJobParameterService.getAvailableBusinessStepsByJobName(jobName);
     }
 }

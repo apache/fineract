@@ -21,7 +21,7 @@ package org.apache.fineract.integrationtests.common;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.client.models.BusinessStep;
-import org.apache.fineract.client.models.UpdateBusinessStepConfigRequest;
+import org.apache.fineract.client.models.BusinessStepRequest;
 import org.apache.fineract.client.util.Calls;
 
 public class BusinessStepHelper {
@@ -39,6 +39,6 @@ public class BusinessStepHelper {
             stepList.add(businessStep);
         }
         Calls.ok(FineractClientHelper.getFineractClient().businessStepConfiguration.updateJobBusinessStepConfig(jobName,
-                new UpdateBusinessStepConfigRequest().businessSteps(stepList)));
+                new BusinessStepRequest().businessSteps(stepList)));
     }
 }
