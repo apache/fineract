@@ -91,6 +91,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.Mon
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.service.InterestRefundService;
+import org.apache.fineract.portfolio.loanaccount.service.schedule.LoanScheduleComponent;
 import org.apache.fineract.portfolio.loanproduct.calc.EMICalculator;
 import org.apache.fineract.portfolio.loanproduct.calc.data.PeriodDueDetails;
 import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
@@ -114,13 +115,15 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     private final EMICalculator emiCalculator;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final InterestRefundService interestRefundService;
+    private final LoanScheduleComponent loanSchedule;
 
     public AdvancedPaymentScheduleTransactionProcessor(EMICalculator emiCalculator, LoanRepositoryWrapper loanRepositoryWrapper,
-            InterestRefundService interestRefundService, ExternalIdFactory externalIdFactory) {
+            InterestRefundService interestRefundService, ExternalIdFactory externalIdFactory, LoanScheduleComponent loanSchedule) {
         super(externalIdFactory);
         this.emiCalculator = emiCalculator;
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.interestRefundService = interestRefundService;
+        this.loanSchedule = loanSchedule;
     }
 
     @Override
@@ -1460,8 +1463,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 }
             }
 
-            loan.updateLoanSchedule(installmentsUpToTransactionDate);
-            loan.updateLoanScheduleDependentDerivedFields();
+            loanSchedule.updateLoanSchedule(loan, installmentsUpToTransactionDate);
 
             if (transactionCtx instanceof ProgressiveTransactionCtx progressiveTransactionCtx && loan.isInterestRecalculationEnabled()) {
                 updateRepaymentPeriodsAfterChargeOff(progressiveTransactionCtx, transactionDate, transactionsToBeReprocessed);

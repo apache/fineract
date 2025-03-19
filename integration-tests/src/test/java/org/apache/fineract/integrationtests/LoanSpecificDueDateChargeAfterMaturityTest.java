@@ -173,10 +173,10 @@ public class LoanSpecificDueDateChargeAfterMaturityTest extends BaseLoanIntegrat
 
         ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
         assertEquals(2, loanSchedule.size());
-        assertEquals(0, loanSchedule.get(1).get("feeChargesDue"));
-        assertEquals(0, loanSchedule.get(1).get("feeChargesOutstanding"));
-        assertEquals(0, loanSchedule.get(1).get("penaltyChargesDue"));
-        assertEquals(0, loanSchedule.get(1).get("penaltyChargesOutstanding"));
+        assertEquals(0.0f, loanSchedule.get(1).get("feeChargesDue"));
+        assertEquals(0.0f, loanSchedule.get(1).get("feeChargesOutstanding"));
+        assertEquals(0.0f, loanSchedule.get(1).get("penaltyChargesDue"));
+        assertEquals(0.0f, loanSchedule.get(1).get("penaltyChargesOutstanding"));
         assertEquals(10000.0f, loanSchedule.get(1).get("totalDueForPeriod"));
         assertEquals(10000.0f, loanSchedule.get(1).get("totalOutstandingForPeriod"));
         targetDate = LocalDate.of(2011, 4, 5);
@@ -306,10 +306,10 @@ public class LoanSpecificDueDateChargeAfterMaturityTest extends BaseLoanIntegrat
 
         ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
         assertEquals(2, loanSchedule.size());
-        assertEquals(0, loanSchedule.get(1).get("feeChargesDue"));
-        assertEquals(0, loanSchedule.get(1).get("feeChargesOutstanding"));
-        assertEquals(0, loanSchedule.get(1).get("penaltyChargesDue"));
-        assertEquals(0, loanSchedule.get(1).get("penaltyChargesOutstanding"));
+        assertEquals(0.0f, loanSchedule.get(1).get("feeChargesDue"));
+        assertEquals(0.0f, loanSchedule.get(1).get("feeChargesOutstanding"));
+        assertEquals(0.0f, loanSchedule.get(1).get("penaltyChargesDue"));
+        assertEquals(0.0f, loanSchedule.get(1).get("penaltyChargesOutstanding"));
         assertEquals(10000.0f, loanSchedule.get(1).get("totalDueForPeriod"));
         assertEquals(10000.0f, loanSchedule.get(1).get("totalOutstandingForPeriod"));
 

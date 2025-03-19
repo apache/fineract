@@ -38,10 +38,12 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelPeriod;
 import org.apache.fineract.portfolio.loanproduct.domain.AllocationType;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
 
 @Getter
+@Setter
 @Entity
 @Table(name = "m_loan_repayment_schedule")
 public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDateTimeCustom<Long>
@@ -60,67 +62,67 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     @Column(name = "duedate", nullable = false)
     private LocalDate dueDate;
 
-    @Column(name = "principal_amount", scale = 6, precision = 19, nullable = true)
+    @Column(name = "principal_amount", scale = 6, precision = 19)
     private BigDecimal principal;
 
-    @Column(name = "principal_completed_derived", scale = 6, precision = 19, nullable = true)
+    @Column(name = "principal_completed_derived", scale = 6, precision = 19)
     private BigDecimal principalCompleted;
 
-    @Column(name = "principal_writtenoff_derived", scale = 6, precision = 19, nullable = true)
+    @Column(name = "principal_writtenoff_derived", scale = 6, precision = 19)
     private BigDecimal principalWrittenOff;
 
-    @Column(name = "interest_amount", scale = 6, precision = 19, nullable = true)
+    @Column(name = "interest_amount", scale = 6, precision = 19)
     private BigDecimal interestCharged;
 
-    @Column(name = "interest_completed_derived", scale = 6, precision = 19, nullable = true)
+    @Column(name = "interest_completed_derived", scale = 6, precision = 19)
     private BigDecimal interestPaid;
 
-    @Column(name = "interest_waived_derived", scale = 6, precision = 19, nullable = true)
+    @Column(name = "interest_waived_derived", scale = 6, precision = 19)
     private BigDecimal interestWaived;
 
-    @Column(name = "interest_writtenoff_derived", scale = 6, precision = 19, nullable = true)
+    @Column(name = "interest_writtenoff_derived", scale = 6, precision = 19)
     private BigDecimal interestWrittenOff;
 
-    @Column(name = "accrual_interest_derived", scale = 6, precision = 19, nullable = true)
+    @Column(name = "accrual_interest_derived", scale = 6, precision = 19)
     private BigDecimal interestAccrued;
 
-    @Column(name = "reschedule_interest_portion", scale = 6, precision = 19, nullable = true)
+    @Column(name = "reschedule_interest_portion", scale = 6, precision = 19)
     private BigDecimal rescheduleInterestPortion;
 
-    @Column(name = "fee_charges_amount", scale = 6, precision = 19, nullable = true)
+    @Column(name = "fee_charges_amount", scale = 6, precision = 19)
     private BigDecimal feeChargesCharged;
 
-    @Column(name = "fee_charges_completed_derived", scale = 6, precision = 19, nullable = true)
+    @Column(name = "fee_charges_completed_derived", scale = 6, precision = 19)
     private BigDecimal feeChargesPaid;
 
-    @Column(name = "fee_charges_writtenoff_derived", scale = 6, precision = 19, nullable = true)
+    @Column(name = "fee_charges_writtenoff_derived", scale = 6, precision = 19)
     private BigDecimal feeChargesWrittenOff;
 
-    @Column(name = "fee_charges_waived_derived", scale = 6, precision = 19, nullable = true)
+    @Column(name = "fee_charges_waived_derived", scale = 6, precision = 19)
     private BigDecimal feeChargesWaived;
 
-    @Column(name = "accrual_fee_charges_derived", scale = 6, precision = 19, nullable = true)
+    @Column(name = "accrual_fee_charges_derived", scale = 6, precision = 19)
     private BigDecimal feeAccrued;
 
-    @Column(name = "penalty_charges_amount", scale = 6, precision = 19, nullable = true)
+    @Column(name = "penalty_charges_amount", scale = 6, precision = 19)
     private BigDecimal penaltyCharges;
 
-    @Column(name = "penalty_charges_completed_derived", scale = 6, precision = 19, nullable = true)
+    @Column(name = "penalty_charges_completed_derived", scale = 6, precision = 19)
     private BigDecimal penaltyChargesPaid;
 
-    @Column(name = "penalty_charges_writtenoff_derived", scale = 6, precision = 19, nullable = true)
+    @Column(name = "penalty_charges_writtenoff_derived", scale = 6, precision = 19)
     private BigDecimal penaltyChargesWrittenOff;
 
-    @Column(name = "penalty_charges_waived_derived", scale = 6, precision = 19, nullable = true)
+    @Column(name = "penalty_charges_waived_derived", scale = 6, precision = 19)
     private BigDecimal penaltyChargesWaived;
 
-    @Column(name = "accrual_penalty_charges_derived", scale = 6, precision = 19, nullable = true)
+    @Column(name = "accrual_penalty_charges_derived", scale = 6, precision = 19)
     private BigDecimal penaltyAccrued;
 
-    @Column(name = "total_paid_in_advance_derived", scale = 6, precision = 19, nullable = true)
+    @Column(name = "total_paid_in_advance_derived", scale = 6, precision = 19)
     private BigDecimal totalPaidInAdvance;
 
-    @Column(name = "total_paid_late_derived", scale = 6, precision = 19, nullable = true)
+    @Column(name = "total_paid_late_derived", scale = 6, precision = 19)
     private BigDecimal totalPaidLate;
 
     @Column(name = "completed_derived", nullable = false)
@@ -139,17 +141,17 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     // approach
     // https://blog.thepete.net/blog/2023/12/05/expand/contract-making-a-breaking-change-without-a-big-bang/
     @Setter
-    @Column(name = "credits_amount", scale = 6, precision = 19, nullable = true)
+    @Column(name = "credits_amount", scale = 6, precision = 19)
     private BigDecimal creditedPrincipal;
 
     @Setter
-    @Column(name = "credited_interest", scale = 6, precision = 19, nullable = true)
+    @Column(name = "credited_interest", scale = 6, precision = 19)
     private BigDecimal creditedInterest;
 
-    @Column(name = "credited_fee", scale = 6, precision = 19, nullable = true)
+    @Column(name = "credited_fee", scale = 6, precision = 19)
     private BigDecimal creditedFee;
 
-    @Column(name = "credited_penalty", scale = 6, precision = 19, nullable = true)
+    @Column(name = "credited_penalty", scale = 6, precision = 19)
     private BigDecimal creditedPenalty;
 
     @Column(name = "is_down_payment", nullable = false)
@@ -1066,6 +1068,60 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     public boolean isDueBalanceZero() {
         return MathUtil.isZero(
                 MathUtil.nullToZero(MathUtil.add(getPrincipal(), getInterestCharged(), getFeeChargesCharged(), getPenaltyCharges())));
+    }
+
+    public void copyFrom(final LoanScheduleModelPeriod period) {
+        resetBalances();
+        setFromDate(period.periodFromDate());
+        setDueDate(period.periodDueDate());
+        setPrincipal(period.principalDue());
+        setInterestCharged(period.interestDue());
+        setFeeChargesCharged(period.feeChargesDue());
+        setPenaltyCharges(period.penaltyChargesDue());
+
+        setRecalculatedInterestComponent(period.isRecalculatedInterestComponent());
+        if (getLoanCompoundingDetails() != null) {
+            getLoanCompoundingDetails().clear();
+        }
+        if (period.getLoanCompoundingDetails() != null) {
+            period.getLoanCompoundingDetails().forEach(lcd -> {
+                lcd.setLoanRepaymentScheduleInstallment(this);
+                getLoanCompoundingDetails().add(lcd);
+            });
+        }
+        setRescheduleInterestPortion(period.rescheduleInterestPortion());
+        setDownPayment(period.isDownPaymentPeriod());
+
+        setAdditional(false);
+        setReAged(false);
+    }
+
+    public void copyFrom(final LoanRepaymentScheduleInstallment installment) {
+        setFromDate(installment.getFromDate());
+        setDueDate(installment.getDueDate());
+
+        setPrincipal(installment.getPrincipal());
+        setInterestCharged(installment.getInterestCharged());
+        setFeeChargesCharged(installment.getFeeChargesCharged());
+        setPenaltyCharges(installment.getPenaltyCharges());
+        setRecalculatedInterestComponent(installment.isRecalculatedInterestComponent());
+        if (getLoanCompoundingDetails() != null) {
+            getLoanCompoundingDetails().clear();
+        }
+        if (installment.getLoanCompoundingDetails() != null) {
+            installment.getLoanCompoundingDetails().forEach(lcd -> {
+                lcd.setLoanRepaymentScheduleInstallment(this);
+                getLoanCompoundingDetails().add(lcd);
+            });
+        }
+
+        Set<LoanInstallmentCharge> installmentCharges = installment.getInstallmentCharges();
+        installmentCharges.forEach(c -> c.setInstallment(this));
+        getInstallmentCharges().addAll(installmentCharges);
+
+        setAdditional(installment.isAdditional());
+        setReAged(installment.isReAged());
+        setDownPayment(installment.isDownPayment());
     }
 
 }

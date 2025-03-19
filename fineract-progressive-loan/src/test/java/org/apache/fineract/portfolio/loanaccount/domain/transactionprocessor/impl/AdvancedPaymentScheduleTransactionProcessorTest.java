@@ -69,6 +69,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
+import org.apache.fineract.portfolio.loanaccount.service.schedule.LoanScheduleComponent;
 import org.apache.fineract.portfolio.loanproduct.calc.EMICalculator;
 import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
 import org.apache.fineract.portfolio.loanproduct.domain.AllocationType;
@@ -98,6 +99,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
     private AdvancedPaymentScheduleTransactionProcessor underTest;
     private static final EMICalculator emiCalculator = Mockito.mock(EMICalculator.class);
     private static final LoanRepositoryWrapper loanRepositoryWrapper = Mockito.mock(LoanRepositoryWrapper.class);
+    private static final LoanScheduleComponent loanSchedule = Mockito.mock(LoanScheduleComponent.class);
 
     @BeforeAll
     public static void init() {
@@ -112,7 +114,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
 
     @BeforeEach
     public void setUp() {
-        underTest = new AdvancedPaymentScheduleTransactionProcessor(emiCalculator, loanRepositoryWrapper, null, null);
+        underTest = new AdvancedPaymentScheduleTransactionProcessor(emiCalculator, loanRepositoryWrapper, null, null, loanSchedule);
 
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);

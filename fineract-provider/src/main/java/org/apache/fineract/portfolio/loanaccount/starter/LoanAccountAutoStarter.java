@@ -34,6 +34,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.imp
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.RBILoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanInterestRefundServiceImpl;
+import org.apache.fineract.portfolio.loanaccount.service.schedule.LoanScheduleComponent;
 import org.apache.fineract.portfolio.loanproduct.calc.EMICalculator;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -118,8 +119,9 @@ public class LoanAccountAutoStarter {
     @Conditional(AdvancedPaymentScheduleTransactionProcessorCondition.class)
     public AdvancedPaymentScheduleTransactionProcessor advancedPaymentScheduleTransactionProcessor(EMICalculator emiCalculator,
             LoanRepositoryWrapper loanRepositoryWrapper,
-            @Lazy ProgressiveLoanInterestRefundServiceImpl progressiveLoanInterestRefundService, ExternalIdFactory externalIdFactory) {
+            @Lazy ProgressiveLoanInterestRefundServiceImpl progressiveLoanInterestRefundService, ExternalIdFactory externalIdFactory,
+            LoanScheduleComponent loanSchedule) {
         return new AdvancedPaymentScheduleTransactionProcessor(emiCalculator, loanRepositoryWrapper, progressiveLoanInterestRefundService,
-                externalIdFactory);
+                externalIdFactory, loanSchedule);
     }
 }

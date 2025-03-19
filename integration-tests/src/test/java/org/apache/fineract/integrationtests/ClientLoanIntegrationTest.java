@@ -5310,8 +5310,8 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
 
             ArrayList<HashMap> loanSchedule = LOAN_TRANSACTION_HELPER.getLoanRepaymentSchedule(REQUEST_SPEC, RESPONSE_SPEC, loanID);
             assertEquals(2, loanSchedule.size());
-            assertEquals(0, loanSchedule.get(1).get("penaltyChargesDue"));
-            assertEquals(0, loanSchedule.get(1).get("penaltyChargesOutstanding"));
+            assertEquals(0.0f, loanSchedule.get(1).get("penaltyChargesDue"));
+            assertEquals(0.0f, loanSchedule.get(1).get("penaltyChargesOutstanding"));
             assertEquals(1000.0f, loanSchedule.get(1).get("totalDueForPeriod"));
             assertEquals(1000.0f, loanSchedule.get(1).get("totalOutstandingForPeriod"));
             LocalDate targetDate = LocalDate.of(2022, 9, 7);
@@ -5906,10 +5906,10 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
 
         ArrayList<HashMap> loanSchedule = LOAN_TRANSACTION_HELPER.getLoanRepaymentSchedule(REQUEST_SPEC, RESPONSE_SPEC, loanID);
         assertEquals(2, loanSchedule.size());
-        assertEquals(0, loanSchedule.get(1).get("feeChargesDue"));
-        assertEquals(0, loanSchedule.get(1).get("feeChargesOutstanding"));
-        assertEquals(0, loanSchedule.get(1).get("penaltyChargesDue"));
-        assertEquals(0, loanSchedule.get(1).get("penaltyChargesOutstanding"));
+        assertEquals(0.0f, loanSchedule.get(1).get("feeChargesDue"));
+        assertEquals(0.0f, loanSchedule.get(1).get("feeChargesOutstanding"));
+        assertEquals(0.0f, loanSchedule.get(1).get("penaltyChargesDue"));
+        assertEquals(0.0f, loanSchedule.get(1).get("penaltyChargesOutstanding"));
         assertEquals(1000.0f, loanSchedule.get(1).get("totalDueForPeriod"));
         assertEquals(1000.0f, loanSchedule.get(1).get("totalOutstandingForPeriod"));
         LocalDate targetDate = LocalDate.of(2022, 9, 7);
