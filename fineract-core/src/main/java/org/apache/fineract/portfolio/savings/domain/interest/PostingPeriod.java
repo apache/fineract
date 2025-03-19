@@ -68,10 +68,19 @@ public final class PostingPeriod {
     private Integer financialYearBeginningMonth;
 
     private Boolean isAcrual = false;
+    private Boolean isNegative = false;
     private Boolean isEndTransacction = false;
 
     public void setAcrual(Boolean acrual) {
         isAcrual = acrual;
+    }
+
+    public Boolean getNegative() {
+        return isNegative;
+    }
+
+    public void setNegative(Boolean negative) {
+        isNegative = negative;
     }
 
     public void setOverdraftInterestRateAsFraction(BigDecimal overdraftInterestRateAsFraction) {
@@ -319,7 +328,12 @@ public final class PostingPeriod {
 
             if (compoundingPeriodEndDate.equals(compoundingPeriod.getPeriodInterval().endDate())) {
                 BigDecimal interestCompounded = compoundInterestValues.getcompoundedInterest().add(unCompoundedInterest);
-                compoundInterestValues.setcompoundedInterest(interestCompounded);
+                if (isNegative){
+                    compoundInterestValues.setcompoundedInterest(interestCompounded.negate());
+                }else{
+                    compoundInterestValues.setcompoundedInterest(interestCompounded);
+                }
+
                 compoundInterestValues.setZeroForInterestToBeUncompounded();
             }
             interestEarned = interestEarned.add(interestUnrounded);

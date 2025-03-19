@@ -28,8 +28,10 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.filters.ClientIpHolder;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.apache.fineract.infrastructure.core.filters.ClientIpHolder;
 
 @Entity
 @Table(name = "m_portfolio_command_source")
@@ -139,7 +141,7 @@ public class CommandSource extends AbstractPersistableCustom<Long> {
         this.madeOnDate = DateUtils.getAuditOffsetDateTime();
         this.status = status;
         this.idempotencyKey = idempotencyKey;
-        this.clientIp = "127.0.0.1";
+        this.clientIp = ClientIpHolder.getClientIp();
     }
 
     public static CommandSource fullEntryFrom(final CommandWrapper wrapper, final JsonCommand command, final AppUser maker,

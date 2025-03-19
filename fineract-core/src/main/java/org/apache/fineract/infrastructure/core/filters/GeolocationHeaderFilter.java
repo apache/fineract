@@ -30,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.security.utils.LogParameterEscapeUtil;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.apache.fineract.infrastructure.core.filters.ClientIpHolder;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -81,10 +82,13 @@ public class GeolocationHeaderFilter extends OncePerRequestFilter {
             String clientIpAddress = getClientIpAddress(request);
             if (StringUtils.isNotBlank(clientIpAddress)) {
                 log.info("Found Client IP in header : {}", clientIpAddress);
+                ClientIpHolder.setClientIp(clientIpAddress);
             }
             filterChain.doFilter(request, response);
         } catch(Exception e) {
             e.printStackTrace();
+        } finally {
+            ClientIpHolder.clear();
         }
     }
 
