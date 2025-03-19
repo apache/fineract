@@ -307,7 +307,8 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
                 loanTransaction.feeChargesPortion, loanTransaction.penaltyChargesPortion, loanTransaction.overPaymentPortion,
                 loanTransaction.reversed, loanTransaction.paymentDetail, loanTransaction.externalId);
 
-        if (LoanTransactionType.CHARGE_PAYMENT.equals(loanTransaction.getTypeOf())) {
+        if (LoanTransactionType.CHARGE_PAYMENT.equals(loanTransaction.getTypeOf())
+                || LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.equals(loanTransaction.getTypeOf())) {
             newTransaction.getLoanChargesPaid().addAll(loanTransaction.getLoanChargesPaid());
         }
         if (LoanTransactionType.REAGE.equals(loanTransaction.getTypeOf())) {

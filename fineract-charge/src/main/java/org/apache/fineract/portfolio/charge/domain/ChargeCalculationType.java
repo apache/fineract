@@ -24,8 +24,8 @@ public enum ChargeCalculationType {
     FLAT(1, "chargeCalculationType.flat"), //
     PERCENT_OF_AMOUNT(2, "chargeCalculationType.percent.of.amount"), //
     PERCENT_OF_AMOUNT_AND_INTEREST(3, "chargeCalculationType.percent.of.amount.and.interest"), //
-    PERCENT_OF_INTEREST(4, "chargeCalculationType.percent.of.interest"), PERCENT_OF_DISBURSEMENT_AMOUNT(5,
-            "chargeCalculationType.percent.of.disbursement.amount");
+    PERCENT_OF_INTEREST(4, "chargeCalculationType.percent.of.interest"), //
+    PERCENT_OF_DISBURSEMENT_AMOUNT(5, "chargeCalculationType.percent.of.disbursement.amount");
 
     private final Integer value;
     private final String code;

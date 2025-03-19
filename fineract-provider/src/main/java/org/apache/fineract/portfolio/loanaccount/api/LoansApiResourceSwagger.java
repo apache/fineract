@@ -1225,8 +1225,8 @@ final class LoansApiResourceSwagger {
 
             private PostLoansDisbursementData() {}
 
-            @Schema(example = "[2013, 11, 1]")
-            public LocalDate expectedDisbursementDate;
+            @Schema(example = "1 November 2023")
+            public String expectedDisbursementDate;
             @Schema(example = "1000.00")
             public Double principal;
         }

@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -142,33 +143,45 @@ public class LoanChargeAssembler {
                                     expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed(
                                             LoanApiConstants.expectedDisbursementDateParameterName, disbursementDataElement, dateFormat,
                                             locale);
+                                } else {
+                                    expectedDisbursementDate = this.fromApiJsonHelper
+                                            .extractLocalDateNamed(LoanApiConstants.expectedDisbursementDateParameterName, element);
                                 }
                             }
 
                             if (ChargeTimeType.DISBURSEMENT.getValue().equals(chargeDefinition.getChargeTimeType())) {
-                                for (LoanDisbursementDetails disbursementDetail : disbursementDetails) {
-                                    LoanTrancheDisbursementCharge loanTrancheDisbursementCharge = null;
-                                    if (chargeDefinition.isPercentageOfApprovedAmount()
-                                            && disbursementDetail.expectedDisbursementDateAsLocalDate().equals(expectedDisbursementDate)) {
-                                        final LoanCharge loanCharge = createNewWithoutLoan(chargeDefinition, principal, amount, chargeTime,
-                                                chargeCalculation, dueDate, chargePaymentModeEnum, numberOfRepayments, externalId);
-                                        loanCharges.add(loanCharge);
-                                        if (loanCharge.isTrancheDisbursementCharge()) {
-                                            loanTrancheDisbursementCharge = new LoanTrancheDisbursementCharge(loanCharge,
-                                                    disbursementDetail);
-                                            loanCharge.updateLoanTrancheDisbursementCharge(loanTrancheDisbursementCharge);
-                                        }
-                                    } else {
-                                        if (disbursementDetail.expectedDisbursementDateAsLocalDate().equals(expectedDisbursementDate)) {
-                                            final LoanCharge loanCharge = createNewWithoutLoan(chargeDefinition,
-                                                    disbursementDetail.principal(), amount, chargeTime, chargeCalculation,
-                                                    disbursementDetail.expectedDisbursementDateAsLocalDate(), chargePaymentModeEnum,
-                                                    numberOfRepayments, externalId);
+                                if (CollectionUtils.isEmpty(disbursementDetails)) {
+                                    // non-tranche
+                                    final LoanCharge loanCharge = createNewWithoutLoan(chargeDefinition, principal, amount, chargeTime,
+                                            chargeCalculation, dueDate, chargePaymentModeEnum, numberOfRepayments, externalId);
+                                    loanCharges.add(loanCharge);
+                                } else {
+                                    // tranche
+                                    for (LoanDisbursementDetails disbursementDetail : disbursementDetails) {
+                                        LoanTrancheDisbursementCharge loanTrancheDisbursementCharge = null;
+                                        if (chargeDefinition.isPercentageOfApprovedAmount() && disbursementDetail
+                                                .expectedDisbursementDateAsLocalDate().equals(expectedDisbursementDate)) {
+                                            final LoanCharge loanCharge = createNewWithoutLoan(chargeDefinition, principal, amount,
+                                                    chargeTime, chargeCalculation, dueDate, chargePaymentModeEnum, numberOfRepayments,
+                                                    externalId);
                                             loanCharges.add(loanCharge);
                                             if (loanCharge.isTrancheDisbursementCharge()) {
                                                 loanTrancheDisbursementCharge = new LoanTrancheDisbursementCharge(loanCharge,
                                                         disbursementDetail);
                                                 loanCharge.updateLoanTrancheDisbursementCharge(loanTrancheDisbursementCharge);
+                                            }
+                                        } else {
+                                            if (disbursementDetail.expectedDisbursementDateAsLocalDate().equals(expectedDisbursementDate)) {
+                                                final LoanCharge loanCharge = createNewWithoutLoan(chargeDefinition,
+                                                        disbursementDetail.principal(), amount, chargeTime, chargeCalculation,
+                                                        disbursementDetail.expectedDisbursementDateAsLocalDate(), chargePaymentModeEnum,
+                                                        numberOfRepayments, externalId);
+                                                loanCharges.add(loanCharge);
+                                                if (loanCharge.isTrancheDisbursementCharge()) {
+                                                    loanTrancheDisbursementCharge = new LoanTrancheDisbursementCharge(loanCharge,
+                                                            disbursementDetail);
+                                                    loanCharge.updateLoanTrancheDisbursementCharge(loanTrancheDisbursementCharge);
+                                                }
                                             }
                                         }
                                     }

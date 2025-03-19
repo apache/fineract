@@ -416,6 +416,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                         txnExternalId, loan.getTotalOverpaidAsMoney());
                 disbursementTransaction.updateLoan(loan);
                 loan.addLoanTransaction(disbursementTransaction);
+                loanTransactionRepository.saveAndFlush(disbursementTransaction);
             }
             if (loan.getRepaymentScheduleInstallments().isEmpty()) {
                 /*
@@ -440,10 +441,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             if (loan.isInterestBearingAndInterestRecalculationEnabled()
                     && (DateUtils.isBeforeBusinessDate(firstInstallmentDueDate) || loan.isDisbursementMissed())) {
                 loanAccrualsProcessingService.processIncomePostingAndAccruals(loan);
-            }
-
-            if (disbursementTransaction != null) {
-                loanTransactionRepository.saveAndFlush(disbursementTransaction);
             }
 
             if (loan.isAutoRepaymentForDownPaymentEnabled() && !isWithoutAutoPayment) {
