@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-24.04
     services:
         mariad:
-            image: mysql:9.1
+            image: mysql:9.2
             ports:
                 - 3306:3306
             env:

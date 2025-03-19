@@ -44,8 +44,8 @@ dependencyManagement {
         // We do not use :+ to get the latest available version available on Maven Central, as that could suddenly break things.
         // We use the Renovate Bot to automatically propose Pull Requests (PRs) when upgrades for all of these versions are available.
 
-        dependency 'ch.qos.logback:logback-core:1.5.17'
-        dependency 'ch.qos.logback:logback-classic:1.5.17'
+        dependency 'ch.qos.logback:logback-core:1.5.18'
+        dependency 'ch.qos.logback:logback-classic:1.5.18'
         dependency 'ch.qos.logback.contrib:logback-json-classic:0.1.5'
         dependency 'ch.qos.logback.contrib:logback-jackson:0.1.5'
         dependency 'org.codehaus.janino:janino:3.1.12'
@@ -153,8 +153,8 @@ dependencyManagement {
         dependency "commons-codec:commons-codec:1.17.1"
         dependency "org.projectlombok:lombok:1.18.36"
 
-        dependency 'org.bouncycastle:bcpkix-jdk15to18:1.79'
-        dependency 'org.bouncycastle:bcprov-jdk15to18:1.79'
+        dependency 'org.bouncycastle:bcpkix-jdk15to18:1.80'
+        dependency 'org.bouncycastle:bcprov-jdk15to18:1.80'
         dependency 'org.bouncycastle:bcprov-jdk15on:1.70'
         dependency 'org.bouncycastle:bcpg-jdk15on:1.70'
 
