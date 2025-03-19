@@ -28,8 +28,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.client.models.BatchResponse;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
-import org.apache.fineract.client.models.GetLoanAccountLockResponse;
 import org.apache.fineract.client.models.Header;
+import org.apache.fineract.client.models.LoanAccountLockResponseDTO;
 import retrofit2.Response;
 
 public final class ErrorMessageHelper {
@@ -680,12 +680,12 @@ public final class ErrorMessageHelper {
                 expectedStr);
     }
 
-    public static String listOfLockedLoansNotEmpty(Response<GetLoanAccountLockResponse> response) {
+    public static String listOfLockedLoansNotEmpty(Response<LoanAccountLockResponseDTO> response) {
         String bodyStr = response.body().toString();
         return String.format("List of locked loan accounts is not empty. Actual response is: %n%s", bodyStr);
     }
 
-    public static String listOfLockedLoansContainsLoan(Long loanId, Response<GetLoanAccountLockResponse> response) {
+    public static String listOfLockedLoansContainsLoan(Long loanId, Response<LoanAccountLockResponseDTO> response) {
         String bodyStr = response.body().toString();
         return String.format("List of locked loan accounts contains the loan with loanId %s. List of locked loans: %n%s", loanId, bodyStr);
     }

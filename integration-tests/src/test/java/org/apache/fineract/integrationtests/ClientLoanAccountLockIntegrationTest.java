@@ -26,7 +26,7 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import org.apache.fineract.client.models.GetLoanAccountLockResponse;
+import org.apache.fineract.client.models.LoanAccountLockResponseDTO;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -86,7 +86,7 @@ public class ClientLoanAccountLockIntegrationTest {
 
         loanAccountLockHelper.placeSoftLockOnLoanAccount(loanID, "LOAN_INLINE_COB_PROCESSING", "Sample error");
 
-        GetLoanAccountLockResponse getLoanAccountLockResponse = clientHelper.retrieveLockedAccounts(0, 1000);
+        LoanAccountLockResponseDTO getLoanAccountLockResponse = clientHelper.retrieveLockedAccounts(0, 1000);
         Assertions.assertTrue(getLoanAccountLockResponse.getContent().size() > 0);
         Assertions.assertTrue(getLoanAccountLockResponse.getContent().stream()
                 .anyMatch(loanAccountLock -> loanAccountLock.getLoanId().equals(Long.valueOf(loanID))));

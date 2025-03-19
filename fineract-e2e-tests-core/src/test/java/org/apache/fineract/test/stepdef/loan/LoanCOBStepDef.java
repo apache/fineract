@@ -26,9 +26,9 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.client.models.GetLoanAccountLockResponse;
 import org.apache.fineract.client.models.GetOldestCOBProcessedLoanResponse;
 import org.apache.fineract.client.models.LoanAccountLock;
+import org.apache.fineract.client.models.LoanAccountLockResponseDTO;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.services.DefaultApi;
 import org.apache.fineract.client.services.LoanAccountLockApi;
@@ -69,7 +69,7 @@ public class LoanCOBStepDef extends AbstractStepDef {
 
     @Then("There are no locked loan accounts")
     public void listOfLockedLoansEmpty() throws IOException {
-        Response<GetLoanAccountLockResponse> response = loanAccountLockApi.retrieveLockedAccounts(0, 1000).execute();
+        Response<LoanAccountLockResponseDTO> response = loanAccountLockApi.retrieveLockedAccounts(0, 1000).execute();
         ErrorHelper.checkSuccessfulApiCall(response);
 
         int size = response.body().getContent().size();
@@ -82,7 +82,7 @@ public class LoanCOBStepDef extends AbstractStepDef {
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         Long targetLoanId = loanResponse.body().getLoanId();
 
-        Response<GetLoanAccountLockResponse> response = loanAccountLockApi.retrieveLockedAccounts(0, 1000).execute();
+        Response<LoanAccountLockResponseDTO> response = loanAccountLockApi.retrieveLockedAccounts(0, 1000).execute();
         ErrorHelper.checkSuccessfulApiCall(response);
 
         List<LoanAccountLock> content = response.body().getContent();
