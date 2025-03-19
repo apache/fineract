@@ -56,4 +56,5 @@ public final class AuditData implements Serializable {
     private final Long clientId;
     private final Long loanId;
     private final String url;
+    private final String ip;
 }

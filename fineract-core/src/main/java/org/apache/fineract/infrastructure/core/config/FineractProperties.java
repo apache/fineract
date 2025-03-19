@@ -50,6 +50,8 @@ public class FineractProperties {
 
     private FineractCorrelationProperties correlation;
 
+    private FineractGeolocationProperties geolocation;
+
     private FineractPartitionedJob partitionedJob;
 
     private FineractRemoteJobMessageHandlerProperties remoteJobMessageHandler;
@@ -151,6 +153,13 @@ public class FineractProperties {
 
         private boolean enabled;
         private String headerName;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractGeolocationProperties {
+
+        private boolean enabled;
     }
 
     @Getter
