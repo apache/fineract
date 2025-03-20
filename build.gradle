@@ -112,7 +112,7 @@ plugins {
     id "com.github.davidmc24.gradle.plugin.avro-base" version "1.9.1" apply false
     id 'org.openapi.generator' version '7.8.0' apply false
     id 'com.gradleup.shadow' version '8.3.5' apply false
-}
+    }
 
 apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.release.gradle"
 
