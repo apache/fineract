@@ -387,10 +387,13 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                        firstIsSet = true;
                    }
                }else if (periodInterval.startDate().getMonth() == lists.getDate().getMonth()){
-                   listOfTransactionsPositive.add(lists);
-                   if (!firstIsSet) {
-                       firstIsNegative = false;
-                       firstIsSet = true;
+                   BigDecimal bd = new BigDecimal(String.valueOf(lists.getRunningBalance())).setScale(2, RoundingMode.DOWN);
+                   if (!MathUtil.isZero(bd)){
+                       listOfTransactionsPositive.add(lists);
+                       if (!firstIsSet) {
+                           firstIsNegative = false;
+                           firstIsSet = true;
+                       }
                    }
                }
 
