@@ -523,6 +523,13 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             this.daysInYearType = newValue;
         }
 
+        if (command.parameterExists(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME)) {
+            final DaysInYearCustomStrategyType newValue = DaysInYearCustomStrategyType
+                    .valueOf(command.stringValueOfParameterNamed(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME));
+            actualChanges.put(LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME, newValue.name());
+            this.daysInYearCustomStrategy = newValue;
+        }
+
         if (command.isChangeInBooleanParameterNamed(LoanProductConstants.IS_INTEREST_RECALCULATION_ENABLED_PARAMETER_NAME,
                 this.isInterestRecalculationEnabled)) {
             final boolean newValue = command

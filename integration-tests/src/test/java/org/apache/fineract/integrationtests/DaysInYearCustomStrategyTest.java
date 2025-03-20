@@ -20,7 +20,9 @@ package org.apache.fineract.integrationtests;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
+import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.junit.jupiter.api.Assertions;
@@ -44,6 +46,22 @@ public class DaysInYearCustomStrategyTest extends BaseLoanIntegrationTest {
         } catch (IOException e) {
             Assertions.fail("Unexpected exception", e);
         }
+    }
+
+    @Test
+    public void test_Update_DaysInYearsCustomStrategy_Value() {
+        PostLoanProductsResponse postLoanProduct = loanProductHelper.createLoanProduct(create4IProgressive().currencyCode("USD")
+                .daysInYearType(DaysInYearType.ACTUAL).daysInYearCustomStrategy(DaysInYearCustomStrategy.FEB_29_PERIOD_ONLY));
+        Assertions.assertNotNull(postLoanProduct.getResourceId());
+        final Long loanProductId = postLoanProduct.getResourceId();
+
+        GetLoanProductsProductIdResponse loanProduct = loanTransactionHelper.getLoanProduct(loanProductId.intValue());
+        Assertions.assertEquals("FEB_29_PERIOD_ONLY", loanProduct.getDaysInYearCustomStrategy().getId());
+
+        loanProductHelper.updateLoanProductById(loanProductId,
+                new PutLoanProductsProductIdRequest().daysInYearCustomStrategy(DaysInYearCustomStrategy.FULL_LEAP_YEAR));
+        loanProduct = loanTransactionHelper.getLoanProduct(loanProductId.intValue());
+        Assertions.assertEquals("FULL_LEAP_YEAR", loanProduct.getDaysInYearCustomStrategy().getId());
     }
 
     @Test
