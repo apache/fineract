@@ -19,8 +19,6 @@
 package org.apache.fineract.cob.api;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,41 +29,31 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.util.Objects;
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.cob.data.IsCatchUpRunningDTO;
 import org.apache.fineract.cob.data.OldestCOBProcessedLoanDTO;
 import org.apache.fineract.cob.service.LoanCOBCatchUpService;
 import org.apache.fineract.infrastructure.core.exception.JobIsNotFoundOrNotEnabledException;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/loans")
 @Component
 @Tag(name = "Loan COB Catch Up", description = "")
+@RequiredArgsConstructor
 public class LoanCOBCatchUpApiResource {
 
-    @Autowired
-    private DefaultToApiJsonSerializer<OldestCOBProcessedLoanDTO> oldestCOBProcessedLoanSerializeService;
-    @Autowired
-    private DefaultToApiJsonSerializer<IsCatchUpRunningDTO> isCatchUpRunningSerializer;
-    @Autowired(required = false)
-    private LoanCOBCatchUpService loanCOBCatchUpService;
+    private final Optional<LoanCOBCatchUpService> loanCOBCatchUpServiceOp;
 
     @GET
     @Path("oldest-cob-closed")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieves the oldest COB processed loan", description = "Retrieves the COB business date and the oldest COB processed loan")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanCOBCatchUpApiResourceSwagger.GetOldestCOBProcessedLoanResponse.class))) })
-    public String getOldestCOBProcessedLoan() {
-        if (Objects.isNull(loanCOBCatchUpService)) {
-            throw new JobIsNotFoundOrNotEnabledException(JobName.LOAN_COB.name());
-        }
-        OldestCOBProcessedLoanDTO response = loanCOBCatchUpService.getOldestCOBProcessedLoan();
-        return oldestCOBProcessedLoanSerializeService.serialize(response);
+    public OldestCOBProcessedLoanDTO getOldestCOBProcessedLoan() {
+        return loanCOBCatchUpServiceOp.map(LoanCOBCatchUpService::getOldestCOBProcessedLoan)
+                .orElseThrow(() -> new JobIsNotFoundOrNotEnabledException(JobName.LOAN_COB.name()));
     }
 
     @POST
@@ -77,20 +65,19 @@ public class LoanCOBCatchUpApiResource {
             @ApiResponse(responseCode = "202", description = "Catch Up has been started"),
             @ApiResponse(responseCode = "400", description = "Catch Up is already running") })
     public Response executeLoanCOBCatchUp() {
-        if (Objects.isNull(loanCOBCatchUpService)) {
-            throw new JobIsNotFoundOrNotEnabledException(JobName.LOAN_COB.name());
-        }
-        if (loanCOBCatchUpService.isCatchUpRunning().isCatchUpRunning()) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        }
-        loanCOBCatchUpService.unlockHardLockedLoans();
-        OldestCOBProcessedLoanDTO oldestCOBProcessedLoan = loanCOBCatchUpService.getOldestCOBProcessedLoan();
-        if (oldestCOBProcessedLoan.getCobProcessedDate().equals(oldestCOBProcessedLoan.getCobBusinessDate())) {
-            return Response.status(Response.Status.OK).build();
-        }
-        loanCOBCatchUpService.executeLoanCOBCatchUp();
+        return loanCOBCatchUpServiceOp.map(loanCOBCatchUpService -> {
+            if (loanCOBCatchUpService.isCatchUpRunning().isCatchUpRunning()) {
+                return Response.status(Response.Status.BAD_REQUEST).build();
+            }
+            loanCOBCatchUpService.unlockHardLockedLoans();
+            OldestCOBProcessedLoanDTO oldestCOBProcessedLoan = loanCOBCatchUpService.getOldestCOBProcessedLoan();
 
-        return Response.status(Response.Status.ACCEPTED).build();
+            if (oldestCOBProcessedLoan.getCobProcessedDate().equals(oldestCOBProcessedLoan.getCobBusinessDate())) {
+                return Response.status(Response.Status.OK).build();
+            }
+            loanCOBCatchUpService.executeLoanCOBCatchUp();
+            return Response.status(Response.Status.ACCEPTED).build();
+        }).orElseThrow(() -> new JobIsNotFoundOrNotEnabledException(JobName.LOAN_COB.name()));
     }
 
     @GET
@@ -98,14 +85,8 @@ public class LoanCOBCatchUpApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieves whether Loan COB catch up is running", description = "Retrieves whether Loan COB catch up is running, and the current execution date if it is running.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanCOBCatchUpApiResourceSwagger.IsCatchUpRunningResponse.class))) })
-    public String isCatchUpRunning() {
-        if (Objects.isNull(loanCOBCatchUpService)) {
-            throw new JobIsNotFoundOrNotEnabledException(JobName.LOAN_COB.name());
-        }
-        IsCatchUpRunningDTO response = loanCOBCatchUpService.isCatchUpRunning();
-
-        return isCatchUpRunningSerializer.serialize(response);
+    public IsCatchUpRunningDTO isCatchUpRunning() {
+        return loanCOBCatchUpServiceOp.map(LoanCOBCatchUpService::isCatchUpRunning)
+                .orElseThrow(() -> new JobIsNotFoundOrNotEnabledException(JobName.LOAN_COB.name()));
     }
 }

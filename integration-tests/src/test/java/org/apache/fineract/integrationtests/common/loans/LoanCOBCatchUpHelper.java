@@ -21,8 +21,8 @@ package org.apache.fineract.integrationtests.common.loans;
 import java.time.LocalDate;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.client.models.GetOldestCOBProcessedLoanResponse;
-import org.apache.fineract.client.models.IsCatchUpRunningResponse;
+import org.apache.fineract.client.models.IsCatchUpRunningDTO;
+import org.apache.fineract.client.models.OldestCOBProcessedLoanDTO;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.jetbrains.annotations.NotNull;
@@ -34,16 +34,16 @@ public class LoanCOBCatchUpHelper {
     public LoanCOBCatchUpHelper() {}
 
     public boolean isLoanCOBCatchUpRunning() {
-        Response<IsCatchUpRunningResponse> response = executeGetLoanCatchUpStatus();
-        return Boolean.TRUE.equals(Objects.requireNonNull(response.body()).getIsCatchUpRunning());
+        Response<IsCatchUpRunningDTO> response = executeGetLoanCatchUpStatus();
+        return Boolean.TRUE.equals(Objects.requireNonNull(response.body()).getCatchUpRunning());
     }
 
     public boolean isLoanCOBCatchUpFinishedFor(@NotNull LocalDate cobBusinessDate) {
-        Response<IsCatchUpRunningResponse> response = executeGetLoanCatchUpStatus();
-        IsCatchUpRunningResponse isCatchUpRunningResponse = Objects.requireNonNull(response.body());
-        GetOldestCOBProcessedLoanResponse getOldestCOBProcessedLoanResponse = executeRetrieveOldestCOBProcessedLoan();
+        Response<IsCatchUpRunningDTO> response = executeGetLoanCatchUpStatus();
+        IsCatchUpRunningDTO isCatchUpRunningResponse = Objects.requireNonNull(response.body());
+        OldestCOBProcessedLoanDTO getOldestCOBProcessedLoanResponse = executeRetrieveOldestCOBProcessedLoan();
 
-        return !Boolean.TRUE.equals(isCatchUpRunningResponse.getIsCatchUpRunning())
+        return !Boolean.TRUE.equals(isCatchUpRunningResponse.getCatchUpRunning())
                 && cobBusinessDate.equals(getOldestCOBProcessedLoanResponse.getCobProcessedDate());
     }
 
@@ -51,11 +51,11 @@ public class LoanCOBCatchUpHelper {
         return Calls.okR(FineractClientHelper.getFineractClient().loanCobCatchUpApi.executeLoanCOBCatchUp());
     }
 
-    public GetOldestCOBProcessedLoanResponse executeRetrieveOldestCOBProcessedLoan() {
+    public OldestCOBProcessedLoanDTO executeRetrieveOldestCOBProcessedLoan() {
         return Calls.ok(FineractClientHelper.getFineractClient().loanCobCatchUpApi.getOldestCOBProcessedLoan());
     }
 
-    public Response<IsCatchUpRunningResponse> executeGetLoanCatchUpStatus() {
+    public Response<IsCatchUpRunningDTO> executeGetLoanCatchUpStatus() {
         return Calls.okR(FineractClientHelper.getFineractClient().loanCobCatchUpApi.isCatchUpRunning());
     }
 

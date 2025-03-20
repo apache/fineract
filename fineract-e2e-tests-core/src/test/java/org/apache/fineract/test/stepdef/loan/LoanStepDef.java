@@ -79,7 +79,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.InterestPauseRequestDto;
-import org.apache.fineract.client.models.IsCatchUpRunningResponse;
+import org.apache.fineract.client.models.IsCatchUpRunningDTO;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
@@ -2293,19 +2293,19 @@ public class LoanStepDef extends AbstractStepDef {
                 .pollInterval(Duration.ofSeconds(5)) //
                 .pollDelay(Duration.ofSeconds(5)) //
                 .until(() -> {
-                    Response<IsCatchUpRunningResponse> isCatchUpRunningResponse = loanCobCatchUpApi.isCatchUpRunning().execute();
+                    Response<IsCatchUpRunningDTO> isCatchUpRunningResponse = loanCobCatchUpApi.isCatchUpRunning().execute();
                     ErrorHelper.checkSuccessfulApiCall(isCatchUpRunningResponse);
-                    IsCatchUpRunningResponse isCatchUpRunning = isCatchUpRunningResponse.body();
-                    return isCatchUpRunning.getIsCatchUpRunning();
+                    IsCatchUpRunningDTO isCatchUpRunning = isCatchUpRunningResponse.body();
+                    return isCatchUpRunning.getCatchUpRunning();
                 });
         await().atMost(Duration.ofMinutes(4)) //
                 .pollInterval(Duration.ofSeconds(5)) //
                 .pollDelay(Duration.ofSeconds(5)) //
                 .until(() -> {
-                    Response<IsCatchUpRunningResponse> isCatchUpRunningResponse = loanCobCatchUpApi.isCatchUpRunning().execute();
+                    Response<IsCatchUpRunningDTO> isCatchUpRunningResponse = loanCobCatchUpApi.isCatchUpRunning().execute();
                     ErrorHelper.checkSuccessfulApiCall(isCatchUpRunningResponse);
-                    IsCatchUpRunningResponse isCatchUpRunning = isCatchUpRunningResponse.body();
-                    return !isCatchUpRunning.getIsCatchUpRunning();
+                    IsCatchUpRunningDTO isCatchUpRunning = isCatchUpRunningResponse.body();
+                    return !isCatchUpRunning.getCatchUpRunning();
                 });
     }
 

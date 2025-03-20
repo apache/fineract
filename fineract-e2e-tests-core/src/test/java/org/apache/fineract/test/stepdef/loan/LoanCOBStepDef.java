@@ -26,9 +26,9 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.client.models.GetOldestCOBProcessedLoanResponse;
 import org.apache.fineract.client.models.LoanAccountLock;
 import org.apache.fineract.client.models.LoanAccountLockResponseDTO;
+import org.apache.fineract.client.models.OldestCOBProcessedLoanDTO;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.services.DefaultApi;
 import org.apache.fineract.client.services.LoanAccountLockApi;
@@ -54,7 +54,7 @@ public class LoanCOBStepDef extends AbstractStepDef {
 
     @Then("The cobProcessedDate of the oldest loan processed by COB is more than 1 day earlier than cobBusinessDate")
     public void checkOldestCOBProcessed() throws IOException {
-        Response<GetOldestCOBProcessedLoanResponse> response = loanCobCatchUpApi.getOldestCOBProcessedLoan().execute();
+        Response<OldestCOBProcessedLoanDTO> response = loanCobCatchUpApi.getOldestCOBProcessedLoan().execute();
         ErrorHelper.checkSuccessfulApiCall(response);
 
         LocalDate cobDate = response.body().getCobBusinessDate();
