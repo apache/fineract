@@ -93,6 +93,7 @@ public class ProductToGLAccountMappingHelper {
                 optionalProductToGLAccountMappingEntries.add("incomeFromGoodwillCreditInterestAccountId");
                 optionalProductToGLAccountMappingEntries.add("incomeFromGoodwillCreditFeesAccountId");
                 optionalProductToGLAccountMappingEntries.add("incomeFromGoodwillCreditPenaltyAccountId");
+                optionalProductToGLAccountMappingEntries.add("interestReceivableAccountId");
 
                 if (optionalProductToGLAccountMappingEntries.contains(paramName)) {
                     saveProductToAccountMapping(element, paramName, productId, accountTypeId, expectedAccountType, portfolioProductType);
