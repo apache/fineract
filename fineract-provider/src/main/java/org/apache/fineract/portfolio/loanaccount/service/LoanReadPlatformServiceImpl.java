@@ -614,8 +614,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                     predicates.add(builder.equal(loanjoin.get("id"), loanId));
 
                     if (excludedTransactionTypes != null && !excludedTransactionTypes.isEmpty()) {
-                        final List<Integer> excludedTransactionTypeValues = excludedTransactionTypes.stream()
-                                .map(LoanTransactionType::getValue).toList();
+                        final List<LoanTransactionType> excludedTransactionTypeValues = excludedTransactionTypes.stream().toList();
                         predicates.add(builder.not(root.get("typeOf").in(excludedTransactionTypeValues)));
                     }
                     return builder.and(predicates.toArray(new Predicate[] {}));
