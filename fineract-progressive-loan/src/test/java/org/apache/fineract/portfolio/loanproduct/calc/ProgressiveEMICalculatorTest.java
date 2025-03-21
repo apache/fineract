@@ -1302,10 +1302,9 @@ class ProgressiveEMICalculatorTest {
         final LocalDate dueDate = LocalDate.of(2024, 2, 1);
         final LocalDate startDay = LocalDate.of(2024, 1, 1);
 
-        // TODO: work on interest calculation
-        // emiCalculator.payInterest(interestModel, dueDate, startDay.plusDays(3), toMoney(0.56));
-        // emiCalculator.chargebackInterest(interestModel, startDay.plusDays(3), toMoney(0.0));
-        // emiCalculator.addBalanceCorrection(interestModel, startDay.plusDays(3), toMoney(0.0));
+        emiCalculator.payInterest(interestModel, dueDate, startDay.plusDays(3), toMoney(0.56));
+        emiCalculator.chargebackInterest(interestModel, startDay.plusDays(3), toMoney(0.0));
+        emiCalculator.addBalanceCorrection(interestModel, startDay.plusDays(3), toMoney(0.0));
 
         checkDailyInterest(interestModel, dueDate, startDay, 1, 0.19, 0.19);
         checkDailyInterest(interestModel, dueDate, startDay, 2, 0.19, 0.38);

@@ -182,6 +182,16 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
                 .principal(outstandingAmounts.getOutstandingPrincipal()) //
                 .interest(outstandingAmounts.getOutstandingInterest());//
 
+        // We need to deduct any paid amount if there is no interest recalculation
+        if (!loan.isInterestRecalculationEnabled()) {
+            BigDecimal paidInterest = installments.stream().map(LoanRepaymentScheduleInstallment::getInterestPaid).reduce(BigDecimal.ZERO,
+                    BigDecimal::add);
+            BigDecimal paidPrincipal = installments.stream().map(LoanRepaymentScheduleInstallment::getPrincipal).reduce(BigDecimal.ZERO,
+                    BigDecimal::add);
+            result.principal().minus(paidPrincipal);
+            result.interest().minus(paidInterest);
+        }
+
         installments.forEach(installment -> {
             if (installment.isAdditional()) {
                 result.plusPrincipal(installment.getPrincipalOutstanding(currency))

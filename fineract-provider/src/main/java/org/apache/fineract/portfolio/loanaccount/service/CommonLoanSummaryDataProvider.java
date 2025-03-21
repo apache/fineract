@@ -87,13 +87,13 @@ public abstract class CommonLoanSummaryDataProvider implements LoanSummaryDataPr
         totalRepaymentTransactionReversed = fetchLoanTransactionBalanceReversedByType(loanTransactionBalances,
                 LoanTransactionType.REPAYMENT);
 
-        if (repaymentSchedule != null) {
+        if (repaymentSchedule != null && defaultSummaryData.getInterestCharged().compareTo(BigDecimal.ZERO) > 0) {
             // Outstanding Interest on Past due installments
             totalUnpaidPayableDueInterest = computeTotalUnpaidPayableDueInterestAmount(repaymentSchedule.getPeriods(), businessDate);
 
             // Accumulated daily interest of the current Installment period
             totalUnpaidPayableNotDueInterest = computeTotalUnpaidPayableNotDueInterestAmountOnActualPeriod(loan,
-                    repaymentSchedule.getPeriods(), businessDate, defaultSummaryData.getCurrency());
+                    repaymentSchedule.getPeriods(), businessDate, defaultSummaryData.getCurrency(), totalUnpaidPayableDueInterest);
         }
 
         return LoanSummaryData.builder().currency(defaultSummaryData.getCurrency())

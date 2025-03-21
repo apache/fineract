@@ -2301,6 +2301,12 @@ public class LoanTransactionHelper {
         return response;
     }
 
+    public GetLoansLoanIdTransactionsTemplateResponse getPrepaymentAmount(final Long loanId, final String transactionDate,
+            String dateformat) {
+        return Calls.ok(FineractClientHelper.getFineractClient().loanTransactions.retrieveTransactionTemplate(loanId, "prepayLoan",
+                dateformat, transactionDate, "en"));
+    }
+
     // TODO: Rewrite to use fineract-client instead!
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
