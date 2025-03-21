@@ -225,4 +225,58 @@ public class JournalEntriesStepDef extends AbstractStepDef {
                     .isTrue();
         }
     }
+
+    @Then("Loan Transactions tab has a {string} transaction with date {string} has no the Journal entries")
+    public void journalEntryNoDataCheck(String transactionType, String transactionDate) throws IOException {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
+        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.body().getLoanId();
+
+        Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        TransactionType transactionType1 = TransactionType.valueOf(transactionType);
+        String transactionTypeExpected = transactionType1.getValue();
+
+        List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.body().getTransactions();
+        List<GetLoansLoanIdTransactions> transactionsMatch = transactions.stream()
+                .filter(t -> transactionDate.equals(formatter.format(t.getDate()))
+                        && transactionTypeExpected.equals(t.getType().getCode().substring(20)))
+                .collect(Collectors.toList());
+
+        List<List<JournalEntryTransactionItem>> journalLinesActualList = transactionsMatch.stream().map(t -> {
+            String transactionId = "L" + t.getId();
+            Response<GetJournalEntriesTransactionIdResponse> journalEntryDataResponse = null;
+            try {
+                journalEntryDataResponse = journalEntriesApi.retrieveAll1(//
+                        null, //
+                        null, //
+                        null, //
+                        null, //
+                        null, //
+                        null, //
+                        null, //
+                        transactionId, //
+                        null, //
+                        null, //
+                        null, //
+                        null, //
+                        null, //
+                        null, //
+                        null, //
+                        null, //
+                        null, //
+                        null, //
+                        true//
+                ).execute();
+                ErrorHelper.checkSuccessfulApiCall(journalEntryDataResponse);
+            } catch (IOException e) {
+                log.error("Exception", e);
+            }
+
+            return journalEntryDataResponse.body().getPageItems();
+        }).collect(Collectors.toList());
+
+        assertThat(journalLinesActualList.stream().findFirst().get().size()).isZero();
+    }
 }

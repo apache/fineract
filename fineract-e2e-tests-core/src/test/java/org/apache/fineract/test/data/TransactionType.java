@@ -32,7 +32,8 @@ public enum TransactionType {
     ACCRUAL("accrual"), //
     CHARGE_OFF("chargeOff"), //
     CHARGE_ADJUSTMENT("chargeAdjustment"), //
-    INTEREST_PAYMENT_WAIVER("interestPaymentWaiver");//
+    INTEREST_PAYMENT_WAIVER("interestPaymentWaiver"), //
+    REPAYMENT_AT_DISBURSEMENT("repaymentAtDisbursement"); //
 
     public final String value;
 
