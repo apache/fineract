@@ -687,7 +687,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         BigDecimal totalChargeAmt = BigDecimal.ZERO;
         if (loanCharge.getChargeCalculation().isPercentageBased()) {
             chargeAmt = loanCharge.getPercentage();
-            if (loanCharge.isInstalmentFee()) {
+            if (loanCharge.isDueAtDisbursement()) {
+                totalChargeAmt = calculateDisbursementChargeAmount(loanCharge.getChargeCalculation(), loanCharge.amountOrPercentage());
+            } else if (loanCharge.isInstalmentFee()) {
                 totalChargeAmt = calculatePerInstallmentChargeAmount(loanCharge);
             } else if (loanCharge.isOverdueInstallmentCharge()) {
                 totalChargeAmt = loanCharge.amountOutstanding();
@@ -957,6 +959,18 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
             amount = amount.plus(calculateInstallmentChargeAmount(calculationType, percentage, installment));
         }
         return amount.getAmount();
+    }
+
+    public BigDecimal calculateDisbursementChargeAmount(final ChargeCalculationType calculationType, final BigDecimal percentage) {
+        Money percentOf = switch (calculationType) {
+            case PERCENT_OF_AMOUNT -> this.getPrincipal();
+            case PERCENT_OF_AMOUNT_AND_INTEREST -> this.getPrincipal().plus(this.getTotalInterest());
+            case PERCENT_OF_INTEREST -> Money.zero(getCurrency()).plus(this.getTotalInterest());
+            case PERCENT_OF_DISBURSEMENT_AMOUNT, INVALID, FLAT -> Money.zero(getCurrency());
+
+        };
+        return Money.zero(getCurrency()) //
+                .plus(LoanCharge.percentageOf(percentOf.getAmount(), percentage)).getAmount();
     }
 
     public BigDecimal getTotalWrittenOff() {
