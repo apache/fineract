@@ -30,7 +30,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.HashMap;
 import java.util.UUID;
-import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
+import org.apache.fineract.client.models.DelinquencyBucketData;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
@@ -77,7 +77,7 @@ public class LoanAccountCreditRefundPayoutWithChargebackTest {
 
         // Delinquency Bucket
         final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
                 delinquencyBucketId);
 
         // Client and Loan account creation

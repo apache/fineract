@@ -26,7 +26,7 @@ import java.util.Set;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
-import org.apache.fineract.portfolio.delinquency.api.DelinquencyApiResourceSwagger.GetDelinquencyBucketsResponse;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
 
 /**
  * Created by Chirag Gupta on 12/27/17.
@@ -1404,8 +1404,8 @@ final class LoanProductsApiResourceSwagger {
         public Integer overdueDaysForNPA;
         @Schema(example = "50")
         public Integer principalThresholdForLastInstalment;
-        public GetDelinquencyBucketsResponse delinquencyBucket;
-        public List<GetDelinquencyBucketsResponse> delinquencyBucketOptions;
+        public DelinquencyBucketData delinquencyBucket;
+        public List<DelinquencyBucketData> delinquencyBucketOptions;
         @Schema(example = "false")
         public Boolean enableInstallmentLevelDelinquency;
         @Schema(example = "3")

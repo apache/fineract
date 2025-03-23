@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
+import org.apache.fineract.client.models.DelinquencyBucketData;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
@@ -75,7 +75,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         String loanExternalIdStr = UUID.randomUUID().toString();
 
         final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
                 delinquencyBucketId);
 
         Boolean enableDownPayment = true;
@@ -121,7 +121,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         String loanExternalIdStr = UUID.randomUUID().toString();
 
         final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
                 delinquencyBucketId);
 
         Boolean enableDownPayment = true;
@@ -170,7 +170,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         String loanExternalIdStr = UUID.randomUUID().toString();
 
         final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
                 delinquencyBucketId);
 
         Boolean enableDownPayment = true;
@@ -216,7 +216,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         String loanExternalIdStr = UUID.randomUUID().toString();
 
         final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
                 delinquencyBucketId);
 
         Boolean enableDownPayment = true;
@@ -267,7 +267,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         String loanExternalIdStr = UUID.randomUUID().toString();
 
         final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
                 delinquencyBucketId);
 
         Boolean enableDownPayment = true;
@@ -322,7 +322,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         String loanExternalIdStr = UUID.randomUUID().toString();
 
         final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
                 delinquencyBucketId);
 
         Boolean enableDownPayment = true;
@@ -394,7 +394,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         String loanExternalIdStr = UUID.randomUUID().toString();
 
         final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
                 delinquencyBucketId);
 
         Boolean enableDownPayment = true;
@@ -480,7 +480,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         String loanExternalIdStr = UUID.randomUUID().toString();
 
         final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
                 delinquencyBucketId);
 
         Boolean enableDownPayment = true;
@@ -544,7 +544,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         String loanExternalIdStr = UUID.randomUUID().toString();
 
         final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
                 delinquencyBucketId);
 
         Boolean enableDownPayment = true;
@@ -645,7 +645,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         String loanExternalIdStr = UUID.randomUUID().toString();
 
         final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
                 delinquencyBucketId);
 
         Boolean enableDownPayment = true;
@@ -711,7 +711,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         String loanExternalIdStr = UUID.randomUUID().toString();
 
         final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
                 delinquencyBucketId);
 
         Boolean enableDownPayment = true;
@@ -825,7 +825,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
             String loanExternalIdStr = UUID.randomUUID().toString();
 
             final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-            final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+            final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
                     delinquencyBucketId);
 
             Boolean enableDownPayment = true;
@@ -885,7 +885,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
 
         // Delinquency Bucket
         final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
                 delinquencyBucketId);
 
         // down-payment configuration
@@ -927,7 +927,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
 
         // Delinquency Bucket
         final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
                 delinquencyBucketId);
 
         // down-payment configuration
@@ -1009,7 +1009,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
 
             // Delinquency Bucket
             final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-            final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+            final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
                     delinquencyBucketId);
 
             // down-payment configuration
@@ -1130,7 +1130,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
 
             // Delinquency Bucket
             final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-            final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+            final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
                     delinquencyBucketId);
 
             // down-payment configuration
@@ -1623,7 +1623,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         String loanExternalIdStr = UUID.randomUUID().toString();
 
         final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
                 delinquencyBucketId);
 
         Boolean enableDownPayment = true;

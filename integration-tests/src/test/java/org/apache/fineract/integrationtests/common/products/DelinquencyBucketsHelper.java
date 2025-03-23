@@ -33,8 +33,8 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.client.models.DeleteDelinquencyBucketResponse;
-import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
-import org.apache.fineract.client.models.GetDelinquencyRangesResponse;
+import org.apache.fineract.client.models.DelinquencyBucketData;
+import org.apache.fineract.client.models.DelinquencyRangeData;
 import org.apache.fineract.client.models.GetLoansLoanIdDelinquencySummary;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostDelinquencyBucketResponse;
@@ -55,11 +55,11 @@ public class DelinquencyBucketsHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static ArrayList<GetDelinquencyBucketsResponse> getDelinquencyBuckets(final RequestSpecification requestSpec,
+    public static ArrayList<DelinquencyBucketData> getDelinquencyBuckets(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
         String response = Utils.performServerGet(requestSpec, responseSpec, DELINQUENCY_BUCKETS_URL + "?" + Utils.TENANT_IDENTIFIER);
 
-        Type delinquencyBucketListType = new TypeToken<ArrayList<GetDelinquencyBucketsResponse>>() {}.getType();
+        Type delinquencyBucketListType = new TypeToken<ArrayList<DelinquencyBucketData>>() {}.getType();
         return GSON.fromJson(response, delinquencyBucketListType);
     }
 
@@ -67,11 +67,11 @@ public class DelinquencyBucketsHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static GetDelinquencyBucketsResponse getDelinquencyBucket(final RequestSpecification requestSpec,
+    public static DelinquencyBucketData getDelinquencyBucket(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final Integer resourceId) {
         String response = Utils.performServerGet(requestSpec, responseSpec,
                 DELINQUENCY_BUCKETS_URL + "/" + resourceId + "?" + Utils.TENANT_IDENTIFIER);
-        return GSON.fromJson(response, GetDelinquencyBucketsResponse.class);
+        return GSON.fromJson(response, DelinquencyBucketData.class);
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -159,7 +159,7 @@ public class DelinquencyBucketsHelper {
                 jsonRange);
         rangeIds.add(delinquencyRangeResponse.getResourceId());
         jsonRange = DelinquencyRangesHelper.getAsJSON(4, 60);
-        GetDelinquencyRangesResponse range = DelinquencyRangesHelper.getDelinquencyRange(requestSpec, responseSpec,
+        DelinquencyRangeData range = DelinquencyRangesHelper.getDelinquencyRange(requestSpec, responseSpec,
                 delinquencyRangeResponse.getResourceId());
 
         // Second Range
@@ -187,7 +187,7 @@ public class DelinquencyBucketsHelper {
             log.info("Loan Delinquency Data is null");
         }
 
-        GetDelinquencyRangesResponse delinquencyRange = getLoansLoanIdResponse.getDelinquencyRange();
+        DelinquencyRangeData delinquencyRange = getLoansLoanIdResponse.getDelinquencyRange();
         if (delinquencyRange != null) {
             log.info("Loan Delinquency Classification is {} : ({} - {}) {}", delinquencyRange.getClassification(),
                     delinquencyRange.getMinimumAgeDays(), delinquencyRange.getMaximumAgeDays(), pastDueDays);

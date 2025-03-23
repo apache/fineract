@@ -74,7 +74,7 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
     private final ConfigurationDomainService configurationDomainService;
 
     @Override
-    public Collection<DelinquencyRangeData> retrieveAllDelinquencyRanges() {
+    public List<DelinquencyRangeData> retrieveAllDelinquencyRanges() {
         final List<DelinquencyRange> delinquencyRangeList = repositoryRange.findAll();
         return mapperRange.map(delinquencyRangeList);
     }
@@ -86,7 +86,7 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
     }
 
     @Override
-    public Collection<DelinquencyBucketData> retrieveAllDelinquencyBuckets() {
+    public List<DelinquencyBucketData> retrieveAllDelinquencyBuckets() {
         final List<DelinquencyBucket> delinquencyRangeList = repositoryBucket.findAll();
         return mapperBucket.map(delinquencyRangeList);
     }

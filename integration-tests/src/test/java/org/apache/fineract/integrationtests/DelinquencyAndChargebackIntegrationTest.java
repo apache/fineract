@@ -36,8 +36,8 @@ import java.util.List;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.AdvancedPaymentData;
-import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
-import org.apache.fineract.client.models.GetDelinquencyRangesResponse;
+import org.apache.fineract.client.models.DelinquencyBucketData;
+import org.apache.fineract.client.models.DelinquencyRangeData;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
@@ -100,7 +100,7 @@ public class DelinquencyAndChargebackIntegrationTest extends BaseLoanIntegration
             final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
             // Delinquency Bucket
             final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-            final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+            final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
                     delinquencyBucketId);
 
             // Client and Loan account creation
@@ -223,7 +223,7 @@ public class DelinquencyAndChargebackIntegrationTest extends BaseLoanIntegration
             final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
             // Delinquency Bucket
             final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-            final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+            final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
                     delinquencyBucketId);
 
             // Client and Loan account creation
@@ -364,10 +364,10 @@ public class DelinquencyAndChargebackIntegrationTest extends BaseLoanIntegration
         return loanId;
     }
 
-    private GetDelinquencyRangesResponse validateLoanAccount(GetLoansLoanIdResponse getLoansLoanIdResponse, final String adjustments,
+    private DelinquencyRangeData validateLoanAccount(GetLoansLoanIdResponse getLoansLoanIdResponse, final String adjustments,
             final String outstanding, Integer pastDueDays, Double delinquentAmount) {
         assertNotNull(getLoansLoanIdResponse);
-        final GetDelinquencyRangesResponse delinquencyRange = getLoansLoanIdResponse.getDelinquencyRange();
+        final DelinquencyRangeData delinquencyRange = getLoansLoanIdResponse.getDelinquencyRange();
 
         log.info("Loan Delinquency Range is null {}", (delinquencyRange == null));
         if (delinquencyRange != null) {

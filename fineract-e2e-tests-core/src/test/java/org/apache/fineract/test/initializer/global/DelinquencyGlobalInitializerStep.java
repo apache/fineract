@@ -23,8 +23,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.client.models.PostDelinquencyBucketRequest;
-import org.apache.fineract.client.models.PostDelinquencyRangeRequest;
+import org.apache.fineract.client.models.DelinquencyBucketRequest;
+import org.apache.fineract.client.models.DelinquencyRangeRequest;
 import org.apache.fineract.client.services.DelinquencyRangeAndBucketsManagementApi;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -49,7 +49,7 @@ public class DelinquencyGlobalInitializerStep implements FineractGlobalInitializ
 
     public void setDefaultDelinquencyRanges() throws IOException {
         for (int i = 0; i < DEFAULT_DELINQUENCY_RANGES.size() - 1; i++) {
-            PostDelinquencyRangeRequest postDelinquencyRangeRequest = new PostDelinquencyRangeRequest();
+            DelinquencyRangeRequest postDelinquencyRangeRequest = new DelinquencyRangeRequest();
             postDelinquencyRangeRequest.classification("Delinquency range " + DEFAULT_DELINQUENCY_RANGES.get(i).toString());
             postDelinquencyRangeRequest.locale(DEFAULT_LOCALE);
             if (DEFAULT_DELINQUENCY_RANGES.get(i) == 1) {
@@ -63,7 +63,7 @@ public class DelinquencyGlobalInitializerStep implements FineractGlobalInitializ
             delinquencyApi.createDelinquencyRange(postDelinquencyRangeRequest).execute();
         }
 
-        PostDelinquencyRangeRequest lastRange = new PostDelinquencyRangeRequest();
+        DelinquencyRangeRequest lastRange = new DelinquencyRangeRequest();
         lastRange.classification("Delinquency range " + DEFAULT_DELINQUENCY_RANGES.get(DEFAULT_DELINQUENCY_RANGES.size() - 1).toString());
         lastRange.locale(DEFAULT_LOCALE);
         lastRange.minimumAgeDays(DEFAULT_DELINQUENCY_RANGES.get(DEFAULT_DELINQUENCY_RANGES.size() - 1) + 1);
@@ -80,7 +80,7 @@ public class DelinquencyGlobalInitializerStep implements FineractGlobalInitializ
         }
         rangesNr.add((long) DEFAULT_DELINQUENCY_RANGES.size());
 
-        PostDelinquencyBucketRequest postDelinquencyBucketRequest = new PostDelinquencyBucketRequest();
+        DelinquencyBucketRequest postDelinquencyBucketRequest = new DelinquencyBucketRequest();
         postDelinquencyBucketRequest.name(DEFAULT_DELINQUENCY_BUCKET_NAME);
         postDelinquencyBucketRequest.ranges(rangesNr);
 

@@ -29,7 +29,7 @@ import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
-import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
+import org.apache.fineract.client.models.DelinquencyBucketData;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdResponse;
@@ -60,7 +60,7 @@ public class LoanProductWithDownPaymentConfigurationTest {
     public void loanProductCreationWithDownPaymentConfigurationTest() {
         // Delinquency Bucket
         final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
                 delinquencyBucketId);
 
         // down-payment configuration
@@ -83,7 +83,7 @@ public class LoanProductWithDownPaymentConfigurationTest {
     public void loanProductUpdateWithEnableDownPaymentConfigurationTest() {
         // Delinquency Bucket
         final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
                 delinquencyBucketId);
         // Loan Product without enable down payment configuration
         GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper, delinquencyBucketId);
@@ -108,7 +108,7 @@ public class LoanProductWithDownPaymentConfigurationTest {
 
         // Delinquency Bucket
         final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
                 delinquencyBucketId);
 
         // down-payment configuration

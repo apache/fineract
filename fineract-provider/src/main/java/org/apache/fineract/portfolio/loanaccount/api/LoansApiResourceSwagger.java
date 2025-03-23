@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Set;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
-import org.apache.fineract.portfolio.delinquency.api.DelinquencyApiResourceSwagger.GetDelinquencyRangesResponse;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
 
 /**
  * Created by Chirag Gupta on 12/09/17.
@@ -1175,7 +1175,7 @@ final class LoansApiResourceSwagger {
         public GetLoansLoanIdDelinquencySummary delinquent;
         @Schema(description = "Set of charges")
         public List<GetLoansLoanIdLoanChargeData> charges;
-        public GetDelinquencyRangesResponse delinquencyRange;
+        public DelinquencyRangeData delinquencyRange;
         @Schema(example = "false")
         public Boolean fraud;
         @Schema(example = "false")

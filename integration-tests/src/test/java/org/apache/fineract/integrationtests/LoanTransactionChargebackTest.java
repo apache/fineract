@@ -41,8 +41,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.CreditAllocationData;
 import org.apache.fineract.client.models.CreditAllocationOrder;
-import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
-import org.apache.fineract.client.models.GetDelinquencyRangesResponse;
+import org.apache.fineract.client.models.DelinquencyBucketData;
+import org.apache.fineract.client.models.DelinquencyRangeData;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
@@ -308,7 +308,7 @@ public class LoanTransactionChargebackTest extends BaseLoanIntegrationTest {
 
             loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
 
-            GetDelinquencyRangesResponse delinquencyRange = getLoansLoanIdResponse.getDelinquencyRange();
+            DelinquencyRangeData delinquencyRange = getLoansLoanIdResponse.getDelinquencyRange();
             assertNotNull(delinquencyRange);
             log.info("Loan Delinquency Range is {}", delinquencyRange.getClassification());
 
@@ -448,7 +448,7 @@ public class LoanTransactionChargebackTest extends BaseLoanIntegrationTest {
                 debit(overpaymentAccount, 100.0) //
         );
 
-        final GetDelinquencyRangesResponse delinquencyRange = getLoansLoanIdResponse.getDelinquencyRange();
+        final DelinquencyRangeData delinquencyRange = getLoansLoanIdResponse.getDelinquencyRange();
         assertNull(delinquencyRange);
         log.info("Loan Delinquency Range is null {}", (delinquencyRange == null));
     }
@@ -512,7 +512,7 @@ public class LoanTransactionChargebackTest extends BaseLoanIntegrationTest {
 
         reviewLoanTransactionRelations(loanId, transactionId, 0, Double.valueOf("0.00"));
 
-        GetDelinquencyRangesResponse delinquencyRange = getLoansLoanIdResponse.getDelinquencyRange();
+        DelinquencyRangeData delinquencyRange = getLoansLoanIdResponse.getDelinquencyRange();
         assertNull(delinquencyRange);
         log.info("Loan Delinquency Range is null {}", (delinquencyRange == null));
         final Long chargebackTransactionId = loanTransactionHelper.applyChargebackTransaction(loanId, transactionId, "50.00", 0,
@@ -1395,7 +1395,7 @@ public class LoanTransactionChargebackTest extends BaseLoanIntegrationTest {
             LoanProductTestBuilder loanProductTestBuilder) {
         // Delinquency Bucket
         final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
                 delinquencyBucketId);
 
         // Client and Loan account creation

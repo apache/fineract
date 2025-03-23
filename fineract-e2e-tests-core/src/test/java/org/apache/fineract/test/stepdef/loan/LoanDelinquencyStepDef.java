@@ -39,8 +39,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.fineract.avro.loan.v1.LoanAccountDelinquencyRangeDataV1;
 import org.apache.fineract.avro.loan.v1.LoanInstallmentDelinquencyBucketDataV1;
+import org.apache.fineract.client.models.DelinquencyRangeData;
 import org.apache.fineract.client.models.GetDelinquencyActionsResponse;
-import org.apache.fineract.client.models.GetDelinquencyRangesResponse;
 import org.apache.fineract.client.models.GetDelinquencyTagHistoryResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdDelinquencyPausePeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdDelinquencySummary;
@@ -108,7 +108,7 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
         String expectedDelinquencyRangeValue = expectedDelinquencyRange.getValue();
 
         String actualDelinquencyRangeValue = DelinquencyRange.NO_DELINQUENCY.value;
-        GetDelinquencyRangesResponse actualDelinquencyRange = loanDetails.body().getDelinquencyRange();
+        DelinquencyRangeData actualDelinquencyRange = loanDetails.body().getDelinquencyRange();
         if (actualDelinquencyRange != null) {
             actualDelinquencyRangeValue = actualDelinquencyRange.getClassification();
         }
@@ -640,7 +640,7 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
         long loanId = loanResponse.body().getLoanId();
 
         Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "", "", "").execute();
-        GetDelinquencyRangesResponse delinquencyRange = loanDetails.body().getDelinquencyRange();
+        DelinquencyRangeData delinquencyRange = loanDetails.body().getDelinquencyRange();
         GetLoansLoanIdDelinquencySummary delinquent = loanDetails.body().getDelinquent();
 
         eventAssertion.assertEvent(LoanDelinquencyRangeChangeEvent.class, loanId)//

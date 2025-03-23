@@ -34,7 +34,7 @@ import java.util.UUID;
 import org.apache.fineract.client.models.BusinessDateRequest;
 import org.apache.fineract.client.models.DeleteLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.DeleteLoansLoanIdResponse;
-import org.apache.fineract.client.models.GetDelinquencyRangesResponse;
+import org.apache.fineract.client.models.DelinquencyRangeData;
 import org.apache.fineract.client.models.GetDelinquencyTagHistoryResponse;
 import org.apache.fineract.client.models.GetLoansApprovalTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesChargeIdResponse;
@@ -843,7 +843,7 @@ public class ExternalIdSupportIntegrationTest extends BaseLoanIntegrationTest {
             rangeIds.add(delinquencyRangeResponse.getResourceId());
             jsonRange = DelinquencyRangesHelper.getAsJSON(4, 60);
 
-            GetDelinquencyRangesResponse range = DelinquencyRangesHelper.getDelinquencyRange(requestSpec, responseSpec,
+            DelinquencyRangeData range = DelinquencyRangesHelper.getDelinquencyRange(requestSpec, responseSpec,
                     delinquencyRangeResponse.getResourceId());
 
             // Second Range

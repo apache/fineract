@@ -29,11 +29,11 @@ import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
 
 public interface DelinquencyReadPlatformService {
 
-    Collection<DelinquencyRangeData> retrieveAllDelinquencyRanges();
+    List<DelinquencyRangeData> retrieveAllDelinquencyRanges();
 
     DelinquencyRangeData retrieveDelinquencyRange(Long delinquencyRangeId);
 
-    Collection<DelinquencyBucketData> retrieveAllDelinquencyBuckets();
+    List<DelinquencyBucketData> retrieveAllDelinquencyBuckets();
 
     DelinquencyBucketData retrieveDelinquencyBucket(Long delinquencyBucketId);
 

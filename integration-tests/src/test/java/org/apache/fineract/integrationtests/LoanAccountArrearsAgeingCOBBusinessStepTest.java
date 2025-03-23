@@ -30,7 +30,7 @@ import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.UUID;
-import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
+import org.apache.fineract.client.models.DelinquencyBucketData;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdSummary;
@@ -88,7 +88,7 @@ public class LoanAccountArrearsAgeingCOBBusinessStepTest extends BaseLoanIntegra
 
             // Delinquency Bucket
             final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-            final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+            final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
                     delinquencyBucketId);
 
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,

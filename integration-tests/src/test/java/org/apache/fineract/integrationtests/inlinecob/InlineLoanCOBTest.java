@@ -36,8 +36,8 @@ import java.util.stream.LongStream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
-import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
-import org.apache.fineract.client.models.GetDelinquencyRangesResponse;
+import org.apache.fineract.client.models.DelinquencyBucketData;
+import org.apache.fineract.client.models.DelinquencyRangeData;
 import org.apache.fineract.client.models.GetDelinquencyTagHistoryResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostDelinquencyBucketResponse;
@@ -170,7 +170,7 @@ public class InlineLoanCOBTest extends BaseLoanIntegrationTest {
             rangeIds.add(delinquencyRangeResponse.getResourceId());
             jsonRange = DelinquencyRangesHelper.getAsJSON(4, 60);
 
-            GetDelinquencyRangesResponse range = DelinquencyRangesHelper.getDelinquencyRange(requestSpec, responseSpec,
+            DelinquencyRangeData range = DelinquencyRangesHelper.getDelinquencyRange(requestSpec, responseSpec,
                     delinquencyRangeResponse.getResourceId());
 
             // Second Range
@@ -185,7 +185,7 @@ public class InlineLoanCOBTest extends BaseLoanIntegrationTest {
             PostDelinquencyBucketResponse delinquencyBucketResponse = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec,
                     responseSpec, jsonBucket);
             assertNotNull(delinquencyBucketResponse);
-            final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+            final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
                     delinquencyBucketResponse.getResourceId());
 
             final Integer loanProductID = createLoanProduct(loanTransactionHelper, Math.toIntExact(delinquencyBucket.getId()));
