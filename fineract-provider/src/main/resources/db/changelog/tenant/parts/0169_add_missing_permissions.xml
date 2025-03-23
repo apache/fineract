@@ -89,4 +89,13 @@
             <column name="can_maker_checker" valueBoolean="false"/>
         </insert>
     </changeSet>
+    <changeSet author="fineract" id="3">
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="DEACTIVATEOVERDUE_LOANCHARGE"/>
+            <column name="entity_name" value="LOANCHARGE"/>
+            <column name="action_name" value="DEACTIVATEOVERDUE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>

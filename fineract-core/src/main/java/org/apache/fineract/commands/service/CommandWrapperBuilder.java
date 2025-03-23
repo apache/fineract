@@ -18,7 +18,13 @@
  */
 package org.apache.fineract.commands.service;
 
+import static org.apache.fineract.useradministration.service.AppUserConstants.PASSWORD;
+import static org.apache.fineract.useradministration.service.AppUserConstants.REPEAT_PASSWORD;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.infrastructure.accountnumberformat.service.AccountNumberFormatConstants;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -49,18 +55,21 @@ public class CommandWrapperBuilder {
     private String jobName;
     private String idempotencyKey;
     private ExternalId loanExternalId;
+    private Set<String> sanitizeJsonKeys;
 
     @SuppressFBWarnings(value = "UWF_UNWRITTEN_FIELD", justification = "TODO: fix this!")
     public CommandWrapper build() {
         return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName, this.entityName,
                 this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, this.templateId,
-                this.creditBureauId, this.organisationCreditBureauId, this.jobName, this.idempotencyKey, this.loanExternalId);
+                this.creditBureauId, this.organisationCreditBureauId, this.jobName, this.idempotencyKey, this.loanExternalId,
+                this.sanitizeJsonKeys);
     }
 
     public CommandWrapper build(String idempotencyKey) {
         return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName, this.entityName,
                 this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, this.templateId,
-                this.creditBureauId, this.organisationCreditBureauId, this.jobName, idempotencyKey, this.loanExternalId);
+                this.creditBureauId, this.organisationCreditBureauId, this.jobName, idempotencyKey, this.loanExternalId,
+                this.sanitizeJsonKeys);
     }
 
     public CommandWrapperBuilder updateCreditBureau() {
@@ -264,6 +273,16 @@ public class CommandWrapperBuilder {
         this.entityName = "USER";
         this.entityId = null;
         this.href = "/users/template";
+        this.sanitizeJsonKeys = new HashSet<>(Arrays.asList(PASSWORD, REPEAT_PASSWORD));
+        return this;
+    }
+
+    public CommandWrapperBuilder changeUserPassword(final Long userId) {
+        this.actionName = "CHANGEPWD";
+        this.entityName = "USER";
+        this.entityId = userId;
+        this.href = "/users/" + userId + "/pwd";
+        this.sanitizeJsonKeys = new HashSet<>(Arrays.asList(PASSWORD, REPEAT_PASSWORD));
         return this;
     }
 
@@ -272,6 +291,7 @@ public class CommandWrapperBuilder {
         this.entityName = "USER";
         this.entityId = userId;
         this.href = "/users/" + userId;
+        this.sanitizeJsonKeys = new HashSet<>(Arrays.asList(PASSWORD, REPEAT_PASSWORD));
         return this;
     }
 

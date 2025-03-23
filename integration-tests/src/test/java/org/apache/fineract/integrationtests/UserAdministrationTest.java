@@ -28,6 +28,8 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.apache.fineract.client.models.ChangePwdUsersUserIdRequest;
+import org.apache.fineract.client.models.ChangePwdUsersUserIdResponse;
 import org.apache.fineract.client.models.GetOfficesResponse;
 import org.apache.fineract.client.models.GetUsersUserIdResponse;
 import org.apache.fineract.client.models.PostUsersRequest;
@@ -183,7 +185,7 @@ public class UserAdministrationTest extends IntegrationTest {
     }
 
     @Test
-    public void testApplicationUserCanChangeOwnPassword() {
+    public void testApplicationUserCanUpdateOwnPassword() {
         // Admin creates a new user with an empty role
         Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
         String originalPassword = "QwE!5rTy#9uP0";
@@ -203,6 +205,40 @@ public class UserAdministrationTest extends IntegrationTest {
         PutUsersUserIdResponse putUsersUserIdResponse = ok(newFineractClient(simpleUsername, originalPassword).users.update26(userId,
                 new PutUsersUserIdRequest().password(updatedPassword).repeatPassword(updatedPassword)));
         Assertions.assertNotNull(putUsersUserIdResponse.getResourceId());
+
+        // From then on the originalPassword is not working anymore
+        CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class, () -> {
+            ok(newFineractClient(simpleUsername, originalPassword).users.retrieveOne31(userId));
+        });
+        Assertions.assertEquals(401, callFailedRuntimeException.getResponse().raw().code());
+        Assertions.assertTrue(callFailedRuntimeException.getMessage().contains("Unauthorized"));
+
+        // The update password is still working perfectly
+        GetUsersUserIdResponse ok = ok(newFineractClient(simpleUsername, updatedPassword).users.retrieveOne31(userId));
+    }
+
+    @Test
+    public void testApplicationUserCanChangeOwnPassword() {
+        // Admin creates a new user with an empty role
+        Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
+        String originalPassword = "QwE!5rTy#9uP0";
+        String simpleUsername = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
+        GetOfficesResponse headOffice = OfficeHelper.getHeadOffice(requestSpec, responseSpec);
+        PostUsersRequest createUserRequest = new PostUsersRequest().username(simpleUsername)
+                .firstname(Utils.randomStringGenerator("NotificationFN", 4)).lastname(Utils.randomStringGenerator("NotificationLN", 4))
+                .email("whatever@mifos.org").password(originalPassword).repeatPassword(originalPassword).sendPasswordToEmail(false)
+                .officeId(headOffice.getId()).roles(List.of(Long.valueOf(roleId)));
+
+        PostUsersResponse userCreationResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
+        Long userId = userCreationResponse.getResourceId();
+        Assertions.assertNotNull(userId);
+
+        // User changes its own password
+
+        String updatedPassword = "pX268-4Pfv|kF6";
+        ChangePwdUsersUserIdResponse changePwdUsersUserIdResponse = ok(newFineractClient(simpleUsername, originalPassword).users
+                .changePassword(userId, new ChangePwdUsersUserIdRequest().password(updatedPassword).repeatPassword(updatedPassword)));
+        Assertions.assertNotNull(changePwdUsersUserIdResponse.getResourceId());
 
         // From then on the originalPassword is not working anymore
         CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class, () -> {

@@ -157,6 +157,36 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     @Override
     @Transactional
     @Caching(evict = { @CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true) })
+    public CommandProcessingResult changeUserPassword(final Long userId, final JsonCommand command) {
+        try {
+            this.context.authenticatedUser(new CommandWrapperBuilder().updateUser(null).build());
+            this.fromApiJsonDeserializer.validateForChangePassword(command.json(), this.context.authenticatedUser());
+            final AppUser userToUpdate = this.appUserRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+            final AppUserPreviousPassword currentPasswordToSaveAsPreview = getCurrentPasswordToSaveAsPreview(userToUpdate, command);
+            final Map<String, Object> changes = userToUpdate.changePassword(command, this.platformPasswordEncoder);
+            if (!changes.isEmpty()) {
+                this.appUserRepository.saveAndFlush(userToUpdate);
+                if (currentPasswordToSaveAsPreview != null) {
+                    this.appUserPreviewPasswordRepository.save(currentPasswordToSaveAsPreview);
+                }
+            }
+            return new CommandProcessingResultBuilder() //
+                    .withEntityId(userId) //
+                    .withOfficeId(userToUpdate.getOffice().getId()) //
+                    .with(changes) //
+                    .build();
+        } catch (final DataIntegrityViolationException dve) {
+            throw handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
+        } catch (final JpaSystemException | PersistenceException | AuthenticationServiceException dve) {
+            log.error("changeUserPassword: JpaSystemException | PersistenceException | AuthenticationServiceException", dve);
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
+            throw handleDataIntegrityIssues(command, throwable, dve);
+        }
+    }
+
+    @Override
+    @Transactional
+    @Caching(evict = { @CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true) })
     public CommandProcessingResult updateUser(final Long userId, final JsonCommand command) {
         try {
             this.context.authenticatedUser(new CommandWrapperBuilder().updateUser(null).build());

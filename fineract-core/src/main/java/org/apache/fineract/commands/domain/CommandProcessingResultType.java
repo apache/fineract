@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.commands.domain;
 
+import jakarta.validation.constraints.NotNull;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -41,8 +42,21 @@ public enum CommandProcessingResultType {
     private final Integer value;
     private final String code;
 
+    @NotNull
     public static CommandProcessingResultType fromInt(final Integer value) {
         CommandProcessingResultType transactionType = BY_ID.get(value);
         return transactionType == null ? INVALID : transactionType;
+    }
+
+    public boolean isProcessed() {
+        return this == PROCESSED;
+    }
+
+    public boolean isAwaitingApproval() {
+        return this == AWAITING_APPROVAL;
+    }
+
+    public boolean isRejected() {
+        return this == REJECTED;
     }
 }

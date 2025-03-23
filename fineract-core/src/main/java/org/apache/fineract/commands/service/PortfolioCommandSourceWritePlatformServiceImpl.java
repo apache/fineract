@@ -55,7 +55,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         boolean isApprovedByChecker = false;
 
         // check if is update of own account details
-        if (wrapper.isUpdateOfOwnUserDetails(this.context.authenticatedUser(wrapper).getId())) {
+        if (wrapper.isChangeOfOwnUserDetails(this.context.authenticatedUser(wrapper).getId())) {
             // then allow this operation to proceed.
             // maker checker doesnt mean anything here.
             isApprovedByChecker = true; // set to true in case permissions have
@@ -117,7 +117,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
     private CommandSource validateMakerCheckerTransaction(final Long makerCheckerId) {
         final CommandSource commandSource = this.commandSourceRepository.findById(makerCheckerId)
                 .orElseThrow(() -> new CommandNotFoundException(makerCheckerId));
-        if (!commandSource.isMarkedAsAwaitingApproval()) {
+        if (!commandSource.isAwaitingApproval()) {
             throw new CommandNotAwaitingApprovalException(makerCheckerId);
         }
         AppUser appUser = this.context.authenticatedUser();

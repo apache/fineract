@@ -117,16 +117,11 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             storeCommandIdInContext(commandSource); // Store command id as a request attribute
         }
 
-        boolean isMakerChecker = configurationDomainService.isMakerCheckerEnabledForTask(wrapper.taskPermissionName());
-        if (isApprovedByChecker || (isMakerChecker && user.isCheckerSuperUser())) {
-            commandSource.markAsChecked(user);
-        }
         setIdempotencyKeyStoreFlag(true);
 
         final CommandProcessingResult result;
         try {
-            result = commandSourceService.processCommand(findCommandHandler(wrapper), command, commandSource, user, isApprovedByChecker,
-                    isMakerChecker);
+            result = commandSourceService.processCommand(findCommandHandler(wrapper), command, commandSource, user, isApprovedByChecker);
         } catch (Throwable t) { // NOSONAR
             RuntimeException mappable = ErrorHandler.getMappable(t);
             ErrorInfo errorInfo = commandSourceService.generateErrorInfo(mappable);
@@ -134,7 +129,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             commandSource.setResultStatusCode(statusCode);
             commandSource.setResult(errorInfo.getMessage());
             if (statusCode != SC_OK) {
-                commandSource.setStatus(ERROR.getValue());
+                commandSource.setStatus(ERROR);
             }
             if (!isEnclosingTransaction) { // TODO: temporary solution
                 commandSource = commandSourceService.saveResultNewTransaction(commandSource);
@@ -148,7 +143,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         commandSource.setResultStatusCode(SC_OK);
         commandSource.updateForAudit(result);
         commandSource.setResult(toApiResultJsonSerializer.serializeResult(result));
-        commandSource.setStatus(PROCESSED.getValue());
+        commandSource.setStatus(PROCESSED);
         commandSource = commandSourceService.saveResultSameTransaction(commandSource);
         storeCommandIdInContext(commandSource); // Store command id as a request attribute
 

@@ -101,7 +101,7 @@ public class CommandServiceStepDefinitions implements En {
 
         public DummyCommand() {
             super(null, null, null, null, null, null, null, null, null, null, "{}", null, null, null, null, null, null,
-                    UUID.randomUUID().toString(), null);
+                    UUID.randomUUID().toString(), null, null);
         }
 
         @Override

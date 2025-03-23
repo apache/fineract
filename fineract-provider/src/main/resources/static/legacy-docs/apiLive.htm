@@ -39423,6 +39423,40 @@ Request body:
 				</div>
 			</div>
 
+            <a id="users_changepwd" name="users_changepwd" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Change the password of a User</h4>
+                    <p>
+                        <b>Note:</b> When updating a password you must provide the
+                        repeatPassword parameter also.
+                    </p>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+POST https://DomainName/api/v1/users/{userId)/pwd
+                    </code>
+                    <code class="method-request">
+POST users/3/pwd
+Content-Type: application/json
+Request body:
+{
+    "password": "window75",
+    "repeatPassword": "window75"
+}
+                    </code>
+                    <code class="method-response">
+{
+    "officeId": 1,
+    "resourceId": 3,
+    "changes": {
+        "passwordEncoded": "abc3326b1bb376351c7baeb4175f5e0504e33aadf6a158474a6d71de1befae51"
+    }
+}
+                    </code>
+                </div>
+            </div>
+
 			<a id="users_update" name="users_update" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -39451,8 +39485,7 @@ Request body:
     "officeId": 1,
     "resourceId": 3,
     "changes": {
-        "firstname": "Test",
-        "passwordEncoded": "abc3326b1bb376351c7baeb4175f5e0504e33aadf6a158474a6d71de1befae51"
+        "firstname": "Test"
     }
 }
 					</code>

@@ -171,7 +171,7 @@ public class UsersApiResource {
 
     @PUT
     @Path("{userId}")
-    @Operation(summary = "Update a User", description = "When updating a password you must provide the repeatPassword parameter also.")
+    @Operation(summary = "Update a User", description = "Updates the user")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.PutUsersUserIdRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.PutUsersUserIdResponse.class))) })
@@ -182,6 +182,27 @@ public class UsersApiResource {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .updateUser(userId) //
+                .withJson(apiRequestBodyAsJson) //
+                .build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
+    }
+
+    @POST
+    @Path("{userId}/pwd")
+    @Operation(summary = "Change the password of a User", description = "When updating a password you must provide the repeatPassword parameter also.")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.ChangePwdUsersUserIdRequest.class)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.ChangePwdUsersUserIdResponse.class))) })
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String changePassword(@PathParam("userId") @Parameter(description = "userId") final Long userId,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
+                .changeUserPassword(userId) //
                 .withJson(apiRequestBodyAsJson) //
                 .build();
 

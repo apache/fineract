@@ -151,6 +151,43 @@ final class UsersApiResourceSwagger {
         public Long resourceId;
     }
 
+    @Schema(description = "ChangePwdUsersUserIdRequest")
+    public static final class ChangePwdUsersUserIdRequest {
+
+        private ChangePwdUsersUserIdRequest() {
+
+        }
+
+        @Schema(example = "password")
+        public String password;
+        @Schema(example = "repeatPassword")
+        public String repeatPassword;
+    }
+
+    @Schema(description = "ChangePwdUsersUserIdResponse")
+    public static final class ChangePwdUsersUserIdResponse {
+
+        private ChangePwdUsersUserIdResponse() {
+
+        }
+
+        static final class ChangePwdUsersUserIdResponseChanges {
+
+            private ChangePwdUsersUserIdResponseChanges() {
+
+            }
+
+            @Schema(example = "true")
+            public boolean password;
+        }
+
+        @Schema(example = "1")
+        public Long officeId;
+        @Schema(example = "11")
+        public Long resourceId;
+        public ChangePwdUsersUserIdResponseChanges changes;
+    }
+
     @Schema(description = "PutUsersUserIdRequest")
     public static final class PutUsersUserIdRequest {
 

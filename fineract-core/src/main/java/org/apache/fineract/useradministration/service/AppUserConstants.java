@@ -24,6 +24,8 @@ public final class AppUserConstants {
 
     }
 
+    public static final String PASSWORD = "password";
+    public static final String REPEAT_PASSWORD = "repeatPassword";
     public static final String PASSWORD_NEVER_EXPIRES = "passwordNeverExpires";
     public static final String IS_SELF_SERVICE_USER = "isSelfServiceUser";
     public static final String CLIENTS = "clients";

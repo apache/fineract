@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.useradministration.domain;
 
+import static org.apache.fineract.useradministration.service.AppUserConstants.PASSWORD;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -195,8 +197,27 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
         return organisationalRole;
     }
 
+    public Map<String, Object> changePassword(final JsonCommand command, final PlatformPasswordEncoder platformPasswordEncoder) {
+        // unencoded password provided
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(1);
+        updatePassword(command, platformPasswordEncoder, actualChanges);
+        return actualChanges;
+    }
+
+    private void updatePassword(JsonCommand command, PlatformPasswordEncoder platformPasswordEncoder, Map<String, Object> actualChanges) {
+        final String passwordParamName = PASSWORD;
+        if (command.hasParameter(passwordParamName)) {
+            if (command.isChangeInPasswordParameterNamed(passwordParamName, this.password, platformPasswordEncoder, getId())) {
+                final String passwordEncodedValue = command.passwordValueOfParameterNamed(passwordParamName, platformPasswordEncoder,
+                        getId());
+                actualChanges.put(passwordParamName, true);
+                updatePassword(passwordEncodedValue);
+            }
+        }
+    }
+
     public void updatePassword(final String encodePassword) {
-        if (cannotChangePassword != null && cannotChangePassword == true) {
+        if (Boolean.TRUE.equals(cannotChangePassword)) {
             throw new NoAuthorizationException("Password of this user may not be modified");
         }
 
@@ -223,27 +244,10 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
 
     public Map<String, Object> update(final JsonCommand command, final PlatformPasswordEncoder platformPasswordEncoder,
             final Collection<Client> clients) {
-
         final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
 
         // unencoded password provided
-        final String passwordParamName = "password";
-        final String passwordEncodedParamName = "passwordEncoded";
-        if (command.hasParameter(passwordParamName)) {
-            if (command.isChangeInPasswordParameterNamed(passwordParamName, this.password, platformPasswordEncoder, getId())) {
-                final String passwordEncodedValue = command.passwordValueOfParameterNamed(passwordParamName, platformPasswordEncoder,
-                        getId());
-                updatePassword(passwordEncodedValue);
-            }
-        }
-
-        if (command.hasParameter(passwordEncodedParamName)) {
-            if (command.isChangeInStringParameterNamed(passwordEncodedParamName, this.password)) {
-                final String newValue = command.stringValueOfParameterNamed(passwordEncodedParamName);
-                updatePassword(newValue);
-            }
-        }
-
+        updatePassword(command, platformPasswordEncoder, actualChanges);
         final String officeIdParamName = "officeId";
         if (command.isChangeInLongParameterNamed(officeIdParamName, this.office.getId())) {
             final Long newValue = command.longValueOfParameterNamed(officeIdParamName);

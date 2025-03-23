@@ -117,7 +117,7 @@ public class SynchronousCommandProcessingServiceTest {
         when(commandSource.getStatus()).thenReturn(CommandProcessingResultType.PROCESSED.getValue());
         when(context.authenticatedUser(Mockito.any(CommandWrapper.class))).thenReturn(appUser);
 
-        when(commandSourceService.processCommand(commandHandler, jsonCommand, commandSource, appUser, false, false))
+        when(commandSourceService.processCommand(commandHandler, jsonCommand, commandSource, appUser, false))
                 .thenReturn(commandProcessingResult);
 
         CommandProcessingResult actualCommandProcessingResult = underTest.executeCommand(commandWrapper, jsonCommand, false);
@@ -163,8 +163,7 @@ public class SynchronousCommandProcessingServiceTest {
 
         when(commandSourceService.findCommandSource(commandWrapper, idk)).thenReturn(initialCommandSource);
 
-        when(commandSourceService.processCommand(commandHandler, jsonCommand, commandSource, appUser, false, false))
-                .thenThrow(runtimeException);
+        when(commandSourceService.processCommand(commandHandler, jsonCommand, commandSource, appUser, false)).thenThrow(runtimeException);
 
         assertThrows(RuntimeException.class, () -> {
             underTest.executeCommand(commandWrapper, jsonCommand, false);
