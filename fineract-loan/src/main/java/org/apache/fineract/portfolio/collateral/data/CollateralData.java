@@ -20,12 +20,14 @@ package org.apache.fineract.portfolio.collateral.data;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 /**
  * Immutable data object for Collateral data.
  */
+@Getter
 public final class CollateralData {
 
     private final Long id;

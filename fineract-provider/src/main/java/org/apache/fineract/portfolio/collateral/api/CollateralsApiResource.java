@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.collateral.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -55,6 +54,8 @@ import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSeria
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.collateral.data.CollateralData;
+import org.apache.fineract.portfolio.collateral.data.LoansLoanIdCollateralsRequest;
+import org.apache.fineract.portfolio.collateral.data.LoansLoandIdCollateralsCollateralIdRequest;
 import org.apache.fineract.portfolio.collateral.service.CollateralReadPlatformService;
 import org.springframework.stereotype.Component;
 
@@ -82,18 +83,12 @@ public class CollateralsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Collateral Details Template", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
             + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "Example Request:\n" + "\n" + "loans/1/collaterals/template")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CollateralsApiResourceSwagger.GetLoansLoanIdCollateralsTemplateResponse.class))) })
-    public String newCollateralTemplate(@Context final UriInfo uriInfo,
-            @PathParam("loanId") @Parameter(description = "loanId") final Long loanId) {
+    public CollateralData newCollateralTemplate(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId) {
 
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
 
-        final Collection<CodeValueData> codeValues = this.codeValueReadPlatformService.retrieveCodeValuesByCode("LoanCollateral");
-        final CollateralData collateralData = CollateralData.template(codeValues);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.apiJsonSerializerService.serialize(settings, collateralData, RESPONSE_DATA_PARAMETERS);
+        final List<CodeValueData> codeValues = this.codeValueReadPlatformService.retrieveCodeValuesByCode("LoanCollateral");
+        return CollateralData.template(codeValues);
     }
 
     @GET
@@ -101,17 +96,10 @@ public class CollateralsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Loan Collaterals", description = "Example Requests:\n" + "\n" + "loans/1/collaterals\n" + "\n" + "\n"
             + "loans/1/collaterals?fields=value,description")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = CollateralsApiResourceSwagger.GetLoansLoanIdCollateralsResponse.class)))) })
-    public String retrieveCollateralDetails(@Context final UriInfo uriInfo,
-            @PathParam("loanId") @Parameter(description = "loanId") final Long loanId) {
+    public List<CollateralData> retrieveCollateralDetails(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId) {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
 
-        final List<CollateralData> collateralDatas = this.collateralReadPlatformService.retrieveCollateralsForValidLoan(loanId);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-
-        return this.apiJsonSerializerService.serialize(settings, collateralDatas, RESPONSE_DATA_PARAMETERS);
+        return this.collateralReadPlatformService.retrieveCollateralsForValidLoan(loanId);
     }
 
     @GET
@@ -143,17 +131,16 @@ public class CollateralsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create a Collateral", description = "Note: Currently, Collaterals may be added only before a Loan is approved")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CollateralsApiResourceSwagger.PostLoansLoanIdCollateralsRequest.class)))
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoansLoanIdCollateralsRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CollateralsApiResourceSwagger.PostLoansLoanIdCollateralsResponse.class))) })
-    public String createCollateral(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
-            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
+    public CommandProcessingResult createCollateral(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
+            @Parameter(hidden = true) final LoansLoanIdCollateralsRequest loansLoanIdCollateralsRequest) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createCollateral(loanId).withJson(apiRequestBodyAsJson).build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createCollateral(loanId)
+                .withJson(apiJsonSerializerService.serialize(loansLoanIdCollateralsRequest)).build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.apiJsonSerializerService.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @PUT
@@ -161,18 +148,16 @@ public class CollateralsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Collateral")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CollateralsApiResourceSwagger.PutLoansLoandIdCollateralsCollateralIdRequest.class)))
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoansLoandIdCollateralsCollateralIdRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CollateralsApiResourceSwagger.PutLoansLoanIdCollateralsCollateralIdResponse.class))) })
-    public String updateCollateral(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
+    public CommandProcessingResult updateCollateral(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @PathParam("collateralId") @Parameter(description = "collateralId") final Long collateralId,
-            @Parameter(hidden = true) final String jsonRequestBody) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateCollateral(loanId, collateralId).withJson(jsonRequestBody)
-                .build();
+            @Parameter(hidden = true) final LoansLoandIdCollateralsCollateralIdRequest loansLoandIdCollateralsCollateralIdRequest) {
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateCollateral(loanId, collateralId)
+                .withJson(apiJsonSerializerService.serialize(loansLoandIdCollateralsCollateralIdRequest)).build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.apiJsonSerializerService.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @DELETE
@@ -182,12 +167,10 @@ public class CollateralsApiResource {
     @Operation(summary = "Remove a Collateral", description = "Note: A collateral can only be removed from Loans that are not yet approved.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CollateralsApiResourceSwagger.DeleteLoansLoanIdCollateralsCollateralIdResponse.class))) })
-    public String deleteCollateral(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
+    public CommandProcessingResult deleteCollateral(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @PathParam("collateralId") @Parameter(description = "collateralId") final Long collateralId) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteCollateral(loanId, collateralId).build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.apiJsonSerializerService.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 }

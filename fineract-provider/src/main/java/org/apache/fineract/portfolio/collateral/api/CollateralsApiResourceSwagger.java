@@ -19,7 +19,7 @@
 package org.apache.fineract.portfolio.collateral.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.Set;
+import org.apache.fineract.portfolio.collateral.data.LoansLoanIdCollateralsRequest;
 
 /**
  * Created by Chirag Gupta on 12/01/17.
@@ -71,15 +71,6 @@ final class CollateralsApiResourceSwagger {
         public GetCollateralCurrencyResponse currency;
     }
 
-    @Schema(description = "PostLoansLoanIdCollateralsRequest")
-    public static final class PostLoansLoanIdCollateralsRequest {
-
-        private PostLoansLoanIdCollateralsRequest() {}
-
-        @Schema(example = "9")
-        public Long collateralTypeId;
-    }
-
     @Schema(description = "PostLoansLoanIdCollateralsResponse")
     public static final class PostLoansLoanIdCollateralsResponse {
 
@@ -87,15 +78,6 @@ final class CollateralsApiResourceSwagger {
 
         @Schema(example = "12")
         public Long resourceId;
-    }
-
-    @Schema(description = "PutLoansLoandIdCollateralsCollateralIdRequest")
-    public static final class PutLoansLoandIdCollateralsCollateralIdRequest {
-
-        private PutLoansLoandIdCollateralsCollateralIdRequest() {}
-
-        @Schema(example = "22 Carat Gold chain weighing 12 grams")
-        public String description;
     }
 
     @Schema(description = "PutLoansLoanIdCollateralsCollateralIdResponse")
@@ -107,27 +89,7 @@ final class CollateralsApiResourceSwagger {
         public Long loanId;
         @Schema(example = "12")
         public Long resourceId;
-        public PutLoansLoandIdCollateralsCollateralIdRequest changes;
-    }
-
-    @Schema(description = "GetLoansLoanIdCollateralsTemplateResponse")
-    public static final class GetLoansLoanIdCollateralsTemplateResponse {
-
-        private GetLoansLoanIdCollateralsTemplateResponse() {}
-
-        static final class GetCollateralsTemplateAllowedTypes {
-
-            private GetCollateralsTemplateAllowedTypes() {}
-
-            @Schema(example = "9")
-            public Long id;
-            @Schema(example = "Silver")
-            public String name;
-            @Schema(example = "0")
-            public Integer position;
-        }
-
-        public Set<GetCollateralsTemplateAllowedTypes> allowedCollateralTypes;
+        public LoansLoanIdCollateralsRequest changes;
     }
 
     @Schema(description = "DeleteLoansLoanIdCollateralsCollateralIdResponse")
