@@ -62,7 +62,6 @@ public class LoanChargeOffBusinessEventSerializer extends LoanTransactionBusines
         LoanTransactionBusinessEvent event = (LoanTransactionBusinessEvent) rawEvent;
         List<UnpaidChargeData> unpaidChargeDataList = loanTransactionRepository.fetchTotalUnpaidChargesForLoan(event.get().getLoan());
         transactionDataV1.setUnpaidCharges(unpaidChargeDataMapper.map(unpaidChargeDataList));
-        transactionDataV1.setCustomData(collectCustomData(event));
         return transactionDataV1;
     }
 

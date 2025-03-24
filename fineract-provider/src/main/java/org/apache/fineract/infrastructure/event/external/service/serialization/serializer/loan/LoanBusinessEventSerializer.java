@@ -18,11 +18,8 @@
  */
 package org.apache.fineract.infrastructure.event.external.service.serialization.serializer.loan;
 
-import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.generic.GenericContainer;
 import org.apache.commons.collections4.CollectionUtils;
@@ -50,7 +47,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class LoanBusinessEventSerializer implements BusinessEventSerializer {
+public class LoanBusinessEventSerializer extends AbstractLoanBusinessEventSerializer<LoanBusinessEvent> implements BusinessEventSerializer {
 
     private final LoanReadPlatformService service;
     private final LoanAccountDataMapper mapper;
@@ -116,9 +113,8 @@ public class LoanBusinessEventSerializer implements BusinessEventSerializer {
         return LoanAccountDataV1.class;
     }
 
-    private Map<String, ByteBuffer> collectCustomData(final LoanBusinessEvent event) {
-        return externalEventCustomDataSerializers.stream().collect(Collectors.toMap(ExternalEventCustomDataSerializer::key,
-                serializer -> serializer.serialize(event), (existing, replacement) -> replacement));
+    @Override
+    protected List<ExternalEventCustomDataSerializer<LoanBusinessEvent>> getExternalEventCustomDataSerializers() {
+        return externalEventCustomDataSerializers;
     }
-
 }
