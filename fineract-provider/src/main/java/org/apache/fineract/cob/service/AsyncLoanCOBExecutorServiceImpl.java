@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.cob.service;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -37,11 +36,11 @@ import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.data.JobParameterDTO;
-import org.apache.fineract.infrastructure.jobs.domain.JobParameterRepository;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetailRepository;
 import org.apache.fineract.infrastructure.jobs.exception.JobNotFoundException;
 import org.apache.fineract.infrastructure.jobs.service.JobStarter;
+import org.apache.fineract.infrastructure.jobs.service.SchedulerServiceConstants;
 import org.quartz.JobExecutionException;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParametersInvalidException;
@@ -63,12 +62,10 @@ public class AsyncLoanCOBExecutorServiceImpl implements AsyncLoanCOBExecutorServ
     private final JobLocator jobLocator;
     private final ScheduledJobDetailRepository scheduledJobDetailRepository;
     private final JobStarter jobStarter;
-    private final JobParameterRepository jobParameterRepository;
     private final RetrieveLoanIdService retrieveLoanIdService;
 
     @Override
     @Async(TaskExecutorConstant.LOAN_COB_CATCH_UP_TASK_EXECUTOR_BEAN_NAME)
-    @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     public void executeLoanCOBCatchUpAsync(FineractContext context) {
         try {
             ThreadLocalContextUtil.init(context);
@@ -80,35 +77,36 @@ public class AsyncLoanCOBExecutorServiceImpl implements AsyncLoanCOBExecutorServ
                     ? loanIdAndLastClosedBusinessDate.get(0).getLastClosedBusinessDate()
                     : cobBusinessDate;
             if (DateUtils.isBefore(oldestCOBProcessedDate, cobBusinessDate)) {
-                executeLoanCOBDayByDayUntilCOBBusinessDate(oldestCOBProcessedDate, cobBusinessDate, context);
+                executeLoanCOBDayByDayUntilCOBBusinessDate(oldestCOBProcessedDate, cobBusinessDate);
             }
         } catch (NoSuchJobException e) {
             // Throwing an error here is useless as it will be swallowed hence it is async method
-            log.error("", new JobNotFoundException(LoanCOBConstant.JOB_NAME, e));
+            log.error("Job not found: {}", LoanCOBConstant.JOB_NAME, new JobNotFoundException(LoanCOBConstant.JOB_NAME, e));
         } catch (JobInstanceAlreadyCompleteException | JobRestartException | JobParametersInvalidException
                 | JobExecutionAlreadyRunningException | JobExecutionException e) {
             // Throwing an error here is useless as it will be swallowed hence it is async method
-            log.error("", e);
+            log.error("Error executing job", e);
         } finally {
             ThreadLocalContextUtil.reset();
         }
     }
 
-    private void executeLoanCOBDayByDayUntilCOBBusinessDate(LocalDate oldestCOBProcessedDate, LocalDate cobBusinessDate,
-            FineractContext context) throws NoSuchJobException, JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException,
+    private void executeLoanCOBDayByDayUntilCOBBusinessDate(LocalDate oldestCOBProcessedDate, LocalDate cobBusinessDate)
+            throws NoSuchJobException, JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException,
             JobParametersInvalidException, JobRestartException, JobExecutionException {
         Job job = jobLocator.getJob(LoanCOBConstant.JOB_NAME);
         ScheduledJobDetail scheduledJobDetail = scheduledJobDetailRepository.findByJobName(LoanCOBConstant.JOB_HUMAN_READABLE_NAME);
         LocalDate executingBusinessDate = oldestCOBProcessedDate.plusDays(1);
+        String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
+
         while (!DateUtils.isAfter(executingBusinessDate, cobBusinessDate)) {
-            // Need to reinitialize the thread-local tenant info because after running the job, it resets the thread
-            ThreadLocalContextUtil.init(context);
             JobParameterDTO jobParameterDTO = new JobParameterDTO(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME,
                     executingBusinessDate.format(DateTimeFormatter.ISO_DATE));
             JobParameterDTO jobParameterCatchUpDTO = new JobParameterDTO(LoanCOBConstant.IS_CATCH_UP_PARAMETER_NAME, "true");
+            JobParameterDTO tenantParameterDTO = new JobParameterDTO(SchedulerServiceConstants.TENANT_IDENTIFIER, tenantIdentifier);
             Set<JobParameterDTO> jobParameters = new HashSet<>();
-            Collections.addAll(jobParameters, jobParameterDTO, jobParameterCatchUpDTO);
-            jobStarter.run(job, scheduledJobDetail, jobParameters, ThreadLocalContextUtil.getTenant().getTenantIdentifier());
+            Collections.addAll(jobParameters, jobParameterDTO, jobParameterCatchUpDTO, tenantParameterDTO);
+            jobStarter.run(job, scheduledJobDetail, jobParameters, tenantIdentifier);
             executingBusinessDate = executingBusinessDate.plusDays(1);
         }
     }

@@ -18,19 +18,30 @@
  */
 package org.apache.fineract.cob.loan;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.core.task.TaskDecorator;
+import org.springframework.lang.NonNull;
 
+/**
+ * Task decorator to ensure proper thread context propagation and cleanup
+ */
+@Slf4j
 public class ContextAwareTaskDecorator implements TaskDecorator {
 
+    @NonNull
     @Override
-    public Runnable decorate(@NotNull Runnable runnable) {
+    public Runnable decorate(@NonNull final Runnable runnable) {
         final FineractContext context = ThreadLocalContextUtil.getContext();
         return () -> {
-            ThreadLocalContextUtil.init(context);
-            runnable.run();
+            try {
+                log.debug("Initializing thread context for decorated task");
+                ThreadLocalContextUtil.init(context);
+                runnable.run();
+            } finally {
+                ThreadLocalContextUtil.reset();
+            }
         };
     }
 

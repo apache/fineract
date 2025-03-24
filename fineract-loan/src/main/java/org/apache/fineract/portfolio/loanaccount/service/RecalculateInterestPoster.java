@@ -41,9 +41,12 @@ public class RecalculateInterestPoster implements Callable<Void> {
 
     @Override
     public Void call() throws JobExecutionException {
-        ThreadLocalContextUtil.init(fineractContext);
-        if (!loanIds.isEmpty()) {
-            List<Throwable> errors = new ArrayList<>();
+        if (loanIds.isEmpty()) {
+            return null;
+        }
+        try {
+            ThreadLocalContextUtil.init(fineractContext);
+            final List<Throwable> errors = new ArrayList<>();
             for (Long loanId : loanIds) {
                 log.debug("Loan ID {}", loanId);
                 try {
@@ -55,6 +58,8 @@ public class RecalculateInterestPoster implements Callable<Void> {
             if (!errors.isEmpty()) {
                 throw new JobExecutionException(errors);
             }
+        } finally {
+            ThreadLocalContextUtil.reset();
         }
         return null;
     }

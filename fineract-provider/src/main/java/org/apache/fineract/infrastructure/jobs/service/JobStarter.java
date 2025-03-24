@@ -78,16 +78,24 @@ public class JobStarter {
     public JobExecution run(Job job, ScheduledJobDetail scheduledJobDetail, Set<JobParameterDTO> jobParameterDTOSet,
             String tenantIdentifier) throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException,
             JobParametersInvalidException, JobRestartException, JobExecutionException {
+
+        boolean contextInitialized = false;
+        final FineractPlatformTenant existingTenant = ThreadLocalContextUtil.getTenant();
+
         try {
-            FineractPlatformTenant tenant = tenantDetailsService.loadTenantById(tenantIdentifier);
-            ThreadLocalContextUtil.setTenant(tenant);
-            AppUser user = this.userRepository.fetchSystemUser();
-            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, user.getPassword(),
-                    user.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(auth);
-            HashMap<BusinessDateType, LocalDate> businessDates = businessDateReadPlatformService.getBusinessDates();
-            ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
-            ThreadLocalContextUtil.setBusinessDates(businessDates);
+            if (existingTenant == null) {
+                contextInitialized = true;
+                FineractPlatformTenant tenant = tenantDetailsService.loadTenantById(tenantIdentifier);
+                ThreadLocalContextUtil.setTenant(tenant);
+                AppUser user = this.userRepository.fetchSystemUser();
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, user.getPassword(),
+                        user.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(auth);
+                HashMap<BusinessDateType, LocalDate> businessDates = businessDateReadPlatformService.getBusinessDates();
+                ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
+                ThreadLocalContextUtil.setBusinessDates(businessDates);
+            }
+
             Map<String, JobParameter<?>> jobParameterMap = getJobParameter(scheduledJobDetail);
             JobParameters jobParameters = new JobParametersBuilder(jobExplorer).getNextJobParameters(job)
                     .addJobParameters(new JobParameters(jobParameterMap))
@@ -101,7 +109,9 @@ public class JobStarter {
             }
             return result;
         } finally {
-            ThreadLocalContextUtil.reset();
+            if (contextInitialized) {
+                ThreadLocalContextUtil.reset();
+            }
         }
     }
 

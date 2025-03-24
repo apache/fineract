@@ -109,7 +109,7 @@ public class SendAsynchronousEventsTasklet implements Tasklet {
         eventProducer.sendEvents(partitions);
     }
 
-    private void markEventsAsSent(List<Long> eventIds) {
+    private void markEventsAsSent(final List<Long> eventIds) {
         OffsetDateTime sentAt = DateUtils.getAuditOffsetDateTime();
 
         // Partitioning dataset to avoid exception: PreparedStatement can have at most 65,535 parameters
@@ -117,20 +117,23 @@ public class SendAsynchronousEventsTasklet implements Tasklet {
         List<List<Long>> partitions = Lists.partition(eventIds, partitionSize);
         List<Future<?>> tasks = new ArrayList<>();
         final FineractContext context = ThreadLocalContextUtil.getContext();
-        partitions //
-                .forEach(partitionedEventIds -> {
-                    tasks.add(threadPoolTaskExecutor.submit(() -> {
-                        ThreadLocalContextUtil.init(context);
-                        transactionTemplate.execute((status) -> {
-                            measure(() -> {
-                                repository.markEventsSent(partitionedEventIds, sentAt);
-                            }, timeTaken -> {
-                                log.debug("Took {}ms to update {} events", timeTaken.toMillis(), partitionedEventIds.size());
-                            });
-                            return null;
+        partitions.forEach(partitionedEventIds -> {
+            tasks.add(threadPoolTaskExecutor.submit(() -> {
+                try {
+                    ThreadLocalContextUtil.init(context);
+                    transactionTemplate.execute((status) -> {
+                        measure(() -> {
+                            repository.markEventsSent(partitionedEventIds, sentAt);
+                        }, timeTaken -> {
+                            log.debug("Took {}ms to update {} events", timeTaken.toMillis(), partitionedEventIds.size());
                         });
-                    }));
-                });
+                        return null;
+                    });
+                } finally {
+                    ThreadLocalContextUtil.reset();
+                }
+            }));
+        });
         for (Future<?> task : tasks) {
             try {
                 task.get();

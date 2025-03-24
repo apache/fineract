@@ -155,8 +155,12 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
 
         @Override
         public void run() {
-            ThreadLocalContextUtil.init(context);
-            connectAndSendToIntermediateServer(apiQueueResourceDatas);
+            try {
+                ThreadLocalContextUtil.init(context);
+                connectAndSendToIntermediateServer(apiQueueResourceDatas);
+            } finally {
+                ThreadLocalContextUtil.reset();
+            }
         }
 
         @Override

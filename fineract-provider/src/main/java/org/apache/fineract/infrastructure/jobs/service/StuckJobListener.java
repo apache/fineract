@@ -25,7 +25,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
-import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.JdbcTemplateFactory;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.core.service.tenant.TenantDetailsService;
@@ -37,6 +36,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -55,30 +55,32 @@ public class StuckJobListener implements ApplicationListener<ContextRefreshedEve
     private final AppUserRepositoryWrapper userRepository;
 
     @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-        if (!jobRegistry.getJobNames().isEmpty()) {
-            List<FineractPlatformTenant> allTenants = tenantDetailsService.findAllTenants();
-            allTenants.forEach(tenant -> {
+    public void onApplicationEvent(@NonNull final ContextRefreshedEvent event) {
+        if (jobRegistry.getJobNames().isEmpty()) {
+            return;
+        }
+        tenantDetailsService.findAllTenants().forEach(tenant -> {
+            try {
                 ThreadLocalContextUtil.setTenant(tenant);
-                NamedParameterJdbcTemplate namedParameterJdbcTemplate = jdbcTemplateFactory.createNamedParameterJdbcTemplate(tenant);
-                List<String> stuckJobNames = jobExecutionRepository.getStuckJobNames(namedParameterJdbcTemplate);
+                final NamedParameterJdbcTemplate namedParameterJdbcTemplate = jdbcTemplateFactory.createNamedParameterJdbcTemplate(tenant);
+                final List<String> stuckJobNames = jobExecutionRepository.getStuckJobNames(namedParameterJdbcTemplate);
                 if (!stuckJobNames.isEmpty()) {
                     try {
-                        HashMap<BusinessDateType, LocalDate> businessDates = businessDateReadPlatformService.getBusinessDates();
+                        final HashMap<BusinessDateType, LocalDate> businessDates = businessDateReadPlatformService.getBusinessDates();
                         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
                         ThreadLocalContextUtil.setBusinessDates(businessDates);
-                        AppUser user = userRepository.fetchSystemUser();
-                        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, user.getPassword(),
+                        final AppUser user = userRepository.fetchSystemUser();
+                        final UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, user.getPassword(),
                                 user.getAuthorities());
                         SecurityContextHolder.getContext().setAuthentication(auth);
                         stuckJobNames.forEach(stuckJobExecutorService::resumeStuckJob);
-                    } catch (Exception e) {
-                        throw new RuntimeException("Error while trying to restart stuck jobs", e);
                     } finally {
-                        ThreadLocalContextUtil.reset();
+                        SecurityContextHolder.getContext().setAuthentication(null);
                     }
                 }
-            });
-        }
+            } finally {
+                ThreadLocalContextUtil.reset();
+            }
+        });
     }
 }

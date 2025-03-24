@@ -18,22 +18,35 @@
  */
 package org.apache.fineract.infrastructure.springbatch;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.integration.partition.StepExecutionRequest;
+import org.springframework.lang.NonNull;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.support.ExecutorChannelInterceptor;
 import org.springframework.messaging.support.GenericMessage;
 
+/**
+ * Channel interceptor for Spring Batch message handling that ensures ThreadLocal context is properly initialized before
+ * message handling and cleaned up afterwards
+ */
+@Slf4j
 public class InputChannelInterceptor implements ExecutorChannelInterceptor {
 
     @Override
-    public Message<StepExecutionRequest> beforeHandle(Message<?> message, @NotNull MessageChannel channel,
-            @NotNull MessageHandler handler) {
+    public Message<StepExecutionRequest> beforeHandle(@NonNull final Message<?> message, @NonNull final MessageChannel channel,
+            @NonNull final MessageHandler handler) {
         return beforeHandleMessage(message);
+    }
+
+    @Override
+    public void afterMessageHandled(@NonNull final Message<?> message, @NonNull final MessageChannel channel,
+            @NonNull final MessageHandler handler, final Exception ex) {
+        log.debug("Cleaning up ThreadLocal context after message handling");
+        ThreadLocalContextUtil.reset();
     }
 
     public Message<StepExecutionRequest> beforeHandleMessage(Message<?> message) {
@@ -41,6 +54,7 @@ public class InputChannelInterceptor implements ExecutorChannelInterceptor {
     }
 
     public StepExecutionRequest beforeHandleMessage(ContextualMessage contextualMessage) {
+        log.debug("Initializing ThreadLocal context for message handling");
         ThreadLocalContextUtil.init(contextualMessage.getContext());
         ThreadLocalContextUtil.setActionContext(ActionContext.COB);
         return contextualMessage.getStepExecutionRequest();

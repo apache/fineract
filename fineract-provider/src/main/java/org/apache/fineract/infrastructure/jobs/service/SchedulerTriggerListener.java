@@ -50,14 +50,22 @@ public class SchedulerTriggerListener implements TriggerListener {
 
     @Override
     public boolean vetoJobExecution(final Trigger trigger, final JobExecutionContext context) {
-        String tenantIdentifier = trigger.getJobDataMap().getString(SchedulerServiceConstants.TENANT_IDENTIFIER);
-        FineractPlatformTenant tenant = tenantDetailsService.loadTenantById(tenantIdentifier);
+        final String tenantIdentifier = trigger.getJobDataMap().getString(SchedulerServiceConstants.TENANT_IDENTIFIER);
+        final FineractPlatformTenant existingTenant = ThreadLocalContextUtil.getTenant();
+        boolean contextInitialized = false;
+
         try {
-            ThreadLocalContextUtil.setTenant(tenant);
-            ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
+            if (existingTenant == null || !existingTenant.getTenantIdentifier().equals(tenantIdentifier)) {
+                contextInitialized = true;
+                final FineractPlatformTenant tenant = tenantDetailsService.loadTenantById(tenantIdentifier);
+                ThreadLocalContextUtil.setTenant(tenant);
+                ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
+            }
             return schedulerVetoer.veto(trigger, context);
         } finally {
-            ThreadLocalContextUtil.reset();
+            if (contextInitialized) {
+                ThreadLocalContextUtil.reset();
+            }
         }
     }
 

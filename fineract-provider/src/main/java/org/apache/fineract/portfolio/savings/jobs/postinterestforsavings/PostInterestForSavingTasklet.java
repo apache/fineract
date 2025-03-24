@@ -117,23 +117,27 @@ public class PostInterestForSavingTasklet implements Tasklet {
         FineractContext context = ThreadLocalContextUtil.getContext();
 
         Callable<Void> fetchData = () -> {
-            ThreadLocalContextUtil.init(context);
-            Long maxId = maxSavingsIdInList;
-            if (!queue.isEmpty()) {
-                maxId = Math.max(maxSavingsIdInList, queue.element().get(queue.element().size() - 1).getId());
-            }
-
-            while (queue.size() <= QUEUE_SIZE) {
-                log.debug("Fetching while threads are running!");
-                List<SavingsAccountData> savingsAccountDataList = Collections.synchronizedList(this.savingAccountReadPlatformService
-                        .retrieveAllSavingsDataForInterestPosting(backdatedTxnsAllowedTill, pageSize, ACTIVE.getValue(), maxId));
-                if (savingsAccountDataList.isEmpty()) {
-                    break;
+            try {
+                ThreadLocalContextUtil.init(context);
+                Long maxId = maxSavingsIdInList;
+                if (!queue.isEmpty()) {
+                    maxId = Math.max(maxSavingsIdInList, queue.element().get(queue.element().size() - 1).getId());
                 }
-                maxId = savingsAccountDataList.get(savingsAccountDataList.size() - 1).getId();
-                queue.add(savingsAccountDataList);
+
+                while (queue.size() <= QUEUE_SIZE) {
+                    log.debug("Fetching while threads are running!");
+                    List<SavingsAccountData> savingsAccountDataList = Collections.synchronizedList(this.savingAccountReadPlatformService
+                            .retrieveAllSavingsDataForInterestPosting(backdatedTxnsAllowedTill, pageSize, ACTIVE.getValue(), maxId));
+                    if (savingsAccountDataList.isEmpty()) {
+                        break;
+                    }
+                    maxId = savingsAccountDataList.get(savingsAccountDataList.size() - 1).getId();
+                    queue.add(savingsAccountDataList);
+                }
+                return null;
+            } finally {
+                ThreadLocalContextUtil.reset();
             }
-            return null;
         };
         posters.add(fetchData);
 
