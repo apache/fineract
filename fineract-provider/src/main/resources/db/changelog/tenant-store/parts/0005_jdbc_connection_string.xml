@@ -22,9 +22,27 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
     <changeSet author="fineract" id="1" context="tenant_store_db">
-        <update tableName="tenant_server_connections">
-            <column name="schema_connection_parameters" value="serverTimezone=UTC&amp;useLegacyDatetimeCode=false&amp;sessionVariables=time_zone='-00:00'"/>
-        </update>
+        <validCheckSum>9:14cc7994587792811d35cff3df30dc5d</validCheckSum>
+        <sql dbms="postgresql">
+            UPDATE tenant_server_connections
+            SET schema_connection_parameters =
+                    CASE
+                        WHEN schema_connection_parameters IS NULL OR TRIM(schema_connection_parameters) = ''
+                            THEN 'serverTimezone=UTC&amp;useLegacyDatetimeCode=false&amp;sessionVariables=time_zone=''-00:00'''
+                        ELSE schema_connection_parameters || '&amp;serverTimezone=UTC&amp;useLegacyDatetimeCode=false&amp;sessionVariables=time_zone=''-00:00'''
+                        END;
+        </sql>
+        <sql dbms="mysql,mariadb">
+            UPDATE tenant_server_connections
+            SET schema_connection_parameters =
+                    CASE
+                        WHEN schema_connection_parameters IS NULL OR TRIM(schema_connection_parameters) = ''
+                            THEN 'serverTimezone=UTC&amp;useLegacyDatetimeCode=false&amp;sessionVariables=time_zone=''-00:00'''
+                        ELSE CONCAT(schema_connection_parameters, '&amp;serverTimezone=UTC&amp;useLegacyDatetimeCode=false&amp;sessionVariables=time_zone=''-00:00''')
+                        END;
+        </sql>
     </changeSet>
+
 </databaseChangeLog>
