@@ -36,6 +36,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Future;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -43,11 +44,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.core.config.TaskExecutorConstant;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAdjustTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualAdjustmentTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualTransactionCreatedBusinessEvent;
@@ -78,8 +82,11 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanSchedul
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestRecalculationCompoundingMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Slf4j
 @Component
@@ -99,6 +106,10 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
     private final LoanTransactionRepository loanTransactionRepository;
     private final LoanScheduleGeneratorFactory loanScheduleFactory;
     private final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessorFactory;
+
+    @Qualifier(TaskExecutorConstant.CONFIGURABLE_TASK_EXECUTOR_BEAN_NAME)
+    private final ThreadPoolTaskExecutor taskExecutor;
+    private final TransactionTemplate transactionTemplate;
 
     /**
      * method adds accrual for batch job "Add Periodic Accrual Transactions" and add accruals api for Loan
@@ -143,13 +154,34 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
     public void addAccruals(@NotNull LocalDate tillDate) throws JobExecutionException {
         List<Loan> loans = loanRepositoryWrapper.findLoansForAddAccrual(AccountingRuleType.ACCRUAL_PERIODIC, tillDate,
                 !isChargeOnDueDate());
+
+        List<Future<?>> loanTasks = new ArrayList<>();
+
+        FineractContext context = ThreadLocalContextUtil.getContext();
+
+        loans.forEach(outerLoan -> {
+            loanTasks.add(taskExecutor.submit(() -> {
+                ThreadLocalContextUtil.init(context);
+                transactionTemplate.executeWithoutResult(status -> {
+                    Loan loan = loanRepositoryWrapper.findOneWithNotFoundDetection(outerLoan.getId());
+                    setSetHelpers(loan);
+                    try {
+                        log.debug("Adding accruals for loan '{}'", loan.getId());
+                        addAccruals(loan, tillDate, false, false, true);
+                        log.debug("Successfully processed loan: '{}' for accrual entries", loan.getId());
+                    } catch (Exception e) {
+                        log.error("Failed to add accrual for loan {}", loan.getId(), e);
+                        throw new RuntimeException("Failed to add accrual for loan " + loan.getId(), e);
+                    }
+                });
+            }));
+        });
+
         List<Throwable> errors = new ArrayList<>();
-        for (Loan loan : loans) {
+        for (Future<?> task : loanTasks) {
             try {
-                setSetHelpers(loan);
-                addAccruals(loan, tillDate, false, false, true);
+                task.get();
             } catch (Exception e) {
-                log.error("Failed to add accrual for loan {}", loan.getId(), e);
                 errors.add(e);
             }
         }
