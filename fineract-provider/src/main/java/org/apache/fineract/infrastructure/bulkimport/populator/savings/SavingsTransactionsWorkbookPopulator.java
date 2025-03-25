@@ -112,8 +112,8 @@ public class SavingsTransactionsWorkbookPopulator extends AbstractWorkbookPopula
                 .createExplicitListConstraint(new String[] { "Withdrawal", "Deposit" });
         DataValidationConstraint paymentTypeConstraint = validationHelper.createFormulaListConstraint("PaymentTypes");
         DataValidationConstraint transactionDateConstraint = validationHelper.createDateConstraint(
-                DataValidationConstraint.OperatorType.BETWEEN, "=VLOOKUP($C1,$Q$2:$T$" + (savingsAccounts.size() + 1) + ",4,FALSE)",
-                "=TODAY()", dateFormat);
+                DataValidationConstraint.OperatorType.BETWEEN,
+                "=DATEVALUE(VLOOKUP($C1,$Q$2:$T$" + (savingsAccounts.size() + 1) + ",4,FALSE))", "=TODAY()", dateFormat);
 
         DataValidation officeValidation = validationHelper.createValidation(officeNameConstraint, officeNameRange);
         DataValidation clientValidation = validationHelper.createValidation(clientNameConstraint, clientNameRange);
@@ -208,11 +208,13 @@ public class SavingsTransactionsWorkbookPopulator extends AbstractWorkbookPopula
             if (savingsAccount.getMinRequiredOpeningBalance() != null) {
                 writeBigDecimal(TransactionConstants.LOOKUP_OPENING_BALANCE_COL, row, savingsAccount.getMinRequiredOpeningBalance());
             }
-            writeDate(TransactionConstants.LOOKUP_SAVINGS_ACTIVATION_DATE_COL, row,
-                    "" + savingsAccount.getTimeline().getActivatedOnDate().getDayOfMonth() + "/"
-                            + savingsAccount.getTimeline().getActivatedOnDate().getMonthValue() + "/"
-                            + savingsAccount.getTimeline().getActivatedOnDate().getYear(),
-                    dateCellStyle, dateFormat);
+            if (savingsAccount.getActivatedOnDate() != null) {
+                writeDate(TransactionConstants.LOOKUP_SAVINGS_ACTIVATION_DATE_COL, row,
+                        "" + savingsAccount.getTimeline().getActivatedOnDate().getDayOfMonth() + "/"
+                                + savingsAccount.getTimeline().getActivatedOnDate().getMonthValue() + "/"
+                                + savingsAccount.getTimeline().getActivatedOnDate().getYear(),
+                        dateCellStyle, dateFormat);
+            }
         }
     }
 

@@ -62,7 +62,7 @@ public class ClientPersonImportHandler implements ImportHandler {
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
 
         List<ClientData> clients = readExcelFile(workbook, locale, dateFormat);
-        return importEntity(workbook, clients, dateFormat);
+        return importEntity(workbook, clients, dateFormat, locale);
     }
 
     public List<ClientData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
@@ -183,13 +183,13 @@ public class ClientPersonImportHandler implements ImportHandler {
 
     }
 
-    public Count importEntity(final Workbook workbook, final List<ClientData> clients, final String dateFormat) {
+    public Count importEntity(final Workbook workbook, final List<ClientData> clients, final String dateFormat, String locale) {
         Sheet clientSheet = workbook.getSheet(TemplatePopulateImportConstants.CLIENT_PERSON_SHEET_NAME);
         int successCount = 0;
         int errorCount = 0;
         String errorMessage;
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
+        gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat, locale));
         for (ClientData client : clients) {
             try {
                 String payload = gsonBuilder.create().toJson(client);

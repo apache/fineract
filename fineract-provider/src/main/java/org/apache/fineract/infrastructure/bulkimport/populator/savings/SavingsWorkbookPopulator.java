@@ -131,7 +131,7 @@ public class SavingsWorkbookPopulator extends AbstractWorkbookPopulator {
         writeString(SavingsConstants.INTEREST_CALCULATION_COL, rowHeader, "Interest Calculated*");
         writeString(SavingsConstants.INTEREST_CALCULATION_DAYS_IN_YEAR_COL, rowHeader, "# Days in Year*");
         writeString(SavingsConstants.MIN_OPENING_BALANCE_COL, rowHeader, "Min Opening Balance");
-        writeString(SavingsConstants.LOCKIN_PERIOD_COL, rowHeader, "Locked In For");
+        writeString(SavingsConstants.LOCKIN_PERIOD_COL, rowHeader, "Locked In For*");
         writeString(SavingsConstants.APPLY_WITHDRAWAL_FEE_FOR_TRANSFERS, rowHeader, "Apply Withdrawal Fee For Transfers");
 
         writeString(SavingsConstants.LOOKUP_CLIENT_NAME_COL, rowHeader, "Client Name");
@@ -234,8 +234,8 @@ public class SavingsWorkbookPopulator extends AbstractWorkbookPopulator {
         DataValidationConstraint fieldOfficerNameConstraint = validationHelper
                 .createFormulaListConstraint("INDIRECT(CONCATENATE(\"Staff_\",$A1))");
         DataValidationConstraint submittedDateConstraint = validationHelper.createDateConstraint(
-                DataValidationConstraint.OperatorType.BETWEEN,
-                "=VLOOKUP($C1,$AF$2:$AG$" + (clientSheetPopulator.getClientsSize() + groupSheetPopulator.getGroupsSize() + 1) + ",2,FALSE)",
+                DataValidationConstraint.OperatorType.BETWEEN, "=DATEVALUE(VLOOKUP($C1,$AF$2:$AG$"
+                        + (clientSheetPopulator.getClientsSize() + groupSheetPopulator.getGroupsSize() + 1) + ",2,FALSE))",
                 "=TODAY()", dateFormat);
         DataValidationConstraint approvalDateConstraint = validationHelper
                 .createDateConstraint(DataValidationConstraint.OperatorType.BETWEEN, "=$F1", "=TODAY()", dateFormat);
