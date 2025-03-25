@@ -53,7 +53,7 @@ import org.springframework.stereotype.Component;
 
 @Path("/v1/runreports")
 @Component
-@Tag(name = "Run Reports", description = "")
+@Tag(name = "Run Reports")
 @RequiredArgsConstructor
 public class RunreportsApiResource {
 
@@ -69,7 +69,7 @@ public class RunreportsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Return all available export types for the specific report", description = "Returns the list of all available export types.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ReportExportType.class)))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ReportExportType.class)))) })
     public Response retrieveAllAvailableExports(@PathParam("reportName") @Parameter(description = "reportName") final String reportName,
             @Context final UriInfo uriInfo,
             @DefaultValue("false") @QueryParam(IS_SELF_SERVICE_USER_REPORT_PARAMETER) @Parameter(description = IS_SELF_SERVICE_USER_REPORT_PARAMETER) final boolean isSelfServiceUserReport) {
