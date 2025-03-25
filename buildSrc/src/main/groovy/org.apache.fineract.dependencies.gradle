@@ -232,7 +232,8 @@ dependencyManagement {
             exclude 'org.slf4j:slf4j-api'
         }
 
-        dependency 'org.postgresql:postgresql:42.7.5'
+        //v42.7.5: performance issue: https://github.com/pgjdbc/pgjdbc/issues/3511#issuecomment-2637277977
+        dependency 'org.postgresql:postgresql:42.7.4'
 
         dependency 'org.assertj:assertj-core:3.26.3'
 
