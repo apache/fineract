@@ -298,6 +298,28 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         return new CommandProcessingResultBuilder().withTransactionId(reversalTransactionId).build();
     }
 
+    @Override
+    public void createJournalEntryForReversedLoanTransaction(final LocalDate transactionDate, final String loanTransactionId,
+            final Long officeId) {
+        final GLClosure latestGLClosure = this.helper.getLatestClosureByBranch(officeId);
+        this.helper.checkForBranchClosures(latestGLClosure, transactionDate);
+        final String transactionId = AccountingProcessorHelper.LOAN_TRANSACTION_IDENTIFIER + loanTransactionId;
+        final List<JournalEntry> journalEntries = this.glJournalEntryRepository.findJournalEntries(transactionId,
+                PortfolioProductType.LOAN.getValue());
+        if (journalEntries == null || journalEntries.isEmpty()) {
+            return;
+        }
+        for (final JournalEntry journalEntry : journalEntries) {
+            final JournalEntry reversalJournalEntry = JournalEntry.createNew(journalEntry.getOffice(), journalEntry.getPaymentDetail(),
+                    journalEntry.getGlAccount(), journalEntry.getCurrencyCode(), transactionId, Boolean.FALSE, transactionDate,
+                    journalEntry.isDebitEntry() ? JournalEntryType.CREDIT : JournalEntryType.DEBIT, journalEntry.getAmount(),
+                    journalEntry.getDescription(), journalEntry.getEntityType(), journalEntry.getEntityId(),
+                    journalEntry.getReferenceNumber(), journalEntry.getLoanTransactionId(), journalEntry.getSavingsTransactionId(),
+                    journalEntry.getClientTransactionId(), journalEntry.getShareTransactionId());
+            helper.persistJournalEntry(reversalJournalEntry);
+        }
+    }
+
     public String revertJournalEntry(final List<JournalEntry> journalEntries, String reversalComment) {
         final Long officeId = journalEntries.get(0).getOffice().getId();
         final String reversalTransactionId = generateTransactionId(officeId);

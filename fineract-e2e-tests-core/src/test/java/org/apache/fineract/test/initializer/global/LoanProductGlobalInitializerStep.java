@@ -1973,6 +1973,34 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .createLoanProduct(loanProductsRequestInterest36030DecliningPeriodDailyIntRecalc).execute();
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_360_30__DECLINING_PERIOD_DAILY_INT_RECALC,
                 responseInterest36030DecliningPeriodDailyIntRecalc);
+
+        // LP2 + zero-interest chargeOff behaviour + progressive loan schedule + horizontal + delinquent charge-off
+        // reason to GL account mapping
+        // (LP2_ADV_PYMNT_ZERO_INTEREST_CHARGE_OFF_DELINQUENT_REASON)
+        final String name83 = DefaultLoanProduct.LP2_ADV_PYMNT_ZERO_INTEREST_CHARGE_OFF_DELINQUENT_REASON.getName();
+
+        final PostLoanProductsRequest loanProductsRequestAdvZeroInterestChargeOffProgressiveDelinquentReason = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2ChargeOffReasonToExpenseAccountMappings()//
+                .name(name83)//
+                .enableDownPayment(false)//
+                .enableAutoRepaymentForDownPayment(null)//
+                .disbursedAmountPercentageForDownPayment(null)//
+                .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION.getValue())//
+                .loanScheduleType("PROGRESSIVE") //
+                .loanScheduleProcessingType("HORIZONTAL")//
+                .interestRateFrequencyType(3)//
+                .maxInterestRatePerPeriod(10.0)//
+                .paymentAllocation(List.of(//
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                        createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                        createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                        createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")))//
+                .chargeOffBehaviour("ZERO_INTEREST");//
+        final Response<PostLoanProductsResponse> responseLoanProductsRequestAdvZeroInterestChargeOffProgressiveDelinquentReason = loanProductsApi
+                .createLoanProduct(loanProductsRequestAdvZeroInterestChargeOffProgressiveDelinquentReason).execute();
+        TestContext.INSTANCE.set(
+                TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_ZERO_INTEREST_CHARGE_OFF_DELINQUENT_REASON,
+                responseLoanProductsRequestAdvZeroInterestChargeOffProgressiveDelinquentReason);
     }
 
     public static AdvancedPaymentData createPaymentAllocation(String transactionType, String futureInstallmentAllocationRule,

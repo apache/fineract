@@ -7542,3 +7542,45 @@ Feature: Charge-off
       | 20 January 2024  | Charge-off         | 790.71 | 757.67    | 33.04    | 0.0  | 0.0       | 0.0          | false    | false    |
     Then Loan marked as charged-off on "20 January 2024"
     Then LoanAccrualAdjustmentTransactionBusinessEvent is raised on "20 January 2024"
+
+  @TestRailId:C3567
+  Scenario: Charge-off reversal on a fraud loan respects GL mapping based on charge-off reason
+    When Admin sets the business date to "1 January 2024"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_ZERO_INTEREST_CHARGE_OFF_DELINQUENT_REASON | 01 January 2024   | 100            | 7                      | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   |      |            |      | 0.0         |
+      | 1  | 31   | 01 February 2024 |           | 83.59           | 16.41         | 0.59     | 0.0  | 0.0       | 17.0  | 0.0  | 0.0        | 0.0  | 17.0        |
+      | 2  | 29   | 01 March 2024    |           | 67.05           | 16.54         | 0.46     | 0.0  | 0.0       | 17.0  | 0.0  | 0.0        | 0.0  | 17.0        |
+      | 3  | 31   | 01 April 2024    |           | 50.45           | 16.6          | 0.4      | 0.0  | 0.0       | 17.0  | 0.0  | 0.0        | 0.0  | 17.0        |
+      | 4  | 30   | 01 May 2024      |           | 33.74           | 16.71         | 0.29     | 0.0  | 0.0       | 17.0  | 0.0  | 0.0        | 0.0  | 17.0        |
+      | 5  | 31   | 01 June 2024     |           | 16.94           | 16.8          | 0.2      | 0.0  | 0.0       | 17.0  | 0.0  | 0.0        | 0.0  | 17.0        |
+      | 6  | 30   | 01 July 2024     |           | 0.0             | 16.94         | 0.1      | 0.0  | 0.0       | 17.04 | 0.0  | 0.0        | 0.0  | 17.04       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 100           | 2.04     | 0    | 0         | 102.04 | 0    | 0          | 0    | 102.04      |
+    And Admin successfully approves the loan on "1 January 2024" with "100" amount and expected disbursement date on "1 January 2024"
+    And Admin successfully disburse the loan on "1 January 2024" with "100" EUR transaction amount
+    Then Admin can successfully set Fraud flag to the loan
+    When Admin sets the business date to "03 February 2024"
+    And Admin does charge-off the loan with reason "DELINQUENT" on "03 February 2024"
+    Then Loan Transactions tab has a "CHARGE_OFF" transaction with date "03 February 2024" which has the following Journal entries:
+      | Type    | Account code | Account name               | Debit | Credit |
+      | ASSET   | 112601       | Loans Receivable           |       | 100.0  |
+      | ASSET   | 112603       | Interest/Fee Receivable    |       | 0.62   |
+      | EXPENSE | 744037       | Credit Loss/Bad Debt-Fraud | 100.0 |        |
+      | INCOME  | 404001       | Interest Income Charge Off | 0.62  |        |
+    Then Admin does a charge-off undo the loan
+    Then Loan Transactions tab has a "CHARGE_OFF" transaction with date "03 February 2024" which has the following Journal entries:
+      | Type    | Account code | Account name               | Debit | Credit |
+      | ASSET   | 112601       | Loans Receivable           |       | 100.0  |
+      | ASSET   | 112601       | Loans Receivable           | 100.0 |        |
+      | ASSET   | 112603       | Interest/Fee Receivable    |       | 0.62   |
+      | ASSET   | 112603       | Interest/Fee Receivable    | 0.62  |        |
+      | EXPENSE | 744037       | Credit Loss/Bad Debt-Fraud | 100.0 |        |
+      | EXPENSE | 744037       | Credit Loss/Bad Debt-Fraud |       | 100.0  |
+      | INCOME  | 404001       | Interest Income Charge Off | 0.62  |        |
+      | INCOME  | 404001       | Interest Income Charge Off |       | 0.62   |

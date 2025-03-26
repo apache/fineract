@@ -39,6 +39,8 @@ public interface JournalEntryWritePlatformService {
 
     CommandProcessingResult defineOpeningBalance(JsonCommand command);
 
+    void createJournalEntryForReversedLoanTransaction(LocalDate transactionDate, String loanTransactionId, Long officeId);
+
     String revertProvisioningJournalEntries(LocalDate reversalTransactionDate, Long entityId, Integer entityType);
 
     String createProvisioningJournalEntries(ProvisioningEntry entry);
