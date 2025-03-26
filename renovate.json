@@ -1,4 +1,5 @@
 {
+  "commitMessagePrefix": "FINERACT-2181: ",
   "extends": [
     "config:base",
     "group:allNonMajor",
@@ -84,6 +85,11 @@
     "matchPackageNames": ["io.swagger.core.v3.swagger-gradle-plugin"],
     "allowedVersions": "<=2.2.11",
     "description": "2.2.14 version is not compatible with the org.openapi.generator Gradle plugin version 6.6.0"
+  },
+  {
+    "matchPackageNames": ["org.postgresql:postgresql"],
+    "allowedVersions": "<=42.7.4",
+    "description": "Postgres JDBC driver 42.7.5 has a performance bug: https://github.com/pgjdbc/pgjdbc/issues/3511#issuecomment-2637277977"
   },
   {
     "depTypeList": ["dependencies"],
