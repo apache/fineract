@@ -1961,6 +1961,18 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 .createLoanProduct(loanProductsRequestInterestDecliningPeriodDailyIntRecalc).execute();
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_DECLINING_PERIOD_DAILY_INT_RECALC,
                 responseInterestDecliningPeriodDailyIntRecalc);
+
+        // LP1 with 12% DECLINING BALANCE interest, interest period: Daily, interest recalculation enabled, 360/30
+        // (LP1_INTEREST_DECLINING_BALANCE_PERIOD_DAILY_INT_RECALC)
+        final String name82 = DefaultLoanProduct.LP1_INTEREST_360_30_DECLINING_BALANCE_PERIOD_DAILY_INT_RECALC.getName();
+        final PostLoanProductsRequest loanProductsRequestInterest36030DecliningPeriodDailyIntRecalc = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP1InterestDeclining().name(name82).isInterestRecalculationEnabled(false)
+                .daysInYearType(DaysInYearType.DAYS360.value).daysInMonthType(DaysInMonthType.DAYS30.value)
+                .interestCalculationPeriodType(InterestCalculationPeriodTime.DAILY.value).allowPartialPeriodInterestCalcualtion(false);
+        final Response<PostLoanProductsResponse> responseInterest36030DecliningPeriodDailyIntRecalc = loanProductsApi
+                .createLoanProduct(loanProductsRequestInterest36030DecliningPeriodDailyIntRecalc).execute();
+        TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP1_INTEREST_360_30__DECLINING_PERIOD_DAILY_INT_RECALC,
+                responseInterest36030DecliningPeriodDailyIntRecalc);
     }
 
     public static AdvancedPaymentData createPaymentAllocation(String transactionType, String futureInstallmentAllocationRule,

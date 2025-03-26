@@ -1311,6 +1311,7 @@ Feature: Charge-off
       | 04 January 2023  | Charge-off       | 1010.19 | 1000.0    | 10.19    | 0.0  | 0.0       | 0.0          |
       | 06 January 2023  | Repayment        | 1010.19 | 1000.0    | 10.19    | 0.0  | 0.0       | 0.0          |
 
+  @TestRailId:C3545
   Scenario: Accrual handling in case of charged-off loan when charge-off behavior is regular, interestRecalculation = true, cumulative loan
     When Admin sets the business date to "1 January 2024"
     And Admin creates a client with random data
@@ -7449,3 +7450,95 @@ Feature: Charge-off
       | 14 February 2024 | Accrual Adjustment | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 February 2024 | Charge-off         | 83.79  | 83.57     | 0.22     | 0.0  | 0.0       | 0.0          | false    | true     |
     Then LoanAccrualAdjustmentTransactionBusinessEvent is raised on "14 February 2024"
+
+  @TestRailId:C3559
+  Scenario: Reverse-replay Charge-off with accrual adjustment due to backdated payment
+    When Admin sets the business date to "1 January 2024"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                   | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1_INTEREST_360_30_DECLINING_BALANCE_PERIOD_DAILY_INT_RECALC | 01 January 2024   | 1000           | 26                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 4                 | MONTHS                | 1              | MONTHS                 | 4                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+    And Admin successfully approves the loan on "1 January 2024" with "1000" amount and expected disbursement date on "1 January 2024"
+    And Admin successfully disburse the loan on "1 January 2024" with "1000" EUR transaction amount
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2024 |           | 757.67          | 242.33        | 21.67    | 0.0  | 0.0       | 264.0  | 0.0  | 0.0        | 0.0  | 264.0       |
+      | 2  | 29   | 01 March 2024    |           | 510.09          | 247.58        | 16.42    | 0.0  | 0.0       | 264.0  | 0.0  | 0.0        | 0.0  | 264.0       |
+      | 3  | 31   | 01 April 2024    |           | 257.14          | 252.95        | 11.05    | 0.0  | 0.0       | 264.0  | 0.0  | 0.0        | 0.0  | 264.0       |
+      | 4  | 30   | 01 May 2024      |           | 0.0             | 257.14        | 5.57     | 0.0  | 0.0       | 262.71 | 0.0  | 0.0        | 0.0  | 262.71      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      | 1000          | 54.71    | 0    | 0         | 1054.71 | 0.0  | 0.0        | 0.0  | 1054.71     |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+    # Run COB for each day from Jan 1 to Jan 19 to create accrual entries
+    When Admin sets the business date to "3 January 2024"
+    When Admin runs inline COB job for Loan
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2024 |           | 757.67          | 242.33        | 21.67    | 0.0  | 0.0       | 264.0  | 0.0  | 0.0        | 0.0  | 264.0       |
+      | 2  | 29   | 01 March 2024    |           | 510.09          | 247.58        | 16.42    | 0.0  | 0.0       | 264.0  | 0.0  | 0.0        | 0.0  | 264.0       |
+      | 3  | 31   | 01 April 2024    |           | 257.14          | 252.95        | 11.05    | 0.0  | 0.0       | 264.0  | 0.0  | 0.0        | 0.0  | 264.0       |
+      | 4  | 30   | 01 May 2024      |           | 0.0             | 257.14        | 5.57     | 0.0  | 0.0       | 262.71 | 0.0  | 0.0        | 0.0  | 262.71      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      | 1000          | 54.71    | 0    | 0         | 1054.71 | 0.0  | 0.0        | 0.0  | 1054.71     |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 02 January 2024  | Accrual          | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
+    When Admin sets the business date to "20 January 2024"
+    When Admin runs inline COB job for Loan
+    When Admin sets the business date to "15 January 2024"
+    And Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "15 January 2024" with 264 EUR transaction amount and system-generated Idempotency key and check external owner
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 31   | 01 February 2024 | 15 January 2024 | 757.67          | 242.33        | 21.67    | 0.0  | 0.0       | 264.0  | 264.0 | 264.0      | 0.0  | 0.0         |
+      | 2  | 29   | 01 March 2024    |                 | 510.09          | 247.58        | 16.42    | 0.0  | 0.0       | 264.0  | 0.0   | 0.0        | 0.0  | 264.0       |
+      | 3  | 31   | 01 April 2024    |                 | 257.14          | 252.95        | 11.05    | 0.0  | 0.0       | 264.0  | 0.0   | 0.0        | 0.0  | 264.0       |
+      | 4  | 30   | 01 May 2024      |                 | 0.0             | 257.14        | 5.57     | 0.0  | 0.0       | 262.71 | 0.0   | 0.0        | 0.0  | 262.71      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid  | In advance | Late | Outstanding |
+      | 1000          | 54.71    | 0    | 0         | 1054.71 | 264.0 | 264.0      | 0.0  | 790.71     |
+    When Admin sets the business date to "20 January 2024"
+    And Admin does charge-off the loan on "20 January 2024"
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date       | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |                 | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 31   | 01 February 2024 | 15 January 2024 | 757.67          | 242.33        | 21.67    | 0.0  | 0.0       | 264.0  | 264.0 | 264.0      | 0.0  | 0.0         |
+      | 2  | 29   | 01 March 2024    |                 | 510.09          | 247.58        | 16.42    | 0.0  | 0.0       | 264.0  | 0.0   | 0.0        | 0.0  | 264.0       |
+      | 3  | 31   | 01 April 2024    |                 | 257.14          | 252.95        | 11.05    | 0.0  | 0.0       | 264.0  | 0.0   | 0.0        | 0.0  | 264.0       |
+      | 4  | 30   | 01 May 2024      |                 | 0.0             | 257.14        | 5.57     | 0.0  | 0.0       | 262.71 | 0.0   | 0.0        | 0.0  | 262.71      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid  | In advance | Late | Outstanding |
+      | 1000          | 54.71    | 0    | 0         | 1054.71 | 264.0 | 264.0      | 0.0  | 790.71     |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024  | Disbursement       | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 02 January 2024  | Accrual            | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 January 2024  | Accrual            | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 January 2024  | Accrual            | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 January 2024  | Accrual            | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 January 2024  | Accrual            | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 07 January 2024  | Accrual            | 0.69   | 0.0       | 0.69     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 January 2024  | Accrual            | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 January 2024  | Accrual            | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 January 2024  | Accrual            | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 11 January 2024  | Accrual            | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 12 January 2024  | Accrual            | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 13 January 2024  | Accrual            | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 January 2024  | Accrual            | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 January 2024  | Accrual            | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 January 2024  | Repayment          | 264.0  | 242.33    | 21.67    | 0.0  | 0.0       | 757.67       | false    | false    |
+      | 16 January 2024  | Accrual            | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 17 January 2024  | Accrual            | 0.69   | 0.0       | 0.69     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 18 January 2024  | Accrual            | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 19 January 2024  | Accrual            | 0.7    | 0.0       | 0.7      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 January 2024  | Accrual Adjustment | 12.58  | 0.0       | 12.58    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 20 January 2024  | Charge-off         | 790.71 | 757.67    | 33.04    | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then Loan marked as charged-off on "20 January 2024"
+    Then LoanAccrualAdjustmentTransactionBusinessEvent is raised on "20 January 2024"
