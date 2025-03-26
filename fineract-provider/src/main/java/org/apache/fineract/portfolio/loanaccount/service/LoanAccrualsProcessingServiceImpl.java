@@ -161,19 +161,23 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
 
         loans.forEach(outerLoan -> {
             loanTasks.add(taskExecutor.submit(() -> {
-                ThreadLocalContextUtil.init(context);
-                transactionTemplate.executeWithoutResult(status -> {
-                    Loan loan = loanRepositoryWrapper.findOneWithNotFoundDetection(outerLoan.getId());
-                    setSetHelpers(loan);
-                    try {
-                        log.debug("Adding accruals for loan '{}'", loan.getId());
-                        addAccruals(loan, tillDate, false, false, true);
-                        log.debug("Successfully processed loan: '{}' for accrual entries", loan.getId());
-                    } catch (Exception e) {
-                        log.error("Failed to add accrual for loan {}", loan.getId(), e);
-                        throw new RuntimeException("Failed to add accrual for loan " + loan.getId(), e);
-                    }
-                });
+                try {
+                    ThreadLocalContextUtil.init(context);
+                    transactionTemplate.executeWithoutResult(status -> {
+                        Loan loan = loanRepositoryWrapper.findOneWithNotFoundDetection(outerLoan.getId());
+                        setSetHelpers(loan);
+                        try {
+                            log.debug("Adding accruals for loan '{}'", loan.getId());
+                            addAccruals(loan, tillDate, false, false, true);
+                            log.debug("Successfully processed loan: '{}' for accrual entries", loan.getId());
+                        } catch (Exception e) {
+                            log.error("Failed to add accrual for loan {}", loan.getId(), e);
+                            throw new RuntimeException("Failed to add accrual for loan " + loan.getId(), e);
+                        }
+                    });
+                } finally {
+                    ThreadLocalContextUtil.reset();
+                }
             }));
         });
 
