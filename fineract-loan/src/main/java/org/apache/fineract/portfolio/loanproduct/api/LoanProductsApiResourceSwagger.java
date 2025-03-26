@@ -23,7 +23,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
-import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
+import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.apache.fineract.portfolio.delinquency.api.DelinquencyApiResourceSwagger.GetDelinquencyBucketsResponse;
@@ -34,6 +34,25 @@ import org.apache.fineract.portfolio.delinquency.api.DelinquencyApiResourceSwagg
 final class LoanProductsApiResourceSwagger {
 
     private LoanProductsApiResourceSwagger() {}
+
+    @Schema(description = "LoanProductChargeData")
+    public static final class LoanProductChargeData {
+
+        private LoanProductChargeData() {}
+
+        @Schema(example = "1")
+        public Long id;
+    }
+
+    @Schema(description = "LoanProductChargeToGLAccountMapper")
+    public static final class LoanProductChargeToGLAccountMapper {
+
+        private LoanProductChargeToGLAccountMapper() {}
+
+        public LoanProductChargeData charge;
+        public GLAccountData incomeAccount;
+
+    }
 
     @Schema(description = "PostLoanProductsRequest")
     public static final class PostLoanProductsRequest {
@@ -251,9 +270,9 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "11")
         public Long incomeFromGoodwillCreditPenaltyAccountId;
         public List<GetLoanProductsProductIdResponse.GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings;
-        public List<GetLoanProductsProductIdResponse.GetLoanFeeToIncomeAccountMappings> feeToIncomeAccountMappings;
+        public List<LoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings;
         public List<PostChargeOffReasonToExpenseAccountMappings> chargeOffReasonToExpenseAccountMappings;
-        public List<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings;
+        public List<LoanProductChargeToGLAccountMapper> penaltyToIncomeAccountMappings;
 
         // Multi Disburse
         @Schema(example = "true")
@@ -300,14 +319,6 @@ final class LoanProductsApiResourceSwagger {
             public boolean graceOnPrincipalAndInterestPayment;
             @Schema(example = "true")
             public boolean graceOnArrearsAgeing;
-        }
-
-        static final class LoanProductChargeData {
-
-            private LoanProductChargeData() {}
-
-            @Schema(example = "1")
-            public Long id;
         }
 
         static final class RateData {
@@ -1639,9 +1650,9 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "11")
         public Long incomeFromChargeOffPenaltyAccountId;
         public List<GetLoanProductsProductIdResponse.GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings;
-        public List<GetLoanProductsProductIdResponse.GetLoanFeeToIncomeAccountMappings> feeToIncomeAccountMappings;
+        public List<LoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings;
         public List<PostLoanProductsRequest.PostChargeOffReasonToExpenseAccountMappings> chargeOffReasonToExpenseAccountMappings;
-        public List<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings;
+        public List<LoanProductChargeToGLAccountMapper> penaltyToIncomeAccountMappings;
         @Schema(example = "false")
         public Boolean enableAccrualActivityPosting;
 
@@ -1657,7 +1668,7 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "36000.00")
         public Double outstandingLoanBalance;
 
-        public List<PostLoanProductsRequest.LoanProductChargeData> charges;
+        public List<LoanProductChargeData> charges;
         @Schema(example = "en_GB")
         public String locale;
         @Schema(example = "dd MMMM yyyy")
