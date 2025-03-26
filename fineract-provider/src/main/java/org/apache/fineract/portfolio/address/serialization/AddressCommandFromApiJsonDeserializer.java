@@ -65,10 +65,9 @@ public class AddressCommandFromApiJsonDeserializer {
         final JsonElement element = this.fromApiJsonHelper.parse(json);
         final List<FieldConfigurationData> configurationData = new ArrayList<>(this.readservice.retrieveFieldConfigurationList("ADDRESS"));
         // validate the json fields from the configuration data fields
-        final List<FieldConfigurationData> configData = configurationData.stream().filter(FieldConfigurationData::isEnabled)
-                .collect(Collectors.toList());
+        final List<FieldConfigurationData> configData = configurationData.stream().filter(FieldConfigurationData::isEnabled).toList();
 
-        final Set<String> supportedParameters = configData.stream().map(FieldConfigurationData::getField).collect(Collectors.toSet());
+        final Set<String> supportedParameters = configData.stream().map(FieldConfigurationData::field).collect(Collectors.toSet());
 
         supportedParameters.add("locale");
         supportedParameters.add("dateFormat");
@@ -77,20 +76,19 @@ public class AddressCommandFromApiJsonDeserializer {
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
         configData.forEach(fieldConfiguration -> {
-            final String field = fieldConfiguration.getField().equals("addressType") ? "addressTypeId" : fieldConfiguration.getField();
+            final String field = fieldConfiguration.field().equals("addressType") ? "addressTypeId" : fieldConfiguration.field();
             final String fieldValue = this.fromApiJsonHelper.extractStringNamed(field, element);
 
-            if (fieldConfiguration.getField().equals("addressType") && fromNewClient) {
+            if (fieldConfiguration.field().equals("addressType") && fromNewClient) {
                 baseDataValidator.reset().parameter(field).value(fieldValue).notBlank();
             } else {
-                if (fieldConfiguration.isIs_mandatory() && fromNewClient) {
+                if (fieldConfiguration.isMandatory() && fromNewClient) {
                     baseDataValidator.reset().parameter(field).value(fieldValue).notBlank();
                 }
             }
 
-            if (!fieldConfiguration.getValidation_regex().isEmpty()) {
-                baseDataValidator.reset().parameter(field).value(fieldValue)
-                        .matchesRegularExpression(fieldConfiguration.getValidation_regex());
+            if (!fieldConfiguration.validationRegex().isEmpty()) {
+                baseDataValidator.reset().parameter(field).value(fieldValue).matchesRegularExpression(fieldConfiguration.validationRegex());
             }
         });
 
