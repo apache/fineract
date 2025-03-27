@@ -16,21 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.service;
+package org.apache.fineract.investor.data.request;
 
-import org.apache.commons.lang3.StringUtils;
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public final class CommandParameterUtil {
+@Data
+@NoArgsConstructor
+public class ExternalAssetOwnerRequest implements Serializable {
 
-    public static final String INTERMEDIARY_SALE_COMMAND_VALUE = "intermediarySale";
-    public static final String SALE_COMMAND_VALUE = "sale";
-    public static final String BUY_BACK_COMMAND_VALUE = "buyback";
-    public static final String CANCEL_COMMAND_VALUE = "cancel";
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    private CommandParameterUtil() {}
-
-    public static boolean is(final String commandParam, final String commandValue) {
-        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
-    }
-
+    private String settlementDate;
+    private String ownerExternalId;
+    private String transferExternalId;
+    private String transferExternalGroupId;
+    private String purchasePriceRatio;
+    private String dateFormat;
+    private String locale;
 }

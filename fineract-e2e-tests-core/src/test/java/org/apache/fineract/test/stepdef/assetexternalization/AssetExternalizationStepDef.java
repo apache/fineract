@@ -49,12 +49,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.ExternalAssetOwnerRequest;
 import org.apache.fineract.client.models.ExternalOwnerJournalEntryData;
 import org.apache.fineract.client.models.ExternalOwnerTransferJournalEntryData;
 import org.apache.fineract.client.models.ExternalTransferData;
 import org.apache.fineract.client.models.JournalEntryData;
 import org.apache.fineract.client.models.PageExternalTransferData;
-import org.apache.fineract.client.models.PostInitiateTransferRequest;
 import org.apache.fineract.client.models.PostInitiateTransferResponse;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.services.ExternalAssetOwnersApi;
@@ -116,7 +116,7 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.body().getLoanId();
 
-        PostInitiateTransferRequest request = new PostInitiateTransferRequest();
+        ExternalAssetOwnerRequest request = new ExternalAssetOwnerRequest();
         if (transferData.get(0).equals(TRANSACTION_TYPE_BUYBACK)) {
             request.settlementDate(transferData.get(1))//
                     .transferExternalId(transferExternalId)//
@@ -163,7 +163,7 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.body().getLoanId();
 
-        PostInitiateTransferRequest request = new PostInitiateTransferRequest()//
+        ExternalAssetOwnerRequest request = new ExternalAssetOwnerRequest()//
                 .settlementDate(settlementDate)//
                 .ownerExternalId(null)//
                 .transferExternalId(testContext().get(TestContextKey.ASSET_EXTERNALIZATION_TRANSFER_EXTERNAL_ID_FROM_RESPONSE))//
@@ -202,7 +202,7 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         String loanExternalId = loanResponse.body().getResourceExternalId();
 
-        PostInitiateTransferRequest request = new PostInitiateTransferRequest();
+        ExternalAssetOwnerRequest request = new ExternalAssetOwnerRequest();
         if (transferData.get(0).equals(TRANSACTION_TYPE_BUYBACK)) {
             request.settlementDate(transferData.get(1))//
                     .transferExternalId(transferExternalId)//
@@ -381,7 +381,7 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
 
         String transferExternalId = testContext().get(TestContextKey.ASSET_EXTERNALIZATION_TRANSFER_EXTERNAL_ID_FROM_RESPONSE);
 
-        PostInitiateTransferRequest request = new PostInitiateTransferRequest()//
+        ExternalAssetOwnerRequest request = new ExternalAssetOwnerRequest()//
                 .settlementDate(transferData.get(1))//
                 .transferExternalId(transferExternalId)//
                 .dateFormat(DATE_FORMAT_ASSET_EXT)//
@@ -417,7 +417,7 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.body().getLoanId();
 
-        PostInitiateTransferRequest request = new PostInitiateTransferRequest();
+        ExternalAssetOwnerRequest request = new ExternalAssetOwnerRequest();
         if (transferData.get(0).equals(TRANSACTION_TYPE_BUYBACK)) {
             request.settlementDate(transferData.get(1))//
                     .transferExternalId(null)//
@@ -465,7 +465,7 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.body().getLoanId();
 
-        PostInitiateTransferRequest request = new PostInitiateTransferRequest()//
+        ExternalAssetOwnerRequest request = new ExternalAssetOwnerRequest()//
                 .settlementDate(transferData.get(0))//
                 .ownerExternalId(null)//
                 .transferExternalId(null)//

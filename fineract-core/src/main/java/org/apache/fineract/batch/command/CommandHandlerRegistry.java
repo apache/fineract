@@ -16,21 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.service;
+package org.apache.fineract.batch.command;
 
-import org.apache.commons.lang3.StringUtils;
+import java.util.Map;
+import java.util.function.BiFunction;
+import lombok.RequiredArgsConstructor;
 
-public final class CommandParameterUtil {
+@RequiredArgsConstructor
+public final class CommandHandlerRegistry<K, P1, P2, R> {
 
-    public static final String INTERMEDIARY_SALE_COMMAND_VALUE = "intermediarySale";
-    public static final String SALE_COMMAND_VALUE = "sale";
-    public static final String BUY_BACK_COMMAND_VALUE = "buyback";
-    public static final String CANCEL_COMMAND_VALUE = "cancel";
+    private final Map<K, BiFunction<P1, P2, R>> handlers;
 
-    private CommandParameterUtil() {}
-
-    public static boolean is(final String commandParam, final String commandValue) {
-        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
+    public void register(K key, BiFunction<P1, P2, R> handler) {
+        handlers.put(key, handler);
     }
 
+    public R execute(K key, P1 param1, P2 param2, RuntimeException ex) {
+        return handlers.getOrDefault(key, (p1, p2) -> {
+            throw ex;
+        }).apply(param1, param2);
+
+    }
 }
