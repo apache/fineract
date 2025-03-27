@@ -25,6 +25,7 @@
 
     <changeSet author="fineract" id="1" context="tenant_store_db">
         <validCheckSum>9:14cc7994587792811d35cff3df30dc5d</validCheckSum>
+        <validCheckSum>9:90654ac665c3ab846d618257fe27f518</validCheckSum>
         <sql dbms="postgresql">
             UPDATE tenant_server_connections
             SET schema_connection_parameters =
