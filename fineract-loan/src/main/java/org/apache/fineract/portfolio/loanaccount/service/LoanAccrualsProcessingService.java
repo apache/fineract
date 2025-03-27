@@ -24,6 +24,7 @@ import java.util.List;
 import org.apache.fineract.infrastructure.core.exception.MultiException;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.springframework.lang.NonNull;
 
 public interface LoanAccrualsProcessingService {
 
@@ -41,7 +42,7 @@ public interface LoanAccrualsProcessingService {
 
     void processIncomePostingAndAccruals(@NotNull Loan loan);
 
-    void processAccrualsOnLoanClosure(@NotNull Loan loan);
+    void processAccrualsOnLoanClosure(@NonNull Loan loan, boolean addJournal);
 
     void processAccrualsOnLoanForeClosure(@NotNull Loan loan, @NotNull LocalDate foreClosureDate,
             @NotNull List<LoanTransaction> newAccrualTransactions);

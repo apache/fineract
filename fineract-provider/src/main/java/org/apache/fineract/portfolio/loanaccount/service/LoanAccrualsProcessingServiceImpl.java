@@ -83,6 +83,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanSchedul
 import org.apache.fineract.portfolio.loanproduct.domain.InterestRecalculationCompoundingMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.lang.NonNull;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -284,9 +285,9 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
      * method calculates accruals for loan on loan closure
      */
     @Override
-    public void processAccrualsOnLoanClosure(@NotNull Loan loan) {
+    public void processAccrualsOnLoanClosure(@NonNull final Loan loan, final boolean addJournal) {
         // check and process accruals for loan WITHOUT interest recalculation details and compounding posted as income
-        addAccruals(loan, loan.getLastLoanRepaymentScheduleInstallment().getDueDate(), false, true, false);
+        addAccruals(loan, loan.getLastLoanRepaymentScheduleInstallment().getDueDate(), false, true, addJournal);
         if (isProgressiveAccrual(loan)) {
             return;
         }

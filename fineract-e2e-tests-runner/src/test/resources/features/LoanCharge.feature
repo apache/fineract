@@ -2722,3 +2722,28 @@ Feature: LoanCharge
       | 01 March 2024    | Accrual           | 1.16   | 0.0       | 1.16     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 March 2024    | Charge-off        | 107.14 | 100.0     | 2.14     | 5.0  | 0.0       | 0.0          | false    | false    |
       | 01 March 2024    | Charge Adjustment | 5.0    | 5.0       | 0.0      | 0.0  | 0.0       | 95.0         | false    | false    |
+
+  @TestRailId:C3571
+  Scenario: Charge adjustment on account with zero principal balance should not create accrual transactions without journal entries
+    When Admin sets the business date to "25 March 2025"
+    When Admin creates a client with random data
+    And Admin successfully creates a new customised Loan submitted on date: "25 March 2025", with Principal: "800", a loanTermFrequency: 1 months, and numberOfRepayments: 1
+    And Admin successfully approves the loan on "25 March 2025" with "800" amount and expected disbursement date on "25 March 2025"
+    When Admin successfully disburse the loan on "25 March 2025" with "800" EUR transaction amount
+    And Customer makes "AUTOPAY" repayment on "25 March 2025" with 800 EUR transaction amount
+    And Admin adds an NSF fee because of payment bounce with "25 March 2025" transaction date
+    When Admin makes a charge adjustment for the last "LOAN_NSF_FEE" type charge which is due on "25 March 2025" with 10 EUR transaction amount and externalId ""
+    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "25 March 2025" which has the following Journal entries:
+      | Type   | Account code | Account name     | Debit | Credit |
+      | ASSET  | 112601       | Loans Receivable |       | 10.0   |
+      | INCOME | 404007       | Fee Income       | 10.0  |        |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 25 March 2025    | Disbursement      | 800.0  | 0.0       | 0.0      | 0.0  | 0.0       | 800.0        |
+      | 25 March 2025    | Repayment         | 800.0  | 790.0     | 0.0      | 0.0  | 10.0      | 10.0         |
+      | 25 March 2025    | Charge Adjustment | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 0.0          |
+      | 25 March 2025    | Accrual           | 10.0   | 0.0       | 0.0      | 0.0  | 10.0      | 0.0          |
+    Then Loan Transactions tab has a "ACCRUAL" transaction with date "25 March 2025" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable | 10.0  |        |
+      | INCOME | 404007       | Fee Income              |       | 10.0   |
