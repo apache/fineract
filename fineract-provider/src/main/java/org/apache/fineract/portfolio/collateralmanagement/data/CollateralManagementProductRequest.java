@@ -16,16 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.monetary.service;
+package org.apache.fineract.portfolio.collateralmanagement.data;
 
-import java.util.List;
-import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import java.io.Serial;
+import java.io.Serializable;
+import java.math.BigDecimal;
 
-public interface CurrencyReadPlatformService {
+public record CollateralManagementProductRequest(String quality, BigDecimal basePrice, BigDecimal pctToBase, String unitType, String name,
+        String currency, String locale) implements Serializable {
 
-    List<CurrencyData> retrieveAllowedCurrencies();
-
-    List<CurrencyData> retrieveAllPlatformCurrencies();
-
-    CurrencyData retrieveCurrency(String code);
+    @Serial
+    private static final long serialVersionUID = 1L;
 }

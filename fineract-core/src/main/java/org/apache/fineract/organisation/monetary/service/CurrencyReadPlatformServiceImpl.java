@@ -20,7 +20,7 @@ package org.apache.fineract.organisation.monetary.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -36,7 +36,7 @@ public class CurrencyReadPlatformServiceImpl implements CurrencyReadPlatformServ
     private final CurrencyMapper currencyRowMapper = new CurrencyMapper();
 
     @Override
-    public Collection<CurrencyData> retrieveAllowedCurrencies() {
+    public List<CurrencyData> retrieveAllowedCurrencies() {
 
         this.context.authenticatedUser();
 
@@ -46,7 +46,7 @@ public class CurrencyReadPlatformServiceImpl implements CurrencyReadPlatformServ
     }
 
     @Override
-    public Collection<CurrencyData> retrieveAllPlatformCurrencies() {
+    public List<CurrencyData> retrieveAllPlatformCurrencies() {
 
         final String sql = "select " + this.currencyRowMapper.schema() + " from m_currency c order by c.name";
 
