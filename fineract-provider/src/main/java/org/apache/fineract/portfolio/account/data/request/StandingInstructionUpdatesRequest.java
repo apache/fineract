@@ -16,23 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.service;
+package org.apache.fineract.portfolio.account.data.request;
 
-import org.apache.commons.lang3.StringUtils;
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public final class CommandParameterUtil {
+@Data
+@NoArgsConstructor
+public class StandingInstructionUpdatesRequest implements Serializable {
 
-    public static final String INTERMEDIARY_SALE_COMMAND_VALUE = "intermediarySale";
-    public static final String SALE_COMMAND_VALUE = "sale";
-    public static final String BUY_BACK_COMMAND_VALUE = "buyback";
-    public static final String CANCEL_COMMAND_VALUE = "cancel";
-    public static final String UPDATE_COMMAND_VALUE = "update";
-    public static final String DELETE_COMMAND_VALUE = "delete";
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    private CommandParameterUtil() {}
-
-    public static boolean is(final String commandParam, final String commandValue) {
-        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
-    }
-
+    private String amount;
+    private String validTill;
+    private String dateFormat;
+    private String validFrom;
+    private String locale;
+    private String priority;
+    private String recurrenceType;
+    private String recurrenceInterval;
+    private String instructionType;
+    private String recurrenceFrequency;
+    private String recurrenceOnMonthDay;
+    private String name;
+    private String monthDayFormat;
+    private String status;
 }

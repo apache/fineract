@@ -18,11 +18,6 @@
  */
 package org.apache.fineract.portfolio.account.api;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import org.apache.fineract.portfolio.account.AccountDetailConstants;
-
 public final class StandingInstructionApiConstants {
 
     private StandingInstructionApiConstants() {
@@ -43,9 +38,5 @@ public final class StandingInstructionApiConstants {
     public static final String recurrenceIntervalParamName = "recurrenceInterval";
     public static final String recurrenceOnMonthDayParamName = "recurrenceOnMonthDay";
     public static final String monthDayFormatParamName = "monthDayFormat";
-
-    static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(AccountDetailConstants.idParamName, nameParamName, priorityParamName, instructionTypeParamName, statusParamName,
-                    AccountDetailConstants.transferTypeParamName, validFromParamName, validTillParamName));
 
 }

@@ -26,6 +26,7 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -39,18 +40,19 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.batch.command.CommandHandlerRegistry;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.service.CommandParameterUtil;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -58,6 +60,9 @@ import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.apache.fineract.portfolio.account.data.AccountTransferData;
 import org.apache.fineract.portfolio.account.data.StandingInstructionDTO;
 import org.apache.fineract.portfolio.account.data.StandingInstructionData;
+import org.apache.fineract.portfolio.account.data.request.StandingInstructionCreationRequest;
+import org.apache.fineract.portfolio.account.data.request.StandingInstructionSearchParam;
+import org.apache.fineract.portfolio.account.data.request.StandingInstructionUpdatesRequest;
 import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.apache.fineract.portfolio.account.service.StandingInstructionReadPlatformService;
 import org.springframework.stereotype.Component;
@@ -72,10 +77,15 @@ public class StandingInstructionApiResource {
     private final PlatformSecurityContext context;
     private final DefaultToApiJsonSerializer<StandingInstructionData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final StandingInstructionReadPlatformService standingInstructionReadPlatformService;
     private final AccountTransfersReadPlatformService accountTransfersReadPlatformService;
     private final SqlValidator sqlValidator;
+
+    private static final CommandHandlerRegistry<String, Long, String, CommandWrapper> COMMAND_HANDLER_REGISTRY = new CommandHandlerRegistry<>(
+            Map.of(CommandParameterUtil.UPDATE_COMMAND_VALUE,
+                    (id, json) -> new CommandWrapperBuilder().updateStandingInstruction(id).withJson(json).build(),
+                    CommandParameterUtil.DELETE_COMMAND_VALUE,
+                    (id, json) -> new CommandWrapperBuilder().deleteStandingInstruction(id).withJson(json).build()));
 
     @GET
     @Path("template")
@@ -88,42 +98,27 @@ public class StandingInstructionApiResource {
             + "standinginstructions/template?fromAccountType=2&fromOfficeId=1&fromClientId=1&transferType=1\n" + "\n"
             + "standinginstructions/template?fromClientId=1&fromAccountType=2&fromAccountId=1&transferType=1")
     @ApiResponses(@ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StandingInstructionApiResourceSwagger.GetStandingInstructionsTemplateResponse.class))))
-    public String template(@QueryParam("fromOfficeId") @Parameter(description = "fromOfficeId") final Long fromOfficeId,
-            @QueryParam("fromClientId") @Parameter(description = "fromClientId") final Long fromClientId,
-            @QueryParam("fromAccountId") @Parameter(description = "fromAccountId") final Long fromAccountId,
-            @QueryParam("fromAccountType") @Parameter(description = "fromAccountType") final Integer fromAccountType,
-            @QueryParam("toOfficeId") @Parameter(description = "toOfficeId") final Long toOfficeId,
-            @QueryParam("toClientId") @Parameter(description = "toClientId") final Long toClientId,
-            @QueryParam("toAccountId") @Parameter(description = "toAccountId") final Long toAccountId,
-            @QueryParam("toAccountType") @Parameter(description = "toAccountType") final Integer toAccountType,
-            @QueryParam("transferType") @Parameter(description = "transferType") final Integer transferType,
-            @Context final UriInfo uriInfo) {
+    public StandingInstructionData template(@BeanParam StandingInstructionSearchParam instructionParam) {
+        context.authenticatedUser().validateHasReadPermission(StandingInstructionApiConstants.STANDING_INSTRUCTION_RESOURCE_NAME);
 
-        this.context.authenticatedUser().validateHasReadPermission(StandingInstructionApiConstants.STANDING_INSTRUCTION_RESOURCE_NAME);
-
-        final StandingInstructionData standingInstructionData = this.standingInstructionReadPlatformService.retrieveTemplate(fromOfficeId,
-                fromClientId, fromAccountId, fromAccountType, toOfficeId, toClientId, toAccountId, toAccountType, transferType);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, standingInstructionData,
-                StandingInstructionApiConstants.RESPONSE_DATA_PARAMETERS);
+        return standingInstructionReadPlatformService.retrieveTemplate(instructionParam.getFromOfficeId(),
+                instructionParam.getFromClientId(), instructionParam.getFromAccountId(), instructionParam.getFromAccountType(),
+                instructionParam.getToOfficeId(), instructionParam.getToClientId(), instructionParam.getToAccountId(),
+                instructionParam.getToAccountType(), instructionParam.getTransferType());
     }
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create new Standing Instruction", description = "Ability to create new instruction for transfer of monetary funds from one account to another")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = StandingInstructionApiResourceSwagger.PostStandingInstructionsRequest.class)))
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = StandingInstructionCreationRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StandingInstructionApiResourceSwagger.PostStandingInstructionsResponse.class))) })
-    public String create(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
+    public CommandProcessingResult create(@Parameter(hidden = true) StandingInstructionCreationRequest creationRequest) {
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createStandingInstruction()
+                .withJson(toApiJsonSerializer.serialize(creationRequest)).build();
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createStandingInstruction().withJson(apiRequestBodyAsJson)
-                .build();
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @PUT
@@ -134,34 +129,19 @@ public class StandingInstructionApiResource {
             + "\n" + "PUT https://DomainName/api/v1/standinginstructions/1?command=update\n" + "\n\n"
             + "Ability to modify existing instruction for transfer of monetary funds from one account to another.\n" + "\n"
             + "PUT https://DomainName/api/v1/standinginstructions/1?command=delete")
-    @RequestBody(required = false, content = @Content(schema = @Schema(implementation = StandingInstructionApiResourceSwagger.PutStandingInstructionsStandingInstructionIdRequest.class)))
+    @RequestBody(content = @Content(schema = @Schema(implementation = StandingInstructionUpdatesRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StandingInstructionApiResourceSwagger.PutStandingInstructionsStandingInstructionIdResponse.class))) })
-    public String update(
+    public CommandProcessingResult update(
             @PathParam("standingInstructionId") @Parameter(description = "standingInstructionId") final Long standingInstructionId,
-            @Parameter(hidden = true) final String apiRequestBodyAsJson,
+            @Parameter(hidden = true) StandingInstructionUpdatesRequest updatesRequest,
             @QueryParam("command") @Parameter(description = "command") final String commandParam) {
 
-        CommandWrapper commandRequest = null;
-        if (is(commandParam, "update")) {
-            commandRequest = new CommandWrapperBuilder().updateStandingInstruction(standingInstructionId).withJson(apiRequestBodyAsJson)
-                    .build();
-        } else if (is(commandParam, "delete")) {
-            commandRequest = new CommandWrapperBuilder().deleteStandingInstruction(standingInstructionId).withJson(apiRequestBodyAsJson)
-                    .build();
-        }
+        final String serializedUpdatesRequest = toApiJsonSerializer.serialize(updatesRequest);
+        final CommandWrapper commandRequest = COMMAND_HANDLER_REGISTRY.execute(StringUtils.toRootLowerCase(commandParam),
+                standingInstructionId, serializedUpdatesRequest, new UnrecognizedQueryParamException("command", commandParam));
 
-        if (commandRequest == null) {
-            throw new UnrecognizedQueryParamException("command", commandParam);
-        }
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
-
-    }
-
-    private boolean is(final String commandParam, final String commandValue) {
-        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @GET
@@ -170,7 +150,7 @@ public class StandingInstructionApiResource {
     @Operation(summary = "List Standing Instructions", description = "Example Requests:\n" + "\n" + "standinginstructions")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StandingInstructionApiResourceSwagger.GetStandingInstructionsResponse.class))) })
-    public String retrieveAll(@Context final UriInfo uriInfo,
+    public Page<StandingInstructionData> retrieveAll(
             @QueryParam("externalId") @Parameter(description = "externalId") final String externalId,
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
@@ -182,7 +162,7 @@ public class StandingInstructionApiResource {
             @QueryParam("fromAccountId") @Parameter(description = "fromAccountId") final Long fromAccount,
             @QueryParam("fromAccountType") @Parameter(description = "fromAccountType") final Integer fromAccountType) {
 
-        this.context.authenticatedUser().validateHasReadPermission(StandingInstructionApiConstants.STANDING_INSTRUCTION_RESOURCE_NAME);
+        context.authenticatedUser().validateHasReadPermission(StandingInstructionApiConstants.STANDING_INSTRUCTION_RESOURCE_NAME);
 
         sqlValidator.validate(orderBy);
         sqlValidator.validate(sortOrder);
@@ -195,10 +175,7 @@ public class StandingInstructionApiResource {
         StandingInstructionDTO standingInstructionDTO = new StandingInstructionDTO(searchParameters, transferType, clientName, clientId,
                 fromAccount, fromAccountType, startDateRange, endDateRange);
 
-        final Page<StandingInstructionData> transfers = this.standingInstructionReadPlatformService.retrieveAll(standingInstructionDTO);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, transfers, StandingInstructionApiConstants.RESPONSE_DATA_PARAMETERS);
+        return standingInstructionReadPlatformService.retrieveAll(standingInstructionDTO);
     }
 
     @GET
@@ -208,7 +185,7 @@ public class StandingInstructionApiResource {
     @Operation(summary = "Retrieve Standing Instruction", description = "Example Requests :\n" + "\n" + "standinginstructions/1")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StandingInstructionApiResourceSwagger.GetStandingInstructionsStandingInstructionIdResponse.class))) })
-    public String retrieveOne(
+    public StandingInstructionData retrieveOne(
             @PathParam("standingInstructionId") @Parameter(description = "standingInstructionId") final Long standingInstructionId,
             @Context final UriInfo uriInfo, @QueryParam("externalId") @Parameter(description = "externalId") final String externalId,
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
@@ -216,36 +193,34 @@ public class StandingInstructionApiResource {
             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
             @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder) {
 
-        this.context.authenticatedUser().validateHasReadPermission(StandingInstructionApiConstants.STANDING_INSTRUCTION_RESOURCE_NAME);
+        context.authenticatedUser().validateHasReadPermission(StandingInstructionApiConstants.STANDING_INSTRUCTION_RESOURCE_NAME);
 
         sqlValidator.validate(orderBy);
         sqlValidator.validate(sortOrder);
-        StandingInstructionData standingInstructionData = this.standingInstructionReadPlatformService.retrieveOne(standingInstructionId);
+        StandingInstructionData standingInstructionData = standingInstructionReadPlatformService.retrieveOne(standingInstructionId);
         final SearchParameters searchParameters = SearchParameters.builder().limit(limit).externalId(externalId).offset(offset)
                 .orderBy(orderBy).sortOrder(sortOrder).build();
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
-        Page<AccountTransferData> transfers = null;
         if (!associationParameters.isEmpty()) {
             if (associationParameters.contains("all")) {
                 associationParameters.addAll(Arrays.asList("transactions", "template"));
             }
             if (associationParameters.contains("transactions")) {
-                transfers = this.accountTransfersReadPlatformService.retrieveByStandingInstruction(standingInstructionId, searchParameters);
+                Page<AccountTransferData> transfers = accountTransfersReadPlatformService
+                        .retrieveByStandingInstruction(standingInstructionId, searchParameters);
                 standingInstructionData = StandingInstructionData.withTransferData(standingInstructionData, transfers);
             }
             if (associationParameters.contains("template")) {
-                final StandingInstructionData templateData = this.standingInstructionReadPlatformService.retrieveTemplate(
-                        standingInstructionData.fromClient().getOfficeId(), standingInstructionData.fromClient().getId(),
-                        standingInstructionData.fromAccount().getId(), standingInstructionData.fromAccountType().getValue(),
-                        standingInstructionData.toClient().getOfficeId(), standingInstructionData.toClient().getId(),
-                        standingInstructionData.toAccount().getId(), standingInstructionData.toAccountType().getValue(),
-                        standingInstructionData.transferType().getValue());
+                final StandingInstructionData templateData = standingInstructionReadPlatformService.retrieveTemplate(
+                        standingInstructionData.getFromClient().getOfficeId(), standingInstructionData.getFromClient().getId(),
+                        standingInstructionData.getFromAccount().getId(), standingInstructionData.getFromAccountType().getValue(),
+                        standingInstructionData.getToClient().getOfficeId(), standingInstructionData.getToClient().getId(),
+                        standingInstructionData.getToAccount().getId(), standingInstructionData.getToAccountType().getValue(),
+                        standingInstructionData.getTransferType().getValue());
                 standingInstructionData = StandingInstructionData.withTemplateData(standingInstructionData, templateData);
             }
         }
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, standingInstructionData,
-                StandingInstructionApiConstants.RESPONSE_DATA_PARAMETERS);
+        return standingInstructionData;
     }
 }

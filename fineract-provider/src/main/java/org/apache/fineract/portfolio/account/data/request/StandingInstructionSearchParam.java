@@ -16,23 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.service;
+package org.apache.fineract.portfolio.account.data.request;
 
-import org.apache.commons.lang3.StringUtils;
+import jakarta.ws.rs.QueryParam;
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-public final class CommandParameterUtil {
+@Getter
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+@AllArgsConstructor
+public class StandingInstructionSearchParam extends AccountTransSearchParam implements Serializable {
 
-    public static final String INTERMEDIARY_SALE_COMMAND_VALUE = "intermediarySale";
-    public static final String SALE_COMMAND_VALUE = "sale";
-    public static final String BUY_BACK_COMMAND_VALUE = "buyback";
-    public static final String CANCEL_COMMAND_VALUE = "cancel";
-    public static final String UPDATE_COMMAND_VALUE = "update";
-    public static final String DELETE_COMMAND_VALUE = "delete";
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    private CommandParameterUtil() {}
-
-    public static boolean is(final String commandParam, final String commandValue) {
-        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
-    }
-
+    @QueryParam("transferType")
+    private Integer transferType;
 }

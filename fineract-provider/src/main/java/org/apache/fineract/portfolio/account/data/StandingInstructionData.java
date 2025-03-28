@@ -23,6 +23,8 @@ import java.time.LocalDate;
 import java.time.MonthDay;
 import java.time.temporal.ChronoField;
 import java.util.Collection;
+import java.util.Optional;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.organisation.office.data.OfficeData;
@@ -40,26 +42,36 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 @SuppressWarnings("unused")
 public final class StandingInstructionData {
 
+    @Getter
     private final Long id;
+    @Getter
     private final Long accountDetailId;
+    @Getter
     private final String name;
     private final OfficeData fromOffice;
+    @Getter
     private final ClientData fromClient;
     private final EnumOptionData fromAccountType;
+    @Getter
     private final PortfolioAccountData fromAccount;
     private final OfficeData toOffice;
+    @Getter
     private final ClientData toClient;
     private final EnumOptionData toAccountType;
+    @Getter
     private final PortfolioAccountData toAccount;
     private final EnumOptionData transferType;
     private final EnumOptionData priority;
     private final EnumOptionData instructionType;
     private final EnumOptionData status;
+    @Getter
     private final BigDecimal amount;
+    @Getter
     private final LocalDate validFrom;
     private final LocalDate validTill;
     private final EnumOptionData recurrenceType;
     private final EnumOptionData recurrenceFrequency;
+    @Getter
     private final Integer recurrenceInterval;
     private final MonthDay recurrenceOnMonthDay;
     private final Page<AccountTransferData> transactions;
@@ -269,119 +281,48 @@ public final class StandingInstructionData {
                 instructionData.recurrenceTypeOptions, instructionData.recurrenceFrequencyOptions);
     }
 
-    public StandingInstructionType instructionType() {
-        StandingInstructionType standingInstructionType = null;
-        if (this.instructionType != null) {
-            standingInstructionType = StandingInstructionType.fromInt(this.instructionType.getId().intValue());
-        }
-        return standingInstructionType;
+    public StandingInstructionType getInstructionType() {
+        return Optional.ofNullable(this.instructionType).map(e -> StandingInstructionType.fromInt(e.getId().intValue())).orElse(null);
+
     }
 
-    public AccountTransferRecurrenceType recurrenceType() {
-        AccountTransferRecurrenceType recurrenceType = null;
-        if (this.recurrenceType != null) {
-            recurrenceType = AccountTransferRecurrenceType.fromInt(this.recurrenceType.getId().intValue());
-        }
-        return recurrenceType;
+    public AccountTransferRecurrenceType getRecurrenceType() {
+        return Optional.ofNullable(this.recurrenceType).map(e -> AccountTransferRecurrenceType.fromInt(e.getId().intValue())).orElse(null);
     }
 
-    public PeriodFrequencyType recurrenceFrequency() {
-        PeriodFrequencyType frequencyType = null;
-        if (this.recurrenceFrequency != null) {
-            frequencyType = PeriodFrequencyType.fromInt(this.recurrenceFrequency.getId().intValue());
-        }
-        return frequencyType;
+    public PeriodFrequencyType getRecurrenceFrequency() {
+        return Optional.ofNullable(this.recurrenceFrequency).map(e -> PeriodFrequencyType.fromInt(e.getId().intValue())).orElse(null);
     }
 
-    public PortfolioAccountType fromAccountType() {
-        PortfolioAccountType accountType = null;
-        if (this.fromAccountType != null) {
-            accountType = PortfolioAccountType.fromInt(this.fromAccountType.getId().intValue());
-        }
-        return accountType;
+    public PortfolioAccountType getFromAccountType() {
+        return Optional.ofNullable(this.fromAccountType).map(e -> PortfolioAccountType.fromInt(e.getId().intValue())).orElse(null);
     }
 
-    public PortfolioAccountType toAccountType() {
-        PortfolioAccountType accountType = null;
-        if (this.toAccountType != null) {
-            accountType = PortfolioAccountType.fromInt(this.toAccountType.getId().intValue());
-        }
-        return accountType;
+    public PortfolioAccountType getToAccountType() {
+        return Optional.ofNullable(this.toAccountType).map(e -> PortfolioAccountType.fromInt(e.getId().intValue())).orElse(null);
     }
 
-    public AccountTransferType transferType() {
-        AccountTransferType accountTransferType = null;
-        if (this.transferType != null) {
-            accountTransferType = AccountTransferType.fromInt(this.transferType.getId().intValue());
-        }
-        return accountTransferType;
+    public AccountTransferType getTransferType() {
+        return Optional.ofNullable(this.transferType).map(e -> AccountTransferType.fromInt(e.getId().intValue())).orElse(null);
     }
 
-    public Integer recurrenceInterval() {
-        return this.recurrenceInterval;
+    public Integer getRecurrenceOnDay() {
+        return Optional.ofNullable(this.recurrenceOnMonthDay).map(monthDay -> monthDay.get(ChronoField.DAY_OF_MONTH)).orElse(0);
     }
 
-    public Integer recurrenceOnDay() {
-        Integer recurrenceOnDay = 0;
-        if (this.recurrenceOnMonthDay != null) {
-            recurrenceOnDay = this.recurrenceOnMonthDay.get(ChronoField.DAY_OF_MONTH);
-        }
-        return recurrenceOnDay;
-    }
-
-    public Integer recurrenceOnMonth() {
-        Integer recurrenceOnMonth = 0;
-        if (this.recurrenceOnMonthDay != null) {
-            recurrenceOnMonth = this.recurrenceOnMonthDay.get(ChronoField.MONTH_OF_YEAR);
-        }
-        return recurrenceOnMonth;
-    }
-
-    public LocalDate validFrom() {
-        return this.validFrom;
-    }
-
-    public BigDecimal amount() {
-        return this.amount;
-    }
-
-    public PortfolioAccountData fromAccount() {
-        return this.fromAccount;
-    }
-
-    public PortfolioAccountData toAccount() {
-        return this.toAccount;
-    }
-
-    public String name() {
-        return this.name;
+    public Integer getRecurrenceOnMonth() {
+        return Optional.ofNullable(this.recurrenceOnMonthDay).map(monthDay -> monthDay.get(ChronoField.MONTH_OF_YEAR)).orElse(0);
     }
 
     public Integer toTransferType() {
         Integer transferType = null;
-        AccountTransferType accountTransferType = transferType();
+        AccountTransferType accountTransferType = getTransferType();
         if (accountTransferType.isChargePayment()) {
             transferType = LoanTransactionType.CHARGE_PAYMENT.getValue();
         } else if (accountTransferType.isLoanRepayment()) {
             transferType = LoanTransactionType.REPAYMENT.getValue();
         }
         return transferType;
-    }
-
-    public Long accountDetailId() {
-        return this.accountDetailId;
-    }
-
-    public ClientData fromClient() {
-        return this.fromClient;
-    }
-
-    public ClientData toClient() {
-        return this.toClient;
-    }
-
-    public Long getId() {
-        return this.id;
     }
 
 }
