@@ -20,8 +20,6 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAdjustTransactionBusinessEvent;
-import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualAdjustmentTransactionBusinessEvent;
-import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualTransactionCreatedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.data.TransactionChangeData;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
@@ -51,14 +49,6 @@ public class ReplayedTransactionBusinessEventServiceImpl implements ReplayedTran
                     final LoanAdjustTransactionBusinessEvent.Data data = new LoanAdjustTransactionBusinessEvent.Data(oldTransaction);
                     data.setNewTransactionDetail(newTransaction);
                     businessEventNotifierService.notifyPostBusinessEvent(new LoanAdjustTransactionBusinessEvent(data));
-                } else {
-                    if (newTransaction.isAccrual()) {
-                        businessEventNotifierService
-                                .notifyPostBusinessEvent(new LoanAccrualTransactionCreatedBusinessEvent(newTransaction));
-                    } else {
-                        businessEventNotifierService
-                                .notifyPostBusinessEvent(new LoanAccrualAdjustmentTransactionBusinessEvent(newTransaction));
-                    }
                 }
             }
             businessEventNotifierService.stopExternalEventRecording();
