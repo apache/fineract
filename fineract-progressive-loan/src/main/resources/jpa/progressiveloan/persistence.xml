@@ -118,6 +118,7 @@
         <class>org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParameter</class>
         <class>org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest</class>
         <class>org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanStatusConverter</class>
         <!-- Fineract Charge module -->
         <class>org.apache.fineract.portfolio.charge.domain.Charge</class>
         <!-- Fineract Accounting module -->

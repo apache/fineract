@@ -122,6 +122,7 @@
         <class>org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParameter</class>
         <class>org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest</class>
         <class>org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanStatusConverter</class>
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <properties>
             <property name="eclipselink.weaving" value="static" />

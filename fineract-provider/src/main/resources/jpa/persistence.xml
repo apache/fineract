@@ -125,6 +125,7 @@
         <class>org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTypeListConverter</class>
         <class>org.apache.fineract.portfolio.loanproduct.domain.SupportedInterestRefundTypesListConverter</class>
         <class>org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanStatusConverter</class>
         <!-- Fineract Savings module -->
         <class>org.apache.fineract.interoperation.domain.InteropIdentifier</class>
         <class>org.apache.fineract.portfolio.interestratechart.domain.InterestIncentives</class>

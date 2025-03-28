@@ -26,6 +26,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
@@ -235,6 +236,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @Setter(AccessLevel.PACKAGE)
     @Column(name = "loan_status_id", nullable = false)
+    @Convert(converter = LoanStatusConverter.class)
     private LoanStatus loanStatus;
 
     @Setter()

@@ -21,7 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-@Converter(autoApply = true)
+@Converter
 public class LoanStatusConverter implements AttributeConverter<LoanStatus, Integer> {
 
     @Override
