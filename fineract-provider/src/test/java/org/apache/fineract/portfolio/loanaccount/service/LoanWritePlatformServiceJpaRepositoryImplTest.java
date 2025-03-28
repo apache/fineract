@@ -112,6 +112,9 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
     @Mock
     private LoanJournalEntryPoster journalEntryPoster;
 
+    @Mock
+    private LoanAccrualTransactionBusinessEventService loanAccrualTransactionBusinessEventService;
+
     @InjectMocks
     private LoanWritePlatformServiceJpaRepositoryImpl loanWritePlatformService;
 

@@ -891,6 +891,80 @@ Feature: Charge-off
       | 01 June 2023     | Charge-off       | 1020.0 | 1000.0    | 0.0      | 20.0 | 0.0       | 0.0          |
     Then On Loan Transactions tab the "Repayment" Transaction with date "01 March 2023" is reverted
 
+  @TestRailId:C3568
+  Scenario: Verify that charge-off is reversed/replayed if repayment is reversed after the charge-off with COB process
+    When Admin sets the business date to "21 February 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                   | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_ACCRUAL_ACTIVITY_POSTING | 21 February 2024  | 500            | 9.99                   | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1             | MONTHS                  | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "21 January 2025" with "500" amount and expected disbursement date on "21 January 2025"
+    And Admin successfully disburse the loan on "21 January 2025" with "500" EUR transaction amount
+    When Admin sets the business date to "23 February 2025"
+    When Admin runs inline COB job for Loan
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 21 January 2025  |           | 500.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 31   | 21 February 2025 |           | 334.71          | 165.29        | 4.16     | 0.0  | 0.0       | 169.45 | 0.0  | 0.0        | 0.0  | 169.45      |
+      | 2  | 28   | 21 March 2025    |           | 168.14          | 166.57        | 2.88     | 0.0  | 0.0       | 169.45 | 0.0  | 0.0        | 0.0  | 169.45      |
+      | 3  | 31   | 21 April 2025    |           | 0.0             | 168.14        | 1.4      | 0.0  | 0.0       | 169.54 | 0.0  | 0.0        | 0.0  | 169.54      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 500.0         | 8.44     | 0.0  | 0         | 508.44 | 0.0  | 0.0        | 0.0  | 508.44      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Replayed | Reverted |
+      | 21 January 2025  | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
+      | 21 February 2025 | Accrual Activity | 4.16   | 0.0       | 4.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 February 2025 | Accrual          | 4.31   | 0.0       | 4.31     | 0.0  | 0.0       | 0.0          | false    | false    |
+    When Admin sets the business date to "21 February 2025"
+    When Admin adds "LOAN_SNOOZE_FEE" due date charge with "21 February 2025" due date and 20 EUR transaction amount
+    When Admin sets the business date to "22 February 2025"
+    When Customer makes "REPAYMENT" transaction with "SCHEDULED" payment type on "22 February 2025" with 169.45 EUR transaction amount and system-generated Idempotency key
+    When Admin runs inline COB job for Loan
+    When Admin sets the business date to "24 February 2025"
+    And Admin does charge-off the loan on "24 February 2025"
+    And Admin runs inline COB job for Loan
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late   | Outstanding |
+      |    |      | 21 January 2025  |           | 500.0           |               |          | 0.0  |           | 0.0    | 0.0    |            |        |             |
+      | 1  | 31   | 21 February 2025 |           | 334.71          | 165.29        | 4.16     | 20.0 | 0.0       | 189.45 | 169.45 | 0.0        | 169.45 | 20.0        |
+      | 2  | 28   | 21 March 2025    |           | 168.11          | 166.6         | 2.85     | 0.0  | 0.0       | 169.45 | 0.0    | 0.0        | 0.0    | 169.45      |
+      | 3  | 31   | 21 April 2025    |           | 0.0             | 168.11        | 1.4      | 0.0  | 0.0       | 169.51 | 0.0    | 0.0        | 0.0    | 169.51      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late   | Outstanding |
+      | 500.0         | 8.41     | 20.0 | 0         | 528.41 | 169.45 | 0.0        | 169.45 | 358.96      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Replayed | Reverted |
+      | 21 January 2025  | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
+      | 21 February 2025 | Accrual Activity | 24.16  | 0.0       | 4.16     | 20.0 | 0.0       | 0.0          | true     | false    |
+      | 22 February 2025 | Accrual          | 4.31   | 0.0       | 4.31     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 February 2025 | Repayment        | 169.45 | 149.45    | 0.0      | 20.0 | 0.0       | 350.55       | false    | false    |
+      | 24 February 2025 | Accrual          | 0.21   | 0.0       | 0.21     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 February 2025 | Charge-off       | 358.96 | 350.55    | 8.41     | 0.0  | 0.0       | 0.0          | false    | false    |
+    When Customer undo "1"th "Repayment" transaction made on "22 February 2025"
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 21 January 2025  |           | 500.0           |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 31   | 21 February 2025 |           | 334.71          | 165.29        | 4.16     | 20.0 | 0.0       | 189.45 | 0.0  | 0.0        | 0.0  | 189.45      |
+      | 2  | 28   | 21 March 2025    |           | 168.19          | 166.52        | 2.93     | 0.0  | 0.0       | 169.45 | 0.0  | 0.0        | 0.0  | 169.45      |
+      | 3  | 31   | 21 April 2025    |           | 0.0             | 168.19        | 1.4      | 0.0  | 0.0       | 169.59 | 0.0  | 0.0        | 0.0  | 169.59      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 500.0         | 8.49     | 20.0 | 0         | 528.49 | 0.0  | 0.0        | 0.0  | 528.49      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Replayed | Reverted |
+      | 21 January 2025  | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
+      | 21 February 2025 | Accrual Activity | 24.16  | 0.0       | 4.16     | 20.0 | 0.0       | 0.0          | true     | false    |
+      | 22 February 2025 | Accrual          | 4.31   | 0.0       | 4.31     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 22 February 2025 | Repayment        | 169.45 | 149.45    | 0.0      | 20.0 | 0.0       | 350.55       | false    | true     |
+      | 24 February 2025 | Accrual          | 0.21   | 0.0       | 0.21     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 February 2025 | Accrual          | 0.09   | 0.0       | 0.09     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 February 2025 | Charge-off       | 528.49 | 500.0     | 8.49     | 20.0 | 0.0       | 0.0          | true     | false    |
+    Then On Loan Transactions tab the "Repayment" Transaction with date "22 February 2025" is reverted
+    And LoanAccrualTransactionCreatedBusinessEvent is raised on "24 February 2025"
+    And "Charge-off" transaction on "24 February 2025" got reverse-replayed on "24 February 2025"
+    Then BulkBusinessEvent is not raised on "24 February 2025"
+
   @TestRailId:C2762
   Scenario: Verify that charge-off is reversed/replayed if Real time repayment which was placed on a date before the charge-off is reversed after the charge-off
     When Admin sets the business date to "01 January 2023"

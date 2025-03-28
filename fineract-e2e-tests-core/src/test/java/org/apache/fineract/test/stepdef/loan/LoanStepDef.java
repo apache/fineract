@@ -127,6 +127,7 @@ import org.apache.fineract.test.messaging.config.EventProperties;
 import org.apache.fineract.test.messaging.event.EventCheckHelper;
 import org.apache.fineract.test.messaging.event.loan.LoanRescheduledDueAdjustScheduleEvent;
 import org.apache.fineract.test.messaging.event.loan.LoanStatusChangedEvent;
+import org.apache.fineract.test.messaging.event.loan.transaction.BulkBusinessEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanAccrualAdjustmentTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanAccrualTransactionCreatedBusinessEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanAdjustTransactionBusinessEvent;
@@ -2337,7 +2338,8 @@ public class LoanStepDef extends AbstractStepDef {
 
         List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.body().getTransactions();
         GetLoansLoanIdTransactions accrualTransaction = transactions.stream()
-                .filter(t -> date.equals(FORMATTER.format(t.getDate())) && "Accrual".equals(t.getType().getValue())).findFirst()
+                .filter(t -> date.equals(FORMATTER.format(t.getDate())) && "Accrual".equals(t.getType().getValue()))
+                .reduce((first, second) -> second)
                 .orElseThrow(() -> new IllegalStateException(String.format("No Accrual transaction found on %s", date)));
         Long accrualTransactionId = accrualTransaction.getId();
 
@@ -2378,6 +2380,11 @@ public class LoanStepDef extends AbstractStepDef {
         eventAssertion.assertEventRaised(LoanChargeAdjustmentPostBusinessEvent.class, loadTransaction.getId());
     }
 
+    @Then("BulkBusinessEvent is not raised on {string}")
+    public void checkLoanBulkBusinessEventNotCreatedBusinessEvent(String date) {
+        eventAssertion.assertEventNotRaised(BulkBusinessEvent.class, em -> FORMATTER.format(em.getBusinessDate()).equals(date));
+    }
+
     @Then("LoanAccrualTransactionCreatedBusinessEvent is not raised on {string}")
     public void checkLoanAccrualTransactionNotCreatedBusinessEvent(String date) throws IOException {
         Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
@@ -2390,6 +2397,9 @@ public class LoanStepDef extends AbstractStepDef {
 
         assertThat(transactions).as("Unexpected Accrual activity transaction found on %s", date)
                 .noneMatch(t -> date.equals(FORMATTER.format(t.getDate())) && "Accrual Activity".equals(t.getType().getValue()));
+
+        eventAssertion.assertEventNotRaised(LoanAccrualTransactionCreatedBusinessEvent.class,
+                em -> FORMATTER.format(em.getBusinessDate()).equals(date));
     }
 
     @Then("{string} transaction on {string} got reverse-replayed on {string}")
