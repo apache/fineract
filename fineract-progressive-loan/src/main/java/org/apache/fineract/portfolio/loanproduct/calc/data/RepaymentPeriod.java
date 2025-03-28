@@ -318,4 +318,8 @@ public final class RepaymentPeriod {
     public boolean isFirstRepaymentPeriod() {
         return previous == null;
     }
+
+    public Money getOutstandingPrincipal() {
+        return getDuePrincipal().minus(getPaidPrincipal());
+    }
 }

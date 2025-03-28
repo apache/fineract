@@ -302,7 +302,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
             } else {
                 reprocessLoanTransactionsService.reprocessTransactions(loan);
             }
-
+            loan.doPostLoanTransactionChecks(transactionDate, loan.getLoanLifecycleStateMachine());
             loan = loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
         }
 

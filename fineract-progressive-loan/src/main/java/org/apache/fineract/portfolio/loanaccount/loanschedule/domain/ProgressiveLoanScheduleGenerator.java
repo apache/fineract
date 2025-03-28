@@ -275,8 +275,7 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
                 continue;
             }
 
-            Money outstandingBalance = emiCalculator.getOutstandingLoanBalanceOfPeriod(interestScheduleModel, periodDueDate,
-                    disbursementDate);
+            Money outstandingBalance = emiCalculator.getOutstandingLoanBalanceOfPeriod(interestScheduleModel, disbursementDate);
 
             final Money disbursedAmount = Money.of(loanApplicationTerms.getCurrency(), disbursementData.getPrincipal(), mc);
             final LoanScheduleModelDisbursementPeriod disbursementPeriod = LoanScheduleModelDisbursementPeriod

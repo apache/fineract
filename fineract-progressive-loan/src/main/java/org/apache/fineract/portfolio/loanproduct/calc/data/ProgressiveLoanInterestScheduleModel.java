@@ -42,6 +42,7 @@ import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
@@ -336,6 +337,14 @@ public class ProgressiveLoanInterestScheduleModel {
      */
     public Money getTotalChargebackPrincipal() {
         return repaymentPeriods().stream().map(RepaymentPeriod::getChargebackPrincipal).reduce(zero, Money::plus);
+    }
+
+    public Money getTotalOutstandingPrincipal() {
+        return MathUtil.negativeToZero(getTotalDuePrincipal().minus(getTotalPaidPrincipal()));
+    }
+
+    public Money getTotalOutstandingInterest() {
+        return MathUtil.negativeToZero(getTotalDueInterest().minus(getTotalPaidInterest()));
     }
 
     public Optional<RepaymentPeriod> findRepaymentPeriod(@NotNull LocalDate transactionDate) {

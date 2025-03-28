@@ -184,8 +184,8 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
         if (!transactionIds.isEmpty()) {
             this.accountTransfersWritePlatformService.reverseTransfersWithFromAccountTransactions(transactionIds,
                     PortfolioAccountType.LOAN);
-            loan.updateLoanSummaryAndStatus();
         }
+        loan.updateLoanSummaryAndStatus();
 
         loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan, loan.isInterestBearingAndInterestRecalculationEnabled(),
                 false);
@@ -266,8 +266,6 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
                     "reversed");
             writeOffTransaction.reverse();
         }
-
-        loan.updateLoanSummaryAndStatus();
 
         if (newTransactionDetail.isRepaymentLikeType() || newTransactionDetail.isInterestWaiver()) {
             loanDownPaymentHandlerService.handleRepaymentOrRecoveryOrWaiverTransaction(loan, newTransactionDetail,

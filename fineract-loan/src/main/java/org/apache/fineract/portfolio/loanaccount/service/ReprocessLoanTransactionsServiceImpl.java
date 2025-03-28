@@ -60,7 +60,6 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
     public void reprocessTransactionsWithPostTransactionChecks(final Loan loan, final LocalDate transactionDate) {
         final ChangedTransactionDetail changedTransactionDetail = reprocessTransactionsAndFetchChangedTransactions(loan,
                 loan.retrieveListOfTransactionsForReprocessing());
-        loan.doPostLoanTransactionChecks(transactionDate, loan.getLoanLifecycleStateMachine());
         handleChangedDetail(changedTransactionDetail);
     }
 
