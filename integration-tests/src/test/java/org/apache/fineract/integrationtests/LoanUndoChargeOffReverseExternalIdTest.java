@@ -120,6 +120,68 @@ public class LoanUndoChargeOffReverseExternalIdTest {
         assertEquals(reverseTransactionExternalId, chargeOffTransactionDetails.getReversalExternalId());
     }
 
+    /**
+     * Test scenario: - Charge-off is performed. - Charge-off is then undone. - A new charge-off is performed with an
+     * earlier transaction date. This verifies that reversed transactions are properly excluded so that the new
+     * charge-off is allowed.
+     */
+    @Test
+    public void loanChargeOffAfterUndoWithEarlierDateTest() {
+        // Loan ExternalId
+        String loanExternalIdStr = UUID.randomUUID().toString();
+
+        final Integer loanProductID = createLoanProductWithPeriodicAccrualAccounting(assetAccount, incomeAccount, expenseAccount,
+                overpaymentAccount);
+        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+        final Integer loanId = createLoanAccount(clientId, loanProductID, loanExternalIdStr);
+
+        // make Repayment
+        final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
+                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("28 March 2025").locale("en")
+                        .transactionAmount(100.0));
+
+        GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+        assertTrue(loanDetails.getStatus().getActive());
+
+        // Perform first charge-off with date "29 March 2025"
+        String randomText1 = Utils.randomStringGenerator("en", 5) + Utils.randomNumberGenerator(6) + Utils.randomStringGenerator("is", 5);
+        Integer chargeOffReasonId1 = CodeHelper.createChargeOffCodeValue(requestSpec, responseSpec, randomText1, 1);
+        String transactionExternalId1 = UUID.randomUUID().toString();
+        loanTransactionHelper.chargeOffLoan((long) loanId, new PostLoansLoanIdTransactionsRequest().transactionDate("29 March 2025")
+                .locale("en").dateFormat("dd MMMM yyyy").externalId(transactionExternalId1).chargeOffReasonId((long) chargeOffReasonId1));
+
+        loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
+        assertTrue(loanDetails.getStatus().getActive());
+        assertTrue(loanDetails.getChargedOff());
+
+        // Undo the charge-off
+        String reverseTransactionExternalId = UUID.randomUUID().toString();
+        PostLoansLoanIdTransactionsResponse undoChargeOffTxResponse = loanTransactionHelper.undoChargeOffLoan((long) loanId,
+                new PostLoansLoanIdTransactionsRequest().reversalExternalId(reverseTransactionExternalId));
+        assertNotNull(undoChargeOffTxResponse);
+
+        loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
+        assertTrue(loanDetails.getStatus().getActive());
+        assertFalse(loanDetails.getChargedOff());
+
+        // Perform a new charge-off with an earlier date ("28 March 2025") than the first charge-off
+        String randomText2 = Utils.randomStringGenerator("en", 5) + Utils.randomNumberGenerator(6) + Utils.randomStringGenerator("is", 5);
+        Integer chargeOffReasonId2 = CodeHelper.createChargeOffCodeValue(requestSpec, responseSpec, randomText2, 1);
+        String transactionExternalId2 = UUID.randomUUID().toString();
+        loanTransactionHelper.chargeOffLoan((long) loanId, new PostLoansLoanIdTransactionsRequest().transactionDate("28 March 2025")
+                .locale("en").dateFormat("dd MMMM yyyy").externalId(transactionExternalId2).chargeOffReasonId((long) chargeOffReasonId2));
+
+        loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
+        // After the new charge-off, the loan should be charged off
+        assertTrue(loanDetails.getStatus().getActive());
+        assertTrue(loanDetails.getChargedOff());
+
+        // Verify the new charge-off transaction details
+        GetLoansLoanIdTransactionsTransactionIdResponse newChargeOffTransactionDetails = loanTransactionHelper
+                .getLoanTransactionDetails((long) loanId, transactionExternalId2);
+        assertNotNull(newChargeOffTransactionDetails);
+    }
+
     private Integer createLoanAccount(final Integer clientID, final Integer loanProductID, final String externalId) {
 
         String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("1")
