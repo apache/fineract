@@ -32,11 +32,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.collateralmanagement.data.LoanCollateralResponseData;
 import org.apache.fineract.portfolio.collateralmanagement.service.LoanCollateralManagementReadPlatformService;
 import org.springframework.stereotype.Component;
@@ -47,24 +43,19 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class LoanCollateralManagementApiResource {
 
-    private final DefaultToApiJsonSerializer<LoanCollateralResponseData> apiJsonSerializerService;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    private final PlatformSecurityContext context;
     private final LoanCollateralManagementReadPlatformService loanCollateralManagementReadPlatformService;
-    private final CodeValueReadPlatformService codeValueReadPlatformService;
 
     @DELETE
     @Path("{id}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Consumes({ MediaType.APPLICATION_JSON })
     @Operation(description = "Delete Loan Collateral", summary = "Delete Loan Collateral")
-    public String deleteLoanCollateral(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
+    public CommandProcessingResult deleteLoanCollateral(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @PathParam("id") @Parameter(description = "loan collateral id") final Long id) {
 
         final CommandWrapper commandWrapper = new CommandWrapperBuilder().deleteLoanCollateral(loanId, id).build();
-        final CommandProcessingResult commandProcessingResult = this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
-        return this.apiJsonSerializerService.serialize(commandProcessingResult);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
     }
 
     @GET
@@ -72,10 +63,9 @@ public class LoanCollateralManagementApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Consumes({ MediaType.APPLICATION_JSON })
     @Operation(description = "Get Loan Collateral Details", summary = "Get Loan Collateral Details")
-    public String getLoanCollateral(@PathParam("collateralId") @Parameter(description = "collateralId") final Long collateralId) {
-        final LoanCollateralResponseData loanCollateralResponseData = this.loanCollateralManagementReadPlatformService
-                .getLoanCollateralResponseData(collateralId);
-        return this.apiJsonSerializerService.serialize(loanCollateralResponseData);
+    public LoanCollateralResponseData getLoanCollateral(
+            @PathParam("collateralId") @Parameter(description = "collateralId") final Long collateralId) {
+        return this.loanCollateralManagementReadPlatformService.getLoanCollateralResponseData(collateralId);
     }
 
 }
