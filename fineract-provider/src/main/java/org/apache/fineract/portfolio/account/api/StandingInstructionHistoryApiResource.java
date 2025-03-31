@@ -30,17 +30,12 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.UriInfo;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.api.DateParam;
 import org.apache.fineract.infrastructure.core.data.DateFormat;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -57,8 +52,6 @@ import org.springframework.stereotype.Component;
 public class StandingInstructionHistoryApiResource {
 
     private final PlatformSecurityContext context;
-    private final DefaultToApiJsonSerializer<StandingInstructionHistoryData> toApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final StandingInstructionHistoryReadPlatformService standingInstructionHistoryReadPlatformService;
     private final SqlValidator sqlValidator;
 
@@ -70,7 +63,7 @@ public class StandingInstructionHistoryApiResource {
             + "standinginstructionrunhistory?orderBy=name&sortOrder=DESC\n" + "\n" + "standinginstructionrunhistory?offset=10&limit=50")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StandingInstructionHistoryApiResourceSwagger.GetStandingInstructionRunHistoryResponse.class))) })
-    public String retrieveAll(@Context final UriInfo uriInfo,
+    public Page<StandingInstructionHistoryData> retrieveAll(
             @QueryParam("externalId") @Parameter(description = "externalId") final String externalId,
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
@@ -107,10 +100,6 @@ public class StandingInstructionHistoryApiResource {
         StandingInstructionDTO standingInstructionDTO = new StandingInstructionDTO(searchParameters, transferType, clientName, clientId,
                 fromAccount, fromAccountType, startDateRange, endDateRange);
 
-        final Page<StandingInstructionHistoryData> history = this.standingInstructionHistoryReadPlatformService
-                .retrieveAll(standingInstructionDTO);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, history);
+        return standingInstructionHistoryReadPlatformService.retrieveAll(standingInstructionDTO);
     }
 }

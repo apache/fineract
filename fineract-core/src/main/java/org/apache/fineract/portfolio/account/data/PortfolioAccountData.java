@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.account.data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Optional;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -69,7 +70,7 @@ public class PortfolioAccountData implements Serializable {
         this.amtForTransfer = null;
     }
 
-    public String getCurrencyCode() {
-        return this.currency.getCode();
+    public String getCurrencyCodeFromCurrency() {
+        return Optional.ofNullable(getCurrency()).map(CurrencyData::getCode).orElse(null);
     }
 }

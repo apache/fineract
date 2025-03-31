@@ -146,7 +146,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
 
         if (toAccountId != null && fromAccount != null) {
             toAccount = this.portfolioAccountReadPlatformService.retrieveOne(toAccountId, mostRelevantToAccountType,
-                    fromAccount.getCurrencyCode());
+                    fromAccount.getCurrencyCodeFromCurrency());
             mostRelevantToClientId = toAccount.getClientId();
         }
 
@@ -179,7 +179,8 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
     private Collection<PortfolioAccountData> retrieveToAccounts(final PortfolioAccountData excludeThisAccountFromOptions,
             final Integer toAccountType, final Long toClientId) {
 
-        final String currencyCode = excludeThisAccountFromOptions != null ? excludeThisAccountFromOptions.getCurrencyCode() : null;
+        final String currencyCode = excludeThisAccountFromOptions != null ? excludeThisAccountFromOptions.getCurrencyCodeFromCurrency()
+                : null;
 
         PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(toAccountType, toClientId, currencyCode, null, null);
         Collection<PortfolioAccountData> accountOptions = this.portfolioAccountReadPlatformService
@@ -379,7 +380,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
 
         if (toAccountId != null && fromAccount != null) {
             toAccount = this.portfolioAccountReadPlatformService.retrieveOne(toAccountId, mostRelevantToAccountType,
-                    fromAccount.getCurrencyCode());
+                    fromAccount.getCurrencyCodeFromCurrency());
             mostRelevantToClientId = toAccount.getClientId();
         }
 
