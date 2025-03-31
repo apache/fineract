@@ -20,7 +20,9 @@ package org.apache.fineract.portfolio.collateralmanagement.data;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import lombok.Getter;
 
+@Getter
 public final class LoanTransactionData {
 
     private final BigDecimal lastRepayment;

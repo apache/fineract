@@ -18,32 +18,12 @@
  */
 package org.apache.fineract.portfolio.collateralmanagement.data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
-@Getter
-@AllArgsConstructor
-public final class ClientCollateralManagementData {
+public record UpdateClientCollateralRequest(BigDecimal quantity, String locale) implements Serializable {
 
-    private final String name;
-
-    private final BigDecimal quantity;
-
-    private final BigDecimal total;
-
-    private final BigDecimal totalCollateral;
-
-    private final Long clientId;
-
-    private final List<LoanTransactionData> loanTransactionData;
-
-    private final Long id;
-
-    public static ClientCollateralManagementData instance(final String name, final BigDecimal quantity, final BigDecimal total,
-            final BigDecimal totalCollateral, final Long clientId, final List<LoanTransactionData> loanTransactionData, final Long id) {
-        return new ClientCollateralManagementData(name, quantity, total, totalCollateral, clientId, loanTransactionData, id);
-    }
-
+    @Serial
+    private static final long serialVersionUID = 1L;
 }
