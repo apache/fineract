@@ -1864,6 +1864,14 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         List<LoanRepaymentScheduleInstallment> installments = transactionCtx.getInstallments();
         Money paidPortion;
         boolean exit = false;
+        List<LoanRepaymentScheduleInstallment> alreadyProcessedInstallments;
+        if (transactionCtx instanceof ProgressiveTransactionCtx ctx) {
+            ctx.getSkipRepaymentScheduleInstallments().clear();
+            alreadyProcessedInstallments = ctx.getSkipRepaymentScheduleInstallments();
+        } else {
+            alreadyProcessedInstallments = new ArrayList<>();
+        }
+
         do {
             LoanRepaymentScheduleInstallment oldestPastDueInstallment = installments.stream()
                     .filter(LoanRepaymentScheduleInstallment::isNotFullyPaidOff).filter(e -> loanTransaction.isAfter(e.getDueDate()))
@@ -1892,6 +1900,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                         // run ouf of unallocated amounts
                         .filter(i -> i.isNotFullyPaidOff() || i.isDueBalanceZero()) //
                         .filter(e -> loanTransaction.isBefore(e.getDueDate())) //
+                        .filter(e -> !alreadyProcessedInstallments.contains(e))
                         .max(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).stream() //
                         .toList(); //
             } else if (FutureInstallmentAllocationRule.NEXT_LAST_INSTALLMENT.equals(futureInstallmentAllocationRule)) {
@@ -1910,6 +1919,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                             // till we run ouf of unallocated amounts
                             .filter(i -> i.isNotFullyPaidOff() || i.isDueBalanceZero()) //
                             .filter(e -> loanTransaction.isBefore(e.getDueDate())) //
+                            .filter(e -> !alreadyProcessedInstallments.contains(e))
                             .max(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).stream() //
                             .toList(); //
                 }
@@ -2068,6 +2078,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             LoanRepaymentScheduleInstallment inAdvanceInstallment, ProgressiveTransactionCtx ctx, LocalDate payDate) {
         PeriodDueDetails payableDetails = emiCalculator.getDueAmounts(ctx.getModel(), inAdvanceInstallment.getDueDate(), payDate);
 
+        if (payableDetails.getDueInterest().isZero() && payableDetails.getDuePrincipal().isZero()) {
+            ctx.getSkipRepaymentScheduleInstallments().add(inAdvanceInstallment);
+        }
         switch (paymentAllocationType) {
             case IN_ADVANCE_INTEREST -> inAdvanceInstallment.updateInterestCharged(payableDetails.getDueInterest().getAmount());
             case IN_ADVANCE_PRINCIPAL -> inAdvanceInstallment.updatePrincipal(payableDetails.getDuePrincipal().getAmount());

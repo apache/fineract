@@ -269,10 +269,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 repaymentPeriod.setEmi(MathUtil.min(repaymentPeriod.getOriginalEmi(), //
                         recalculatedScheduleModelTillDate.getTotalDuePrincipal() //
                                 .minus(recalculatedScheduleModelTillDate.getTotalPaidPrincipal()) //
-                                .add(recalculatedScheduleModelTillDate.getTotalDueInterest()) //
-                                .minus(recalculatedScheduleModelTillDate.getTotalPaidInterest()) //
                                 .add(repaymentPeriod.getPaidPrincipal()) //
-                                .add(repaymentPeriod.getPaidInterest()),
+                                .add(repaymentPeriod.getDueInterest()),
                         false)); //
             }
         }
