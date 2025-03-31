@@ -19,19 +19,28 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidBy;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 
 @RequiredArgsConstructor
 public class LoanChargeService {
 
     private final LoanChargeValidator loanChargeValidator;
+    private final LoanTransactionProcessingService loanTransactionProcessingService;
 
     public void recalculateAllCharges(final Loan loan) {
         Set<LoanCharge> charges = loan.getActiveCharges();
@@ -79,6 +88,37 @@ public class LoanChargeService {
                 charge = loanCharge;
             }
         }
-        loan.handleChargePaidTransaction(charge, paymentTransaction, loanLifecycleStateMachine, installmentNumber);
+        handleChargePaidTransaction(loan, charge, paymentTransaction, loanLifecycleStateMachine, installmentNumber);
+    }
+
+    public void handleChargePaidTransaction(final Loan loan, final LoanCharge charge, final LoanTransaction chargesPayment,
+            final LoanLifecycleStateMachine loanLifecycleStateMachine, final Integer installmentNumber) {
+        chargesPayment.updateLoan(loan);
+        final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(chargesPayment, charge,
+                chargesPayment.getAmount(loan.getCurrency()).getAmount(), installmentNumber);
+        chargesPayment.getLoanChargesPaid().add(loanChargePaidBy);
+        loan.addLoanTransaction(chargesPayment);
+        loanLifecycleStateMachine.transition(LoanEvent.LOAN_CHARGE_PAYMENT, loan);
+
+        final List<LoanRepaymentScheduleInstallment> chargePaymentInstallments = new ArrayList<>();
+        List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
+        int firstNormalInstallmentNumber = LoanRepaymentScheduleProcessingWrapper
+                .fetchFirstNormalInstallmentNumber(loan.getRepaymentScheduleInstallments());
+        for (final LoanRepaymentScheduleInstallment installment : installments) {
+            boolean isFirstInstallment = installment.getInstallmentNumber().equals(firstNormalInstallmentNumber);
+            if (installment.getInstallmentNumber().equals(installmentNumber) || (installmentNumber == null
+                    && charge.isDueInPeriod(installment.getFromDate(), installment.getDueDate(), isFirstInstallment))) {
+                chargePaymentInstallments.add(installment);
+                break;
+            }
+        }
+        final Set<LoanCharge> loanCharges = new HashSet<>(1);
+        loanCharges.add(charge);
+        loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(), chargesPayment,
+                new TransactionCtx(loan.getCurrency(), chargePaymentInstallments, loanCharges,
+                        new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+
+        loan.updateLoanSummaryDerivedFields();
+        loan.doPostLoanTransactionChecks(chargesPayment.getTransactionDate(), loanLifecycleStateMachine);
     }
 }

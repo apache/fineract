@@ -26,7 +26,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanRefundValidator;
@@ -35,6 +34,7 @@ import org.apache.fineract.portfolio.loanaccount.serialization.LoanRefundValidat
 public class LoanRefundService {
 
     private final LoanRefundValidator loanRefundValidator;
+    private final LoanTransactionProcessingService loadTransactionProcessingService;
 
     public void makeRefund(final Loan loan, final LoanTransaction loanTransaction,
             final LoanLifecycleStateMachine loanLifecycleStateMachine, final List<Long> existingTransactionIds,
@@ -106,10 +106,9 @@ public class LoanRefundService {
         loanRefundValidator.validateTransactionDateNotInFuture(loanTransactionDate);
         loanRefundValidator.validateTransactionAmountThreshold(loan, null);
 
-        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loan.getTransactionProcessor();
-
-        loanRepaymentScheduleTransactionProcessor.processLatestTransaction(loanTransaction, new TransactionCtx(loan.getCurrency(),
-                loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+        loadTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(), loanTransaction,
+                new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
+                        new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
 
         loan.updateLoanSummaryDerivedFields();
         loan.doPostLoanTransactionChecks(loanTransaction.getTransactionDate(), loanLifecycleStateMachine);

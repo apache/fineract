@@ -107,13 +107,8 @@ import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
-import org.apache.fineract.portfolio.loanaccount.data.OutstandingAmountsDTO;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
-import org.apache.fineract.portfolio.loanaccount.data.TransactionChangeData;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGenerator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
@@ -365,8 +360,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @Transient
     private boolean accountNumberRequiresAutoGeneration;
-    @Transient
-    private LoanRepaymentScheduleTransactionProcessorFactory transactionProcessorFactory;
 
     @Transient
     private LoanLifecycleStateMachine loanLifecycleStateMachine;
@@ -767,37 +760,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         applyLoanChargeTransaction.getLoanChargesPaid().add(loanChargePaidBy);
         addLoanTransaction(applyLoanChargeTransaction);
         return applyLoanChargeTransaction;
-    }
-
-    public void handleChargePaidTransaction(final LoanCharge charge, final LoanTransaction chargesPayment,
-            final LoanLifecycleStateMachine loanLifecycleStateMachine, final Integer installmentNumber) {
-        chargesPayment.updateLoan(this);
-        final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(chargesPayment, charge,
-                chargesPayment.getAmount(getCurrency()).getAmount(), installmentNumber);
-        chargesPayment.getLoanChargesPaid().add(loanChargePaidBy);
-        addLoanTransaction(chargesPayment);
-        loanLifecycleStateMachine.transition(LoanEvent.LOAN_CHARGE_PAYMENT, this);
-
-        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = getTransactionProcessor();
-        final List<LoanRepaymentScheduleInstallment> chargePaymentInstallments = new ArrayList<>();
-        List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
-        int firstNormalInstallmentNumber = LoanRepaymentScheduleProcessingWrapper
-                .fetchFirstNormalInstallmentNumber(repaymentScheduleInstallments);
-        for (final LoanRepaymentScheduleInstallment installment : installments) {
-            boolean isFirstInstallment = installment.getInstallmentNumber().equals(firstNormalInstallmentNumber);
-            if (installment.getInstallmentNumber().equals(installmentNumber) || (installmentNumber == null
-                    && charge.isDueInPeriod(installment.getFromDate(), installment.getDueDate(), isFirstInstallment))) {
-                chargePaymentInstallments.add(installment);
-                break;
-            }
-        }
-        final Set<LoanCharge> loanCharges = new HashSet<>(1);
-        loanCharges.add(charge);
-        loanRepaymentScheduleTransactionProcessor.processLatestTransaction(chargesPayment, new TransactionCtx(getCurrency(),
-                chargePaymentInstallments, loanCharges, new MoneyHolder(getTotalOverpaidAsMoney()), null));
-
-        updateLoanSummaryDerivedFields();
-        doPostLoanTransactionChecks(chargesPayment.getTransactionDate(), loanLifecycleStateMachine);
     }
 
     public LocalDate getLastRepaymentPeriodDueDate(final boolean includeRecalculatedInterestComponent) {
@@ -2245,10 +2207,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return receivableInterest;
     }
 
-    public void setHelpers(final LoanLifecycleStateMachine loanLifecycleStateMachine,
-            final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessorFactory) {
+    public void setHelpers(final LoanLifecycleStateMachine loanLifecycleStateMachine) {
         this.loanLifecycleStateMachine = loanLifecycleStateMachine;
-        this.transactionProcessorFactory = transactionProcessorFactory;
     }
 
     public boolean isSyncDisbursementWithMeeting() {
@@ -2601,89 +2561,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return (this.actualMaturityDate != null) ? (referenceDate.compareTo(this.actualMaturityDate) >= 0) : false;
     }
 
-    public ChangedTransactionDetail processTransactions() {
-        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = getTransactionProcessor();
-        final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retrieveListOfTransactionsForReprocessing();
-        ChangedTransactionDetail changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(
-                getDisbursementDate(), allNonContraTransactionsPostDisbursement, getCurrency(), getRepaymentScheduleInstallments(),
-                getActiveCharges());
-        for (TransactionChangeData change : changedTransactionDetail.getTransactionChanges()) {
-            change.getNewTransaction().updateLoan(this);
-        }
-        /*
-         * Commented since throwing exception if external id present for one of the transactions. for this need to save
-         * the reversed transactions first and then new transactions.
-         */
-        final List<LoanTransaction> newTransactions = changedTransactionDetail.getTransactionChanges().stream()
-                .map(TransactionChangeData::getNewTransaction).toList();
-        this.loanTransactions.addAll(newTransactions);
-        updateLoanSummaryDerivedFields();
-
-        return changedTransactionDetail;
-    }
-
-    /*
-     * Probably this is buggy when a chargeback transaction happens
-     */
-    public Optional<ChangedTransactionDetail> processPostDisbursementTransactions() {
-        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = getTransactionProcessor();
-        final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retrieveListOfTransactionsForReprocessing();
-        final List<LoanTransaction> copyTransactions = new ArrayList<>();
-
-        if (allNonContraTransactionsPostDisbursement.isEmpty()) {
-            return Optional.empty();
-        }
-
-        // TODO: Probably this is not needed and can be eliminated, make sure to double check it
-        for (LoanTransaction loanTransaction : allNonContraTransactionsPostDisbursement) {
-            copyTransactions.add(LoanTransaction.copyTransactionProperties(loanTransaction));
-        }
-        final ChangedTransactionDetail changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(
-                getDisbursementDate(), copyTransactions, getCurrency(), getRepaymentScheduleInstallments(), getActiveCharges());
-
-        updateLoanSummaryDerivedFields();
-
-        return Optional.of(changedTransactionDetail);
-    }
-
-    public LoanScheduleDTO getRecalculatedSchedule(final ScheduleGeneratorDTO generatorDTO) {
-        if (!isInterestBearingAndInterestRecalculationEnabled() || isNpa || isChargedOff()) {
-            return null;
-        }
-        final InterestMethod interestMethod = this.loanRepaymentScheduleDetail.getInterestMethod();
-        final LoanScheduleGenerator loanScheduleGenerator = generatorDTO.getLoanScheduleFactory()
-                .create(this.loanRepaymentScheduleDetail.getLoanScheduleType(), interestMethod);
-
-        final MathContext mc = MoneyHelper.getMathContext();
-
-        final LoanApplicationTerms loanApplicationTerms = constructLoanApplicationTerms(generatorDTO);
-
-        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = getTransactionProcessor();
-
-        return loanScheduleGenerator.rescheduleNextInstallments(mc, loanApplicationTerms, this, generatorDTO.getHolidayDetailDTO(),
-                loanRepaymentScheduleTransactionProcessor, generatorDTO.getRecalculateFrom());
-    }
-
-    public OutstandingAmountsDTO fetchPrepaymentDetail(final ScheduleGeneratorDTO scheduleGeneratorDTO, final LocalDate onDate) {
-        OutstandingAmountsDTO outstandingAmounts;
-
-        if (isInterestBearingAndInterestRecalculationEnabled() && !isChargeOffOnDate(onDate)) {
-            final MathContext mc = MoneyHelper.getMathContext();
-
-            final InterestMethod interestMethod = this.loanRepaymentScheduleDetail.getInterestMethod();
-            final LoanApplicationTerms loanApplicationTerms = constructLoanApplicationTerms(scheduleGeneratorDTO);
-
-            final LoanScheduleGenerator loanScheduleGenerator = scheduleGeneratorDTO.getLoanScheduleFactory()
-                    .create(loanApplicationTerms.getLoanScheduleType(), interestMethod);
-            final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = getTransactionProcessor();
-            outstandingAmounts = loanScheduleGenerator.calculatePrepaymentAmount(getCurrency(), onDate, loanApplicationTerms, mc, this,
-                    scheduleGeneratorDTO.getHolidayDetailDTO(), loanRepaymentScheduleTransactionProcessor);
-        } else {
-            outstandingAmounts = this.getTotalOutstandingOnLoan();
-        }
-        return outstandingAmounts;
-    }
-
     public LoanApplicationTerms constructLoanApplicationTerms(final ScheduleGeneratorDTO scheduleGeneratorDTO) {
         final Integer loanTermFrequency = this.termFrequency;
         NthDayType nthDayType = null;
@@ -2752,22 +2629,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         }
         annualNominalInterestRate = constructFloatingInterestRates(annualNominalInterestRate, floatingRateDTO, loanTermVariations);
         return annualNominalInterestRate;
-    }
-
-    private OutstandingAmountsDTO getTotalOutstandingOnLoan() {
-        Money totalPrincipal = Money.zero(getCurrency());
-        Money totalInterest = Money.zero(getCurrency());
-        Money feeCharges = Money.zero(getCurrency());
-        Money penaltyCharges = Money.zero(getCurrency());
-        List<LoanRepaymentScheduleInstallment> repaymentSchedule = getRepaymentScheduleInstallments();
-        for (final LoanRepaymentScheduleInstallment scheduledRepayment : repaymentSchedule) {
-            totalPrincipal = totalPrincipal.plus(scheduledRepayment.getPrincipalOutstanding(getCurrency()));
-            totalInterest = totalInterest.plus(scheduledRepayment.getInterestOutstanding(getCurrency()));
-            feeCharges = feeCharges.plus(scheduledRepayment.getFeeChargesOutstanding(getCurrency()));
-            penaltyCharges = penaltyCharges.plus(scheduledRepayment.getPenaltyChargesOutstanding(getCurrency()));
-        }
-        return new OutstandingAmountsDTO(totalPrincipal.getCurrency()).principal(totalPrincipal).interest(totalInterest)
-                .feeCharges(feeCharges).penaltyCharges(penaltyCharges);
     }
 
     public LocalDate fetchInterestRecalculateFromDate() {
@@ -3508,10 +3369,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     public void setIsTopup(boolean topup) {
         isTopup = topup;
-    }
-
-    public LoanRepaymentScheduleTransactionProcessor getTransactionProcessor() {
-        return transactionProcessorFactory.determineProcessor(transactionProcessingStrategyCode);
     }
 
     public boolean isProgressiveSchedule() {

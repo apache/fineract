@@ -129,7 +129,6 @@ public class LoanReschedulePreviewPlatformServiceImpl implements LoanRescheduleP
                 .determineProcessor(loan.transactionProcessingStrategy());
         final LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getLoanScheduleType(),
                 loanApplicationTerms.getInterestMethod());
-        loan.setHelpers(null, this.loanRepaymentScheduleTransactionProcessorFactory);
         final LoanScheduleDTO loanSchedule = loanScheduleGenerator.rescheduleNextInstallments(mathContext, loanApplicationTerms, loan,
                 loanApplicationTerms.getHolidayDetailDTO(), loanRepaymentScheduleTransactionProcessor, rescheduleFromDate);
         final LoanScheduleModel loanScheduleModel = loanSchedule.getLoanScheduleModel();

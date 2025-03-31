@@ -42,7 +42,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachin
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanStateTransitionException;
@@ -61,6 +60,7 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
     private final LoanRefundService loanRefundService;
     private final LoanRefundValidator loanRefundValidator;
     private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
+    private final LoanTransactionProcessingService loanTransactionProcessingService;
 
     @Override
     public LoanTransaction handleDownPayment(ScheduleGeneratorDTO scheduleGeneratorDTO, JsonCommand command,
@@ -124,8 +124,6 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
 
         loanRefundValidator.validateTransactionAmountThreshold(loan, adjustedTransaction);
 
-        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loan.getTransactionProcessor();
-
         final LoanRepaymentScheduleInstallment currentInstallment = loan
                 .fetchLoanRepaymentScheduleInstallmentByDueDate(loanTransaction.getTransactionDate());
 
@@ -135,7 +133,7 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
 
         if (isTransactionChronologicallyLatest && adjustedTransaction == null
                 && (!reprocess || !loan.isInterestBearingAndInterestRecalculationEnabled()) && !loan.isForeclosure()) {
-            loanRepaymentScheduleTransactionProcessor.processLatestTransaction(loanTransaction,
+            loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(), loanTransaction,
                     new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
                             new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
             reprocess = false;

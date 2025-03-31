@@ -176,7 +176,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationR
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.exception.DateMismatchException;
@@ -281,6 +280,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final LoanAccountService loanAccountService;
     private final LoanJournalEntryPoster journalEntryPoster;
     private final LoanAdjustmentService loanAdjustmentService;
+    private final LoanTransactionProcessingService loanTransactionProcessingService;
 
     @Transactional
     @Override
@@ -1068,8 +1068,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             loan.addLoanTransaction(newInterestPaymentWaiverTransaction);
         }
 
-        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loan.getTransactionProcessor();
-
         final LoanRepaymentScheduleInstallment currentInstallment = loan.fetchLoanRepaymentScheduleInstallmentByDueDate(transactionDate);
 
         boolean reprocess = true;
@@ -1081,9 +1079,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         if (isTransactionChronologicallyLatest && (!reprocess || !loan.isInterestBearingAndInterestRecalculationEnabled())
                 && !loan.isForeclosure()) {
-            loanRepaymentScheduleTransactionProcessor.processLatestTransaction(newInterestPaymentWaiverTransaction,
-                    new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
-                            new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+            loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(),
+                    newInterestPaymentWaiverTransaction, new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
+                            loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
             reprocess = false;
             if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
                 if (currentInstallment == null || currentInstallment.isNotFullyPaidOff()) {
@@ -2105,7 +2103,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), loan.getDisbursementDate());
                 if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
                     ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
-                    loan.setHelpers(null, this.transactionProcessingStrategy);
                     loanScheduleService.recalculateScheduleFromLastTransaction(loan, scheduleGeneratorDTO, existingTransactionIds,
                             existingReversedTransactionIds);
                     createAndSaveLoanScheduleArchive(loan, scheduleGeneratorDTO);
@@ -3106,15 +3103,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public void handleChargebackTransaction(final Loan loan, LoanTransaction chargebackTransaction,
             final LoanLifecycleStateMachine loanLifecycleStateMachine) {
         loanTransactionValidator.validateIfTransactionIsChargeback(chargebackTransaction);
-        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loan.getTransactionProcessor();
 
         loan.addLoanTransaction(chargebackTransaction);
         if (loan.isInterestBearing() && loan.isInterestRecalculationEnabled()) {
-            loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(loan.getDisbursementDate(),
-                    loan.retrieveListOfTransactionsForReprocessing(), loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
-                    loan.getActiveCharges());
+            loanTransactionProcessingService.reprocessLoanTransactions(loan.getTransactionProcessingStrategyCode(),
+                    loan.getDisbursementDate(), loan.retrieveListOfTransactionsForReprocessing(), loan.getCurrency(),
+                    loan.getRepaymentScheduleInstallments(), loan.getActiveCharges());
         } else {
-            loanRepaymentScheduleTransactionProcessor.processLatestTransaction(chargebackTransaction,
+            loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(), chargebackTransaction,
                     new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
                             new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
         }
@@ -3261,7 +3257,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final LoanLifecycleStateMachine loanLifecycleStateMachine, final Map<String, Object> changes,
             final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds, final AppUser currentUser,
             final ScheduleGeneratorDTO scheduleGeneratorDTO) {
-        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loan.getTransactionProcessor();
         closeDisbursements(loan, scheduleGeneratorDTO);
 
         final LocalDate writtenOffOnLocalDate = command.localDateValueOfParameterNamed(TRANSACTION_DATE);
@@ -3313,8 +3308,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         loan.addLoanTransaction(loanTransaction);
-        loanRepaymentScheduleTransactionProcessor.processLatestTransaction(loanTransaction, new TransactionCtx(loan.getCurrency(),
-                loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+        loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(), loanTransaction,
+                new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
+                        new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
 
         loan.updateLoanSummaryDerivedFields();
 
@@ -3366,7 +3362,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final String errorMessage = "The date on which a loan is closed cannot be in the future.";
             throw new InvalidLoanStateTransitionException("close", "cannot.be.a.future.date", errorMessage, closureDate);
         }
-        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loan.getTransactionProcessor();
         closeDisbursements(loan, scheduleGeneratorDTO);
 
         LoanTransaction loanTransaction = null;
@@ -3390,7 +3385,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 }
 
                 loan.addLoanTransaction(loanTransaction);
-                loanRepaymentScheduleTransactionProcessor.processLatestTransaction(loanTransaction,
+                loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(), loanTransaction,
                         new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
                                 new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
 

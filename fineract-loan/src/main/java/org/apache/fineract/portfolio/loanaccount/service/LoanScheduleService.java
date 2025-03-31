@@ -35,6 +35,7 @@ public class LoanScheduleService {
 
     private final LoanChargeService loanChargeService;
     private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
+    private final LoanTransactionProcessingService loadTransactionProcessingService;
 
     /**
      * Ability to regenerate the repayment schedule based on the loans current details/state.
@@ -79,7 +80,7 @@ public class LoanScheduleService {
 
     public void regenerateRepaymentScheduleWithInterestRecalculation(final Loan loan, final ScheduleGeneratorDTO generatorDTO) {
         final LocalDate lastTransactionDate = loan.getLastUserTransactionDate();
-        final LoanScheduleDTO loanSchedule = loan.getRecalculatedSchedule(generatorDTO);
+        final LoanScheduleDTO loanSchedule = loadTransactionProcessingService.getRecalculatedSchedule(generatorDTO, loan);
         if (loanSchedule == null) {
             return;
         }
@@ -107,7 +108,7 @@ public class LoanScheduleService {
                 }
             }
         }
-        loan.processPostDisbursementTransactions();
+        loadTransactionProcessingService.processPostDisbursementTransactions(loan);
     }
 
     public void handleRegenerateRepaymentScheduleWithInterestRecalculation(final Loan loan, final ScheduleGeneratorDTO generatorDTO) {

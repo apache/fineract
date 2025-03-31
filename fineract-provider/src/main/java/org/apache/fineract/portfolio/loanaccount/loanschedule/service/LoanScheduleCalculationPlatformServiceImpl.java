@@ -209,7 +209,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
 
     private Loan fetchLoan(final Long accountId) {
         final Loan loanAccount = this.loanRepository.findOneWithNotFoundDetection(accountId, true);
-        loanAccount.setHelpers(defaultLoanLifecycleStateMachine, this.loanRepaymentScheduleTransactionProcessorFactory);
+        loanAccount.setHelpers(defaultLoanLifecycleStateMachine);
 
         return loanAccount;
     }

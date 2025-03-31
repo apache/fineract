@@ -60,6 +60,7 @@ public class ProgressiveLoanInterestRefundServiceImpl implements InterestRefundS
     private final LoanAssembler loanAssembler;
     private final LoanScheduleService loanScheduleService;
     private final LoanUtilService loanUtilService;
+    private final LoanTransactionProcessingService loanTransactionProcessingService;
 
     private static void simulateRepaymentForDisbursements(LoanTransaction lt, final AtomicReference<BigDecimal> refundFinal,
             List<LoanTransaction> collect) {
@@ -116,7 +117,7 @@ public class ProgressiveLoanInterestRefundServiceImpl implements InterestRefundS
             LocalDate relatedRefundTransactionDate, List<LoanTransaction> newTransactions, List<Long> oldTransactionIds) {
         Loan loan = loanAssembler.assembleFrom(loanId);
         if (processor == null) {
-            processor = loan.getTransactionProcessor();
+            processor = loanTransactionProcessingService.getTransactionProcessor(loan.getTransactionProcessingStrategyCode());
         }
         if (!(processor instanceof AdvancedPaymentScheduleTransactionProcessor)) {
             throw new IllegalArgumentException(

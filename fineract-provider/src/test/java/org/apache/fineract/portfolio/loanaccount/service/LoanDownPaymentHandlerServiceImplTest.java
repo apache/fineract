@@ -104,13 +104,16 @@ public class LoanDownPaymentHandlerServiceImplTest {
     @Mock
     private ReprocessLoanTransactionsService reprocessLoanTransactionsService;
 
+    @Mock
+    private LoanTransactionProcessingService loanTransactionProcessingService;
+
     private LoanDownPaymentHandlerServiceImpl underTest;
 
     @BeforeEach
     public void setUp() {
         underTest = new LoanDownPaymentHandlerServiceImpl(loanTransactionRepository, businessEventNotifierService,
                 loanDownPaymentTransactionValidator, loanScheduleService, loanRefundService, loanRefundValidator,
-                reprocessLoanTransactionsService);
+                reprocessLoanTransactionsService, loanTransactionProcessingService);
         moneyHelper.when(MoneyHelper::getMathContext).thenReturn(new MathContext(12, RoundingMode.UP));
         moneyHelper.when(MoneyHelper::getRoundingMode).thenReturn(RoundingMode.UP);
         tempConfigServiceMock.when(TemporaryConfigurationServiceContainer::isExternalIdAutoGenerationEnabled).thenReturn(true);
@@ -156,8 +159,7 @@ public class LoanDownPaymentHandlerServiceImplTest {
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
         when(loanProduct.getInstallmentAmountInMultiplesOf()).thenReturn(10);
         when(loanForProcessing.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
-        when(loanForProcessing.getTransactionProcessor()).thenReturn(loanRepaymentScheduleTransactionProcessor);
-        when(loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(any(), any(), any(), any(), any()))
+        when(loanTransactionProcessingService.reprocessLoanTransactions(any(), any(), any(), any(), any(), any()))
                 .thenReturn(changedTransactionDetail);
         when(loanProductRelatedDetail.getLoanScheduleType()).thenReturn(LoanScheduleType.PROGRESSIVE);
 

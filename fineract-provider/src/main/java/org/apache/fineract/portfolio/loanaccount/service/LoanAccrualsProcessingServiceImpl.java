@@ -71,7 +71,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanInstallmentCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanInterestRecalcualtionAdditionalDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanInterestRecalculationDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionComparator;
@@ -105,7 +104,6 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final LoanTransactionRepository loanTransactionRepository;
     private final LoanScheduleGeneratorFactory loanScheduleFactory;
-    private final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessorFactory;
 
     @Qualifier(TaskExecutorConstant.CONFIGURABLE_TASK_EXECUTOR_BEAN_NAME)
     private final ThreadPoolTaskExecutor taskExecutor;
@@ -122,7 +120,6 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
         List<Throwable> errors = new ArrayList<>();
         for (Loan loan : loans) {
             try {
-                setSetHelpers(loan);
                 addPeriodicAccruals(tillDate, loan);
             } catch (Exception e) {
                 log.error("Failed to add accrual for loan {}", loan.getId(), e);
@@ -165,7 +162,6 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
                     ThreadLocalContextUtil.init(context);
                     transactionTemplate.executeWithoutResult(status -> {
                         Loan loan = loanRepositoryWrapper.findOneWithNotFoundDetection(outerLoan.getId());
-                        setSetHelpers(loan);
                         try {
                             log.debug("Adding accruals for loan '{}'", loan.getId());
                             addAccruals(loan, tillDate, false, false, true);
@@ -1291,9 +1287,5 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
 
     public boolean isProgressiveAccrual(@NotNull Loan loan) {
         return loan.isProgressiveSchedule();
-    }
-
-    private void setSetHelpers(Loan loan) {
-        loan.setHelpers(null, transactionProcessorFactory);
     }
 }

@@ -29,7 +29,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
 import org.springframework.stereotype.Service;
@@ -41,6 +40,7 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
     private final LoanAccountService loanAccountService;
     private final LoanAccountTransfersService loanAccountTransfersService;
     private final ReplayedTransactionBusinessEventService replayedTransactionBusinessEventService;
+    private final LoanTransactionProcessingService loadTransactionProcessingService;
 
     @Override
     public void reprocessTransactions(final Loan loan) {
@@ -66,7 +66,7 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
 
     @Override
     public void processPostDisbursementTransactions(final Loan loan) {
-        loan.processPostDisbursementTransactions().ifPresent(this::handleChangedDetail);
+        loadTransactionProcessingService.processPostDisbursementTransactions(loan).ifPresent(this::handleChangedDetail);
     }
 
     @Override
@@ -99,7 +99,8 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
 
     @Override
     public void processLatestTransaction(final LoanTransaction loanTransaction, final Loan loan) {
-        final ChangedTransactionDetail changedTransactionDetail = loan.getTransactionProcessor().processLatestTransaction(loanTransaction,
+        final ChangedTransactionDetail changedTransactionDetail = loadTransactionProcessingService.processLatestTransaction(
+                loan.getTransactionProcessingStrategyCode(), loanTransaction,
                 new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
                         new MoneyHolder(loan.getTotalOverpaidAsMoney()), new ChangedTransactionDetail()));
         final List<LoanTransaction> newTransactions = changedTransactionDetail.getTransactionChanges().stream()
@@ -126,10 +127,9 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
 
     private ChangedTransactionDetail reprocessTransactionsAndFetchChangedTransactions(final Loan loan,
             final List<LoanTransaction> loanTransactions) {
-        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loan.getTransactionProcessor();
-        final ChangedTransactionDetail changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.reprocessLoanTransactions(
-                loan.getDisbursementDate(), loanTransactions, loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
-                loan.getActiveCharges());
+        final ChangedTransactionDetail changedTransactionDetail = loadTransactionProcessingService.reprocessLoanTransactions(
+                loan.getTransactionProcessingStrategyCode(), loan.getDisbursementDate(), loanTransactions, loan.getCurrency(),
+                loan.getRepaymentScheduleInstallments(), loan.getActiveCharges());
         for (TransactionChangeData change : changedTransactionDetail.getTransactionChanges()) {
             change.getNewTransaction().updateLoan(loan);
         }

@@ -2022,7 +2022,7 @@ public final class LoanApplicationValidator {
             baseDataValidator.reset().parameter(LoanApiConstants.noteParameterName).value(note).notExceedingLengthOf(1000);
 
             final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
-            loan.setHelpers(defaultLoanLifecycleStateMachine, this.loanRepaymentScheduleTransactionProcessorFactory);
+            loan.setHelpers(defaultLoanLifecycleStateMachine);
 
             final Client client = loan.client();
             if (client != null && client.isNotActive()) {

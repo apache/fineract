@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -32,9 +33,13 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleP
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePlanDisbursementPeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePlanDownPaymentPeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePlanRepaymentPeriod;
+import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionProcessingService;
 import org.apache.fineract.portfolio.loanproduct.calc.ProgressiveEMICalculator;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class LoanScheduleGeneratorTest {
 
     private static final ProgressiveEMICalculator emiCalculator = new ProgressiveEMICalculator();
@@ -49,6 +54,7 @@ class LoanScheduleGeneratorTest {
     private static final LocalDate DISBURSEMENT_DATE = LocalDate.of(2024, 1, 15);
     private static final MathContext mc = new MathContext(12, RoundingMode.HALF_EVEN);
     private static final BigDecimal DOWN_PAYMENT_PORTION = BigDecimal.valueOf(25);
+    private static final LoanTransactionProcessingService loanTransactionProcessingService = mock(LoanTransactionProcessingService.class);
 
     @Test
     void testGenerateLoanSchedule() {
@@ -58,6 +64,7 @@ class LoanScheduleGeneratorTest {
 
         ScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
         ProgressiveLoanScheduleGenerator generator = new ProgressiveLoanScheduleGenerator(scheduledDateGenerator, emiCalculator);
+        generator.setLoanTransactionProcessingService(loanTransactionProcessingService);
 
         LoanSchedulePlan loanSchedule = generator.generate(mc, modelData);
 
@@ -94,6 +101,7 @@ class LoanScheduleGeneratorTest {
 
         ScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
         ProgressiveLoanScheduleGenerator generator = new ProgressiveLoanScheduleGenerator(scheduledDateGenerator, emiCalculator);
+        generator.setLoanTransactionProcessingService(loanTransactionProcessingService);
 
         LoanSchedulePlan loanSchedule = generator.generate(mc, modelData);
 

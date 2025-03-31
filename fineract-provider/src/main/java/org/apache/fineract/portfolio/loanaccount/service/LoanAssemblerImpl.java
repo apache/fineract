@@ -169,7 +169,7 @@ public class LoanAssemblerImpl implements LoanAssembler {
 
     @Override
     public void setHelpers(final Loan loanAccount) {
-        loanAccount.setHelpers(defaultLoanLifecycleStateMachine, loanRepaymentScheduleTransactionProcessorFactory);
+        loanAccount.setHelpers(defaultLoanLifecycleStateMachine);
     }
 
     @Override
@@ -294,7 +294,7 @@ public class LoanAssemblerImpl implements LoanAssembler {
         }
 
         copyAdvancedPaymentRulesIfApplicable(transactionProcessingStrategyCode, loanProduct, loanApplication);
-        loanApplication.setHelpers(defaultLoanLifecycleStateMachine, this.loanRepaymentScheduleTransactionProcessorFactory);
+        loanApplication.setHelpers(defaultLoanLifecycleStateMachine);
         // TODO: review
         loanChargeService.recalculateAllCharges(loanApplication);
         topUpLoanConfiguration(element, loanApplication);
