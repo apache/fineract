@@ -237,7 +237,7 @@ public class SavingsAccrualWritePlatformServiceImpl implements SavingsAccrualWri
                 period.calculateInterest(compoundInterestValues);
                 log.debug("  period {} {} : {}", period.getPeriodInterval().startDate(), period.getPeriodInterval().endDate(),
                         period.getInterestEarned());
-                if (!accrualTransactionDates.contains(period.getPeriodInterval().endDate()) ) {
+                if (!accrualTransactionDates.contains(period.getPeriodInterval().endDate()) && !MathUtil.isZero(period.getInterestEarned().getAmount())) {
                     SavingsAccountTransaction savingsAccountTransaction = SavingsAccountTransaction.accrual(savingsAccount,
                             savingsAccount.office(), period.getPeriodInterval().endDate(), period.getInterestEarned(), false, true);
                     savingsAccount.addTransaction(savingsAccountTransaction);

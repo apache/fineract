@@ -273,7 +273,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         Long savingsTransactionId = null;
         account.postMaturityInterest(isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
         final DepositAccountOnClosureType onClosureType = DepositAccountOnClosureType.fromInt(onAccountClosureId);
-        if (onClosureType.isReinvest()) {
+        if (onClosureType.isReinvest() && account.getClosedOnDate() != null) {
             BigDecimal reInvestAmount;
             if (onClosureType.isReinvestPrincipal()) {
                 reInvestAmount = account.getDepositAmount();
