@@ -67,6 +67,7 @@ import org.apache.fineract.portfolio.savings.domain.interest.PostingPeriod;
 import org.apache.fineract.portfolio.savings.domain.interest.SavingsAccountTransactionDetailsForPostingPeriod;
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Entity
 @DiscriminatorValue("200")
@@ -555,8 +556,9 @@ public class FixedDepositAccount extends SavingsAccount {
                 }
             }
         }
-        recalucateDailyBalanceDetails = applyWithholdTaxForDepositAccounts(interestPostingUpToDate, recalucateDailyBalanceDetails,
-                backdatedTxnsAllowedTill);
+        recalucateDailyBalanceDetails = chart.getAccount().applyWithholdTaxForDepositAccounts(interestPostingUpToDate, recalucateDailyBalanceDetails, backdatedTxnsAllowedTill);
+        /*recalucateDailyBalanceDetails = applyWithholdTaxForDepositAccounts(interestPostingUpToDate, recalucateDailyBalanceDetails,
+                backdatedTxnsAllowedTill);*/
         if (recalucateDailyBalanceDetails) {
             // update existing transactions so derived balance fields are
             // correct.
