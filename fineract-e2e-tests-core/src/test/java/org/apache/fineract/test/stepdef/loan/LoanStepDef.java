@@ -1422,12 +1422,7 @@ public class LoanStepDef extends AbstractStepDef {
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.body().getLoanId();
 
-        PostLoansLoanIdTransactionsRequest chargeOffRequest = LoanRequestFactory.defaultChargeOffRequest().transactionDate(transactionDate)
-                .dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE);
-
-        Response<PostLoansLoanIdTransactionsResponse> chargeOffResponse = loanTransactionsApi
-                .executeLoanTransaction(loanId, chargeOffRequest, "charge-off").execute();
-        testContext().set(TestContextKey.LOAN_CHARGE_OFF_RESPONSE, chargeOffResponse);
+        Response<PostLoansLoanIdTransactionsResponse> chargeOffResponse = chargeOffUndo(loanId, transactionDate);
         ErrorHelper.checkSuccessfulApiCall(chargeOffResponse);
 
         Long transactionId = chargeOffResponse.body().getResourceId();
@@ -1440,13 +1435,7 @@ public class LoanStepDef extends AbstractStepDef {
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.body().getLoanId();
 
-        PostLoansLoanIdTransactionsRequest chargeOffRequest = LoanRequestFactory.defaultChargeOffRequest().transactionDate(transactionDate)
-                .dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE);
-
-        Response<PostLoansLoanIdTransactionsResponse> chargeOffResponse = loanTransactionsApi
-                .executeLoanTransaction(loanId, chargeOffRequest, "charge-off").execute();
-        testContext().set(TestContextKey.LOAN_CHARGE_OFF_RESPONSE, chargeOffResponse);
-
+        Response<PostLoansLoanIdTransactionsResponse> chargeOffResponse = chargeOffUndo(loanId, transactionDate);
         assertThat(chargeOffResponse.isSuccessful()).isFalse();
 
         String string = chargeOffResponse.errorBody().string();
@@ -1512,13 +1501,7 @@ public class LoanStepDef extends AbstractStepDef {
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.body().getLoanId();
 
-        PostLoansLoanIdTransactionsRequest chargeOffRequest = LoanRequestFactory.defaultChargeOffRequest().transactionDate(transactionDate)
-                .dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE);
-
-        Response<PostLoansLoanIdTransactionsResponse> chargeOffResponse = loanTransactionsApi
-                .executeLoanTransaction(loanId, chargeOffRequest, "charge-off").execute();
-        testContext().set(TestContextKey.LOAN_CHARGE_OFF_RESPONSE, chargeOffResponse);
-
+        Response<PostLoansLoanIdTransactionsResponse> chargeOffResponse = chargeOffUndo(loanId, transactionDate);
         assertThat(chargeOffResponse.isSuccessful()).isFalse();
 
         String string = chargeOffResponse.errorBody().string();
@@ -1560,20 +1543,39 @@ public class LoanStepDef extends AbstractStepDef {
         eventAssertion.assertEventRaised(LoanChargeOffUndoEvent.class, transactionId);
     }
 
-    @Then("Charge-off undo is not possible on {string}")
-    public void chargeOffUndoFailure(String transactionDate) throws IOException {
-        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        Long loanId = loanResponse.body().getLoanId();
-
+    public Response<PostLoansLoanIdTransactionsResponse> chargeOffUndo(Long loanId, String transactionDate) throws IOException {
         PostLoansLoanIdTransactionsRequest chargeOffRequest = LoanRequestFactory.defaultChargeOffRequest().transactionDate(transactionDate)
                 .dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE);
 
         Response<PostLoansLoanIdTransactionsResponse> chargeOffResponse = loanTransactionsApi
                 .executeLoanTransaction(loanId, chargeOffRequest, "charge-off").execute();
         testContext().set(TestContextKey.LOAN_CHARGE_OFF_RESPONSE, chargeOffResponse);
+        return chargeOffResponse;
+    }
+
+    @Then("Charge-off undo is not possible on {string}")
+    public void chargeOffUndoFailure(String transactionDate) throws IOException {
+        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        Long loanId = loanResponse.body().getLoanId();
+
+        Response<PostLoansLoanIdTransactionsResponse> chargeOffResponse = chargeOffUndo(loanId, transactionDate);
+
         ErrorResponse errorDetails = ErrorResponse.from(chargeOffResponse);
         assertThat(errorDetails.getHttpStatusCode()).as(ErrorMessageHelper.chargeOffUndoFailureCodeMsg()).isEqualTo(403);
         assertThat(errorDetails.getSingleError().getDeveloperMessage()).isEqualTo(ErrorMessageHelper.chargeOffUndoFailure(loanId));
+    }
+
+    @Then("Charge-off undo is not possible on {string} due to monetary activity before")
+    public void chargeOffUndoFailureDueToMonetaryActivityBefore(String transactionDate) throws IOException {
+        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        Long loanId = loanResponse.body().getLoanId();
+
+        Response<PostLoansLoanIdTransactionsResponse> chargeOffResponse = chargeOffUndo(loanId, transactionDate);
+
+        ErrorResponse errorDetails = ErrorResponse.from(chargeOffResponse);
+        assertThat(errorDetails.getHttpStatusCode()).as(ErrorMessageHelper.chargeOffUndoFailureCodeMsg()).isEqualTo(403);
+        assertThat(errorDetails.getSingleError().getDeveloperMessage())
+                .isEqualTo(ErrorMessageHelper.chargeOffUndoFailureDueToMonetaryActivityBefore(loanId));
     }
 
     @Then("Charge-off undo is not possible as the loan is not charged-off")

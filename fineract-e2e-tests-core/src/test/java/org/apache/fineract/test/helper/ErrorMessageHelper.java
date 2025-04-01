@@ -121,6 +121,12 @@ public final class ErrorMessageHelper {
                 loanIdStr);
     }
 
+    public static String chargeOffUndoFailureDueToMonetaryActivityBefore(Long loanId) {
+        String loanIdStr = String.valueOf(loanId);
+        return String.format("Loan: %s charge-off cannot be executed. Loan has monetary activity after the charge-off transaction date!",
+                loanIdStr);
+    }
+
     public static String notChargedOffFailure(Long loanId) {
         String loanIdStr = String.valueOf(loanId);
         return String.format("Loan: %s is not charged-off", loanIdStr);
