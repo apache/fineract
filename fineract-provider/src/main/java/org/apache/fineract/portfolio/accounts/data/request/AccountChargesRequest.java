@@ -16,39 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.shareaccounts.data;
+package org.apache.fineract.portfolio.accounts.data.request;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
-@RequiredArgsConstructor
-@JsonLocalDateArrayFormat
-public class ShareAccountTransactionData implements Serializable {
+@Data
+@NoArgsConstructor
+public class AccountChargesRequest implements Serializable {
 
-    private final Long id;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    private final Long accountId;
-
-    private final LocalDate purchasedDate;
-
-    private final Long numberOfShares;
-
-    private final BigDecimal purchasedPrice;
-
-    private final EnumOptionData status;
-
-    private final EnumOptionData type;
-
-    private final BigDecimal amount;
-
-    private final BigDecimal chargeAmount;
-
-    private final BigDecimal amountPaid;
-
+    private Long chargeId;
+    private BigDecimal amount;
 }

@@ -997,10 +997,10 @@ public class ShareAccountIntegrationTests {
 
     private Integer createShareAccount(final Integer clientId, final Integer productId, final Integer savingsAccountId,
             List<Map<String, Object>> charges) {
-        String josn = new ShareAccountHelper().withClientId(String.valueOf(clientId)).withProductId(String.valueOf(productId))
+        String json = new ShareAccountHelper().withClientId(String.valueOf(clientId)).withProductId(String.valueOf(productId))
                 .withExternalId("External1").withSavingsAccountId(String.valueOf(savingsAccountId)).withSubmittedDate("01 January 2016")
                 .withApplicationDate("01 January 2016").withRequestedShares("25").withCharges(charges).build();
-        return ShareAccountTransactionHelper.createShareAccount(josn, requestSpec, responseSpec);
+        return ShareAccountTransactionHelper.createShareAccount(json, requestSpec, responseSpec);
     }
 
     private Map<String, Object> createCharge(final Integer chargeId, String amount) {
