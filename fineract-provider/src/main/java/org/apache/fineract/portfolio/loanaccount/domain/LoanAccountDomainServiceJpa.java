@@ -87,6 +87,7 @@ import org.apache.fineract.portfolio.delinquency.service.DelinquencyWritePlatfor
 import org.apache.fineract.portfolio.delinquency.validator.LoanDelinquencyActionData;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
+import org.apache.fineract.portfolio.loanaccount.data.AccountingBridgeDataDTO;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanRefundRequestData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData;
@@ -94,6 +95,7 @@ import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
+import org.apache.fineract.portfolio.loanaccount.mapper.LoanAccountingBridgeMapper;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanDownPaymentTransactionValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanForeclosureValidator;
@@ -157,6 +159,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final LoanRefundService loanRefundService;
     private final LoanAccountService loanAccountService;
     private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
+    private final LoanAccountingBridgeMapper loanAccountingBridgeMapper;
 
     @Transactional
     @Override
@@ -449,19 +452,26 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         final MonetaryCurrency currency = loanAccount.getCurrency();
 
-        List<Map<String, Object>> accountingBridgeData = new ArrayList<>();
         if (loanAccount.isChargedOff()) {
-            accountingBridgeData = loanAccount.deriveAccountingBridgeDataForChargeOff(currency.getCode(), existingTransactionIds,
-                    existingReversedTransactionIds, isAccountTransfer);
-        } else {
-            accountingBridgeData.add(loanAccount.deriveAccountingBridgeData(currency.getCode(), existingTransactionIds,
-                    existingReversedTransactionIds, isAccountTransfer));
-        }
-        for (Map<String, Object> accountingData : accountingBridgeData) {
-            accountingData.put("isLoanToLoanTransfer", isLoanToLoanTransfer);
-            this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingData);
-        }
+            final List<AccountingBridgeDataDTO> accountingBridgeDataList = loanAccountingBridgeMapper
+                    .deriveAccountingBridgeDataForChargeOff(currency.getCode(), existingTransactionIds, existingReversedTransactionIds,
+                            isAccountTransfer, loanAccount);
+            if (isLoanToLoanTransfer) {
+                accountingBridgeDataList.forEach(dto -> dto.getNewLoanTransactions().forEach(tx -> tx.setLoanToLoanTransfer(true)));
+            }
 
+            for (AccountingBridgeDataDTO accountingBridgeData : accountingBridgeDataList) {
+                this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
+            }
+        } else {
+            final AccountingBridgeDataDTO accountingBridgeData = loanAccountingBridgeMapper.deriveAccountingBridgeData(currency.getCode(),
+                    existingTransactionIds, existingReversedTransactionIds, isAccountTransfer, loanAccount);
+            if (isLoanToLoanTransfer) {
+                accountingBridgeData.getNewLoanTransactions().forEach(tx -> tx.setLoanToLoanTransfer(true));
+            }
+
+            this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
+        }
     }
 
     private void checkClientOrGroupActive(final Loan loan) {
@@ -985,7 +995,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final List<LoanRepaymentScheduleInstallment> newInstallments = new ArrayList<>(loan.getRepaymentScheduleInstallments());
         final MonetaryCurrency currency = loan.getCurrency();
         Money totalPrincipal = Money.zero(currency);
-        final Money[] balances = loan.retriveIncomeForOverlappingPeriod(transactionDate);
+        final Money[] balances = loan.retrieveIncomeForOverlappingPeriod(transactionDate);
         boolean isInterestComponent = true;
         for (final LoanRepaymentScheduleInstallment installment : loan.getRepaymentScheduleInstallments()) {
             if (!DateUtils.isAfter(transactionDate, installment.getDueDate())) {

@@ -41,6 +41,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.Tra
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGenerator;
+import org.apache.fineract.portfolio.loanaccount.mapper.LoanTermVariationsMapper;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
 import org.springframework.stereotype.Service;
 
@@ -49,6 +50,7 @@ import org.springframework.stereotype.Service;
 public class LoanTransactionProcessingService {
 
     private final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessorFactory;
+    private final LoanTermVariationsMapper loanMapper;
 
     public ChangedTransactionDetail processLatestTransaction(String transactionProcessingStrategyCode, LoanTransaction loanTransaction,
             TransactionCtx ctx) {
@@ -103,7 +105,7 @@ public class LoanTransactionProcessingService {
 
         final MathContext mc = MoneyHelper.getMathContext();
 
-        final LoanApplicationTerms loanApplicationTerms = loan.constructLoanApplicationTerms(generatorDTO);
+        final LoanApplicationTerms loanApplicationTerms = loanMapper.constructLoanApplicationTerms(generatorDTO, loan);
 
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = getTransactionProcessor(
                 loan.getTransactionProcessingStrategyCode());
@@ -119,7 +121,7 @@ public class LoanTransactionProcessingService {
             final MathContext mc = MoneyHelper.getMathContext();
 
             final InterestMethod interestMethod = loan.getLoanRepaymentScheduleDetail().getInterestMethod();
-            final LoanApplicationTerms loanApplicationTerms = loan.constructLoanApplicationTerms(scheduleGeneratorDTO);
+            final LoanApplicationTerms loanApplicationTerms = loanMapper.constructLoanApplicationTerms(scheduleGeneratorDTO, loan);
 
             final LoanScheduleGenerator loanScheduleGenerator = scheduleGeneratorDTO.getLoanScheduleFactory()
                     .create(loanApplicationTerms.getLoanScheduleType(), interestMethod);

@@ -29,8 +29,8 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.closure.domain.GLClosure;
 import org.apache.fineract.accounting.closure.domain.GLClosureRepository;
+import org.apache.fineract.accounting.common.AccountingConstants;
 import org.apache.fineract.accounting.common.AccountingConstants.AccrualAccountsForLoan;
-import org.apache.fineract.accounting.common.AccountingConstants.AccrualAccountsForSavings;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForLoan;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForSavings;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForShares;
@@ -68,12 +68,11 @@ import org.apache.fineract.portfolio.PortfolioProductType;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
-import org.apache.fineract.portfolio.client.domain.ClientTransactionRepository;
+import org.apache.fineract.portfolio.loanaccount.data.AccountingBridgeLoanTransactionDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidByDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionEnumData;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionRepository;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionEnumData;
 import org.springframework.dao.DataAccessException;
 
@@ -92,55 +91,53 @@ public class AccountingProcessorHelper {
     private final GLClosureRepository closureRepository;
     private final GLAccountRepository glAccountRepository;
     private final OfficeRepository officeRepository;
-    private final LoanTransactionRepository loanTransactionRepository;
-    private final ClientTransactionRepository clientTransactionRepository;
-    private final SavingsAccountTransactionRepository savingsAccountTransactionRepository;
     private final AccountTransfersReadPlatformService accountTransfersReadPlatformService;
     private final ChargeRepositoryWrapper chargeRepositoryWrapper;
     private final BusinessEventNotifierService businessEventNotifierService;
 
-    public LoanDTO populateLoanDtoFromMap(final Map<String, Object> accountingBridgeData, final boolean cashBasedAccountingEnabled,
-            final boolean upfrontAccrualBasedAccountingEnabled, final boolean periodicAccrualBasedAccountingEnabled) {
-        final Long loanId = (Long) accountingBridgeData.get("loanId");
-        final Long loanProductId = (Long) accountingBridgeData.get("loanProductId");
-        final Long officeId = (Long) accountingBridgeData.get("officeId");
-        final String currencyCode = (String) accountingBridgeData.get("currencyCode");
+    public LoanDTO populateLoanDtoFromDTO(
+            final org.apache.fineract.portfolio.loanaccount.data.AccountingBridgeDataDTO accountingBridgeData) {
+        final Long loanId = accountingBridgeData.getLoanId();
+        final Long loanProductId = accountingBridgeData.getLoanProductId();
+        final Long officeId = accountingBridgeData.getOfficeId();
+        final String currencyCode = accountingBridgeData.getCurrencyCode();
         final List<LoanTransactionDTO> newLoanTransactions = new ArrayList<>();
-        boolean isAccountTransfer = (Boolean) accountingBridgeData.get("isAccountTransfer");
-        boolean isLoanMarkedAsChargeOff = (Boolean) accountingBridgeData.get("isChargeOff");
-        boolean isLoanMarkedAsFraud = (Boolean) accountingBridgeData.get("isFraud");
-        final Long chargeOffReasonCodeValue = (Long) accountingBridgeData.get("chargeOffReasonCodeValue");
+        boolean isAccountTransfer = accountingBridgeData.isAccountTransfer();
+        boolean isLoanMarkedAsChargeOff = accountingBridgeData.isChargeOff();
+        boolean isLoanMarkedAsFraud = accountingBridgeData.isFraud();
+        final Long chargeOffReasonCodeValue = accountingBridgeData.getChargeOffReasonCodeValue();
+        final boolean cashBasedAccountingEnabled = accountingBridgeData.isCashBasedAccountingEnabled();
+        final boolean upfrontAccrualBasedAccountingEnabled = accountingBridgeData.isUpfrontAccrualBasedAccountingEnabled();
+        final boolean periodicAccrualBasedAccountingEnabled = accountingBridgeData.isPeriodicAccrualBasedAccountingEnabled();
 
-        @SuppressWarnings("unchecked")
-        final List<Map<String, Object>> newTransactionsMap = (List<Map<String, Object>>) accountingBridgeData.get("newLoanTransactions");
+        final List<AccountingBridgeLoanTransactionDTO> loanTransactionDTOs = accountingBridgeData.getNewLoanTransactions();
 
-        for (final Map<String, Object> map : newTransactionsMap) {
-            final Long transactionOfficeId = (Long) map.get("officeId");
-            final String transactionId = ((Long) map.get("id")).toString();
-            final LocalDate transactionDate = ((LocalDate) map.get("date"));
-            final LoanTransactionEnumData transactionType = (LoanTransactionEnumData) map.get("type");
-            final BigDecimal amount = (BigDecimal) map.get("amount");
-            final BigDecimal principal = (BigDecimal) map.get("principalPortion");
-            final BigDecimal interest = (BigDecimal) map.get("interestPortion");
-            final BigDecimal fees = (BigDecimal) map.get("feeChargesPortion");
-            final BigDecimal penalties = (BigDecimal) map.get("penaltyChargesPortion");
-            final BigDecimal overPayments = (BigDecimal) map.get("overPaymentPortion");
-            final boolean reversed = (Boolean) map.get("reversed");
-            final Long paymentTypeId = (Long) map.get("paymentTypeId");
-            final String chargeRefundChargeType = (String) map.get("chargeRefundChargeType");
-            final LoanChargeData loanChargeData = (LoanChargeData) map.get("loanChargeData");
+        for (final AccountingBridgeLoanTransactionDTO loanTxnDto : loanTransactionDTOs) {
+            final Long transactionOfficeId = loanTxnDto.getOfficeId();
+            final String transactionId = loanTxnDto.getId().toString();
+            final LocalDate transactionDate = loanTxnDto.getDate();
+            final LoanTransactionEnumData transactionType = loanTxnDto.getType();
+            final BigDecimal amount = loanTxnDto.getAmount();
+            final BigDecimal principal = loanTxnDto.getPrincipalPortion();
+            final BigDecimal interest = loanTxnDto.getInterestPortion();
+            final BigDecimal fees = loanTxnDto.getFeeChargesPortion();
+            final BigDecimal penalties = loanTxnDto.getPenaltyChargesPortion();
+            final BigDecimal overPayments = loanTxnDto.getOverPaymentPortion();
+            final boolean reversed = loanTxnDto.isReversed();
+            final Long paymentTypeId = loanTxnDto.getPaymentTypeId();
+            final String chargeRefundChargeType = loanTxnDto.getChargeRefundChargeType();
+            final LoanChargeData loanChargeData = loanTxnDto.getLoanChargeData();
 
             final List<ChargePaymentDTO> feePaymentDetails = new ArrayList<>();
             final List<ChargePaymentDTO> penaltyPaymentDetails = new ArrayList<>();
             // extract charge payment details (if exists)
-            if (map.containsKey("loanChargesPaid")) {
-                @SuppressWarnings("unchecked")
-                final List<Map<String, Object>> loanChargesPaidData = (List<Map<String, Object>>) map.get("loanChargesPaid");
-                for (final Map<String, Object> loanChargePaid : loanChargesPaidData) {
-                    final Long chargeId = (Long) loanChargePaid.get("chargeId");
-                    final Long loanChargeId = (Long) loanChargePaid.get("loanChargeId");
-                    final boolean isPenalty = (Boolean) loanChargePaid.get("isPenalty");
-                    final BigDecimal chargeAmountPaid = (BigDecimal) loanChargePaid.get("amount");
+            if (loanTxnDto.getLoanChargesPaid() != null) {
+                List<LoanChargePaidByDTO> loanChargesPaidData = loanTxnDto.getLoanChargesPaid();
+                for (final LoanChargePaidByDTO loanChargePaid : loanChargesPaidData) {
+                    final Long chargeId = loanChargePaid.getChargeId();
+                    final Long loanChargeId = loanChargePaid.getLoanChargeId();
+                    final boolean isPenalty = loanChargePaid.getIsPenalty();
+                    final BigDecimal chargeAmountPaid = loanChargePaid.getAmount();
                     final ChargePaymentDTO chargePaymentDTO = new ChargePaymentDTO(chargeId, chargeAmountPaid, loanChargeId);
                     if (isPenalty) {
                         penaltyPaymentDetails.add(chargePaymentDTO);
@@ -150,23 +147,23 @@ public class AccountingProcessorHelper {
                 }
             }
 
-            if (!isAccountTransfer) {
-                isAccountTransfer = this.accountTransfersReadPlatformService.isAccountTransfer(Long.parseLong(transactionId),
+            boolean localIsAccountTransfer = isAccountTransfer;
+            if (!localIsAccountTransfer) {
+                localIsAccountTransfer = this.accountTransfersReadPlatformService.isAccountTransfer(Long.parseLong(transactionId),
                         PortfolioAccountType.LOAN);
             }
 
-            BigDecimal principalPaid = (BigDecimal) map.get("principalPaid");
-            BigDecimal feePaid = (BigDecimal) map.get("feePaid");
-            BigDecimal penaltyPaid = (BigDecimal) map.get("penaltyPaid");
+            BigDecimal principalPaid = loanTxnDto.getPrincipalPaid();
+            BigDecimal feePaid = loanTxnDto.getFeePaid();
+            BigDecimal penaltyPaid = loanTxnDto.getPenaltyPaid();
 
             final LoanTransactionDTO transaction = new LoanTransactionDTO(transactionOfficeId, paymentTypeId, transactionId,
                     transactionDate, transactionType, amount, principal, interest, fees, penalties, overPayments, reversed,
-                    penaltyPaymentDetails, feePaymentDetails, isAccountTransfer, chargeRefundChargeType, loanChargeData, principalPaid,
+                    penaltyPaymentDetails, feePaymentDetails, localIsAccountTransfer, chargeRefundChargeType, loanChargeData, principalPaid,
                     feePaid, penaltyPaid);
-            Boolean isLoanToLoanTransfer = (Boolean) accountingBridgeData.get("isLoanToLoanTransfer");
-            transaction.setLoanToLoanTransfer(isLoanToLoanTransfer != null && isLoanToLoanTransfer);
-            newLoanTransactions.add(transaction);
 
+            transaction.setLoanToLoanTransfer(loanTxnDto.isLoanToLoanTransfer());
+            newLoanTransactions.add(transaction);
         }
 
         return new LoanDTO(loanId, loanProductId, officeId, currencyCode, cashBasedAccountingEnabled, upfrontAccrualBasedAccountingEnabled,
@@ -559,10 +556,10 @@ public class AccountingProcessorHelper {
     }
 
     public void createAccrualBasedJournalEntriesAndReversalsForSavingsTax(final Office office, final String currencyCode,
-            final AccrualAccountsForSavings accountTypeToBeDebited, final AccrualAccountsForSavings accountTypeToBeCredited,
-            final Long savingsProductId, final Long paymentTypeId, final Long savingsId, final String transactionId,
-            final LocalDate transactionDate, final BigDecimal amount, final Boolean isReversal, final List<TaxPaymentDTO> taxDetails) {
-
+            final AccountingConstants.AccrualAccountsForSavings accountTypeToBeDebited,
+            final AccountingConstants.AccrualAccountsForSavings accountTypeToBeCredited, final Long savingsProductId,
+            final Long paymentTypeId, final Long savingsId, final String transactionId, final LocalDate transactionDate,
+            final BigDecimal amount, final Boolean isReversal, final List<TaxPaymentDTO> taxDetails) {
         for (TaxPaymentDTO taxPaymentDTO : taxDetails) {
             if (taxPaymentDTO.getAmount() != null) {
                 if (taxPaymentDTO.getCreditAccountId() == null) {
@@ -769,10 +766,10 @@ public class AccountingProcessorHelper {
     }
 
     public void createAccrualBasedJournalEntriesAndReversalsForSavingsCharges(final Office office, final String currencyCode,
-            final AccrualAccountsForSavings accountTypeToBeDebited, AccrualAccountsForSavings accountTypeToBeCredited,
-            final Long savingsProductId, final Long paymentTypeId, final Long loanId, final String transactionId,
-            final LocalDate transactionDate, final BigDecimal totalAmount, final Boolean isReversal,
-            final List<ChargePaymentDTO> chargePaymentDTOs) {
+            final AccountingConstants.AccrualAccountsForSavings accountTypeToBeDebited,
+            final AccountingConstants.AccrualAccountsForSavings accountTypeToBeCredited, final Long savingsProductId,
+            final Long paymentTypeId, final Long loanId, final String transactionId, final LocalDate transactionDate,
+            final BigDecimal totalAmount, final Boolean isReversal, final List<ChargePaymentDTO> chargePaymentDTOs) {
         // TODO Vishwas: Remove this validation, as and when appropriate Junit
         // tests are written for accounting
         /**

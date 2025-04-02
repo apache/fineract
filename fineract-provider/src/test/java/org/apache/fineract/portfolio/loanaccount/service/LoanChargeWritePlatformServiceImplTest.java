@@ -19,7 +19,11 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -27,6 +31,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -38,6 +44,7 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
+import org.apache.fineract.portfolio.loanaccount.data.AccountingBridgeDataDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountService;
@@ -46,6 +53,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
+import org.apache.fineract.portfolio.loanaccount.mapper.LoanAccountingBridgeMapper;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeApiJsonValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
@@ -71,6 +79,7 @@ class LoanChargeWritePlatformServiceImplTest {
     private static final LocalDate BUSINESS_DATE_AFTER = LocalDate.of(2024, 2, 26);
     private static final LocalDate BUSINESS_DATE_ON = MATURITY_DATE;
     private static final LocalDate BUSINESS_DATE_BEFORE = LocalDate.of(2024, 2, 14);
+    private static final String CURRENCY_CODE = "USD";
 
     @InjectMocks
     private LoanChargeWritePlatformServiceImpl loanChargeWritePlatformService;
@@ -138,19 +147,35 @@ class LoanChargeWritePlatformServiceImplTest {
     @Mock
     private LoanAccountService loanAccountService;
 
+    @Mock
+    private LoanAccountingBridgeMapper loanAccountingBridgeMapper;
+
     @BeforeEach
     void setUp() {
         when(loanAssembler.assembleFrom(LOAN_ID)).thenReturn(loan);
         when(chargeRepository.findOneWithNotFoundDetection(anyLong())).thenReturn(chargeDefinition);
         when(chargeDefinition.getChargeTimeType()).thenReturn(SPECIFIED_DUE_DATE);
+        when(chargeDefinition.getCurrencyCode()).thenReturn(CURRENCY_CODE);
         when(loanChargeAssembler.createNewFromJson(loan, chargeDefinition, jsonCommand)).thenReturn(loanCharge);
         when(loan.repaymentScheduleDetail()).thenReturn(loanRepaymentScheduleDetail);
-        when(loan.hasCurrencyCodeOf(any())).thenReturn(true);
+        when(loan.hasCurrencyCodeOf(CURRENCY_CODE)).thenReturn(true);
         when(loanCharge.getChargePaymentMode()).thenReturn(ChargePaymentMode.REGULAR);
         when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
         when(loanChargeRepository.saveAndFlush(any(LoanCharge.class))).thenReturn(loanCharge);
         when(loan.getCurrency()).thenReturn(monetaryCurrency);
+        when(monetaryCurrency.getCode()).thenReturn(CURRENCY_CODE);
         when(loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(any())).thenReturn(loan);
+        List<Long> existingTransactionIds = new ArrayList<>();
+        List<Long> existingReversedTransactionIds = new ArrayList<>();
+        when(loan.findExistingTransactionIds()).thenReturn(existingTransactionIds);
+        when(loan.findExistingReversedTransactionIds()).thenReturn(existingReversedTransactionIds);
+
+        when(loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()).thenReturn(false);
+        when(loan.isCashBasedAccountingEnabledOnLoanProduct()).thenReturn(false);
+        when(loan.isUpfrontAccrualAccountingEnabledOnLoanProduct()).thenReturn(false);
+
+        when(loanAccountingBridgeMapper.deriveAccountingBridgeData(anyString(), anyList(), anyList(), anyBoolean(), any(Loan.class))).thenReturn(new AccountingBridgeDataDTO());
+        doNothing().when(journalEntryWritePlatformService).createJournalEntriesForLoan(any(AccountingBridgeDataDTO.class));
     }
 
     @ParameterizedTest
@@ -159,6 +184,10 @@ class LoanChargeWritePlatformServiceImplTest {
         when(configurationDomainService.isImmediateChargeAccrualPostMaturityEnabled()).thenReturn(isAccrualEnabled);
         when(loan.getMaturityDate()).thenReturn(maturityDate);
         when(loan.handleChargeAppliedTransaction(loanCharge, null)).thenReturn(loanTransaction);
+
+        if (isAccrualExpected) {
+            when(loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()).thenReturn(true);
+        }
 
         try (MockedStatic<DateUtils> mockedDateUtils = mockStatic(DateUtils.class)) {
             mockedDateUtils.when(DateUtils::getBusinessLocalDate).thenReturn(businessDate);

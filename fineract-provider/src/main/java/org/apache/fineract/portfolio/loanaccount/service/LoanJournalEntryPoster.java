@@ -18,13 +18,13 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.portfolio.loanaccount.data.AccountingBridgeDataDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.mapper.LoanAccountingBridgeMapper;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -32,23 +32,24 @@ import org.springframework.stereotype.Component;
 public class LoanJournalEntryPoster {
 
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
+    private final LoanAccountingBridgeMapper loanAccountingBridgeMapper;
 
     public void postJournalEntries(final Loan loan, final List<Long> existingTransactionIds,
             final List<Long> existingReversedTransactionIds) {
-
         final MonetaryCurrency currency = loan.getCurrency();
         boolean isAccountTransfer = false;
-        List<Map<String, Object>> accountingBridgeData = new ArrayList<>();
-        if (loan.isChargedOff()) {
-            accountingBridgeData = loan.deriveAccountingBridgeDataForChargeOff(currency.getCode(), existingTransactionIds,
-                    existingReversedTransactionIds, isAccountTransfer);
-        } else {
-            accountingBridgeData.add(loan.deriveAccountingBridgeData(currency.getCode(), existingTransactionIds,
-                    existingReversedTransactionIds, isAccountTransfer));
-        }
-        for (Map<String, Object> accountingData : accountingBridgeData) {
-            this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingData);
-        }
 
+        if (loan.isChargedOff()) {
+            List<AccountingBridgeDataDTO> accountingBridgeDataList = loanAccountingBridgeMapper.deriveAccountingBridgeDataForChargeOff(
+                    currency.getCode(), existingTransactionIds, existingReversedTransactionIds, isAccountTransfer, loan);
+            for (AccountingBridgeDataDTO accountingBridgeData : accountingBridgeDataList) {
+                this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
+            }
+        } else {
+            AccountingBridgeDataDTO accountingBridgeData = loanAccountingBridgeMapper.deriveAccountingBridgeData(currency.getCode(),
+                    existingTransactionIds, existingReversedTransactionIds, isAccountTransfer, loan);
+            this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
+        }
     }
+
 }

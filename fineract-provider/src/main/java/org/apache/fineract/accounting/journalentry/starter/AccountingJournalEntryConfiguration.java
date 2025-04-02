@@ -46,10 +46,7 @@ import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
-import org.apache.fineract.portfolio.client.domain.ClientTransactionRepository;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -63,14 +60,11 @@ public class AccountingJournalEntryConfiguration {
     public AccountingProcessorHelper accountingProcessorHelper(JournalEntryRepository glJournalEntryRepository,
             ProductToGLAccountMappingRepository accountMappingRepository,
             FinancialActivityAccountRepositoryWrapper financialActivityAccountRepository, GLClosureRepository closureRepository,
-            GLAccountRepository glAccountRepository, OfficeRepository officeRepository, LoanTransactionRepository loanTransactionRepository,
-            ClientTransactionRepository clientTransactionRepository,
-            SavingsAccountTransactionRepository savingsAccountTransactionRepository,
+            GLAccountRepository glAccountRepository, OfficeRepository officeRepository,
             AccountTransfersReadPlatformService accountTransfersReadPlatformService, ChargeRepositoryWrapper chargeRepositoryWrapper,
             BusinessEventNotifierService businessEventNotifierService) {
         return new AccountingProcessorHelper(glJournalEntryRepository, accountMappingRepository, financialActivityAccountRepository,
-                closureRepository, glAccountRepository, officeRepository, loanTransactionRepository, clientTransactionRepository,
-                savingsAccountTransactionRepository, accountTransfersReadPlatformService, chargeRepositoryWrapper,
+                closureRepository, glAccountRepository, officeRepository, accountTransfersReadPlatformService, chargeRepositoryWrapper,
                 businessEventNotifierService);
     }
 

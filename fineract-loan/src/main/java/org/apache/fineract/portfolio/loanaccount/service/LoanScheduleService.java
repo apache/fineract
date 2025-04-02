@@ -29,6 +29,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
+import org.apache.fineract.portfolio.loanaccount.mapper.LoanMapper;
 import org.apache.fineract.portfolio.loanaccount.service.schedule.LoanScheduleComponent;
 
 @RequiredArgsConstructor
@@ -36,6 +37,7 @@ public class LoanScheduleService {
 
     private final LoanChargeService loanChargeService;
     private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
+    private final LoanMapper loanMapper;
     private final LoanTransactionProcessingService loadTransactionProcessingService;
     private final LoanScheduleComponent loanSchedule;
 
@@ -43,7 +45,7 @@ public class LoanScheduleService {
      * Ability to regenerate the repayment schedule based on the loans current details/state.
      */
     public void regenerateRepaymentSchedule(final Loan loan, final ScheduleGeneratorDTO scheduleGeneratorDTO) {
-        final LoanScheduleModel loanScheduleModel = loan.regenerateScheduleModel(scheduleGeneratorDTO);
+        final LoanScheduleModel loanScheduleModel = loanMapper.regenerateScheduleModel(scheduleGeneratorDTO, loan);
         if (loanScheduleModel == null) {
             return;
         }
