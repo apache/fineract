@@ -27,6 +27,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -34,11 +36,14 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleIns
 
 @Entity
 @Table(name = "m_repayment_with_post_dated_checks")
+@Getter
 public class PostDatedChecks extends AbstractPersistableCustom<Long> {
 
+    @Setter
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id", referencedColumnName = "id", nullable = false)
     private Loan loan;
+    @Setter
     @ManyToOne(optional = false)
     @JoinColumn(name = "repayment_id", referencedColumnName = "id", nullable = false)
     private LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment;
@@ -50,6 +55,7 @@ public class PostDatedChecks extends AbstractPersistableCustom<Long> {
     private BigDecimal amount;
     @Column(name = "repayment_date", nullable = false)
     private LocalDate repaymentDate;
+    @Setter
     @Column(name = "status", columnDefinition = "0")
     private Integer status;
     @Column(name = "check_no", nullable = false, unique = true)
@@ -73,14 +79,6 @@ public class PostDatedChecks extends AbstractPersistableCustom<Long> {
             final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment, final Loan loan, final Long checkNo) {
         return new PostDatedChecks(accountNo, bankName, amount, loanRepaymentScheduleInstallment,
                 loanRepaymentScheduleInstallment.getDueDate(), loan, checkNo);
-    }
-
-    public void setLoan(Loan loan) {
-        this.loan = loan;
-    }
-
-    public void setLoanRepaymentScheduleInstallment(final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment) {
-        this.loanRepaymentScheduleInstallment = loanRepaymentScheduleInstallment;
     }
 
     public Map<String, Object> updatePostDatedChecks(JsonCommand command) {
@@ -112,37 +110,4 @@ public class PostDatedChecks extends AbstractPersistableCustom<Long> {
 
         return changes;
     }
-
-    public Loan getLoan() {
-        return this.loan;
-    }
-
-    public LoanRepaymentScheduleInstallment getLoanRepaymentScheduleInstallment() {
-        return this.loanRepaymentScheduleInstallment;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public String getBankName() {
-        return this.bankName;
-    }
-
-    public Long getCheckNo() {
-        return this.checkNo;
-    }
-
-    public Long getAccountNo() {
-        return this.accountNo;
-    }
-
-    public BigDecimal getAmount() {
-        return this.amount;
-    }
-
-    public Integer getStatus() {
-        return this.status;
-    }
-
 }

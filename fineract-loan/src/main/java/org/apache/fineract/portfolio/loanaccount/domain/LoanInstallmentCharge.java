@@ -24,6 +24,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -31,6 +33,7 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.data.LoanInstallmentChargeData;
 
 @Entity
+@Getter
 @Table(name = "m_loan_installment_charge")
 public class LoanInstallmentCharge extends AbstractPersistableCustom<Long> implements Comparable<LoanInstallmentCharge> {
 
@@ -38,6 +41,7 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom<Long> imple
     @JoinColumn(name = "loan_charge_id", referencedColumnName = "id", nullable = false)
     private LoanCharge loancharge;
 
+    @Setter
     @ManyToOne
     @JoinColumn(name = "loan_schedule_id", nullable = false)
     private LoanRepaymentScheduleInstallment installment;
@@ -48,6 +52,7 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom<Long> imple
     @Column(name = "amount_paid_derived", scale = 6, precision = 19, nullable = true)
     private BigDecimal amountPaid;
 
+    @Setter
     @Column(name = "amount_waived_derived", scale = 6, precision = 19, nullable = true)
     private BigDecimal amountWaived;
 
@@ -140,10 +145,6 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom<Long> imple
         return this.amount.subtract(totalAccountedFor);
     }
 
-    public BigDecimal getAmount() {
-        return this.amount;
-    }
-
     public Money getAmount(final MonetaryCurrency currency) {
         return Money.of(currency, this.amount);
     }
@@ -152,20 +153,8 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom<Long> imple
         return Money.of(currency, this.amountPaid);
     }
 
-    public BigDecimal getAmountOutstanding() {
-        return this.amountOutstanding;
-    }
-
     private BigDecimal calculateAmountOutstanding(final MonetaryCurrency currency) {
         return getAmount(currency).minus(getAmountWaived(currency)).minus(getAmountPaid(currency)).getAmount();
-    }
-
-    public boolean isPaid() {
-        return this.paid;
-    }
-
-    public boolean isWaived() {
-        return this.waived;
     }
 
     public boolean isPending() {
@@ -226,10 +215,6 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom<Long> imple
         this.amountPaid = BigDecimal.ZERO;
         this.amountOutstanding = calculateAmountOutstanding(currency);
         this.paid = false;
-    }
-
-    public void setAmountWaived(final BigDecimal amountWaived) {
-        this.amountWaived = amountWaived;
     }
 
     public void undoWaiveFlag() {
@@ -315,14 +300,6 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom<Long> imple
 
     public LoanCharge getLoanCharge() {
         return this.loancharge;
-    }
-
-    public LoanRepaymentScheduleInstallment getInstallment() {
-        return this.installment;
-    }
-
-    public void setInstallment(LoanRepaymentScheduleInstallment installment) {
-        this.installment = installment;
     }
 
     public LoanInstallmentChargeData toData() {

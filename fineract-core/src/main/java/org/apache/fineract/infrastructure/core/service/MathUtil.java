@@ -39,8 +39,8 @@ public final class MathUtil {
         return nullToDefault(value, 0L);
     }
 
-    public static Long nullToDefault(Long value, Long def) {
-        return value == null ? def : value;
+    public static Integer nullToZero(Integer value) {
+        return nullToDefault(value, 0);
     }
 
     public static Long zeroToNull(Long value) {
@@ -504,5 +504,9 @@ public final class MathUtil {
     public static Money max(Money first, Money second, boolean notNull) {
         return notNull ? first == null ? second : second == null ? first : max(first, second, false)
                 : isGreaterThan(first, second) ? first : second;
+    }
+
+    public static boolean isEqualTo(Integer first, Integer second) {
+        return nullToZero(first).equals(nullToZero(second));
     }
 }

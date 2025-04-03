@@ -25,12 +25,16 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_loan_interest_recalculation_additional_details")
+@Getter
 public class LoanInterestRecalcualtionAdditionalDetails extends AbstractPersistableCustom<Long> {
 
+    @Setter
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_repayment_schedule_id", nullable = false)
     private LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment;
@@ -52,19 +56,4 @@ public class LoanInterestRecalcualtionAdditionalDetails extends AbstractPersista
         this.amount = amount;
     }
 
-    public LocalDate getEffectiveDate() {
-        return this.effectiveDate;
-    }
-
-    public BigDecimal getAmount() {
-        return this.amount;
-    }
-
-    public LoanRepaymentScheduleInstallment getLoanRepaymentScheduleInstallment() {
-        return loanRepaymentScheduleInstallment;
-    }
-
-    public void setLoanRepaymentScheduleInstallment(LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment) {
-        this.loanRepaymentScheduleInstallment = loanRepaymentScheduleInstallment;
-    }
 }

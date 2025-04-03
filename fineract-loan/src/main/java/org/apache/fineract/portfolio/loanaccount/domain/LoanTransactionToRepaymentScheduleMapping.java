@@ -25,20 +25,24 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
-import org.apache.fineract.portfolio.loanproduct.domain.AllocationType;
 
 @Entity
 @Table(name = "m_loan_transaction_repayment_schedule_mapping")
+@Getter
 public class LoanTransactionToRepaymentScheduleMapping extends AbstractPersistableCustom<Long> {
 
+    @Setter
     @ManyToOne(optional = false, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "loan_transaction_id", nullable = false)
     private LoanTransaction loanTransaction;
 
+    @Setter
     @ManyToOne(optional = false, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "loan_repayment_schedule_id", nullable = false)
     private LoanRepaymentScheduleInstallment installment;
@@ -137,36 +141,4 @@ public class LoanTransactionToRepaymentScheduleMapping extends AbstractPersistab
         return Money.of(currency, this.penaltyChargesPortion);
     }
 
-    public BigDecimal getPortion(AllocationType allocationType) {
-        return switch (allocationType) {
-            case PRINCIPAL -> getPrincipalPortion();
-            case INTEREST -> getInterestPortion();
-            case FEE -> getFeeChargesPortion();
-            case PENALTY -> getPenaltyChargesPortion();
-        };
-    }
-
-    public LoanTransaction getLoanTransaction() {
-        return loanTransaction;
-    }
-
-    public BigDecimal getPrincipalPortion() {
-        return this.principalPortion;
-    }
-
-    public BigDecimal getInterestPortion() {
-        return this.interestPortion;
-    }
-
-    public BigDecimal getFeeChargesPortion() {
-        return this.feeChargesPortion;
-    }
-
-    public BigDecimal getPenaltyChargesPortion() {
-        return this.penaltyChargesPortion;
-    }
-
-    public void setLoanTransaction(LoanTransaction loanTransaction) {
-        this.loanTransaction = loanTransaction;
-    }
 }

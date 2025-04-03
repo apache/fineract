@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
@@ -56,7 +57,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     @Column(name = "installment", nullable = false)
     private Integer installmentNumber;
 
-    @Column(name = "fromdate", nullable = true)
+    @Column(name = "fromdate")
     private LocalDate fromDate;
 
     @Column(name = "duedate", nullable = false)
@@ -140,11 +141,9 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     // TODO: At some point in time this database column needs to be renamed to credited_principal using the following
     // approach
     // https://blog.thepete.net/blog/2023/12/05/expand/contract-making-a-breaking-change-without-a-big-bang/
-    @Setter
     @Column(name = "credits_amount", scale = 6, precision = 19)
     private BigDecimal creditedPrincipal;
 
-    @Setter
     @Column(name = "credited_interest", scale = 6, precision = 19)
     private BigDecimal creditedInterest;
 
@@ -392,10 +391,6 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         return getInterestOutstanding(currency).isGreaterThanZero();
     }
 
-    public Money getTotalPrincipalAndInterest(final MonetaryCurrency currency) {
-        return getPrincipal(currency).plus(getInterestCharged(currency));
-    }
-
     public Money getTotalOutstanding(final MonetaryCurrency currency) {
         return getPrincipalOutstanding(currency).plus(getInterestOutstanding(currency)).plus(getFeeChargesOutstanding(currency))
                 .plus(getPenaltyChargesOutstanding(currency));
@@ -403,10 +398,6 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
 
     void updateLoan(final Loan loan) {
         this.loan = loan;
-    }
-
-    public boolean isPartlyPaid() {
-        return !this.obligationsMet && (this.interestPaid != null || this.feeChargesPaid != null || this.principalCompleted != null);
     }
 
     public boolean isNotFullyPaidOff() {
@@ -734,18 +725,6 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         this.penaltyAccrued = MathUtil.zeroToNull(MathUtil.toBigDecimal(penalityCharges));
     }
 
-    public void setInterestAccrued(BigDecimal interestAccrued) {
-        this.interestAccrued = interestAccrued;
-    }
-
-    public void setFeeAccrued(BigDecimal feeAccrued) {
-        this.feeAccrued = feeAccrued;
-    }
-
-    public void setPenaltyAccrued(BigDecimal penaltyAccrued) {
-        this.penaltyAccrued = penaltyAccrued;
-    }
-
     public void updateObligationsMet(final MonetaryCurrency currency, final LocalDate transactionDate) {
         if (!this.obligationsMet && getTotalOutstanding(currency).isZero()) {
             this.obligationsMet = true;
@@ -802,18 +781,6 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         return Money.of(currency, this.totalPaidInAdvance);
     }
 
-    public Money getTotalPaidLate(final MonetaryCurrency currency) {
-        return Money.of(currency, this.totalPaidLate);
-    }
-
-    public boolean isRecalculatedInterestComponent() {
-        return this.recalculatedInterestComponent;
-    }
-
-    public void setRecalculatedInterestComponent(boolean recalculatedInterestComponent) {
-        this.recalculatedInterestComponent = recalculatedInterestComponent;
-    }
-
     public void updateInstallmentNumber(final Integer installmentNumber) {
         if (installmentNumber != null) {
             this.installmentNumber = installmentNumber;
@@ -830,10 +797,6 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
 
     public void updateObligationMetOnDate(final LocalDate obligationsMetOnDate) {
         this.obligationsMetOnDate = obligationsMetOnDate;
-    }
-
-    public void updateInterestWrittenOff(final BigDecimal interestWrittenOff) {
-        this.interestWrittenOff = interestWrittenOff;
     }
 
     public void updatePrincipal(final BigDecimal principal) {
@@ -1007,39 +970,13 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
                 .plus(getPenaltyChargesCharged(currency));
     }
 
-    public Set<LoanInterestRecalcualtionAdditionalDetails> getLoanCompoundingDetails() {
-        return this.loanCompoundingDetails;
-    }
-
-    public Money getAccruedInterestOutstanding(final MonetaryCurrency currency) {
-        final Money interestAccountedFor = getInterestPaid(currency).plus(getInterestWaived(currency))
-                .plus(getInterestWrittenOff(currency));
-        return getInterestAccrued(currency).minus(interestAccountedFor);
-    }
-
     public Money getTotalPaid(final MonetaryCurrency currency) {
         return getPenaltyChargesPaid(currency).plus(getFeeChargesPaid(currency)).plus(getInterestPaid(currency))
                 .plus(getPrincipalCompleted(currency));
     }
 
-    public void setRescheduleInterestPortion(BigDecimal rescheduleInterestPortion) {
-        this.rescheduleInterestPortion = rescheduleInterestPortion;
-    }
-
-    public void setFeeChargesWaived(final BigDecimal newFeeChargesCharged) {
-        this.feeChargesWaived = newFeeChargesCharged;
-    }
-
-    public void setPenaltyChargesWaived(final BigDecimal newPenaltyChargesCharged) {
-        this.penaltyChargesWaived = newPenaltyChargesCharged;
-    }
-
     public void markAsAdditional() {
         this.additional = true;
-    }
-
-    public Set<LoanTransactionToRepaymentScheduleMapping> getLoanTransactionToRepaymentScheduleMappings() {
-        return this.loanTransactionToRepaymentScheduleMappings;
     }
 
     public void resetBalances() {
@@ -1071,57 +1008,149 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     }
 
     public void copyFrom(final LoanScheduleModelPeriod period) {
+        // Reset fields and relations
         resetBalances();
+        updateLoanCompoundingDetails(period.getLoanCompoundingDetails());
+        getInstallmentCharges().clear();
+        getPostDatedChecks().clear();
+        getLoanTransactionToRepaymentScheduleMappings().clear();
+        // Update fields
         setFromDate(period.periodFromDate());
         setDueDate(period.periodDueDate());
         setPrincipal(period.principalDue());
         setInterestCharged(period.interestDue());
         setFeeChargesCharged(period.feeChargesDue());
         setPenaltyCharges(period.penaltyChargesDue());
-
         setRecalculatedInterestComponent(period.isRecalculatedInterestComponent());
-        if (getLoanCompoundingDetails() != null) {
-            getLoanCompoundingDetails().clear();
-        }
-        if (period.getLoanCompoundingDetails() != null) {
-            period.getLoanCompoundingDetails().forEach(lcd -> {
-                lcd.setLoanRepaymentScheduleInstallment(this);
-                getLoanCompoundingDetails().add(lcd);
-            });
-        }
         setRescheduleInterestPortion(period.rescheduleInterestPortion());
         setDownPayment(period.isDownPaymentPeriod());
-
         setAdditional(false);
         setReAged(false);
     }
 
     public void copyFrom(final LoanRepaymentScheduleInstallment installment) {
+        if (getId().equals(installment.getId())) {
+            return;
+        }
+        // Reset balances
+        resetBalances();
+        // Dates
         setFromDate(installment.getFromDate());
         setDueDate(installment.getDueDate());
-
-        setPrincipal(installment.getPrincipal());
-        setInterestCharged(installment.getInterestCharged());
-        setFeeChargesCharged(installment.getFeeChargesCharged());
-        setPenaltyCharges(installment.getPenaltyCharges());
-        setRecalculatedInterestComponent(installment.isRecalculatedInterestComponent());
-        if (getLoanCompoundingDetails() != null) {
-            getLoanCompoundingDetails().clear();
-        }
-        if (installment.getLoanCompoundingDetails() != null) {
-            installment.getLoanCompoundingDetails().forEach(lcd -> {
-                lcd.setLoanRepaymentScheduleInstallment(this);
-                getLoanCompoundingDetails().add(lcd);
-            });
-        }
-
-        Set<LoanInstallmentCharge> installmentCharges = installment.getInstallmentCharges();
-        installmentCharges.forEach(c -> c.setInstallment(this));
-        getInstallmentCharges().addAll(installmentCharges);
-
+        setObligationsMetOnDate(installment.getObligationsMetOnDate());
+        // Flags
+        setObligationsMet(installment.isObligationsMet());
         setAdditional(installment.isAdditional());
         setReAged(installment.isReAged());
         setDownPayment(installment.isDownPayment());
+        // Principal
+        setPrincipal(installment.getPrincipal());
+        setPrincipalCompleted(installment.getPrincipalCompleted());
+        setPrincipalWrittenOff(installment.getPrincipalWrittenOff());
+        // Interest
+        setInterestCharged(installment.getInterestCharged());
+        setInterestAccrued(installment.getInterestAccrued());
+        setInterestPaid(installment.getInterestPaid());
+        setInterestWaived(installment.getInterestWaived());
+        setInterestWrittenOff(installment.getInterestWrittenOff());
+        setRescheduleInterestPortion(installment.getRescheduleInterestPortion());
+        setRecalculatedInterestComponent(installment.isRecalculatedInterestComponent());
+        // Fee
+        setFeeChargesCharged(installment.getFeeChargesCharged());
+        setFeeChargesPaid(installment.getFeeChargesPaid());
+        setFeeAccrued(installment.getFeeAccrued());
+        setFeeChargesWaived(installment.getFeeChargesWaived());
+        setFeeChargesWrittenOff(installment.getFeeChargesWrittenOff());
+        // Penalty
+        setPenaltyCharges(installment.getPenaltyCharges());
+        setPenaltyAccrued(installment.getPenaltyAccrued());
+        setPenaltyChargesWaived(installment.getPenaltyChargesWaived());
+        setPenaltyChargesPaid(installment.getPenaltyChargesPaid());
+        setPenaltyChargesWrittenOff(installment.getPenaltyChargesWrittenOff());
+        // paid in advance / late
+        setTotalPaidInAdvance(installment.getTotalPaidInAdvance());
+        setTotalPaidLate(installment.getTotalPaidLate());
+        // Credits (Chargeback)
+        setCreditedFee(installment.getCreditedFee());
+        setCreditedPenalty(installment.getCreditedPenalty());
+        setCreditedInterest(installment.getCreditedInterest());
+        setCreditedPrincipal(installment.getCreditedPrincipal());
+        // Compounding details
+        updateLoanCompoundingDetails(installment.getLoanCompoundingDetails());
+        // Installment charges
+        updateLoaInstallmentCharges(installment.getInstallmentCharges());
+        // Post dated checks
+        updatePostDatedChecks(installment.getPostDatedChecks());
+        // Loan transaction repayment schedule mapping
+        updateTransactionRepaymentScheduleMapping(installment.getLoanTransactionToRepaymentScheduleMappings());
     }
 
+    private void updateLoanCompoundingDetails(Set<LoanInterestRecalcualtionAdditionalDetails> loanCompoundingDetails) {
+        Set<LoanInterestRecalcualtionAdditionalDetails> retainedLoanCompoundingDetails = new HashSet<>();
+        if (loanCompoundingDetails != null) {
+            loanCompoundingDetails.forEach(nlcd -> {
+                nlcd.setLoanRepaymentScheduleInstallment(this);
+                getLoanCompoundingDetails().stream().filter(lcd -> MathUtil.isEqualTo(lcd.getAmount(), nlcd.getAmount()) //
+                        && DateUtils.isEqual(lcd.getEffectiveDate(), nlcd.getEffectiveDate())) //
+                        .findAny().ifPresentOrElse(retainedLoanCompoundingDetails::add, () -> retainedLoanCompoundingDetails.add(nlcd));
+            });
+        }
+        setLoanCompoundingDetails(retainedLoanCompoundingDetails);
+    }
+
+    private void updateLoaInstallmentCharges(Set<LoanInstallmentCharge> installmentCharges) {
+        Set<LoanInstallmentCharge> retainedInstallmentCharges = new HashSet<>();
+        if (installmentCharges != null) {
+            installmentCharges.forEach(nic -> {
+                nic.setInstallment(this);
+                getInstallmentCharges().stream().filter(ic -> MathUtil.isEqualTo(ic.getAmountOutstanding(), nic.getAmountOutstanding()) //
+                        && MathUtil.isEqualTo(ic.getAmountWrittenOff(), nic.getAmountWrittenOff()) //
+                        && MathUtil.isEqualTo(ic.getAmountPaid(), nic.getAmountPaid()) //
+                        && MathUtil.isEqualTo(ic.getAmountThroughChargePayment(), nic.getAmountThroughChargePayment()) //
+                        && MathUtil.isEqualTo(ic.getAmountWaived(), nic.getAmountWaived()) //
+                        && MathUtil.isEqualTo(ic.getAmount(), nic.getAmount()) //
+                        && Boolean.logicalAnd(ic.isPaid(), nic.isPaid()) //
+                        && Boolean.logicalAnd(ic.isWaived(), nic.isWaived()) //
+                        && Boolean.logicalAnd(ic.isPending(), nic.isPending())) //
+                        .findAny().ifPresentOrElse(retainedInstallmentCharges::add, () -> retainedInstallmentCharges.add(nic));
+            });
+        }
+        setInstallmentCharges(retainedInstallmentCharges);
+    }
+
+    private void updatePostDatedChecks(Set<PostDatedChecks> postDatedChecks) {
+        Set<PostDatedChecks> retainedPostDatedChecks = new HashSet<>();
+        if (postDatedChecks != null) {
+            postDatedChecks.forEach(npdc -> {
+                npdc.setLoanRepaymentScheduleInstallment(this);
+                getPostDatedChecks().stream().filter(pdc -> MathUtil.isEqualTo(pdc.getCheckNo(), npdc.getCheckNo()) //
+                        && MathUtil.isEqualTo(pdc.getAccountNo(), npdc.getAccountNo()) //
+                        && MathUtil.isEqualTo(pdc.getAmount(), npdc.getAmount()) //
+                        && StringUtils.equals(pdc.getBankName(), npdc.getBankName()) //
+                        && MathUtil.isEqualTo(pdc.getStatus(), npdc.getStatus()) //
+                        && DateUtils.isEqual(pdc.getRepaymentDate(), npdc.getRepaymentDate())) //
+                        .findAny().ifPresentOrElse(retainedPostDatedChecks::add, () -> retainedPostDatedChecks.add(npdc));
+            });
+        }
+        setPostDatedChecks(retainedPostDatedChecks);
+    }
+
+    private void updateTransactionRepaymentScheduleMapping(
+            Set<LoanTransactionToRepaymentScheduleMapping> transactionToRepaymentScheduleMappings) {
+        Set<LoanTransactionToRepaymentScheduleMapping> retainedTransactionRepaymentScheduleMapping = new HashSet<>();
+        if (transactionToRepaymentScheduleMappings != null) {
+            transactionToRepaymentScheduleMappings.forEach(ntrsm -> {
+                ntrsm.setInstallment(this);
+                getLoanTransactionToRepaymentScheduleMappings().stream()
+                        .filter(trsm -> MathUtil.isEqualTo(trsm.getAmount(), ntrsm.getAmount()) //
+                                && MathUtil.isEqualTo(trsm.getFeeChargesPortion(), ntrsm.getFeeChargesPortion()) //
+                                && MathUtil.isEqualTo(trsm.getInterestPortion(), ntrsm.getInterestPortion()) //
+                                && MathUtil.isEqualTo(trsm.getPrincipalPortion(), ntrsm.getPrincipalPortion()) //
+                                && MathUtil.isEqualTo(trsm.getPenaltyChargesPortion(), ntrsm.getPenaltyChargesPortion())) //
+                        .findAny().ifPresentOrElse(retainedTransactionRepaymentScheduleMapping::add,
+                                () -> retainedTransactionRepaymentScheduleMapping.add(ntrsm));
+            });
+        }
+        setLoanTransactionToRepaymentScheduleMappings(retainedTransactionRepaymentScheduleMapping);
+    }
 }
