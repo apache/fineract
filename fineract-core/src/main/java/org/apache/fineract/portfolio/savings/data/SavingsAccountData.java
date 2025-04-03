@@ -148,6 +148,9 @@ public final class SavingsAccountData implements Serializable {
     private transient Long glAccountIdForOverdraftPorfolioNegative;
     private transient Long glAccountIdForInterestReceivableNegative;
 
+    private BigDecimal interestPosting;
+    private BigDecimal overdraftPosting;
+
     public static SavingsAccountData importInstanceIndividual(Long clientId, Long productId, Long fieldOfficerId, LocalDate submittedOnDate,
             BigDecimal nominalAnnualInterestRate, EnumOptionData interestCompoundingPeriodTypeEnum,
             EnumOptionData interestPostingPeriodTypeEnum, EnumOptionData interestCalculationTypeEnum,
@@ -1003,5 +1006,21 @@ public final class SavingsAccountData implements Serializable {
 
     public boolean isIsDormancyTrackingActive() {
         return this.isDormancyTrackingActive;
+    }
+
+    public BigDecimal getInterestPosting() {
+        return interestPosting;
+    }
+
+    public void setInterestPosting(BigDecimal interestPosting) {
+        this.interestPosting = interestPosting;
+    }
+
+    public BigDecimal getOverdraftPosting() {
+        return overdraftPosting;
+    }
+
+    public void setOverdraftPosting(BigDecimal overdraftPosting) {
+        this.overdraftPosting = overdraftPosting;
     }
 }

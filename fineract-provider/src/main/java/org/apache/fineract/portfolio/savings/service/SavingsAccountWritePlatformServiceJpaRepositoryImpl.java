@@ -588,6 +588,13 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 for (SavingsAccountTransactionData accountTransaction : transactions) {
                     if (accountTransaction.getId() == null && !MathUtil.isZero(accountTransaction.getAmount())) {
                         savingsAccountData.setNewSavingsAccountTransactionData(accountTransaction);
+
+                        SavingsAccountTransactionType transactionType = SavingsAccountTransactionType.fromInt(Math.toIntExact(accountTransaction.getTransactionType().getId()));
+                        if (transactionType.equals(SavingsAccountTransactionType.INTEREST_POSTING)){
+                            savingsAccountData.setInterestPosting(accountTransaction.getAmount());
+                        }else if(transactionType.equals(SavingsAccountTransactionType.OVERDRAFT_INTEREST)){
+                            savingsAccountData.setOverdraftPosting(accountTransaction.getOverdraftAmount());
+                        }
                     }
                 }
             }

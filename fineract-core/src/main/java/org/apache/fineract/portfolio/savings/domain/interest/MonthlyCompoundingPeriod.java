@@ -131,6 +131,10 @@ public final class MonthlyCompoundingPeriod implements CompoundingPeriod {
                             minBalanceForInterestCalculation, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation)
                             : balance.calculateInterestOnBalance(interestToCompound, interestRateAsFraction, daysInYear,
                             minBalanceForInterestCalculation, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation);
+                    if (isAcrual && balance.getNumberOfDays() == 0){
+                        interestOnBalanceUnrounded = BigDecimal.ZERO ;
+                    }
+
                 break;
                 // case QUATERLY:
                 // break;

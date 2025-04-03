@@ -39,6 +39,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountSummaryData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
@@ -176,8 +177,7 @@ public class SavingsSchedularInterestPoster {
         List<Object[]> paramsForGLInsertion = new ArrayList<>();
         String currencyCode = savingsAccountData.getCurrency().getCode();
 
-        BigDecimal amountCreditFirst = savingsAccountTransactionData.getRunningBalance().abs().subtract(savingsAccountTransactionData.getAmount().abs());
-        BigDecimal amountCreditsecond = savingsAccountTransactionData.getRunningBalance();
+        BigDecimal amountCreditsecond = savingsAccountTransactionData.getAmount();
 
         final SavingsAccountTransactionData dataFromFetch = savingsAccountTransactionDataHashMap.get(key);
         savingsAccountTransactionData.setId(dataFromFetch.getId());
@@ -191,7 +191,7 @@ public class SavingsSchedularInterestPoster {
                     SAVINGS_TRANSACTION_IDENTIFIER + savingsAccountTransactionData.getId().toString(),
                     savingsAccountTransactionData.getId(), null, false, null, false,
                     savingsAccountTransactionData.getTransactionDate(), JournalEntryType.CREDIT.getValue().longValue(),
-                    amountCreditFirst.abs(), null, JournalEntryType.CREDIT.getValue().longValue(),
+                    savingsAccountData.getInterestPosting(), null, JournalEntryType.CREDIT.getValue().longValue(),
                     savingsAccountData.getId(), auditDatetime, auditDatetime, false, BigDecimal.ZERO, BigDecimal.ZERO, null,
                     savingsAccountTransactionData.getTransactionDate(), null, userId, userId,
                     DateUtils.getBusinessLocalDate() });
@@ -202,7 +202,7 @@ public class SavingsSchedularInterestPoster {
                     SAVINGS_TRANSACTION_IDENTIFIER + savingsAccountTransactionData.getId().toString(),
                     savingsAccountTransactionData.getId(), null, false, null, false,
                     savingsAccountTransactionData.getTransactionDate(), JournalEntryType.DEBIT.getValue().longValue(),
-                    amountCreditFirst.abs(), null, JournalEntryType.DEBIT.getValue().longValue(),
+                    savingsAccountData.getInterestPosting(), null, JournalEntryType.DEBIT.getValue().longValue(),
                     savingsAccountData.getId(), auditDatetime, auditDatetime, false, BigDecimal.ZERO, BigDecimal.ZERO, null,
                     savingsAccountTransactionData.getTransactionDate(), null, userId, userId,
                     DateUtils.getBusinessLocalDate() });
