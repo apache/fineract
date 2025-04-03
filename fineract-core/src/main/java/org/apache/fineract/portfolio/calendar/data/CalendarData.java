@@ -194,6 +194,20 @@ public final class CalendarData implements Serializable {
         this.duration = null;
     }
 
+    public CalendarData(String title, String description, LocalDate startDate, boolean repeating, EnumOptionData frequency,
+            Integer interval, EnumOptionData repeatsOnDay, String dateFormat, String locale, String typeId) {
+        this.title = title;
+        this.description = description;
+        this.startDate = startDate;
+        this.repeating = repeating;
+        this.frequency = frequency;
+        this.interval = interval;
+        this.repeatsOnDay = repeatsOnDay;
+        this.dateFormat = dateFormat;
+        this.locale = locale;
+        this.typeId = typeId;
+    }
+
     public void setCenterId(String centerId) {
         this.centerId = centerId;
     }
