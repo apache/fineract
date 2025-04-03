@@ -415,6 +415,7 @@ public final class SavingsAccountTransactionData implements Serializable {
         Money endOfDayBalance = openingBalance.copy();
         if (isDeposit() || isDividendPayoutAndNotReversed()) {
             endOfDayBalance = openingBalance.plus(getAmount());
+            endOfDayBalance = Money.of(currency, this.runningBalance);
         } else if (isWithdrawal() || isChargeTransactionAndNotReversed()) {
             if (isWithdrawal()){
                 endOfDayBalance = Money.of(currency, this.runningBalance);
