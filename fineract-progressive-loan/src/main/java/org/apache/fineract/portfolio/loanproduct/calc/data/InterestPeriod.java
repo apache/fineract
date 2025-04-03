@@ -29,6 +29,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.apache.fineract.infrastructure.core.serialization.gson.JsonExclude;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -39,6 +40,7 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class InterestPeriod implements Comparable<InterestPeriod> {
 
+    @JsonExclude
     private final RepaymentPeriod repaymentPeriod;
     @Setter
     @NotNull
@@ -58,8 +60,20 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
     private Money balanceCorrectionAmount;
     private Money outstandingLoanBalance;
 
+    @JsonExclude
     private final MathContext mc;
     private final boolean isPaused;
+
+    public static InterestPeriod copy(@NotNull RepaymentPeriod repaymentPeriod, @NotNull InterestPeriod interestPeriod, MathContext mc) {
+        return new InterestPeriod(repaymentPeriod, interestPeriod.getFromDate(), interestPeriod.getDueDate(),
+                interestPeriod.getRateFactor(), interestPeriod.getRateFactorTillPeriodDueDate(), interestPeriod.getChargebackPrincipal(),
+                interestPeriod.getChargebackInterest(), interestPeriod.getDisbursementAmount(), interestPeriod.getBalanceCorrectionAmount(),
+                interestPeriod.getOutstandingLoanBalance(), mc, interestPeriod.isPaused());
+    }
+
+    public static InterestPeriod empty(@NotNull RepaymentPeriod repaymentPeriod, MathContext mc) {
+        return new InterestPeriod(repaymentPeriod, null, null, null, null, null, null, null, null, null, mc, false);
+    }
 
     public static InterestPeriod copy(@NotNull RepaymentPeriod repaymentPeriod, @NotNull InterestPeriod interestPeriod) {
         return new InterestPeriod(repaymentPeriod, interestPeriod.getFromDate(), interestPeriod.getDueDate(),

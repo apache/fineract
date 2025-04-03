@@ -39,8 +39,10 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.apache.fineract.infrastructure.core.serialization.gson.JsonExclude;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -50,14 +52,18 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProductMinimumRepaym
 
 @Data
 @Accessors(fluent = true)
+@AllArgsConstructor
 public class ProgressiveLoanInterestScheduleModel {
 
     private final List<RepaymentPeriod> repaymentPeriods;
     private final TreeSet<InterestRate> interestRates;
+    @JsonExclude
     private final LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail;
     private final Map<LoanTermVariationType, List<LoanTermVariationsData>> loanTermVariations;
     private final Integer installmentAmountInMultiplesOf;
+    @JsonExclude
     private final MathContext mc;
+    @JsonExclude
     private final Money zero;
     private final Map<LoanInterestScheduleModelModifiers, Boolean> modifiers;
 

@@ -31,6 +31,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.apache.fineract.infrastructure.core.serialization.gson.JsonExclude;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.util.Memo;
@@ -39,6 +40,7 @@ import org.apache.fineract.portfolio.util.Memo;
 @EqualsAndHashCode(exclude = { "previous" })
 public final class RepaymentPeriod {
 
+    @JsonExclude
     private final RepaymentPeriod previous;
     @Getter
     private final LocalDate fromDate;
@@ -59,11 +61,16 @@ public final class RepaymentPeriod {
     @Getter
     private Money paidInterest;
 
+    @JsonExclude
     private final MathContext mc;
 
+    @JsonExclude
     private Memo<BigDecimal> rateFactorPlus1Calculation;
+    @JsonExclude
     private Memo<Money> calculatedDueInterestCalculation;
+    @JsonExclude
     private Memo<Money> dueInterestCalculation;
+    @JsonExclude
     private Memo<Money> outstandingBalanceCalculation;
 
     private RepaymentPeriod(RepaymentPeriod previous, LocalDate fromDate, LocalDate dueDate, List<InterestPeriod> interestPeriods,
@@ -77,6 +84,10 @@ public final class RepaymentPeriod {
         this.paidPrincipal = paidPrincipal;
         this.paidInterest = paidInterest;
         this.mc = mc;
+    }
+
+    public static RepaymentPeriod empty(RepaymentPeriod previous, MathContext mc) {
+        return new RepaymentPeriod(previous, null, null, new ArrayList<>(), null, null, null, null, mc);
     }
 
     public static RepaymentPeriod create(RepaymentPeriod previous, LocalDate fromDate, LocalDate dueDate, Money emi, MathContext mc) {
@@ -94,7 +105,7 @@ public final class RepaymentPeriod {
                 repaymentPeriod.paidInterest, mc);
         // There is always at least 1 interest period, by default with same from-due date as repayment period
         for (InterestPeriod interestPeriod : repaymentPeriod.interestPeriods) {
-            newRepaymentPeriod.interestPeriods.add(InterestPeriod.copy(newRepaymentPeriod, interestPeriod));
+            newRepaymentPeriod.interestPeriods.add(InterestPeriod.copy(newRepaymentPeriod, interestPeriod, mc));
         }
         return newRepaymentPeriod;
     }

@@ -107,6 +107,7 @@ import org.apache.fineract.client.services.PaymentTypeApi;
 import org.apache.fineract.client.services.PeriodicAccrualAccountingApi;
 import org.apache.fineract.client.services.PermissionsApi;
 import org.apache.fineract.client.services.PocketApi;
+import org.apache.fineract.client.services.ProgressiveLoanApi;
 import org.apache.fineract.client.services.ProvisioningCategoryApi;
 import org.apache.fineract.client.services.ProvisioningCriteriaApi;
 import org.apache.fineract.client.services.ProvisioningEntriesApi;
@@ -294,6 +295,7 @@ public final class FineractClient {
     public final UsersApi users;
     public final WorkingDaysApi workingDays;
     public final LoanInterestPauseApi loanInterestPauseApi;
+    public final ProgressiveLoanApi progressiveLoanApi;
 
     public final ExternalAssetOwnersApi externalAssetOwners;
     public final ExternalAssetOwnerLoanProductAttributesApi externalAssetOwnerLoanProductAttributes;
@@ -421,6 +423,7 @@ public final class FineractClient {
         users = retrofit.create(UsersApi.class);
         workingDays = retrofit.create(WorkingDaysApi.class);
         loanInterestPauseApi = retrofit.create(LoanInterestPauseApi.class);
+        progressiveLoanApi = retrofit.create(ProgressiveLoanApi.class);
     }
 
     public static Builder builder() {

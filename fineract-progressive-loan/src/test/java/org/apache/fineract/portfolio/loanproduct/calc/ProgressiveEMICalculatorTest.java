@@ -37,6 +37,7 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelRepaymentPeriod;
+import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanInterestScheduleModelParserServiceGsonImpl;
 import org.apache.fineract.portfolio.loanproduct.calc.data.InterestPeriod;
 import org.apache.fineract.portfolio.loanproduct.calc.data.PeriodDueDetails;
 import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
@@ -70,6 +71,7 @@ class ProgressiveEMICalculatorTest {
 
     private static List<LoanRepaymentScheduleInstallment> periods;
     private final BigDecimal interestRate = BigDecimal.valueOf(0.094822);
+    private final ProgressiveLoanInterestScheduleModelParserServiceGsonImpl interestScheduleModelService = new ProgressiveLoanInterestScheduleModelParserServiceGsonImpl();
 
     @BeforeAll
     public static void init() {
@@ -3114,6 +3116,79 @@ class ProgressiveEMICalculatorTest {
         checkPeriod(interestSchedule, 5, 0, 17.05, 0.005833333333, 0.0988749999945, 0.10, 16.95, 0.0);
     }
 
+    @Test
+    public void test_interest_schedule_model_service_serialization() {
+        final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = List.of(
+                repayment(1, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)),
+                repayment(2, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)),
+                repayment(3, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)),
+                repayment(4, LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)),
+                repayment(5, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)),
+                repayment(6, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+
+        final BigDecimal interestRate = BigDecimal.valueOf(7.0);
+        final Integer installmentAmountInMultiplesOf = null;
+
+        Mockito.when(loanProductRelatedDetail.getAnnualNominalInterestRate()).thenReturn(interestRate);
+        Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
+        Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.DAYS_30.getValue());
+        Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.MONTHS);
+        Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
+        Mockito.when(loanProductRelatedDetail.getCurrencyData()).thenReturn(currency);
+
+        final ProgressiveLoanInterestScheduleModel interestScheduleExpected = emiCalculator.generatePeriodInterestScheduleModel(
+                expectedRepaymentPeriods, loanProductRelatedDetail, List.of(), installmentAmountInMultiplesOf, mc);
+
+        final Money disbursedAmount = toMoney(100.0);
+        ProgressiveLoanInterestScheduleModel interestScheduleActual = copyJson(interestScheduleExpected);
+        verifyAllPeriods(interestScheduleExpected, interestScheduleActual);
+        emiCalculator.addDisbursement(interestScheduleExpected, LocalDate.of(2024, 1, 1), disbursedAmount);
+        emiCalculator.addDisbursement(interestScheduleActual, LocalDate.of(2024, 1, 1), disbursedAmount);
+        verifyAllPeriods(interestScheduleExpected, interestScheduleActual);
+        interestScheduleActual = copyJson(interestScheduleExpected);
+        verifyAllPeriods(interestScheduleExpected, interestScheduleActual);
+
+        // repay 1st period
+        LocalDate txnDate = LocalDate.of(2024, 2, 1);
+        emiCalculator.payPrincipal(interestScheduleExpected, txnDate, txnDate, toMoney(16.43));
+        emiCalculator.payInterest(interestScheduleExpected, txnDate, txnDate, toMoney(0.58));
+        emiCalculator.payPrincipal(interestScheduleActual, txnDate, txnDate, toMoney(16.43));
+        emiCalculator.payInterest(interestScheduleActual, txnDate, txnDate, toMoney(0.58));
+
+        verifyAllPeriods(interestScheduleExpected, interestScheduleActual);
+        interestScheduleActual = copyJson(interestScheduleExpected);
+        verifyAllPeriods(interestScheduleExpected, interestScheduleActual);
+
+        // repay 2nd period
+        txnDate = LocalDate.of(2024, 3, 1);
+        emiCalculator.payPrincipal(interestScheduleExpected, txnDate, txnDate, toMoney(16.52));
+        emiCalculator.payInterest(interestScheduleExpected, txnDate, txnDate, toMoney(0.49));
+        emiCalculator.payPrincipal(interestScheduleActual, txnDate, txnDate, toMoney(16.52));
+        emiCalculator.payInterest(interestScheduleActual, txnDate, txnDate, toMoney(0.49));
+
+        verifyAllPeriods(interestScheduleExpected, interestScheduleActual);
+        interestScheduleActual = copyJson(interestScheduleExpected);
+        verifyAllPeriods(interestScheduleExpected, interestScheduleActual);
+
+        // chargeback
+        txnDate = LocalDate.of(2024, 3, 15);
+        emiCalculator.chargebackPrincipal(interestScheduleExpected, txnDate, toMoney(16.52));
+        emiCalculator.chargebackInterest(interestScheduleExpected, txnDate, toMoney(0.49));
+        emiCalculator.chargebackPrincipal(interestScheduleActual, txnDate, toMoney(16.52));
+        emiCalculator.chargebackInterest(interestScheduleActual, txnDate, toMoney(0.49));
+
+        verifyAllPeriods(interestScheduleExpected, interestScheduleActual);
+        interestScheduleActual = copyJson(interestScheduleExpected);
+        verifyAllPeriods(interestScheduleExpected, interestScheduleActual);
+
+        PeriodDueDetails dueAmountsExpected = emiCalculator.getDueAmounts(interestScheduleExpected, LocalDate.of(2024, 4, 1), txnDate);
+        PeriodDueDetails dueAmountsActual = emiCalculator.getDueAmounts(interestScheduleActual, LocalDate.of(2024, 4, 1), txnDate);
+
+        Assertions.assertEquals(toDouble(dueAmountsExpected.getDuePrincipal()), toDouble(dueAmountsActual.getDuePrincipal()));
+        Assertions.assertEquals(toDouble(dueAmountsExpected.getDueInterest()), toDouble(dueAmountsActual.getDueInterest()));
+
+    }
+
     private static LoanScheduleModelRepaymentPeriod repayment(int periodNumber, LocalDate fromDate, LocalDate dueDate) {
         final Money zeroAmount = Money.zero(currency);
         return LoanScheduleModelRepaymentPeriod.repayment(periodNumber, fromDate, dueDate, zeroAmount, zeroAmount, zeroAmount, zeroAmount,
@@ -3201,5 +3276,25 @@ class ProgressiveEMICalculatorTest {
 
     private static Money toMoney(final double value) {
         return Money.of(currency, BigDecimal.valueOf(value));
+    }
+
+    private static void verifyAllPeriods(final ProgressiveLoanInterestScheduleModel expectedModel,
+            final ProgressiveLoanInterestScheduleModel actualModel) {
+        for (int repInd = 0; repInd < expectedModel.repaymentPeriods().size(); repInd++) {
+            RepaymentPeriod repaymentPeriod = expectedModel.repaymentPeriods().get(repInd);
+            for (int interestPeriodIndex = 0; interestPeriodIndex < repaymentPeriod.getInterestPeriods().size(); interestPeriodIndex++) {
+                final InterestPeriod interestPeriod = repaymentPeriod.getInterestPeriods().get(interestPeriodIndex);
+                checkPeriod(actualModel, repInd, interestPeriodIndex, toDouble(repaymentPeriod.getEmi()),
+                        toDouble(applyMathContext(interestPeriod.getRateFactor())), toDouble(interestPeriod.getCalculatedDueInterest()),
+                        toDouble(repaymentPeriod.getDueInterest()), toDouble(repaymentPeriod.getDuePrincipal()),
+                        toDouble(repaymentPeriod.getOutstandingLoanBalance()));
+            }
+        }
+    }
+
+    private ProgressiveLoanInterestScheduleModel copyJson(ProgressiveLoanInterestScheduleModel toCopy) {
+        String json = interestScheduleModelService.toJson(toCopy);
+        return interestScheduleModelService.fromJson(json, toCopy.loanProductRelatedDetail(), toCopy.mc(),
+                toCopy.installmentAmountInMultiplesOf());
     }
 }
