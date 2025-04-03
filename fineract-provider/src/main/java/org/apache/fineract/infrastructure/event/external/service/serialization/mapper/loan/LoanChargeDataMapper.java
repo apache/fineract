@@ -29,6 +29,7 @@ import org.mapstruct.Mapping;
 public interface LoanChargeDataMapper {
 
     @Mapping(target = "externalOwnerId", ignore = true)
+    @Mapping(target = "customData", ignore = true)
     LoanChargeDataV1 map(LoanChargeData source);
 
     LoanChargeDataRangeViewV1 mapRangeView(LoanChargeData source);

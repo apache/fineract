@@ -256,6 +256,17 @@
                 "null",
                 "string"
             ]
+        },
+        {
+            "default": null,
+            "name": "customData",
+            "type": [
+                "null",
+                {
+                    "values": "bytes",
+                    "type": "map"
+                }
+            ]
         }
     ]
 }
