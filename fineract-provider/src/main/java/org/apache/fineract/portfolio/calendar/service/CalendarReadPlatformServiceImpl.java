@@ -355,8 +355,8 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
     }
 
     @Override
-    public Collection<CalendarData> updateWithRecurringDates(final Collection<CalendarData> calendarsData) {
-        final Collection<CalendarData> recuCalendarsData = new ArrayList<>();
+    public List<CalendarData> updateWithRecurringDates(final Collection<CalendarData> calendarsData) {
+        final List<CalendarData> recuCalendarsData = new ArrayList<>();
         final boolean withHistory = true;
         final LocalDate tillDate = null;
         for (final CalendarData calendarData : calendarsData) {

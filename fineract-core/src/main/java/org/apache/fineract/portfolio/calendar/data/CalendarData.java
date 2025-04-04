@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.calendar.data;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -41,6 +42,9 @@ import org.apache.fineract.portfolio.common.domain.NthDayType;
 @NoArgsConstructor
 @Accessors(chain = true)
 public final class CalendarData implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private Long id;
     private Long calendarInstanceId;
