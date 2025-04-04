@@ -1864,12 +1864,22 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         List<LoanRepaymentScheduleInstallment> installments = transactionCtx.getInstallments();
         Money paidPortion;
         boolean exit = false;
-        List<LoanRepaymentScheduleInstallment> alreadyProcessedInstallments;
-        if (transactionCtx instanceof ProgressiveTransactionCtx ctx) {
+        Predicate<LoanRepaymentScheduleInstallment> inAdvanceInstallmentsFilteringRules;
+        boolean interestBearingAndInterestRecalculationEnabled = loanTransaction.getLoan()
+                .isInterestBearingAndInterestRecalculationEnabled();
+        boolean isProgressiveCtx = transactionCtx instanceof ProgressiveTransactionCtx;
+
+        if (isProgressiveCtx && interestBearingAndInterestRecalculationEnabled) {
+            ProgressiveTransactionCtx ctx = (ProgressiveTransactionCtx) transactionCtx;
+            // Clear any previously skipped installments before re-evaluating
             ctx.getSkipRepaymentScheduleInstallments().clear();
-            alreadyProcessedInstallments = ctx.getSkipRepaymentScheduleInstallments();
+
+            inAdvanceInstallmentsFilteringRules = installment -> loanTransaction.isBefore(installment.getDueDate())
+                    && (installment.isNotFullyPaidOff()
+                            || (installment.isDueBalanceZero() && !ctx.getSkipRepaymentScheduleInstallments().contains(installment)));
         } else {
-            alreadyProcessedInstallments = new ArrayList<>();
+            inAdvanceInstallmentsFilteringRules = installment -> loanTransaction.isBefore(installment.getDueDate())
+                    && installment.isNotFullyPaidOff();
         }
 
         do {
@@ -1893,14 +1903,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                         .min(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).stream() //
                         .toList(); //
             } else if (FutureInstallmentAllocationRule.LAST_INSTALLMENT.equals(futureInstallmentAllocationRule)) {
-                inAdvanceInstallments = installments.stream()
-                        // In case of Last installment strategy it could occur the projected EMI of an installment is
-                        // zero,
-                        // but we should still involve this period to allocated further amounts and pushing this till we
-                        // run ouf of unallocated amounts
-                        .filter(i -> i.isNotFullyPaidOff() || i.isDueBalanceZero()) //
-                        .filter(e -> loanTransaction.isBefore(e.getDueDate())) //
-                        .filter(e -> !alreadyProcessedInstallments.contains(e))
+                inAdvanceInstallments = installments.stream().filter(inAdvanceInstallmentsFilteringRules)
                         .max(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).stream() //
                         .toList(); //
             } else if (FutureInstallmentAllocationRule.NEXT_LAST_INSTALLMENT.equals(futureInstallmentAllocationRule)) {
@@ -1912,14 +1915,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                         .toList(); //
                 // if there is no current installment, resolve similar to LAST_INSTALLMENT
                 if (inAdvanceInstallments.isEmpty()) {
-                    inAdvanceInstallments = installments.stream()
-                            // In case of Last installment strategy it could occur the projected EMI of an installment
-                            // is zero,
-                            // but we should still involve this period to allocated further amounts and pushing this
-                            // till we run ouf of unallocated amounts
-                            .filter(i -> i.isNotFullyPaidOff() || i.isDueBalanceZero()) //
-                            .filter(e -> loanTransaction.isBefore(e.getDueDate())) //
-                            .filter(e -> !alreadyProcessedInstallments.contains(e))
+                    inAdvanceInstallments = installments.stream().filter(inAdvanceInstallmentsFilteringRules)
                             .max(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).stream() //
                             .toList(); //
                 }
@@ -2038,6 +2034,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         if (installment.isDownPayment() || installment.getDueDate().isAfter(ctx.getModel().getMaturityDate())) {
             // Skip interest and principal payment processing for down payment period or periods after loan maturity
             // date
+            ctx.getSkipRepaymentScheduleInstallments().add(installment);
             return processPaymentAllocation(paymentAllocationType, installment, loanTransaction, transactionAmountUnprocessed,
                     loanTransactionToRepaymentScheduleMapping, charges, balances, LoanRepaymentScheduleInstallment.PaymentAction.PAY);
         }
