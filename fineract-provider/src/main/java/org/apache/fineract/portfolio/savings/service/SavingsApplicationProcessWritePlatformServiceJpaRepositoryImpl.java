@@ -168,7 +168,9 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
                     Group group = this.groupRepositoryWrapper.findOneWithNotFoundDetection(groupId);
 
-                    if (command.booleanObjectValueOfParameterNamed("isParentAccount") != null) {
+                    if (command.booleanObjectValueOfParameterNamed("isParentAccount") != null
+                            && ("1".equals(command.stringValueOfParameterNamed("isParentAccount"))
+                                    || command.booleanObjectValueOfParameterNamed("isParentAccount"))) {
                         // empty table check
                         if (gsimRepository.count() != 0) {
                             // Parent-Not an empty table
@@ -193,7 +195,12 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     } else {
                         if (gsimRepository.count() != 0) {
                             // Child-Not an empty table check
-                            gsimAccount = gsimRepository.findOneByIsAcceptingChildAndApplicationId(true, applicationId);
+                            if (applicationId.compareTo(BigDecimal.ZERO) == 0) {
+                                gsimAccount = gsimRepository.findOneByIsAcceptingChildAndApplicationIdAndGroupId(true, applicationId,
+                                        groupId);
+                            } else {
+                                gsimAccount = gsimRepository.findOneByIsAcceptingChildAndApplicationId(true, applicationId);
+                            }
                             accountNumber = gsimAccount.getAccountNumber() + (gsimAccount.getChildAccountsCount() + 1);
                             account.updateAccountNo(accountNumber);
                             this.gsimWritePlatformService.incrementChildAccountCount(gsimAccount);

@@ -407,6 +407,17 @@ public class GroupHelper {
         return list;
     }
 
+    public static Integer getChildAccountCount(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer groupID) {
+        List<Object> list;
+        LOG.info("------------------------------GET CHILD ACCOUNT COUNT------------------------------------\n");
+        final String GROUP_URL = "/fineract-provider/api/v1/groups/" + groupID + "/gsimaccounts?" + Utils.TENANT_IDENTIFIER;
+        list = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "childGSIMAccounts");
+
+        return ((ArrayList) list.get(0)).size();
+
+    }
+
     public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
         return Utils.uniqueRandomStringGenerator(prefix, lenOfRandomSuffix);
     }
