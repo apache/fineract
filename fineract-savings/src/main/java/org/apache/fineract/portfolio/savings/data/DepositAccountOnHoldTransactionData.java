@@ -18,11 +18,18 @@
  */
 package org.apache.fineract.portfolio.savings.data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
-public final class DepositAccountOnHoldTransactionData {
+@Getter
+public final class DepositAccountOnHoldTransactionData implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @SuppressWarnings("unused")
     private final Long id;

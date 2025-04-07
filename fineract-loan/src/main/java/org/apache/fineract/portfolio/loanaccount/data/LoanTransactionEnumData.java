@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import lombok.Getter;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 
@@ -25,7 +27,10 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
  * Immutable data object represent loan status enumerations.
  */
 @Getter
-public class LoanTransactionEnumData {
+public class LoanTransactionEnumData implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private final Long id;
     private final String code;

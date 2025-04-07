@@ -18,10 +18,17 @@
  */
 package org.apache.fineract.portfolio.loanaccount.guarantor.data;
 
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.Getter;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.savings.data.DepositAccountOnHoldTransactionData;
 
-public final class GuarantorTransactionData {
+@Getter
+public final class GuarantorTransactionData implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @SuppressWarnings("unused")
     private final Long id;

@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -35,7 +37,10 @@ import org.springframework.integration.annotation.Default;
  * Immutable data object representing a loan transaction.
  */
 @Getter
-public class LoanTransactionData {
+public class LoanTransactionData implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private final Long id;
     private final Long loanId;

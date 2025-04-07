@@ -16,33 +16,47 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.data;
+package org.apache.fineract.portfolio.loanaccount.guarantor.data;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@AllArgsConstructor
+@Setter
 @Getter
-public final class LoanRepaymentScheduleInstallmentData implements Serializable {
+@NoArgsConstructor
+public class GuarantorsRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private Long id;
+    private String locale;
+    private String dateFormat; // "dd MMMM yyyy"
 
-    private Integer installmentId;
+    /*** Fields for capturing relationship of Guarantor with customer **/
+    private Long clientRelationshipTypeId;
 
-    private LocalDate date;
+    /*** Fields for current customers serving as guarantors **/
+    private Integer guarantorTypeId;
+    private Long entityId;
 
+    /*** Fields for external persons serving as guarantors ***/
+    private String firstname;
+    private String lastname;
+    private String addressLine1;
+    private String addressLine2;
+    private String city;
+    private String state;
+    private String zip;
+    private String country;
+    private String mobileNumber;
+    private String housePhoneNumber;
+    private String comment;
+    private String dob;
+    private Long savingsId;
     private BigDecimal amount;
-
-    public static LoanRepaymentScheduleInstallmentData instanceOf(final Long id, final Integer installmentId, final LocalDate date,
-            final BigDecimal amount) {
-        return new LoanRepaymentScheduleInstallmentData(id, installmentId, date, amount);
-    }
 
 }

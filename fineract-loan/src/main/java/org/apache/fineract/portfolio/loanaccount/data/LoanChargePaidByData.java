@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import lombok.Data;
 import lombok.Getter;
@@ -25,7 +27,10 @@ import org.springframework.integration.annotation.Default;
 
 @Data
 @Getter
-public class LoanChargePaidByData {
+public class LoanChargePaidByData implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private Long id;
     private BigDecimal amount;
