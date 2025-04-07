@@ -28,6 +28,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -90,6 +91,7 @@ import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
 import org.apache.fineract.portfolio.group.exception.ClientNotInGroupException;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
+import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
@@ -109,6 +111,7 @@ import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementData
 import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementDataRequiredException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
+import org.apache.fineract.portfolio.loanaccount.mapper.LoanMapper;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
@@ -200,6 +203,7 @@ public final class LoanApplicationValidator {
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final LoanUtilService loanUtilService;
     private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
+    private final LoanMapper loanMapper;
 
     public void validateForCreate(final Loan loan) {
         final LocalDate expectedFirstRepaymentOnDate = loan.getExpectedFirstRepaymentOnDate();
@@ -1404,12 +1408,11 @@ public final class LoanApplicationValidator {
                     BigDecimal loanOutstanding = this.loanReadPlatformService
                             .retrieveLoanPrePaymentTemplate(LoanTransactionType.REPAYMENT, loanIdToClose, expectedDisbursementDate)
                             .getAmount();
-                    final BigDecimal firstDisbursalAmount = loan.getFirstDisbursalAmount();
+                    final BigDecimal firstDisbursalAmount = getFirstDisbursalAmount(loan);
                     if (loanOutstanding.compareTo(firstDisbursalAmount) > 0) {
                         throw new GeneralPlatformDomainRuleException("error.msg.loan.amount.less.than.outstanding.of.loan.to.be.closed",
                                 "Topup loan amount should be greater than outstanding amount of loan to be closed.");
                     }
-
                 }
             }
 
@@ -1953,7 +1956,7 @@ public final class LoanApplicationValidator {
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
     }
 
-    public void validateTopupLoan(Loan loan, LocalDate expectedDisbursementDate) {
+    public BigDecimal validateTopupLoan(final Loan loan, final LocalDate disbursementDate) {
         final Long loanIdToClose = loan.getTopupLoanDetails().getLoanIdToClose();
         final Loan loanToClose = loanRepositoryWrapper.findNonClosedLoanThatBelongsToClient(loanIdToClose, loan.getClientId());
         if (loanToClose == null) {
@@ -1969,16 +1972,15 @@ public final class LoanApplicationValidator {
                             + " should be after last transaction date of loan to be closed " + lastUserTransactionOnLoanToClose);
         }
 
-        BigDecimal loanOutstanding = loanReadPlatformService
-                .retrieveLoanPrePaymentTemplate(LoanTransactionType.REPAYMENT, loanIdToClose, expectedDisbursementDate).getAmount();
-        final BigDecimal firstDisbursalAmount = loan.getFirstDisbursalAmount();
+        final BigDecimal loanOutstanding = loanReadPlatformService
+                .retrieveLoanPrePaymentTemplate(LoanTransactionType.REPAYMENT, loanIdToClose, disbursementDate).getAmount();
+        final BigDecimal firstDisbursalAmount = getFirstDisbursalAmount(loan);
         if (loanOutstanding.compareTo(firstDisbursalAmount) > 0) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.amount.less.than.outstanding.of.loan.to.be.closed",
                     "Topup loan amount should be greater than outstanding amount of loan to be closed.");
         }
 
-        BigDecimal netDisbursalAmount = loan.getApprovedPrincipal().subtract(loanOutstanding);
-        loan.adjustNetDisbursalAmount(netDisbursalAmount);
+        return loanOutstanding;
     }
 
     public void validateApproval(JsonCommand command, Long loanId) {
@@ -2074,7 +2076,9 @@ public final class LoanApplicationValidator {
                     StatusEnum.APPROVE.getValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
 
             if (loan.isTopup() && loan.getClientId() != null) {
-                validateTopupLoan(loan, expectedDisbursementDate);
+                final BigDecimal loanOutstanding = validateTopupLoan(loan, expectedDisbursementDate);
+                final BigDecimal netDisbursalAmountAdjusted = loan.getApprovedPrincipal().subtract(loanOutstanding);
+                loan.adjustNetDisbursalAmount(netDisbursalAmountAdjusted);
             }
 
             if (!loan.getStatus().isSubmittedAndPendingApproval()) {
@@ -2202,4 +2206,18 @@ public final class LoanApplicationValidator {
         throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
                 dataValidationErrors);
     }
+
+    private BigDecimal getFirstDisbursalAmount(final Loan loan) {
+        BigDecimal firstDisbursalAmount;
+
+        if (loan.isMultiDisburmentLoan()) {
+            List<DisbursementData> disbursementData = loanMapper.getDisbursementData(loan);
+            Collections.sort(disbursementData);
+            firstDisbursalAmount = disbursementData.get(disbursementData.size() - 1).getPrincipal();
+        } else {
+            firstDisbursalAmount = loan.getLoanRepaymentScheduleDetail().getPrincipal().getAmount();
+        }
+        return firstDisbursalAmount;
+    }
+
 }

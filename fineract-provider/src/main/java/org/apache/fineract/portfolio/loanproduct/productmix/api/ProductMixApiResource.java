@@ -45,6 +45,7 @@ import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSer
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.productmix.data.ProductMixData;
+import org.apache.fineract.portfolio.loanproduct.productmix.data.ProductMixRequest;
 import org.apache.fineract.portfolio.loanproduct.productmix.service.ProductMixReadPlatformService;
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.springframework.stereotype.Component;
@@ -88,39 +89,35 @@ public class ProductMixApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String createProductMix(@PathParam("productId") final Long productId, final String apiRequestBodyAsJson) {
+    public CommandProcessingResult createProductMix(@PathParam("productId") final Long productId,
+            final ProductMixRequest productMixRequest) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createProductMix(productId).withJson(apiRequestBodyAsJson)
-                .build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createProductMix(productId)
+                .withJson(toApiJsonSerializer.serialize(productMixRequest)).build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @PUT
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateProductMix(@PathParam("productId") final Long productId, final String apiRequestBodyAsJson) {
+    public CommandProcessingResult updateProductMix(@PathParam("productId") final Long productId,
+            final ProductMixRequest productMixRequest) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateProductMix(productId).withJson(apiRequestBodyAsJson)
-                .build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateProductMix(productId)
+                .withJson(toApiJsonSerializer.serialize(productMixRequest)).build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @DELETE
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteProductMix(@PathParam("productId") final Long productId) {
+    public CommandProcessingResult deleteProductMix(@PathParam("productId") final Long productId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteProductMix(productId).build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
 }

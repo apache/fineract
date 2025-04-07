@@ -44,7 +44,7 @@ Please also indicate with "Tested: YES/NO/PARTIAL" if you have locally built and
 
 Tested: YES ... Verified integrity and signatures of release artifacts locally, built from source, ran jar/war: Did everything mentioned in the current release candidate verification guidance ( https://lists.apache.org/thread/hym94pdy3nk9gjspkz4qonv2v15n5dpo ). If you did more than that, please specify.
 
-Tested: NO ... No testing performed on release candidate, e.g. relying on testing performed by other contributors ( https://lists.apache.org/thread/q4xvombgzk99lpow23bdpvd7n0dx49lt , https://lists.apache.org/thread/42p54kfx69olcopdg4lojgpj1drmbmtw ) and/or output of GitHub Actions, while exercising my right to vote.
+Tested: NO ... No testing performed on release candidate, e.g. relying on testing performed by other contributors and/or output of GitHub Actions, while exercising my right to vote.
 
 Tested: PARTIAL ... Please specify.
 

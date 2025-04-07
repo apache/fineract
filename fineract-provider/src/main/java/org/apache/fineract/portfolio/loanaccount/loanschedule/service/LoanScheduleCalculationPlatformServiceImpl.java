@@ -44,6 +44,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleD
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
+import org.apache.fineract.portfolio.loanaccount.mapper.LoanTermVariationsMapper;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanScheduleValidator;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
@@ -63,6 +64,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
     private final LoanUtilService loanUtilService;
     private final LoanRepositoryWrapper loanRepository;
     private final LoanLifecycleStateMachine defaultLoanLifecycleStateMachine;
+    private final LoanTermVariationsMapper loanTermVariationsMapper;
 
     @Override
     public LoanScheduleModel calculateLoanSchedule(final JsonQuery query, Boolean validateParams) {
@@ -204,7 +206,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
     private LoanApplicationTerms constructLoanApplicationTerms(final Loan loan) {
         final LocalDate recalculateFrom = null;
         ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
-        return loan.constructLoanApplicationTerms(scheduleGeneratorDTO);
+        return loanTermVariationsMapper.constructLoanApplicationTerms(scheduleGeneratorDTO, loan);
     }
 
     private Loan fetchLoan(final Long accountId) {

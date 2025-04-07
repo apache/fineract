@@ -144,15 +144,54 @@ We recommend using the JAR instead of the WAR file deployment, because it's much
 Note that with the 1.4 release the tenants database pool configuration changed from Tomcat DBCP in XML to an embedded Hikari, configured by environment variables, see above.
 
 
-INSTRUCTIONS: How to execute Integration Tests
+INSTRUCTIONS: How to run tests
 ============
-> Note that if this is the first time to access MySQL DB, then you may need to reset your password.
 
-Run the following commands:
-1. `./gradlew createDB -PdbName=fineract_tenants`
-1. `./gradlew createDB -PdbName=fineract_default`
-1. `./gradlew clean test`
+Unit tests
+----------
 
+Here's how to run the set of relatviely fast and indepedent Fineract tests:
+
+```bash
+./gradlew test -x :twofactor-tests:test -x :oauth2-tests:test -x :integration-tests:test
+```
+
+This runs nearly 1,000 tests and completes in a few minutes on decent hardware.
+They shouldn't need any special servers/services running.
+
+Integration tests
+-----------------
+
+Running tests with external dependencies yourself is a multi-step process with many moving parts.
+Sometimes there are arbitrary failures and the prerequisite setup can be daunting.
+A full local integration test run (on a developer workstation) covering every possible test using every external service and every supported relational database engine could take an entire day, and that's assuming everything is properly configured and runs as expected.
+
+Right now we depend on GitHub to know if "the build" is passing (it's actually multiple builds).
+The authoritative source of truth for what commands/services/tests to run, how, and when are the files in `.github/workflows/`.
+Output from runs based on those configuration files appears at <https://github.com/apache/fineract/actions>.
+
+Note these builds are run in [short-lived virtual machines](https://docs.github.com/en/actions/using-github-hosted-runners/using-github-hosted-runners), so locally reproducing the same may require additional effort, such as these extra clean-up procedures:
+
+```bash
+# Destroy anything untracked by git.
+# ⚠️ This may delete something important, e.g. a finely-tuned IDE configuration.
+git clean --force -dx
+
+# Destroy various caches and configs.
+# ⚠️ This may delete gibibytes of cached data, making the next build very slow.
+rm -rf ~/.gradle ~/.m2 /tmp/cargo*
+
+# Destroy any Java containers left running.
+# 💚 This is generally very safe to run between builds.
+ps auxwww | grep [c]argo | awk '{ print $2 }' | xargs -r kill
+```
+
+Testing within IDEs
+-----------------
+
+See the next section for testing in Eclipse.
+
+See <https://fineract-academy.com> for testing in IntelliJ.
 
 INSTRUCTIONS: How to run and debug in Eclipse IDE
 ============
@@ -219,6 +258,21 @@ id -u ${GROUP}
 ```
 
 Please make sure that you are not checking in your changed values. The defaults should normally work for most people.
+
+INSTRUCTIONS: How to build documentation
+===================================================
+
+Run the following command:
+
+```bash
+./gradlew doc
+```
+
+Some dependencies are required (e.g. Ghostscript, Graphviz), see `.github/workflows/build-documentation.yml` for hints.
+
+Additionally, IDEs such as IntelliJ are useful for editing the AsciiDoc source files while providing a live rendered preview.
+
+HTML rendered from the AsciiDoc source files is also available online at <https://fineract.apache.org/docs/current/>.
 
 Connection pool configuration
 =============================

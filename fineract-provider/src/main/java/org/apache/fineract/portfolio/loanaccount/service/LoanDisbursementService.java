@@ -24,15 +24,18 @@ import com.google.common.base.Splitter;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.configuration.service.TemporaryConfigurationServiceContainer;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -76,14 +79,14 @@ public class LoanDisbursementService {
             if (disbursementDataArray != null && !disbursementDataArray.isEmpty()) {
                 String dateFormat;
                 Locale locale = null;
-                final Map<String, String> dateAndLocale = loan.getDateFormatAndLocale(jsonCommand);
+                final Map<String, String> dateAndLocale = getDateFormatAndLocale(jsonCommand);
                 dateFormat = dateAndLocale.get(LoanApiConstants.dateFormatParameterName);
                 if (dateAndLocale.containsKey(LoanApiConstants.localeParameterName)) {
                     locale = JsonParserHelper.localeFromString(dateAndLocale.get(LoanApiConstants.localeParameterName));
                 }
                 for (JsonElement jsonElement : disbursementDataArray) {
                     final JsonObject jsonObject = jsonElement.getAsJsonObject();
-                    final Map<String, Object> parsedDisbursementData = loan.parseDisbursementDetails(jsonObject, dateFormat, locale);
+                    final Map<String, Object> parsedDisbursementData = parseDisbursementDetails(jsonObject, dateFormat, locale);
                     final LocalDate expectedDisbursementDate = (LocalDate) parsedDisbursementData
                             .get(LoanApiConstants.expectedDisbursementDateParameterName);
                     final BigDecimal principal = (BigDecimal) parsedDisbursementData
@@ -298,4 +301,63 @@ public class LoanDisbursementService {
                 }) //
                 .forEach(loanCharge -> reprocessLoanTransactionsService.removeLoanCharge(loan, loanCharge));
     }
+
+    // This method returns date format and locale if present in the JsonCommand
+    private Map<String, String> getDateFormatAndLocale(final JsonCommand jsonCommand) {
+        Map<String, String> returnObject = new HashMap<>();
+        JsonElement jsonElement = jsonCommand.parsedJson();
+        if (jsonElement.isJsonObject()) {
+            JsonObject topLevel = jsonElement.getAsJsonObject();
+            if (topLevel.has(LoanApiConstants.dateFormatParameterName)
+                    && topLevel.get(LoanApiConstants.dateFormatParameterName).isJsonPrimitive()) {
+                final JsonPrimitive primitive = topLevel.get(LoanApiConstants.dateFormatParameterName).getAsJsonPrimitive();
+                returnObject.put(LoanApiConstants.dateFormatParameterName, primitive.getAsString());
+            }
+            if (topLevel.has(LoanApiConstants.localeParameterName)
+                    && topLevel.get(LoanApiConstants.localeParameterName).isJsonPrimitive()) {
+                final JsonPrimitive primitive = topLevel.get(LoanApiConstants.localeParameterName).getAsJsonPrimitive();
+                String localeString = primitive.getAsString();
+                returnObject.put(LoanApiConstants.localeParameterName, localeString);
+            }
+        }
+        return returnObject;
+    }
+
+    private Map<String, Object> parseDisbursementDetails(final JsonObject jsonObject, String dateFormat, Locale locale) {
+        Map<String, Object> returnObject = new HashMap<>();
+        if (jsonObject.get(LoanApiConstants.expectedDisbursementDateParameterName) != null
+                && jsonObject.get(LoanApiConstants.expectedDisbursementDateParameterName).isJsonPrimitive()) {
+            final JsonPrimitive primitive = jsonObject.get(LoanApiConstants.expectedDisbursementDateParameterName).getAsJsonPrimitive();
+            final String valueAsString = primitive.getAsString();
+            if (StringUtils.isNotBlank(valueAsString)) {
+                LocalDate date = JsonParserHelper.convertFrom(valueAsString, LoanApiConstants.expectedDisbursementDateParameterName,
+                        dateFormat, locale);
+                if (date != null) {
+                    returnObject.put(LoanApiConstants.expectedDisbursementDateParameterName, date);
+                }
+            }
+        }
+
+        if (jsonObject.get(LoanApiConstants.disbursementPrincipalParameterName).isJsonPrimitive()
+                && StringUtils.isNotBlank(jsonObject.get(LoanApiConstants.disbursementPrincipalParameterName).getAsString())) {
+            BigDecimal principal = jsonObject.getAsJsonPrimitive(LoanApiConstants.disbursementPrincipalParameterName).getAsBigDecimal();
+            returnObject.put(LoanApiConstants.disbursementPrincipalParameterName, principal);
+        }
+
+        if (jsonObject.has(LoanApiConstants.disbursementIdParameterName)
+                && jsonObject.get(LoanApiConstants.disbursementIdParameterName).isJsonPrimitive()
+                && StringUtils.isNotBlank(jsonObject.get(LoanApiConstants.disbursementIdParameterName).getAsString())) {
+            Long id = jsonObject.getAsJsonPrimitive(LoanApiConstants.disbursementIdParameterName).getAsLong();
+            returnObject.put(LoanApiConstants.disbursementIdParameterName, id);
+        }
+
+        if (jsonObject.has(LoanApiConstants.loanChargeIdParameterName)
+                && jsonObject.get(LoanApiConstants.loanChargeIdParameterName).isJsonPrimitive()
+                && StringUtils.isNotBlank(jsonObject.get(LoanApiConstants.loanChargeIdParameterName).getAsString())) {
+            returnObject.put(LoanApiConstants.loanChargeIdParameterName,
+                    jsonObject.getAsJsonPrimitive(LoanApiConstants.loanChargeIdParameterName).getAsString());
+        }
+        return returnObject;
+    }
+
 }

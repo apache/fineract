@@ -42,6 +42,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.DefaultScheduledDateGenerator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
+import org.apache.fineract.portfolio.loanaccount.mapper.LoanTermVariationsMapper;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -59,6 +60,7 @@ public class ApplyHolidaysToLoansTasklet implements Tasklet {
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final LoanUtilService loanUtilService;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final LoanTermVariationsMapper loanTermVariationsMapper;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
@@ -120,7 +122,8 @@ public class ApplyHolidaysToLoansTasklet implements Tasklet {
     private void adjustRepaymentSchedules(Loan loan, Holiday holiday, LocalDate adjustedRescheduleToDate) {
         final DefaultScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
         ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, holiday.getFromDate());
-        final LoanApplicationTerms loanApplicationTerms = loan.constructLoanApplicationTerms(scheduleGeneratorDTO);
+        final LoanApplicationTerms loanApplicationTerms = loanTermVariationsMapper.constructLoanApplicationTerms(scheduleGeneratorDTO,
+                loan);
 
         // first repayment's from date is same as disbursement date.
         LocalDate tmpFromDate = loan.getDisbursementDate();
@@ -152,7 +155,8 @@ public class ApplyHolidaysToLoansTasklet implements Tasklet {
     private void adjustAllRepaymentSchedules(Loan loan, Holiday holiday, LocalDate adjustedRescheduleToDate) {
         final DefaultScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
         ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, holiday.getFromDate());
-        final LoanApplicationTerms loanApplicationTerms = loan.constructLoanApplicationTerms(scheduleGeneratorDTO);
+        final LoanApplicationTerms loanApplicationTerms = loanTermVariationsMapper.constructLoanApplicationTerms(scheduleGeneratorDTO,
+                loan);
 
         // first repayment's from date is same as disbursement date.
         LocalDate tmpFromDate = loan.getDisbursementDate();

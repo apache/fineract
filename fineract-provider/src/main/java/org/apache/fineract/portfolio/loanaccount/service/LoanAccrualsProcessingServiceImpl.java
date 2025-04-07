@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,6 +59,8 @@ import org.apache.fineract.infrastructure.event.business.service.BusinessEventNo
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.portfolio.loanaccount.data.AccountingBridgeDataDTO;
+import org.apache.fineract.portfolio.loanaccount.data.AccountingBridgeLoanTransactionDTO;
 import org.apache.fineract.portfolio.loanaccount.data.AccrualBalances;
 import org.apache.fineract.portfolio.loanaccount.data.AccrualChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.AccrualPeriodData;
@@ -79,6 +80,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionToRepayme
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGenerator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
+import org.apache.fineract.portfolio.loanaccount.mapper.LoanAccountingBridgeMapper;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestRecalculationCompoundingMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -109,6 +111,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
     @Qualifier(TaskExecutorConstant.CONFIGURABLE_TASK_EXECUTOR_BEAN_NAME)
     private final ThreadPoolTaskExecutor taskExecutor;
     private final TransactionTemplate transactionTemplate;
+    private final LoanAccountingBridgeMapper loanAccountingBridgeMapper;
 
     /**
      * method adds accrual for batch job "Add Periodic Accrual Transactions" and add accruals api for Loan
@@ -413,7 +416,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
         if (!isFinal || progressiveAccrual) {
             loan.setAccruedTill(isFinal ? accrualDate : tillDate);
         }
-        ArrayList<Map<String, Object>> newTransactionMapping = new ArrayList<>();
+        List<AccountingBridgeLoanTransactionDTO> newTransactionDTOs = new ArrayList<>();
         for (LoanTransaction accrualTransaction : accrualTransactions) {
             accrualTransaction = loanTransactionRepository.saveAndFlush(accrualTransaction);
             if (addJournal) {
@@ -421,11 +424,17 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
                         ? new LoanAccrualTransactionCreatedBusinessEvent(accrualTransaction)
                         : new LoanAccrualAdjustmentTransactionBusinessEvent(accrualTransaction);
                 businessEventNotifierService.notifyPostBusinessEvent(businessEvent);
-                newTransactionMapping.add(accrualTransaction.toMapData(currency.getCode()));
+                AccountingBridgeLoanTransactionDTO transactionDTO = loanAccountingBridgeMapper.mapToLoanTransactionData(accrualTransaction,
+                        currency.getCode());
+                newTransactionDTOs.add(transactionDTO);
             }
         }
         if (addJournal) {
-            Map<String, Object> accountingBridgeData = deriveAccountingBridgeData(loan, newTransactionMapping);
+            AccountingBridgeDataDTO accountingBridgeData = new AccountingBridgeDataDTO(loan.getId(), loan.getLoanProduct().getId(),
+                    loan.getOfficeId(), loan.getCurrencyCode(), loan.getSummary().getTotalInterestCharged(),
+                    loan.isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct(),
+                    loan.isUpfrontAccrualAccountingEnabledOnLoanProduct(), loan.isPeriodicAccrualAccountingEnabledOnLoanProduct(), false,
+                    false, false, null, newTransactionDTOs);
             this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
         }
     }
@@ -1110,30 +1119,12 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
         }
     }
 
-    // Utility
-
-    private Map<String, Object> deriveAccountingBridgeData(@NotNull Loan loan, List<Map<String, Object>> newLoanTransactions) {
-        final Map<String, Object> accountingBridgeData = new LinkedHashMap<>();
-        accountingBridgeData.put("loanId", loan.getId());
-        accountingBridgeData.put("loanProductId", loan.getLoanProduct().getId());
-        accountingBridgeData.put("officeId", loan.getOfficeId());
-        accountingBridgeData.put("currencyCode", loan.getCurrencyCode());
-        accountingBridgeData.put("cashBasedAccountingEnabled", loan.isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct());
-        accountingBridgeData.put("upfrontAccrualBasedAccountingEnabled", loan.isUpfrontAccrualAccountingEnabledOnLoanProduct());
-        accountingBridgeData.put("periodicAccrualBasedAccountingEnabled", loan.isPeriodicAccrualAccountingEnabledOnLoanProduct());
-        accountingBridgeData.put("isAccountTransfer", false);
-        accountingBridgeData.put("isChargeOff", false);
-        accountingBridgeData.put("isFraud", false);
-        accountingBridgeData.put("newLoanTransactions", newLoanTransactions);
-        return accountingBridgeData;
-    }
-
     private void postJournalEntries(final Loan loan, final List<Long> existingTransactionIds,
             final List<Long> existingReversedTransactionIds) {
         final MonetaryCurrency currency = loan.getCurrency();
         boolean isAccountTransfer = false;
-        final Map<String, Object> accountingBridgeData = loan.deriveAccountingBridgeData(currency.getCode(), existingTransactionIds,
-                existingReversedTransactionIds, isAccountTransfer);
+        final AccountingBridgeDataDTO accountingBridgeData = loanAccountingBridgeMapper.deriveAccountingBridgeData(currency.getCode(),
+                existingTransactionIds, existingReversedTransactionIds, isAccountTransfer, loan);
         journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
     }
 
