@@ -19,20 +19,20 @@
 package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanStatusChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 // TODO: introduce tests for the state machine
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachine {
-
-    private static Logger LOG = LoggerFactory.getLogger(DefaultLoanLifecycleStateMachine.class);
 
     private static final List<LoanStatus> ALLOWED_LOAN_STATUSES = List.of(LoanStatus.values());
     private final BusinessEventNotifierService businessEventNotifierService;
@@ -46,7 +46,29 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
     @Override
     public void transition(final LoanEvent loanEvent, final Loan loan) {
         loan.updateLoanSummaryDerivedFields();
+        internalTransition(loanEvent, loan);
+    }
 
+    @Override
+    public void determineAndTransition(final Loan loan, final LocalDate transactionDate) {
+        if (loan.getStatus() == null) {
+            return;
+        }
+
+        loan.updateLoanSummaryDerivedFields();
+
+        final LoanStatusTransition transition = determineTransition(loan, loan.getStatus(), transactionDate);
+
+        if (MathUtil.isEmpty(loan.getTotalOverpaid())) {
+            loan.setOverpaidOnDate(null);
+        }
+
+        if (transition.transitionNeeded()) {
+            internalTransition(transition.event(), loan);
+        }
+    }
+
+    private void internalTransition(final LoanEvent loanEvent, final Loan loan) {
         LoanStatus oldStatus = loan.getStatus();
         LoanStatus newStatus = getNextStatus(loanEvent, loan);
         if (newStatus != null) {
@@ -58,7 +80,7 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
             }
 
             // set mandatory field states based on new status after the transition
-            LOG.debug("Transitioning loan {} status from {} to {}", loan.getId(), oldStatus, newStatus);
+            log.debug("Transitioning loan {} status from {} to {}", loan.getId(), oldStatus, newStatus);
             switch (newStatus) {
                 case SUBMITTED_AND_PENDING_APPROVAL -> {
                     loan.setApprovedOnDate(null);
@@ -276,4 +298,89 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
 
         return allowed;
     }
+
+    private LoanStatusTransition determineTransition(final Loan loan, final LoanStatus currentStatus, final LocalDate transactionDate) {
+        final boolean hasOutstanding = loan.getSummary().getTotalOutstanding(loan.getCurrency()).isGreaterThanZero();
+        final boolean isRepaidInFull = loan.getSummary().isRepaidInFull(loan.getCurrency());
+        final boolean isOverpaid = MathUtil.isGreaterThanZero(loan.getTotalOverpaid());
+        final boolean isAllChargesPaid = loan.getLoanCharges().stream().allMatch(
+                charge -> !charge.isActive() || charge.amount().compareTo(BigDecimal.ZERO) <= 0 || charge.isPaid() || charge.isWaived());
+
+        if (currentStatus.isOverpaid()) {
+            return determineTransitionFromOverpaid(loan, isOverpaid, isRepaidInFull, isAllChargesPaid, hasOutstanding, transactionDate);
+        } else if (currentStatus.isClosedObligationsMet()) {
+            return determineTransitionFromClosedObligationsMet(loan, isOverpaid, hasOutstanding, transactionDate);
+        } else if (currentStatus.isActive()) {
+            return determineTransitionFromActive(loan, isOverpaid, isRepaidInFull, isAllChargesPaid, transactionDate);
+        } else if (currentStatus.isClosedWrittenOff() || currentStatus.isClosedWithOutsandingAmountMarkedForReschedule()) {
+            return determineTransitionFromClosedWrittenOffOrRescheduled(loan, hasOutstanding);
+        }
+
+        return LoanStatusTransition.noTransition(currentStatus);
+    }
+
+    private LoanStatusTransition determineTransitionFromOverpaid(final Loan loan, final boolean isOverpaid, final boolean isRepaidInFull,
+            final boolean isAllChargesPaid, final boolean hasOutstanding, final LocalDate transactionDate) {
+        if (!isOverpaid) {
+            if (isRepaidInFull && isAllChargesPaid) {
+                loan.setClosedOnDate(transactionDate);
+                loan.setActualMaturityDate(transactionDate);
+                return LoanStatusTransition.to(LoanStatus.CLOSED_OBLIGATIONS_MET, LoanEvent.LOAN_CREDIT_BALANCE_REFUND);
+            } else if (hasOutstanding) {
+                loan.handleMaturityDateActivate();
+                return LoanStatusTransition.to(LoanStatus.ACTIVE, LoanEvent.LOAN_REPAYMENT_OR_WAIVER);
+            }
+        }
+        return LoanStatusTransition.noTransition(LoanStatus.OVERPAID);
+    }
+
+    private LoanStatusTransition determineTransitionFromClosedObligationsMet(final Loan loan, final boolean isOverpaid,
+            final boolean hasOutstanding, LocalDate transactionDate) {
+        if (isOverpaid) {
+            loan.setOverpaidOnDate(transactionDate);
+            loan.setClosedOnDate(null);
+            loan.setActualMaturityDate(null);
+            return LoanStatusTransition.to(LoanStatus.OVERPAID, LoanEvent.LOAN_OVERPAYMENT);
+        } else if (hasOutstanding) {
+            loan.setClosedOnDate(null);
+            loan.setActualMaturityDate(null);
+            loan.handleMaturityDateActivate();
+            return LoanStatusTransition.to(LoanStatus.ACTIVE, LoanEvent.LOAN_REPAYMENT_OR_WAIVER);
+        }
+        return LoanStatusTransition.noTransition(LoanStatus.CLOSED_OBLIGATIONS_MET);
+    }
+
+    private LoanStatusTransition determineTransitionFromActive(final Loan loan, final boolean isOverpaid, final boolean isRepaidInFull,
+            final boolean isAllChargesPaid, final LocalDate transactionDate) {
+        if (isOverpaid) {
+            loan.setOverpaidOnDate(transactionDate);
+            loan.setActualMaturityDate(null);
+            return LoanStatusTransition.to(LoanStatus.OVERPAID, LoanEvent.LOAN_OVERPAYMENT);
+        } else if (isRepaidInFull && isAllChargesPaid) {
+            loan.setClosedOnDate(transactionDate);
+            loan.setActualMaturityDate(transactionDate);
+            return LoanStatusTransition.to(LoanStatus.CLOSED_OBLIGATIONS_MET, LoanEvent.REPAID_IN_FULL);
+        }
+        return LoanStatusTransition.noTransition(LoanStatus.ACTIVE);
+    }
+
+    private LoanStatusTransition determineTransitionFromClosedWrittenOffOrRescheduled(final Loan loan, final boolean hasOutstanding) {
+        if (hasOutstanding) {
+            return LoanStatusTransition.to(LoanStatus.ACTIVE, LoanEvent.LOAN_ADJUST_TRANSACTION);
+        }
+        return LoanStatusTransition.noTransition(loan.getStatus());
+    }
+
+    private record LoanStatusTransition(LoanStatus targetStatus, LoanEvent event, boolean transitionNeeded) {
+
+        public static LoanStatusTransition to(final LoanStatus targetStatus, final LoanEvent event) {
+            return new LoanStatusTransition(targetStatus, event, true);
+        }
+
+        public static LoanStatusTransition noTransition(final LoanStatus currentStatus) {
+            return new LoanStatusTransition(currentStatus, null, false);
+        }
+
+    }
+
 }

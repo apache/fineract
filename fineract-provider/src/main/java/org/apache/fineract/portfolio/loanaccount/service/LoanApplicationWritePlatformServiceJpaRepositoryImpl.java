@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import static org.apache.fineract.portfolio.loanaccount.domain.Loan.APPROVED_ON_DATE;
+import static org.apache.fineract.portfolio.loanaccount.domain.Loan.PARAM_STATUS;
 import static org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType.SAME_AS_REPAYMENT_PERIOD;
 
 import com.google.gson.JsonArray;
@@ -29,6 +31,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -75,7 +78,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
@@ -87,6 +89,7 @@ import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationVa
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanDownPaymentTransactionValidator;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
+import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.savings.data.GroupSavingsIndividualMonitoringAccountData;
@@ -108,7 +111,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final NoteRepository noteRepository;
     private final LoanAssembler loanAssembler;
-    private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
     private final CalendarRepository calendarRepository;
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final SavingsAccountRepositoryWrapper savingsAccountRepository;
@@ -121,7 +123,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final GLIMAccountInfoRepository glimRepository;
     private final LoanRepository loanRepository;
     private final GSIMReadPlatformService gsimReadPlatformService;
-    private final LoanLifecycleStateMachine defaultLoanLifecycleStateMachine;
+    private final LoanLifecycleStateMachine loanLifecycleStateMachine;
     private final LoanAccrualsProcessingService loanAccrualsProcessingService;
     private final LoanDownPaymentTransactionValidator loanDownPaymentTransactionValidator;
     private final LoanScheduleService loanScheduleService;
@@ -505,9 +507,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     @Transactional
     @Override
     public CommandProcessingResult approveGLIMLoanAppication(final Long loanId, final JsonCommand command) {
-
-        final Long parentLoanId = loanId;
-        GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(parentLoanId).orElseThrow();
+        GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(loanId).orElseThrow();
         JsonArray approvalFormData = command.arrayOfParameterNamed("approvalFormData");
 
         JsonObject jsonObject = null;
@@ -579,11 +579,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     @Transactional
     @Override
     public CommandProcessingResult undoGLIMLoanApplicationApproval(final Long loanId, final JsonCommand command) {
-
-        // GroupLoanIndividualMonitoringAccount
-        // glimAccount=glimRepository.findOne(loanId);
-        final Long parentLoanId = loanId;
-        GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(parentLoanId).orElseThrow();
+        GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(loanId).orElseThrow();
         List<Loan> childLoans = this.loanRepository.findByGlimId(loanId);
 
         CommandProcessingResult result = null;
@@ -610,19 +606,16 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     @Transactional
     @Override
     public CommandProcessingResult undoApplicationApproval(final Long loanId, final JsonCommand command) {
-
         this.loanApplicationValidator.validateForUndo(command.json());
 
         Loan loan = retrieveLoanBy(loanId);
         loanApplicationTransitionValidator.checkClientOrGroupActive(loan);
 
         loanDownPaymentTransactionValidator.validateAccountStatus(loan, LoanEvent.LOAN_APPROVAL_UNDO);
-        final Map<String, Object> changes = loan.undoApproval(defaultLoanLifecycleStateMachine);
+        final Map<String, Object> changes = undoApproval(loan);
         if (!changes.isEmpty()) {
-
             // If loan approved amount is not same as loan amount demanded, then
             // during undo, restore the demand amount to principal amount.
-
             if (changes.containsKey(LoanApiConstants.approvedLoanAmountParameterName)
                     || changes.containsKey(LoanApiConstants.disbursementPrincipalParameterName)) {
                 LocalDate recalculateFrom = null;
@@ -655,11 +648,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     @Transactional
     @Override
     public CommandProcessingResult rejectGLIMApplicationApproval(final Long glimId, final JsonCommand command) {
-
-        // GroupLoanIndividualMonitoringAccount
-        // glimAccount=glimRepository.findOne(loanId);
-        final Long parentLoanId = glimId;
-        GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(parentLoanId).orElseThrow();
+        GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(glimId).orElseThrow();
         List<Loan> childLoans = this.loanRepository.findByGlimId(glimId);
 
         CommandProcessingResult result = null;
@@ -699,7 +688,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         // loan application rejection
         final AppUser currentUser = getAppUserIfPresent();
-        defaultLoanLifecycleStateMachine.transition(LoanEvent.LOAN_REJECTED, loan);
+        loanLifecycleStateMachine.transition(LoanEvent.LOAN_REJECTED, loan);
         final Map<String, Object> changes = loanAssembler.updateLoanApplicationAttributesForRejection(loan, command, currentUser);
 
         if (!changes.isEmpty()) {
@@ -737,7 +726,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         // loan application withdrawal
         final AppUser currentUser = getAppUserIfPresent();
-        defaultLoanLifecycleStateMachine.transition(LoanEvent.LOAN_WITHDRAWN, loan);
+        loanLifecycleStateMachine.transition(LoanEvent.LOAN_WITHDRAWN, loan);
         final Map<String, Object> changes = loanAssembler.updateLoanApplicationAttributesForWithdrawal(loan, command, currentUser);
         // Release attached collaterals
         if (loan.getLoanType().isIndividualAccount()) {
@@ -764,9 +753,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     }
 
     private Loan retrieveLoanBy(final Long loanId) {
-        final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
-        loan.setHelpers(defaultLoanLifecycleStateMachine);
-        return loan;
+        return loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
     }
 
     private AppUser getAppUserIfPresent() {
@@ -860,6 +847,34 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             loanCollateralManagement.setIsReleased(true);
         }
         loan.updateLoanCollateral(loanCollateralManagements);
+    }
+
+    private Map<String, Object> undoApproval(final Loan loan) {
+        final Map<String, Object> actualChanges = new LinkedHashMap<>();
+
+        final LoanStatus currentStatus = loan.getStatus();
+        final LoanStatus statusEnum = loanLifecycleStateMachine.dryTransition(LoanEvent.LOAN_APPROVAL_UNDO, loan);
+        if (!statusEnum.hasStateOf(currentStatus)) {
+            loanLifecycleStateMachine.transition(LoanEvent.LOAN_APPROVAL_UNDO, loan);
+            actualChanges.put(PARAM_STATUS, LoanEnumerations.status(loan.getStatus()));
+
+            loan.setApprovedOnDate(null);
+            loan.setApprovedBy(null);
+
+            if (loan.getApprovedPrincipal().compareTo(loan.getProposedPrincipal()) != 0) {
+                loan.setApprovedPrincipal(loan.getProposedPrincipal());
+                loan.getLoanRepaymentScheduleDetail().setPrincipal(loan.getProposedPrincipal());
+
+                actualChanges.put(LoanApiConstants.approvedLoanAmountParameterName, loan.getProposedPrincipal());
+                actualChanges.put(LoanApiConstants.disbursementPrincipalParameterName, loan.getProposedPrincipal());
+            }
+
+            actualChanges.put(APPROVED_ON_DATE, "");
+
+            loan.getLoanOfficerHistory().clear();
+        }
+
+        return actualChanges;
     }
 
 }

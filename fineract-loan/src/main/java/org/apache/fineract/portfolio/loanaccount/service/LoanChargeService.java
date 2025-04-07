@@ -32,6 +32,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachin
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.SingleLoanChargeRepaymentScheduleProcessingWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
@@ -41,6 +42,7 @@ public class LoanChargeService {
 
     private final LoanChargeValidator loanChargeValidator;
     private final LoanTransactionProcessingService loanTransactionProcessingService;
+    private final LoanLifecycleStateMachine loanLifecycleStateMachine;
 
     public void recalculateAllCharges(final Loan loan) {
         Set<LoanCharge> charges = loan.getActiveCharges();
@@ -76,9 +78,8 @@ public class LoanChargeService {
         }
     }
 
-    public void makeChargePayment(final Loan loan, final Long chargeId, final LoanLifecycleStateMachine loanLifecycleStateMachine,
-            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
-            final LoanTransaction paymentTransaction, final Integer installmentNumber) {
+    public void makeChargePayment(final Loan loan, final Long chargeId, final List<Long> existingTransactionIds,
+            final List<Long> existingReversedTransactionIds, final LoanTransaction paymentTransaction, final Integer installmentNumber) {
         loanChargeValidator.validateChargePaymentNotInFuture(paymentTransaction);
         existingTransactionIds.addAll(loan.findExistingTransactionIds());
         existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
@@ -88,11 +89,11 @@ public class LoanChargeService {
                 charge = loanCharge;
             }
         }
-        handleChargePaidTransaction(loan, charge, paymentTransaction, loanLifecycleStateMachine, installmentNumber);
+        handleChargePaidTransaction(loan, charge, paymentTransaction, installmentNumber);
     }
 
     public void handleChargePaidTransaction(final Loan loan, final LoanCharge charge, final LoanTransaction chargesPayment,
-            final LoanLifecycleStateMachine loanLifecycleStateMachine, final Integer installmentNumber) {
+            final Integer installmentNumber) {
         chargesPayment.updateLoan(loan);
         final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(chargesPayment, charge,
                 chargesPayment.getAmount(loan.getCurrency()).getAmount(), installmentNumber);
@@ -118,7 +119,41 @@ public class LoanChargeService {
                 new TransactionCtx(loan.getCurrency(), chargePaymentInstallments, loanCharges,
                         new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
 
-        loan.updateLoanSummaryDerivedFields();
-        loan.doPostLoanTransactionChecks(chargesPayment.getTransactionDate(), loanLifecycleStateMachine);
+        loanLifecycleStateMachine.determineAndTransition(loan, chargesPayment.getTransactionDate());
     }
+
+    public void addLoanCharge(final Loan loan, final LoanCharge loanCharge) {
+        loanCharge.update(loan);
+
+        final BigDecimal amount = loan.calculateAmountPercentageAppliedTo(loanCharge);
+        BigDecimal chargeAmt;
+        BigDecimal totalChargeAmt = BigDecimal.ZERO;
+        if (loanCharge.getChargeCalculation().isPercentageBased()) {
+            chargeAmt = loanCharge.getPercentage();
+            if (loanCharge.isInstalmentFee()) {
+                totalChargeAmt = loan.calculatePerInstallmentChargeAmount(loanCharge);
+            } else if (loanCharge.isOverdueInstallmentCharge()) {
+                totalChargeAmt = loanCharge.amountOutstanding();
+            }
+        } else {
+            chargeAmt = loanCharge.amountOrPercentage();
+        }
+        loanCharge.update(chargeAmt, loanCharge.getDueLocalDate(), amount, loan.fetchNumberOfInstallmensAfterExceptions(), totalChargeAmt);
+
+        // NOTE: must add new loan charge to set of loan charges before
+        // reprocessing the repayment schedule.
+        if (loan.getLoanCharges() == null) {
+            loan.setCharges(new HashSet<>());
+        }
+        loan.getLoanCharges().add(loanCharge);
+        loan.setSummary(loan.updateSummaryWithTotalFeeChargesDueAtDisbursement(loan.deriveSumTotalOfChargesDueAtDisbursement()));
+
+        // store Id's of existing loan transactions and existing reversed loan transactions
+        final SingleLoanChargeRepaymentScheduleProcessingWrapper wrapper = new SingleLoanChargeRepaymentScheduleProcessingWrapper();
+        wrapper.reprocess(loan.getCurrency(), loan.getDisbursementDate(), loan.getRepaymentScheduleInstallments(), loanCharge);
+        loan.updateLoanSummaryDerivedFields();
+
+        loanLifecycleStateMachine.transition(LoanEvent.LOAN_CHARGE_ADDED, loan);
+    }
+
 }

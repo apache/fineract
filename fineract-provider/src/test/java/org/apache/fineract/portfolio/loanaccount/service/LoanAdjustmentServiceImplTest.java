@@ -241,8 +241,8 @@ class LoanAdjustmentServiceImplTest {
         when(newTransactionDetail.isRepaymentLikeType()).thenReturn(true);
 
         // Act
-        underTest.adjustExistingTransaction(loan, newTransactionDetail, loanLifecycleStateMachine, transactionForAdjustment,
-                existingTransactionIds, existingReversedTransactionIds, scheduleGeneratorDTO, reversalExternalId);
+        underTest.adjustExistingTransaction(loan, newTransactionDetail, transactionForAdjustment, existingTransactionIds,
+                existingReversedTransactionIds, scheduleGeneratorDTO, reversalExternalId);
 
         // Assert
         // Verify that related transaction is reversed and event is triggered
@@ -286,8 +286,8 @@ class LoanAdjustmentServiceImplTest {
         when(newTransactionDetail.isRepaymentLikeType()).thenReturn(true);
 
         // Act
-        underTest.adjustExistingTransaction(loan, newTransactionDetail, loanLifecycleStateMachine, transactionForAdjustment,
-                existingTransactionIds, existingReversedTransactionIds, scheduleGeneratorDTO, reversalExternalId);
+        underTest.adjustExistingTransaction(loan, newTransactionDetail, transactionForAdjustment, existingTransactionIds,
+                existingReversedTransactionIds, scheduleGeneratorDTO, reversalExternalId);
 
         // Assert
         // Verify that no related transactions are reversed

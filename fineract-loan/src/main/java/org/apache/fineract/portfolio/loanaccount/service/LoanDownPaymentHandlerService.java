@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 
 public interface LoanDownPaymentHandlerService {
@@ -30,6 +29,5 @@ public interface LoanDownPaymentHandlerService {
             LoanTransaction disbursementTransaction, Loan loan);
 
     void handleRepaymentOrRecoveryOrWaiverTransaction(Loan loan, LoanTransaction newTransactionDetail,
-            LoanLifecycleStateMachine loanLifecycleStateMachine, LoanTransaction transactionForAdjustment,
-            ScheduleGeneratorDTO scheduleGeneratorDTO);
+            LoanTransaction transactionForAdjustment, ScheduleGeneratorDTO scheduleGeneratorDTO);
 }

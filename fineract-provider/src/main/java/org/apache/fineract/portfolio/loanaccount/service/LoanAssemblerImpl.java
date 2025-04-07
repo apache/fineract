@@ -76,7 +76,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCreditAllocationRule;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanPaymentAllocationRule;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
@@ -123,7 +122,6 @@ public class LoanAssemblerImpl implements LoanAssembler {
     private final ConfigurationDomainService configurationDomainService;
     private final WorkingDaysRepositoryWrapper workingDaysRepository;
     private final RateAssembler rateAssembler;
-    private final LoanLifecycleStateMachine defaultLoanLifecycleStateMachine;
     private final ExternalIdFactory externalIdFactory;
     private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
     private final GLIMAccountInfoRepository glimRepository;
@@ -147,31 +145,17 @@ public class LoanAssemblerImpl implements LoanAssembler {
 
     @Override
     public Loan assembleFrom(final Long accountId, final boolean loadLazyCollections) {
-        final Loan loanAccount = loanRepository.findOneWithNotFoundDetection(accountId, loadLazyCollections);
-        setHelpers(loanAccount);
-
-        return loanAccount;
+        return loanRepository.findOneWithNotFoundDetection(accountId, loadLazyCollections);
     }
 
     @Override
     public Loan assembleFrom(final ExternalId externalId) {
-        final Loan loanAccount = loanRepository.findOneWithNotFoundDetection(externalId, true);
-        setHelpers(loanAccount);
-
-        return loanAccount;
+        return loanRepository.findOneWithNotFoundDetection(externalId, true);
     }
 
     @Override
     public Loan assembleFrom(final ExternalId externalId, final boolean loadLazyCollections) {
-        final Loan loanAccount = loanRepository.findOneWithNotFoundDetection(externalId, loadLazyCollections);
-        setHelpers(loanAccount);
-
-        return loanAccount;
-    }
-
-    @Override
-    public void setHelpers(final Loan loanAccount) {
-        loanAccount.setHelpers(defaultLoanLifecycleStateMachine);
+        return loanRepository.findOneWithNotFoundDetection(externalId, loadLazyCollections);
     }
 
     @Override
@@ -298,7 +282,6 @@ public class LoanAssemblerImpl implements LoanAssembler {
         loanSchedule.updateLoanSchedule(loanApplication, loanScheduleModel);
 
         copyAdvancedPaymentRulesIfApplicable(transactionProcessingStrategyCode, loanProduct, loanApplication);
-        loanApplication.setHelpers(defaultLoanLifecycleStateMachine);
         // TODO: review
         loanChargeService.recalculateAllCharges(loanApplication);
         topUpLoanConfiguration(element, loanApplication);

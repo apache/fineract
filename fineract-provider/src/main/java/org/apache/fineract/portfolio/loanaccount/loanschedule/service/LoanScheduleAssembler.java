@@ -160,7 +160,7 @@ public class LoanScheduleAssembler {
     private final LoanUtilService loanUtilService;
     private final LoanDisbursementDetailsAssembler loanDisbursementDetailsAssembler;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
-    private final LoanLifecycleStateMachine defaultLoanLifecycleStateMachine;
+    private final LoanLifecycleStateMachine loanLifecycleStateMachine;
     private final LoanAccrualsProcessingService loanAccrualsProcessingService;
     private final LoanDisbursementService loanDisbursementService;
     private final LoanChargeService loanChargeService;
@@ -1479,7 +1479,7 @@ public class LoanScheduleAssembler {
         final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
 
         final Map<String, Object> actualChanges = new HashMap<>();
-        defaultLoanLifecycleStateMachine.transition(LoanEvent.LOAN_APPROVED, loan);
+        loanLifecycleStateMachine.transition(LoanEvent.LOAN_APPROVED, loan);
         actualChanges.put(PARAM_STATUS, LoanEnumerations.status(loan.getStatus()));
 
         LocalDate approvedOn = command.localDateValueOfParameterNamed(APPROVED_ON_DATE);

@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
@@ -35,9 +34,9 @@ public class LoanRefundService {
 
     private final LoanRefundValidator loanRefundValidator;
     private final LoanTransactionProcessingService loadTransactionProcessingService;
+    private final LoanLifecycleStateMachine loanLifecycleStateMachine;
 
-    public void makeRefund(final Loan loan, final LoanTransaction loanTransaction,
-            final LoanLifecycleStateMachine loanLifecycleStateMachine, final List<Long> existingTransactionIds,
+    public void makeRefund(final Loan loan, final LoanTransaction loanTransaction, final List<Long> existingTransactionIds,
             final List<Long> existingReversedTransactionIds) {
         existingTransactionIds.addAll(loan.findExistingTransactionIds());
         existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
@@ -49,8 +48,7 @@ public class LoanRefundService {
         if (loanTransaction.isNotZero()) {
             loan.addLoanTransaction(loanTransaction);
         }
-        loan.updateLoanSummaryDerivedFields();
-        loan.doPostLoanTransactionChecks(loanTransaction.getTransactionDate(), loanLifecycleStateMachine);
+        loanLifecycleStateMachine.determineAndTransition(loan, loanTransaction.getTransactionDate());
     }
 
     public LocalDate extractTransactionDate(final Loan loan, final LoanTransaction loanTransaction) {
@@ -59,18 +57,16 @@ public class LoanRefundService {
         return loanTransactionDate;
     }
 
-    public void makeRefundForActiveLoan(final Loan loan, final LoanTransaction loanTransaction,
-            final LoanLifecycleStateMachine loanLifecycleStateMachine, final List<Long> existingTransactionIds,
+    public void makeRefundForActiveLoan(final Loan loan, final LoanTransaction loanTransaction, final List<Long> existingTransactionIds,
             final List<Long> existingReversedTransactionIds) {
         existingTransactionIds.addAll(loan.findExistingTransactionIds());
         existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
 
-        handleRefundTransaction(loan, loanTransaction, loanLifecycleStateMachine);
+        handleRefundTransaction(loan, loanTransaction);
     }
 
     public void creditBalanceRefund(final Loan loan, final LoanTransaction newCreditBalanceRefundTransaction,
-            final LoanLifecycleStateMachine defaultLoanLifecycleStateMachine, final List<Long> existingTransactionIds,
-            final List<Long> existingReversedTransactionIds) {
+            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
         loanRefundValidator.validateCreditBalanceRefund(loan, newCreditBalanceRefundTransaction);
 
         existingTransactionIds.addAll(loan.findExistingTransactionIds());
@@ -78,17 +74,10 @@ public class LoanRefundService {
 
         loan.getLoanTransactions().add(newCreditBalanceRefundTransaction);
 
-        loan.updateLoanSummaryDerivedFields();
-
-        if (MathUtil.isEmpty(loan.getTotalOverpaid())) {
-            loan.setOverpaidOnDate(null);
-            loan.setClosedOnDate(newCreditBalanceRefundTransaction.getTransactionDate());
-            defaultLoanLifecycleStateMachine.transition(LoanEvent.LOAN_CREDIT_BALANCE_REFUND, loan);
-        }
+        loanLifecycleStateMachine.determineAndTransition(loan, newCreditBalanceRefundTransaction.getTransactionDate());
     }
 
-    private void handleRefundTransaction(final Loan loan, final LoanTransaction loanTransaction,
-            final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+    private void handleRefundTransaction(final Loan loan, final LoanTransaction loanTransaction) {
         loanLifecycleStateMachine.transition(LoanEvent.LOAN_REFUND, loan);
 
         loanTransaction.updateLoan(loan);
@@ -110,7 +99,6 @@ public class LoanRefundService {
                 new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
                         new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
 
-        loan.updateLoanSummaryDerivedFields();
-        loan.doPostLoanTransactionChecks(loanTransaction.getTransactionDate(), loanLifecycleStateMachine);
+        loanLifecycleStateMachine.determineAndTransition(loan, loanTransaction.getTransactionDate());
     }
 }

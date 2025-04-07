@@ -62,6 +62,7 @@ public class LoanDisbursementService {
     private final LoanChargeValidator loanChargeValidator;
     private final LoanDisbursementValidator loanDisbursementValidator;
     private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
+    private final LoanChargeService loanChargeService;
 
     public void updateDisbursementDetails(final Loan loan, final JsonCommand jsonCommand, final Map<String, Object> actualChanges) {
         final List<Long> disbursementList = loan.fetchDisbursementIds();
@@ -251,7 +252,7 @@ public class LoanDisbursementService {
 
                 loanChargeValidator.validateChargeAdditionForDisbursedLoan(loan, loanCharge);
                 loanChargeValidator.validateChargeHasValidSpecifiedDateIfApplicable(loan, loanCharge, loan.getDisbursementDate());
-                loan.addLoanCharge(loanCharge);
+                loanChargeService.addLoanCharge(loan, loanCharge);
             }
             actualChanges.put(LoanApiConstants.disbursementDataParameterName, expectedDisbursementDate + "-" + principal);
             actualChanges.put(RECALCULATE_LOAN_SCHEDULE, true);

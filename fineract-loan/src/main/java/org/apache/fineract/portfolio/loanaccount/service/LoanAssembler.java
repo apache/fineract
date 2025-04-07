@@ -39,8 +39,6 @@ public interface LoanAssembler {
 
     Loan assembleFrom(JsonCommand command);
 
-    void setHelpers(Loan loanAccount);
-
     void accountNumberGeneration(JsonCommand command, Loan loan);
 
     CodeValue findCodeValueByIdIfProvided(Long codeValueId);

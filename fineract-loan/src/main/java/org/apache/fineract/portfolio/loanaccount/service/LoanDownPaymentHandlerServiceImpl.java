@@ -61,6 +61,7 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
     private final LoanRefundValidator loanRefundValidator;
     private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
     private final LoanTransactionProcessingService loanTransactionProcessingService;
+    private final LoanLifecycleStateMachine loanLifecycleStateMachine;
 
     @Override
     public LoanTransaction handleDownPayment(ScheduleGeneratorDTO scheduleGeneratorDTO, JsonCommand command,
@@ -77,8 +78,7 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
 
     @Override
     public void handleRepaymentOrRecoveryOrWaiverTransaction(final Loan loan, final LoanTransaction loanTransaction,
-            final LoanLifecycleStateMachine loanLifecycleStateMachine, final LoanTransaction adjustedTransaction,
-            final ScheduleGeneratorDTO scheduleGeneratorDTO) {
+            final LoanTransaction adjustedTransaction, final ScheduleGeneratorDTO scheduleGeneratorDTO) {
         if (loanTransaction.isRecoveryRepayment()) {
             loanLifecycleStateMachine.transition(LoanEvent.LOAN_RECOVERY_PAYMENT, loan);
         }
@@ -158,13 +158,13 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
             reprocessLoanTransactionsService.reprocessTransactions(loan);
         }
 
-        loan.updateLoanSummaryDerivedFields();
-
         /**
          * FIXME: Vishwas, skipping post loan transaction checks for Loan recoveries
          **/
         if (loanTransaction.isNotRecoveryRepayment()) {
-            loan.doPostLoanTransactionChecks(loanTransaction.getTransactionDate(), loanLifecycleStateMachine);
+            loanLifecycleStateMachine.determineAndTransition(loan, loanTransaction.getTransactionDate());
+        } else {
+            loan.updateLoanSummaryDerivedFields();
         }
 
         if (loan.getLoanProduct().isMultiDisburseLoan()) {
@@ -223,8 +223,7 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
             loanDownPaymentTransactionValidator.validateRepaymentDateIsOnNonWorkingDay(downPaymentTransaction.getTransactionDate(),
                     holidayDetailDTO.getWorkingDays(), holidayDetailDTO.isAllowTransactionsOnNonWorkingDay());
 
-            handleRepaymentOrRecoveryOrWaiverTransaction(loan, downPaymentTransaction, loan.getLoanLifecycleStateMachine(), null,
-                    scheduleGeneratorDTO);
+            handleRepaymentOrRecoveryOrWaiverTransaction(loan, downPaymentTransaction, null, scheduleGeneratorDTO);
             return downPaymentTransaction;
         } else {
             return null;

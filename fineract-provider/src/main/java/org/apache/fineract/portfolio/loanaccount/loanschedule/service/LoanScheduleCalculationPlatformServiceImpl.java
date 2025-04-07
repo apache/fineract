@@ -35,7 +35,6 @@ import org.apache.fineract.portfolio.loanaccount.data.OutstandingAmountsDTO;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
@@ -63,7 +62,6 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
     private final CurrencyReadPlatformService currencyReadPlatformService;
     private final LoanUtilService loanUtilService;
     private final LoanRepositoryWrapper loanRepository;
-    private final LoanLifecycleStateMachine defaultLoanLifecycleStateMachine;
     private final LoanTermVariationsMapper loanTermVariationsMapper;
 
     @Override
@@ -204,16 +202,12 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
     }
 
     private LoanApplicationTerms constructLoanApplicationTerms(final Loan loan) {
-        final LocalDate recalculateFrom = null;
-        ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
+        final ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, null);
         return loanTermVariationsMapper.constructLoanApplicationTerms(scheduleGeneratorDTO, loan);
     }
 
     private Loan fetchLoan(final Long accountId) {
-        final Loan loanAccount = this.loanRepository.findOneWithNotFoundDetection(accountId, true);
-        loanAccount.setHelpers(defaultLoanLifecycleStateMachine);
-
-        return loanAccount;
+        return loanRepository.findOneWithNotFoundDetection(accountId, true);
     }
 
 }

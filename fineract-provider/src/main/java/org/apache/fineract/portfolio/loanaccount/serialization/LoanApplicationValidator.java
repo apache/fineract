@@ -199,7 +199,7 @@ public final class LoanApplicationValidator {
     private final WorkingDaysRepositoryWrapper workingDaysRepository;
     private final HolidayRepository holidayRepository;
     private final SavingsAccountRepositoryWrapper savingsAccountRepository;
-    private final LoanLifecycleStateMachine defaultLoanLifecycleStateMachine;
+    private final LoanLifecycleStateMachine loanLifecycleStateMachine;
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final LoanUtilService loanUtilService;
     private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
@@ -799,7 +799,6 @@ public final class LoanApplicationValidator {
 
     private void fixedLengthValidations(final JsonElement element) {
         validateOrThrow("loan", baseDataValidator -> {
-            boolean isInterestBearing = false;
             final String transactionProcessingStrategy = this.fromApiJsonHelper
                     .extractStringNamed(LoanApiConstants.transactionProcessingStrategyCodeParameterName, element);
             final Integer numberOfRepayments = this.fromApiJsonHelper
@@ -809,7 +808,7 @@ public final class LoanApplicationValidator {
 
             final BigDecimal interestRatePerPeriod = this.fromApiJsonHelper
                     .extractBigDecimalWithLocaleNamed(LoanApiConstants.interestRatePerPeriodParameterName, element);
-            isInterestBearing = interestRatePerPeriod != null && interestRatePerPeriod.compareTo(BigDecimal.ZERO) > 0;
+            final boolean isInterestBearing = interestRatePerPeriod != null && interestRatePerPeriod.compareTo(BigDecimal.ZERO) > 0;
             loanProductDataValidator.fixedLengthValidations(transactionProcessingStrategy, isInterestBearing, numberOfRepayments,
                     repaymentEvery, element, baseDataValidator);
         });
@@ -1267,7 +1266,7 @@ public final class LoanApplicationValidator {
                             final Set<String> supportedParameters = new HashSet<>(Arrays.asList(LoanApiConstants.idParameterName,
                                     LoanApiConstants.clientCollateralIdParameterName, LoanApiConstants.quantityParameterName));
                             final JsonArray array = topLevelJsonElement.get(LoanApiConstants.collateralParameterName).getAsJsonArray();
-                            if (array.size() > 0) {
+                            if (!array.isEmpty()) {
                                 BigDecimal totalAmount = BigDecimal.ZERO;
                                 for (int i = 1; i <= array.size(); i++) {
                                     final JsonObject collateralItemElement = array.get(i - 1).getAsJsonObject();
@@ -1688,7 +1687,7 @@ public final class LoanApplicationValidator {
             final JsonArray variationArray = this.fromApiJsonHelper.extractJsonArrayNamed(LoanApiConstants.disbursementDataParameterName,
                     element);
             List<LocalDate> expectedDisbursementDates = new ArrayList<>();
-            if (variationArray != null && variationArray.size() > 0) {
+            if (variationArray != null && !variationArray.isEmpty()) {
                 if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.isEqualAmortizationParam, element)) {
                     boolean isEqualAmortization = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.isEqualAmortizationParam,
                             element);
@@ -1890,15 +1889,14 @@ public final class LoanApplicationValidator {
                         ? this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.expectedDisbursementDateParameterName, element)
                         : originalExpectedDisbursementDate;
 
-        String defaultUserMessage = "";
         if (DateUtils.isBefore(submittedOnDate, startDate)) {
-            defaultUserMessage = "submittedOnDate cannot be before the loan product startDate.";
+            String defaultUserMessage = "submittedOnDate cannot be before the loan product startDate.";
             throw new LoanApplicationDateException("submitted.on.date.cannot.be.before.the.loan.product.start.date", defaultUserMessage,
                     submittedOnDate.toString(), startDate.toString());
         }
 
         if (closeDate != null && DateUtils.isAfter(submittedOnDate, closeDate)) {
-            defaultUserMessage = "submittedOnDate cannot be after the loan product closeDate.";
+            String defaultUserMessage = "submittedOnDate cannot be after the loan product closeDate.";
             throw new LoanApplicationDateException("submitted.on.date.cannot.be.after.the.loan.product.close.date", defaultUserMessage,
                     submittedOnDate.toString(), closeDate.toString());
         }
@@ -2024,7 +2022,6 @@ public final class LoanApplicationValidator {
             baseDataValidator.reset().parameter(LoanApiConstants.noteParameterName).value(note).notExceedingLengthOf(1000);
 
             final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
-            loan.setHelpers(defaultLoanLifecycleStateMachine);
 
             final Client client = loan.client();
             if (client != null && client.isNotActive()) {
@@ -2116,7 +2113,7 @@ public final class LoanApplicationValidator {
                 throw new InvalidLoanStateTransitionException("approval", "cannot.be.a.future.date", errorMessage, approvedOnDate);
             }
 
-            final LoanStatus newStatus = defaultLoanLifecycleStateMachine.dryTransition(LoanEvent.LOAN_APPROVED, loan);
+            final LoanStatus newStatus = loanLifecycleStateMachine.dryTransition(LoanEvent.LOAN_APPROVED, loan);
             if (newStatus.hasStateOf(loan.getStatus())) {
                 final String defaultUserMessage = "Loan is already approved.";
                 final ApiParameterError error = ApiParameterError
