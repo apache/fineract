@@ -31,7 +31,7 @@ import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
 /**
  * Created by Chirag Gupta on 12/27/17.
  */
-final class LoanProductsApiResourceSwagger {
+public final class LoanProductsApiResourceSwagger {
 
     private LoanProductsApiResourceSwagger() {}
 
@@ -1038,24 +1038,6 @@ final class LoanProductsApiResourceSwagger {
             public String description;
         }
 
-        static final class GetLoanProductsChargeOffReasonOptions {
-
-            private GetLoanProductsChargeOffReasonOptions() {}
-
-            @Schema(example = "2")
-            public Long id;
-            @Schema(example = "debit_card")
-            public String name;
-            @Schema(example = "2")
-            public Integer position;
-            @Schema(example = "Charge-Off reason description")
-            public String description;
-            @Schema(example = "true")
-            public Boolean active;
-            @Schema(example = "false")
-            public Boolean mandatory;
-        }
-
         @Schema(example = "false")
         public Boolean includeInBorrowerCycle;
         @Schema(example = "false")
@@ -1428,7 +1410,7 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "false")
         public Boolean enableAccrualActivityPosting;
         public List<StringEnumOptionData> supportedInterestRefundTypes;
-        public List<GetLoanProductsTemplateResponse.GetLoanProductsChargeOffReasonOptions> chargeOffReasonOptions;
+        public List<GetLoanProductsChargeOffReasonOptions> chargeOffReasonOptions;
         public StringEnumOptionData chargeOffBehaviour;
         @Schema(example = "false")
         public Boolean interestRecognitionOnDisbursementDate;
@@ -1742,5 +1724,24 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "1")
         public Long resourceId;
         public PutLoanChanges changes;
+    }
+
+    @Schema(description = "GetLoanProductsChargeOffReasonOptions")
+    public static final class GetLoanProductsChargeOffReasonOptions {
+
+        private GetLoanProductsChargeOffReasonOptions() {}
+
+        @Schema(example = "2")
+        public Long id;
+        @Schema(example = "debit_card")
+        public String name;
+        @Schema(example = "2")
+        public Integer position;
+        @Schema(example = "Charge-Off reason description")
+        public String description;
+        @Schema(example = "true")
+        public Boolean active;
+        @Schema(example = "false")
+        public Boolean mandatory;
     }
 }
