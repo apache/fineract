@@ -99,21 +99,21 @@ final class SelfAccountTransferApiResourceSwagger {
         private PostNewTransferRequest() {}
 
         @Schema(example = "1")
-        public Integer fromOfficeId;
+        public Long fromOfficeId;
         @Schema(example = "1")
-        public Integer fromClientId;
+        public Long fromClientId;
         @Schema(example = "2")
         public Integer fromAccountType;
         @Schema(example = "1")
-        public Integer fromAccountId;
+        public Long fromAccountId;
         @Schema(example = "1")
-        public Integer toOfficeId;
+        public Long toOfficeId;
         @Schema(example = "1")
-        public Integer toClientId;
+        public Long toClientId;
         @Schema(example = "2")
         public Integer toAccountType;
         @Schema(example = "2")
-        public Integer toAccountId;
+        public Long toAccountId;
         @Schema(example = "dd  MMMM YYYY")
         public String dateFormat;
         @Schema(example = "en")

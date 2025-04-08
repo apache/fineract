@@ -222,7 +222,8 @@ public class NotesTest {
         Assertions.assertNotNull(postNoteResponse);
         Assertions.assertNotNull(postNoteResponse.getResourceId());
 
-        NoteData getNoteResponse = NotesHelper.retrieveSavingsNote(requestSpec, responseSpec, savingsId, postNoteResponse.getResourceId());
+        NoteData getNoteResponse = NotesHelper.retrieveSavingsNote(requestSpec, responseSpec, savingsId,
+                Math.toIntExact(postNoteResponse.getResourceId()));
         Assertions.assertNotNull(getNoteResponse);
         Assertions.assertEquals(noteText, getNoteResponse.getNote());
     }

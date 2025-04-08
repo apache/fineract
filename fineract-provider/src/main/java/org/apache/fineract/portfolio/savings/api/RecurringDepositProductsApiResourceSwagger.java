@@ -120,7 +120,7 @@ final class RecurringDepositProductsApiResourceSwagger {
         private PostRecurringDepositProductsResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PutRecurringDepositProductsRequest")
@@ -154,7 +154,7 @@ final class RecurringDepositProductsApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
         public PutRecurringDepositProductsChanges changes;
     }
 
@@ -546,6 +546,6 @@ final class RecurringDepositProductsApiResourceSwagger {
         private DeleteRecurringDepositProductsProductIdResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 }

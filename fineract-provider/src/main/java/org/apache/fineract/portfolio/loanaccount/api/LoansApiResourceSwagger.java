@@ -1600,7 +1600,7 @@ final class LoansApiResourceSwagger {
         }
 
         @Schema(example = "2")
-        public Integer toLoanOfficerId;
+        public Long toLoanOfficerId;
         @Schema(example = "02 September 2014")
         public String assignmentDate;
 
@@ -1611,7 +1611,7 @@ final class LoansApiResourceSwagger {
         @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
         @Schema(example = "")
-        public Integer fromLoanOfficerId;
+        public Long fromLoanOfficerId;
         @Schema(example = "3e7791ce-aa10-11ec-b909-0242ac120002")
         public String externalId;
         @Schema(example = "5000.33")
@@ -1690,7 +1690,7 @@ final class LoansApiResourceSwagger {
         }
 
         @Schema(example = "2")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "6")
         public Long clientId;
         @Schema(example = "3")

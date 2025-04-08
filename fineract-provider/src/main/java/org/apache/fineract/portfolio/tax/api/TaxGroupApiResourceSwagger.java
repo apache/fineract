@@ -93,7 +93,7 @@ final class TaxGroupApiResourceSwagger {
         private PostTaxesGroupResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PutTaxesGroupTaxGroupIdRequest")
@@ -138,18 +138,18 @@ final class TaxGroupApiResourceSwagger {
                 @Schema(example = "Apr 22, 2016 12:00:00 AM")
                 public String endDate;
                 @Schema(example = "7")
-                public Integer taxComponentId;
+                public Long taxComponentId;
             }
 
             @Schema(example = "[6]")
-            public List<Integer> addComponents;
+            public List<Long> addComponents;
             public Set<PutTaxesGroupModifiedComponents> modifiedComponents;
             @Schema(example = "tax group 2")
             public String name;
         }
 
         @Schema(example = "7")
-        public Integer resourceId;
+        public Long resourceId;
         public PutTaxesGroupChanges changes;
     }
 }

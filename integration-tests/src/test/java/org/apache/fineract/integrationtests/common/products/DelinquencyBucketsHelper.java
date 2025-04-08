@@ -131,7 +131,7 @@ public class DelinquencyBucketsHelper {
         PostDelinquencyBucketResponse delinquencyBucketResponse = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec,
                 responseSpec, jsonBucket);
         assertNotNull(delinquencyBucketResponse);
-        return delinquencyBucketResponse.getResourceId();
+        return Math.toIntExact(delinquencyBucketResponse.getResourceId());
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -143,7 +143,7 @@ public class DelinquencyBucketsHelper {
         String jsonRange = DelinquencyRangesHelper.getAsJSON(range.getLeft(), range.getRight());
         PostDelinquencyRangeResponse delinquencyRangeResponse = DelinquencyRangesHelper.createDelinquencyRange(requestSpec, responseSpec,
                 jsonRange);
-        return delinquencyRangeResponse.getResourceId();
+        return Math.toIntExact(delinquencyRangeResponse.getResourceId());
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -157,22 +157,23 @@ public class DelinquencyBucketsHelper {
         String jsonRange = DelinquencyRangesHelper.getAsJSON(1, 3);
         PostDelinquencyRangeResponse delinquencyRangeResponse = DelinquencyRangesHelper.createDelinquencyRange(requestSpec, responseSpec,
                 jsonRange);
-        rangeIds.add(delinquencyRangeResponse.getResourceId());
+        rangeIds.add(Math.toIntExact(delinquencyRangeResponse.getResourceId()));
         jsonRange = DelinquencyRangesHelper.getAsJSON(4, 60);
         DelinquencyRangeData range = DelinquencyRangesHelper.getDelinquencyRange(requestSpec, responseSpec,
-                delinquencyRangeResponse.getResourceId());
+                Math.toIntExact(delinquencyRangeResponse.getResourceId()));
 
         // Second Range
         delinquencyRangeResponse = DelinquencyRangesHelper.createDelinquencyRange(requestSpec, responseSpec, jsonRange);
-        rangeIds.add(delinquencyRangeResponse.getResourceId());
-        range = DelinquencyRangesHelper.getDelinquencyRange(requestSpec, responseSpec, delinquencyRangeResponse.getResourceId());
+        rangeIds.add(Math.toIntExact(delinquencyRangeResponse.getResourceId()));
+        range = DelinquencyRangesHelper.getDelinquencyRange(requestSpec, responseSpec,
+                Math.toIntExact(delinquencyRangeResponse.getResourceId()));
 
         String jsonBucket = DelinquencyBucketsHelper.getAsJSON(rangeIds);
         PostDelinquencyBucketResponse delinquencyBucketResponse = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec,
                 responseSpec, jsonBucket);
         assertNotNull(delinquencyBucketResponse);
 
-        return delinquencyBucketResponse.getResourceId();
+        return Math.toIntExact(delinquencyBucketResponse.getResourceId());
     }
 
     public static void evaluateLoanCollectionData(GetLoansLoanIdResponse getLoansLoanIdResponse, Integer pastDueDays,

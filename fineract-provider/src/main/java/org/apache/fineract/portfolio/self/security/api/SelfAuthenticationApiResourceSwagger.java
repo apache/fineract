@@ -61,17 +61,17 @@ final class SelfAuthenticationApiResourceSwagger {
         @Schema(example = "mifos")
         public String username;
         @Schema(example = "1")
-        public Integer userId;
+        public Long userId;
         @Schema(example = "bWlmb3M6cGFzc3dvcmQ=")
         public String base64EncodedAuthenticationKey;
         @Schema(example = "true")
         public Boolean authenticated;
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "Head Office")
         public String officeName;
         @Schema(example = "1")
-        public Integer staffId;
+        public Long staffId;
         @Schema(example = "Director, Program")
         public String staffDisplayName;
         public GetSelfUserDetailsOrganisationalRole organisationalRole;
@@ -81,6 +81,6 @@ final class SelfAuthenticationApiResourceSwagger {
         @Schema(example = "true")
         public Boolean isSelfServiceUser;
         @Schema(example = "1, 2, 3")
-        public List<Integer> clients;
+        public List<Long> clients;
     }
 }

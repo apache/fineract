@@ -44,7 +44,7 @@ final class LoanScheduleApiResourceSwagger {
             private PostLoanChanges() {}
 
             @Schema(example = "[21, 22]")
-            public List<Integer> removedEntityIds;
+            public List<Long> removedEntityIds;
         }
 
         @Schema(example = "1")

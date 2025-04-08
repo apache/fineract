@@ -73,7 +73,7 @@ final class PostDatedChecksApiResourceSwagger {
         private UpdatePostDatedCheckResponse() {}
 
         @Schema(example = "12")
-        public Integer resourceId;
+        public Long resourceId;
         public UpdateChangesResponse changes;
 
         static final class UpdateChangesResponse {

@@ -81,6 +81,6 @@ final class SelfUserDetailsApiResourceSwagger {
         @Schema(example = "true")
         public Boolean isSelfServiceUser;
         @Schema(example = "[1, 2, 3]")
-        public List<Integer> clients;
+        public List<Long> clients;
     }
 }

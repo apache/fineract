@@ -110,7 +110,7 @@ final class FixedDepositProductsApiResourceSwagger {
         private PostFixedDepositProductsResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PutFixedDepositProductsProductIdRequest")
@@ -144,7 +144,7 @@ final class FixedDepositProductsApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
         public PutFixedDepositProductsChanges changes;
     }
 
@@ -519,6 +519,6 @@ final class FixedDepositProductsApiResourceSwagger {
         private DeleteFixedDepositProductsProductIdResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 }

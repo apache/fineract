@@ -142,19 +142,19 @@ final class SelfSavingsApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer id;
+        public Long id;
         @Schema(example = "000000001")
         public Long accountNo;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "small business")
         public String clientName;
         @Schema(example = "1")
-        public Integer savingsProductId;
+        public Long savingsProductId;
         @Schema(example = "Passbook Savings")
         public String savingsProductName;
         @Schema(example = "0")
-        public Integer fieldOfficerId;
+        public Long fieldOfficerId;
         public GetSelfSavingsStatus status;
         public GetSelfSavingsTimeline timeline;
         public GetSelfSavingsCurrency currency;
@@ -227,7 +227,7 @@ final class SelfSavingsApiResourceSwagger {
             }
 
             @Schema(example = "62")
-            public Integer id;
+            public Long id;
             public GetSelfSavingsPaymentType paymentType;
             @Schema(example = "")
             public Integer accountNumber;
@@ -242,10 +242,10 @@ final class SelfSavingsApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer id;
+        public Long id;
         public GetSelfSavingsTransactionType transactionType;
         @Schema(example = "1")
-        public Integer accountId;
+        public Long accountId;
         @Schema(example = "000000001")
         public Long accountNo;
         @Schema(example = "[2013, 8, 7]")
@@ -290,11 +290,11 @@ final class SelfSavingsApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer id;
+        public Long id;
         @Schema(example = "3")
-        public Integer chargeId;
+        public Long chargeId;
         @Schema(example = "57")
-        public Integer accountId;
+        public Long accountId;
         @Schema(example = "Savings account maintenance fee")
         public String name;
         public GetSelfSavingsChargeTimeType chargeTimeType;
@@ -326,9 +326,9 @@ final class SelfSavingsApiResourceSwagger {
         private GetSelfSavingsAccountsAccountIdChargesSavingsAccountChargeIdResponse() {}
 
         @Schema(example = "1")
-        public Integer id;
+        public Long id;
         @Schema(example = "1")
-        public Integer chargeId;
+        public Long chargeId;
         @Schema(example = "Passbook fee")
         public String name;
         public GetSelfSavingsAccountsAccountIdChargesResponse.GetSelfSavingsChargeTimeType chargeTimeType;

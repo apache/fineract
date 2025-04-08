@@ -33,7 +33,7 @@ public final class DelinquencyApiResourceSwagger {
         private PostDelinquencyRangeResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PutDelinquencyRangeResponse")
@@ -42,7 +42,7 @@ public final class DelinquencyApiResourceSwagger {
         private PutDelinquencyRangeResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
         public DelinquencyRangeRequest changes;
     }
 
@@ -52,7 +52,7 @@ public final class DelinquencyApiResourceSwagger {
         private DeleteDelinquencyRangeResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PostDelinquencyBucketResponse")
@@ -61,7 +61,7 @@ public final class DelinquencyApiResourceSwagger {
         private PostDelinquencyBucketResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PutDelinquencyBucketResponse")
@@ -70,7 +70,7 @@ public final class DelinquencyApiResourceSwagger {
         private PutDelinquencyBucketResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "DeleteDelinquencyBucketResponse")
@@ -79,7 +79,7 @@ public final class DelinquencyApiResourceSwagger {
         private DeleteDelinquencyBucketResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "GetDelinquencyTagHistoryResponse")

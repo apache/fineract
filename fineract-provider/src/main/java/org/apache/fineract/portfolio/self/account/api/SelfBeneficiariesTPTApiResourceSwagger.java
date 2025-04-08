@@ -73,7 +73,7 @@ final class SelfBeneficiariesTPTApiResourceSwagger {
         private PostSelfBeneficiariesTPTResponse() {}
 
         @Schema(example = "5")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PutSelfBeneficiariesTPTBeneficiaryIdRequest")
@@ -103,7 +103,7 @@ final class SelfBeneficiariesTPTApiResourceSwagger {
         }
 
         @Schema(example = "5")
-        public Integer resourceId;
+        public Long resourceId;
         public PutSelfBeneficiariesChanges changes;
     }
 
@@ -113,7 +113,7 @@ final class SelfBeneficiariesTPTApiResourceSwagger {
         private DeleteSelfBeneficiariesTPTBeneficiaryIdResponse() {}
 
         @Schema(example = "5")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "GetSelfBeneficiariesTPTResponse")
@@ -122,7 +122,7 @@ final class SelfBeneficiariesTPTApiResourceSwagger {
         private GetSelfBeneficiariesTPTResponse() {}
 
         @Schema(example = "1")
-        public Integer id;
+        public Long id;
         @Schema(example = "Client2Savings")
         public String name;
         @Schema(example = "Test Office")

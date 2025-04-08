@@ -123,7 +123,7 @@ final class SelfShareAccountsApiResourceSwagger {
             }
 
             @Schema(example = "2")
-            public Integer id;
+            public Long id;
             @Schema(example = "Activation fee")
             public String name;
             @Schema(example = "true")
@@ -141,7 +141,7 @@ final class SelfShareAccountsApiResourceSwagger {
         }
 
         @Schema(example = "14")
-        public Integer clientId;
+        public Long clientId;
         public Set<GetShareAccountsProductOptions> productOptions;
         public Set<GetShareAccountsChargeOptions> chargeOptions;
     }
@@ -203,7 +203,7 @@ final class SelfShareAccountsApiResourceSwagger {
                     private GetShareAccountsShareReferenceId() {}
 
                     @Schema(example = "32")
-                    public Integer id;
+                    public Long id;
                     @Schema(example = "Cash in Hand")
                     public String name;
                     @Schema(example = "20301")
@@ -216,7 +216,7 @@ final class SelfShareAccountsApiResourceSwagger {
                     private GetShareAccountsIncomeFromFeeAccountId() {}
 
                     @Schema(example = "40")
-                    public Integer id;
+                    public Long id;
                     @Schema(example = "Other Operating Income")
                     public String name;
                     @Schema(example = "30105")
@@ -229,7 +229,7 @@ final class SelfShareAccountsApiResourceSwagger {
                     private GetShareAccountsShareEquityId() {}
 
                     @Schema(example = "56")
-                    public Integer id;
+                    public Long id;
                     @Schema(example = "Share Equity")
                     public String name;
                     @Schema(example = "00098")
@@ -242,7 +242,7 @@ final class SelfShareAccountsApiResourceSwagger {
                     private GetShareAccountsShareSuspenseId() {}
 
                     @Schema(example = "2")
-                    public Integer id;
+                    public Long id;
                     @Schema(example = "Overpayment Liability")
                     public String name;
                     @Schema(example = "10200")
@@ -321,7 +321,7 @@ final class SelfShareAccountsApiResourceSwagger {
                         private GetLiabilityAccountTagId() {}
 
                         @Schema(example = "0")
-                        public Integer id;
+                        public Long id;
                         @Schema(example = "false")
                         public Boolean active;
                         @Schema(example = "false")
@@ -330,11 +330,11 @@ final class SelfShareAccountsApiResourceSwagger {
                     }
 
                     @Schema(example = "30")
-                    public Integer id;
+                    public Long id;
                     @Schema(example = "Recurring Deposits")
                     public String name;
                     @Schema(example = "1")
-                    public Integer parentId;
+                    public Long parentId;
                     @Schema(example = "10104")
                     public String glCode;
                     @Schema(example = "false")
@@ -384,7 +384,7 @@ final class SelfShareAccountsApiResourceSwagger {
                         private GetAssetAccountTagId() {}
 
                         @Schema(example = "0")
-                        public Integer id;
+                        public Long id;
                         @Schema(example = "false")
                         public Boolean active;
                         @Schema(example = "false")
@@ -393,11 +393,11 @@ final class SelfShareAccountsApiResourceSwagger {
                     }
 
                     @Schema(example = "31")
-                    public Integer id;
+                    public Long id;
                     @Schema(example = "Furniture and Fixtures")
                     public String name;
                     @Schema(example = "8")
-                    public Integer parentId;
+                    public Long parentId;
                     @Schema(example = "20101")
                     public String glCode;
                     @Schema(example = "false")
@@ -447,7 +447,7 @@ final class SelfShareAccountsApiResourceSwagger {
                         private GetIncomeAccountTagId() {}
 
                         @Schema(example = "0")
-                        public Integer id;
+                        public Long id;
                         @Schema(example = "false")
                         public Boolean active;
                         @Schema(example = "false")
@@ -456,7 +456,7 @@ final class SelfShareAccountsApiResourceSwagger {
                     }
 
                     @Schema(example = "54")
-                    public Integer id;
+                    public Long id;
                     @Schema(example = "Loan Recovery (Temp)")
                     public String name;
                     @Schema(example = "220002-Temp")
@@ -509,7 +509,7 @@ final class SelfShareAccountsApiResourceSwagger {
                         private GetShareAccountsEquityAccountTagId() {}
 
                         @Schema(example = "0")
-                        public Integer id;
+                        public Long id;
                         @Schema(example = "false")
                         public Boolean active;
                         @Schema(example = "false")
@@ -518,11 +518,11 @@ final class SelfShareAccountsApiResourceSwagger {
                     }
 
                     @Schema(example = "56")
-                    public Integer id;
+                    public Long id;
                     @Schema(example = "Share Equity")
                     public String name;
                     @Schema(example = "25")
-                    public Integer parentId;
+                    public Long parentId;
                     @Schema(example = "00098")
                     public String glCode;
                     @Schema(example = "false")
@@ -540,7 +540,7 @@ final class SelfShareAccountsApiResourceSwagger {
             }
 
             @Schema(example = "3")
-            public Integer id;
+            public Long id;
             @Schema(example = "SP")
             public String name;
             @Schema(example = "SP")
@@ -604,13 +604,13 @@ final class SelfShareAccountsApiResourceSwagger {
             private GetShareAccountsCharges() {}
 
             @Schema(example = "2")
-            public Integer chargeId;
+            public Long chargeId;
             @Schema(example = "2")
             public Integer amount;
         }
 
         @Schema(example = "3")
-        public Integer productId;
+        public Long productId;
         @Schema(example = "1")
         public Integer unitPrice;
         @Schema(example = "500")
@@ -618,7 +618,7 @@ final class SelfShareAccountsApiResourceSwagger {
         @Schema(example = "31 July 2018")
         public String submittedDate;
         @Schema(example = "2")
-        public Integer savingsAccountId;
+        public Long savingsAccountId;
         @Schema(example = "31 July 2018")
         public String applicationDate;
         @Schema(example = "en")
@@ -627,7 +627,7 @@ final class SelfShareAccountsApiResourceSwagger {
         public String dateFormat;
         public GetShareAccountsCharges charges;
         @Schema(example = "14")
-        public Integer clientId;
+        public Long clientId;
     }
 
     @Schema(description = "PostNewShareApplicationResponse")

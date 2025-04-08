@@ -46,7 +46,7 @@ final class SavingsAccountsApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "small business")
         public String clientName;
         public Set<GetSavingsProductOptions> productOptions;
@@ -190,15 +190,15 @@ final class SavingsAccountsApiResourceSwagger {
             @Schema(example = "000000001")
             public String accountNo;
             @Schema(example = "1")
-            public Integer clientId;
+            public Long clientId;
             @Schema(example = "small business")
             public String clientName;
             @Schema(example = "1")
-            public Integer savingsProductId;
+            public Long savingsProductId;
             @Schema(example = "Passbook Savings")
             public String savingsProductName;
             @Schema(example = "0")
-            public Integer fieldOfficerId;
+            public Long fieldOfficerId;
             public GetSavingsStatus status;
             public GetSavingsTimeline timeline;
             public GetSavingsCurrency currency;
@@ -222,9 +222,9 @@ final class SavingsAccountsApiResourceSwagger {
         private PostSavingsAccountsRequest() {}
 
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "1")
-        public Integer productId;
+        public Long productId;
         @Schema(example = "en")
         public String locale;
         @Schema(example = "dd MMMM yyyy")
@@ -241,13 +241,13 @@ final class SavingsAccountsApiResourceSwagger {
         private PostSavingsAccountsResponse() {}
 
         @Schema(example = "2")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "1")
-        public Integer savingsId;
+        public Long savingsId;
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "GetSavingsAccountsAccountIdResponse")
@@ -267,19 +267,19 @@ final class SavingsAccountsApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer id;
+        public Long id;
         @Schema(example = "000000001")
         public String accountNo;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "small business")
         public String clientName;
         @Schema(example = "1")
-        public Integer savingsProductId;
+        public Long savingsProductId;
         @Schema(example = "Passbook Savings")
         public String savingsProductName;
         @Schema(example = "0")
-        public Integer fieldOfficerId;
+        public Long fieldOfficerId;
         public GetSavingsAccountsResponse.GetSavingsPageItems.GetSavingsStatus status;
         public GetSavingsAccountsResponse.GetSavingsPageItems.GetSavingsTimeline timeline;
         public GetSavingsAccountsResponse.GetSavingsPageItems.GetSavingsCurrency currency;
@@ -319,13 +319,13 @@ final class SavingsAccountsApiResourceSwagger {
         }
 
         @Schema(example = "2")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "1")
-        public Integer savingsId;
+        public Long savingsId;
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
         public PutSavingsAccountsChanges changes;
     }
 
@@ -355,11 +355,11 @@ final class SavingsAccountsApiResourceSwagger {
         }
 
         @Schema(example = "2")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "8")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "8")
-        public Integer resourceId;
+        public Long resourceId;
         public PostSavingsAccountsAccountIdChanges changes;
     }
 
@@ -369,10 +369,10 @@ final class SavingsAccountsApiResourceSwagger {
         private DeleteSavingsAccountsAccountIdResponse() {}
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 }

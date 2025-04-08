@@ -50,7 +50,7 @@ public class SavingsAccountStepDef extends AbstractStepDef {
         long clientId = clientResponse.body().getClientId();
 
         PostSavingsAccountsRequest createSavingsAccountRequest = SavingsAccountRequestFactory.defaultEURSavingsAccountRequest()
-                .clientId((int) clientId).submittedOnDate(submittedOnDate);
+                .clientId(clientId).submittedOnDate(submittedOnDate);
 
         Response<PostSavingsAccountsResponse> createSavingsAccountResponse = savingsAccountApi
                 .submitApplication2(createSavingsAccountRequest).execute();
@@ -63,7 +63,7 @@ public class SavingsAccountStepDef extends AbstractStepDef {
         long clientId = clientResponse.body().getClientId();
 
         PostSavingsAccountsRequest createSavingsAccountRequest = SavingsAccountRequestFactory.defaultUSDSavingsAccountRequest()
-                .clientId((int) clientId).submittedOnDate(submittedOnDate);
+                .clientId(clientId).submittedOnDate(submittedOnDate);
 
         Response<PostSavingsAccountsResponse> createSavingsAccountResponse = savingsAccountApi
                 .submitApplication2(createSavingsAccountRequest).execute();

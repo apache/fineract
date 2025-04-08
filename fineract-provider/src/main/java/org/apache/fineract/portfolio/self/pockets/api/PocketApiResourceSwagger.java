@@ -53,7 +53,7 @@ final class PocketApiResourceSwagger {
         private PostLinkDelinkAccountsToFromPocketResponse() {}
 
         @Schema(example = "6")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "GetAccountsLinkedToPocketResponse")

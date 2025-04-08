@@ -51,7 +51,7 @@ final class TaxComponentApiResourceSwagger {
             private GetTaxesComponentsCreditAccount() {}
 
             @Schema(example = "4")
-            public Integer id;
+            public Long id;
             @Schema(example = "ACCOUNT_NAME_7BR9C")
             public String name;
             @Schema(example = "LIABILITY_PA1460364665046")
@@ -88,7 +88,7 @@ final class TaxComponentApiResourceSwagger {
         @Schema(example = "2")
         public Integer creditAccountType;
         @Schema(example = "4")
-        public Integer creditAcountId;
+        public Long creditAcountId;
         @Schema(example = "en")
         public String locale;
         @Schema(example = "dd MMMM yyyy")
@@ -103,7 +103,7 @@ final class TaxComponentApiResourceSwagger {
         private PostTaxesComponentsResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PutTaxesComponentsTaxComponentIdRequest")
@@ -141,7 +141,7 @@ final class TaxComponentApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
         public PutTaxesComponentsChanges changes;
     }
 }

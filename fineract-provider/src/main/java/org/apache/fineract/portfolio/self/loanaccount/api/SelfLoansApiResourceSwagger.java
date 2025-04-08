@@ -215,7 +215,7 @@ final class SelfLoansApiResourceSwagger {
                 private GetLoansLoanIdLinkedAccount() {}
 
                 @Schema(example = "1")
-                public Integer id;
+                public Long id;
                 @Schema(example = "000000001")
                 public Long accountNo;
             }
@@ -225,7 +225,7 @@ final class SelfLoansApiResourceSwagger {
                 private GetLoansLoanIdDisbursementDetails() {}
 
                 @Schema(example = "71")
-                public Integer id;
+                public Long id;
                 @Schema(example = "[2013, 11, 1]")
                 public LocalDate expectedDisbursementDate;
                 @Schema(example = "[2022, 07, 01]")
@@ -333,7 +333,7 @@ final class SelfLoansApiResourceSwagger {
                 }
 
                 @Schema(example = "20")
-                public Integer id;
+                public Long id;
                 @Schema(example = "overdraft penality")
                 public String name;
                 @Schema(example = "true")
@@ -469,13 +469,13 @@ final class SelfLoansApiResourceSwagger {
         public Long accountNo;
         public GetLoansLoanIdStatus status;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "Kampala first Client")
         public String clientName;
         @Schema(example = "2")
-        public Integer clientOfficeId;
+        public Long clientOfficeId;
         @Schema(example = "1")
-        public Integer loanProductId;
+        public Long loanProductId;
         @Schema(example = "Kampala Product (with cash accounting)")
         public String loanProductName;
         @Schema(example = "Typical Kampala loan product with cash accounting enabled for testing.")
@@ -485,7 +485,7 @@ final class SelfLoansApiResourceSwagger {
         @Schema(example = "option.HousingImprovement")
         public String loanPurposeName;
         @Schema(example = "2")
-        public Integer loanOfficerId;
+        public Long loanOfficerId;
         @Schema(example = "LoanOfficer, Kampala")
         public String loanOfficerName;
         public GetLoansLoanIdLoanType loanType;
@@ -548,7 +548,7 @@ final class SelfLoansApiResourceSwagger {
         }
 
         @Schema(example = "3")
-        public Integer id;
+        public Long id;
         public GetSelfLoansLoanIdTransactionsType type;
         @Schema(example = "[2012, 5, 14]")
         public LocalDate date;
@@ -591,9 +591,9 @@ final class SelfLoansApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer id;
+        public Long id;
         @Schema(example = "1")
-        public Integer chargeId;
+        public Long chargeId;
         @Schema(example = "Loan Processing fee")
         public String name;
         public GetSelfLoansChargeTimeType chargeTimeType;
@@ -643,11 +643,11 @@ final class SelfLoansApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "Kampala first Client")
         public String clientName;
         @Schema(example = "2")
-        public Integer clientOfficeId;
+        public Long clientOfficeId;
         public GetSelfLoansTimeline timeline;
         public Set<GetSelfLoansProductOptions> productOptions;
     }
@@ -695,9 +695,9 @@ final class SelfLoansApiResourceSwagger {
         @Schema(example = "en_GB")
         public String locale;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "1")
-        public Integer productId;
+        public Long productId;
         @Schema(example = "10,000.00")
         public Double principal;
         @Schema(example = "12")
@@ -727,7 +727,7 @@ final class SelfLoansApiResourceSwagger {
         @Schema(example = "10 Jun 2013")
         public String submittedOnDate;
         @Schema(example = "1")
-        public Integer linkAccountId;
+        public Long linkAccountId;
         @Schema(example = "1100")
         public Integer fixedEmiAmount;
         @Schema(example = "35000")
@@ -742,13 +742,13 @@ final class SelfLoansApiResourceSwagger {
         private PostSelfLoansResponse() {}
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "1")
-        public Integer loanId;
+        public Long loanId;
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PutSelfLoansLoanIdRequest")
@@ -761,7 +761,7 @@ final class SelfLoansApiResourceSwagger {
         @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
         @Schema(example = "1")
-        public Integer productId;
+        public Long productId;
         @Schema(example = "5000")
         public Long principal;
         @Schema(example = "10")
@@ -804,13 +804,13 @@ final class SelfLoansApiResourceSwagger {
         }
 
         @Schema(example = "2")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "1")
-        public Integer loanId;
+        public Long loanId;
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
         public PutSelfLoansChanges changes;
     }
 
@@ -878,13 +878,13 @@ final class SelfLoansApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "2")
-        public Integer loanId;
+        public Long loanId;
         @Schema(example = "2")
-        public Integer resourceId;
+        public Long resourceId;
         public PostSelfLoansLoanIdChanges changes;
     }
 }

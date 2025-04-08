@@ -51,8 +51,8 @@ public class SavingsAccountsExternalIdTest extends IntegrationTest {
     void submitSavingsAccountsApplication() {
         LOG.info("------------------------------ CREATING NEW SAVINGS ACCOUNT APPLICATION ---------------------------------------");
         PostSavingsAccountsRequest request = new PostSavingsAccountsRequest();
-        request.setClientId(1);
-        request.setProductId(1);
+        request.setClientId(1L);
+        request.setProductId(1L);
         request.setLocale(locale);
         request.setDateFormat(dateFormat);
         request.submittedOnDate(formattedDate);

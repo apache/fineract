@@ -167,17 +167,18 @@ public class InlineLoanCOBTest extends BaseLoanIntegrationTest {
             String jsonRange = DelinquencyRangesHelper.getAsJSON(1, 3);
             PostDelinquencyRangeResponse delinquencyRangeResponse = DelinquencyRangesHelper.createDelinquencyRange(requestSpec,
                     responseSpec, jsonRange);
-            rangeIds.add(delinquencyRangeResponse.getResourceId());
+            rangeIds.add(Math.toIntExact(delinquencyRangeResponse.getResourceId()));
             jsonRange = DelinquencyRangesHelper.getAsJSON(4, 60);
 
             DelinquencyRangeData range = DelinquencyRangesHelper.getDelinquencyRange(requestSpec, responseSpec,
-                    delinquencyRangeResponse.getResourceId());
+                    Math.toIntExact(delinquencyRangeResponse.getResourceId()));
 
             // Second Range
             delinquencyRangeResponse = DelinquencyRangesHelper.createDelinquencyRange(requestSpec, responseSpec, jsonRange);
-            rangeIds.add(delinquencyRangeResponse.getResourceId());
+            rangeIds.add(Math.toIntExact(delinquencyRangeResponse.getResourceId()));
 
-            range = DelinquencyRangesHelper.getDelinquencyRange(requestSpec, responseSpec, delinquencyRangeResponse.getResourceId());
+            range = DelinquencyRangesHelper.getDelinquencyRange(requestSpec, responseSpec,
+                    Math.toIntExact(delinquencyRangeResponse.getResourceId()));
             final String classificationExpected = range.getClassification();
             log.info("Expected Delinquency Range classification after Disbursement {}", classificationExpected);
 
@@ -186,7 +187,7 @@ public class InlineLoanCOBTest extends BaseLoanIntegrationTest {
                     responseSpec, jsonBucket);
             assertNotNull(delinquencyBucketResponse);
             final DelinquencyBucketData delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
-                    delinquencyBucketResponse.getResourceId());
+                    Math.toIntExact(delinquencyBucketResponse.getResourceId()));
 
             final Integer loanProductID = createLoanProduct(loanTransactionHelper, Math.toIntExact(delinquencyBucket.getId()));
 

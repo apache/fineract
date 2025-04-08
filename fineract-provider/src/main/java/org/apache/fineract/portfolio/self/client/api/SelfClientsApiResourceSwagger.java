@@ -53,7 +53,7 @@ final class SelfClientsApiResourceSwagger {
             }
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "000000001")
             public Long accountNo;
             public GetSelfClientsStatus status;
@@ -66,7 +66,7 @@ final class SelfClientsApiResourceSwagger {
             @Schema(example = "Small shop")
             public String displayName;
             @Schema(example = "1")
-            public Integer officeId;
+            public Long officeId;
             @Schema(example = "Head Office")
             public String officeName;
         }
@@ -105,7 +105,7 @@ final class SelfClientsApiResourceSwagger {
         }
 
         @Schema(example = "27")
-        public Integer id;
+        public Long id;
         @Schema(example = "000000027")
         public Long accountNo;
         public GetSelfClientsResponse.GetSelfClientsPageItems.GetSelfClientsStatus status;
@@ -120,12 +120,12 @@ final class SelfClientsApiResourceSwagger {
         @Schema(example = "savings test")
         public String displayName;
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "Head Office")
         public String officeName;
         public GetSelfClientsTimeline timeline;
         @Schema(example = "4")
-        public Integer savingsProductId;
+        public Long savingsProductId;
         @Schema(example = "account overdraft")
         public String savingsProductName;
         @Schema(example = "")
@@ -182,13 +182,13 @@ final class SelfClientsApiResourceSwagger {
             }
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "000000001")
             public Long accountNo;
-            @Schema(example = "456")
-            public Integer externalId;
+            @Schema(example = "36efeb06-d835-48a1-99eb-09bd1d348c1e")
+            public String externalId;
             @Schema(example = "1")
-            public Integer productId;
+            public Long productId;
             @Schema(example = "TestOne")
             public String productName;
             public GetSelfClientsLoanAccountsStatus status;
@@ -244,11 +244,11 @@ final class SelfClientsApiResourceSwagger {
             }
 
             @Schema(example = "7")
-            public Integer id;
+            public Long id;
             @Schema(example = "000000007")
             public Long accountNo;
             @Schema(example = "2")
-            public Integer productId;
+            public Long productId;
             @Schema(example = "Other product")
             public String productName;
             public GetSelfClientsSavingsAccountsStatus status;
@@ -293,11 +293,11 @@ final class SelfClientsApiResourceSwagger {
             }
 
             @Schema(example = "5")
-            public Integer id;
+            public Long id;
             @Schema(example = "1")
-            public Integer clientId;
+            public Long clientId;
             @Schema(example = "6")
-            public Integer chargeId;
+            public Long chargeId;
             @Schema(example = "Client Fees 2")
             public String name;
             public GetSelfClientsChargeTimeType chargeTimeType;
@@ -336,11 +336,11 @@ final class SelfClientsApiResourceSwagger {
         private GetSelfClientsClientIdChargesChargeIdResponse() {}
 
         @Schema(example = "3")
-        public Integer id;
+        public Long id;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "5")
-        public Integer chargeId;
+        public Long chargeId;
         @Schema(example = "Client Fee 1")
         public String name;
         public GetSelfClientsClientIdChargesResponse.GetSelfClientsChargesPageItems.GetSelfClientsChargeTimeType chargeTimeType;
@@ -390,9 +390,9 @@ final class SelfClientsApiResourceSwagger {
             }
 
             @Schema(example = "226")
-            public Integer id;
+            public Long id;
             @Schema(example = "1")
-            public Integer officeId;
+            public Long officeId;
             @Schema(example = "Head Office")
             public String officeName;
             public GetSelfClientsClientIdTransactionsType type;
@@ -418,9 +418,9 @@ final class SelfClientsApiResourceSwagger {
         private GetSelfClientsClientIdTransactionsTransactionIdResponse() {}
 
         @Schema(example = "1")
-        public Integer id;
+        public Long id;
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "Head Office")
         public String officeName;
         public GetSelfClientsClientIdTransactionsResponse.GetSelfClientsClientIdTransactionsPageItems.GetSelfClientsClientIdTransactionsType type;

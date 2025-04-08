@@ -171,7 +171,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
             final String paymentTypeIdParamName = "paymentTypeId";
             if (changes.containsKey(paymentTypeIdParamName)) {
 
-                final Integer paymentTypeIdNewValue = command.integerValueOfParameterNamed(paymentTypeIdParamName);
+                final Long paymentTypeIdNewValue = command.longValueOfParameterNamed(paymentTypeIdParamName);
 
                 PaymentType paymentType = null;
                 if (paymentTypeIdNewValue != null) {

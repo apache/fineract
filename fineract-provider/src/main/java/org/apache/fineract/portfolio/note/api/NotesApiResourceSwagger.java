@@ -46,7 +46,7 @@ public final class NotesApiResourceSwagger {
         @Schema(example = "1")
         public Long clientId;
         @Schema(example = "76")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PutResourceTypeResourceIdNotesNoteIdResponse")
@@ -67,7 +67,7 @@ public final class NotesApiResourceSwagger {
         @Schema(example = "1")
         public Long clientId;
         @Schema(example = "76")
-        public Integer resourceId;
+        public Long resourceId;
         public PutNotesChanges changes;
     }
 
@@ -77,6 +77,6 @@ public final class NotesApiResourceSwagger {
         private DeleteResourceTypeResourceIdNotesNoteIdResponse() {}
 
         @Schema(example = "76")
-        public Integer resourceId;
+        public Long resourceId;
     }
 }
