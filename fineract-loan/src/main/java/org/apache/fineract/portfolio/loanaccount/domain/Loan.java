@@ -1233,7 +1233,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
                 || disbursementDetails.stream().anyMatch(it -> it.actualDisbursementDate() == null);
         boolean isMultiDisburseLoanDisbursementAllowed = isMultiDisburmentLoan()
                 && (disbursementDetails == null || disbursementDetails.stream().filter(it -> it.actualDisbursementDate() != null)
-                        .count() < loanProduct.getLoanProductTrancheDetails().maxTrancheCount());
+                        .count() < loanProduct.getLoanProductTrancheDetails().getMaxTrancheCount());
         return isSingleDisburseLoanDisbursementAllowed || isMultiDisburseLoanDisbursementAllowed;
     }
 

@@ -118,6 +118,7 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanChargeAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanDisbursementDetailsAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanDisbursementService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanProductRelatedDetailUpdateUtil;
 import org.apache.fineract.portfolio.loanaccount.service.LoanScheduleService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
@@ -164,6 +165,7 @@ public class LoanScheduleAssembler {
     private final LoanDisbursementService loanDisbursementService;
     private final LoanChargeService loanChargeService;
     private final LoanScheduleService loanScheduleService;
+    private final LoanProductRelatedDetailUpdateUtil relatedDetailUpdateUtil;
 
     public LoanApplicationTerms assembleLoanTerms(final JsonElement element) {
         final Long loanProductId = this.fromApiJsonHelper.extractLongNamed("productId", element);
@@ -421,7 +423,7 @@ public class LoanScheduleAssembler {
                             loanProductInterestRecalculationDetails.getCompoundingInterval(), recalculationCompoundingFrequencyNthDay,
                             compoundingRepeatsOnDay);
                 }
-                allowCompoundingOnEod = loanProductInterestRecalculationDetails.allowCompoundingOnEod();
+                allowCompoundingOnEod = loanProductInterestRecalculationDetails.getAllowCompoundingOnEod();
             }
         }
 
@@ -1303,7 +1305,7 @@ public class LoanScheduleAssembler {
             changes.put(interestRatePerPeriodParamName, newValue);
             changes.put("locale", localeAsInput);
             loanProductRelatedDetail.setNominalInterestRatePerPeriod(newValue);
-            loanProductRelatedDetail.updateInterestRateDerivedFields(aprCalculator);
+            relatedDetailUpdateUtil.updateInterestRateDerivedFields(loanProductRelatedDetail, aprCalculator);
         }
 
         final String interestRateFrequencyTypeParamName = "interestRateFrequencyType";
@@ -1315,7 +1317,7 @@ public class LoanScheduleAssembler {
             changes.put(interestRateFrequencyTypeParamName, newValue);
             changes.put("locale", localeAsInput);
             loanProductRelatedDetail.setInterestPeriodFrequencyType(PeriodFrequencyType.fromInt(newValue));
-            loanProductRelatedDetail.updateInterestRateDerivedFields(aprCalculator);
+            relatedDetailUpdateUtil.updateInterestRateDerivedFields(loanProductRelatedDetail, aprCalculator);
         }
 
         final String interestTypeParamName = "interestType";

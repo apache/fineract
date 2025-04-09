@@ -26,14 +26,15 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateDTO;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRatePeriodData;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRate;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "m_product_loan_floating_rates")
 public class LoanProductFloatingRates extends AbstractPersistableCustom<Long> {
@@ -75,80 +76,6 @@ public class LoanProductFloatingRates extends AbstractPersistableCustom<Long> {
         this.maxDifferentialLendingRate = maxDifferentialLendingRate;
         this.defaultDifferentialLendingRate = defaultDifferentialLendingRate;
         this.isFloatingInterestRateCalculationAllowed = isFloatingInterestRateCalculationAllowed;
-    }
-
-    public LoanProduct getLoanProduct() {
-        return this.loanProduct;
-    }
-
-    public FloatingRate getFloatingRate() {
-        return this.floatingRate;
-    }
-
-    public BigDecimal getInterestRateDifferential() {
-        return this.interestRateDifferential;
-    }
-
-    public BigDecimal getMinDifferentialLendingRate() {
-        return this.minDifferentialLendingRate;
-    }
-
-    public BigDecimal getDefaultDifferentialLendingRate() {
-        return this.defaultDifferentialLendingRate;
-    }
-
-    public BigDecimal getMaxDifferentialLendingRate() {
-        return this.maxDifferentialLendingRate;
-    }
-
-    public boolean isFloatingInterestRateCalculationAllowed() {
-        return this.isFloatingInterestRateCalculationAllowed;
-    }
-
-    public Map<? extends String, ?> update(JsonCommand command, FloatingRate floatingRate) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(20);
-        if (floatingRate != null) {
-            final String floatingRatesId = "floatingRatesId";
-            if (this.floatingRate == null || command.isChangeInLongParameterNamed(floatingRatesId, this.floatingRate.getId())) {
-                final long newValue = command.longValueOfParameterNamed(floatingRatesId);
-                actualChanges.put(floatingRatesId, newValue);
-                this.floatingRate = floatingRate;
-            }
-        }
-
-        final String interestRateDifferential = "interestRateDifferential";
-        if (command.isChangeInBigDecimalParameterNamed(interestRateDifferential, this.interestRateDifferential)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(interestRateDifferential);
-            actualChanges.put(interestRateDifferential, newValue);
-            this.interestRateDifferential = newValue;
-        }
-        final String minDifferentialLendingRate = "minDifferentialLendingRate";
-        if (command.isChangeInBigDecimalParameterNamed(minDifferentialLendingRate, this.minDifferentialLendingRate)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(minDifferentialLendingRate);
-            actualChanges.put(minDifferentialLendingRate, newValue);
-            this.minDifferentialLendingRate = newValue;
-        }
-        final String defaultDifferentialLendingRate = "defaultDifferentialLendingRate";
-        if (command.isChangeInBigDecimalParameterNamed(defaultDifferentialLendingRate, this.defaultDifferentialLendingRate)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(defaultDifferentialLendingRate);
-            actualChanges.put(defaultDifferentialLendingRate, newValue);
-            this.defaultDifferentialLendingRate = newValue;
-        }
-        final String maxDifferentialLendingRate = "maxDifferentialLendingRate";
-        if (command.isChangeInBigDecimalParameterNamed(maxDifferentialLendingRate, this.maxDifferentialLendingRate)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(maxDifferentialLendingRate);
-            actualChanges.put(maxDifferentialLendingRate, newValue);
-            this.maxDifferentialLendingRate = newValue;
-        }
-        final String isFloatingInterestRateCalculationAllowed = "isFloatingInterestRateCalculationAllowed";
-        if (command.isChangeInBooleanParameterNamed(isFloatingInterestRateCalculationAllowed,
-                this.isFloatingInterestRateCalculationAllowed)) {
-            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(isFloatingInterestRateCalculationAllowed);
-            actualChanges.put(isFloatingInterestRateCalculationAllowed, newValue);
-            this.isFloatingInterestRateCalculationAllowed = newValue;
-        }
-
-        return actualChanges;
     }
 
     public Collection<FloatingRatePeriodData> fetchInterestRates(final FloatingRateDTO floatingRateDTO) {

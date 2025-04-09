@@ -140,8 +140,8 @@ public class LoanInterestRecalculationDetails extends AbstractPersistableCustom<
                 loanProductInterestRecalculationDetails.getCompoundingFrequencyWeekday(),
                 loanProductInterestRecalculationDetails.getCompoundingFrequencyOnDay(),
                 loanProductInterestRecalculationDetails.getIsCompoundingToBePostedAsTransaction(),
-                loanProductInterestRecalculationDetails.allowCompoundingOnEod(),
-                loanProductInterestRecalculationDetails.disallowInterestCalculationOnPastDue(),
+                loanProductInterestRecalculationDetails.getAllowCompoundingOnEod(),
+                loanProductInterestRecalculationDetails.getDisallowInterestCalculationOnPastDue(),
                 loanProductInterestRecalculationDetails.getPreCloseInterestCalculationStrategy());
     }
 
