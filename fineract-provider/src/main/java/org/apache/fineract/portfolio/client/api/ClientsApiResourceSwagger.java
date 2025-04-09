@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import org.apache.fineract.portfolio.client.data.ClientAddressRequest;
 
 /**
  * Created by Chirag Gupta on 01/13/18.
@@ -327,7 +328,7 @@ final class ClientsApiResourceSwagger {
         @Schema(description = "List of PostClientsDatatable")
         public List<PostClientsDatatable> datatables;
         @Schema(description = "Address requests")
-        public List<PostClientsAddressRequest> address;
+        public List<ClientAddressRequest> address;
         @Schema(example = "test@test.com")
         public String emailAddress;
     }

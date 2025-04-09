@@ -16,33 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.client.api;
+package org.apache.fineract.infrastructure.core.component;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import lombok.RequiredArgsConstructor;
 
-/**
- * Created by Chirag Gupta on 01/12/18.
- */
-@SuppressWarnings({ "MemberName" })
-final class ClientAddressApiResourcesSwagger {
+@RequiredArgsConstructor
+public class FetcherRule<P, R> {
 
-    private ClientAddressApiResourcesSwagger() {}
+    private final Predicate<P> condition;
+    private final Function<P, R> action;
 
-    @Schema(description = "PostClientClientIdAddressesResponse")
-    public static final class PostClientClientIdAddressesResponse {
-
-        private PostClientClientIdAddressesResponse() {}
-
-        @Schema(example = "15")
-        public Long resourceId;
+    public boolean matches(P params) {
+        return condition.test(params);
     }
 
-    @Schema(description = "PutClientClientIdAddressesResponse")
-    public static final class PutClientClientIdAddressesResponse {
-
-        private PutClientClientIdAddressesResponse() {}
-
-        @Schema(example = "67")
-        public Long resourceId;
+    public R execute(P params) {
+        return action.apply(params);
     }
 }

@@ -16,25 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.address.service;
+package org.apache.fineract.portfolio.address.filter;
 
-import java.util.List;
-import org.apache.fineract.portfolio.address.data.AddressData;
-import org.apache.fineract.portfolio.address.filter.ClientAddressSearchParam;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.FieldNameConstants;
 
-public interface AddressReadPlatformService {
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@FieldNameConstants
+public class ClientAddressSearchParam {
 
-    List<AddressData> retrieveAddressFields(long clientid);
-
-    List<AddressData> retrieveAllClientAddress(long clientid);
-
-    List<AddressData> retrieveAddressbyType(long clientid, long typeid);
-
-    List<AddressData> retrieveAddressbyTypeAndStatus(long clientid, long typeid, String status);
-
-    List<AddressData> retrieveAddressbyStatus(long clientid, String status);
-
-    List<AddressData> retrieveBySearchParam(ClientAddressSearchParam searchFilter);
-
-    AddressData retrieveTemplate();
+    private Long clientId;
+    private Long addressTypeId;
+    private String status;
 }

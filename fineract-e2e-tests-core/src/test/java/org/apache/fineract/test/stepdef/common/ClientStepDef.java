@@ -23,8 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.io.IOException;
-import java.util.Arrays;
-import org.apache.fineract.client.models.PostClientsAddressRequest;
+import java.util.Collections;
+import org.apache.fineract.client.models.ClientAddressRequest;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.services.ClientApi;
@@ -92,13 +92,13 @@ public class ClientStepDef extends AbstractStepDef {
         Long stateId = codeHelper.createStateCodeValue(Utils.randomNameGenerator("Budapest", 4)).body().getResourceId();
         String city = "Budapest";
         boolean addressIsActive = true;
-        long postalCode = 1000L;
+        String postalCode = "1000";
 
-        PostClientsAddressRequest addressRequest = new PostClientsAddressRequest().postalCode(postalCode).city(city).countryId(countryId)
+        ClientAddressRequest addressRequest = new ClientAddressRequest().postalCode(postalCode).city(city).countryId(countryId)
                 .stateProvinceId(stateId).addressTypeId(addressTypeId).isActive(addressIsActive);
 
         PostClientsRequest clientsRequest = clientRequestFactory.defaultClientCreationRequest().firstname(firstName).lastname(lastName)
-                .address(Arrays.asList(addressRequest));
+                .address(Collections.singletonList(addressRequest));
 
         Response<PostClientsResponse> response = clientApi.create6(clientsRequest).execute();
         ErrorHelper.checkSuccessfulApiCall(response);
