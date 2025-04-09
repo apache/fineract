@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -51,6 +52,7 @@ import org.springframework.util.CollectionUtils;
  * Immutable data object representing a savings account transaction.
  */
 @Getter
+@JsonLocalDateArrayFormat
 public final class SavingsAccountTransactionData implements Serializable {
 
     private Long id;

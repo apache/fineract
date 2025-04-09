@@ -56,13 +56,13 @@ public class PostInterestForSavingTasklet implements Tasklet {
 
     private final SavingsAccountReadPlatformService savingAccountReadPlatformService;
     private final ConfigurationDomainService configurationDomainService;
-    private final Queue<List<SavingsAccountData>> queue = new ArrayDeque<>();
     private final ApplicationContext applicationContext;
     @Qualifier(TaskExecutorConstant.CONFIGURABLE_TASK_EXECUTOR_BEAN_NAME)
     private final ThreadPoolTaskExecutor taskExecutor;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+        final Queue<List<SavingsAccountData>> queue = new ArrayDeque<>();
         final int threadPoolSize = Integer.parseInt((String) chunkContext.getStepContext().getJobParameters().get("thread-pool-size"));
         taskExecutor.setCorePoolSize(threadPoolSize);
         taskExecutor.setMaxPoolSize(threadPoolSize);
@@ -89,7 +89,7 @@ public class PostInterestForSavingTasklet implements Tasklet {
                     log.debug("Starting Interest posting - total records - {}", totalFilteredRecords);
                     List<SavingsAccountData> queueElement = queue.element();
                     maxSavingsIdInList = queueElement.get(queueElement.size() - 1).getId();
-                    postInterest(queue.remove(), threadPoolSize, backdatedTxnsAllowedTill, pageSize, maxSavingsIdInList);
+                    postInterest(queue.remove(), threadPoolSize, backdatedTxnsAllowedTill, pageSize, maxSavingsIdInList, queue);
                 } while (!CollectionUtils.isEmpty(queue));
             }
         }
@@ -97,7 +97,7 @@ public class PostInterestForSavingTasklet implements Tasklet {
     }
 
     private void postInterest(List<SavingsAccountData> savingsAccounts, int threadPoolSize, final boolean backdatedTxnsAllowedTill,
-            final int pageSize, Long maxSavingsIdInList) {
+            final int pageSize, Long maxSavingsIdInList, Queue<List<SavingsAccountData>> queue) {
         List<Callable<Void>> posters = new ArrayList<>();
         int fromIndex = 0;
         int size = savingsAccounts.size();

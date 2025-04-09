@@ -40,11 +40,16 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
 import java.util.HashMap;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
+import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
+import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.exception.ClientNotFoundException;
 import org.apache.fineract.portfolio.savings.api.SavingsAccountChargesApiResource;
 import org.apache.fineract.portfolio.savings.api.SavingsAccountTransactionsApiResource;
 import org.apache.fineract.portfolio.savings.api.SavingsAccountsApiResource;
+import org.apache.fineract.portfolio.savings.api.SavingsApiSetConstants;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountNotFoundException;
 import org.apache.fineract.portfolio.self.client.service.AppuserClientMapperReadService;
 import org.apache.fineract.portfolio.self.savings.data.SelfSavingsAccountConstants;
@@ -66,6 +71,8 @@ public class SelfSavingsApiResource {
     private final AppuserSavingsMapperReadService appuserSavingsMapperReadService;
     private final SelfSavingsDataValidator dataValidator;
     private final AppuserClientMapperReadService appUserClientMapperReadService;
+    private final DefaultToApiJsonSerializer<SavingsAccountData> toApiJsonSerializer;
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
 
     @GET
     @Path("{accountId}")
@@ -77,6 +84,7 @@ public class SelfSavingsApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SelfSavingsApiResourceSwagger.GetSelfSavingsAccountsResponse.class))) })
     public String retrieveSavings(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
             @DefaultValue("all") @QueryParam("chargeStatus") @Parameter(description = "chargeStatus") final String chargeStatus,
+            @QueryParam("associations") @Parameter(description = "associations") final String associations,
             @Context final UriInfo uriInfo) {
 
         this.dataValidator.validateRetrieveSavings(uriInfo);
@@ -84,7 +92,10 @@ public class SelfSavingsApiResource {
         validateAppuserSavingsAccountMapping(accountId);
 
         final boolean staffInSelectedOfficeOnly = false;
-        return this.savingsAccountsApiResource.retrieveOne(accountId, staffInSelectedOfficeOnly, chargeStatus, uriInfo);
+        SavingsAccountData result = this.savingsAccountsApiResource.retrieveOne(accountId, staffInSelectedOfficeOnly, chargeStatus,
+                associations, uriInfo);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return toApiJsonSerializer.serialize(settings, result, SavingsApiSetConstants.SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS);
     }
 
     @GET

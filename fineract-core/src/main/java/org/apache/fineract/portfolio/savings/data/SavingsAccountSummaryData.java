@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import lombok.Getter;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -36,6 +37,7 @@ import org.apache.fineract.portfolio.savings.domain.interest.PostingPeriod;
  * Immutable data object representing Savings Account summary information.
  */
 @Getter
+@JsonLocalDateArrayFormat
 public class SavingsAccountSummaryData implements Serializable {
 
     private final CurrencyData currency;

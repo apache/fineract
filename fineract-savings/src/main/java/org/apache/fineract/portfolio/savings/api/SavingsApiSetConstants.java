@@ -47,17 +47,17 @@ public class SavingsApiSetConstants extends SavingsApiConstants {
      * These parameters will match the class level parameters of {@link SavingsAccountData}. Where possible, we try to
      * get response parameters to match those of request parameters.
      */
-    protected static final Set<String> SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName,
-            accountNoParamName, externalIdParamName, statusParamName, activatedOnDateParamName, staffIdParamName, clientIdParamName,
-            "clientName", groupIdParamName, "groupName", "savingsProductId", "savingsProductName", "currency",
-            nominalAnnualInterestRateParamName, interestCompoundingPeriodTypeParamName, interestCalculationTypeParamName,
-            interestCalculationDaysInYearTypeParamName, minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName,
-            lockinPeriodFrequencyTypeParamName, withdrawalFeeAmountParamName, withdrawalFeeTypeParamName,
-            withdrawalFeeForTransfersParamName, feeAmountParamName, feeOnMonthDayParamName, "summary", "transactions", "productOptions",
-            "interestCompoundingPeriodTypeOptions", "interestPostingPeriodTypeOptions", "interestCalculationTypeOptions",
-            "interestCalculationDaysInYearTypeOptions", "lockinPeriodFrequencyTypeOptions", "withdrawalFeeTypeOptions", "withdrawalFee",
-            "annualFee", onHoldFundsParamName, nominalAnnualInterestRateOverdraftParamName, minOverdraftForInterestCalculationParamName,
-            datatables, savingsAmountOnHold, accountMappingForPaymentParamName, interestPostedTillDate));
+    public static final Set<String> SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName, accountNoParamName,
+            externalIdParamName, statusParamName, activatedOnDateParamName, staffIdParamName, clientIdParamName, "clientName",
+            groupIdParamName, "groupName", "savingsProductId", "savingsProductName", "currency", nominalAnnualInterestRateParamName,
+            interestCompoundingPeriodTypeParamName, interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName,
+            minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName,
+            withdrawalFeeAmountParamName, withdrawalFeeTypeParamName, withdrawalFeeForTransfersParamName, feeAmountParamName,
+            feeOnMonthDayParamName, "summary", "transactions", "productOptions", "interestCompoundingPeriodTypeOptions",
+            "interestPostingPeriodTypeOptions", "interestCalculationTypeOptions", "interestCalculationDaysInYearTypeOptions",
+            "lockinPeriodFrequencyTypeOptions", "withdrawalFeeTypeOptions", "withdrawalFee", "annualFee", onHoldFundsParamName,
+            nominalAnnualInterestRateOverdraftParamName, minOverdraftForInterestCalculationParamName, datatables, savingsAmountOnHold,
+            accountMappingForPaymentParamName, interestPostedTillDate));
 
     protected static final Set<String> SAVINGS_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(idParamName, "accountId", accountNoParamName, "currency", "amount", dateParamName, paymentDetailDataParamName,
