@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.fineract.infrastructure.bulkimport.constants.LoanRepaymentConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.populator.AbstractWorkbookPopulator;
@@ -185,12 +186,12 @@ public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
         String clientName = "";
         String clientId = "";
         for (int i = 0; i < allloans.size(); i++) {
-            if (!clientName.equals(allloans.get(i).getClientName())) {
+            if (!Objects.equals(clientName, allloans.get(i).getClientName())) {
                 endIndex = i + 1;
                 clientNameToBeginEndIndexes.put(clientName, new Integer[] { startIndex, endIndex });
                 startIndex = i + 2;
                 clientName = allloans.get(i).getClientName();
-                clientId = allloans.get(i).getClientId().toString();
+                clientId = String.valueOf(allloans.get(i).getClientId());
                 if (!clientsWithActiveLoans.contains(clientName)) {
                     clientsWithActiveLoans.add(clientName);
                     clientIdsWithActiveLoans.add(clientId);

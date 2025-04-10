@@ -129,7 +129,8 @@ public class ChartOfAccountsImportHandler implements ImportHandler {
         String glCode = ImportHandlerUtils.readAsString(ChartOfAcountsConstants.GL_CODE_COL, row);
         Long tagId = null;
         CodeValueData tagIdCodeValueData = null;
-        if (ImportHandlerUtils.readAsString(ChartOfAcountsConstants.TAG_ID_COL, row) != null) {
+        if (ImportHandlerUtils.readAsString(ChartOfAcountsConstants.TAG_ID_COL, row) != null
+                && !ImportHandlerUtils.readAsString(ChartOfAcountsConstants.TAG_ID_COL, row).equals("0")) {
             tagId = Long.parseLong(Objects.requireNonNull(ImportHandlerUtils.readAsString(ChartOfAcountsConstants.TAG_ID_COL, row)));
             tagIdCodeValueData = new CodeValueData().setId(tagId);
         }
@@ -147,7 +148,7 @@ public class ChartOfAccountsImportHandler implements ImportHandler {
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
         gsonBuilder.registerTypeAdapter(EnumOptionData.class, new EnumOptionDataIdSerializer());
         gsonBuilder.registerTypeAdapter(CodeValueData.class, new CodeValueDataIdSerializer());
-        gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
+        gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat, locale));
         gsonBuilder.registerTypeAdapter(CurrencyData.class, new CurrencyDateCodeSerializer());
         int successCount = 0;
         int errorCount = 0;

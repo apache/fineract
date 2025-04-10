@@ -181,6 +181,9 @@ public final class DepositsApiConstants {
     public static final String amountOutstandingParamName = "amountOutstanding";
     public static final String amountOrPercentageParamName = "amountOrPercentage";
     public static final String amountParamName = "amount";
+    public static final String isManualTransaction = "isManualTransaction";
+    public static final String lienTransaction = "lienTransaction";
+    public static final String chargesPaidByData = "chargesPaidByData";
     public static final String amountPaidParamName = "amountPaid";
     public static final String chargeOptionsParamName = "chargeOptions";
     public static final String chargePaymentModeParamName = "chargePaymentMode";

@@ -113,12 +113,9 @@ public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
         CellRangeAddressList tagRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
                 ChartOfAcountsConstants.TAG_COL, ChartOfAcountsConstants.TAG_COL);
         CellRangeAddressList officeNameRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
-                ChartOfAcountsConstants.OFFICE_COL, ChartOfAcountsConstants.OFFICE_COL); // validation for opening bal
-                                                                                         // office column
+                ChartOfAcountsConstants.OFFICE_COL, ChartOfAcountsConstants.OFFICE_COL);
         CellRangeAddressList currencyCodeRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
-                ChartOfAcountsConstants.CURRENCY_CODE, ChartOfAcountsConstants.CURRENCY_CODE);// validation for currency
-                                                                                              // code for opening
-                                                                                              // balance
+                ChartOfAcountsConstants.CURRENCY_CODE, ChartOfAcountsConstants.CURRENCY_CODE);
 
         DataValidationHelper validationHelper = new HSSFDataValidationHelper((HSSFSheet) chartOfAccountsSheet);
         setNames(chartOfAccountsSheet, accountTypesNoDuplicatesList, offices);
@@ -134,7 +131,6 @@ public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
         DataValidationConstraint tagConstraint = validationHelper.createFormulaListConstraint("INDIRECT(CONCATENATE(\"Tags_\",$A1))");
         DataValidationConstraint officeNameConstraint = validationHelper.createFormulaListConstraint("Office");
         DataValidationConstraint currencyCodeConstraint = validationHelper.createExplicitListConstraint(getCurrency());
-
         DataValidation accountTypeValidation = validationHelper.createValidation(accountTypeConstraint, accountTypeRange);
         DataValidation accountUsageValidation = validationHelper.createValidation(accountUsageConstraint, accountUsageRange);
         DataValidation manualEntriesValidation = validationHelper.createValidation(booleanConstraint, manualEntriesAllowedRange);
@@ -142,7 +138,6 @@ public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
         DataValidation tagValidation = validationHelper.createValidation(tagConstraint, tagRange);
         DataValidation officeNameValidation = validationHelper.createValidation(officeNameConstraint, officeNameRange);
         DataValidation currencyCodeValidation = validationHelper.createValidation(currencyCodeConstraint, currencyCodeRange);
-
         chartOfAccountsSheet.addValidationData(accountTypeValidation);
         chartOfAccountsSheet.addValidationData(accountUsageValidation);
         chartOfAccountsSheet.addValidationData(manualEntriesValidation);
@@ -189,10 +184,7 @@ public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
                 writeFormula(ChartOfAcountsConstants.TAG_ID_COL, row,
                         "IF(ISERROR(VLOOKUP($H" + (rowNo + 1) + ",$V$2:$W$" + (glAccounts.size() + 1) + ",2,FALSE))," + "\"\",(VLOOKUP($H"
                                 + (rowNo + 1) + ",$V$2:$W$" + (glAccounts.size() + 1) + ",2,FALSE)))");
-                // auto populate office id for bulk import of opening balance
-                writeFormula(ChartOfAcountsConstants.OFFICE_COL_ID, row,
-                        "IF(ISERROR(VLOOKUP($K" + (rowNo + 1) + ",$X$2:$Y$" + (offices.size() + 1) + ",2,FALSE)),\"\",(VLOOKUP($K"
-                                + (rowNo + 1) + ",$X$2:$Y$" + (offices.size() + 1) + ",2,FALSE)))");
+
             }
         } catch (Exception e) {
             LOG.error("Problem occurred in setDefaults function", e);
@@ -301,11 +293,6 @@ public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
         writeString(ChartOfAcountsConstants.TAG_ID_COL, rowHeader, "Tag Id");
         writeString(ChartOfAcountsConstants.DESCRIPTION_COL, rowHeader, "Description *");
         // adding data for opening balance bulk import
-        writeString(ChartOfAcountsConstants.OFFICE_COL, rowHeader, "Parent Office for Opening Balance");
-        writeString(ChartOfAcountsConstants.OFFICE_COL_ID, rowHeader, "Parent Office Code Opening Balance");
-        writeString(ChartOfAcountsConstants.CURRENCY_CODE, rowHeader, "Currency Code");
-        writeString(ChartOfAcountsConstants.DEBIT_AMOUNT, rowHeader, "Debit Amount");
-        writeString(ChartOfAcountsConstants.CREDIT_AMOUNT, rowHeader, "Credit Amount");
 
         writeString(ChartOfAcountsConstants.LOOKUP_ACCOUNT_TYPE_COL, rowHeader, "Lookup Account type");
         writeString(ChartOfAcountsConstants.LOOKUP_TAG_COL, rowHeader, "Lookup Tag");

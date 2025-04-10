@@ -58,7 +58,7 @@ public class OfficeImportHandler implements ImportHandler {
     @Override
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
         List<OfficeData> offices = readExcelFile(workbook, locale, dateFormat);
-        return importEntity(workbook, offices, dateFormat);
+        return importEntity(workbook, offices, dateFormat, locale);
     }
 
     private List<OfficeData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
@@ -85,10 +85,10 @@ public class OfficeImportHandler implements ImportHandler {
         return office;
     }
 
-    private Count importEntity(final Workbook workbook, final List<OfficeData> offices, final String dateFormat) {
+    private Count importEntity(final Workbook workbook, final List<OfficeData> offices, final String dateFormat, final String locale) {
         Sheet officeSheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
+        gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat, locale));
 
         int successCount = 0;
         int errorCount = 0;

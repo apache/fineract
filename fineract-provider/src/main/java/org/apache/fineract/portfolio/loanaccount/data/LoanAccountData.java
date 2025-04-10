@@ -302,24 +302,25 @@ public class LoanAccountData {
     public static LoanAccountData importInstanceGroup(EnumOptionData loanTypeEnumOption, Long groupIdforGroupLoan, Long productId,
             Long loanOfficerId, LocalDate submittedOnDate, Long fundId, BigDecimal principal, Integer numberOfRepayments,
             Integer repaidEvery, EnumOptionData repaidEveryFrequencyEnums, Integer loanTermFrequency,
-            EnumOptionData loanTermFrequencyTypeEnum, BigDecimal nominalInterestRate, EnumOptionData amortizationEnumOption,
-            EnumOptionData interestMethodEnum, EnumOptionData interestCalculationPeriodEnum, BigDecimal arrearsTolerance,
-            String transactionProcessingStrategyCode, Integer graceOnPrincipalPayment, Integer graceOnInterestPayment,
-            Integer graceOnInterestCharged, LocalDate interestChargedFromDate, LocalDate repaymentsStartingFromDate, Integer rowIndex,
-            ExternalId externalId, String linkAccountId, String locale, String dateFormat, Integer fixedLength) {
+            EnumOptionData loanTermFrequencyTypeEnum, BigDecimal nominalInterestRate, LocalDate expectedDisbursementDate,
+            EnumOptionData amortizationEnumOption, EnumOptionData interestMethodEnum, EnumOptionData interestCalculationPeriodEnum,
+            BigDecimal arrearsTolerance, String transactionProcessingStrategyCode, Integer graceOnPrincipalPayment,
+            Integer graceOnInterestPayment, Integer graceOnInterestCharged, LocalDate interestChargedFromDate,
+            LocalDate repaymentsStartingFromDate, Integer rowIndex, ExternalId externalId, String linkAccountId, String locale,
+            String dateFormat, Integer fixedLength) {
 
         return new LoanAccountData().setLoanType(loanTypeEnumOption).setGroupId(groupIdforGroupLoan).setProductId(productId)
                 .setLoanOfficerId(loanOfficerId).setSubmittedOnDate(submittedOnDate).setFundId(fundId).setPrincipal(principal)
                 .setNumberOfRepayments(numberOfRepayments).setRepaymentEvery(repaidEvery)
                 .setRepaymentFrequencyType(repaidEveryFrequencyEnums).setLoanTermFrequency(loanTermFrequency)
                 .setLoanTermFrequencyType(loanTermFrequencyTypeEnum).setInterestRatePerPeriod(nominalInterestRate)
-                .setAmortizationTypeOptions(List.of(amortizationEnumOption)).setInterestType(interestMethodEnum)
-                .setInterestCalculationPeriodType(interestCalculationPeriodEnum).setInArrearsTolerance(arrearsTolerance)
-                .setTransactionProcessingStrategyCode(transactionProcessingStrategyCode).setGraceOnPrincipalPayment(graceOnPrincipalPayment)
-                .setGraceOnInterestPayment(graceOnInterestPayment).setGraceOnInterestCharged(graceOnInterestCharged)
-                .setInterestChargedFromDate(interestChargedFromDate).setRepaymentsStartingFromDate(repaymentsStartingFromDate)
-                .setRowIndex(rowIndex).setExternalId(externalId).setLinkAccountId(linkAccountId).setLocale(locale).setDateFormat(dateFormat)
-                .setFixedLength(fixedLength);
+                .setAmortizationType(amortizationEnumOption).setInterestType(interestMethodEnum)
+                .setExpectedDisbursementDate(expectedDisbursementDate).setInterestCalculationPeriodType(interestCalculationPeriodEnum)
+                .setInArrearsTolerance(arrearsTolerance).setTransactionProcessingStrategyCode(transactionProcessingStrategyCode)
+                .setGraceOnPrincipalPayment(graceOnPrincipalPayment).setGraceOnInterestPayment(graceOnInterestPayment)
+                .setGraceOnInterestCharged(graceOnInterestCharged).setInterestChargedFromDate(interestChargedFromDate)
+                .setRepaymentsStartingFromDate(repaymentsStartingFromDate).setRowIndex(rowIndex).setExternalId(externalId)
+                .setLinkAccountId(linkAccountId).setLocale(locale).setDateFormat(dateFormat).setFixedLength(fixedLength);
     }
 
     public LoanAccountData withClientData(final ClientData clientData) {

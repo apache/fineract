@@ -53,10 +53,17 @@ public final class ImportHandlerUtils {
         Integer noOfEntries = 0;
         // getLastRowNum and getPhysicalNumberOfRows showing false values
         // sometimes
-        while (sheet.getRow(noOfEntries + 1) != null && sheet.getRow(noOfEntries + 1).getCell(primaryColumn) != null) {
+        while (true) {
+            Row row = sheet.getRow(noOfEntries + 1);
+            if (row == null) {
+                break;
+            }
+            Cell cell = row.getCell(primaryColumn);
+            if (cell == null || cell.getCellType() == CellType.BLANK) {
+                break;
+            }
             noOfEntries++;
         }
-
         return noOfEntries;
     }
 
