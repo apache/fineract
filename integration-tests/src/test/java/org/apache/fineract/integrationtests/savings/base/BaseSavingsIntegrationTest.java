@@ -129,8 +129,8 @@ public class BaseSavingsIntegrationTest extends IntegrationTest {
     }
 
     protected PostSavingsAccountsRequest applySavingsRequest(Long clientId, Long productId, String submittedDate) {
-        return new PostSavingsAccountsRequest().clientId(clientId.intValue()).productId(productId.intValue()).dateFormat(DATETIME_PATTERN)
-                .locale("en").submittedOnDate(submittedDate);
+        return new PostSavingsAccountsRequest().clientId(clientId).productId(productId).dateFormat(DATETIME_PATTERN).locale("en")
+                .submittedOnDate(submittedDate);
     }
 
     protected PostSavingsAccountsResponse applySavingsAccount(PostSavingsAccountsRequest request) {

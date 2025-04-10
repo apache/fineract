@@ -23,6 +23,7 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
+import org.apache.fineract.client.models.PostSavingsAccountsResponse;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
 import org.apache.fineract.client.models.PostSavingsProductsResponse;
 import org.apache.fineract.client.models.SavingsAccountData;
@@ -46,13 +47,13 @@ public class SavingsInterestPostingTest extends BaseSavingsIntegrationTest {
             // Create product
             PostSavingsProductsRequest productsRequest = dailyInterestPostingProduct();
             PostSavingsProductsResponse product = createProduct(productsRequest);
-            Integer productId = product.getResourceId();
+            Long productId = product.getResourceId();
 
             // Create accounts
             IntStream.range(0, 200)//
-                    .parallel().mapToObj(i -> applySavingsRequest(clientId, productId.longValue(), "01 January 2023"))//
+                    .parallel().mapToObj(i -> applySavingsRequest(clientId, productId, "01 January 2023"))//
                     .map(this::applySavingsAccount) //
-                    .mapToLong(savingsAccount -> savingsAccount.getResourceId().longValue()) //
+                    .mapToLong(PostSavingsAccountsResponse::getResourceId) //
                     .forEach(savingsId -> {
                         approveSavingsAccount(savingsId, "01 January 2023");
                         activateSavingsAccount(savingsId, "01 January 2023");
