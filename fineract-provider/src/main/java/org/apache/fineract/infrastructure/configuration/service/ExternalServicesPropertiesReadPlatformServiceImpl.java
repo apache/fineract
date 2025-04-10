@@ -20,13 +20,16 @@ package org.apache.fineract.infrastructure.configuration.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.campaigns.sms.data.MessageGatewayConfigurationData;
 import org.apache.fineract.infrastructure.configuration.data.ExternalServicesPropertiesData;
 import org.apache.fineract.infrastructure.configuration.data.S3CredentialsData;
 import org.apache.fineract.infrastructure.configuration.data.SMTPCredentialsData;
 import org.apache.fineract.infrastructure.configuration.exception.ExternalServiceConfigurationNotFoundException;
+import org.apache.fineract.infrastructure.core.service.StringUtil;
 import org.apache.fineract.infrastructure.gcm.domain.NotificationConfigurationData;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -99,14 +102,21 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
 
     private static final class ExternalServiceMapper implements RowMapper<ExternalServicesPropertiesData> {
 
+        List<String> secretAttributes;
+
+        ExternalServiceMapper() {
+            secretAttributes = new ArrayList<>();
+            secretAttributes.add("password");
+            secretAttributes.add("server_key");
+        }
+
         @Override
         public ExternalServicesPropertiesData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
-            // TODO Auto-generated method stub
             final String name = rs.getString("name");
             String value = rs.getString("value");
             // Masking the password as we should not send the password back
-            if (name != null && "password".equalsIgnoreCase(name)) {
-                value = "XXXX";
+            if (name != null && secretAttributes.contains(name)) {
+                value = StringUtil.maskValue(value);
             }
             return new ExternalServicesPropertiesData().setName(name).setValue(value);
         }

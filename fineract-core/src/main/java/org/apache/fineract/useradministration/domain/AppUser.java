@@ -233,7 +233,6 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
             if (command.isChangeInPasswordParameterNamed(passwordParamName, this.password, platformPasswordEncoder, getId())) {
                 final String passwordEncodedValue = command.passwordValueOfParameterNamed(passwordParamName, platformPasswordEncoder,
                         getId());
-                actualChanges.put(passwordEncodedParamName, passwordEncodedValue);
                 updatePassword(passwordEncodedValue);
             }
         }
@@ -241,7 +240,6 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
         if (command.hasParameter(passwordEncodedParamName)) {
             if (command.isChangeInStringParameterNamed(passwordEncodedParamName, this.password)) {
                 final String newValue = command.stringValueOfParameterNamed(passwordEncodedParamName);
-                actualChanges.put(passwordEncodedParamName, newValue);
                 updatePassword(newValue);
             }
         }

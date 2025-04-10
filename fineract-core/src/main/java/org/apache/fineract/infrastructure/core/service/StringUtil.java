@@ -16,24 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.configuration.data;
+package org.apache.fineract.infrastructure.core.service;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import java.io.Serializable;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
-import org.apache.fineract.infrastructure.core.jersey.serializer.MaskedValueSerializer;
+public final class StringUtil {
 
-@Data
-@NoArgsConstructor
-@Accessors(chain = true)
-public class ExternalServicesPropertiesData implements Serializable {
+    private StringUtil() {}
 
-    private static final long serialVersionUID = 1L;
+    public static String maskValue(String value) {
+        return maskValue(value, 4);
+    }
 
-    private String name;
-    @JsonSerialize(using = MaskedValueSerializer.class)
-    private String value;
+    public static String maskValue(String value, Integer unmaskedLength) {
+        if (value.length() <= unmaskedLength) {
+            return "****";
+        }
+        return value.substring(0, 1) + "*".repeat(value.length() - 1 - unmaskedLength) + value.substring(value.length() - unmaskedLength);
+    }
 
 }

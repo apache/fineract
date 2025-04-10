@@ -16,24 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.configuration.data;
+package org.apache.fineract.infrastructure.core.jersey.serializer;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import java.io.Serializable;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
-import org.apache.fineract.infrastructure.core.jersey.serializer.MaskedValueSerializer;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import java.io.IOException;
+import org.apache.fineract.infrastructure.core.service.StringUtil;
 
-@Data
-@NoArgsConstructor
-@Accessors(chain = true)
-public class ExternalServicesPropertiesData implements Serializable {
+public class MaskedValueSerializer extends JsonSerializer<String> {
 
-    private static final long serialVersionUID = 1L;
+    @Override
+    public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+        if (value == null || value.isBlank()) {
+            gen.writeString(value);
+            return;
+        }
 
-    private String name;
-    @JsonSerialize(using = MaskedValueSerializer.class)
-    private String value;
+        String masked = StringUtil.maskValue(value);
+        gen.writeString(masked);
+    }
 
 }

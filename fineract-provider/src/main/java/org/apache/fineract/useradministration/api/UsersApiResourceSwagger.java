@@ -197,8 +197,6 @@ final class UsersApiResourceSwagger {
 
             @Schema(example = "Test")
             public String firstname;
-            @Schema(example = "abc3326b1bb376351c7baeb4175f5e0504e33aadf6a158474a6d71de1befae51")
-            public String passwordEncoded;
         }
 
         @Schema(example = "1")

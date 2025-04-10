@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -83,7 +85,6 @@ public class ExternalServicesConfigurationTest {
         }
 
         // Checking for SMTP:
-
         configName = "username";
         externalServicesConfig = ExternalServicesConfigurationHelper.getExternalServicesConfigurationByServiceName(requestSpec,
                 responseSpec, "SMTP");
@@ -111,6 +112,28 @@ public class ExternalServicesConfigurationTest {
 
         }
 
+        // Checking for Notifications:
+        configName = "server_key";
+        externalServicesConfig = ExternalServicesConfigurationHelper.getExternalServicesConfigurationByServiceName(requestSpec,
+                responseSpec, "NOTIFICATION");
+        Assertions.assertNotNull(externalServicesConfig);
+
+        for (Integer configIndex = 0; configIndex < externalServicesConfig.size(); configIndex++) {
+            String name = (String) externalServicesConfig.get(configIndex).get("name");
+            String value = null;
+            if (name.equals(configName)) {
+                value = (String) externalServicesConfig.get(configIndex).get("value");
+                if (value == null) {
+                    value = "testnull";
+                }
+                LOG.info("{} : {}", name, value);
+                assertTrue(hasMoreThanThreeStars(value));
+            }
+
+        }
     }
 
+    private boolean hasMoreThanThreeStars(String input) {
+        return input != null && input.matches("(.*\\*.*){4,}");
+    }
 }
