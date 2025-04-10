@@ -36,6 +36,8 @@ import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeCalculationType;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeStrategy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeOffBehaviour;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
@@ -168,6 +170,17 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     @Column(name = "days_in_year_custom_strategy")
     private DaysInYearCustomStrategyType daysInYearCustomStrategy;
 
+    @Column(name = "enable_income_capitalization")
+    private boolean enableIncomeCapitalization = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "capitalized_income_calculation_type")
+    private LoanCapitalizedIncomeCalculationType capitalizedIncomeCalculationType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "capitalized_income_strategy")
+    private LoanCapitalizedIncomeStrategy capitalizedIncomeStrategy;
+
     public static LoanProductRelatedDetail createFrom(final CurrencyData currencyData, final BigDecimal principal,
             final BigDecimal nominalInterestRatePerPeriod, final PeriodFrequencyType interestRatePeriodFrequencyType,
             final BigDecimal nominalAnnualInterestRate, final InterestMethod interestMethod,
@@ -182,7 +195,9 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength,
             final boolean enableAccrualActivityPosting, final List<LoanSupportedInterestRefundTypes> supportedInterestRefundTypes,
             final LoanChargeOffBehaviour chargeOffBehaviour, final boolean interestRecognitionOnDisbursementDate,
-            final DaysInYearCustomStrategyType daysInYearCustomStrategy) {
+            final DaysInYearCustomStrategyType daysInYearCustomStrategy, final boolean enableIncomeCapitalization,
+            final LoanCapitalizedIncomeCalculationType capitalizedIncomeCalculationType,
+            final LoanCapitalizedIncomeStrategy capitalizedIncomeStrategy) {
 
         final MonetaryCurrency currency = MonetaryCurrency.fromCurrencyData(currencyData);
         return new LoanProductRelatedDetail(currency, principal, nominalInterestRatePerPeriod, interestRatePeriodFrequencyType,
@@ -192,7 +207,8 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
                 inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
                 isEqualAmortization, enableDownPayment, disbursedAmountPercentageForDownPayment, enableAutoRepaymentForDownPayment,
                 loanScheduleType, loanScheduleProcessingType, fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes,
-                chargeOffBehaviour, interestRecognitionOnDisbursementDate, daysInYearCustomStrategy);
+                chargeOffBehaviour, interestRecognitionOnDisbursementDate, daysInYearCustomStrategy, enableIncomeCapitalization,
+                capitalizedIncomeCalculationType, capitalizedIncomeStrategy);
     }
 
     protected LoanProductRelatedDetail() {
@@ -213,7 +229,9 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength,
             final boolean enableAccrualActivityPosting, List<LoanSupportedInterestRefundTypes> supportedInterestRefundTypes,
             final LoanChargeOffBehaviour chargeOffBehaviour, final boolean interestRecognitionOnDisbursementDate,
-            final DaysInYearCustomStrategyType daysInYearCustomStrategy) {
+            final DaysInYearCustomStrategyType daysInYearCustomStrategy, final boolean enableIncomeCapitalization,
+            final LoanCapitalizedIncomeCalculationType capitalizedIncomeCalculationType,
+            final LoanCapitalizedIncomeStrategy capitalizedIncomeStrategy) {
         this.currency = currency;
         this.principal = defaultPrincipal;
         this.nominalInterestRatePerPeriod = defaultNominalInterestRatePerPeriod;
@@ -251,6 +269,9 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         this.chargeOffBehaviour = chargeOffBehaviour;
         this.interestRecognitionOnDisbursementDate = interestRecognitionOnDisbursementDate;
         this.daysInYearCustomStrategy = daysInYearCustomStrategy;
+        this.enableIncomeCapitalization = enableIncomeCapitalization;
+        this.capitalizedIncomeCalculationType = capitalizedIncomeCalculationType;
+        this.capitalizedIncomeStrategy = capitalizedIncomeStrategy;
     }
 
     private Integer defaultToNullIfZero(final Integer value) {

@@ -59,6 +59,8 @@ import org.apache.fineract.portfolio.floatingrates.data.FloatingRateDTO;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRatePeriodData;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRate;
 import org.apache.fineract.portfolio.fund.domain.Fund;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeCalculationType;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeStrategy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeOffBehaviour;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
@@ -280,7 +282,9 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
             final LoanScheduleProcessingType loanScheduleProcessingType, final Integer fixedLength,
             final boolean enableAccrualActivityPosting, final List<LoanSupportedInterestRefundTypes> supportedInterestRefundTypes,
             final LoanChargeOffBehaviour chargeOffBehaviour, final boolean isInterestRecognitionOnDisbursementDate,
-            final DaysInYearCustomStrategyType daysInYearCustomStrategy) {
+            final DaysInYearCustomStrategyType daysInYearCustomStrategy, final boolean enableIncomeCapitalization,
+            final LoanCapitalizedIncomeCalculationType capitalizedIncomeCalculationType,
+            final LoanCapitalizedIncomeStrategy capitalizedIncomeStrategy) {
         this.fund = fund;
         this.transactionProcessingStrategyCode = transactionProcessingStrategyCode;
 
@@ -330,7 +334,8 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
                 inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType.getValue(), daysInYearType.getValue(),
                 isInterestRecalculationEnabled, isEqualAmortization, enableDownPayment, disbursedAmountPercentageForDownPayment,
                 enableAutoRepaymentForDownPayment, loanScheduleType, loanScheduleProcessingType, fixedLength, enableAccrualActivityPosting,
-                supportedInterestRefundTypes, chargeOffBehaviour, isInterestRecognitionOnDisbursementDate, daysInYearCustomStrategy);
+                supportedInterestRefundTypes, chargeOffBehaviour, isInterestRecognitionOnDisbursementDate, daysInYearCustomStrategy,
+                enableIncomeCapitalization, capitalizedIncomeCalculationType, capitalizedIncomeStrategy);
 
         this.loanProductMinMaxConstraints = new LoanProductMinMaxConstraints(defaultMinPrincipal, defaultMaxPrincipal,
                 defaultMinNominalInterestRatePerPeriod, defaultMaxNominalInterestRatePerPeriod, defaultMinNumberOfInstallments,

@@ -49,6 +49,8 @@ import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeCalculationType;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeStrategy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeOffBehaviour;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
@@ -186,7 +188,10 @@ public final class LoanProductDataValidator {
             LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE, LoanProductConstants.FIXED_LENGTH,
             LoanProductConstants.ENABLE_ACCRUAL_ACTIVITY_POSTING, LoanProductConstants.SUPPORTED_INTEREST_REFUND_TYPES,
             LoanProductConstants.CHARGE_OFF_BEHAVIOUR, LoanProductConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE,
-            LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME));
+            LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME,
+            LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME,
+            LoanProductConstants.CAPITALIZED_INCOME_CALCULATION_TYPE_PARAM_NAME,
+            LoanProductConstants.CAPITALIZED_INCOME_STRATEGY_PARAM_NAME));
 
     private static final String[] SUPPORTED_LOAN_CONFIGURABLE_ATTRIBUTES = { LoanProductConstants.amortizationTypeParamName,
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyCodeParamName,
@@ -876,6 +881,8 @@ public final class LoanProductDataValidator {
                     "supported.only.for.progressive.loan.charge.off.behaviour",
                     "Charge off behaviour is only supported for Progressive loans");
         }
+
+        validateIncomeCapitalization(transactionProcessingStrategyCode, element, baseDataValidator);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -1922,6 +1929,9 @@ public final class LoanProductDataValidator {
 
         validateRepaymentPeriodWithGraceSettings(numberOfRepayments, graceOnPrincipalPayment, graceOnInterestPayment,
                 graceOnInterestCharged, recurringMoratoriumOnPrincipalPeriods, baseDataValidator);
+
+        validateIncomeCapitalization(transactionProcessingStrategyCode, element, baseDataValidator);
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -2656,6 +2666,39 @@ public final class LoanProductDataValidator {
                 baseDataValidator.reset().parameter("graceOnPrincipalPayments.and.recurringMoratoriumOnPrincipalPeriods")
                         .value(graceOnPrincipal).value(recurMoratoriumOnPrincipal)
                         .failWithCode("causes.principal.moratorium.for.last.installment");
+            }
+        }
+    }
+
+    private void validateIncomeCapitalization(String transactionProcessingStrategyCode, JsonElement element,
+            DataValidatorBuilder baseDataValidator) {
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.CAPITALIZED_INCOME_CALCULATION_TYPE_PARAM_NAME, element)) {
+            final String capitalizedIncomeCalculationType = this.fromApiJsonHelper
+                    .extractStringNamed(LoanProductConstants.CAPITALIZED_INCOME_CALCULATION_TYPE_PARAM_NAME, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.CAPITALIZED_INCOME_CALCULATION_TYPE_PARAM_NAME)
+                    .value(capitalizedIncomeCalculationType).isOneOfEnumValues(LoanCapitalizedIncomeCalculationType.class);
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.CAPITALIZED_INCOME_STRATEGY_PARAM_NAME, element)) {
+            final String capitalizedIncomeStrategy = this.fromApiJsonHelper
+                    .extractStringNamed(LoanProductConstants.CAPITALIZED_INCOME_STRATEGY_PARAM_NAME, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.CAPITALIZED_INCOME_STRATEGY_PARAM_NAME)
+                    .value(capitalizedIncomeStrategy).isOneOfEnumValues(LoanCapitalizedIncomeStrategy.class);
+        }
+
+        if (AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY.equals(transactionProcessingStrategyCode)
+                && this.fromApiJsonHelper.parameterExists(LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME, element)) {
+            Boolean enableIncomeCapitalization = this.fromApiJsonHelper
+                    .extractBooleanNamed(LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME)
+                    .value(enableIncomeCapitalization).ignoreIfNull().validateForBooleanValue();
+        } else if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME, element)) {
+            Boolean enableIncomeCapitalization = this.fromApiJsonHelper
+                    .extractBooleanNamed(LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME, element);
+            if (Boolean.TRUE.equals(enableIncomeCapitalization)) {
+                baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME).failWithCode(
+                        "supported.only.for.progressive.loan.income.capitalization",
+                        "Income capitalization is only supported for Progressive loans");
             }
         }
     }

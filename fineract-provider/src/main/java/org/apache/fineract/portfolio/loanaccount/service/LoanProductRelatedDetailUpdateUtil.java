@@ -26,6 +26,8 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeCalculationType;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeStrategy;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
@@ -294,6 +296,28 @@ public class LoanProductRelatedDetailUpdateUtil {
                     .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE);
             actualChanges.put(LoanProductConstants.INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE, newValue);
             loanRepaymentScheduleDetail.updateInterestRecognitionOnDisbursementDate(newValue);
+        }
+
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME,
+                loanRepaymentScheduleDetail.isEnableIncomeCapitalization())) {
+            final boolean newValue = command
+                    .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME);
+            actualChanges.put(LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME, newValue);
+            loanRepaymentScheduleDetail.setEnableIncomeCapitalization(newValue);
+        }
+
+        if (command.parameterExists(LoanProductConstants.CAPITALIZED_INCOME_CALCULATION_TYPE_PARAM_NAME)) {
+            final LoanCapitalizedIncomeCalculationType newValue = command.enumValueOfParameterNamed(
+                    LoanProductConstants.CAPITALIZED_INCOME_CALCULATION_TYPE_PARAM_NAME, LoanCapitalizedIncomeCalculationType.class);
+            actualChanges.put(LoanProductConstants.CAPITALIZED_INCOME_CALCULATION_TYPE_PARAM_NAME, newValue);
+            loanRepaymentScheduleDetail.setCapitalizedIncomeCalculationType(newValue);
+        }
+
+        if (command.parameterExists(LoanProductConstants.CAPITALIZED_INCOME_STRATEGY_PARAM_NAME)) {
+            final LoanCapitalizedIncomeStrategy newValue = command.enumValueOfParameterNamed(
+                    LoanProductConstants.CAPITALIZED_INCOME_STRATEGY_PARAM_NAME, LoanCapitalizedIncomeStrategy.class);
+            actualChanges.put(LoanProductConstants.CAPITALIZED_INCOME_STRATEGY_PARAM_NAME, newValue);
+            loanRepaymentScheduleDetail.setCapitalizedIncomeStrategy(newValue);
         }
 
         return actualChanges;

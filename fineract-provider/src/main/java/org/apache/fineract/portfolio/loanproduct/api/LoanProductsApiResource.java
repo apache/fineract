@@ -81,6 +81,8 @@ import org.apache.fineract.portfolio.floatingrates.service.FloatingRatesReadPlat
 import org.apache.fineract.portfolio.fund.data.FundData;
 import org.apache.fineract.portfolio.fund.service.FundReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeCalculationType;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeStrategy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeOffBehaviour;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
@@ -127,7 +129,10 @@ public class LoanProductsApiResource {
             LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName, LoanProductConstants.DUE_DAYS_FOR_REPAYMENT_EVENT,
             LoanProductConstants.OVER_DUE_DAYS_FOR_REPAYMENT_EVENT, LoanProductConstants.ENABLE_DOWN_PAYMENT,
             LoanProductConstants.DISBURSED_AMOUNT_PERCENTAGE_DOWN_PAYMENT, LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT,
-            LoanProductConstants.REPAYMENT_START_DATE_TYPE, LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME));
+            LoanProductConstants.REPAYMENT_START_DATE_TYPE, LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME,
+            LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME,
+            LoanProductConstants.CAPITALIZED_INCOME_CALCULATION_TYPE_PARAM_NAME,
+            LoanProductConstants.CAPITALIZED_INCOME_STRATEGY_PARAM_NAME));
 
     private static final Set<String> PRODUCT_MIX_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList("productId", "productName", "restrictedProducts", "allowedProducts", "productOptions"));
@@ -439,6 +444,10 @@ public class LoanProductsApiResource {
                 .retrieveCodeValuesByCode(LoanApiConstants.CHARGE_OFF_REASONS);
         final List<StringEnumOptionData> daysInYearCustomStrategyOptions = DaysInYearCustomStrategyType
                 .getValuesAsStringEnumOptionDataList();
+        final List<StringEnumOptionData> capitalizedIncomeCalculationTypeOptions = LoanCapitalizedIncomeCalculationType
+                .getValuesAsStringEnumOptionDataList();
+        final List<StringEnumOptionData> capitalizedIncomeStrategyOptions = LoanCapitalizedIncomeStrategy
+                .getValuesAsStringEnumOptionDataList();
 
         return new LoanProductData(productData, chargeOptions, penaltyOptions, paymentTypeOptions, currencyOptions, amortizationTypeOptions,
                 interestTypeOptions, interestCalculationPeriodTypeOptions, repaymentFrequencyTypeOptions, interestRateFrequencyTypeOptions,
@@ -451,7 +460,7 @@ public class LoanProductsApiResource {
                 advancedPaymentAllocationTypes, LoanScheduleType.getValuesAsEnumOptionDataList(),
                 LoanScheduleProcessingType.getValuesAsEnumOptionDataList(), creditAllocationTransactionTypes,
                 creditAllocationAllocationTypes, supportedInterestRefundTypesOptions, chargeOffBehaviourOptions, chargeOffReasonOptions,
-                daysInYearCustomStrategyOptions);
+                daysInYearCustomStrategyOptions, capitalizedIncomeCalculationTypeOptions, capitalizedIncomeStrategyOptions);
     }
 
 }

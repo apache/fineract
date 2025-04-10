@@ -1206,6 +1206,12 @@ final class LoansApiResourceSwagger {
         public StringEnumOptionData chargeOffBehaviour;
         @Schema(example = "false")
         public Boolean interestRecognitionOnDisbursementDate;
+        @Schema(example = "false")
+        public Boolean enableIncomeCapitalization;
+        @Schema(example = "FLAT")
+        public StringEnumOptionData capitalizedIncomeCalculationType;
+        @Schema(example = "EQUAL_AMORTIZATION")
+        public StringEnumOptionData capitalizedIncomeStrategy;
     }
 
     @Schema(description = "GetLoansResponse")
@@ -1309,6 +1315,12 @@ final class LoansApiResourceSwagger {
         public BigDecimal fixedEmiAmount;
         @Schema(example = "false")
         public Boolean interestRecognitionOnDisbursementDate;
+        @Schema(example = "false")
+        public Boolean enableIncomeCapitalization;
+        @Schema(example = "FLAT", allowableValues = "FLAT")
+        public String capitalizedIncomeCalculationType;
+        @Schema(example = "EQUAL_AMORTIZATION", allowableValues = "EQUAL_AMORTIZATION")
+        public String capitalizedIncomeStrategy;
 
         public List<PostLoansRequestChargeData> charges;
 

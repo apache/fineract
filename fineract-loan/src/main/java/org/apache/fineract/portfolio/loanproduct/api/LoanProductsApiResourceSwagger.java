@@ -195,6 +195,12 @@ public final class LoanProductsApiResourceSwagger {
         public Boolean enableAccrualActivityPosting;
         @Schema(example = "false")
         public Boolean interestRecognitionOnDisbursementDate;
+        @Schema(example = "false")
+        public Boolean enableIncomeCapitalization;
+        @Schema(example = "FLAT", allowableValues = "FLAT")
+        public String capitalizedIncomeCalculationType;
+        @Schema(example = "EQUAL_AMORTIZATION", allowableValues = "EQUAL_AMORTIZATION")
+        public String capitalizedIncomeStrategy;
 
         // Interest Recalculation
         @Schema(example = "false")
@@ -651,6 +657,12 @@ public final class LoanProductsApiResourceSwagger {
         public StringEnumOptionData chargeOffBehaviour;
         @Schema(example = "false")
         public Boolean interestRecognitionOnDisbursementDate;
+        @Schema(example = "false")
+        public Boolean enableIncomeCapitalization;
+        @Schema(example = "FLAT")
+        public StringEnumOptionData capitalizedIncomeCalculationType;
+        @Schema(example = "EQUAL_AMORTIZATION")
+        public StringEnumOptionData capitalizedIncomeStrategy;
     }
 
     @Schema(description = "GetLoanProductsTemplateResponse")
@@ -1097,6 +1109,14 @@ public final class LoanProductsApiResourceSwagger {
         public List<GetLoanProductsChargeOffReasonOptions> chargeOffReasonOptions;
         public StringEnumOptionData chargeOffBehaviour;
         public List<StringEnumOptionData> chargeOffBehaviourOptions;
+        @Schema(example = "false")
+        public Boolean enableIncomeCapitalization;
+        @Schema(example = "FLAT")
+        public StringEnumOptionData capitalizedIncomeCalculationType;
+        @Schema(example = "EQUAL_AMORTIZATION")
+        public StringEnumOptionData capitalizedIncomeStrategy;
+        public List<StringEnumOptionData> capitalizedIncomeCalculationTypeOptions;
+        public List<StringEnumOptionData> capitalizedIncomeStrategyOptions;
     }
 
     @Schema(description = "GetLoanProductsProductIdResponse")
@@ -1416,6 +1436,14 @@ public final class LoanProductsApiResourceSwagger {
         public StringEnumOptionData chargeOffBehaviour;
         @Schema(example = "false")
         public Boolean interestRecognitionOnDisbursementDate;
+        @Schema(example = "false")
+        public Boolean enableIncomeCapitalization;
+        @Schema(example = "FLAT")
+        public StringEnumOptionData capitalizedIncomeCalculationType;
+        @Schema(example = "EQUAL_AMORTIZATION")
+        public StringEnumOptionData capitalizedIncomeStrategy;
+        public List<StringEnumOptionData> capitalizedIncomeCalculationTypeOptions;
+        public List<StringEnumOptionData> capitalizedIncomeStrategyOptions;
     }
 
     @Schema(description = "PutLoanProductsProductIdRequest")
@@ -1669,6 +1697,12 @@ public final class LoanProductsApiResourceSwagger {
         public List<String> supportedInterestRefundTypes;
         @Schema(example = "REGULAR")
         public String chargeOffBehaviour;
+        @Schema(example = "false")
+        public Boolean enableIncomeCapitalization;
+        @Schema(example = "FLAT", allowableValues = "FLAT")
+        public String capitalizedIncomeCalculationType;
+        @Schema(example = "EQUAL_AMORTIZATION", allowableValues = "EQUAL_AMORTIZATION")
+        public String capitalizedIncomeStrategy;
     }
 
     public static final class AdvancedPaymentData {

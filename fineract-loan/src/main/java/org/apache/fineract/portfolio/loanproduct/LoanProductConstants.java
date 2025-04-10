@@ -171,4 +171,9 @@ public interface LoanProductConstants {
     String CHARGE_OFF_BEHAVIOUR = "chargeOffBehaviour";
 
     String INTEREST_RECOGNITION_ON_DISBURSEMENT_DATE = "interestRecognitionOnDisbursementDate";
+
+    // Capitalized income
+    String ENABLE_INCOME_CAPITALIZATION_PARAM_NAME = "enableIncomeCapitalization";
+    String CAPITALIZED_INCOME_CALCULATION_TYPE_PARAM_NAME = "capitalizedIncomeCalculationType";
+    String CAPITALIZED_INCOME_STRATEGY_PARAM_NAME = "capitalizedIncomeStrategy";
 }

@@ -132,6 +132,8 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.data.PaidInAdvanceData;
 import org.apache.fineract.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeCalculationType;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeStrategy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummaryBalancesRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
@@ -1135,7 +1137,9 @@ public class LoansApiResource {
                 loanCollateralOptions, calendarOptions, notes, accountLinkingOptions, linkedAccount, disbursementData, emiAmountVariations,
                 overdueCharges, paidInAdvanceTemplate, interestRatesPeriods, clientActiveLoanOptions, rates, isRatesEnabled, collectionData,
                 LoanScheduleType.getValuesAsEnumOptionDataList(), LoanScheduleProcessingType.getValuesAsEnumOptionDataList(),
-                loanTermVariations, DaysInYearCustomStrategyType.getValuesAsStringEnumOptionDataList());
+                loanTermVariations, DaysInYearCustomStrategyType.getValuesAsStringEnumOptionDataList(),
+                LoanCapitalizedIncomeCalculationType.getValuesAsStringEnumOptionDataList(),
+                LoanCapitalizedIncomeStrategy.getValuesAsStringEnumOptionDataList());
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);

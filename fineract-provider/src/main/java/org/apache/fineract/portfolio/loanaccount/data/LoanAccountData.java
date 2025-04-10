@@ -172,6 +172,8 @@ public class LoanAccountData {
     private List<EnumOptionData> loanScheduleTypeOptions;
     private List<EnumOptionData> loanScheduleProcessingTypeOptions;
     private List<StringEnumOptionData> daysInYearCustomStrategyOptions;
+    private List<StringEnumOptionData> capitalizedIncomeCalculationTypeOptions;
+    private List<StringEnumOptionData> capitalizedIncomeStrategyOptions;
 
     @Transient
     private BigDecimal feeChargesAtDisbursementCharged;
@@ -274,6 +276,9 @@ public class LoanAccountData {
     private EnumOptionData loanScheduleProcessingType;
 
     private StringEnumOptionData chargeOffBehaviour;
+    private Boolean enableIncomeCapitalization;
+    private StringEnumOptionData capitalizedIncomeCalculationType;
+    private StringEnumOptionData capitalizedIncomeStrategy;
 
     public static LoanAccountData importInstanceIndividual(EnumOptionData loanTypeEnumOption, Long clientId, Long productId,
             Long loanOfficerId, LocalDate submittedOnDate, Long fundId, BigDecimal principal, Integer numberOfRepayments,
@@ -464,7 +469,9 @@ public class LoanAccountData {
             final BigDecimal disbursedAmountPercentageForDownPayment, final boolean enableAutoRepaymentForDownPayment,
             final boolean enableInstallmentLevelDelinquency, final EnumOptionData loanScheduleType,
             final EnumOptionData loanScheduleProcessingType, final Integer fixedLength, final StringEnumOptionData chargeOffBehaviour,
-            final boolean isInterestRecognitionOnDisbursementDate, final StringEnumOptionData daysInYearCustomStrategy) {
+            final boolean isInterestRecognitionOnDisbursementDate, final StringEnumOptionData daysInYearCustomStrategy,
+            final boolean enableIncomeCapitalization, final StringEnumOptionData capitalizedIncomeCalculationType,
+            final StringEnumOptionData capitalizedIncomeStrategy) {
 
         final CollectionData delinquent = CollectionData.template();
 
@@ -510,7 +517,9 @@ public class LoanAccountData {
                 .setEnableInstallmentLevelDelinquency(enableInstallmentLevelDelinquency).setLoanScheduleType(loanScheduleType)
                 .setLoanScheduleProcessingType(loanScheduleProcessingType).setFixedLength(fixedLength)
                 .setChargeOffBehaviour(chargeOffBehaviour).setInterestRecognitionOnDisbursementDate(isInterestRecognitionOnDisbursementDate)
-                .setDaysInYearCustomStrategy(daysInYearCustomStrategy);
+                .setDaysInYearCustomStrategy(daysInYearCustomStrategy).setEnableIncomeCapitalization(enableIncomeCapitalization)
+                .setCapitalizedIncomeCalculationType(capitalizedIncomeCalculationType)
+                .setCapitalizedIncomeStrategy(capitalizedIncomeStrategy);
     }
 
     /*
@@ -536,7 +545,9 @@ public class LoanAccountData {
             final Collection<LoanAccountSummaryData> clientActiveLoanOptions, final List<RateData> rates, final Boolean isRatesEnabled,
             final CollectionData delinquent, final List<EnumOptionData> loanScheduleTypeOptions,
             final List<EnumOptionData> loanScheduleProcessingTypeOptions, final List<LoanTermVariationsData> loanTermVariations,
-            final List<StringEnumOptionData> daysInYearCustomStrategyOptions) {
+            final List<StringEnumOptionData> daysInYearCustomStrategyOptions,
+            final List<StringEnumOptionData> capitalizedIncomeCalculationTypeOptions,
+            final List<StringEnumOptionData> capitalizedIncomeStrategyOptions) {
 
         // TODO: why are these variables 'calendarData', 'chargeTemplate' never used (see original private constructor)
 
@@ -557,7 +568,9 @@ public class LoanAccountData {
                 .setClientActiveLoanOptions(clientActiveLoanOptions).setRates(rates).setIsRatesEnabled(isRatesEnabled)
                 .setDelinquent(delinquent).setLoanScheduleTypeOptions(loanScheduleTypeOptions)
                 .setLoanScheduleProcessingTypeOptions(loanScheduleProcessingTypeOptions).setLoanTermVariations(loanTermVariations)
-                .setDaysInYearCustomStrategyOptions(daysInYearCustomStrategyOptions);
+                .setDaysInYearCustomStrategyOptions(daysInYearCustomStrategyOptions)
+                .setCapitalizedIncomeCalculationTypeOptions(capitalizedIncomeCalculationTypeOptions)
+                .setCapitalizedIncomeStrategyOptions(capitalizedIncomeStrategyOptions);
     }
 
     public LoanAccountData associationsAndTemplate(final Collection<LoanProductData> productOptions,

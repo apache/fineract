@@ -45,6 +45,8 @@ import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.service.CommonEnumerations;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeCalculationType;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeStrategy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeOffBehaviour;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
@@ -288,8 +290,11 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lp.allow_variabe_installments as isVariableIntallmentsAllowed, " + "lvi.minimum_gap as minimumGap, "
                     + "lvi.maximum_gap as maximumGap, dbuc.id as delinquencyBucketId, dbuc.name as delinquencyBucketName, "
                     + "lp.can_use_for_topup as canUseForTopup, lp.is_equal_amortization as isEqualAmortization, lp.loan_schedule_type as loanScheduleType, lp.loan_schedule_processing_type as loanScheduleProcessingType, lp.supported_interest_refund_types as supportedInterestRefundTypes, "
-                    + "lp.charge_off_behaviour as chargeOffBehaviour" + " from m_product_loan lp "
-                    + " left join m_fund f on f.id = lp.fund_id "
+                    + "lp.charge_off_behaviour as chargeOffBehaviour, " //
+                    + "lp.enable_income_capitalization as enableIncomeCapitalization, " //
+                    + "lp.capitalized_income_calculation_type as capitalizedIncomeCalculationType, " //
+                    + "lp.capitalized_income_strategy as capitalizedIncomeStrategy " //
+                    + " from m_product_loan lp " + " left join m_fund f on f.id = lp.fund_id "
                     + " left join m_product_loan_recalculation_details lpr on lpr.product_id=lp.id "
                     + " left join m_product_loan_guarantee_details lpg on lpg.loan_product_id=lp.id "
                     + " left join m_product_loan_configurable_attributes lca on lca.loan_product_id = lp.id "
@@ -552,6 +557,11 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final String chargeOffBehaviourStr = rs.getString("chargeOffBehaviour");
             final LoanChargeOffBehaviour loanChargeOffBehaviour = LoanChargeOffBehaviour.valueOf(chargeOffBehaviourStr);
             final boolean interestRecognitionOnDisbursementDate = rs.getBoolean("interestRecognitionOnDisbursementDate");
+            final boolean enableIncomeCapitalization = rs.getBoolean("enableIncomeCapitalization");
+            final StringEnumOptionData capitalizedIncomeCalculationType = LoanCapitalizedIncomeCalculationType
+                    .getStringEnumOptionData(rs.getString("capitalizedIncomeCalculationType"));
+            final StringEnumOptionData capitalizedIncomeStrategy = LoanCapitalizedIncomeStrategy
+                    .getStringEnumOptionData(rs.getString("capitalizedIncomeStrategy"));
 
             return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                     numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -576,7 +586,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     enableInstallmentLevelDelinquency, loanScheduleType.asEnumOptionData(), loanScheduleProcessingType.asEnumOptionData(),
                     fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes,
                     loanChargeOffBehaviour.getValueAsStringEnumOptionData(), interestRecognitionOnDisbursementDate,
-                    daysInYearCustomStrategy);
+                    daysInYearCustomStrategy, enableIncomeCapitalization, capitalizedIncomeCalculationType, capitalizedIncomeStrategy);
         }
     }
 

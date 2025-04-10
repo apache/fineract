@@ -106,6 +106,8 @@ import org.apache.fineract.portfolio.loanaccount.data.PaidInAdvanceData;
 import org.apache.fineract.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeCalculationType;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeStrategy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeOffBehaviour;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
@@ -722,6 +724,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                     + " l.is_floating_interest_rate as isFloatingInterestRate, "
                     + " l.interest_rate_differential as interestRateDifferential, "
                     + " l.days_in_year_custom_strategy as daysInYearCustomStrategy, "
+                    + " l.enable_income_capitalization as enableIncomeCapitalization, "
+                    + " l.capitalized_income_calculation_type as capitalizedIncomeCalculationType, "
+                    + " l.capitalized_income_strategy as capitalizedIncomeStrategy, "
                     + " l.create_standing_instruction_at_disbursement as createStandingInstructionAtDisbursement, "
                     + " lpvi.minimum_gap as minimuminstallmentgap, lpvi.maximum_gap as maximuminstallmentgap, "
                     + " lp.can_use_for_topup as canUseForTopup, l.is_topup as isTopup, topup.closure_loan_id as closureLoanId, "
@@ -1098,6 +1103,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             final boolean interestRecognitionOnDisbursementDate = rs.getBoolean("interestRecognitionOnDisbursementDate");
             final StringEnumOptionData daysInYearCustomStrategy = DaysInYearCustomStrategyType
                     .getStringEnumOptionData(rs.getString("daysInYearCustomStrategy"));
+            final boolean enableIncomeCapitalization = rs.getBoolean("enableIncomeCapitalization");
+            final StringEnumOptionData capitalizedIncomeCalculationType = LoanCapitalizedIncomeCalculationType
+                    .getStringEnumOptionData(rs.getString("capitalizedIncomeCalculationType"));
+            final StringEnumOptionData capitalizedIncomeStrategy = LoanCapitalizedIncomeStrategy
+                    .getStringEnumOptionData(rs.getString("capitalizedIncomeStrategy"));
 
             return LoanAccountData.basicLoanDetails(id, accountNo, status, externalId, clientId, clientAccountNo, clientName,
                     clientOfficeId, clientExternalId, groupData, loanType, loanProductId, loanProductName, loanProductDescription,
@@ -1117,7 +1127,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                     lastClosedBusinessDate, overpaidOnDate, isChargedOff, enableDownPayment, disbursedAmountPercentageForDownPayment,
                     enableAutoRepaymentForDownPayment, enableInstallmentLevelDelinquency, loanScheduleType.asEnumOptionData(),
                     loanScheduleProcessingType.asEnumOptionData(), fixedLength, chargeOffBehaviour.getValueAsStringEnumOptionData(),
-                    interestRecognitionOnDisbursementDate, daysInYearCustomStrategy);
+                    interestRecognitionOnDisbursementDate, daysInYearCustomStrategy, enableIncomeCapitalization,
+                    capitalizedIncomeCalculationType, capitalizedIncomeStrategy);
         }
     }
 
