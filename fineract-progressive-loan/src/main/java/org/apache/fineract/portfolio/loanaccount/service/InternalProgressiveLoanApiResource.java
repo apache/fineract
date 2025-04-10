@@ -93,13 +93,13 @@ public class InternalProgressiveLoanApiResource implements InitializingBean {
                 .map(progressiveLoanInterestScheduleModelParserService::toJson).orElse(null);
     }
 
-    private ProgressiveLoanInterestScheduleModel reprocessTransactionsAndGetModel(Loan loan) {
-        List<LoanTransaction> transactionsToReprocess = loan.retrieveListOfTransactionsForReprocessing();
-        LocalDate businessDate = ThreadLocalContextUtil.getBusinessDate();
-        Pair<ChangedTransactionDetail, ProgressiveLoanInterestScheduleModel> changedTransactionDetailProgressiveLoanInterestScheduleModelPair = advancedPaymentScheduleTransactionProcessor
-                .reprocessProgressiveLoanTransactions(loan.getDisbursementDate(), businessDate, transactionsToReprocess, loan.getCurrency(),
-                        loan.getRepaymentScheduleInstallments(), loan.getActiveCharges());
-        ProgressiveLoanInterestScheduleModel model = changedTransactionDetailProgressiveLoanInterestScheduleModelPair.getRight();
+    private ProgressiveLoanInterestScheduleModel reprocessTransactionsAndGetModel(final Loan loan) {
+        final List<LoanTransaction> transactionsToReprocess = loan.retrieveListOfTransactionsForReprocessing();
+        final LocalDate businessDate = ThreadLocalContextUtil.getBusinessDate();
+        final Pair<ChangedTransactionDetail, ProgressiveLoanInterestScheduleModel> changedTransactionDetailProgressiveLoanInterestScheduleModelPair = advancedPaymentScheduleTransactionProcessor
+                .reprocessProgressiveLoanTransactionsTransactional(loan.getDisbursementDate(), businessDate, transactionsToReprocess,
+                        loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges());
+        final ProgressiveLoanInterestScheduleModel model = changedTransactionDetailProgressiveLoanInterestScheduleModelPair.getRight();
         final List<Long> replayedTransactions = changedTransactionDetailProgressiveLoanInterestScheduleModelPair.getLeft()
                 .getTransactionChanges().stream().filter(change -> change.getOldTransaction() != null)
                 .map(change -> change.getNewTransaction().getId()).filter(Objects::nonNull).toList();

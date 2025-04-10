@@ -33,13 +33,11 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -47,10 +45,8 @@ import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.office.domain.Office;
-import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParameter;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
-import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 
 /**
@@ -71,7 +67,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
     private Office office;
 
     @ManyToOne(optional = true)
-    @JoinColumn(name = "payment_detail_id", nullable = true)
+    @JoinColumn(name = "payment_detail_id")
     private PaymentDetail paymentDetail;
 
     @Column(name = "transaction_type_enum", nullable = false)
@@ -80,63 +76,67 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
     @Column(name = "transaction_date", nullable = false)
     private LocalDate dateOf;
 
+    @Getter
     @Column(name = "submitted_on_date", nullable = false)
     private LocalDate submittedOnDate;
 
     @Column(name = "amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal amount;
 
-    @Column(name = "principal_portion_derived", scale = 6, precision = 19, nullable = true)
+    @Column(name = "principal_portion_derived", scale = 6, precision = 19)
     private BigDecimal principalPortion;
 
-    @Column(name = "interest_portion_derived", scale = 6, precision = 19, nullable = true)
+    @Column(name = "interest_portion_derived", scale = 6, precision = 19)
     private BigDecimal interestPortion;
 
-    @Column(name = "fee_charges_portion_derived", scale = 6, precision = 19, nullable = true)
+    @Column(name = "fee_charges_portion_derived", scale = 6, precision = 19)
     private BigDecimal feeChargesPortion;
 
-    @Column(name = "penalty_charges_portion_derived", scale = 6, precision = 19, nullable = true)
+    @Column(name = "penalty_charges_portion_derived", scale = 6, precision = 19)
     private BigDecimal penaltyChargesPortion;
 
-    @Column(name = "overpayment_portion_derived", scale = 6, precision = 19, nullable = true)
+    @Column(name = "overpayment_portion_derived", scale = 6, precision = 19)
     private BigDecimal overPaymentPortion;
 
-    @Column(name = "unrecognized_income_portion", scale = 6, precision = 19, nullable = true)
+    @Column(name = "unrecognized_income_portion", scale = 6, precision = 19)
     private BigDecimal unrecognizedIncomePortion;
 
     @Column(name = "is_reversed", nullable = false)
     private boolean reversed;
 
-    @Column(name = "external_id", length = 100, nullable = true, unique = true)
+    @Column(name = "external_id", length = 100, unique = true)
     private ExternalId externalId;
 
-    @Column(name = "reversal_external_id", length = 100, nullable = true, unique = true)
+    @Column(name = "reversal_external_id", length = 100, unique = true)
     private ExternalId reversalExternalId;
 
-    @Column(name = "reversed_on_date", nullable = true)
+    @Column(name = "reversed_on_date")
     private LocalDate reversedOnDate;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanTransaction", orphanRemoval = true, fetch = FetchType.EAGER)
+    @Setter
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanTransaction", orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<LoanChargePaidBy> loanChargesPaid = new HashSet<>();
 
-    @Column(name = "outstanding_loan_balance_derived", scale = 6, precision = 19, nullable = true)
+    @Column(name = "outstanding_loan_balance_derived", scale = 6, precision = 19)
     private BigDecimal outstandingLoanBalance;
 
     @Column(name = "manually_adjusted_or_reversed", nullable = false)
     private boolean manuallyAdjustedOrReversed;
 
-    @Column(name = "charge_refund_charge_type", length = 1, nullable = true, unique = true)
+    @Column(name = "charge_refund_charge_type", length = 1, unique = true)
     private String chargeRefundChargeType;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "loanTransaction")
     private Set<LoanCollateralManagement> loanCollateralManagementSet = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "loanTransaction")
+    @Getter
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "loanTransaction")
     private Set<LoanTransactionToRepaymentScheduleMapping> loanTransactionToRepaymentScheduleMappings = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "fromTransaction")
     private Set<LoanTransactionRelation> loanTransactionRelations = new HashSet<>();
 
+    @Setter
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "loanTransaction")
     private LoanReAgeParameter loanReAgeParameter;
 
@@ -207,17 +207,6 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
             PaymentDetail paymentDetail, LocalDate transactionDate, ExternalId txnExternalId) {
         return new LoanTransaction(loan, loan.getOffice(), loanTransactionType, paymentDetail, transactionAmount, transactionDate,
                 txnExternalId);
-    }
-
-    public void setLoanTransactionToRepaymentScheduleMappings(final Integer installmentId, final BigDecimal chargePerInstallment) {
-        for (LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping : this.loanTransactionToRepaymentScheduleMappings) {
-            final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = loanTransactionToRepaymentScheduleMapping
-                    .getLoanRepaymentScheduleInstallment();
-            if (loanRepaymentScheduleInstallment.getInstallmentNumber().equals(installmentId)) {
-                loanRepaymentScheduleInstallment.updateLoanRepaymentSchedule(chargePerInstallment);
-                break;
-            }
-        }
     }
 
     public static LoanTransaction recoveryRepayment(final Office office, final Money amount, final PaymentDetail paymentDetail,
@@ -527,10 +516,6 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
         return Money.of(currency, this.interestPortion);
     }
 
-    public Money getUnrecognizedIncomePortion(final MonetaryCurrency currency) {
-        return Money.of(currency, this.unrecognizedIncomePortion);
-    }
-
     public Money getFeeChargesPortion(final MonetaryCurrency currency) {
         return Money.of(currency, this.feeChargesPortion);
     }
@@ -561,10 +546,6 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
 
     public boolean isNotReversed() {
         return !isReversed();
-    }
-
-    public void setReversed() {
-        this.reversed = true;
     }
 
     public void setManuallyAdjustedOrReversed() {
@@ -621,10 +602,6 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
         return LoanTransactionType.INCOME_POSTING.equals(getTypeOf()) && isNotReversed();
     }
 
-    public boolean isNotIncomePosting() {
-        return !isIncomePosting();
-    }
-
     public boolean isDisbursement() {
         return LoanTransactionType.DISBURSEMENT.equals(getTypeOf()) && isNotReversed();
     }
@@ -647,10 +624,6 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
 
     public boolean isChargesWaiver() {
         return LoanTransactionType.WAIVE_CHARGES.equals(getTypeOf()) && isNotReversed();
-    }
-
-    public boolean isNotInterestWaiver() {
-        return !isInterestWaiver();
     }
 
     public boolean isWaiver() {
@@ -718,87 +691,6 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
 
     public boolean isNotZero() {
         return !MathUtil.isEmpty(amount);
-    }
-
-    public Map<String, Object> toMapData(final String currencyCode) {
-        final Map<String, Object> thisTransactionData = new LinkedHashMap<>();
-
-        final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(this.typeOf);
-
-        thisTransactionData.put("id", getId());
-        thisTransactionData.put("officeId", this.office.getId());
-        thisTransactionData.put("type", transactionType);
-        thisTransactionData.put("reversed", isReversed());
-        thisTransactionData.put("date", getTransactionDate());
-        thisTransactionData.put("currencyCode", currencyCode);
-        thisTransactionData.put("amount", this.amount);
-        thisTransactionData.put("netDisbursalAmount", this.loan.getNetDisbursalAmount());
-
-        if (transactionType.isChargeback()
-                && (getLoan().getCreditAllocationRules() == null || getLoan().getCreditAllocationRules().size() == 0)) {
-            thisTransactionData.put("principalPortion", this.amount);
-        } else {
-            thisTransactionData.put("principalPortion", this.principalPortion);
-        }
-
-        thisTransactionData.put("interestPortion", this.interestPortion);
-        thisTransactionData.put("feeChargesPortion", this.feeChargesPortion);
-        thisTransactionData.put("penaltyChargesPortion", this.penaltyChargesPortion);
-        thisTransactionData.put("overPaymentPortion", this.overPaymentPortion);
-        if (transactionType.isChargeRefund()) {
-            thisTransactionData.put("chargeRefundChargeType", this.chargeRefundChargeType);
-        }
-
-        if (this.paymentDetail != null) {
-            thisTransactionData.put("paymentTypeId", this.paymentDetail.getPaymentType().getId());
-        }
-
-        if (!this.loanChargesPaid.isEmpty()) {
-            final List<Map<String, Object>> loanChargesPaidData = new ArrayList<>();
-            for (final LoanChargePaidBy chargePaidBy : this.loanChargesPaid) {
-                final Map<String, Object> loanChargePaidData = new LinkedHashMap<>();
-                loanChargePaidData.put("chargeId", chargePaidBy.getLoanCharge().getCharge().getId());
-                loanChargePaidData.put("isPenalty", chargePaidBy.getLoanCharge().isPenaltyCharge());
-                loanChargePaidData.put("loanChargeId", chargePaidBy.getLoanCharge().getId());
-                loanChargePaidData.put("amount", chargePaidBy.getAmount());
-
-                loanChargesPaidData.add(loanChargePaidData);
-            }
-            thisTransactionData.put("loanChargesPaid", loanChargesPaidData);
-        }
-
-        if (transactionType.isChargeback() && this.overPaymentPortion != null && this.overPaymentPortion.compareTo(BigDecimal.ZERO) > 0) {
-            BigDecimal principalPaid = overPaymentPortion;
-            BigDecimal feePaid = BigDecimal.ZERO;
-            BigDecimal penaltyPaid = BigDecimal.ZERO;
-            if (getLoanTransactionToRepaymentScheduleMappings().size() > 0) {
-                principalPaid = getLoanTransactionToRepaymentScheduleMappings().stream()
-                        .map(mapping -> Optional.ofNullable(mapping.getPrincipalPortion()).orElse(BigDecimal.ZERO))
-                        .reduce(BigDecimal.ZERO, BigDecimal::add);
-                feePaid = getLoanTransactionToRepaymentScheduleMappings().stream()
-                        .map(mapping -> Optional.ofNullable(mapping.getFeeChargesPortion()).orElse(BigDecimal.ZERO))
-                        .reduce(BigDecimal.ZERO, BigDecimal::add);
-                penaltyPaid = getLoanTransactionToRepaymentScheduleMappings().stream()
-                        .map(mapping -> Optional.ofNullable(mapping.getPenaltyChargesPortion()).orElse(BigDecimal.ZERO))
-                        .reduce(BigDecimal.ZERO, BigDecimal::add);
-            }
-            thisTransactionData.put("principalPaid", principalPaid);
-            thisTransactionData.put("feePaid", feePaid);
-            thisTransactionData.put("penaltyPaid", penaltyPaid);
-        }
-
-        LoanTransactionRelation loanTransactionRelation = loanTransactionRelations.stream()
-                .filter(e -> LoanTransactionRelationTypeEnum.CHARGE_ADJUSTMENT.equals(e.getRelationType())).findAny().orElse(null);
-        if (loanTransactionRelation != null) {
-            LoanCharge loanCharge = loanTransactionRelation.getToCharge();
-            thisTransactionData.put("loanChargeData", loanCharge.toData());
-        }
-
-        return thisTransactionData;
-    }
-
-    public void setLoanChargesPaid(final Set<LoanChargePaidBy> loanChargesPaid) {
-        this.loanChargesPaid = loanChargesPaid;
     }
 
     public boolean isRefund() {
@@ -878,7 +770,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
         }
     }
 
-    private boolean updateMappingDetail(final Collection<LoanTransactionToRepaymentScheduleMapping> retainMappings,
+    private void updateMappingDetail(final Collection<LoanTransactionToRepaymentScheduleMapping> retainMappings,
             final LoanTransactionToRepaymentScheduleMapping updatedMapping, boolean overwrite) {
         boolean isMappingUpdated = false;
         LoanRepaymentScheduleInstallment updatedInstallment = updatedMapping.getLoanRepaymentScheduleInstallment();
@@ -910,7 +802,6 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
                 retainMappings.add(newMapping);
             }
         }
-        return isMappingUpdated;
     }
 
     public void updateLoanChargePaidMappings(final Collection<LoanChargePaidBy> updatedMappings) {
@@ -921,7 +812,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
         this.loanChargesPaid.retainAll(retainMappings);
     }
 
-    private boolean updateLoanChargePaid(final Collection<LoanChargePaidBy> retainMappings, final LoanChargePaidBy updatedMapping) {
+    private void updateLoanChargePaid(final Collection<LoanChargePaidBy> retainMappings, final LoanChargePaidBy updatedMapping) {
         boolean updated = false;
         LoanCharge updatedCharge = updatedMapping.getLoanCharge();
         Integer updatedInstallment = updatedMapping.getInstallmentNumber();
@@ -941,11 +832,6 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
             this.loanChargesPaid.add(newMapping);
             retainMappings.add(newMapping);
         }
-        return updated;
-    }
-
-    public Set<LoanTransactionToRepaymentScheduleMapping> getLoanTransactionToRepaymentScheduleMappings() {
-        return this.loanTransactionToRepaymentScheduleMappings;
     }
 
     public Boolean isAllowTypeTransactionAtTheTimeOfLastUndo() {
@@ -959,10 +845,6 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
     public boolean isPaymentTransaction() {
         return this.isNotReversed() && !(this.isDisbursement() || this.isRepaymentAtDisbursement() || this.isNonMonetaryTransaction()
                 || this.isIncomePosting());
-    }
-
-    public LocalDate getSubmittedOnDate() {
-        return submittedOnDate;
     }
 
     public boolean hasLoanTransactionRelations() {
@@ -994,10 +876,6 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
 
     public boolean isOn(final LocalDate date) {
         return DateUtils.isEqual(getTransactionDate(), date);
-    }
-
-    public void setLoanReAgeParameter(LoanReAgeParameter loanReAgeParameter) {
-        this.loanReAgeParameter = loanReAgeParameter;
     }
 
     public boolean happenedBefore(LoanTransaction loanTransaction) {

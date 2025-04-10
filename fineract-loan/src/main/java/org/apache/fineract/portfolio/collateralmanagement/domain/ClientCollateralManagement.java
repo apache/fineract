@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -52,7 +53,8 @@ public class ClientCollateralManagement extends AbstractPersistableCustom<Long> 
     @JoinColumn(name = "collateral_id", nullable = false)
     private CollateralManagementDomain collateral;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "clientCollateralManagement", fetch = FetchType.EAGER)
+    @Getter
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "clientCollateralManagement", fetch = FetchType.LAZY)
     private Set<LoanCollateralManagement> loanCollateralManagementSet = new HashSet<>();
 
     public ClientCollateralManagement() {
@@ -129,9 +131,4 @@ public class ClientCollateralManagement extends AbstractPersistableCustom<Long> 
     public CollateralManagementDomain getCollaterals() {
         return this.collateral;
     }
-
-    public Set<LoanCollateralManagement> getLoanCollateralManagementSet() {
-        return this.loanCollateralManagementSet;
-    }
-
 }

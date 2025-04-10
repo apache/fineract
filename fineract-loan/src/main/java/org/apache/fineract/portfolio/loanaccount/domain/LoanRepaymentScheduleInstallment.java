@@ -159,10 +159,10 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     @Column(name = "is_re_aged", nullable = false)
     private boolean isReAged;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "loanRepaymentScheduleInstallment")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "loanRepaymentScheduleInstallment")
     private Set<LoanInterestRecalcualtionAdditionalDetails> loanCompoundingDetails = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "loanRepaymentScheduleInstallment")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "loanRepaymentScheduleInstallment")
     private Set<PostDatedChecks> postDatedChecks = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "installment")
@@ -294,10 +294,6 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
 
     public Money getPrincipalCompleted(final MonetaryCurrency currency) {
         return Money.of(currency, this.principalCompleted);
-    }
-
-    public void updateLoanRepaymentSchedule(final BigDecimal amountWaived) {
-        this.feeChargesWaived = this.feeChargesWaived.subtract(amountWaived);
     }
 
     public Money getPrincipalWrittenOff(final MonetaryCurrency currency) {

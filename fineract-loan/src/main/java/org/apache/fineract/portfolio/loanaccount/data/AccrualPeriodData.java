@@ -43,7 +43,7 @@ public class AccrualPeriodData {
     private Money transactionAccrued;
     private final List<AccrualChargeData> charges = new ArrayList<>();
 
-    public AccrualPeriodData addCharge(AccrualChargeData charge) {
+    public AccrualPeriodData addCharge(final AccrualChargeData charge) {
         charges.add(charge);
         return this;
     }
@@ -56,34 +56,12 @@ public class AccrualPeriodData {
         return charges.stream().filter(charge -> !charge.isPenalty()).map(AccrualChargeData::getChargeAmount).reduce(null, MathUtil::plus);
     }
 
-    public Money getPenaltyAmount() {
-        return charges.stream().filter(AccrualChargeData::isPenalty).map(AccrualChargeData::getChargeAmount).reduce(null, MathUtil::plus);
-    }
-
-    public Money getChargeAccrued() {
-        return charges.stream().map(AccrualChargeData::getChargeAccrued).reduce(null, MathUtil::plus);
-    }
-
     public Money getFeeAccrued() {
         return charges.stream().filter(charge -> !charge.isPenalty()).map(AccrualChargeData::getChargeAccrued).reduce(null, MathUtil::plus);
     }
 
-    public Money getFeeTransactionAccrued() {
-        return charges.stream().filter(charge -> !charge.isPenalty()).map(AccrualChargeData::getTransactionAccrued).reduce(null,
-                MathUtil::plus);
-    }
-
     public Money getPenaltyAccrued() {
         return charges.stream().filter(AccrualChargeData::isPenalty).map(AccrualChargeData::getChargeAccrued).reduce(null, MathUtil::plus);
-    }
-
-    public Money getPenaltyTransactionAccrued() {
-        return charges.stream().filter(AccrualChargeData::isPenalty).map(AccrualChargeData::getTransactionAccrued).reduce(null,
-                MathUtil::plus);
-    }
-
-    public Money getChargeAccruable() {
-        return charges.stream().map(AccrualChargeData::getChargeAccruable).reduce(null, MathUtil::plus);
     }
 
     public Money getFeeAccruable() {

@@ -25,6 +25,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestRecalculationCompoundingMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanPreCloseInterestCalculationStrategy;
@@ -61,29 +62,37 @@ public class LoanInterestRecalculationDetails extends AbstractPersistableCustom<
     @Column(name = "rest_frequency_type_enum", nullable = false)
     private Integer restFrequencyType;
 
+    @Getter
     @Column(name = "rest_frequency_interval", nullable = false)
     private Integer restInterval;
 
-    @Column(name = "rest_frequency_nth_day_enum", nullable = true)
+    @Getter
+    @Column(name = "rest_frequency_nth_day_enum")
     private Integer restFrequencyNthDay;
 
-    @Column(name = "rest_frequency_weekday_enum", nullable = true)
+    @Getter
+    @Column(name = "rest_frequency_weekday_enum")
     private Integer restFrequencyWeekday;
 
-    @Column(name = "rest_frequency_on_day", nullable = true)
+    @Getter
+    @Column(name = "rest_frequency_on_day")
     private Integer restFrequencyOnDay;
 
-    @Column(name = "compounding_frequency_type_enum", nullable = true)
+    @Column(name = "compounding_frequency_type_enum")
     private Integer compoundingFrequencyType;
 
-    @Column(name = "compounding_frequency_interval", nullable = true)
+    @Getter
+    @Column(name = "compounding_frequency_interval")
     private Integer compoundingInterval;
 
-    @Column(name = "compounding_frequency_nth_day_enum", nullable = true)
+    @Getter
+    @Column(name = "compounding_frequency_nth_day_enum")
     private Integer compoundingFrequencyNthDay;
-    @Column(name = "compounding_frequency_weekday_enum", nullable = true)
+    @Getter
+    @Column(name = "compounding_frequency_weekday_enum")
     private Integer compoundingFrequencyWeekday;
-    @Column(name = "compounding_frequency_on_day", nullable = true)
+    @Getter
+    @Column(name = "compounding_frequency_on_day")
     private Integer compoundingFrequencyOnDay;
 
     @Column(name = "is_compounding_to_be_posted_as_transaction")
@@ -91,6 +100,7 @@ public class LoanInterestRecalculationDetails extends AbstractPersistableCustom<
     @Column(name = "allow_compounding_on_eod")
     private Boolean allowCompoundingOnEod;
 
+    @Getter
     @Column(name = "pre_close_interest_calculation_strategy")
     @Enumerated(EnumType.ORDINAL)
     private LoanPreCloseInterestCalculationStrategy preCloseInterestCalculationStrategy;
@@ -161,40 +171,8 @@ public class LoanInterestRecalculationDetails extends AbstractPersistableCustom<
         return RecalculationFrequencyType.fromInt(this.restFrequencyType);
     }
 
-    public Integer getRestInterval() {
-        return this.restInterval;
-    }
-
     public RecalculationFrequencyType getCompoundingFrequencyType() {
         return RecalculationFrequencyType.fromInt(this.compoundingFrequencyType);
-    }
-
-    public Integer getCompoundingInterval() {
-        return this.compoundingInterval;
-    }
-
-    public Integer getRestFrequencyNthDay() {
-        return this.restFrequencyNthDay;
-    }
-
-    public Integer getRestFrequencyWeekday() {
-        return this.restFrequencyWeekday;
-    }
-
-    public Integer getRestFrequencyOnDay() {
-        return this.restFrequencyOnDay;
-    }
-
-    public Integer getCompoundingFrequencyNthDay() {
-        return this.compoundingFrequencyNthDay;
-    }
-
-    public Integer getCompoundingFrequencyWeekday() {
-        return this.compoundingFrequencyWeekday;
-    }
-
-    public Integer getCompoundingFrequencyOnDay() {
-        return this.compoundingFrequencyOnDay;
     }
 
     public boolean isCompoundingToBePostedAsTransaction() {
@@ -209,7 +187,4 @@ public class LoanInterestRecalculationDetails extends AbstractPersistableCustom<
         return disallowInterestCalculationOnPastDue;
     }
 
-    public LoanPreCloseInterestCalculationStrategy getPreCloseInterestCalculationStrategy() {
-        return preCloseInterestCalculationStrategy;
-    }
 }
