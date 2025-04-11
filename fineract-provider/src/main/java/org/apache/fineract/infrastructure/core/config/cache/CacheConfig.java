@@ -109,6 +109,10 @@ public class CacheConfig {
             cacheManager.createCache("userTFAccessToken", accessTokenTemplate);
         }
 
+        if (cacheManager.getCache("payment_types") == null) {
+            cacheManager.createCache("payment_types", defaultTemplate);
+        }
+
         return cacheManager;
     }
 }
