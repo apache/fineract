@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.event.external.service.serialization.serializer.loan;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.generic.GenericContainer;
 import org.apache.fineract.avro.generator.ByteBufferSerializable;
@@ -25,17 +26,19 @@ import org.apache.fineract.avro.loan.v1.LoanProductDataV1;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.product.LoanProductBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan.LoanProductDataMapper;
-import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.AbstractBusinessEventWithCustomDataSerializer;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.ExternalEventCustomDataSerializer;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class LoanProductBusinessEventSerializer implements BusinessEventSerializer {
+public class LoanProductBusinessEventSerializer extends AbstractBusinessEventWithCustomDataSerializer<LoanProductBusinessEvent> {
 
     private final LoanProductReadPlatformService service;
     private final LoanProductDataMapper mapper;
+    private final List<ExternalEventCustomDataSerializer<LoanProductBusinessEvent>> externalEventCustomDataSerializers;
 
     @Override
     public <T> boolean canSerialize(BusinessEvent<T> event) {
@@ -46,11 +49,18 @@ public class LoanProductBusinessEventSerializer implements BusinessEventSerializ
     public <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
         LoanProductBusinessEvent event = (LoanProductBusinessEvent) rawEvent;
         LoanProductData data = service.retrieveLoanProduct(event.get().getId());
-        return mapper.map(data);
+        final LoanProductDataV1 loanProductDataV1 = mapper.map(data);
+        loanProductDataV1.setCustomData(collectCustomData(event));
+        return loanProductDataV1;
     }
 
     @Override
     public Class<? extends GenericContainer> getSupportedSchema() {
         return LoanProductDataV1.class;
+    }
+
+    @Override
+    protected List<ExternalEventCustomDataSerializer<LoanProductBusinessEvent>> getExternalEventCustomDataSerializers() {
+        return externalEventCustomDataSerializers;
     }
 }

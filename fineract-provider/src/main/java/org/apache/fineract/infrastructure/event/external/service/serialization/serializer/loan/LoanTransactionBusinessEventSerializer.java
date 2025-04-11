@@ -26,6 +26,7 @@ import org.apache.fineract.avro.loan.v1.LoanTransactionDataV1;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan.LoanTransactionDataMapper;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.AbstractBusinessEventWithCustomDataSerializer;
 import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
 import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.ExternalEventCustomDataSerializer;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
@@ -35,7 +36,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class LoanTransactionBusinessEventSerializer extends AbstractLoanBusinessEventSerializer<LoanTransactionBusinessEvent>
+public class LoanTransactionBusinessEventSerializer extends AbstractBusinessEventWithCustomDataSerializer<LoanTransactionBusinessEvent>
         implements BusinessEventSerializer {
 
     private final LoanReadPlatformService service;

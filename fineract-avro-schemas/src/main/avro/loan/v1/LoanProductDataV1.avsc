@@ -657,6 +657,17 @@
                 "null",
                 "boolean"
             ]
+        },
+        {
+            "default": null,
+            "name": "customData",
+            "type": [
+                "null",
+                {
+                    "values": "bytes",
+                    "type": "map"
+                }
+            ]
         }
     ]
 }

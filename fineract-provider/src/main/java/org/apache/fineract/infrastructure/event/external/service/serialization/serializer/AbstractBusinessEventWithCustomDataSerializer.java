@@ -16,17 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.external.service.serialization.serializer.loan;
+package org.apache.fineract.infrastructure.event.external.service.serialization.serializer;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
-import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
-import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.ExternalEventCustomDataSerializer;
 
-public abstract class AbstractLoanBusinessEventSerializer<T extends BusinessEvent<?>> implements BusinessEventSerializer {
+public abstract class AbstractBusinessEventWithCustomDataSerializer<T extends BusinessEvent<?>> implements BusinessEventSerializer {
 
     protected Map<String, ByteBuffer> collectCustomData(final T event) {
         return getExternalEventCustomDataSerializers().stream().collect(HashMap::new, (map, serializer) -> {
