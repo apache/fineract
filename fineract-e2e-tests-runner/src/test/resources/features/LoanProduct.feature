@@ -207,3 +207,9 @@ Feature: LoanProduct
       | Fraud                  |             | 2        | true      | false        |
       | Delinquent             |             | 3        | true      | false        |
       | Other                  |             | 4        | true      | false        |
+
+  Scenario: As a user I would like to verify interestRecognitionOnDisbursementDate flag in loan product response
+    When Admin sets the business date to "01 January 2025"
+    When Admin creates a client with random data
+    And Admin successfully creates a new customised Loan submitted on date: "01 January 2025", with Principal: "1000", a loanTermFrequency: 1 months, and numberOfRepayments: 1
+    Then Loan Product response contains interestRecognitionOnDisbursementDate flag with value "false"

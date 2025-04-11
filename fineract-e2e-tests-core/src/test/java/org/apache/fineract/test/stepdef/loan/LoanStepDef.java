@@ -65,6 +65,7 @@ import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.DeleteLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoanProductsChargeOffReasonOptions;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
+import org.apache.fineract.client.models.GetLoanProductsResponse;
 import org.apache.fineract.client.models.GetLoanProductsTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdDelinquencySummary;
 import org.apache.fineract.client.models.GetLoansLoanIdLoanChargeData;
@@ -3833,5 +3834,33 @@ public class LoanStepDef extends AbstractStepDef {
 
         assertThat(totalPagesActual).as(ErrorMessageHelper.wrongValueInTotalPages(totalPagesActual, totalPagesExpected))
                 .isEqualTo(totalPagesExpected);
+    }
+
+    @Then("Loan Product response contains interestRecognitionOnDisbursementDate flag with value {string}")
+    public void verifyInterestRecognitionOnDisbursementDateFlag(final String expectedValue) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        assertNotNull(loanResponse.body());
+        final Long loanId = loanResponse.body().getLoanId();
+
+        final Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetails);
+        assertNotNull(loanDetails.body());
+
+        final Long targetLoanProductId = loanDetails.body().getLoanProductId();
+
+        final Response<List<GetLoanProductsResponse>> allProductsResponse = loanProductsApi.retrieveAllLoanProducts().execute();
+        ErrorHelper.checkSuccessfulApiCall(allProductsResponse);
+
+        assertNotNull(allProductsResponse.body());
+        final List<GetLoanProductsResponse> loanProducts = allProductsResponse.body();
+        assertThat(loanProducts).isNotEmpty();
+
+        final GetLoanProductsResponse targetProduct = loanProducts.stream().filter(product -> {
+            assertNotNull(product.getId());
+            return product.getId().equals(targetLoanProductId);
+        }).findFirst().orElseThrow(() -> new AssertionError("Loan product with ID " + targetLoanProductId + " not found in response"));
+
+        assertNotNull(targetProduct.getInterestRecognitionOnDisbursementDate());
+        assertThat(targetProduct.getInterestRecognitionOnDisbursementDate().toString()).isEqualTo(expectedValue);
     }
 }

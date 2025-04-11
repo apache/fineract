@@ -649,6 +649,8 @@ public final class LoanProductsApiResourceSwagger {
         public GetLoanProductsResponse.GetLoanProductsRepaymentStartDateType repaymentStartDateType;
         public List<StringEnumOptionData> supportedInterestRefundTypes;
         public StringEnumOptionData chargeOffBehaviour;
+        @Schema(example = "false")
+        public Boolean interestRecognitionOnDisbursementDate;
     }
 
     @Schema(description = "GetLoanProductsTemplateResponse")
