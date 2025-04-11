@@ -165,7 +165,7 @@ public final class RepaymentPeriod {
         if (getPrevious().isPresent()) {
             calculatedDueInterest = calculatedDueInterest.add(getPrevious().get().getUnrecognizedInterest(), mc);
         }
-        return calculatedDueInterest;
+        return MathUtil.negativeToZero(calculatedDueInterest, mc);
     }
 
     /**
@@ -176,9 +176,10 @@ public final class RepaymentPeriod {
     public Money getDueInterest() {
         if (dueInterestCalculation == null) {
             // Due interest might be the maximum paid if there is pay-off or early repayment
-            dueInterestCalculation = Memo.of(() -> MathUtil.max(
-                    getPaidPrincipal().isGreaterThan(getCalculatedDuePrincipal()) ? getPaidInterest() : getCalculatedDueInterest(),
-                    getPaidInterest(), false), () -> new Object[] { paidPrincipal, paidInterest, interestPeriods });
+            dueInterestCalculation = Memo.of(
+                    () -> MathUtil.max(getPaidPrincipal().isGreaterThan(getCalculatedDuePrincipal()) ? getPaidInterest()
+                            : MathUtil.min(getCalculatedDueInterest(), getEmiPlusChargeback(), false), getPaidInterest(), false),
+                    () -> new Object[] { paidPrincipal, paidInterest, interestPeriods });
         }
         return dueInterestCalculation.get();
     }
@@ -198,7 +199,7 @@ public final class RepaymentPeriod {
      * @return
      */
     public Money getCalculatedDuePrincipal() {
-        return getEmiPlusChargeback().minus(getCalculatedDueInterest(), mc);
+        return MathUtil.negativeToZero(getEmiPlusChargeback().minus(getCalculatedDueInterest(), mc), mc);
     }
 
     /**
@@ -207,9 +208,9 @@ public final class RepaymentPeriod {
      * @return
      */
     public Money getChargebackPrincipal() {
-        return interestPeriods.stream() //
+        return MathUtil.negativeToZero(interestPeriods.stream() //
                 .map(InterestPeriod::getChargebackPrincipal) //
-                .reduce(getZero(mc), (value, previous) -> value.plus(previous, mc)); //
+                .reduce(getZero(mc), (value, previous) -> value.plus(previous, mc)), mc); //
     }
 
     /**
@@ -218,9 +219,9 @@ public final class RepaymentPeriod {
      * @return
      */
     public Money getChargebackInterest() {
-        return interestPeriods.stream() //
+        return MathUtil.negativeToZero(interestPeriods.stream() //
                 .map(InterestPeriod::getChargebackInterest) //
-                .reduce(getZero(mc), (value, previous) -> value.plus(previous, mc)); //
+                .reduce(getZero(mc), (value, previous) -> value.plus(previous, mc)), mc); //
     }
 
     /**
@@ -230,7 +231,7 @@ public final class RepaymentPeriod {
      */
     public Money getDuePrincipal() {
         // Due principal might be the maximum paid if there is pay-off or early repayment
-        return MathUtil.max(getEmiPlusChargeback().minus(getDueInterest(), mc), getPaidPrincipal(), false);
+        return MathUtil.max(MathUtil.negativeToZero(getEmiPlusChargeback().minus(getDueInterest(), mc), mc), getPaidPrincipal(), false);
     }
 
     /**
@@ -331,6 +332,6 @@ public final class RepaymentPeriod {
     }
 
     public Money getOutstandingPrincipal() {
-        return getDuePrincipal().minus(getPaidPrincipal());
+        return MathUtil.negativeToZero(getDuePrincipal().minus(getPaidPrincipal()), mc);
     }
 }

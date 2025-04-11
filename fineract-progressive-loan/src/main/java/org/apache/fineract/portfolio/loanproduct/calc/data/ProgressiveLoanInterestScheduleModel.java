@@ -305,7 +305,7 @@ public class ProgressiveLoanInterestScheduleModel {
      * @return
      */
     public Money getTotalDueInterest() {
-        return repaymentPeriods().stream().map(RepaymentPeriod::getDueInterest).reduce(zero(), Money::plus);
+        return MathUtil.negativeToZero(repaymentPeriods().stream().map(RepaymentPeriod::getDueInterest).reduce(zero(), Money::plus), mc);
     }
 
     /**
@@ -315,7 +315,7 @@ public class ProgressiveLoanInterestScheduleModel {
      * @return
      */
     public Money getTotalDuePrincipal() {
-        return repaymentPeriods.stream().map(RepaymentPeriod::getCreditedAmounts).reduce(zero(), Money::plus);
+        return MathUtil.negativeToZero(repaymentPeriods.stream().map(RepaymentPeriod::getCreditedAmounts).reduce(zero(), Money::plus), mc);
     }
 
     /**
@@ -324,7 +324,7 @@ public class ProgressiveLoanInterestScheduleModel {
      * @return
      */
     public Money getTotalPaidInterest() {
-        return repaymentPeriods().stream().map(RepaymentPeriod::getPaidInterest).reduce(zero, Money::plus);
+        return MathUtil.negativeToZero(repaymentPeriods().stream().map(RepaymentPeriod::getPaidInterest).reduce(zero, Money::plus), mc);
     }
 
     /**
@@ -333,7 +333,7 @@ public class ProgressiveLoanInterestScheduleModel {
      * @return
      */
     public Money getTotalPaidPrincipal() {
-        return repaymentPeriods().stream().map(RepaymentPeriod::getPaidPrincipal).reduce(zero, Money::plus);
+        return MathUtil.negativeToZero(repaymentPeriods().stream().map(RepaymentPeriod::getPaidPrincipal).reduce(zero, Money::plus), mc);
     }
 
     /**
@@ -342,7 +342,8 @@ public class ProgressiveLoanInterestScheduleModel {
      * @return
      */
     public Money getTotalChargebackPrincipal() {
-        return repaymentPeriods().stream().map(RepaymentPeriod::getChargebackPrincipal).reduce(zero, Money::plus);
+        return MathUtil.negativeToZero(repaymentPeriods().stream().map(RepaymentPeriod::getChargebackPrincipal).reduce(zero, Money::plus),
+                mc);
     }
 
     public Money getTotalOutstandingPrincipal() {
