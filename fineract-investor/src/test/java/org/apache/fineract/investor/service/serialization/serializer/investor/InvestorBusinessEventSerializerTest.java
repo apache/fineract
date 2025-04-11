@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.investor.service.serialization.serializer.investor;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.fineract.investor.data.ExternalTransferStatus.ACTIVE;
 import static org.apache.fineract.investor.data.ExternalTransferStatus.ACTIVE_INTERMEDIATE;
 import static org.apache.fineract.investor.data.ExternalTransferStatus.BUYBACK;
@@ -30,12 +31,14 @@ import static org.apache.fineract.investor.data.ExternalTransferSubStatus.BALANC
 import static org.apache.fineract.investor.data.ExternalTransferSubStatus.BALANCE_ZERO;
 import static org.apache.fineract.investor.data.ExternalTransferSubStatus.SAMEDAY_TRANSFERS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +49,7 @@ import org.apache.fineract.avro.generator.ByteBufferSerializable;
 import org.apache.fineract.avro.loan.v1.LoanOwnershipTransferDataV1;
 import org.apache.fineract.avro.loan.v1.UnpaidChargeDataV1;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.ExternalEventCustomDataSerializer;
 import org.apache.fineract.investor.data.ExternalTransferData;
 import org.apache.fineract.investor.data.ExternalTransferDataDetails;
 import org.apache.fineract.investor.data.ExternalTransferLoanData;
@@ -53,6 +57,7 @@ import org.apache.fineract.investor.data.ExternalTransferOwnerData;
 import org.apache.fineract.investor.data.ExternalTransferStatus;
 import org.apache.fineract.investor.data.ExternalTransferSubStatus;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
+import org.apache.fineract.investor.domain.InvestorBusinessEvent;
 import org.apache.fineract.investor.domain.LoanOwnershipTransferBusinessEvent;
 import org.apache.fineract.investor.service.ExternalAssetOwnersReadService;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -68,6 +73,8 @@ public class InvestorBusinessEventSerializerTest {
     public static final String ASSET_OWNER_EXTERNAL_ID = "1ad87015-8b05-49de-9ed8-e9c214fda7eb";
     public static final String LOAN_EXTERNAL_ID = "29641fe0-0ac6-409a-bb8b-24fdf08d2891";
     public static final ExternalId TRANSFER_EXTERNAL_ID = new ExternalId("ac303982-46a5-4cea-9f71-67b69063a2b7");
+
+    private static final String CUSTOM_DATA_PREFIX = "test_data_invertor_business_event";
 
     @Test
     public void testSerializationSellOK() {
@@ -134,11 +141,16 @@ public class InvestorBusinessEventSerializerTest {
                 createExternalAssetOwnerTransfer(status, subStatus), loan);
 
         // when
-        InvestorBusinessEventSerializer serializer = new InvestorBusinessEventSerializer(mockReadService);
-        ByteBufferSerializable byteBufferSerializable = serializer.toAvroDTO(loanOwnershipTransferBusinessEvent);
+        InvestorBusinessEventSerializer serializer = new InvestorBusinessEventSerializer(mockReadService, createCustomDataForEvents());
+        final ByteBufferSerializable byteBufferSerializable = serializer.toAvroDTO(loanOwnershipTransferBusinessEvent);
+        final LoanOwnershipTransferDataV1 result = (LoanOwnershipTransferDataV1) byteBufferSerializable;
 
         // then
         verifyFields(byteBufferSerializable, expectedType, expectedStatus, expectedReason);
+        assertNotNull(result.getCustomData());
+        final Map<String, ByteBuffer> customData = result.getCustomData();
+        assertEquals(CUSTOM_DATA_PREFIX + "_1", new String(customData.get("test_key_1").array(), UTF_8));
+        assertEquals(CUSTOM_DATA_PREFIX + "_2", new String(customData.get("test_key_2").array(), UTF_8));
     }
 
     private List<LoanCharge> createMockCharges() {
@@ -230,6 +242,43 @@ public class InvestorBusinessEventSerializerTest {
         data.setTransferExternalId(TRANSFER_EXTERNAL_ID.getValue());
         data.setDetails(details);
         return data;
+    }
+
+    private List<ExternalEventCustomDataSerializer<InvestorBusinessEvent>> createCustomDataForEvents() {
+        return List.of(new ExternalEventCustomDataSerializer<>() {
+
+            @Override
+            public ByteBuffer serialize(final InvestorBusinessEvent event) {
+                return ByteBuffer.wrap(CUSTOM_DATA_PREFIX.getBytes(UTF_8));
+            }
+
+            @Override
+            public String key() {
+                return "test_key_1";
+            }
+        }, new ExternalEventCustomDataSerializer<>() {
+
+            @Override
+            public ByteBuffer serialize(final InvestorBusinessEvent event) {
+                return ByteBuffer.wrap((CUSTOM_DATA_PREFIX + "_1").getBytes(UTF_8));
+            }
+
+            @Override
+            public String key() {
+                return "test_key_1";
+            }
+        }, new ExternalEventCustomDataSerializer<>() {
+
+            @Override
+            public ByteBuffer serialize(final InvestorBusinessEvent event) {
+                return ByteBuffer.wrap((CUSTOM_DATA_PREFIX + "_2").getBytes(UTF_8));
+            }
+
+            @Override
+            public String key() {
+                return "test_key_2";
+            }
+        });
     }
 
 }
