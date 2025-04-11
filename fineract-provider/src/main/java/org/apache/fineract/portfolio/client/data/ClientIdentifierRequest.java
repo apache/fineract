@@ -16,15 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.client.service;
+package org.apache.fineract.portfolio.client.data;
 
-import java.util.List;
-import org.apache.fineract.portfolio.client.data.ClientIdentifierData;
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-public interface ClientIdentifierReadPlatformService {
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class ClientIdentifierRequest implements Serializable {
 
-    List<ClientIdentifierData> retrieveClientIdentifiers(Long clientId);
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    ClientIdentifierData retrieveClientIdentifier(Long clientId, Long clientIdentifierId);
+    @Schema(example = "1")
+    public Long documentTypeId;
+    @Schema(example = "KA-54677")
+    public String documentKey;
+    @Schema(example = "Document has been verified")
+    public String description;
+    @Schema(example = "Active")
+    public String status;
 
 }

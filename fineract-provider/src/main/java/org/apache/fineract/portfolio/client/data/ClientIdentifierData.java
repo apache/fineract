@@ -18,13 +18,22 @@
  */
 package org.apache.fineract.portfolio.client.data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Collection;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 
 /**
  * Immutable data object represent client identity data.
  */
-public class ClientIdentifierData {
+@Data
+@AllArgsConstructor
+public class ClientIdentifierData implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private final Long id;
     private final Long clientId;
@@ -47,17 +56,5 @@ public class ClientIdentifierData {
     public static ClientIdentifierData template(final ClientIdentifierData data, final Collection<CodeValueData> codeValues) {
         return new ClientIdentifierData(data.id, data.clientId, data.documentType, data.documentKey, data.description, data.status,
                 codeValues);
-    }
-
-    public ClientIdentifierData(final Long id, final Long clientId, final CodeValueData documentType, final String documentKey,
-            final String description, final String status, final Collection<CodeValueData> allowedDocumentTypes) {
-        this.id = id;
-
-        this.clientId = clientId;
-        this.documentType = documentType;
-        this.documentKey = documentKey;
-        this.description = description;
-        this.allowedDocumentTypes = allowedDocumentTypes;
-        this.status = status;
     }
 }
