@@ -208,8 +208,19 @@ Feature: LoanProduct
       | Delinquent             |             | 3        | true      | false        |
       | Other                  |             | 4        | true      | false        |
 
-  Scenario: As a user I would like to verify interestRecognitionOnDisbursementDate flag in loan product response
+  @TestRailId:C3587
+  Scenario: As a user I would like to verify interestRecognitionOnDisbursementDate=false flag in loan product response
     When Admin sets the business date to "01 January 2025"
     When Admin creates a client with random data
     And Admin successfully creates a new customised Loan submitted on date: "01 January 2025", with Principal: "1000", a loanTermFrequency: 1 months, and numberOfRepayments: 1
     Then Loan Product response contains interestRecognitionOnDisbursementDate flag with value "false"
+
+  @TestRailId:C3588
+  Scenario: As a user I would like to verify interestRecognitionOnDisbursementDate=true flag in loan product response
+    When Admin sets the business date to "01 January 2025"
+    When Admin creates a client with random data
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_RECOGNITION_DISBURSEMENT_DAILY_EMI_360_30_ACCRUAL_ACTIVITY | 01 January 2025   | 1000           | 26                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 4                 | MONTHS                | 1              | MONTHS                 | 4                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    Then Loan Product response contains interestRecognitionOnDisbursementDate flag with value "true"

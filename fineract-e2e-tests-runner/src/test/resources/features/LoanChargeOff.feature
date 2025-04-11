@@ -6614,6 +6614,7 @@ Feature: Charge-off
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
       | 1000          | 54.75    | 0    | 0         | 1054.75 | 0    | 0          | 0    | 1054.75     |
+    Then Loan Product response contains interestRecognitionOnDisbursementDate flag with value "true"
     And Admin successfully approves the loan on "1 January 2024" with "1000" amount and expected disbursement date on "1 January 2024"
     And Admin successfully disburse the loan on "1 January 2024" with "1000" EUR transaction amount
     And Admin runs inline COB job for Loan
@@ -6662,6 +6663,7 @@ Feature: Charge-off
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
       | 1000          | 54.75    | 0    | 0         | 1054.75 | 0    | 0          | 0    | 1054.75     |
+    Then Loan Product response contains interestRecognitionOnDisbursementDate flag with value "false"
     And Admin successfully approves the loan on "1 January 2024" with "1000" amount and expected disbursement date on "1 January 2024"
     And Admin successfully disburse the loan on "1 January 2024" with "1000" EUR transaction amount
     And Admin runs inline COB job for Loan

@@ -4556,6 +4556,7 @@ Feature: LoanAccrualActivity
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
       | LP2_ADV_PYMNT_INTEREST_RECOGNITION_DISBURSEMENT_DAILY_EMI_360_30_ACCRUAL_ACTIVITY | 31 January 2024   | 2000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    Then Loan Product response contains interestRecognitionOnDisbursementDate flag with value "true"
     And Admin successfully approves the loan on "31 January 2024" with "2000" amount and expected disbursement date on "31 January 2024"
     When Admin successfully disburse the loan on "31 January 2024" with "2000" EUR transaction amount
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
@@ -5052,6 +5053,7 @@ Feature: LoanAccrualActivity
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
       | LP2_ADV_PYMNT_INTEREST_RECOGNITION_DISBURSEMENT_DAILY_EMI_360_30_ACCRUAL_ACTIVITY | 01 January 2024   | 200            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    Then Loan Product response contains interestRecognitionOnDisbursementDate flag with value "true"
     And Admin successfully approves the loan on "01 January 2024" with "200" amount and expected disbursement date on "01 January 2024"
     When Admin successfully disburse the loan on "01 January 2024" with "200" EUR transaction amount
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
@@ -5393,6 +5395,7 @@ Feature: LoanAccrualActivity
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
       | LP2_ADV_PYMNT_INTEREST_RECOGNITION_DISBURSEMENT_DAILY_EMI_360_30_ACCRUAL_ACTIVITY | 01 January 2024   | 2000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    Then Loan Product response contains interestRecognitionOnDisbursementDate flag with value "true"
     And Admin successfully approves the loan on "01 January 2024" with "2000" amount and expected disbursement date on "01 January 2024"
     When Admin successfully disburse the loan on "01 January 2024" with "2000" EUR transaction amount
     #run COB for 01st of Jan 2024
@@ -5729,6 +5732,7 @@ Feature: LoanAccrualActivity
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
       | LP2_ADV_PYMNT_INTEREST_RECOGNITION_DISBURSEMENT_DAILY_EMI_360_30_ACCRUAL_ACTIVITY | 01 January 2024   | 2000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    Then Loan Product response contains interestRecognitionOnDisbursementDate flag with value "true"
     And Admin successfully approves the loan on "01 January 2024" with "2000" amount and expected disbursement date on "01 January 2024"
     When Admin successfully disburse the loan on "01 January 2024" with "2000" EUR transaction amount
     #run COB for 01st of Jan 2024
