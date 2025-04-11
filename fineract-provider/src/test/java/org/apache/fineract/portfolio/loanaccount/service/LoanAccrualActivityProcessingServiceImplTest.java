@@ -26,17 +26,13 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.stream.Stream;
+import java.util.ArrayList;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountService;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -54,9 +50,6 @@ public class LoanAccrualActivityProcessingServiceImplTest {
     private Loan loan;
 
     @Mock
-    private LoanStatus loanStatus;
-
-    @Mock
     private LoanProductRelatedDetail loanProductRelatedDetail;
 
     @Mock
@@ -68,22 +61,12 @@ public class LoanAccrualActivityProcessingServiceImplTest {
     @Mock
     private LoanTransactionAssembler loanTransactionAssembler;
 
-    @BeforeEach
-    void setUp() {
-        when(loan.isClosed()).thenReturn(false);
-        when(loan.getStatus()).thenReturn(loanStatus);
-        when(loanStatus.isOverpaid()).thenReturn(false);
-    }
-
-    @ParameterizedTest
-    @MethodSource("loanStatusTestCases")
-    void addPeriodicAccruals_ShouldNotProceed_WhenLoanIsClosedOrOverpaid(final boolean isClosed, final boolean isOverpaid) {
+    @Test
+    void addPeriodicAccruals_ShouldNotProceed_WhenLoanIsNotOpen() {
         // Given
         final LocalDate currentDate = LocalDate.now(ZoneId.systemDefault());
-        when(loan.isClosed()).thenReturn(isClosed);
 
-        when(loan.getStatus()).thenReturn(loanStatus);
-        when(loanStatus.isOverpaid()).thenReturn(isOverpaid);
+        when(loan.isOpen()).thenReturn(false);
 
         when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
         when(loanProductRelatedDetail.isEnableAccrualActivityPosting()).thenReturn(true);
@@ -92,7 +75,7 @@ public class LoanAccrualActivityProcessingServiceImplTest {
         accrualActivityProcessingService.makeAccrualActivityTransaction(loan, currentDate);
 
         // Then
-        verify(loan, times(1)).isClosed();
+        verify(loan, times(1)).isOpen();
 
         verify(loan, never()).getRepaymentScheduleInstallments(any());
         verify(loan, never()).addLoanTransaction(any());
@@ -102,9 +85,29 @@ public class LoanAccrualActivityProcessingServiceImplTest {
         verify(businessEventNotifierService, never()).notifyPostBusinessEvent(any());
     }
 
-    private static Stream<Arguments> loanStatusTestCases() {
-        return Stream.of(Arguments.of(true, false), // Loan is closed
-                Arguments.of(false, true) // Loan is overpaid
-        );
+    @Test
+    void addPeriodicAccruals_ShouldProceed_WhenLoanIsOpen() {
+        // Given
+        final LocalDate currentDate = LocalDate.now(ZoneId.systemDefault());
+
+        when(loan.isOpen()).thenReturn(true);
+
+        when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
+        when(loanProductRelatedDetail.isEnableAccrualActivityPosting()).thenReturn(true);
+        when(loan.getRepaymentScheduleInstallments()).thenReturn(new ArrayList<>());
+
+        // When
+        accrualActivityProcessingService.makeAccrualActivityTransaction(loan, currentDate);
+
+        // Then
+        verify(loan, times(1)).isOpen();
+
+        verify(loan).getRepaymentScheduleInstallments(any());
+        verify(loan, never()).addLoanTransaction(any());
+        verify(loanAccountService, never()).saveLoanTransactionWithDataIntegrityViolationChecks(any());
+        verify(loanTransactionAssembler, never()).assembleAccrualActivityTransaction(any(), any(), any());
+        verify(businessEventNotifierService, never()).notifyPreBusinessEvent(any());
+        verify(businessEventNotifierService, never()).notifyPostBusinessEvent(any());
     }
+
 }

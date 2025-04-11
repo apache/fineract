@@ -65,7 +65,7 @@ public class LoanAccrualActivityProcessingServiceImpl implements LoanAccrualActi
 
     @Override
     public void makeAccrualActivityTransaction(@NotNull Loan loan, @NotNull LocalDate currentDate) {
-        if (!loan.getLoanProductRelatedDetail().isEnableAccrualActivityPosting() || loan.isClosed() || loan.getStatus().isOverpaid()) {
+        if (!loan.getLoanProductRelatedDetail().isEnableAccrualActivityPosting() || !loan.isOpen()) {
             return;
         }
         // check if loan has installment in the past or due on current date
