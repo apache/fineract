@@ -19,17 +19,21 @@
 
 package org.apache.fineract.infrastructure.event.external.service.serialization.serializer.loan;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.fineract.avro.loan.v1.LoanTransactionAdjustmentDataV1;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
@@ -41,6 +45,7 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAdjustT
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan.LoanTransactionDataMapperImpl;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroDateTimeMapper;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.ExternalIdMapper;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.ExternalEventCustomDataSerializer;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
@@ -87,8 +92,44 @@ public class LoanAdjustTransactionBusinessEventSerializerTest {
     @Test
     void loanTransactionReversedOnDateSerializationTest() {
         Loan loanForProcessing = Mockito.mock(Loan.class);
+        final List<ExternalEventCustomDataSerializer<LoanAdjustTransactionBusinessEvent>> externalEventCustomDataSerializers = List
+                .of(new ExternalEventCustomDataSerializer<>() {
+
+                    @Override
+                    public ByteBuffer serialize(final LoanAdjustTransactionBusinessEvent event) {
+                        return ByteBuffer.wrap("test_data_for_loan_adjust_transaction".getBytes(UTF_8));
+                    }
+
+                    @Override
+                    public String key() {
+                        return "test_key_1";
+                    }
+                }, new ExternalEventCustomDataSerializer<>() {
+
+                    @Override
+                    public ByteBuffer serialize(final LoanAdjustTransactionBusinessEvent event) {
+                        return ByteBuffer.wrap("test_data_for_loan_adjust_transaction_1".getBytes(UTF_8));
+                    }
+
+                    @Override
+                    public String key() {
+                        return "test_key_1";
+                    }
+                }, new ExternalEventCustomDataSerializer<>() {
+
+                    @Override
+                    public ByteBuffer serialize(final LoanAdjustTransactionBusinessEvent event) {
+                        return ByteBuffer.wrap("test_data_for_loan_adjust_transaction_2".getBytes(UTF_8));
+                    }
+
+                    @Override
+                    public String key() {
+                        return "test_key_2";
+                    }
+                });
         LoanAdjustTransactionBusinessEventSerializer serializer = new LoanAdjustTransactionBusinessEventSerializer(service,
-                new LoanTransactionDataMapperImpl(avroDateTimeMapper, externalIdMapper), loanChargePaidByReadService);
+                new LoanTransactionDataMapperImpl(avroDateTimeMapper, externalIdMapper), loanChargePaidByReadService,
+                externalEventCustomDataSerializers);
         LoanTransaction transactionToAdjust = Mockito.mock(LoanTransaction.class);
         LoanAdjustTransactionBusinessEvent.Data loanAdjustTransactionBusinessEventData = new LoanAdjustTransactionBusinessEvent.Data(
                 transactionToAdjust);
@@ -112,5 +153,10 @@ public class LoanAdjustTransactionBusinessEventSerializerTest {
         LoanTransactionAdjustmentDataV1 loanTransactionAdjustmentDataV1 = (LoanTransactionAdjustmentDataV1) serializer
                 .toAvroDTO(businessEvent);
         assertEquals(reversedLocalDate, loanTransactionAdjustmentDataV1.getTransactionToAdjust().getReversedOnDate());
+
+        assertNotNull(loanTransactionAdjustmentDataV1.getCustomData());
+        final Map<String, ByteBuffer> customData = loanTransactionAdjustmentDataV1.getCustomData();
+        assertEquals("test_data_for_loan_adjust_transaction_1", new String(customData.get("test_key_1").array(), UTF_8));
+        assertEquals("test_data_for_loan_adjust_transaction_2", new String(customData.get("test_key_2").array(), UTF_8));
     }
 }
