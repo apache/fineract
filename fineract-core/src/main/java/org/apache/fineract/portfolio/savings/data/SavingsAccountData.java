@@ -32,7 +32,6 @@ import lombok.Getter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.staff.data.StaffData;
@@ -48,7 +47,6 @@ import org.apache.fineract.portfolio.tax.data.TaxGroupData;
  * Immutable data object representing a savings account.
  */
 @Getter
-@JsonLocalDateArrayFormat
 public final class SavingsAccountData implements Serializable {
 
     private final Long id;

@@ -28,7 +28,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.jersey.converter.LocalDateJsonConverter;
 import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JacksonLocalDateArraySerializer;
-import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateStringFormat;
 
 @SuppressFBWarnings({ "SE_BAD_FIELD", "SE_BAD_FIELD_STORE" })
 public class JacksonLocalDateBeanSerializerModifier extends BeanSerializerModifier {
@@ -40,10 +40,10 @@ public class JacksonLocalDateBeanSerializerModifier extends BeanSerializerModifi
     @SuppressWarnings("unchecked")
     public List<BeanPropertyWriter> changeProperties(SerializationConfig config, BeanDescription beanDesc,
             List<BeanPropertyWriter> beanProperties) {
-        if (beanDesc.getBeanClass().isAnnotationPresent(JsonLocalDateArrayFormat.class)) {
-            assignLocalDateSerializer(beanProperties, (JsonSerializer<Object>) localDateArraySerializer);
-        } else {
+        if (beanDesc.getBeanClass().isAnnotationPresent(JsonLocalDateStringFormat.class)) {
             assignLocalDateSerializer(beanProperties, (JsonSerializer<Object>) localDateSerializer);
+        } else {
+            assignLocalDateSerializer(beanProperties, (JsonSerializer<Object>) localDateArraySerializer);
         }
 
         return beanProperties;

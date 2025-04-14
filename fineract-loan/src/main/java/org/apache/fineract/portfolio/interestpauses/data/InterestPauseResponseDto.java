@@ -22,10 +22,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateStringFormat;
 
 @Getter
 @AllArgsConstructor
 @Schema(description = "Response DTO for Interest Pause periods")
+@JsonLocalDateStringFormat
 public class InterestPauseResponseDto {
 
     @Schema(example = "1", description = "ID of the loan term variation")
