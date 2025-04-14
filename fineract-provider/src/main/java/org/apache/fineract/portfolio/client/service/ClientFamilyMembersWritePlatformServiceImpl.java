@@ -354,26 +354,14 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
 
     @Override
     public CommandProcessingResult deleteFamilyMember(Long clientFamilyMemberId, JsonCommand command) {
-        // TODO Auto-generated method stub
-
         this.context.authenticatedUser();
 
         apiJsonDeserializer.validateForDelete(clientFamilyMemberId);
 
-        ClientFamilyMembers clientFamilyMember = null;
+        ClientFamilyMembers clientFamilyMember = clientFamilyRepository.getReferenceById(clientFamilyMemberId);
+        clientFamilyRepository.delete(clientFamilyMember);
 
-        if (clientFamilyMemberId != null) {
-            clientFamilyMember = clientFamilyRepository.getReferenceById(clientFamilyMemberId);
-            clientFamilyRepository.delete(clientFamilyMember);
-
-        }
-
-        if (clientFamilyMember != null) {
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(clientFamilyMember.getId()).build();
-        } else {
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(Long.valueOf(clientFamilyMemberId))
-                    .build();
-        }
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(clientFamilyMember.getId()).build();
 
     }
 

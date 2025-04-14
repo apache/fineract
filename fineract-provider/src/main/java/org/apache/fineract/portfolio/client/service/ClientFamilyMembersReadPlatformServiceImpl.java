@@ -22,7 +22,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
@@ -91,7 +90,7 @@ public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyM
     }
 
     @Override
-    public Collection<ClientFamilyMembersData> getClientFamilyMembers(long clientId) {
+    public List<ClientFamilyMembersData> getClientFamilyMembers(long clientId) {
 
         this.context.authenticatedUser();
 
