@@ -4666,3 +4666,35 @@ Feature: LoanRepayment
       | 12 April 2025    | Accrual          | 1.0     | 0.0       | 1.0      | 0.0  | 0.0       |   0.0        | false    | false    |
       | 13 April 2025    | Accrual          | 0.7     | 0.0       | 0.7      | 0.0  | 0.0       |   0.0        | false    | false    |
       | 14 April 2025    | Accrual          | 0.9     | 0.0       | 0.9      | 0.0  | 0.0       |   0.0        | false    | false    |
+
+  @TestRailId:C3590
+  Scenario: Verify no accrual activity created for approved interest bearing loan
+    When Admin sets the business date to "03 June 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                           | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_REFUND_INTEREST_RECALCULATION | 03 June 2025      | 200            | 15                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "03 June 2025" with "200" amount and expected disbursement date on "03 June 2025"
+    And Admin runs inline COB job for Loan
+    Then Loan Repayment schedule has 1 periods, with the following data for periods:
+      | Nr | Days | Date         | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 03 June 2025 |           | 200.0           |               |          | 0.0  |           | 0.0    |      |            |      | 0.0         |
+      | 1  | 30   | 03 July 2025 |           | 0.0             | 200.0         | 2.47     | 0.0  | 0.0       | 202.47 | 0.0  | 0.0        | 0.0  | 202.47      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
+      | 200.0         | 2.47     | 0.0  | 0.0       | 202.47 | 0.0   | 0.0        | 0.0   | 202.47      |
+    When Admin successfully disburse the loan on "03 June 2025" with "200" EUR transaction amount
+    And Admin sets the business date to "18 June 2025"
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "18 June 2025" with 50 EUR transaction amount and self-generated Idempotency key
+    Then Loan Repayment schedule has 1 periods, with the following data for periods:
+      | Nr | Days | Date         | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 03 June 2025 |           | 200.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 30   | 03 July 2025 |           | 0.0             | 200.0         | 2.16     | 0.0  | 0.0       | 202.16 | 50.31 | 50.31      | 0.0  | 151.85      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
+      | 200.0         | 2.16     | 0.0  | 0.0       | 202.16 | 50.31 | 50.31      | 0.0   | 151.85      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 03 June 2025     | Disbursement           | 200.0  | 0.0       | 0.0      | 0.0  | 0.0       | 200.0        | false    |
+      | 18 June 2025     | Merchant Issued Refund | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    |
+      | 18 June 2025     | Interest Refund        | 0.31   | 0.31      | 0.0      | 0.0  | 0.0       | 149.69       | false    |
