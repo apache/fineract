@@ -18,9 +18,13 @@
  */
 package org.apache.fineract.portfolio.interestratechart.data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -28,32 +32,37 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 /**
  * Immutable data object representing a InterestRateChart.
  */
-public final class InterestRateChartData {
+@Data
+@NoArgsConstructor
+public final class InterestRateChartData implements Serializable {
 
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final LocalDate fromDate;
-    private final LocalDate endDate;
-    private final Long productId;
-    private final String productName;
-    private final boolean isPrimaryGroupingByAmount;
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    private Long id;
+    private String name;
+    private String description;
+    private LocalDate fromDate;
+    private LocalDate endDate;
+    private Long productId;
+    private String productName;
+    private Boolean isPrimaryGroupingByAmount;
 
     // associations
     private Collection<InterestRateChartSlabData> chartSlabs;
 
     // template
-    private final Collection<EnumOptionData> periodTypes;
-    private final Collection<EnumOptionData> entityTypeOptions;
-    private final Collection<EnumOptionData> attributeNameOptions;
-    private final Collection<EnumOptionData> conditionTypeOptions;
-    private final Collection<EnumOptionData> incentiveTypeOptions;
-    private final Collection<CodeValueData> genderOptions;
-    private final Collection<CodeValueData> clientTypeOptions;
-    private final Collection<CodeValueData> clientClassificationOptions;
+    private Collection<EnumOptionData> periodTypes;
+    private Collection<EnumOptionData> entityTypeOptions;
+    private Collection<EnumOptionData> attributeNameOptions;
+    private Collection<EnumOptionData> conditionTypeOptions;
+    private Collection<EnumOptionData> incentiveTypeOptions;
+    private Collection<CodeValueData> genderOptions;
+    private Collection<CodeValueData> clientTypeOptions;
+    private Collection<CodeValueData> clientClassificationOptions;
 
     public static InterestRateChartData instance(Long id, String name, String description, LocalDate fromDate, LocalDate endDate,
-            boolean isPrimaryGroupingByAmount, Long savingsProductId, String savingsProductName) {
+            Boolean isPrimaryGroupingByAmount, Long savingsProductId, String savingsProductName) {
         Collection<EnumOptionData> periodTypes = null;
         Collection<InterestRateChartSlabData> chartSlabs = null;
         final Collection<EnumOptionData> entityTypeOptions = null;
@@ -99,7 +108,7 @@ public final class InterestRateChartData {
         final String description = null;
         final LocalDate fromDate = null;
         final LocalDate endDate = null;
-        final boolean isPrimaryGroupingByAmount = false;
+        final Boolean isPrimaryGroupingByAmount = false;
         final Long savingsProductId = null;
         final String savingsProductName = null;
         final Collection<InterestRateChartSlabData> chartSlabs = null;
@@ -110,7 +119,7 @@ public final class InterestRateChartData {
     }
 
     private InterestRateChartData(Long id, String name, String description, LocalDate fromDate, LocalDate endDate,
-            boolean isPrimaryGroupingByAmount, Long savingsProductId, String savingsProductName,
+            Boolean isPrimaryGroupingByAmount, Long savingsProductId, String savingsProductName,
             Collection<InterestRateChartSlabData> chartSlabs, Collection<EnumOptionData> periodTypes,
             final Collection<EnumOptionData> entityTypeOptions, final Collection<EnumOptionData> attributeNameOptions,
             final Collection<EnumOptionData> conditionTypeOptions, final Collection<EnumOptionData> incentiveTypeOptions,
@@ -145,62 +154,6 @@ public final class InterestRateChartData {
 
     public boolean isFromDateAfter(final LocalDate compareDate) {
         return compareDate != null && DateUtils.isAfter(this.fromDate, compareDate);
-    }
-
-    public LocalDate endDate() {
-        return this.endDate;
-    }
-
-    public LocalDate fromDate() {
-        return this.fromDate;
-    }
-
-    public String name() {
-        return this.name;
-    }
-
-    public String description() {
-        return this.description;
-    }
-
-    public Collection<InterestRateChartSlabData> chartSlabs() {
-        return this.chartSlabs;
-    }
-
-    public Collection<EnumOptionData> periodTypes() {
-        return this.periodTypes;
-    }
-
-    public Collection<EnumOptionData> entityTypeOptions() {
-        return this.entityTypeOptions;
-    }
-
-    public Collection<EnumOptionData> attributeNameOptions() {
-        return this.attributeNameOptions;
-    }
-
-    public Collection<EnumOptionData> conditionTypeOptions() {
-        return this.conditionTypeOptions;
-    }
-
-    public Collection<EnumOptionData> incentiveTypeOptions() {
-        return this.incentiveTypeOptions;
-    }
-
-    public Collection<CodeValueData> genderOptions() {
-        return this.genderOptions;
-    }
-
-    public Collection<CodeValueData> clientTypeOptions() {
-        return this.clientTypeOptions;
-    }
-
-    public Collection<CodeValueData> clientClassificationOptions() {
-        return this.clientClassificationOptions;
-    }
-
-    public boolean isPrimaryGroupingByAmount() {
-        return this.isPrimaryGroupingByAmount;
     }
 
 }

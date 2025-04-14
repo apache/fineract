@@ -125,17 +125,6 @@ final class InterestRateChartsApiResourceSwagger {
         public Long resourceId;
     }
 
-    @Schema(description = "PutInterestRateChartsChartIdRequest")
-    public static final class PutInterestRateChartsChartIdRequest {
-
-        private PutInterestRateChartsChartIdRequest() {}
-
-        @Schema(example = "Interest rate chart for 2014")
-        public String name;
-        @Schema(example = "Interest rate chart for 2014")
-        public String description;
-    }
-
     @Schema(description = "PutInterestRateChartsChartIdResponse")
     public static final class PutInterestRateChartsChartIdResponse {
 

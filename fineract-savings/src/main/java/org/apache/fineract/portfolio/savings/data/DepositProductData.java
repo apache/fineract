@@ -389,7 +389,7 @@ public class DepositProductData {
                 if (activeChart == null) {
                     activeChart = chartData;
                 } else {
-                    if (!activeChart.isFromDateAfter(chartData.endDate())) {
+                    if (!activeChart.isFromDateAfter(chartData.getEndDate())) {
                         activeChart = chartData;
                     }
                 }

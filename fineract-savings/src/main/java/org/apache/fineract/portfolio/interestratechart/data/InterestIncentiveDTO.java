@@ -24,32 +24,21 @@ import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Data
-public final class InterestIncentiveData implements Serializable {
+@NoArgsConstructor
+@AllArgsConstructor
+public class InterestIncentiveDTO implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @SuppressWarnings("unused")
     private Long id;
-    private EnumOptionData entityType;
-    private EnumOptionData attributeName;
-    private EnumOptionData conditionType;
+    private String description;
+    private Integer entityType;
+    private Integer attributeName;
+    private Integer conditionType;
     private String attributeValue;
-    private String attributeValueDesc;
-    private EnumOptionData incentiveType;
+    private Integer incentiveType;
     private BigDecimal amount;
-
-    public static InterestIncentiveData instance(final Long id, final EnumOptionData entityType, final EnumOptionData attributeName,
-            final EnumOptionData conditionType, final String attributeValue, final String attributeValueDesc,
-            final EnumOptionData incentiveType, final BigDecimal amount) {
-
-        return new InterestIncentiveData(id, entityType, attributeName, conditionType, attributeValue, attributeValueDesc, incentiveType,
-                amount);
-    }
-
 }

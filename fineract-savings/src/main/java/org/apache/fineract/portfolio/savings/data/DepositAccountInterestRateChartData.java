@@ -74,18 +74,19 @@ public final class DepositAccountInterestRateChartData {
         final Long accountId = null;
         final String accountNumber = null;
         Collection<DepositAccountInterestRateChartSlabData> fromProdChartSlabs = new ArrayList<>();
-        Collection<InterestRateChartSlabData> productChartSlabDatas = productChartData.chartSlabs();
+        Collection<InterestRateChartSlabData> productChartSlabDatas = productChartData.getChartSlabs();
         if (productChartSlabDatas != null) {
             for (InterestRateChartSlabData productChartSlabData : productChartSlabDatas) {
                 fromProdChartSlabs.add(DepositAccountInterestRateChartSlabData.from(productChartSlabData));
             }
         }
 
-        return new DepositAccountInterestRateChartData(id, productChartData.name(), productChartData.description(),
-                productChartData.fromDate(), productChartData.endDate(), productChartData.isPrimaryGroupingByAmount(), accountId,
-                accountNumber, fromProdChartSlabs, productChartData.periodTypes(), productChartData.entityTypeOptions(),
-                productChartData.attributeNameOptions(), productChartData.conditionTypeOptions(), productChartData.incentiveTypeOptions(),
-                productChartData.genderOptions(), productChartData.clientTypeOptions(), productChartData.clientClassificationOptions());
+        return new DepositAccountInterestRateChartData(id, productChartData.getName(), productChartData.getDescription(),
+                productChartData.getFromDate(), productChartData.getEndDate(), productChartData.getIsPrimaryGroupingByAmount(), accountId,
+                accountNumber, fromProdChartSlabs, productChartData.getPeriodTypes(), productChartData.getEntityTypeOptions(),
+                productChartData.getAttributeNameOptions(), productChartData.getConditionTypeOptions(),
+                productChartData.getIncentiveTypeOptions(), productChartData.getGenderOptions(), productChartData.getClientTypeOptions(),
+                productChartData.getClientClassificationOptions());
     }
 
     public static DepositAccountInterestRateChartData withSlabs(DepositAccountInterestRateChartData interestRateChartData,

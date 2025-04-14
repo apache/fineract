@@ -18,38 +18,33 @@
  */
 package org.apache.fineract.portfolio.interestratechart.data;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.Serial;
 import java.io.Serializable;
-import java.math.BigDecimal;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Data
-public final class InterestIncentiveData implements Serializable {
+@NoArgsConstructor
+@AllArgsConstructor
+public class InterestRateChartsRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @SuppressWarnings("unused")
-    private Long id;
-    private EnumOptionData entityType;
-    private EnumOptionData attributeName;
-    private EnumOptionData conditionType;
-    private String attributeValue;
-    private String attributeValueDesc;
-    private EnumOptionData incentiveType;
-    private BigDecimal amount;
-
-    public static InterestIncentiveData instance(final Long id, final EnumOptionData entityType, final EnumOptionData attributeName,
-            final EnumOptionData conditionType, final String attributeValue, final String attributeValueDesc,
-            final EnumOptionData incentiveType, final BigDecimal amount) {
-
-        return new InterestIncentiveData(id, entityType, attributeName, conditionType, attributeValue, attributeValueDesc, incentiveType,
-                amount);
-    }
-
+    @Schema(example = "Chart - 2014")
+    private String name;
+    @Schema(example = "This chart is applicable for year 2014")
+    private String description;
+    @Schema(example = "en")
+    private String locale;
+    @Schema(example = "dd MMMM yyyy")
+    private String dateFormat;
+    @Schema(example = "01 Jan 2014")
+    private String fromDate;
+    private String endDate;
+    private Boolean isPrimaryGroupingByAmount;
+    private List<InterestRateChartStabDTO> chartSlabs;
 }

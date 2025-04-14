@@ -51,9 +51,9 @@ public final class DepositAccountInterestIncentiveData {
 
     public static DepositAccountInterestIncentiveData from(final InterestIncentiveData incentiveData) {
         final Long id = null;
-        return new DepositAccountInterestIncentiveData(id, incentiveData.entityType(), incentiveData.attributeName(),
-                incentiveData.conditionType(), incentiveData.attributeValue(), incentiveData.attributeValueDesc(),
-                incentiveData.incentiveType(), incentiveData.amount());
+        return new DepositAccountInterestIncentiveData(id, incentiveData.getEntityType(), incentiveData.getAttributeName(),
+                incentiveData.getConditionType(), incentiveData.getAttributeValue(), incentiveData.getAttributeValueDesc(),
+                incentiveData.getIncentiveType(), incentiveData.getAmount());
     }
 
     private DepositAccountInterestIncentiveData(final Long id, final EnumOptionData entityType, final EnumOptionData attributeName,

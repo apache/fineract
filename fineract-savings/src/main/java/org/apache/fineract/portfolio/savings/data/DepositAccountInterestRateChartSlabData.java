@@ -84,18 +84,18 @@ public final class DepositAccountInterestRateChartSlabData {
     public static DepositAccountInterestRateChartSlabData from(final InterestRateChartSlabData chartSlabData) {
         final Long id = null;
         Set<DepositAccountInterestIncentiveData> fromProdIncentives = new HashSet<>();
-        Set<InterestIncentiveData> productIncentiveData = chartSlabData.incentives();
+        Set<InterestIncentiveData> productIncentiveData = chartSlabData.getIncentives();
         if (productIncentiveData != null) {
             for (InterestIncentiveData incentive : productIncentiveData) {
                 fromProdIncentives.add(DepositAccountInterestIncentiveData.from(incentive));
             }
         }
-        return new DepositAccountInterestRateChartSlabData(id, chartSlabData.description(), chartSlabData.periodType(),
-                chartSlabData.fromPeriod(), chartSlabData.toPeriod(), chartSlabData.amountRangeFrom(), chartSlabData.amountRangeTo(),
-                chartSlabData.annualInterestRate(), fromProdIncentives, chartSlabData.currency(), chartSlabData.periodTypes(),
-                chartSlabData.entityTypeOptions(), chartSlabData.attributeNameOptions(), chartSlabData.conditionTypeOptions(),
-                chartSlabData.incentiveTypeOptions(), chartSlabData.genderOptions(), chartSlabData.clientTypeOptions(),
-                chartSlabData.clientClassificationOptions());
+        return new DepositAccountInterestRateChartSlabData(id, chartSlabData.getDescription(), chartSlabData.getPeriodType(),
+                chartSlabData.getFromPeriod(), chartSlabData.getToPeriod(), chartSlabData.getAmountRangeFrom(),
+                chartSlabData.getAmountRangeTo(), chartSlabData.getAnnualInterestRate(), fromProdIncentives, chartSlabData.getCurrency(),
+                chartSlabData.getPeriodTypes(), chartSlabData.getEntityTypeOptions(), chartSlabData.getAttributeNameOptions(),
+                chartSlabData.getConditionTypeOptions(), chartSlabData.getIncentiveTypeOptions(), chartSlabData.getGenderOptions(),
+                chartSlabData.getClientTypeOptions(), chartSlabData.getClientClassificationOptions());
     }
 
     public static DepositAccountInterestRateChartSlabData withTemplate(final DepositAccountInterestRateChartSlabData chartSlab,
