@@ -19,23 +19,38 @@
 
 package org.apache.fineract.infrastructure.core.config.cache;
 
+import java.lang.reflect.Method;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.spi.CachingProvider;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.ExpiryPolicyBuilder;
 import org.ehcache.config.builders.ResourcePoolsBuilder;
 import org.ehcache.jsr107.Eh107Configuration;
+import org.reflections.Reflections;
+import org.reflections.scanners.Scanners;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.jcache.JCacheCacheManager;
 import org.springframework.cache.support.NoOpCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@Slf4j
 public class CacheConfig {
 
     public static final String CONFIG_BY_NAME_CACHE_NAME = "configByName";
+    @Autowired
+    private FineractProperties fineractProperties;
 
     @Bean
     public TransactionBoundCacheManager defaultCacheManager(JCacheCacheManager ehCacheManager) {
@@ -56,63 +71,52 @@ public class CacheConfig {
     private CacheManager getInternalEhCacheManager() {
         CachingProvider provider = Caching.getCachingProvider();
         CacheManager cacheManager = provider.getCacheManager();
-
-        javax.cache.configuration.Configuration<Object, Object> defaultTemplate = Eh107Configuration.fromEhcacheCacheConfiguration(
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Object.class, Object.class, ResourcePoolsBuilder.heap(10000))
-                        .withExpiry(ExpiryPolicyBuilder.noExpiration()).build());
-
-        if (cacheManager.getCache("users") == null) {
-            cacheManager.createCache("users", defaultTemplate);
+        // Default cache configuration template
+        Duration defaultTimeToLive = fineractProperties.getCache().getDefaultTemplate().getTtl();
+        Integer defaultMaxEntries = fineractProperties.getCache().getDefaultTemplate().getMaximumEntries();
+        javax.cache.configuration.Configuration<Object, Object> defaultTemplate = generateCacheConfiguration(defaultMaxEntries,
+                defaultTimeToLive);
+        // Scan all packages (entire classpath)
+        Reflections reflections = new Reflections(
+                new org.reflections.util.ConfigurationBuilder().forPackages("").addScanners(Scanners.MethodsAnnotated));
+        // Find all methods annotated with @Cacheable
+        Set<Method> annotatedMethods = reflections.getMethodsAnnotatedWith(Cacheable.class);
+        Set<String> cacheNames = annotatedMethods.stream().map(method -> method.getAnnotation(Cacheable.class))
+                .flatMap(annotation -> Arrays.stream(annotation.value())).collect(Collectors.toSet());
+        // Register the caches into the cache manager
+        cacheNames.forEach(cacheName -> {
+            if (cacheManager.getCache(cacheName) == null) {
+                javax.cache.configuration.Configuration<Object, Object> configurationTemplate = generateCustomCacheConfiguration(cacheName,
+                        defaultTemplate, defaultTimeToLive, defaultMaxEntries);
+                cacheManager.createCache(cacheName, configurationTemplate);
+            }
+        });
+        Set<String> incorrectConfigurations = new HashSet<>(fineractProperties.getCache().getCustomTemplates().keySet());
+        incorrectConfigurations.removeAll(cacheNames);
+        if (!incorrectConfigurations.isEmpty()) {
+            log.warn("The following cache configurations are defined but cache does not exists: {}", incorrectConfigurations);
         }
-        if (cacheManager.getCache("usersByUsername") == null) {
-            cacheManager.createCache("usersByUsername", defaultTemplate);
-        }
-        if (cacheManager.getCache("tenantsById") == null) {
-            cacheManager.createCache("tenantsById", defaultTemplate);
-        }
-        if (cacheManager.getCache("offices") == null) {
-            cacheManager.createCache("offices", defaultTemplate);
-        }
-        if (cacheManager.getCache("officesForDropdown") == null) {
-            cacheManager.createCache("officesForDropdown", defaultTemplate);
-        }
-        if (cacheManager.getCache("officesById") == null) {
-            cacheManager.createCache("officesById", defaultTemplate);
-        }
-        if (cacheManager.getCache("charges") == null) {
-            cacheManager.createCache("charges", defaultTemplate);
-        }
-        if (cacheManager.getCache("funds") == null) {
-            cacheManager.createCache("funds", defaultTemplate);
-        }
-        if (cacheManager.getCache("code_values") == null) {
-            cacheManager.createCache("code_values", defaultTemplate);
-        }
-        if (cacheManager.getCache("codes") == null) {
-            cacheManager.createCache("codes", defaultTemplate);
-        }
-        if (cacheManager.getCache("hooks") == null) {
-            cacheManager.createCache("hooks", defaultTemplate);
-        }
-        if (cacheManager.getCache("tfConfig") == null) {
-            cacheManager.createCache("tfConfig", defaultTemplate);
-        }
-        if (cacheManager.getCache(CONFIG_BY_NAME_CACHE_NAME) == null) {
-            cacheManager.createCache(CONFIG_BY_NAME_CACHE_NAME, defaultTemplate);
-        }
-
-        javax.cache.configuration.Configuration<Object, Object> accessTokenTemplate = Eh107Configuration.fromEhcacheCacheConfiguration(
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(Object.class, Object.class, ResourcePoolsBuilder.heap(10000))
-                        .withExpiry(ExpiryPolicyBuilder.timeToIdleExpiration(Duration.ofHours(2))).build());
-
-        if (cacheManager.getCache("userTFAccessToken") == null) {
-            cacheManager.createCache("userTFAccessToken", accessTokenTemplate);
-        }
-
-        if (cacheManager.getCache("payment_types") == null) {
-            cacheManager.createCache("payment_types", defaultTemplate);
-        }
-
         return cacheManager;
+    }
+
+    private javax.cache.configuration.Configuration<Object, Object> generateCustomCacheConfiguration(String cacheIdentifier,
+            javax.cache.configuration.Configuration<Object, Object> defaultTemplate, Duration defaultTimeToLive,
+            Integer defaultMaxEntries) {
+        javax.cache.configuration.Configuration<Object, Object> configurationTemplate = defaultTemplate;
+        if (fineractProperties.getCache().getCustomTemplates().containsKey(cacheIdentifier)) {
+            Duration timeToLiveExpiration = Objects.requireNonNullElse(
+                    fineractProperties.getCache().getCustomTemplates().get(cacheIdentifier).getTtl(), defaultTimeToLive);
+            Integer maxEntries = Objects.requireNonNullElse(
+                    fineractProperties.getCache().getCustomTemplates().get(cacheIdentifier).getMaximumEntries(), defaultMaxEntries);
+            configurationTemplate = generateCacheConfiguration(maxEntries, timeToLiveExpiration);
+        }
+        return configurationTemplate;
+    }
+
+    private static javax.cache.configuration.Configuration<Object, Object> generateCacheConfiguration(Integer defaultMaxEntries,
+            Duration defaultTimeToLive) {
+        return Eh107Configuration.fromEhcacheCacheConfiguration(CacheConfigurationBuilder
+                .newCacheConfigurationBuilder(Object.class, Object.class, ResourcePoolsBuilder.heap(defaultMaxEntries))
+                .withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(defaultTimeToLive)).build());
     }
 }

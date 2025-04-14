@@ -19,6 +19,7 @@
 
 package org.apache.fineract.infrastructure.core.config;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -80,6 +81,8 @@ public class FineractProperties {
     private FineractModulesProperties module;
 
     private FineractSqlValidationProperties sqlValidation;
+
+    private FineractCache cache;
 
     @Getter
     @Setter
@@ -577,5 +580,21 @@ public class FineractProperties {
 
         private String name;
         private String pattern;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractCache {
+
+        private FineractCacheDetails defaultTemplate;
+        private Map<String, FineractCacheDetails> customTemplates = new HashMap<>();
+    }
+
+    @Getter
+    @Setter
+    public static class FineractCacheDetails {
+
+        private Duration ttl;
+        private Integer maximumEntries;
     }
 }

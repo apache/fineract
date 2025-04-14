@@ -113,6 +113,7 @@ dependencies {
             'org.mapstruct:mapstruct',
 
             'io.github.resilience4j:resilience4j-spring-boot3',
+            'org.reflections:reflections',
             )
 
     implementation 'software.amazon.msk:aws-msk-iam-auth'
