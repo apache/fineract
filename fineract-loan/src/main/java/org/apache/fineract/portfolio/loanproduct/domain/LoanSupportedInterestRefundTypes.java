@@ -18,16 +18,14 @@
  */
 package org.apache.fineract.portfolio.loanproduct.domain;
 
-import java.util.Arrays;
-import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
+import org.apache.fineract.infrastructure.core.api.ApiFacingEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 
 @Getter
 @RequiredArgsConstructor
-public enum LoanSupportedInterestRefundTypes {
+public enum LoanSupportedInterestRefundTypes implements ApiFacingEnum<LoanSupportedInterestRefundTypes> {
 
     MERCHANT_ISSUED_REFUND(LoanTransactionType.MERCHANT_ISSUED_REFUND, "loanRefundType.merchant_issued_refund", "Merchant issued refund"), //
     PAYOUT_REFUND(LoanTransactionType.PAYOUT_REFUND, "loanRefundType.payout_refund", "Payout refund"), //
@@ -37,11 +35,4 @@ public enum LoanSupportedInterestRefundTypes {
     private final String code;
     private final String humanReadableName;
 
-    public static List<StringEnumOptionData> getValuesAsStringEnumOptionDataList() {
-        return Arrays.stream(values()).map(v -> new StringEnumOptionData(v.name(), v.getCode(), v.getHumanReadableName())).toList();
-    }
-
-    public StringEnumOptionData getValueAsStringEnumOptionData() {
-        return new StringEnumOptionData(name(), getCode(), getHumanReadableName());
-    }
 }

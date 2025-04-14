@@ -18,15 +18,13 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
-import java.util.Arrays;
-import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
+import org.apache.fineract.infrastructure.core.api.ApiFacingEnum;
 
 @Getter
 @RequiredArgsConstructor
-public enum LoanChargeOffBehaviour {
+public enum LoanChargeOffBehaviour implements ApiFacingEnum<LoanChargeOffBehaviour> {
 
     REGULAR("chargeOffBehaviour.regular", "Regular"), //
     ZERO_INTEREST("chargeOffBehaviour.zeroInterest", "Zero interest after charge-off"), //
@@ -36,11 +34,4 @@ public enum LoanChargeOffBehaviour {
     private final String code;
     private final String humanReadableName;
 
-    public static List<StringEnumOptionData> getValuesAsStringEnumOptionDataList() {
-        return Arrays.stream(values()).map(v -> new StringEnumOptionData(v.name(), v.getCode(), v.getHumanReadableName())).toList();
-    }
-
-    public StringEnumOptionData getValueAsStringEnumOptionData() {
-        return new StringEnumOptionData(name(), getCode(), getHumanReadableName());
-    }
 }

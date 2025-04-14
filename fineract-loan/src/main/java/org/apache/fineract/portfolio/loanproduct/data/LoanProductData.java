@@ -34,6 +34,7 @@ import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeOffReas
 import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
 import org.apache.fineract.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
+import org.apache.fineract.infrastructure.core.api.ApiFacingEnum;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -976,9 +977,10 @@ public class LoanProductData implements Serializable {
         this.chargeOffBehaviourOptions = null;
         this.chargeOffReasonOptions = null;
         this.interestRecognitionOnDisbursementDate = interestRecognitionOnDisbursementDate;
-        this.daysInYearCustomStrategyOptions = DaysInYearCustomStrategyType.getValuesAsStringEnumOptionDataList();
-        this.capitalizedIncomeCalculationTypeOptions = LoanCapitalizedIncomeCalculationType.getValuesAsStringEnumOptionDataList();
-        this.capitalizedIncomeStrategyOptions = LoanCapitalizedIncomeStrategy.getValuesAsStringEnumOptionDataList();
+        this.daysInYearCustomStrategyOptions = ApiFacingEnum.getValuesAsStringEnumOptionDataList(DaysInYearCustomStrategyType.class);
+        this.capitalizedIncomeCalculationTypeOptions = ApiFacingEnum
+                .getValuesAsStringEnumOptionDataList(LoanCapitalizedIncomeCalculationType.class);
+        this.capitalizedIncomeStrategyOptions = ApiFacingEnum.getValuesAsStringEnumOptionDataList(LoanCapitalizedIncomeStrategy.class);
     }
 
     public LoanProductData(final LoanProductData productData, final Collection<ChargeData> chargeOptions,

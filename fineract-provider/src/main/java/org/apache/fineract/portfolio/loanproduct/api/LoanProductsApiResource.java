@@ -58,6 +58,7 @@ import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformS
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.core.api.ApiFacingEnum;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -437,17 +438,18 @@ public class LoanProductsApiResource {
         final List<EnumOptionData> advancedPaymentAllocationTypes = PaymentAllocationType.getValuesAsEnumOptionDataList();
         final List<EnumOptionData> creditAllocationTransactionTypes = CreditAllocationTransactionType.getValuesAsEnumOptionDataList();
         final List<EnumOptionData> creditAllocationAllocationTypes = AllocationType.getValuesAsEnumOptionDataList();
-        final List<StringEnumOptionData> supportedInterestRefundTypesOptions = LoanSupportedInterestRefundTypes
-                .getValuesAsStringEnumOptionDataList();
-        final List<StringEnumOptionData> chargeOffBehaviourOptions = LoanChargeOffBehaviour.getValuesAsStringEnumOptionDataList();
+        final List<StringEnumOptionData> supportedInterestRefundTypesOptions = ApiFacingEnum
+                .getValuesAsStringEnumOptionDataList(LoanSupportedInterestRefundTypes.class);
+        final List<StringEnumOptionData> chargeOffBehaviourOptions = ApiFacingEnum
+                .getValuesAsStringEnumOptionDataList(LoanChargeOffBehaviour.class);
         final List<CodeValueData> chargeOffReasonOptions = codeValueReadPlatformService
                 .retrieveCodeValuesByCode(LoanApiConstants.CHARGE_OFF_REASONS);
-        final List<StringEnumOptionData> daysInYearCustomStrategyOptions = DaysInYearCustomStrategyType
-                .getValuesAsStringEnumOptionDataList();
-        final List<StringEnumOptionData> capitalizedIncomeCalculationTypeOptions = LoanCapitalizedIncomeCalculationType
-                .getValuesAsStringEnumOptionDataList();
-        final List<StringEnumOptionData> capitalizedIncomeStrategyOptions = LoanCapitalizedIncomeStrategy
-                .getValuesAsStringEnumOptionDataList();
+        final List<StringEnumOptionData> daysInYearCustomStrategyOptions = ApiFacingEnum
+                .getValuesAsStringEnumOptionDataList(DaysInYearCustomStrategyType.class);
+        final List<StringEnumOptionData> capitalizedIncomeCalculationTypeOptions = ApiFacingEnum
+                .getValuesAsStringEnumOptionDataList(LoanCapitalizedIncomeCalculationType.class);
+        final List<StringEnumOptionData> capitalizedIncomeStrategyOptions = ApiFacingEnum
+                .getValuesAsStringEnumOptionDataList(LoanCapitalizedIncomeStrategy.class);
 
         return new LoanProductData(productData, chargeOptions, penaltyOptions, paymentTypeOptions, currencyOptions, amortizationTypeOptions,
                 interestTypeOptions, interestCalculationPeriodTypeOptions, repaymentFrequencyTypeOptions, interestRateFrequencyTypeOptions,

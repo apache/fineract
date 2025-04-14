@@ -67,6 +67,7 @@ import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookS
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.core.api.ApiFacingEnum;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
@@ -1137,9 +1138,9 @@ public class LoansApiResource {
                 loanCollateralOptions, calendarOptions, notes, accountLinkingOptions, linkedAccount, disbursementData, emiAmountVariations,
                 overdueCharges, paidInAdvanceTemplate, interestRatesPeriods, clientActiveLoanOptions, rates, isRatesEnabled, collectionData,
                 LoanScheduleType.getValuesAsEnumOptionDataList(), LoanScheduleProcessingType.getValuesAsEnumOptionDataList(),
-                loanTermVariations, DaysInYearCustomStrategyType.getValuesAsStringEnumOptionDataList(),
-                LoanCapitalizedIncomeCalculationType.getValuesAsStringEnumOptionDataList(),
-                LoanCapitalizedIncomeStrategy.getValuesAsStringEnumOptionDataList());
+                loanTermVariations, ApiFacingEnum.getValuesAsStringEnumOptionDataList(DaysInYearCustomStrategyType.class),
+                ApiFacingEnum.getValuesAsStringEnumOptionDataList(LoanCapitalizedIncomeCalculationType.class),
+                ApiFacingEnum.getValuesAsStringEnumOptionDataList(LoanCapitalizedIncomeStrategy.class));
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);

@@ -43,6 +43,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.core.api.ApiFacingEnum;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -1101,13 +1102,13 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             final Integer fixedLength = JdbcSupport.getInteger(rs, "fixedLength");
             final LoanChargeOffBehaviour chargeOffBehaviour = LoanChargeOffBehaviour.valueOf(rs.getString("chargeOffBehaviour"));
             final boolean interestRecognitionOnDisbursementDate = rs.getBoolean("interestRecognitionOnDisbursementDate");
-            final StringEnumOptionData daysInYearCustomStrategy = DaysInYearCustomStrategyType
-                    .getStringEnumOptionData(rs.getString("daysInYearCustomStrategy"));
+            final StringEnumOptionData daysInYearCustomStrategy = ApiFacingEnum.getStringEnumOptionData(DaysInYearCustomStrategyType.class,
+                    rs.getString("daysInYearCustomStrategy"));
             final boolean enableIncomeCapitalization = rs.getBoolean("enableIncomeCapitalization");
-            final StringEnumOptionData capitalizedIncomeCalculationType = LoanCapitalizedIncomeCalculationType
-                    .getStringEnumOptionData(rs.getString("capitalizedIncomeCalculationType"));
-            final StringEnumOptionData capitalizedIncomeStrategy = LoanCapitalizedIncomeStrategy
-                    .getStringEnumOptionData(rs.getString("capitalizedIncomeStrategy"));
+            final StringEnumOptionData capitalizedIncomeCalculationType = ApiFacingEnum
+                    .getStringEnumOptionData(LoanCapitalizedIncomeCalculationType.class, rs.getString("capitalizedIncomeCalculationType"));
+            final StringEnumOptionData capitalizedIncomeStrategy = ApiFacingEnum
+                    .getStringEnumOptionData(LoanCapitalizedIncomeStrategy.class, rs.getString("capitalizedIncomeStrategy"));
 
             return LoanAccountData.basicLoanDetails(id, accountNo, status, externalId, clientId, clientAccountNo, clientName,
                     clientOfficeId, clientExternalId, groupData, loanType, loanProductId, loanProductName, loanProductDescription,

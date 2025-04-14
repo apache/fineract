@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
+import org.apache.fineract.infrastructure.core.api.ApiFacingEnum;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -435,8 +436,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final int daysInMonth = JdbcSupport.getInteger(rs, "daysInMonth");
             final EnumOptionData daysInMonthType = CommonEnumerations.daysInMonthType(daysInMonth);
             final int daysInYear = JdbcSupport.getInteger(rs, "daysInYear");
-            final StringEnumOptionData daysInYearCustomStrategy = DaysInYearCustomStrategyType
-                    .getStringEnumOptionData(rs.getString("daysInYearCustomStrategy"));
+            final StringEnumOptionData daysInYearCustomStrategy = ApiFacingEnum.getStringEnumOptionData(DaysInYearCustomStrategyType.class,
+                    rs.getString("daysInYearCustomStrategy"));
             final EnumOptionData daysInYearType = CommonEnumerations.daysInYearType(daysInYear);
             final Integer installmentAmountInMultiplesOf = JdbcSupport.getInteger(rs, "installmentAmountInMultiplesOf");
             final boolean canDefineInstallmentAmount = rs.getBoolean("canDefineInstallmentAmount");
@@ -558,10 +559,10 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final LoanChargeOffBehaviour loanChargeOffBehaviour = LoanChargeOffBehaviour.valueOf(chargeOffBehaviourStr);
             final boolean interestRecognitionOnDisbursementDate = rs.getBoolean("interestRecognitionOnDisbursementDate");
             final boolean enableIncomeCapitalization = rs.getBoolean("enableIncomeCapitalization");
-            final StringEnumOptionData capitalizedIncomeCalculationType = LoanCapitalizedIncomeCalculationType
-                    .getStringEnumOptionData(rs.getString("capitalizedIncomeCalculationType"));
-            final StringEnumOptionData capitalizedIncomeStrategy = LoanCapitalizedIncomeStrategy
-                    .getStringEnumOptionData(rs.getString("capitalizedIncomeStrategy"));
+            final StringEnumOptionData capitalizedIncomeCalculationType = ApiFacingEnum
+                    .getStringEnumOptionData(LoanCapitalizedIncomeCalculationType.class, rs.getString("capitalizedIncomeCalculationType"));
+            final StringEnumOptionData capitalizedIncomeStrategy = ApiFacingEnum
+                    .getStringEnumOptionData(LoanCapitalizedIncomeStrategy.class, rs.getString("capitalizedIncomeStrategy"));
 
             return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                     numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,

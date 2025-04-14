@@ -18,11 +18,9 @@
  */
 package org.apache.fineract.portfolio.common.domain;
 
-import java.util.Arrays;
-import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
+import org.apache.fineract.infrastructure.core.api.ApiFacingEnum;
 
 /**
  * Defines the method of leap year calculation for determining the number of days in a year.
@@ -53,7 +51,7 @@ import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
  */
 @Getter
 @RequiredArgsConstructor
-public enum DaysInYearCustomStrategyType {
+public enum DaysInYearCustomStrategyType implements ApiFacingEnum<DaysInYearCustomStrategyType> {
 
     /** Always considers 366 days in a leap year. */
     FULL_LEAP_YEAR("DaysInYearCustomStrategyType.fullLeapYear", "Full Leap Year"),
@@ -64,15 +62,4 @@ public enum DaysInYearCustomStrategyType {
     private final String code;
     private final String humanReadableName;
 
-    public static List<StringEnumOptionData> getValuesAsStringEnumOptionDataList() {
-        return Arrays.stream(values()).map(v -> new StringEnumOptionData(v.name(), v.getCode(), v.getHumanReadableName())).toList();
-    }
-
-    public StringEnumOptionData getValueAsStringEnumOptionData() {
-        return new StringEnumOptionData(name(), getCode(), getHumanReadableName());
-    }
-
-    public static StringEnumOptionData getStringEnumOptionData(String name) {
-        return name == null || name.trim().isEmpty() ? null : DaysInYearCustomStrategyType.valueOf(name).getValueAsStringEnumOptionData();
-    }
 }
