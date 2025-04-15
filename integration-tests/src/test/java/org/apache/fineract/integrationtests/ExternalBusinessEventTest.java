@@ -942,8 +942,9 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             externalEventHelper.enableBusinessEvent("LoanAdjustTransactionBusinessEvent");
             AtomicReference<Long> loanIdRef = new AtomicReference<>();
             runAt("15 January 2025", () -> {
-                PostLoanProductsResponse loanProductResponse = loanProductHelper
-                        .createLoanProduct(create4IProgressive().isInterestRecalculationEnabled(true));
+                PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(create4IProgressive()
+                        .isInterestRecalculationEnabled(true).recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY)
+                        .recalculationRestFrequencyInterval(1));
 
                 Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductResponse.getResourceId(), "15 January 2025",
                         430.0, 9.9, 4, null);
