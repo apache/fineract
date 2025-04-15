@@ -737,13 +737,6 @@ configure(project.fineractJavaProjects) {
     tasks.withType(Javadoc) {
         options.addStringOption('Xdoclint:none', '-quiet')
         options.encoding = 'UTF-8'
-        // FIXME - html5 is the default since sometime before Java 17
-        // Disable strict checking to prevent build failures on invalid javadoc
-        options.addBooleanOption('html5', true)
-        // Add this if you're using Java 21 records or other modern features
-        if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_21)) {
-            options.addBooleanOption('html5', true)
-        }
         // Ignore any errors during javadoc generation
         failOnError = false
     }

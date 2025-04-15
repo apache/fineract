@@ -12,11 +12,6 @@ Fineract is a mature platform with open APIs that provides a reliable, robust, a
 
 [Have a look at the FAQ on our Wiki at apache.org](https://cwiki.apache.org/confluence/display/FINERACT/FAQ) if this README does not answer what you are looking for.  [Visit our JIRA Dashboard](https://issues.apache.org/jira/secure/Dashboard.jspa?selectPageId=12335824) to find issues to work on, see what others are working on, or open new issues.
 
-[![Code Now! (Gitpod)](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/apache/fineract)
-to start contributing to this project in the online web-based IDE GitPod.io right away!
-(You may initially have to press F1 to Find Command and run "Java: Start Language Server".)
-It's of course also possible to contribute with a "traditional" local development environment (see below).
-
 COMMUNITY
 =========
 
@@ -72,7 +67,7 @@ __RECOMMENDATION__: you need to shift all dates in your database by the timezone
 Run the following commands:
 1. `./gradlew createDB -PdbName=fineract_tenants`
 1. `./gradlew createDB -PdbName=fineract_default`
-1. `./gradlew bootRun`
+1. `./gradlew devRun`
 
 
 <br>INSTRUCTIONS: How to build the JAR file
@@ -170,7 +165,24 @@ Right now we depend on GitHub to know if "the build" is passing (it's actually m
 The authoritative source of truth for what commands/services/tests to run, how, and when are the files in `.github/workflows/`.
 Output from runs based on those configuration files appears at <https://github.com/apache/fineract/actions>.
 
-Note these builds are run in [short-lived virtual machines](https://docs.github.com/en/actions/using-github-hosted-runners/using-github-hosted-runners), so locally reproducing the same may require additional effort, such as these extra clean-up procedures:
+Incorrect default Java-related executables may cause test failures.
+To fix this on Debian and Ubuntu systems, run the following:
+
+```bash
+export JAVA_HOME=/usr/lib/jvm/zulu21
+sudo update-alternatives --set java $JAVA_HOME/bin/java
+sudo update-alternatives --set javac $JAVA_HOME/bin/javac
+sudo update-alternatives --set javadoc $JAVA_HOME/bin/javadoc
+```
+
+This would correct, for example, a [class file verson error](https://en.wikipedia.org/wiki/Java_class_file#General_layout).
+You might see something like this if a Java 11 executable (class file format version 56) was the system default, but the integration tests were using Java 21 (class file format version 65):
+
+```
+UnsupportedClassVersionError: com.example.package/ClassName has been compiled by a more recent version of the Java Runtime (class file version 65.0), this version of the Java Runtime only recognizes class file versions up to 55.0
+```
+
+These builds are run in [short-lived virtual machines](https://docs.github.com/en/actions/using-github-hosted-runners/using-github-hosted-runners), so locally reproducing the same may require additional effort, such as these extra clean-up procedures:
 
 ```bash
 # Destroy anything untracked by git.
@@ -185,6 +197,23 @@ rm -rf ~/.gradle ~/.m2 /tmp/cargo*
 # 💚 This is generally very safe to run between builds.
 ps auxwww | grep [c]argo | awk '{ print $2 }' | xargs -r kill
 ```
+
+Integration test runs such as `./gradlew --no-daemon --console=plain test -x :twofactor-tests:test -x :oauth2-test:test :fineract-e2e-tests-runner:test -PdbType=postgresql` in `.github/workflows/build-postgresql.yml` often take an hour or longer to complete.
+If you notice the `:integration-tests:test` task taking significantly less time, say, one minute, gradle may be skipping it.
+Look for something like this in the test output:
+
+```
+> Task :integration-tests:test UP-TO-DATE 👀
+Custom actions are attached to task ':integration-tests:test'.
+Build cache key for task ':integration-tests:test' is 6aeeec3f58bf9703d4c100fbaa657f5c
+Skipping task ':integration-tests:test' as it is up-to-date.
+Resolve mutations for :integration-tests:cargoStopLocal (Thread[Execution worker Thread 11,5,main]) started.
+:integration-tests:cargoStopLocal (Thread[Execution worker Thread 11,5,main]) started.
+```
+
+(This is with the `--info` gradle argument with eyeballs added for emphasis)
+The `--rerun-tasks` gradle argument may help, or you can try destroying `~/.gradle` and other clean-up procedures as indicated above then re-running tests.
+This is useful for repeated test runs (say, for timing) when gradle would otherwise assume a task is "up-to-date" and not re-run it.
 
 Testing within IDEs
 -----------------
