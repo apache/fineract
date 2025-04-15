@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.event.external.service.serialization.serializer.loan;
 
 import java.math.BigDecimal;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.generic.GenericContainer;
 import org.apache.fineract.avro.generator.ByteBufferSerializable;
@@ -30,7 +31,8 @@ import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.repayment.LoanRepaymentBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan.LoanRepaymentPastDueDataMapper;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroDateTimeMapper;
-import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.AbstractBusinessEventWithCustomDataSerializer;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.ExternalEventCustomDataSerializer;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentPastDueData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -40,11 +42,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class LoanRepaymentBusinessEventSerializer implements BusinessEventSerializer {
+public class LoanRepaymentBusinessEventSerializer extends AbstractBusinessEventWithCustomDataSerializer<LoanRepaymentBusinessEvent> {
 
     private final AvroDateTimeMapper dataTimeMapper;
     private final LoanRepaymentPastDueDataMapper pastDueDataMapper;
     private final LoanCalculateRepaymentPastDueService pastDueService;
+    private final List<ExternalEventCustomDataSerializer<LoanRepaymentBusinessEvent>> externalEventCustomDataSerializers;
 
     @Override
     public <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
@@ -68,6 +71,7 @@ public class LoanRepaymentBusinessEventSerializer implements BusinessEventSerial
 
         LoanRepaymentDueDataV1 loanRepaymentDueDataV1 = LoanRepaymentDueDataV1.newBuilder().setLoanId(id).setLoanAccountNo(accountNo)
                 .setLoanExternalId(externalId).setCurrency(currency).setInstallment(repaymentDue).setPastDueAmount(pastDue).build();
+        loanRepaymentDueDataV1.setCustomData(collectCustomData(event));
         return loanRepaymentDueDataV1;
     }
 
@@ -93,5 +97,10 @@ public class LoanRepaymentBusinessEventSerializer implements BusinessEventSerial
     @Override
     public Class<? extends GenericContainer> getSupportedSchema() {
         return LoanRepaymentDueDataV1.class;
+    }
+
+    @Override
+    protected List<ExternalEventCustomDataSerializer<LoanRepaymentBusinessEvent>> getExternalEventCustomDataSerializers() {
+        return externalEventCustomDataSerializers;
     }
 }
