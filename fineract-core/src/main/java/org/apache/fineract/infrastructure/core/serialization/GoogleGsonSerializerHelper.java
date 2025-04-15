@@ -105,7 +105,7 @@ public final class GoogleGsonSerializerHelper {
     public static void registerTypeAdapters(final GsonBuilder builder) {
         builder.registerTypeAdapter(java.util.Date.class, new DateAdapter());
         builder.registerTypeAdapter(LocalDate.class, new LocalDateAdapter());
-        // NOTE: was missing, necessary for GSON serialization with JDK 17's restrictive module access
+        // NOTE: was missing, necessary for GSON serialization with JDK 21's restrictive module access
         builder.registerTypeAdapter(LocalTime.class, new LocalTimeAdapter());
         builder.registerTypeAdapter(ZonedDateTime.class, new JodaDateTimeAdapter());
         builder.registerTypeAdapter(MonthDay.class, new JodaMonthDayAdapter());

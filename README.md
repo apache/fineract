@@ -25,7 +25,7 @@ If you are interested in contributing to this project, but perhaps don't quite k
 
 REQUIREMENTS
 ============
-* `Java >= 17` (Azul Zulu JVM is tested by our CI on GitHub Actions)
+* `Java >= 21` (Azul Zulu JVM is tested by our CI on GitHub Actions)
 * MariaDB `11.5.2`
 
 You can run the required version of the database server in a container, instead of having to install it, like this:

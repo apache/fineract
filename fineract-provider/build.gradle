@@ -258,7 +258,7 @@ bootJar {
 
 jib {
     from {
-        image = 'azul/zulu-openjdk-alpine:17'
+        image = 'azul/zulu-openjdk-alpine:21'
         platforms {
             platform {
                 architecture = System.getProperty("os.arch").equals("aarch64")?"arm64":"amd64"
