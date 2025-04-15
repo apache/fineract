@@ -890,7 +890,7 @@ public class LoanAssemblerImpl implements LoanAssembler {
         loan.setClosedOnDate(withdrawnOn);
         loan.setClosedBy(currentUser);
 
-        final Locale locale = new Locale(command.locale());
+        final Locale locale = Locale.of(command.locale());
         final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
 
         actualChanges.put(Loan.PARAM_STATUS, LoanEnumerations.status(loan.getStatus()));
@@ -912,7 +912,7 @@ public class LoanAssemblerImpl implements LoanAssembler {
         loan.setClosedOnDate(rejectedOn);
         loan.setClosedBy(currentUser);
 
-        final Locale locale = new Locale(command.locale());
+        final Locale locale = Locale.of(command.locale());
         final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
 
         actualChanges.put(Loan.PARAM_STATUS, LoanEnumerations.status(loan.getStatus()));

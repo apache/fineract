@@ -819,7 +819,7 @@ public class JsonParserHelper {
                     dataValidationErrors);
         }
 
-        return new Locale(languageCode.toLowerCase(), courntryCode.toUpperCase(), variantCode);
+        return Locale.of(languageCode.toLowerCase(), courntryCode.toUpperCase(), variantCode);
     }
 
     private Locale extractLocaleValue(final JsonObject object) {

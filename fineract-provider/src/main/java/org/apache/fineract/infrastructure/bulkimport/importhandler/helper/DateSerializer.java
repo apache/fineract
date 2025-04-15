@@ -46,7 +46,7 @@ public class DateSerializer implements JsonSerializer<LocalDate> {
     public JsonElement serialize(LocalDate src, Type typeOfSrc, JsonSerializationContext context) {
         DateTimeFormatter formatter;
         if (StringUtils.isNotEmpty(localeCode)) {
-            formatter = DateTimeFormatter.ofPattern(dateFormat, new Locale(localeCode));
+            formatter = DateTimeFormatter.ofPattern(dateFormat, Locale.of(localeCode));
         } else {
             formatter = DateTimeFormatter.ofPattern(dateFormat);
         }

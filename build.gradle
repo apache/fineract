@@ -355,8 +355,10 @@ configure(project.fineractJavaProjects) {
     apply plugin: 'idea'
 
     java {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+            vendor = JvmVendorSpec.AZUL
+        }
         withSourcesJar()
         withJavadocJar()
     }
@@ -401,11 +403,6 @@ configure(project.fineractJavaProjects) {
     apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.dependencies.gradle"
 
     group = 'org.apache.fineract'
-
-    /* define the valid syntax level for source files */
-    // sourceCompatibility = JavaVersion.VERSION_17
-    // /* define binary compatibility version */
-    // targetCompatibility = JavaVersion.VERSION_17
 
     /* http://stackoverflow.com/questions/19653311/jpa-repository-works-in-idea-and-production-but-not-in-gradle */
     sourceSets.main.output.resourcesDir = sourceSets.main.java.classesDirectory
@@ -741,10 +738,11 @@ configure(project.fineractJavaProjects) {
     tasks.withType(Javadoc) {
         options.addStringOption('Xdoclint:none', '-quiet')
         options.encoding = 'UTF-8'
+        // FIXME - html5 is the default since sometime before Java 17
         // Disable strict checking to prevent build failures on invalid javadoc
         options.addBooleanOption('html5', true)
-        // Add this if you're using Java 17 records or other modern features
-        if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_17)) {
+        // Add this if you're using Java 21 records or other modern features
+        if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_21)) {
             options.addBooleanOption('html5', true)
         }
         // Ignore any errors during javadoc generation

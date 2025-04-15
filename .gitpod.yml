@@ -19,6 +19,8 @@
 # https://www.gitpod.io
 # https://www.gitpod.io/docs/41_Config_Gitpod_File/
 # https://github.com/gitpod-io/workspace-images/tree/master/mysql
+#
+# FIXME - dead code? see https://github.com/apache/fineract/pull/4590#issuecomment-2809760331
 
 image: gitpod/workspace-mysql:2022-08-04-13-40-17
 ports:
