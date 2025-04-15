@@ -190,4 +190,5 @@
     <include file="parts/0169_add_missing_permissions.xml" relativeToChangelogFile="true" />
     <include file="parts/0170_days_in_year_custom_strategy.xml" relativeToChangelogFile="true"/>
     <include file="parts/0171_loan_capitalized_income.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0172_create_loan_capitalized_income_balance.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
