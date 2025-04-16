@@ -18,7 +18,9 @@
  */
 package org.apache.fineract.infrastructure.event.external.service.serialization.serializer.loan;
 
+import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.generic.GenericContainer;
 import org.apache.fineract.avro.generator.ByteBufferSerializable;
@@ -59,6 +61,8 @@ public class LoanAdjustTransactionBusinessEventSerializer
         transactionToAdjustData
                 .setLoanChargePaidByList(loanChargePaidByReadService.fetchLoanChargesPaidByDataTransactionId(transactionToAdjust.getId()));
         LoanTransactionDataV1 transactionToAdjustAvroDto = mapper.map(transactionToAdjustData);
+        Map<String, ByteBuffer> customData = collectCustomData(event);
+        transactionToAdjustAvroDto.setCustomData(customData);
 
         LoanTransaction newTransactionDetail = event.get().getNewTransactionDetail();
         LoanTransactionDataV1 newTransactionDetailAvroDto = null;
@@ -68,9 +72,9 @@ public class LoanAdjustTransactionBusinessEventSerializer
             newTransactionDetailData.setLoanChargePaidByList(
                     loanChargePaidByReadService.fetchLoanChargesPaidByDataTransactionId(newTransactionDetail.getId()));
             newTransactionDetailAvroDto = mapper.map(newTransactionDetailData);
-
+            newTransactionDetailAvroDto.setCustomData(customData);
         }
-        return new LoanTransactionAdjustmentDataV1(transactionToAdjustAvroDto, newTransactionDetailAvroDto, collectCustomData(event));
+        return new LoanTransactionAdjustmentDataV1(transactionToAdjustAvroDto, newTransactionDetailAvroDto);
     }
 
     @Override

@@ -154,8 +154,8 @@ public class LoanAdjustTransactionBusinessEventSerializerTest {
                 .toAvroDTO(businessEvent);
         assertEquals(reversedLocalDate, loanTransactionAdjustmentDataV1.getTransactionToAdjust().getReversedOnDate());
 
-        assertNotNull(loanTransactionAdjustmentDataV1.getCustomData());
-        final Map<String, ByteBuffer> customData = loanTransactionAdjustmentDataV1.getCustomData();
+        assertNotNull(loanTransactionAdjustmentDataV1.getTransactionToAdjust().getCustomData());
+        final Map<String, ByteBuffer> customData = loanTransactionAdjustmentDataV1.getTransactionToAdjust().getCustomData();
         assertEquals("test_data_for_loan_adjust_transaction_1", new String(customData.get("test_key_1").array(), UTF_8));
         assertEquals("test_data_for_loan_adjust_transaction_2", new String(customData.get("test_key_2").array(), UTF_8));
     }
