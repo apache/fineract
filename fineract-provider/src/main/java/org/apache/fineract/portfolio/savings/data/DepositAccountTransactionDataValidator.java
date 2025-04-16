@@ -61,10 +61,12 @@ public class DepositAccountTransactionDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
 
-    private static final Set<String> DEPOSIT_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(DepositsApiConstants.localeParamName, DepositsApiConstants.dateFormatParamName, transactionDateParamName,
-                    transactionAmountParamName, paymentTypeIdParamName, transactionAccountNumberParamName, checkNumberParamName,
-                    routingCodeParamName, receiptNumberParamName, bankNumberParamName));
+    private static final Set<String> DEPOSIT_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
+            DepositsApiConstants.localeParamName, DepositsApiConstants.dateFormatParamName, transactionDateParamName,
+            transactionAmountParamName, paymentTypeIdParamName, transactionAccountNumberParamName, checkNumberParamName,
+            routingCodeParamName, receiptNumberParamName, bankNumberParamName, DepositsApiConstants.amountParamName,
+            DepositsApiConstants.accountIdParamName, DepositsApiConstants.dateParamName, DepositsApiConstants.submittedOnDateParamName,
+            DepositsApiConstants.lienTransaction, DepositsApiConstants.isManualTransaction, DepositsApiConstants.chargesPaidByData));
 
     private static final Set<String> DEPOSIT_ACCOUNT_RECOMMENDED_DEPOSIT_AMOUNT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(DepositsApiConstants.localeParamName, DepositsApiConstants.dateFormatParamName,

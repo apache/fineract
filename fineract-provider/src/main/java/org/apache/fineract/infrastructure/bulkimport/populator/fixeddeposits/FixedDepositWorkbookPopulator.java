@@ -115,7 +115,7 @@ public class FixedDepositWorkbookPopulator extends AbstractWorkbookPopulator {
                 .createFormulaListConstraint("INDIRECT(CONCATENATE(\"Staff_\",$A1))");
         DataValidationConstraint submittedDateConstraint = validationHelper.createDateConstraint(
                 DataValidationConstraint.OperatorType.BETWEEN,
-                "=VLOOKUP($B1,$AF$2:$AG$" + (clientSheetPopulator.getClientsSize() + 1) + ",2,FALSE)", "=TODAY()", dateFormat);
+                "=DATEVALUE(VLOOKUP($B1,$AF$2:$AG$" + (clientSheetPopulator.getClientsSize() + 1) + ",2,FALSE))", "=TODAY()", dateFormat);
         DataValidationConstraint approvalDateConstraint = validationHelper
                 .createDateConstraint(DataValidationConstraint.OperatorType.BETWEEN, "=$E1", "=TODAY()", dateFormat);
         DataValidationConstraint activationDateConstraint = validationHelper
@@ -341,7 +341,7 @@ public class FixedDepositWorkbookPopulator extends AbstractWorkbookPopulator {
         writeString(FixedDepositConstants.INTEREST_CALCULATION_DAYS_IN_YEAR_COL, rowHeader, "# Days in Year*");
         writeString(FixedDepositConstants.LOCKIN_PERIOD_COL, rowHeader, "Locked In For");
         writeString(FixedDepositConstants.DEPOSIT_AMOUNT_COL, rowHeader, "Deposit Amount");
-        writeString(FixedDepositConstants.DEPOSIT_PERIOD_COL, rowHeader, "Deposit Period");
+        writeString(FixedDepositConstants.DEPOSIT_PERIOD_COL, rowHeader, "Deposit Period*");
         writeString(FixedDepositConstants.EXTERNAL_ID_COL, rowHeader, "External Id");
 
         writeString(FixedDepositConstants.CHARGE_ID_1, rowHeader, "Charge Id");
