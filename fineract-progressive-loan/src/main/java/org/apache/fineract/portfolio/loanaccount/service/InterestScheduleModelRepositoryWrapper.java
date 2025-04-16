@@ -18,16 +18,23 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import java.time.LocalDate;
 import java.util.Optional;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.ProgressiveLoanModel;
 import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductMinimumRepaymentScheduleRelatedDetail;
 
 public interface InterestScheduleModelRepositoryWrapper {
+
+    Optional<ProgressiveLoanModel> findOneByLoanId(Long loanId);
+
+    Optional<ProgressiveLoanInterestScheduleModel> extractModel(Optional<ProgressiveLoanModel> progressiveLoanModel);
 
     String writeInterestScheduleModel(Loan loan, ProgressiveLoanInterestScheduleModel model);
 
     Optional<ProgressiveLoanInterestScheduleModel> readProgressiveLoanInterestScheduleModel(Long loanId,
             LoanProductMinimumRepaymentScheduleRelatedDetail detail, Integer installmentAmountInMultipliesOf);
 
+    Optional<ProgressiveLoanInterestScheduleModel> getSavedModel(Loan loan, LocalDate businessDate);
 }

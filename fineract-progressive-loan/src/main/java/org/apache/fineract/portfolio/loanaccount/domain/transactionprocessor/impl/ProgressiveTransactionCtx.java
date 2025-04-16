@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -38,8 +37,6 @@ import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanIntere
 public class ProgressiveTransactionCtx extends TransactionCtx {
 
     private final ProgressiveLoanInterestScheduleModel model;
-    @Setter
-    private LocalDate lastOverdueBalanceChange = null;
     private List<LoanTransaction> alreadyProcessedTransactions = new ArrayList<>();
     @Setter
     private Money sumOfInterestRefundAmount;

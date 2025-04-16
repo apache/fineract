@@ -1187,7 +1187,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 .sorted(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber)).toList();
     }
 
-    private void recalculateInterestForDate(LocalDate targetDate, ProgressiveTransactionCtx ctx) {
+    public void recalculateInterestForDate(LocalDate targetDate, ProgressiveTransactionCtx ctx) {
         if (ctx.getInstallments() != null && !ctx.getInstallments().isEmpty()) {
             Loan loan = ctx.getInstallments().get(0).getLoan();
             if (loan.isInterestBearingAndInterestRecalculationEnabled() && !loan.isNpa() && !ctx.isChargedOff()) {
@@ -1240,17 +1240,18 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         LocalDate toDate = currentInstallment.getDueDate();
         boolean hasUpdate = false;
 
-        if (!currentDate.equals(ctx.getLastOverdueBalanceChange())) {
+        if (!currentDate.equals(ctx.getModel().lastOverdueBalanceChange())) {
             // if we have same date for fromDate & last overdue balance change then it means we have the up-to-date
             // model.
-            if (ctx.getLastOverdueBalanceChange() == null || currentInstallment.getFromDate().isAfter(ctx.getLastOverdueBalanceChange())) {
+            if (ctx.getModel().lastOverdueBalanceChange() == null
+                    || currentInstallment.getFromDate().isAfter(ctx.getModel().lastOverdueBalanceChange())) {
                 // first overdue hit for installment. setting overdue balance correction from instalment from date.
                 emiCalculator.addBalanceCorrection(ctx.getModel(), fromDate, overduePrincipal);
             } else {
                 // not the first balance correction on installment period, then setting overdue balance correction from
                 // last balance change's current date. previous interest period already has the correct balance
                 // correction.
-                emiCalculator.addBalanceCorrection(ctx.getModel(), ctx.getLastOverdueBalanceChange(), overduePrincipal);
+                emiCalculator.addBalanceCorrection(ctx.getModel(), ctx.getModel().lastOverdueBalanceChange(), overduePrincipal);
             }
 
             hasUpdate = true;
@@ -1263,7 +1264,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                     lastOverdueBalanceChange = currentDate;
                 }
                 emiCalculator.addBalanceCorrection(ctx.getModel(), lastOverdueBalanceChange, aggregatedOverDuePrincipal.negated());
-                ctx.setLastOverdueBalanceChange(lastOverdueBalanceChange);
+                ctx.getModel().lastOverdueBalanceChange(lastOverdueBalanceChange);
             }
         }
 

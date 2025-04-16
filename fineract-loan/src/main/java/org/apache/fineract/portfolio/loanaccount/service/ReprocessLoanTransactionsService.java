@@ -38,4 +38,5 @@ public interface ReprocessLoanTransactionsService {
 
     void processLatestTransaction(LoanTransaction loanTransaction, Loan loan);
 
+    void updateModel(Loan loan);
 }

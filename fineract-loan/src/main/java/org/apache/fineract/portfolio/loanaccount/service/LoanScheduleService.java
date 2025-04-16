@@ -38,7 +38,7 @@ public class LoanScheduleService {
     private final LoanChargeService loanChargeService;
     private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
     private final LoanMapper loanMapper;
-    private final LoanTransactionProcessingService loadTransactionProcessingService;
+    private final LoanTransactionProcessingService loanTransactionProcessingService;
     private final LoanScheduleComponent loanSchedule;
 
     /**
@@ -77,14 +77,16 @@ public class LoanScheduleService {
             } else {
                 regenerateRepaymentSchedule(loan, generatorDTO);
             }
+            reprocessLoanTransactionsService.reprocessTransactions(loan);
+        } else {
+            reprocessLoanTransactionsService.updateModel(loan);
         }
 
-        reprocessLoanTransactionsService.reprocessTransactions(loan);
     }
 
     public void regenerateRepaymentScheduleWithInterestRecalculation(final Loan loan, final ScheduleGeneratorDTO generatorDTO) {
         final LocalDate lastTransactionDate = loan.getLastUserTransactionDate();
-        final LoanScheduleDTO loanScheduleDTO = loadTransactionProcessingService.getRecalculatedSchedule(generatorDTO, loan);
+        final LoanScheduleDTO loanScheduleDTO = loanTransactionProcessingService.getRecalculatedSchedule(generatorDTO, loan);
         if (loanScheduleDTO == null) {
             return;
         }
@@ -112,7 +114,7 @@ public class LoanScheduleService {
                 }
             }
         }
-        loadTransactionProcessingService.processPostDisbursementTransactions(loan);
+        loanTransactionProcessingService.processPostDisbursementTransactions(loan);
     }
 
     public void handleRegenerateRepaymentScheduleWithInterestRecalculation(final Loan loan, final ScheduleGeneratorDTO generatorDTO) {
