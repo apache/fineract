@@ -40,6 +40,7 @@ public final class DataTableApiConstant {
     // associationParameters
     public static final String allAssociateParamName = "all";
     public static final String repaymentScheduleAssociateParamName = "repaymentSchedule";
+    public static final String summaryAssociateParamName = "summary";
     public static final String originalScheduleAssociateParamName = "originalSchedule";
     public static final String transactionsAssociateParamName = "transactions";
     public static final String chargesAssociateParamName = "charges";

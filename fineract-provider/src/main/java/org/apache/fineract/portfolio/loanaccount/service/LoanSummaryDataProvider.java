@@ -38,10 +38,10 @@ public interface LoanSummaryDataProvider {
     LoanSummaryData withOnlyCurrencyData(CurrencyData currencyData);
 
     LoanSummaryData withTransactionAmountsSummary(Long loanId, LoanSummaryData defaultSummaryData, LoanScheduleData repaymentSchedule,
-            Collection<LoanTransactionBalance> loanTransactionBalances);
+            Collection<? extends LoanTransactionBalance> loanTransactionBalances);
 
     LoanSummaryData withTransactionAmountsSummary(Loan loan, LoanSummaryData defaultSummaryData, LoanScheduleData repaymentSchedule,
-            Collection<LoanTransactionBalance> loanTransactionBalances);
+            Collection<? extends LoanTransactionBalance> loanTransactionBalances);
 
     boolean accept(String loanProcessingStrategyCode);
 }

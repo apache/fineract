@@ -35,7 +35,7 @@ public abstract class CommonLoanSummaryDataProvider implements LoanSummaryDataPr
 
     @Override
     public LoanSummaryData withTransactionAmountsSummary(Loan loan, LoanSummaryData defaultSummaryData, LoanScheduleData repaymentSchedule,
-            Collection<LoanTransactionBalance> loanTransactionBalances) {
+            Collection<? extends LoanTransactionBalance> loanTransactionBalances) {
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
 
         BigDecimal totalMerchantRefund = BigDecimal.ZERO;
@@ -137,16 +137,16 @@ public abstract class CommonLoanSummaryDataProvider implements LoanSummaryDataPr
                 .totalUnpaidPayableNotDueInterest(totalUnpaidPayableNotDueInterest).totalInterestRefund(totalInterestRefund).build();
     }
 
-    private static BigDecimal fetchLoanTransactionBalanceByType(final Collection<LoanTransactionBalance> loanTransactionBalances,
+    private static BigDecimal fetchLoanTransactionBalanceByType(final Collection<? extends LoanTransactionBalance> loanTransactionBalances,
             final LoanTransactionType transactionType) {
-        final Optional<LoanTransactionBalance> optLoanTransactionBalance = loanTransactionBalances.stream()
+        final Optional<? extends LoanTransactionBalance> optLoanTransactionBalance = loanTransactionBalances.stream()
                 .filter(balance -> balance.getTransactionType().equals(transactionType) && !balance.isReversed()).findFirst();
         return optLoanTransactionBalance.isPresent() ? optLoanTransactionBalance.get().getAmount() : BigDecimal.ZERO;
     }
 
-    private static BigDecimal fetchLoanTransactionBalanceReversedByType(final Collection<LoanTransactionBalance> loanTransactionBalances,
-            final LoanTransactionType transactionType) {
-        final Optional<LoanTransactionBalance> optLoanTransactionBalance = loanTransactionBalances.stream()
+    private static BigDecimal fetchLoanTransactionBalanceReversedByType(
+            final Collection<? extends LoanTransactionBalance> loanTransactionBalances, final LoanTransactionType transactionType) {
+        final Optional<? extends LoanTransactionBalance> optLoanTransactionBalance = loanTransactionBalances.stream()
                 .filter(balance -> balance.getTransactionType().equals(transactionType) && balance.isReversed()
                         && balance.isManuallyAdjustedOrReversed())
                 .findFirst();

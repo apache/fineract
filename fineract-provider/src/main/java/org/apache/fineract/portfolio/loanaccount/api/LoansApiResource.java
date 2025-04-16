@@ -478,6 +478,7 @@ public class LoansApiResource {
             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
             @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder,
             @QueryParam("accountNo") @Parameter(description = "accountNo") final String accountNo,
+            @QueryParam("associations") @Parameter(description = "associations") final String associations,
             @QueryParam("status") @Parameter(description = "status") final String status) {
 
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
@@ -490,7 +491,23 @@ public class LoansApiResource {
                 .externalId(externalId).offset(offset).limit(limit).orderBy(orderBy).status(status).build();
 
         final Page<LoanAccountData> loanBasicDetails = this.loanReadPlatformService.retrieveAll(searchParameters);
-
+        final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
+        if (associationParameters.contains(DataTableApiConstant.summaryAssociateParamName)) {
+            loanBasicDetails.getPageItems().forEach(i -> {
+                Collection<DisbursementData> disbursementData = this.loanReadPlatformService.retrieveLoanDisbursementDetails(i.getId());
+                final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData = new RepaymentScheduleRelatedLoanData(
+                        i.getTimeline().getExpectedDisbursementDate(), i.getTimeline().getActualDisbursementDate(), i.getCurrency(),
+                        i.getPrincipal(), i.getInArrearsTolerance(), i.getFeeChargesAtDisbursementCharged());
+                final LoanScheduleData repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(i.getId(),
+                        repaymentScheduleRelatedData, disbursementData, i.isInterestRecalculationEnabled(),
+                        LoanScheduleType.fromEnumOptionData(i.getLoanScheduleType()));
+                LoanSummaryDataProvider loanSummaryDataProvider = loanSummaryProviderDelegate
+                        .resolveLoanSummaryDataProvider(i.getTransactionProcessingStrategyCode());
+                i.setSummary(loanSummaryDataProvider.withTransactionAmountsSummary(i.getId(), i.getSummary(), repaymentSchedule,
+                        loanSummaryBalancesRepository.retrieveLoanSummaryBalancesByTransactionType(i.getId(),
+                                LoanApiConstants.LOAN_SUMMARY_TRANSACTION_TYPES)));
+            });
+        }
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, loanBasicDetails, LOAN_DATA_PARAMETERS);
     }

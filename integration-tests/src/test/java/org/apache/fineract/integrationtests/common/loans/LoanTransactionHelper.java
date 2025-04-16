@@ -64,6 +64,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
+import org.apache.fineract.client.models.GetLoansResponse;
 import org.apache.fineract.client.models.PaymentTypeData;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
@@ -1605,6 +1606,11 @@ public class LoanTransactionHelper {
             List<TransactionType> excludedTransactionTypes, Integer page, Integer size, String sort) {
         return Calls.ok(FineractClientHelper.getFineractClient().loanTransactions.retrieveTransactionsByExternalLoanId(loanExternalId,
                 excludedTransactionTypes, page, size, sort));
+    }
+
+    public GetLoansResponse retrieveAllLoans(final String accountNumber, final String associations) {
+        return Calls.ok(
+                FineractClientHelper.getFineractClient().loans.retrieveAll27(null, 0, 10, null, null, accountNumber, associations, null));
     }
 
     // TODO: Rewrite to use fineract-client instead!
