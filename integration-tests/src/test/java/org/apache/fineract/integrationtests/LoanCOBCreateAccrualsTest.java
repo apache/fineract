@@ -675,8 +675,8 @@ public class LoanCOBCreateAccrualsTest extends BaseLoanIntegrationTest {
             validateTransactionsExist(loanDetails, //
                     transaction(0.30, "Accrual", "19 February 2025", 0.0, 0.0, 0.30, 0.0, 0.0, 0.0, 0.0), //
                     transaction(0.30, "Accrual", "20 February 2025", 0.0, 0.0, 0.30, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(0.23, "Accrual", "21 February 2025", 0.0, 0.0, 0.23, 0.0, 0.0, 0.0, 0.0), //
-                    transaction(0.22, "Accrual", "22 February 2025", 0.0, 0.0, 0.22, 0.0, 0.0, 0.0, 0.0)); //
+                    transaction(0.33, "Accrual", "21 February 2025", 0.0, 0.0, 0.33, 0.0, 0.0, 0.0, 0.0), //
+                    transaction(0.34, "Accrual", "22 February 2025", 0.0, 0.0, 0.34, 0.0, 0.0, 0.0, 0.0)); //
         });
     }
 

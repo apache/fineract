@@ -94,6 +94,53 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
     }
 
     @Test
+    public void testInterestRecalculationInCaseOfTinyAmountOfRepaymentsEveryRepaymentPeriodForProgressiveLoanSameAsRepaymentPeriod() {
+        AtomicReference<Long> loanIdRef = new AtomicReference<>();
+        runAt("1 January 2023", () -> {
+            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(create4IProgressive() //
+                    .recalculationRestFrequencyType(RecalculationRestFrequencyType.SAME_AS_REPAYMENT_PERIOD) //
+            );//
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2023", 10000.0,
+                    86.42, 6, null);
+            loanIdRef.set(loanId);
+            disburseLoan(loanId, BigDecimal.valueOf(8000), "1 January 2023");
+        });
+        runAt("1 February 2023", () -> {
+            Long loanId = loanIdRef.get();
+            loanTransactionHelper.makeLoanRepayment(loanId, "Repayment", "1 February 2023", 0.01);
+        });
+        runAt("1 March 2023", () -> {
+            Long loanId = loanIdRef.get();
+            loanTransactionHelper.makeLoanRepayment(loanId, "Repayment", "1 March 2023", 0.01);
+        });
+        runAt("1 April 2023", () -> {
+            Long loanId = loanIdRef.get();
+            loanTransactionHelper.makeLoanRepayment(loanId, "Repayment", "1 April 2023", 0.01);
+        });
+        runAt("1 May 2023", () -> {
+            Long loanId = loanIdRef.get();
+            loanTransactionHelper.makeLoanRepayment(loanId, "Repayment", "1 May 2023", 0.01);
+        });
+        runAt("1 June 2023", () -> {
+            Long loanId = loanIdRef.get();
+            loanTransactionHelper.makeLoanRepayment(loanId, "Repayment", "1 June 2023", 0.01);
+        });
+        runAt("17 June 2023", () -> {
+            Long loanId = loanIdRef.get();
+            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            verifyRepaymentSchedule(loanId, //
+                    installment(8000.0, null, "01 January 2023"), //
+                    installment(1112.7, 576.13, 1688.78, false, "01 February 2023"), //
+                    installment(1112.7, 576.13, 1688.83, false, "01 March 2023"), //
+                    installment(1112.7, 576.13, 1688.83, false, "01 April 2023"), //
+                    installment(1112.7, 576.13, 1688.83, false, "01 May 2023"), //
+                    installment(1112.7, 576.13, 1688.83, false, "01 June 2023"), //
+                    installment(2436.5, 576.13, 3012.63, false, "01 July 2023") //
+            );
+        });
+    }
+
+    @Test
     public void verifyLoanInstallmentRecalculatedIfThereIsOverdueInstallmentOn4IProgressiveLoanCOBStepDaily() {
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
         runAt("1 January 2023", () -> {

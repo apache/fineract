@@ -1220,44 +1220,31 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         LocalDate toDate = currentInstallment.getDueDate();
         boolean hasUpdate = false;
 
-        if (currentInstallment.getLoan().getLoanInterestRecalculationDetails().getRestFrequencyType().isSameAsRepayment()) {
+        if (!currentDate.equals(ctx.getLastOverdueBalanceChange())) {
             // if we have same date for fromDate & last overdue balance change then it means we have the up-to-date
             // model.
-            if (ctx.getLastOverdueBalanceChange() == null || fromDate.isAfter(ctx.getLastOverdueBalanceChange())) {
-                emiCalculator.addBalanceCorrection(ctx.getModel(), fromDate, overduePrincipal);
-                ctx.setLastOverdueBalanceChange(fromDate);
-                hasUpdate = true;
-
-                if (currentDate.isAfter(fromDate) && !currentDate.isAfter(toDate)) {
-                    emiCalculator.addBalanceCorrection(ctx.getModel(), currentInstallment.getDueDate(),
-                            aggregatedOverDuePrincipal.negated());
-                    ctx.setLastOverdueBalanceChange(currentInstallment.getDueDate());
-                }
-            }
-        }
-
-        if (currentInstallment.getLoan().getLoanInterestRecalculationDetails().getRestFrequencyType().isDaily()
-                // if we have same date for currentDate & last overdue balance change then it meas we have the
-                // up-to-date model.
-                && !currentDate.equals(ctx.getLastOverdueBalanceChange())) {
             if (ctx.getLastOverdueBalanceChange() == null || currentInstallment.getFromDate().isAfter(ctx.getLastOverdueBalanceChange())) {
                 // first overdue hit for installment. setting overdue balance correction from instalment from date.
                 emiCalculator.addBalanceCorrection(ctx.getModel(), fromDate, overduePrincipal);
             } else {
                 // not the first balance correction on installment period, then setting overdue balance correction from
-                // last balance change's current date. previous interest period already has the correct balanec
-                // correction
+                // last balance change's current date. previous interest period already has the correct balance
+                // correction.
                 emiCalculator.addBalanceCorrection(ctx.getModel(), ctx.getLastOverdueBalanceChange(), overduePrincipal);
             }
 
-            // setting negative correction for the period from current date, expecting the overdue balance's full
-            // repayment on that day.
-            // TODO: we might need to do it outside of this method only for the current date at the end
-            if (currentDate.isAfter(currentInstallment.getFromDate()) && !currentDate.isAfter(currentInstallment.getDueDate())) {
-                emiCalculator.addBalanceCorrection(ctx.getModel(), currentDate, aggregatedOverDuePrincipal.negated());
-                ctx.setLastOverdueBalanceChange(currentDate);
-            }
             hasUpdate = true;
+
+            if (currentDate.isAfter(fromDate) && !currentDate.isAfter(toDate)) {
+                LocalDate lastOverdueBalanceChange;
+                if (currentInstallment.getLoan().getLoanInterestRecalculationDetails().getRestFrequencyType().isSameAsRepayment()) {
+                    lastOverdueBalanceChange = toDate;
+                } else {
+                    lastOverdueBalanceChange = currentDate;
+                }
+                emiCalculator.addBalanceCorrection(ctx.getModel(), lastOverdueBalanceChange, aggregatedOverDuePrincipal.negated());
+                ctx.setLastOverdueBalanceChange(lastOverdueBalanceChange);
+            }
         }
 
         if (hasUpdate) {
