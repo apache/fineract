@@ -89,6 +89,13 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
                 zero.getMc(), false);
     }
 
+    public static InterestPeriod withEmptyAmounts(@NotNull RepaymentPeriod repaymentPeriod, @NotNull LocalDate fromDate, LocalDate dueDate,
+            boolean isPaused) {
+        final Money zero = repaymentPeriod.getEmi().zero();
+        return new InterestPeriod(repaymentPeriod, fromDate, dueDate, BigDecimal.ZERO, BigDecimal.ZERO, zero, zero, zero, zero, zero,
+                zero.getMc(), isPaused);
+    }
+
     public static InterestPeriod withPausedAndEmptyAmounts(@NotNull RepaymentPeriod repaymentPeriod, @NotNull LocalDate fromDate,
             LocalDate dueDate) {
         final Money zero = repaymentPeriod.getEmi().zero();

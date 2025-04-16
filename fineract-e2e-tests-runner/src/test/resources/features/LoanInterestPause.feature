@@ -251,6 +251,9 @@ Feature: Loan interest pause on repayment schedule
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 100           | 1.57     | 0    | 0         | 101.57 | 0.0  | 0          | 0    | 101.57      |
+    When Admin sets the business date to "12 February 2024"
+    When Admin runs inline COB job for Loan
+    And Customer makes "AUTOPAY" repayment on "12 February 2024" with 0.01 EUR transaction amount
     When Admin sets the business date to "15 March 2024"
     When Admin runs inline COB job for Loan
     When Admin sets the business date to "5 April 2024"
@@ -297,6 +300,7 @@ Feature: Loan interest pause on repayment schedule
       | 07 February 2024 | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 08 February 2024 | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 February 2024 | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 12 February 2024 | Repayment        | 0.01   | 0.01      | 0.0      | 0.0  | 0.0       | 99.99        | false    | false    |
       | 11 March 2024    | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 12 March 2024    | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 13 March 2024    | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
