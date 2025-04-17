@@ -28,12 +28,12 @@ public final class FinancialActivityAccountsConstants {
 
     }
 
-    private static final String idParamName = "id";
-    private static final String factivityDataParamName = "financialActivityData";
-    private static final String glAccountDataParamName = "glAccountData";
-    private static final String glAccountOptionsParamName = "glAccountOptions";
-    private static final String financialActivityOptionsParamName = "financialActivityOptions";
-    public static final String resourceNameForPermission = "FINANCIALACTIVITYACCOUNT";
-    static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName, factivityDataParamName,
-            glAccountDataParamName, glAccountOptionsParamName, financialActivityOptionsParamName));
+    private static final String ID_PARAM_NAME = "id";
+    private static final String FINANCIAL_ACTIVITY_DATA_PARAM_NAME = "financialActivityData";
+    private static final String GL_ACCOUNT_DATA_PARAM_NAME = "glAccountData";
+    private static final String GL_ACCOUNT_OPTIONS_PARAM_NAME = "glAccountOptions";
+    private static final String FINANCIAL_ACTIVITY_OPTIONS_PARAM_NAME = "financialActivityOptions";
+    public static final String RESOURCE_NAME_FOR_PERMISSION = "FINANCIALACTIVITYACCOUNT";
+    static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(ID_PARAM_NAME, FINANCIAL_ACTIVITY_DATA_PARAM_NAME,
+            GL_ACCOUNT_DATA_PARAM_NAME, GL_ACCOUNT_OPTIONS_PARAM_NAME, FINANCIAL_ACTIVITY_OPTIONS_PARAM_NAME));
 }

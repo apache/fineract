@@ -79,7 +79,7 @@ public class FinancialActivityAccountsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public FinancialActivityAccountData retrieveTemplate() {
-        context.authenticatedUser().validateHasReadPermission(FinancialActivityAccountsConstants.resourceNameForPermission);
+        context.authenticatedUser().validateHasReadPermission(FinancialActivityAccountsConstants.RESOURCE_NAME_FOR_PERMISSION);
         return financialActivityAccountReadPlatformService.getFinancialActivityAccountTemplate();
     }
 
@@ -91,7 +91,7 @@ public class FinancialActivityAccountsApiResource {
             financialactivityaccounts""")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = FinancialActivityAccountsApiResourceSwagger.GetFinancialActivityAccountsResponse.class))))
     public List<FinancialActivityAccountData> retrieveAll() {
-        context.authenticatedUser().validateHasReadPermission(FinancialActivityAccountsConstants.resourceNameForPermission);
+        context.authenticatedUser().validateHasReadPermission(FinancialActivityAccountsConstants.RESOURCE_NAME_FOR_PERMISSION);
         return financialActivityAccountReadPlatformService.retrieveAll();
     }
 
@@ -105,7 +105,7 @@ public class FinancialActivityAccountsApiResource {
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FinancialActivityAccountsApiResourceSwagger.GetFinancialActivityAccountsResponse.class)))
     public FinancialActivityAccountData retreive(@PathParam("mappingId") @Parameter(description = "mappingId") final Long mappingId,
             @Context final UriInfo uriInfo) {
-        context.authenticatedUser().validateHasReadPermission(FinancialActivityAccountsConstants.resourceNameForPermission);
+        context.authenticatedUser().validateHasReadPermission(FinancialActivityAccountsConstants.RESOURCE_NAME_FOR_PERMISSION);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         FinancialActivityAccountData financialActivityAccountData = financialActivityAccountReadPlatformService.retrieve(mappingId);
