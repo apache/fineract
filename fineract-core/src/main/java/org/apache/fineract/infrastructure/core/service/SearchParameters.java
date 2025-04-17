@@ -47,6 +47,7 @@ public class SearchParameters {
     private String currencyCode;
     private Long staffId;
     private Long loanId;
+    private Long clientId;
     private Long savingsId;
     @Getter(AccessLevel.NONE)
     private Boolean orphansOnly;

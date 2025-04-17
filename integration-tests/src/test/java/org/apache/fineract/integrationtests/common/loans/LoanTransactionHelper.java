@@ -1608,14 +1608,15 @@ public class LoanTransactionHelper {
                 excludedTransactionTypes, page, size, sort));
     }
 
-    public GetLoansResponse retrieveAllLoans(final String accountNumber, final String associations) {
-        return Calls.ok(
-                FineractClientHelper.getFineractClient().loans.retrieveAll27(null, 0, 10, null, null, accountNumber, associations, null));
-    }
-
     // TODO: Rewrite to use fineract-client instead!
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+
+    public GetLoansResponse retrieveAllLoans(final String accountNumber, final String associations, final Long clientId) {
+        return Calls.ok(FineractClientHelper.getFineractClient().loans.retrieveAll27(null, 0, 10, null, null, accountNumber, associations,
+                clientId, null));
+    }
+
     @Deprecated(forRemoval = true)
     public GetLoansLoanIdTransactionsTransactionIdResponse getLoanTransaction(final Integer loanId, final Integer txnId) {
         final String GET_LOAN_CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/transactions/" + txnId + "?"
