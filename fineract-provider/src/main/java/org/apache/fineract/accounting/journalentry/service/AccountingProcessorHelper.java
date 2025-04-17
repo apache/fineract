@@ -60,6 +60,7 @@ import org.apache.fineract.accounting.producttoaccountmapping.exception.ProductT
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.business.domain.journalentry.LoanJournalEntryCreatedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.organisation.office.domain.Office;
@@ -453,13 +454,19 @@ public class AccountingProcessorHelper {
             JournalAmountHolder totalAccountHolder, Long loanProductId, Long paymentTypeId, Long loanId, String transactionId,
             LocalDate transactionDate) {
         splitAccountsHolder.forEach(journalItemHolder -> {
-            final GLAccount account = getLinkedGLAccountForLoanProduct(loanProductId, journalItemHolder.getAccountType(), paymentTypeId);
-            createDebitJournalEntryForLoan(office, currencyCode, account, loanId, transactionId, transactionDate,
-                    journalItemHolder.getAmount());
+            if (MathUtil.isGreaterThanZero(journalItemHolder.getAmount())) {
+                final GLAccount account = getLinkedGLAccountForLoanProduct(loanProductId, journalItemHolder.getAccountType(),
+                        paymentTypeId);
+                createDebitJournalEntryForLoan(office, currencyCode, account, loanId, transactionId, transactionDate,
+                        journalItemHolder.getAmount());
+            }
         });
-        final GLAccount totalAccount = getLinkedGLAccountForLoanProduct(loanProductId, totalAccountHolder.getAccountType(), paymentTypeId);
-        createCreditJournalEntryForLoan(office, currencyCode, totalAccount, loanId, transactionId, transactionDate,
-                totalAccountHolder.getAmount());
+        if (MathUtil.isGreaterThanZero(totalAccountHolder.getAmount())) {
+            final GLAccount totalAccount = getLinkedGLAccountForLoanProduct(loanProductId, totalAccountHolder.getAccountType(),
+                    paymentTypeId);
+            createCreditJournalEntryForLoan(office, currencyCode, totalAccount, loanId, transactionId, transactionDate,
+                    totalAccountHolder.getAmount());
+        }
     }
 
     public void createCreditJournalEntryForLoan(final Office office, final String currencyCode,
