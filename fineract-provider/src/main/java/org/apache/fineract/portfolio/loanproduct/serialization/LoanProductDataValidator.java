@@ -2692,6 +2692,18 @@ public final class LoanProductDataValidator {
                     .extractBooleanNamed(LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME, element);
             baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME)
                     .value(enableIncomeCapitalization).ignoreIfNull().validateForBooleanValue();
+            if (enableIncomeCapitalization) {
+                final String capitalizedIncomeCalculationType = this.fromApiJsonHelper
+                        .extractStringNamed(LoanProductConstants.CAPITALIZED_INCOME_CALCULATION_TYPE_PARAM_NAME, element);
+                baseDataValidator.reset().parameter(LoanProductConstants.CAPITALIZED_INCOME_CALCULATION_TYPE_PARAM_NAME)
+                        .value(capitalizedIncomeCalculationType).isOneOfEnumValues(LoanCapitalizedIncomeCalculationType.class)
+                        .cantBeBlankWhenParameterProvidedIs(LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME, true);
+                final String capitalizedIncomeStrategy = this.fromApiJsonHelper
+                        .extractStringNamed(LoanProductConstants.CAPITALIZED_INCOME_STRATEGY_PARAM_NAME, element);
+                baseDataValidator.reset().parameter(LoanProductConstants.CAPITALIZED_INCOME_STRATEGY_PARAM_NAME)
+                        .value(capitalizedIncomeStrategy).isOneOfEnumValues(LoanCapitalizedIncomeStrategy.class)
+                        .cantBeBlankWhenParameterProvidedIs(LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME, true);
+            }
         } else if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME, element)) {
             Boolean enableIncomeCapitalization = this.fromApiJsonHelper
                     .extractBooleanNamed(LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME, element);

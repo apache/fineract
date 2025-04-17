@@ -29,119 +29,139 @@ import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeCalculationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeStrategy;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 public class LoanProductTest extends BaseLoanIntegrationTest {
 
-    @Test
-    public void testIncomeCapitalizationEnabled() {
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+    @Nested
+    public class IncomeCapitalizationTest {
 
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
-                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
-                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION));
+        @Test
+        public void testIncomeCapitalizationEnabled() {
+            final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
 
-        final GetLoanProductsProductIdResponse loanProductsProductIdResponse = loanProductHelper
-                .retrieveLoanProductById(loanProductsResponse.getResourceId());
-        Assertions.assertEquals(Boolean.TRUE, loanProductsProductIdResponse.getEnableIncomeCapitalization());
-        Assertions.assertNotNull(loanProductsProductIdResponse.getCapitalizedIncomeCalculationType());
-        Assertions.assertEquals(LoanCapitalizedIncomeCalculationType.FLAT.getCode(),
-                loanProductsProductIdResponse.getCapitalizedIncomeCalculationType().getCode());
-        Assertions.assertNotNull(loanProductsProductIdResponse.getCapitalizedIncomeStrategy());
-        Assertions.assertEquals(LoanCapitalizedIncomeStrategy.EQUAL_AMORTIZATION.getCode(),
-                loanProductsProductIdResponse.getCapitalizedIncomeStrategy().getCode());
+            final PostLoanProductsResponse loanProductsResponse = loanProductHelper
+                    .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                            .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                            .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION));
 
-        runAt("20 December 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "20 December 2024",
-                    430.0, 7.0, 6, null);
-
-            final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
-            Assertions.assertEquals(Boolean.TRUE, loanDetails.getEnableIncomeCapitalization());
-            Assertions.assertNotNull(loanDetails.getCapitalizedIncomeCalculationType());
+            final GetLoanProductsProductIdResponse loanProductsProductIdResponse = loanProductHelper
+                    .retrieveLoanProductById(loanProductsResponse.getResourceId());
+            Assertions.assertEquals(Boolean.TRUE, loanProductsProductIdResponse.getEnableIncomeCapitalization());
+            Assertions.assertNotNull(loanProductsProductIdResponse.getCapitalizedIncomeCalculationType());
             Assertions.assertEquals(LoanCapitalizedIncomeCalculationType.FLAT.getCode(),
-                    loanDetails.getCapitalizedIncomeCalculationType().getCode());
-            Assertions.assertNotNull(loanDetails.getCapitalizedIncomeStrategy());
+                    loanProductsProductIdResponse.getCapitalizedIncomeCalculationType().getCode());
+            Assertions.assertNotNull(loanProductsProductIdResponse.getCapitalizedIncomeStrategy());
             Assertions.assertEquals(LoanCapitalizedIncomeStrategy.EQUAL_AMORTIZATION.getCode(),
-                    loanDetails.getCapitalizedIncomeStrategy().getCode());
+                    loanProductsProductIdResponse.getCapitalizedIncomeStrategy().getCode());
 
-            Assertions.assertDoesNotThrow(() -> disburseLoan(loanId, BigDecimal.valueOf(430), "20 December 2024"));
-        });
-    }
+            runAt("20 December 2024", () -> {
+                Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "20 December 2024",
+                        430.0, 7.0, 6, null);
 
-    @Test
-    public void testIncomeCapitalizationDisabled() {
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+                final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+                Assertions.assertEquals(Boolean.TRUE, loanDetails.getEnableIncomeCapitalization());
+                Assertions.assertNotNull(loanDetails.getCapitalizedIncomeCalculationType());
+                Assertions.assertEquals(LoanCapitalizedIncomeCalculationType.FLAT.getCode(),
+                        loanDetails.getCapitalizedIncomeCalculationType().getCode());
+                Assertions.assertNotNull(loanDetails.getCapitalizedIncomeStrategy());
+                Assertions.assertEquals(LoanCapitalizedIncomeStrategy.EQUAL_AMORTIZATION.getCode(),
+                        loanDetails.getCapitalizedIncomeStrategy().getCode());
 
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                .createLoanProduct(create4IProgressive().enableIncomeCapitalization(false)
-                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
-                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION));
+                Assertions.assertDoesNotThrow(() -> disburseLoan(loanId, BigDecimal.valueOf(430), "20 December 2024"));
+            });
+        }
 
-        final GetLoanProductsProductIdResponse loanProductsProductIdResponse = loanProductHelper
-                .retrieveLoanProductById(loanProductsResponse.getResourceId());
-        Assertions.assertEquals(Boolean.FALSE, loanProductsProductIdResponse.getEnableIncomeCapitalization());
-        Assertions.assertNotNull(loanProductsProductIdResponse.getCapitalizedIncomeCalculationType());
-        Assertions.assertEquals(LoanCapitalizedIncomeCalculationType.FLAT.getCode(),
-                loanProductsProductIdResponse.getCapitalizedIncomeCalculationType().getCode());
-        Assertions.assertNotNull(loanProductsProductIdResponse.getCapitalizedIncomeStrategy());
-        Assertions.assertEquals(LoanCapitalizedIncomeStrategy.EQUAL_AMORTIZATION.getCode(),
-                loanProductsProductIdResponse.getCapitalizedIncomeStrategy().getCode());
+        @Test
+        public void testIncomeCapitalizationDisabled() {
+            final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
 
-        runAt("20 December 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "20 December 2024",
-                    430.0, 7.0, 6, null);
+            final PostLoanProductsResponse loanProductsResponse = loanProductHelper
+                    .createLoanProduct(create4IProgressive().enableIncomeCapitalization(false)
+                            .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                            .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION));
 
-            final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
-            Assertions.assertEquals(Boolean.FALSE, loanDetails.getEnableIncomeCapitalization());
-            Assertions.assertNotNull(loanDetails.getCapitalizedIncomeCalculationType());
+            final GetLoanProductsProductIdResponse loanProductsProductIdResponse = loanProductHelper
+                    .retrieveLoanProductById(loanProductsResponse.getResourceId());
+            Assertions.assertEquals(Boolean.FALSE, loanProductsProductIdResponse.getEnableIncomeCapitalization());
+            Assertions.assertNotNull(loanProductsProductIdResponse.getCapitalizedIncomeCalculationType());
             Assertions.assertEquals(LoanCapitalizedIncomeCalculationType.FLAT.getCode(),
-                    loanDetails.getCapitalizedIncomeCalculationType().getCode());
-            Assertions.assertNotNull(loanDetails.getCapitalizedIncomeStrategy());
+                    loanProductsProductIdResponse.getCapitalizedIncomeCalculationType().getCode());
+            Assertions.assertNotNull(loanProductsProductIdResponse.getCapitalizedIncomeStrategy());
             Assertions.assertEquals(LoanCapitalizedIncomeStrategy.EQUAL_AMORTIZATION.getCode(),
-                    loanDetails.getCapitalizedIncomeStrategy().getCode());
+                    loanProductsProductIdResponse.getCapitalizedIncomeStrategy().getCode());
 
-            Assertions.assertDoesNotThrow(() -> disburseLoan(loanId, BigDecimal.valueOf(430), "20 December 2024"));
-        });
+            runAt("20 December 2024", () -> {
+                Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "20 December 2024",
+                        430.0, 7.0, 6, null);
+
+                final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+                Assertions.assertEquals(Boolean.FALSE, loanDetails.getEnableIncomeCapitalization());
+                Assertions.assertNotNull(loanDetails.getCapitalizedIncomeCalculationType());
+                Assertions.assertEquals(LoanCapitalizedIncomeCalculationType.FLAT.getCode(),
+                        loanDetails.getCapitalizedIncomeCalculationType().getCode());
+                Assertions.assertNotNull(loanDetails.getCapitalizedIncomeStrategy());
+                Assertions.assertEquals(LoanCapitalizedIncomeStrategy.EQUAL_AMORTIZATION.getCode(),
+                        loanDetails.getCapitalizedIncomeStrategy().getCode());
+
+                Assertions.assertDoesNotThrow(() -> disburseLoan(loanId, BigDecimal.valueOf(430), "20 December 2024"));
+            });
+        }
+
+        @Test
+        public void testIncomeCapitalizationUpdateProduct() {
+            final PostLoanProductsResponse loanProductsResponse = loanProductHelper
+                    .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                            .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                            .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION));
+
+            final GetLoanProductsProductIdResponse loanProductsProductIdResponse = loanProductHelper
+                    .retrieveLoanProductById(loanProductsResponse.getResourceId());
+            Assertions.assertEquals(Boolean.TRUE, loanProductsProductIdResponse.getEnableIncomeCapitalization());
+            Assertions.assertNotNull(loanProductsProductIdResponse.getCapitalizedIncomeCalculationType());
+            Assertions.assertEquals(LoanCapitalizedIncomeCalculationType.FLAT.getCode(),
+                    loanProductsProductIdResponse.getCapitalizedIncomeCalculationType().getCode());
+            Assertions.assertNotNull(loanProductsProductIdResponse.getCapitalizedIncomeStrategy());
+            Assertions.assertEquals(LoanCapitalizedIncomeStrategy.EQUAL_AMORTIZATION.getCode(),
+                    loanProductsProductIdResponse.getCapitalizedIncomeStrategy().getCode());
+
+            loanProductHelper.updateLoanProductById(loanProductsResponse.getResourceId(),
+                    new PutLoanProductsProductIdRequest().enableIncomeCapitalization(false));
+
+            final GetLoanProductsProductIdResponse updatedLoanProductsProductIdResponse = loanProductHelper
+                    .retrieveLoanProductById(loanProductsResponse.getResourceId());
+            Assertions.assertEquals(Boolean.FALSE, updatedLoanProductsProductIdResponse.getEnableIncomeCapitalization());
+            Assertions.assertNotNull(updatedLoanProductsProductIdResponse.getCapitalizedIncomeCalculationType());
+            Assertions.assertEquals(LoanCapitalizedIncomeCalculationType.FLAT.getCode(),
+                    updatedLoanProductsProductIdResponse.getCapitalizedIncomeCalculationType().getCode());
+            Assertions.assertNotNull(updatedLoanProductsProductIdResponse.getCapitalizedIncomeStrategy());
+            Assertions.assertEquals(LoanCapitalizedIncomeStrategy.EQUAL_AMORTIZATION.getCode(),
+                    updatedLoanProductsProductIdResponse.getCapitalizedIncomeStrategy().getCode());
+        }
+
+        @Test
+        public void testIncomeCapitalizationCumulativeNotSupported() {
+            Assertions
+                    .assertThrows(RuntimeException.class,
+                            () -> loanProductHelper.createLoanProduct(createOnePeriod30DaysPeriodicAccrualProduct(7.0)
+                                    .enableIncomeCapitalization(true)
+                                    .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                                    .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)));
+        }
+
+        @Test
+        public void testIncomeCapitalizationEnabledCalculationTypeNotProvided() {
+            Assertions.assertThrows(RuntimeException.class,
+                    () -> loanProductHelper.createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                            .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)));
+        }
+
+        @Test
+        public void testIncomeCapitalizationEnabledStrategyNotProvided() {
+            Assertions.assertThrows(RuntimeException.class,
+                    () -> loanProductHelper.createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                            .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)));
+        }
     }
-
-    @Test
-    public void testIncomeCapitalizationUpdateProduct() {
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
-                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
-                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION));
-
-        final GetLoanProductsProductIdResponse loanProductsProductIdResponse = loanProductHelper
-                .retrieveLoanProductById(loanProductsResponse.getResourceId());
-        Assertions.assertEquals(Boolean.TRUE, loanProductsProductIdResponse.getEnableIncomeCapitalization());
-        Assertions.assertNotNull(loanProductsProductIdResponse.getCapitalizedIncomeCalculationType());
-        Assertions.assertEquals(LoanCapitalizedIncomeCalculationType.FLAT.getCode(),
-                loanProductsProductIdResponse.getCapitalizedIncomeCalculationType().getCode());
-        Assertions.assertNotNull(loanProductsProductIdResponse.getCapitalizedIncomeStrategy());
-        Assertions.assertEquals(LoanCapitalizedIncomeStrategy.EQUAL_AMORTIZATION.getCode(),
-                loanProductsProductIdResponse.getCapitalizedIncomeStrategy().getCode());
-
-        loanProductHelper.updateLoanProductById(loanProductsResponse.getResourceId(),
-                new PutLoanProductsProductIdRequest().enableIncomeCapitalization(false));
-
-        final GetLoanProductsProductIdResponse updatedLoanProductsProductIdResponse = loanProductHelper
-                .retrieveLoanProductById(loanProductsResponse.getResourceId());
-        Assertions.assertEquals(Boolean.FALSE, updatedLoanProductsProductIdResponse.getEnableIncomeCapitalization());
-        Assertions.assertNotNull(updatedLoanProductsProductIdResponse.getCapitalizedIncomeCalculationType());
-        Assertions.assertEquals(LoanCapitalizedIncomeCalculationType.FLAT.getCode(),
-                updatedLoanProductsProductIdResponse.getCapitalizedIncomeCalculationType().getCode());
-        Assertions.assertNotNull(updatedLoanProductsProductIdResponse.getCapitalizedIncomeStrategy());
-        Assertions.assertEquals(LoanCapitalizedIncomeStrategy.EQUAL_AMORTIZATION.getCode(),
-                updatedLoanProductsProductIdResponse.getCapitalizedIncomeStrategy().getCode());
-    }
-
-    @Test
-    public void testIncomeCapitalizationCumulativeNotSupported() {
-        Assertions.assertThrows(RuntimeException.class,
-                () -> loanProductHelper.createLoanProduct(createOnePeriod30DaysPeriodicAccrualProduct(7.0).enableIncomeCapitalization(true)
-                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
-                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)));
-    }
-
 }
