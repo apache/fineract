@@ -713,7 +713,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         final Collection<PaymentTypeData> paymentOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
 
-        return IndividualCollectionSheetData.instance(transactionDate, clientData, paymentOptions);
+        return new IndividualCollectionSheetData(transactionDate, clientData, paymentOptions);
 
     }
 

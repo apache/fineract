@@ -20,28 +20,29 @@ package org.apache.fineract.portfolio.collectionsheet.data;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDate;
-import java.util.Collection;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
+import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.FieldNameConstants;
 
-/**
- * Immutable data object for collection sheet.
- */
-@Getter
-@RequiredArgsConstructor
-public final class IndividualCollectionSheetData implements Serializable {
+@Data
+@NoArgsConstructor
+@FieldNameConstants
+@AllArgsConstructor
+@Builder
+public class RepaymentTransactionRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @SuppressWarnings("unused")
-    private final LocalDate dueDate;
-    @SuppressWarnings("unused")
-    private final Collection<IndividualClientData> clients;
-
-    @SuppressWarnings("unused")
-    private final Collection<PaymentTypeData> paymentTypeOptions;
-
+    private Long loanId;
+    private BigDecimal transactionAmount;
+    private Long paymentTypeId;
+    private String accountNumber;
+    private String checkNumber;
+    private String routingCode;
+    private String receiptNumber;
+    private String bankNumber;
 }

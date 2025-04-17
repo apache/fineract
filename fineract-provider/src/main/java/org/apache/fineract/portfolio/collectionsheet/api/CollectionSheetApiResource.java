@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.portfolio.collectionsheet.api;
 
+import static org.apache.fineract.infrastructure.core.service.CommandParameterUtil.GENERATE_COLLECTION_SHEET_COMMAND_VALUE;
+import static org.apache.fineract.infrastructure.core.service.CommandParameterUtil.SAVE_COLLECTION_SHEET_COMMAND_VALUE;
+
 import com.google.gson.JsonElement;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -32,23 +35,19 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.service.CommandParameterUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants;
-import org.apache.fineract.portfolio.collectionsheet.data.IndividualCollectionSheetData;
+import org.apache.fineract.portfolio.collectionsheet.data.CollectionSheetRequest;
 import org.apache.fineract.portfolio.collectionsheet.service.CollectionSheetReadPlatformService;
 import org.springframework.stereotype.Component;
 
@@ -61,7 +60,6 @@ public class CollectionSheetApiResource {
     private final CollectionSheetReadPlatformService collectionSheetReadPlatformService;
     private final ToApiJsonSerializer<Object> toApiJsonSerializer;
     private final FromJsonHelper fromJsonHelper;
-    private final ApiRequestParameterHelper apiRequestPrameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final PlatformSecurityContext context;
 
@@ -72,31 +70,23 @@ public class CollectionSheetApiResource {
             + "This Api retrieves repayment details of all individual loans under a office as on a specified meeting date.\n\n"
             + "Save Collection Sheet:\n\n"
             + "This Api allows the loan officer to perform bulk repayments of individual loans and deposit of mandatory savings on a given meeting date.")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CollectionSheetApiResourceSwagger.PostCollectionSheetRequest.class)))
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CollectionSheetRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CollectionSheetApiResourceSwagger.PostCollectionSheetResponse.class))) })
-    public String generateCollectionSheet(@QueryParam("command") @Parameter(description = "command") final String commandParam,
-            @Parameter(hidden = true) final String apiRequestBodyAsJson, @Context final UriInfo uriInfo) {
-        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
-        CommandProcessingResult result = null;
+    public Response generateCollectionSheet(@QueryParam("command") @Parameter(description = "command") final String commandParam,
+            @Parameter(hidden = true) CollectionSheetRequest collectionSheetRequest) {
+        final String payload = toApiJsonSerializer.serialize(collectionSheetRequest);
+        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(payload);
 
-        if (is(commandParam, "generateCollectionSheet")) {
+        if (CommandParameterUtil.is(commandParam, GENERATE_COLLECTION_SHEET_COMMAND_VALUE)) {
             this.context.authenticatedUser().validateHasReadPermission(CollectionSheetConstants.COLLECTIONSHEET_RESOURCE_NAME);
-            final JsonElement parsedQuery = this.fromJsonHelper.parse(apiRequestBodyAsJson);
-            final JsonQuery query = JsonQuery.from(apiRequestBodyAsJson, parsedQuery, this.fromJsonHelper);
-            final IndividualCollectionSheetData collectionSheet = this.collectionSheetReadPlatformService
-                    .generateIndividualCollectionSheet(query);
-            final ApiRequestJsonSerializationSettings settings = this.apiRequestPrameterHelper.process(uriInfo.getQueryParameters());
-            return this.toApiJsonSerializer.serialize(settings, collectionSheet);
-        } else if (is(commandParam, "saveCollectionSheet")) {
+            final JsonElement parsedQuery = this.fromJsonHelper.parse(payload);
+            final JsonQuery query = JsonQuery.from(payload, parsedQuery, this.fromJsonHelper);
+            return Response.ok(this.collectionSheetReadPlatformService.generateIndividualCollectionSheet(query)).build();
+        } else if (CommandParameterUtil.is(commandParam, SAVE_COLLECTION_SHEET_COMMAND_VALUE)) {
             final CommandWrapper commandRequest = builder.saveIndividualCollectionSheet().build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return this.toApiJsonSerializer.serialize(result);
+            return Response.ok(this.commandsSourceWritePlatformService.logCommandSource(commandRequest)).build();
         }
-        return null;
-    }
-
-    private boolean is(final String commandParam, final String commandValue) {
-        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
+        return Response.ok().build();
     }
 }
