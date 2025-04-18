@@ -23,17 +23,9 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.UriInfo;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.group.data.GroupLevelData;
 import org.apache.fineract.portfolio.group.service.GroupLevelReadPlatformService;
@@ -45,25 +37,16 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class GroupsLevelApiResource {
 
-    private static final Set<String> GROUPLEVEL_DATA_PARAMETERS = new HashSet<>(Arrays.asList("levelId", "levelName", "parentLevelId",
-            "parentLevelName", "childLevelId", "childLevelName", "superParent", "recursable", "canHaveClients"));
-
     private final PlatformSecurityContext context;
     private final GroupLevelReadPlatformService groupLevelReadPlatformService;
-    private final ToApiJsonSerializer<GroupLevelData> toApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAllGroups(@Context final UriInfo uriInfo) {
+    public List<GroupLevelData> retrieveAllGroups() {
 
         this.context.authenticatedUser().validateHasReadPermission("GROUP");
 
-        final Collection<GroupLevelData> groupLevel = this.groupLevelReadPlatformService.retrieveAllLevels();
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-
-        return this.toApiJsonSerializer.serialize(settings, groupLevel, GROUPLEVEL_DATA_PARAMETERS);
-
+        return this.groupLevelReadPlatformService.retrieveAllLevels();
     }
 }
