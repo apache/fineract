@@ -55,7 +55,7 @@ public class InterestRateChartSlabReadPlatformServiceImpl implements InterestRat
     private final CodeValueReadPlatformService codeValueReadPlatformService;
 
     @Override
-    public Collection<InterestRateChartSlabData> retrieveAll(Long chartId) {
+    public List<InterestRateChartSlabData> retrieveAll(Long chartId) {
         this.context.authenticatedUser();
         final String sql = "select " + this.chartSlabExtractor.schema() + " where ircd.interest_rate_chart_id = ? order by ircd.id";
         return this.jdbcTemplate.query(sql, this.chartSlabExtractor, new Object[] { chartId }); // NOSONAR
@@ -172,7 +172,7 @@ public class InterestRateChartSlabReadPlatformServiceImpl implements InterestRat
 
     }
 
-    public static final class InterestRateChartSlabExtractor implements ResultSetExtractor<Collection<InterestRateChartSlabData>> {
+    public static final class InterestRateChartSlabExtractor implements ResultSetExtractor<List<InterestRateChartSlabData>> {
 
         InterestRateChartSlabsMapper chartSlabsMapper;
         InterestIncentiveMapper incentiveMapper = new InterestIncentiveMapper();
@@ -189,7 +189,7 @@ public class InterestRateChartSlabReadPlatformServiceImpl implements InterestRat
         }
 
         @Override
-        public Collection<InterestRateChartSlabData> extractData(ResultSet rs) throws SQLException, DataAccessException {
+        public List<InterestRateChartSlabData> extractData(ResultSet rs) throws SQLException, DataAccessException {
 
             List<InterestRateChartSlabData> chartDataList = new ArrayList<>();
 

@@ -213,7 +213,7 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
         }
 
         @Override
-        public Collection<InterestRateChartData> extractData(ResultSet rs) throws SQLException, DataAccessException {
+        public List<InterestRateChartData> extractData(ResultSet rs) throws SQLException, DataAccessException {
 
             List<InterestRateChartData> chartDataList = new ArrayList<>();
 

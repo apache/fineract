@@ -169,7 +169,7 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
     }
 
     public static final class DepositAccountInterestRateChartExtractor
-            implements ResultSetExtractor<Collection<DepositAccountInterestRateChartData>> {
+            implements ResultSetExtractor<List<DepositAccountInterestRateChartData>> {
 
         DepositAccountInterestRateChartMapper chartMapper = new DepositAccountInterestRateChartMapper();
         InterestRateChartSlabExtractor chartSlabsMapper = new InterestRateChartSlabExtractor();
@@ -206,7 +206,7 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
         }
 
         @Override
-        public Collection<DepositAccountInterestRateChartData> extractData(ResultSet rs) throws SQLException, DataAccessException {
+        public List<DepositAccountInterestRateChartData> extractData(ResultSet rs) throws SQLException, DataAccessException {
 
             List<DepositAccountInterestRateChartData> chartDataList = new ArrayList<>();
 

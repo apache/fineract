@@ -16,19 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.interestratechart.service;
+package org.apache.fineract.portfolio.interestratechart.data;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
-import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartSlabData;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public interface InterestRateChartSlabReadPlatformService {
+@Data
+@NoArgsConstructor
+public class InterestRateChartStabRequest implements Serializable {
 
-    List<InterestRateChartSlabData> retrieveAll(Long chartId);
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    InterestRateChartSlabData retrieveOne(Long chartId, Long chartSlabId);
-
-    InterestRateChartSlabData retrieveWithTemplate(InterestRateChartSlabData chartSlab);
-
-    InterestRateChartSlabData retrieveTemplate();
-
+    private String locale;
+    private String currencyCode;
+    private String description;
+    private Integer periodType;
+    private Integer fromPeriod;
+    private Integer toPeriod;
+    private BigDecimal amountRangeFrom;
+    private BigDecimal amountRangeTo;
+    private BigDecimal annualInterestRate;
+    private List<InterestIncentiveRequest> incentives;
 }
