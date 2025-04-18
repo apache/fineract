@@ -90,6 +90,11 @@ public class InvestorAccountingHelper {
         }
     }
 
+    public ProductToGLAccountMapping getChargeOffMappingByCodeValue(final Long loanProductId, final PortfolioProductType productType,
+            final Long chargeOffReasonId) {
+        return accountMappingRepository.findChargeOffReasonMapping(loanProductId, productType.getValue(), chargeOffReasonId);
+    }
+
     private JournalEntry createCreditJournalEntryForInvestor(final Office office, final String currencyCode, final GLAccount account,
             final Long loanId, final Long transactionId, final LocalDate transactionDate, final BigDecimal amount) {
         final boolean manualEntry = false;

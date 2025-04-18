@@ -31,6 +31,8 @@ import org.apache.fineract.accounting.financialactivityaccount.domain.FinancialA
 import org.apache.fineract.accounting.financialactivityaccount.domain.FinancialActivityAccountRepositoryWrapper;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
+import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGLAccountMapping;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.investor.accounting.journalentry.service.InvestorAccountingHelper;
 import org.apache.fineract.investor.domain.ExternalAssetOwner;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerJournalEntryMapping;
@@ -39,6 +41,7 @@ import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferJournalEntryMapping;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferJournalEntryMappingRepository;
 import org.apache.fineract.organisation.office.domain.Office;
+import org.apache.fineract.portfolio.PortfolioProductType;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.jetbrains.annotations.NotNull;
@@ -94,7 +97,8 @@ public class AccountingServiceImpl implements AccountingService {
     }
 
     @NotNull
-    private List<JournalEntry> createJournalEntries(Loan loan, ExternalAssetOwnerTransfer transfer, boolean isReversalOrder) {
+    private List<JournalEntry> createJournalEntries(final Loan loan, final ExternalAssetOwnerTransfer transfer,
+            final boolean isReversalOrder) {
         this.helper.checkForBranchClosures(loan.getOffice().getId(), transfer.getSettlementDate());
         // transaction properties
         final Long transactionId = transfer.getId();
@@ -106,8 +110,8 @@ public class AccountingServiceImpl implements AccountingService {
         final BigDecimal overPaymentAmount = loan.getTotalOverpaid();
 
         // Moving money to asset transfer account
-        List<JournalEntry> journalEntryList = createJournalEntries(loan, transactionId, transactionDate, principalAmount, interestAmount,
-                feesAmount, penaltiesAmount, overPaymentAmount, !isReversalOrder);
+        final List<JournalEntry> journalEntryList = createJournalEntries(loan, transactionId, transactionDate, principalAmount,
+                interestAmount, feesAmount, penaltiesAmount, overPaymentAmount, !isReversalOrder);
         // Moving money from asset transfer account
         journalEntryList.addAll(createJournalEntries(loan, transactionId, transactionDate, principalAmount, interestAmount, feesAmount,
                 penaltiesAmount, overPaymentAmount, isReversalOrder));
@@ -171,82 +175,91 @@ public class AccountingServiceImpl implements AccountingService {
         });
     }
 
-    private List<JournalEntry> createJournalEntries(Loan loan, Long transactionId, LocalDate transactionDate, BigDecimal principalAmount,
-            BigDecimal interestAmount, BigDecimal feesAmount, BigDecimal penaltiesAmount, BigDecimal overPaymentAmount,
-            boolean isReversalOrder) {
-        Long loanProductId = loan.productId();
-        Long loanId = loan.getId();
-        Office office = loan.getOffice();
-        String currencyCode = loan.getCurrencyCode();
-        List<JournalEntry> journalEntryList = new ArrayList<>();
+    private List<JournalEntry> createJournalEntries(final Loan loan, final Long transactionId, final LocalDate transactionDate,
+            final BigDecimal principalAmount, final BigDecimal interestAmount, final BigDecimal feesAmount,
+            final BigDecimal penaltiesAmount, final BigDecimal overPaymentAmount, final boolean isReversalOrder) {
+        final Long loanProductId = loan.productId();
+        final Long loanId = loan.getId();
+        final Office office = loan.getOffice();
+        final String currencyCode = loan.getCurrencyCode();
+        final List<JournalEntry> journalEntryList = new ArrayList<>();
         BigDecimal totalDebitAmount = BigDecimal.ZERO;
-        Map<GLAccount, BigDecimal> accountMap = new LinkedHashMap<>();
+        final Map<GLAccount, BigDecimal> accountMap = new LinkedHashMap<>();
         // principal entry
-        if (principalAmount != null && principalAmount.compareTo(BigDecimal.ZERO) > 0) {
-            AccountingConstants.AccrualAccountsForLoan accrualAccount = AccountingConstants.AccrualAccountsForLoan.LOAN_PORTFOLIO;
-            if (loan.isChargedOff()) {
-                if (loan.isFraud()) {
-                    accrualAccount = AccountingConstants.AccrualAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE;
-                } else {
-                    accrualAccount = AccountingConstants.AccrualAccountsForLoan.CHARGE_OFF_EXPENSE;
-                }
-            }
+        if (MathUtil.isGreaterThanZero(principalAmount)) {
             totalDebitAmount = totalDebitAmount.add(principalAmount);
-            GLAccount account = this.helper.getLinkedGLAccountForLoanProduct(loanProductId, accrualAccount.getValue());
+            GLAccount account;
+            if (loan.isChargedOff()) {
+                final Long chargeOffReasonId = loan.fetchChargeOffReasonId();
+                final ProductToGLAccountMapping mapping = chargeOffReasonId != null
+                        ? helper.getChargeOffMappingByCodeValue(loanProductId, PortfolioProductType.LOAN, chargeOffReasonId)
+                        : null;
+                if (mapping != null) {
+                    account = mapping.getGlAccount();
+                } else {
+                    final AccountingConstants.AccrualAccountsForLoan accrualAccount = loan.isFraud()
+                            ? AccountingConstants.AccrualAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE
+                            : AccountingConstants.AccrualAccountsForLoan.CHARGE_OFF_EXPENSE;
+                    account = helper.getLinkedGLAccountForLoanProduct(loanProductId, accrualAccount.getValue());
+                }
+            } else {
+                account = helper.getLinkedGLAccountForLoanProduct(loanProductId,
+                        AccountingConstants.AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue());
+            }
             accountMap.put(account, principalAmount);
         }
         // interest entry
-        if (interestAmount != null && interestAmount.compareTo(BigDecimal.ZERO) > 0) {
+        if (MathUtil.isGreaterThanZero(interestAmount)) {
             AccountingConstants.AccrualAccountsForLoan accrualAccount = AccountingConstants.AccrualAccountsForLoan.INTEREST_RECEIVABLE;
             if (loan.isChargedOff()) {
                 accrualAccount = AccountingConstants.AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_INTEREST;
             }
             totalDebitAmount = totalDebitAmount.add(interestAmount);
-            GLAccount account = this.helper.getLinkedGLAccountForLoanProduct(loanProductId, accrualAccount.getValue());
+            final GLAccount account = this.helper.getLinkedGLAccountForLoanProduct(loanProductId, accrualAccount.getValue());
             if (accountMap.containsKey(account)) {
-                BigDecimal amount = accountMap.get(account).add(interestAmount);
+                final BigDecimal amount = accountMap.get(account).add(interestAmount);
                 accountMap.put(account, amount);
             } else {
                 accountMap.put(account, interestAmount);
             }
         }
         // fee entry
-        if (feesAmount != null && feesAmount.compareTo(BigDecimal.ZERO) > 0) {
+        if (MathUtil.isGreaterThanZero(feesAmount)) {
             AccountingConstants.AccrualAccountsForLoan accrualAccount = AccountingConstants.AccrualAccountsForLoan.FEES_RECEIVABLE;
             if (loan.isChargedOff()) {
                 accrualAccount = AccountingConstants.AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES;
             }
             totalDebitAmount = totalDebitAmount.add(feesAmount);
-            GLAccount account = this.helper.getLinkedGLAccountForLoanProduct(loanProductId, accrualAccount.getValue());
+            final GLAccount account = this.helper.getLinkedGLAccountForLoanProduct(loanProductId, accrualAccount.getValue());
             if (accountMap.containsKey(account)) {
-                BigDecimal amount = accountMap.get(account).add(feesAmount);
+                final BigDecimal amount = accountMap.get(account).add(feesAmount);
                 accountMap.put(account, amount);
             } else {
                 accountMap.put(account, feesAmount);
             }
         }
         // penalty entry
-        if (penaltiesAmount != null && penaltiesAmount.compareTo(BigDecimal.ZERO) > 0) {
+        if (MathUtil.isGreaterThanZero(penaltiesAmount)) {
             AccountingConstants.AccrualAccountsForLoan accrualAccount = AccountingConstants.AccrualAccountsForLoan.PENALTIES_RECEIVABLE;
             if (loan.isChargedOff()) {
                 accrualAccount = AccountingConstants.AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY;
             }
             totalDebitAmount = totalDebitAmount.add(penaltiesAmount);
-            GLAccount account = this.helper.getLinkedGLAccountForLoanProduct(loanProductId, accrualAccount.getValue());
+            final GLAccount account = this.helper.getLinkedGLAccountForLoanProduct(loanProductId, accrualAccount.getValue());
             if (accountMap.containsKey(account)) {
-                BigDecimal amount = accountMap.get(account).add(penaltiesAmount);
+                final BigDecimal amount = accountMap.get(account).add(penaltiesAmount);
                 accountMap.put(account, amount);
             } else {
                 accountMap.put(account, penaltiesAmount);
             }
         }
         // overpaid entry
-        if (overPaymentAmount != null && overPaymentAmount.compareTo(BigDecimal.ZERO) > 0) {
+        if (MathUtil.isGreaterThanZero(overPaymentAmount)) {
             totalDebitAmount = totalDebitAmount.add(overPaymentAmount);
-            GLAccount account = this.helper.getLinkedGLAccountForLoanProduct(loanProductId,
+            final GLAccount account = this.helper.getLinkedGLAccountForLoanProduct(loanProductId,
                     AccountingConstants.AccrualAccountsForLoan.OVERPAYMENT.getValue());
             if (accountMap.containsKey(account)) {
-                BigDecimal amount = accountMap.get(account).add(overPaymentAmount);
+                final BigDecimal amount = accountMap.get(account).add(overPaymentAmount);
                 accountMap.put(account, amount);
             } else {
                 accountMap.put(account, overPaymentAmount);
@@ -257,7 +270,7 @@ public class AccountingServiceImpl implements AccountingService {
             journalEntryList.add(this.helper.createCreditJournalEntryOrReversalForInvestor(office, currencyCode, loanId, transactionId,
                     transactionDate, entry.getValue(), isReversalOrder, entry.getKey()));
         }
-        if (totalDebitAmount.compareTo(BigDecimal.ZERO) > 0) {
+        if (MathUtil.isGreaterThanZero(totalDebitAmount)) {
             journalEntryList.add(this.helper.createDebitJournalEntryOrReversalForInvestor(office, currencyCode,
                     AccountingConstants.FinancialActivity.ASSET_TRANSFER.getValue(), loanProductId, loanId, transactionId, transactionDate,
                     totalDebitAmount, isReversalOrder));

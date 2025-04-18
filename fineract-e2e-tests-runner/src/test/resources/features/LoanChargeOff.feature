@@ -7647,7 +7647,7 @@ Feature: Charge-off
       | Type    | Account code | Account name               | Debit | Credit |
       | ASSET   | 112601       | Loans Receivable           |       | 100.0  |
       | ASSET   | 112603       | Interest/Fee Receivable    |       | 0.62   |
-      | EXPENSE | 744037       | Credit Loss/Bad Debt-Fraud | 100.0 |        |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt       | 100.0 |        |
       | INCOME  | 404001       | Interest Income Charge Off | 0.62  |        |
     Then Admin does a charge-off undo the loan
     Then Loan Transactions tab has a "CHARGE_OFF" transaction with date "03 February 2024" which has the following Journal entries:
@@ -7656,8 +7656,8 @@ Feature: Charge-off
       | ASSET   | 112601       | Loans Receivable           | 100.0 |        |
       | ASSET   | 112603       | Interest/Fee Receivable    |       | 0.62   |
       | ASSET   | 112603       | Interest/Fee Receivable    | 0.62  |        |
-      | EXPENSE | 744037       | Credit Loss/Bad Debt-Fraud | 100.0 |        |
-      | EXPENSE | 744037       | Credit Loss/Bad Debt-Fraud |       | 100.0  |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt       | 100.0 |        |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt       |       | 100.0  |
       | INCOME  | 404001       | Interest Income Charge Off | 0.62  |        |
       | INCOME  | 404001       | Interest Income Charge Off |       | 0.62   |
 
@@ -8345,3 +8345,98 @@ Feature: Charge-off
       | 14 April 2025    | Accrual                 | 3.26   | 0.0       | 3.26     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 April 2025    | Accrual Adjustment      | 0.1    | 0.0       | 0.1      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 April 2025    | Charge-off              | 0.0    | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | true     |
+
+  @TestRailId:C3618
+  Scenario: Charge-off on a fraud loan respects GL mapping based on charge-off reason for buyback
+    When Admin sets the business date to "1 January 2024"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_ZERO_INTEREST_CHARGE_OFF_DELINQUENT_REASON | 01 January 2024   | 100            | 7                      | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2024  |           | 100.0           |               |          | 0.0  |           | 0.0   |      |            |      | 0.0         |
+      | 1  | 31   | 01 February 2024 |           | 83.59           | 16.41         | 0.59     | 0.0  | 0.0       | 17.0  | 0.0  | 0.0        | 0.0  | 17.0        |
+      | 2  | 29   | 01 March 2024    |           | 67.05           | 16.54         | 0.46     | 0.0  | 0.0       | 17.0  | 0.0  | 0.0        | 0.0  | 17.0        |
+      | 3  | 31   | 01 April 2024    |           | 50.45           | 16.6          | 0.4      | 0.0  | 0.0       | 17.0  | 0.0  | 0.0        | 0.0  | 17.0        |
+      | 4  | 30   | 01 May 2024      |           | 33.74           | 16.71         | 0.29     | 0.0  | 0.0       | 17.0  | 0.0  | 0.0        | 0.0  | 17.0        |
+      | 5  | 31   | 01 June 2024     |           | 16.94           | 16.8          | 0.2      | 0.0  | 0.0       | 17.0  | 0.0  | 0.0        | 0.0  | 17.0        |
+      | 6  | 30   | 01 July 2024     |           | 0.0             | 16.94         | 0.1      | 0.0  | 0.0       | 17.04 | 0.0  | 0.0        | 0.0  | 17.04       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 100           | 2.04     | 0    | 0         | 102.04 | 0    | 0          | 0    | 102.04      |
+    And Admin successfully approves the loan on "1 January 2024" with "100" amount and expected disbursement date on "1 January 2024"
+    And Admin successfully disburse the loan on "1 January 2024" with "100" EUR transaction amount
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | sale             | 2024-01-21     | 1                  |
+    Then Asset externalization response has the correct Loan ID, transferExternalId
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 1 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status  | effectiveFrom | effectiveTo | Transaction type |
+      | 2024-01-21     | 1                  | PENDING | 2024-01-01    | 9999-12-31  | SALE             |
+    When Admin sets the business date to "22 January 2024"
+    When Admin runs inline COB job for Loan
+    Then LoanOwnershipTransferBusinessEvent is created
+    Then LoanAccountSnapshotBusinessEvent is created
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 2 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status  | effectiveFrom | effectiveTo | Transaction type |
+      | 2024-01-21     | 1                  | PENDING | 2024-01-01    | 2024-01-21  | SALE             |
+      | 2024-01-21     | 1                  | ACTIVE  | 2024-01-22    | 9999-12-31  | SALE             |
+    Then The latest asset externalization transaction with "ACTIVE" status has the following TRANSFER Journal entries:
+      | glAccountType | glAccountCode | glAccountName           | entryType | amount |
+      | ASSET         | 112601        | Loans Receivable        | CREDIT    | 100.00 |
+      | ASSET         | 112603        | Interest/Fee Receivable | CREDIT    | 2.04   |
+      | ASSET         | 146000        | Asset transfer          | DEBIT     | 102.04 |
+      | ASSET         | 112601        | Loans Receivable        | DEBIT     | 100.00 |
+      | ASSET         | 112603        | Interest/Fee Receivable | DEBIT     | 2.04   |
+      | ASSET         | 146000        | Asset transfer          | CREDIT    | 102.04 |
+    Then The asset external owner has the following OWNER Journal entries:
+      | glAccountType | glAccountCode | glAccountName           | entryType | amount |
+      | ASSET         | 112601        | Loans Receivable        | DEBIT     | 100.00 |
+      | ASSET         | 112603        | Interest/Fee Receivable | DEBIT     | 2.04   |
+    Then Admin can successfully set Fraud flag to the loan
+    When Admin sets the business date to "03 February 2024"
+    And Admin does charge-off the loan with reason "DELINQUENT" on "03 February 2024"
+    Then Loan Transactions tab has a "CHARGE_OFF" transaction with date "03 February 2024" which has the following Journal entries:
+      | Type    | Account code | Account name               | Debit | Credit |
+      | ASSET   | 112601       | Loans Receivable           |       | 100.0  |
+      | ASSET   | 112603       | Interest/Fee Receivable    |       | 0.62   |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt       | 100.0 |        |
+      | INCOME  | 404001       | Interest Income Charge Off | 0.62  |        |
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | buyback          | 2024-02-03     |                    |
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 3 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status  | effectiveFrom | effectiveTo | Transaction type |
+      | 2024-01-21     | 1                  | PENDING | 2024-01-01    | 2024-01-21  | SALE             |
+      | 2024-01-21     | 1                  | ACTIVE  | 2024-01-22    | 9999-12-31  | SALE             |
+      | 2024-02-03     | 1                  | BUYBACK | 2024-02-03    | 9999-12-31  | BUYBACK          |
+    When Admin sets the business date to "04 May 2024"
+    When Admin runs inline COB job for Loan
+    Then LoanOwnershipTransferBusinessEvent is created
+    Then LoanAccountSnapshotBusinessEvent is created
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 3 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status  | effectiveFrom | effectiveTo | Transaction type |
+      | 2024-01-21     | 1                  | PENDING | 2024-01-01    | 2024-01-21  | SALE             |
+      | 2024-01-21     | 1                  | ACTIVE  | 2024-01-22    | 2024-02-03  | SALE             |
+      | 2024-02-03     | 1                  | BUYBACK | 2024-02-03    | 2024-02-03  | BUYBACK          |
+    Then The latest asset externalization transaction with "BUYBACK" status has the following TRANSFER Journal entries:
+      | glAccountType | glAccountCode | glAccountName              | entryType | amount |
+      | EXPENSE       | 744007        | Credit Loss/Bad Debt       | DEBIT     | 100.00 |
+      | INCOME        | 404001        | Interest Income Charge Off | DEBIT     | 0.62   |
+      | ASSET         | 146000        | Asset transfer             | CREDIT    | 100.62 |
+      | EXPENSE       | 744007        | Credit Loss/Bad Debt       | CREDIT    | 100.00 |
+      | INCOME        | 404001        | Interest Income Charge Off | CREDIT    | 0.62   |
+      | ASSET         | 146000        | Asset transfer             | DEBIT     | 100.62 |
+    Then The asset external owner has the following OWNER Journal entries:
+      | glAccountType | glAccountCode | glAccountName              | entryType | amount |
+      | ASSET         | 112601        | Loans Receivable           | DEBIT     | 100.00 |
+      | ASSET         | 112603        | Interest/Fee Receivable    | DEBIT     | 2.04   |
+      | ASSET         | 112603        | Interest/Fee Receivable    | DEBIT     | 0.24   |
+      | INCOME        | 404000        | Interest Income            | CREDIT    | 0.24   |
+      | ASSET         | 112601        | Loans Receivable           | CREDIT    | 100.00 |
+      | ASSET         | 112603        | Interest/Fee Receivable    | CREDIT    | 0.62   |
+      | EXPENSE       | 744007        | Credit Loss/Bad Debt       | DEBIT     | 100.00 |
+      | INCOME        | 404001        | Interest Income Charge Off | DEBIT     | 0.62   |
+      | EXPENSE       | 744007        | Credit Loss/Bad Debt       | CREDIT    | 100.00 |
+      | INCOME        | 404001        | Interest Income Charge Off | CREDIT    | 0.62   |

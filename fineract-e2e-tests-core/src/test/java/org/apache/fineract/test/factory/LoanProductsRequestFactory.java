@@ -1274,7 +1274,7 @@ public class LoanProductsRequestFactory {
         final List<PostChargeOffReasonToExpenseAccountMappings> chargeOffReasonToExpenseAccountMappings = new ArrayList<>();
         final PostChargeOffReasonToExpenseAccountMappings chargeOffDelinquentReason = new PostChargeOffReasonToExpenseAccountMappings();
         chargeOffDelinquentReason.chargeOffReasonCodeValueId(codeValueResolver.resolve(chargeOffReasonId, DefaultCodeValue.DELINQUENT));
-        chargeOffDelinquentReason.expenseAccountId(accountTypeResolver.resolve(DefaultAccountType.CREDIT_LOSS_BAD_DEBT_FRAUD));
+        chargeOffDelinquentReason.expenseAccountId(accountTypeResolver.resolve(DefaultAccountType.CREDIT_LOSS_BAD_DEBT));
         chargeOffReasonToExpenseAccountMappings.add(chargeOffDelinquentReason);
 
         return new PostLoanProductsRequest()//
@@ -1369,7 +1369,7 @@ public class LoanProductsRequestFactory {
                 .incomeFromChargeOffInterestAccountId(accountTypeResolver.resolve(DefaultAccountType.INTEREST_INCOME_CHARGE_OFF))//
                 .incomeFromChargeOffFeesAccountId(accountTypeResolver.resolve(DefaultAccountType.FEE_CHARGE_OFF))//
                 .chargeOffExpenseAccountId(accountTypeResolver.resolve(DefaultAccountType.CREDIT_LOSS_BAD_DEBT))//
-                .chargeOffFraudExpenseAccountId(accountTypeResolver.resolve(DefaultAccountType.CREDIT_LOSS_BAD_DEBT))//
+                .chargeOffFraudExpenseAccountId(accountTypeResolver.resolve(DefaultAccountType.CREDIT_LOSS_BAD_DEBT_FRAUD))//
                 .chargeOffReasonToExpenseAccountMappings(chargeOffReasonToExpenseAccountMappings)//
                 .incomeFromChargeOffPenaltyAccountId(accountTypeResolver.resolve(DefaultAccountType.FEE_CHARGE_OFF));//
     }
