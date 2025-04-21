@@ -2292,8 +2292,9 @@ Feature: LoanCharge
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 01 January 2024  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
+      | 05 February 2024 | Accrual          | 25.0   | 0.0       | 0.0      | 0.0  | 25.0      | 0.0          |
     Given Global configuration "enable-immediate-charge-accrual-post-maturity" is disabled
-    Then LoanAccrualTransactionCreatedBusinessEvent is not raised on "05 February 2024"
+    Then LoanAccrualTransactionCreatedBusinessEvent is raised on "05 February 2024"
 
   @TestRailId:C3320
   Scenario: Verify enhance the existing implementation to create accruals as part of Charge Creation post maturity with immediate charge accrual and zero interest rate
@@ -2331,8 +2332,9 @@ Feature: LoanCharge
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 01 January 2024  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
+      | 05 February 2024 | Accrual          | 25.0   | 0.0       | 0.0      | 0.0  | 25.0      | 0.0          |
     Given Global configuration "enable-immediate-charge-accrual-post-maturity" is disabled
-    Then LoanAccrualTransactionCreatedBusinessEvent is not raised on "05 February 2024"
+    Then LoanAccrualTransactionCreatedBusinessEvent is raised on "05 February 2024"
 
   @TestRailId:С3335
   Scenario: Verify enhance the existing implementation to create accruals as part of Charge Creation post maturity with inline COB run and non-zero interest rate
@@ -2454,7 +2456,8 @@ Feature: LoanCharge
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
       | 01 January 2024  | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
-      | 05 February 2024 | Accrual          | 30.83  | 0.0       | 5.83     | 0.0  | 25.0      | 0.0          |
+      | 05 February 2024 | Accrual          | 25.0   | 0.0       | 0.0      | 0.0  | 25.0      | 0.0          |
+      | 05 February 2024 | Accrual          | 5.83   | 0.0       | 5.83     | 0.0  | 0.0       | 0.0          |
     Given Global configuration "enable-immediate-charge-accrual-post-maturity" is disabled
     Then LoanAccrualTransactionCreatedBusinessEvent is raised on "05 February 2024"
 
@@ -4750,3 +4753,44 @@ Feature: LoanCharge
       | 01 January 2024  | Repayment (at time of disbursement) | 1.0    | 0.0       | 0.0      | 1.0  | 0.0       | 100.0        | false    | false    |
       | 01 February 2024 | Repayment                           | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | true     | false    |
       | 01 March 2024    | Repayment                           | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | true     |
+
+  @TestRailId:C3613
+  Scenario: Verify immediate charge accrual post maturity for Progressive loans
+    Given Global configuration "enable-immediate-charge-accrual-post-maturity" is enabled
+    When Admin sets the business date to "25 February 2025"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                    | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL | 25 February 2025  | 1000           | 0                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "25 February 2025" with "1000" amount and expected disbursement date on "25 February 2025"
+    When Admin successfully disburse the loan on "25 February 2025" with "1000" EUR transaction amount
+    Then Loan Repayment schedule has 1 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 25 February 2025 |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 28   | 25 March 2025    |           | 0.0             | 1000.0        | 0.0      | 0.0  | 0.0       | 1000.0 | 0.0  | 0.0        | 0.0  | 1000.0      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 1000.0        | 0.0      | 0.0  | 0.0       | 1000.0 | 0.0  | 0.0        | 0.0  | 1000.0      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 25 February 2025 | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
+    When Admin sets the business date to "28 March 2025"
+    And Admin runs inline COB job for Loan
+    When Admin adds "LOAN_SNOOZE_FEE" due date charge with "28 March 2025" due date and 25 EUR transaction amount
+    Then Loan Charges tab has the following data:
+      | Name       | isPenalty | Payment due at     | Due as of     | Calculation type | Due  | Paid | Waived | Outstanding |
+      | Snooze fee | false     | Specified due date | 28 March 2025 | Flat             | 25.0 | 0.0  | 0.0    | 25.0        |
+    Then Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      |    |      | 25 February 2025 |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0  |            |      |             |
+      | 1  | 28   | 25 March 2025    |           | 0.0             | 1000.0        | 0.0      | 0.0  | 0.0       | 1000.0 | 0.0  | 0.0        | 0.0  | 1000.0      |
+      | 2  | 3    | 28 March 2025    |           | 0.0             | 0.0           | 0.0      | 25.0 | 0.0       | 25.0   | 0.0  | 0.0        | 0.0  | 25.0        |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 1000.0        | 0.0      | 25.0 | 0.0       | 1025.0 | 0.0  | 0.0        | 0.0  | 1025.0      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 25 February 2025 | Disbursement     | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       |
+      | 28 March 2025    | Accrual          | 25.0   | 0.0       | 0.0      | 25.0 | 0.0       | 0.0          |
+    Then LoanAccrualTransactionCreatedBusinessEvent is raised on "28 March 2025"
+    Given Global configuration "enable-immediate-charge-accrual-post-maturity" is disabled

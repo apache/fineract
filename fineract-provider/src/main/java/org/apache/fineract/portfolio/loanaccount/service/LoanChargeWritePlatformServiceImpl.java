@@ -1115,16 +1115,20 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         // we want to apply charge transactions only for those loans charges that are applied when a loan is active and
         // the loan product uses Upfront Accruals, or only when the loan are closed too,
         if ((loan.getStatus().isActive() && loan.isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct())
-                || loan.getStatus().isOverpaid() || loan.getStatus().isClosedObligationsMet()
-                || (configurationDomainService.isImmediateChargeAccrualPostMaturityEnabled()
-                        && DateUtils.getBusinessLocalDate().isAfter(loan.getMaturityDate()))) {
+                || loan.getStatus().isOverpaid() || loan.getStatus().isClosedObligationsMet()) {
             final LoanTransaction applyLoanChargeTransaction = loan.handleChargeAppliedTransaction(loanCharge, null);
             if (applyLoanChargeTransaction != null) {
                 this.loanTransactionRepository.saveAndFlush(applyLoanChargeTransaction);
                 businessEventNotifierService
                         .notifyPostBusinessEvent(new LoanAccrualTransactionCreatedBusinessEvent(applyLoanChargeTransaction));
             }
+        } else if (configurationDomainService.isImmediateChargeAccrualPostMaturityEnabled()
+                && DateUtils.getBusinessLocalDate().isAfter(loan.getMaturityDate())) {
+            final LoanTransaction loanTransaction = loan.createChargeAppliedTransaction(loanCharge, null);
+            this.loanTransactionRepository.saveAndFlush(loanTransaction);
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanAccrualTransactionCreatedBusinessEvent(loanTransaction));
         }
+
         return DateUtils.isBeforeBusinessDate(loanCharge.getDueLocalDate());
     }
 

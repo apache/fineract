@@ -184,6 +184,7 @@ class LoanChargeWritePlatformServiceImplTest {
         when(configurationDomainService.isImmediateChargeAccrualPostMaturityEnabled()).thenReturn(isAccrualEnabled);
         when(loan.getMaturityDate()).thenReturn(maturityDate);
         when(loan.handleChargeAppliedTransaction(loanCharge, null)).thenReturn(loanTransaction);
+        when(loan.createChargeAppliedTransaction(loanCharge, null)).thenReturn(loanTransaction);
 
         if (isAccrualExpected) {
             when(loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()).thenReturn(true);

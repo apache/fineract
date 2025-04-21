@@ -683,6 +683,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         if (isProgressiveSchedule()) {
             return null;
         }
+
+        return createChargeAppliedTransaction(loanCharge, suppliedTransactionDate);
+    }
+
+    public LoanTransaction createChargeAppliedTransaction(final LoanCharge loanCharge, final LocalDate suppliedTransactionDate) {
         final Money chargeAmount = loanCharge.getAmount(getCurrency());
         Money feeCharges = chargeAmount;
         Money penaltyCharges = Money.zero(getCurrency());

@@ -79,7 +79,7 @@ public class LoanChargeProgressiveTest extends BaseLoanIntegrationTest {
             addLoanCharge(loanId, chargeResponse.getResourceId(), "03 October 2024", 20.0d);
             final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
             Assertions.assertTrue(
-                    loanDetails.getTransactions().stream().noneMatch(t -> t.getType().getAccrual() && t.getAmount().equals(20.0d)));
+                    loanDetails.getTransactions().stream().anyMatch(t -> t.getType().getAccrual() && t.getAmount().equals(20.0d)));
         });
         runAt("04 October 2024", () -> {
             globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_IMMEDIATE_CHARGE_ACCRUAL_POST_MATURITY,
