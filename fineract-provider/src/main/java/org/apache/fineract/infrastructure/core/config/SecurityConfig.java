@@ -158,6 +158,11 @@ public class SecurityConfig {
         if (serverProperties.getSsl().isEnabled()) {
             http.requiresChannel(channel -> channel.requestMatchers(antMatcher("/api/**")).requiresSecure());
         }
+
+        if (fineractProperties.getSecurity().getHsts().isEnabled()) {
+            http.requiresChannel(channel -> channel.anyRequest().requiresSecure()).headers(
+                    headers -> headers.httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true).maxAgeInSeconds(31536000)));
+        }
         return http.build();
     }
 
