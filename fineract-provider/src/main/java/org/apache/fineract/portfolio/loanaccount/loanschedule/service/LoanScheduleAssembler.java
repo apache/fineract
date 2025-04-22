@@ -916,7 +916,7 @@ public class LoanScheduleAssembler {
                     overlappings);
         }
         LoanProductVariableInstallmentConfig installmentConfig = loan.loanProduct().loanProductVariableInstallmentConfig();
-        final CalendarInstance loanCalendarInstance = calendarInstanceRepository.findCalendarInstaneByEntityId(loan.getId(),
+        final CalendarInstance loanCalendarInstance = calendarInstanceRepository.findCalendarInstanceByEntityId(loan.getId(),
                 CalendarEntityType.LOANS.getValue());
         Calendar loanCalendar = null;
         if (loanCalendarInstance != null) {

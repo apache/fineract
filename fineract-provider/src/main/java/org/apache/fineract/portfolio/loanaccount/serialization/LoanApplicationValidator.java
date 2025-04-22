@@ -2164,7 +2164,7 @@ public final class LoanApplicationValidator {
     }
 
     private Calendar getCalendarInstance(Loan loan) {
-        CalendarInstance calendarInstance = calendarInstanceRepository.findCalendarInstaneByEntityId(loan.getId(),
+        CalendarInstance calendarInstance = calendarInstanceRepository.findCalendarInstanceByEntityId(loan.getId(),
                 CalendarEntityType.LOANS.getValue());
         return calendarInstance != null ? calendarInstance.getCalendar() : null;
     }

@@ -195,7 +195,7 @@ public final class LoanTransactionValidator {
                     StatusEnum.DISBURSE.getValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
 
             ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, null);
-            final CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstaneByEntityId(loan.getId(),
+            final CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstanceByEntityId(loan.getId(),
                     CalendarEntityType.LOANS.getValue());
             if (loan.isSyncDisbursementWithMeeting()) {
                 validateDisbursementDateWithMeetingDate(actualDisbursementDate, calendarInstance,
