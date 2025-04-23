@@ -35,8 +35,8 @@ public class EndOfDayBalance {
     private int decimales;
 
     public static EndOfDayBalance from(final LocalDate date, final Money openingBalance, final Money endOfDayBalance,
-            final int numberOfDays) {
-        return new EndOfDayBalance(date, openingBalance, endOfDayBalance, numberOfDays, 0);
+            final int numberOfDays, final int decimales) {
+        return new EndOfDayBalance(date, openingBalance, endOfDayBalance, numberOfDays, decimales);
     }
 
     public EndOfDayBalance(final LocalDate date, final Money openingBalance, final Money endOfDayBalance, final int numberOfDays, final int decimales) {

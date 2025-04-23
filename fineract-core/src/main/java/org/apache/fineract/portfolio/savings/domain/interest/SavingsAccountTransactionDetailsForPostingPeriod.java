@@ -73,7 +73,7 @@ public class SavingsAccountTransactionDetailsForPostingPeriod {
             }
         }
 
-        return EndOfDayBalance.from(getTransactionDate(), openingBalance, endOfDayBalance, this.balanceNumberOfDays);
+        return EndOfDayBalance.from(getTransactionDate(), openingBalance, endOfDayBalance, this.balanceNumberOfDays, currency.getDigitsAfterDecimal());
     }
 
     public EndOfDayBalance toEndOfDayBalance(final LocalDateInterval periodInterval, final MonetaryCurrency currency) {
@@ -90,7 +90,7 @@ public class SavingsAccountTransactionDetailsForPostingPeriod {
             numberOfDays = newInterval.daysInPeriodInclusiveOfEndDate();
         }
 
-        return EndOfDayBalance.from(balanceDate, openingBalance, endOfDayBalance, numberOfDays);
+        return EndOfDayBalance.from(balanceDate, openingBalance, endOfDayBalance, numberOfDays, currency.getDigitsAfterDecimal());
     }
 
     public EndOfDayBalance toEndOfDayBalanceBoundedBy(final Money openingBalance, final LocalDateInterval boundedBy) {
@@ -128,7 +128,7 @@ public class SavingsAccountTransactionDetailsForPostingPeriod {
             numberOfDaysOfBalance = spanOfBalance.daysInPeriodInclusiveOfEndDate();
         }
 
-        return EndOfDayBalance.from(balanceStartDate, openingBalance, endOfDayBalance, numberOfDaysOfBalance);
+        return EndOfDayBalance.from(balanceStartDate, openingBalance, endOfDayBalance, numberOfDaysOfBalance, currency.getDigitsAfterDecimal());
     }
 
     private Money getAmount(MonetaryCurrency currency) {

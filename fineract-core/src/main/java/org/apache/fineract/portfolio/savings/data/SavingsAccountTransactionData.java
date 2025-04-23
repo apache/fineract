@@ -426,13 +426,13 @@ public final class SavingsAccountTransactionData implements Serializable {
             }
         }
 
-        return EndOfDayBalance.from(getTransactionDate(), openingBalance, endOfDayBalance, this.balanceNumberOfDays);
+        return EndOfDayBalance.from(getTransactionDate(), openingBalance, endOfDayBalance, this.balanceNumberOfDays, currency.getDigitsAfterDecimal());
     }
     public EndOfDayBalance toEndOfDayBalanceDates(final Money openingBalance, LocalDateInterval date) {
         final MonetaryCurrency currency = openingBalance.getCurrency();
         Money endOfDayBalance = Money.of(currency, this.runningBalance);
 
-        return EndOfDayBalance.from(getTransactionDate(), openingBalance, endOfDayBalance, this.balanceNumberOfDays != null ? this.balanceNumberOfDays: date.endDate().getDayOfMonth());
+        return EndOfDayBalance.from(getTransactionDate(), openingBalance, endOfDayBalance, this.balanceNumberOfDays != null ? this.balanceNumberOfDays: date.endDate().getDayOfMonth(), currency.getDigitsAfterDecimal());
     }
 
     public boolean isChargeTransactionAndNotReversed() {
@@ -478,7 +478,7 @@ public final class SavingsAccountTransactionData implements Serializable {
             numberOfDaysOfBalance = spanOfBalance.daysInPeriodInclusiveOfEndDate();
         }
 
-        return EndOfDayBalance.from(balanceStartDate, openingBalance, endOfDayBalance, numberOfDaysOfBalance);
+        return EndOfDayBalance.from(balanceStartDate, openingBalance, endOfDayBalance, numberOfDaysOfBalance, currency.getDigitsAfterDecimal());
     }
 
     public void reverse() {
