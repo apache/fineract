@@ -343,21 +343,41 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         return ctx.getChangedTransactionDetail();
     }
 
-    private void handleInterestRefund(LoanTransaction loanTransaction, TransactionCtx ctx) {
-
-        if (ctx instanceof ProgressiveTransactionCtx progCtx) {
-            Money interestBeforeRefund = emiCalculator.getSumOfDueInterestsOnDate(progCtx.getModel(), loanTransaction.getDateOf());
-            List<Long> unmodifiedTransactionIds = progCtx.getAlreadyProcessedTransactions().stream().filter(LoanTransaction::isNotReversed)
-                    .map(AbstractPersistableCustom::getId).toList();
-            List<LoanTransaction> modifiedTransactions = new ArrayList<>(progCtx.getAlreadyProcessedTransactions().stream()
-                    .filter(LoanTransaction::isNotReversed).filter(tr -> tr.getId() == null).toList());
-            if (!modifiedTransactions.isEmpty()) {
-                Money interestAfterRefund = interestRefundService.totalInterestByTransactions(this, loanTransaction.getLoan().getId(),
-                        loanTransaction.getDateOf(), modifiedTransactions, unmodifiedTransactionIds);
-                Money newAmount = interestBeforeRefund.minus(progCtx.getSumOfInterestRefundAmount()).minus(interestAfterRefund);
-                loanTransaction.updateAmount(newAmount.getAmount());
+    private void handleInterestRefund(final LoanTransaction loanTransaction, final TransactionCtx ctx) {
+        final Loan loan = loanTransaction.getLoan();
+        final LoanTransaction chargeOffTransaction = loan.getLoanTransactions().stream().filter(t -> t.isChargeOff() && t.isNotReversed())
+                .findFirst().orElse(null);
+        if (loan.isChargedOff() && chargeOffTransaction != null) {
+            final LoanChargeOffBehaviour chargeOffBehaviour = loanTransaction.getLoan().getLoanProductRelatedDetail()
+                    .getChargeOffBehaviour();
+            if (loan.isProgressiveSchedule() && !LoanChargeOffBehaviour.REGULAR.equals(chargeOffBehaviour)) {
+                loanTransaction.updateAmount(getInterestTillChargeOffForPeriod(loan, chargeOffTransaction.getTransactionDate(), ctx));
+            } else {
+                Money interestPortion = Money.zero(ctx.getCurrency());
+                for (final LoanRepaymentScheduleInstallment currentInstallment : ctx.getInstallments()) {
+                    interestPortion = interestPortion.plus(currentInstallment.getInterestCharged(ctx.getCurrency()));
+                }
+                loanTransaction.updateAmount(interestPortion.getAmount());
             }
-            progCtx.setSumOfInterestRefundAmount(progCtx.getSumOfInterestRefundAmount().add(loanTransaction.getAmount()));
+            if (ctx instanceof ProgressiveTransactionCtx progCtx) {
+                progCtx.setSumOfInterestRefundAmount(progCtx.getSumOfInterestRefundAmount().add(loanTransaction.getAmount()));
+            }
+        } else {
+            if (ctx instanceof ProgressiveTransactionCtx progCtx) {
+                final Money interestBeforeRefund = emiCalculator.getSumOfDueInterestsOnDate(progCtx.getModel(),
+                        loanTransaction.getDateOf());
+                final List<Long> unmodifiedTransactionIds = progCtx.getAlreadyProcessedTransactions().stream()
+                        .filter(LoanTransaction::isNotReversed).map(AbstractPersistableCustom::getId).toList();
+                final List<LoanTransaction> modifiedTransactions = new ArrayList<>(progCtx.getAlreadyProcessedTransactions().stream()
+                        .filter(LoanTransaction::isNotReversed).filter(tr -> tr.getId() == null).toList());
+                if (!modifiedTransactions.isEmpty()) {
+                    final Money interestAfterRefund = interestRefundService.totalInterestByTransactions(this, loan.getId(),
+                            loanTransaction.getDateOf(), modifiedTransactions, unmodifiedTransactionIds);
+                    final Money newAmount = interestBeforeRefund.minus(progCtx.getSumOfInterestRefundAmount()).minus(interestAfterRefund);
+                    loanTransaction.updateAmount(newAmount.getAmount());
+                }
+                progCtx.setSumOfInterestRefundAmount(progCtx.getSumOfInterestRefundAmount().add(loanTransaction.getAmount()));
+            }
         }
         handleRepayment(loanTransaction, ctx);
     }
@@ -980,7 +1000,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                             .filter(oldRelation -> LoanTransactionRelationTypeEnum.RELATED.equals(oldRelation.getRelationType()))
                             .findFirst().map(oldRelation -> oldRelation.getToTransaction().getId())
                             .flatMap(oldToTransactionId -> ctx.getChangedTransactionDetail().getTransactionChanges().stream()
-                                    .filter(change -> change.getOldTransaction().getId() != null
+                                    .filter(change -> change.getOldTransaction() != null && change.getOldTransaction().getId() != null
                                             && change.getOldTransaction().getId().equals(oldToTransactionId))
                                     .map(TransactionChangeData::getNewTransaction).findFirst())
                             .ifPresent(newRelation::setToTransaction));

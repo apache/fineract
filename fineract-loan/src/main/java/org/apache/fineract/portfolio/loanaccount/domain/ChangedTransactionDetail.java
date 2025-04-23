@@ -41,7 +41,7 @@ public class ChangedTransactionDetail {
                 change.setNewTransaction(transactionChangeData.getNewTransaction());
                 return;
             } else if (transactionChangeData.getOldTransaction() == null && change.getOldTransaction() == null
-                    && change.getNewTransaction() != null
+                    && change.getNewTransaction() != null && transactionChangeData.getNewTransaction() != null
                     && Objects.equals(change.getNewTransaction().getId(), transactionChangeData.getNewTransaction().getId())) {
                 change.setNewTransaction(transactionChangeData.getNewTransaction());
                 return;

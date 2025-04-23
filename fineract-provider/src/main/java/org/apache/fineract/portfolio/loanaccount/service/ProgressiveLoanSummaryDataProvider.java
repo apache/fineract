@@ -100,7 +100,8 @@ public class ProgressiveLoanSummaryDataProvider extends CommonLoanSummaryDataPro
                                 loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges());
                 ProgressiveLoanInterestScheduleModel model = changedTransactionDetailProgressiveLoanInterestScheduleModelPair.getRight();
                 final List<Long> replayedTransactions = changedTransactionDetailProgressiveLoanInterestScheduleModelPair.getLeft()
-                        .getTransactionChanges().stream().filter(change -> change.getOldTransaction() != null)
+                        .getTransactionChanges().stream()
+                        .filter(change -> change.getOldTransaction() != null && change.getNewTransaction() != null)
                         .map(change -> change.getNewTransaction().getId()).filter(Objects::nonNull).toList();
 
                 if (!replayedTransactions.isEmpty()) {
