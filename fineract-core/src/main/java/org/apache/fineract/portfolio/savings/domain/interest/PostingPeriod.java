@@ -201,6 +201,7 @@ public final class PostingPeriod {
                 // period so no need to do any cropping/bounding //ENTRA CUANDO SON POSITIVOS AQUI
                 final EndOfDayBalance endOfDayBalance = transaction.toEndOfDayBalance(openingDayBalance);
                 accountEndOfDayBalances.add(endOfDayBalance);
+                endOfDayBalance.setDecimales(currency.getDigitsAfterDecimal());
 
                 openingDayBalance = endOfDayBalance.closingBalance();
 
@@ -208,6 +209,7 @@ public final class PostingPeriod {
                 final EndOfDayBalance endOfDayBalance = transaction.toEndOfDayBalanceBoundedBy(openingDayBalance, periodInterval,
                         isAllowOverdraft);
                 accountEndOfDayBalances.add(endOfDayBalance);
+                endOfDayBalance.setDecimales(currency.getDigitsAfterDecimal());
 
                 closeOfDayBalance = endOfDayBalance.closingBalance();
                 openingDayBalance = closeOfDayBalance;
@@ -216,6 +218,7 @@ public final class PostingPeriod {
                 accountEndOfDayBalances.add(endOfDayBalance);
                 openingDayBalance = endOfDayBalance.closingBalance();
                 isEndTrasaccion = true;
+                endOfDayBalance.setDecimales(currency.getDigitsAfterDecimal());
             }
 
             // this check is to make sure to add interest if withdrawal is
@@ -243,6 +246,7 @@ public final class PostingPeriod {
 
             final EndOfDayBalance endOfDayBalance = EndOfDayBalance.from(balanceStartDate, openingDayBalance, closeOfDayBalance,
                     numberOfDaysOfBalance);
+            endOfDayBalance.setDecimales(currency.getDigitsAfterDecimal());
 
             accountEndOfDayBalances.add(endOfDayBalance);
 
