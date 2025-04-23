@@ -360,6 +360,9 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
                 mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_PENALTY.getValue(),
                         loanProductId, AccrualAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_PENALTY.getValue(),
                         AccrualAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_PENALTY.toString(), changes);
+                mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_CAPITALIZATION.getValue(),
+                        loanProductId, AccrualAccountsForLoan.INCOME_FROM_CAPITALIZATION.getValue(),
+                        AccrualAccountsForLoan.INCOME_FROM_CAPITALIZATION.toString(), changes);
 
                 // expenses
                 mergeLoanToExpenseAccountMappingChanges(element, LoanProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(), loanProductId,
@@ -377,6 +380,9 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
                 // liabilities
                 mergeLoanToLiabilityAccountMappingChanges(element, LoanProductAccountingParams.OVERPAYMENT.getValue(), loanProductId,
                         CashAccountsForLoan.OVERPAYMENT.getValue(), CashAccountsForLoan.OVERPAYMENT.toString(), changes);
+                mergeLoanToLiabilityAccountMappingChanges(element, LoanProductAccountingParams.DEFERRED_INCOME_LIABILITY.getValue(),
+                        loanProductId, AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(),
+                        AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.toString(), changes);
             break;
         }
     }

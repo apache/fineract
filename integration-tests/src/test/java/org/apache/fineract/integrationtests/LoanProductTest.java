@@ -44,7 +44,9 @@ public class LoanProductTest extends BaseLoanIntegrationTest {
             final PostLoanProductsResponse loanProductsResponse = loanProductHelper
                     .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
                             .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
-                            .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION));
+                            .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                            .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
+                            .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue()));
 
             final GetLoanProductsProductIdResponse loanProductsProductIdResponse = loanProductHelper
                     .retrieveLoanProductById(loanProductsResponse.getResourceId());
@@ -80,7 +82,9 @@ public class LoanProductTest extends BaseLoanIntegrationTest {
             final PostLoanProductsResponse loanProductsResponse = loanProductHelper
                     .createLoanProduct(create4IProgressive().enableIncomeCapitalization(false)
                             .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
-                            .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION));
+                            .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                            .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
+                            .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue()));
 
             final GetLoanProductsProductIdResponse loanProductsProductIdResponse = loanProductHelper
                     .retrieveLoanProductById(loanProductsResponse.getResourceId());
@@ -114,7 +118,9 @@ public class LoanProductTest extends BaseLoanIntegrationTest {
             final PostLoanProductsResponse loanProductsResponse = loanProductHelper
                     .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
                             .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
-                            .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION));
+                            .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                            .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
+                            .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue()));
 
             final GetLoanProductsProductIdResponse loanProductsProductIdResponse = loanProductHelper
                     .retrieveLoanProductById(loanProductsResponse.getResourceId());
@@ -125,9 +131,12 @@ public class LoanProductTest extends BaseLoanIntegrationTest {
             Assertions.assertNotNull(loanProductsProductIdResponse.getCapitalizedIncomeStrategy());
             Assertions.assertEquals(LoanCapitalizedIncomeStrategy.EQUAL_AMORTIZATION.getCode(),
                     loanProductsProductIdResponse.getCapitalizedIncomeStrategy().getCode());
+            Assertions.assertNotNull(loanProductsProductIdResponse.getAccountingMappings());
+            Assertions.assertEquals(feeIncomeAccount.getAccountID().longValue(),
+                    loanProductsProductIdResponse.getAccountingMappings().getIncomeFromCapitalizationAccount().getId());
 
-            loanProductHelper.updateLoanProductById(loanProductsResponse.getResourceId(),
-                    new PutLoanProductsProductIdRequest().enableIncomeCapitalization(false));
+            loanProductHelper.updateLoanProductById(loanProductsResponse.getResourceId(), new PutLoanProductsProductIdRequest()
+                    .enableIncomeCapitalization(false).incomeFromCapitalizationAccountId(interestIncomeAccount.getAccountID().longValue()));
 
             final GetLoanProductsProductIdResponse updatedLoanProductsProductIdResponse = loanProductHelper
                     .retrieveLoanProductById(loanProductsResponse.getResourceId());
@@ -138,6 +147,9 @@ public class LoanProductTest extends BaseLoanIntegrationTest {
             Assertions.assertNotNull(updatedLoanProductsProductIdResponse.getCapitalizedIncomeStrategy());
             Assertions.assertEquals(LoanCapitalizedIncomeStrategy.EQUAL_AMORTIZATION.getCode(),
                     updatedLoanProductsProductIdResponse.getCapitalizedIncomeStrategy().getCode());
+            Assertions.assertNotNull(updatedLoanProductsProductIdResponse.getAccountingMappings());
+            Assertions.assertEquals(interestIncomeAccount.getAccountID().longValue(),
+                    updatedLoanProductsProductIdResponse.getAccountingMappings().getIncomeFromCapitalizationAccount().getId());
         }
 
         @Test
@@ -147,21 +159,45 @@ public class LoanProductTest extends BaseLoanIntegrationTest {
                             () -> loanProductHelper.createLoanProduct(createOnePeriod30DaysPeriodicAccrualProduct(7.0)
                                     .enableIncomeCapitalization(true)
                                     .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
-                                    .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)));
+                                    .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                                    .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
+                                    .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())));
         }
 
         @Test
         public void testIncomeCapitalizationEnabledCalculationTypeNotProvided() {
             Assertions.assertThrows(RuntimeException.class,
                     () -> loanProductHelper.createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
-                            .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)));
+                            .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                            .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
+                            .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())));
         }
 
         @Test
         public void testIncomeCapitalizationEnabledStrategyNotProvided() {
             Assertions.assertThrows(RuntimeException.class,
                     () -> loanProductHelper.createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
-                            .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)));
+                            .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                            .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
+                            .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())));
+        }
+
+        @Test
+        public void testIncomeCapitalizationEnabledDeferredIncomeLiabilityNotProvided() {
+            Assertions.assertThrows(RuntimeException.class,
+                    () -> loanProductHelper.createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                            .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                            .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                            .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())));
+        }
+
+        @Test
+        public void testIncomeCapitalizationEnabledIncomeFromCapitalizationNotProvided() {
+            Assertions.assertThrows(RuntimeException.class,
+                    () -> loanProductHelper.createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                            .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                            .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                            .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())));
         }
     }
 }

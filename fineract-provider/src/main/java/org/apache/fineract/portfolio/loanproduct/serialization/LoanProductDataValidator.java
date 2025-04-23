@@ -148,7 +148,9 @@ public final class LoanProductDataValidator {
             LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_PENALTY.getValue(),
             LoanProductAccountingParams.CHARGE_OFF_REASON_TO_EXPENSE_ACCOUNT_MAPPINGS.getValue(),
             LoanProductAccountingParams.EXPENSE_GL_ACCOUNT_ID.getValue(),
-            LoanProductAccountingParams.CHARGE_OFF_REASON_CODE_VALUE_ID.getValue(), LoanProductConstants.USE_BORROWER_CYCLE_PARAMETER_NAME,
+            LoanProductAccountingParams.CHARGE_OFF_REASON_CODE_VALUE_ID.getValue(),
+            LoanProductAccountingParams.INCOME_FROM_CAPITALIZATION.getValue(),
+            LoanProductAccountingParams.DEFERRED_INCOME_LIABILITY.getValue(), LoanProductConstants.USE_BORROWER_CYCLE_PARAMETER_NAME,
             LoanProductConstants.PRINCIPAL_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME,
             LoanProductConstants.INTEREST_RATE_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME,
             LoanProductConstants.NUMBER_OF_REPAYMENT_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME, LoanProductConstants.SHORT_NAME,
@@ -882,7 +884,7 @@ public final class LoanProductDataValidator {
                     "Charge off behaviour is only supported for Progressive loans");
         }
 
-        validateIncomeCapitalization(transactionProcessingStrategyCode, element, baseDataValidator);
+        validateIncomeCapitalization(transactionProcessingStrategyCode, element, baseDataValidator, accountingRuleType);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -1930,7 +1932,7 @@ public final class LoanProductDataValidator {
         validateRepaymentPeriodWithGraceSettings(numberOfRepayments, graceOnPrincipalPayment, graceOnInterestPayment,
                 graceOnInterestCharged, recurringMoratoriumOnPrincipalPeriods, baseDataValidator);
 
-        validateIncomeCapitalization(transactionProcessingStrategyCode, element, baseDataValidator);
+        validateIncomeCapitalization(transactionProcessingStrategyCode, element, baseDataValidator, accountingRuleType);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -2671,7 +2673,7 @@ public final class LoanProductDataValidator {
     }
 
     private void validateIncomeCapitalization(String transactionProcessingStrategyCode, JsonElement element,
-            DataValidatorBuilder baseDataValidator) {
+            DataValidatorBuilder baseDataValidator, Integer accountingRuleType) {
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.CAPITALIZED_INCOME_CALCULATION_TYPE_PARAM_NAME, element)) {
             final String capitalizedIncomeCalculationType = this.fromApiJsonHelper
                     .extractStringNamed(LoanProductConstants.CAPITALIZED_INCOME_CALCULATION_TYPE_PARAM_NAME, element);
@@ -2703,6 +2705,21 @@ public final class LoanProductDataValidator {
                 baseDataValidator.reset().parameter(LoanProductConstants.CAPITALIZED_INCOME_STRATEGY_PARAM_NAME)
                         .value(capitalizedIncomeStrategy).isOneOfEnumValues(LoanCapitalizedIncomeStrategy.class)
                         .cantBeBlankWhenParameterProvidedIs(LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME, true);
+                // Accounting
+                if (AccountingValidations.isAccrualBasedAccounting(accountingRuleType)) {
+                    final Long deferredIncomeLiabilityAccountId = this.fromApiJsonHelper
+                            .extractLongNamed(LoanProductAccountingParams.DEFERRED_INCOME_LIABILITY.getValue(), element);
+                    baseDataValidator.reset().parameter(LoanProductAccountingParams.DEFERRED_INCOME_LIABILITY.getValue())
+                            .value(deferredIncomeLiabilityAccountId).notNull()
+                            .cantBeBlankWhenParameterProvidedIs(LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME, true)
+                            .integerGreaterThanZero();
+                    final Long incomeFromDeferredIncomeAccountId = this.fromApiJsonHelper
+                            .extractLongNamed(LoanProductAccountingParams.INCOME_FROM_CAPITALIZATION.getValue(), element);
+                    baseDataValidator.reset().parameter(LoanProductAccountingParams.INCOME_FROM_CAPITALIZATION.getValue())
+                            .value(incomeFromDeferredIncomeAccountId).notNull()
+                            .cantBeBlankWhenParameterProvidedIs(LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME, true)
+                            .integerGreaterThanZero();
+                }
             }
         } else if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME, element)) {
             Boolean enableIncomeCapitalization = this.fromApiJsonHelper

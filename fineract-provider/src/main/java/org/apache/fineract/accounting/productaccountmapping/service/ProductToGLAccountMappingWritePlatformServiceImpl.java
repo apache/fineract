@@ -187,6 +187,9 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 this.loanProductToGLAccountMappingHelper.saveLoanToIncomeAccountMapping(element,
                         LoanProductAccountingParams.INCOME_FROM_GOODWILL_CREDIT_PENALTY.getValue(), loanProductId,
                         AccrualAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_PENALTY.getValue());
+                this.loanProductToGLAccountMappingHelper.saveLoanToIncomeAccountMapping(element,
+                        LoanProductAccountingParams.INCOME_FROM_CAPITALIZATION.getValue(), loanProductId,
+                        AccrualAccountsForLoan.INCOME_FROM_CAPITALIZATION.getValue());
 
                 // expenses
                 this.loanProductToGLAccountMappingHelper.saveLoanToExpenseAccountMapping(element,
@@ -205,6 +208,9 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 // liabilities
                 this.loanProductToGLAccountMappingHelper.saveLoanToLiabilityAccountMapping(element,
                         LoanProductAccountingParams.OVERPAYMENT.getValue(), loanProductId, AccrualAccountsForLoan.OVERPAYMENT.getValue());
+                this.loanProductToGLAccountMappingHelper.saveLoanToLiabilityAccountMapping(element,
+                        LoanProductAccountingParams.DEFERRED_INCOME_LIABILITY.getValue(), loanProductId,
+                        AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue());
 
                 // advanced accounting mappings
                 this.loanProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, loanProductId, null);

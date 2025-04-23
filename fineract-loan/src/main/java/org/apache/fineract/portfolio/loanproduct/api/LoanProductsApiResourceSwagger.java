@@ -275,6 +275,10 @@ public final class LoanProductsApiResourceSwagger {
         public Long incomeFromGoodwillCreditFeesAccountId;
         @Schema(example = "11")
         public Long incomeFromGoodwillCreditPenaltyAccountId;
+        @Schema(example = "25")
+        public Long deferredIncomeLiabilityAccountId;
+        @Schema(example = "37")
+        public Long incomeFromCapitalizationAccountId;
         public List<GetLoanProductsProductIdResponse.GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings;
         public List<LoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings;
         public List<PostChargeOffReasonToExpenseAccountMappings> chargeOffReasonToExpenseAccountMappings;
@@ -1227,6 +1231,8 @@ public final class LoanProductsApiResourceSwagger {
             public GetGlAccountMapping chargeOffExpenseAccount;
             public GetGlAccountMapping chargeOffFraudExpenseAccount;
             public GetGlAccountMapping overpaymentLiabilityAccount;
+            public GetGlAccountMapping deferredIncomeLiabilityAccount;
+            public GetGlAccountMapping incomeFromCapitalizationAccount;
         }
 
         static final class GetLoanPaymentChannelToFundSourceMappings {
@@ -1661,6 +1667,10 @@ public final class LoanProductsApiResourceSwagger {
 
         @Schema(example = "11")
         public Long incomeFromChargeOffPenaltyAccountId;
+        @Schema(example = "25")
+        public Long deferredIncomeLiabilityAccountId;
+        @Schema(example = "37")
+        public Long incomeFromCapitalizationAccountId;
         public List<GetLoanProductsProductIdResponse.GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings;
         public List<LoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings;
         public List<PostLoanProductsRequest.PostChargeOffReasonToExpenseAccountMappings> chargeOffReasonToExpenseAccountMappings;
