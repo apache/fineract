@@ -111,7 +111,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeCal
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeStrategy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeOffBehaviour;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSubStatus;
@@ -166,7 +165,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     private final StaffReadPlatformService staffReadPlatformService;
     private final PaginationHelper paginationHelper;
     private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
-    private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
     private final FloatingRatesReadPlatformService floatingRatesReadPlatformService;
     private final LoanUtilService loanUtilService;
     private final ConfigurationDomainService configurationDomainService;
@@ -179,7 +177,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     private final LoanTransactionRelationReadService loanTransactionRelationReadService;
     private final LoanForeclosureValidator loanForeclosureValidator;
     private final LoanTransactionMapper loanTransactionMapper;
-    private final org.apache.fineract.portfolio.loanaccount.mapper.LoanMapper loanMapper;
     private final LoanTransactionProcessingService loadTransactionProcessingService;
 
     @Override
@@ -450,6 +447,12 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         }
 
         return loanDetails;
+    }
+
+    @Override
+    public LoanTransactionData retrieveLoanTransactionTemplate(final Long loanId, LoanTransactionType transactionType) {
+        return LoanTransactionData.templateOnTop(retrieveLoanTransactionTemplate(loanId),
+                LoanEnumerations.transactionType(transactionType));
     }
 
     @Override

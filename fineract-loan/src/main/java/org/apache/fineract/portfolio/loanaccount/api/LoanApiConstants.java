@@ -174,6 +174,7 @@ public interface LoanApiConstants {
     // Commands
     String CHARGEBACK_TRANSACTION_COMMAND = "chargeback";
     String MARK_AS_FRAUD_COMMAND = "markAsFraud";
+    String CAPITALIZED_INCOME_TRANSACTION_COMMAND = "capitalizedIncome";
 
     // Data Validator names
     String LOAN_FRAUD_DATAVALIDATOR_PREFIX = "loans.fraud";

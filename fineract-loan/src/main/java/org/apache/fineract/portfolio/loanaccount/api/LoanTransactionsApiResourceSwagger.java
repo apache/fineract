@@ -75,7 +75,19 @@ final class LoanTransactionsApiResourceSwagger {
             public String displaySymbolValue;
         }
 
-        public GetLoansTransactionType transactionType;
+        static final class GetPaymentTypeOptions {
+
+            private GetPaymentTypeOptions() {}
+
+            @Schema(example = "10")
+            public Long id;
+            @Schema(example = "check")
+            public String name;
+            @Schema(example = "1")
+            public Integer position;
+        }
+
+        public GetLoansTransactionType type;
         @Schema(example = "[2009, 8, 1]")
         public LocalDate date;
         public GetLoansTotal total;
@@ -94,6 +106,8 @@ final class LoanTransactionsApiResourceSwagger {
         public GetLoanCurrency currency;
 
         public List<GetLoanProductsChargeOffReasonOptions> chargeOffReasonOptions;
+
+        public List<GetPaymentTypeOptions> paymentTypeOptions;
     }
 
     public static final class GetLoanCurrency {

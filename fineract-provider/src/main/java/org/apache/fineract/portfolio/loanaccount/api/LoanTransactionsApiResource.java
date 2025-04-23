@@ -664,6 +664,9 @@ public class LoanTransactionsApiResource {
             transactionData = this.loanReadPlatformService.retrieveLoanChargeOffTemplate(resolvedLoanId);
         } else if (CommandParameterUtil.is(commandParam, DOWN_PAYMENT)) {
             transactionData = this.loanReadPlatformService.retrieveLoanTransactionTemplate(resolvedLoanId);
+        } else if (CommandParameterUtil.is(commandParam, LoanApiConstants.CAPITALIZED_INCOME_TRANSACTION_COMMAND)) {
+            transactionData = this.loanReadPlatformService.retrieveLoanTransactionTemplate(resolvedLoanId,
+                    LoanTransactionType.CAPITALIZED_INCOME);
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }

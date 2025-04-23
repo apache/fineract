@@ -216,7 +216,16 @@ public class LoanTransactionData implements Serializable {
                 loanTransactionData.externalId, loanTransactionData.transfer, loanTransactionData.fixedEmiAmount,
                 loanTransactionData.outstandingLoanBalance, loanTransactionData.manuallyReversed, loanTransactionData.loanId,
                 loanTransactionData.externalLoanId);
+    }
 
+    public static LoanTransactionData templateOnTop(final LoanTransactionData loanTransactionData, final LoanTransactionEnumData typeOf) {
+        return new LoanTransactionData(loanTransactionData.id, loanTransactionData.officeId, loanTransactionData.officeName, typeOf,
+                loanTransactionData.paymentDetailData, loanTransactionData.currency, loanTransactionData.date, loanTransactionData.amount,
+                loanTransactionData.netDisbursalAmount, loanTransactionData.principalPortion, loanTransactionData.interestPortion,
+                loanTransactionData.feeChargesPortion, loanTransactionData.penaltyChargesPortion, loanTransactionData.overpaymentPortion,
+                loanTransactionData.unrecognizedIncomePortion, loanTransactionData.paymentTypeOptions, loanTransactionData.externalId,
+                loanTransactionData.transfer, loanTransactionData.fixedEmiAmount, loanTransactionData.outstandingLoanBalance,
+                loanTransactionData.manuallyReversed, loanTransactionData.loanId, loanTransactionData.externalLoanId);
     }
 
     @Default // Default constructor for mapper

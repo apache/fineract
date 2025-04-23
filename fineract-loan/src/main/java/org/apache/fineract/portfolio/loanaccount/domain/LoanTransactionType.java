@@ -67,6 +67,7 @@ public enum LoanTransactionType {
     ACCRUAL_ACTIVITY(32, "loanTransactionType.accrualActivity"), //
     INTEREST_REFUND(33, "loanTransactionType.interestRefund"), //
     ACCRUAL_ADJUSTMENT(34, "loanTransactionType.accrualAdjustment"), //
+    CAPITALIZED_INCOME(35, "loanTransactionType.capitalizedIncome"), //
     ;
 
     private final Integer value;
@@ -117,6 +118,7 @@ public enum LoanTransactionType {
             case 32 -> LoanTransactionType.ACCRUAL_ACTIVITY;
             case 33 -> LoanTransactionType.INTEREST_REFUND;
             case 34 -> LoanTransactionType.ACCRUAL_ADJUSTMENT;
+            case 35 -> LoanTransactionType.CAPITALIZED_INCOME;
             default -> LoanTransactionType.INVALID;
         };
     }
@@ -232,5 +234,9 @@ public enum LoanTransactionType {
 
     public boolean isAccrualAdjustment() {
         return this == LoanTransactionType.ACCRUAL_ADJUSTMENT;
+    }
+
+    public boolean isCapitalizedIncome() {
+        return this == LoanTransactionType.CAPITALIZED_INCOME;
     }
 }

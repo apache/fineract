@@ -18,11 +18,15 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.TransactionType;
@@ -83,6 +87,30 @@ public class LoanTransactionTest extends BaseLoanIntegrationTest {
             final GetLoansLoanIdTransactionsResponse nonAccrualLoanTransactionsByExternalIdPage = loanTransactionHelper
                     .getLoanTransactionsByExternalId(loanExternalIdStr, List.of(TransactionType.ACCRUAL));
             Assertions.assertEquals(3L, nonAccrualLoanTransactionsByExternalIdPage.getTotalElements());
+        });
+    }
+
+    @Test
+    public void testGetLoanTransactionTemplateForCapitalizedIncome() {
+        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+
+        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
+
+        final String loanExternalIdStr = UUID.randomUUID().toString();
+
+        final String command = "capitalizedIncome";
+        runAt("20 December 2024", () -> {
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "20 December 2024",
+                    430.0, 7.0, 6, (request) -> request.externalId(loanExternalIdStr));
+
+            disburseLoan(loanId, BigDecimal.valueOf(430), "20 December 2024");
+
+            final GetLoansLoanIdTransactionsTemplateResponse transactionTemplate = loanTransactionHelper.retrieveTransactionTemplate(loanId,
+                    command, null, null, null);
+
+            assertNotNull(transactionTemplate);
+            assertEquals("loanTransactionType." + command, transactionTemplate.getType().getCode());
+            assertThat(transactionTemplate.getPaymentTypeOptions().size() > 0);
         });
     }
 

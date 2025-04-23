@@ -323,22 +323,20 @@ public class LoanAccountConfiguration {
             CodeValueReadPlatformService codeValueReadPlatformService, CalendarReadPlatformService calendarReadPlatformService,
             StaffReadPlatformService staffReadPlatformService, PaginationHelper paginationHelper,
             PaymentTypeReadPlatformService paymentTypeReadPlatformService,
-            LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
             FloatingRatesReadPlatformService floatingRatesReadPlatformService, LoanUtilService loanUtilService,
             ConfigurationDomainService configurationDomainService, AccountDetailsReadPlatformService accountDetailsReadPlatformService,
             ColumnValidator columnValidator, DatabaseSpecificSQLGenerator sqlGenerator,
             DelinquencyReadPlatformService delinquencyReadPlatformService, LoanTransactionRepository loanTransactionRepository,
             LoanChargePaidByReadService loanChargePaidByReadService, LoanTransactionRelationReadService loanTransactionRelationReadService,
-            LoanForeclosureValidator loanForeclosureValidator, LoanTransactionMapper loanTransactionMapper, LoanMapper loanMapper,
+            LoanForeclosureValidator loanForeclosureValidator, LoanTransactionMapper loanTransactionMapper,
             LoanTransactionProcessingService loanTransactionProcessingService) {
         return new LoanReadPlatformServiceImpl(jdbcTemplate, context, loanRepositoryWrapper, applicationCurrencyRepository,
                 loanProductReadPlatformService, clientReadPlatformService, groupReadPlatformService, loanDropdownReadPlatformService,
                 fundReadPlatformService, chargeReadPlatformService, codeValueReadPlatformService, calendarReadPlatformService,
-                staffReadPlatformService, paginationHelper, paymentTypeReadPlatformService,
-                loanRepaymentScheduleTransactionProcessorFactory, floatingRatesReadPlatformService, loanUtilService,
-                configurationDomainService, accountDetailsReadPlatformService, columnValidator, sqlGenerator,
+                staffReadPlatformService, paginationHelper, paymentTypeReadPlatformService, floatingRatesReadPlatformService,
+                loanUtilService, configurationDomainService, accountDetailsReadPlatformService, columnValidator, sqlGenerator,
                 delinquencyReadPlatformService, loanTransactionRepository, loanChargePaidByReadService, loanTransactionRelationReadService,
-                loanForeclosureValidator, loanTransactionMapper, loanMapper, loanTransactionProcessingService);
+                loanForeclosureValidator, loanTransactionMapper, loanTransactionProcessingService);
     }
 
     @Bean

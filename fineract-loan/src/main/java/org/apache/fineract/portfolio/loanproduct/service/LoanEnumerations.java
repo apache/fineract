@@ -325,6 +325,8 @@ public final class LoanEnumerations {
                     LoanTransactionType.INTEREST_REFUND.getCode(), "Interest Refund");
             case ACCRUAL_ADJUSTMENT -> new LoanTransactionEnumData(LoanTransactionType.ACCRUAL_ADJUSTMENT.getValue().longValue(),
                     LoanTransactionType.ACCRUAL_ADJUSTMENT.getCode(), "Accrual Adjustment");
+            case CAPITALIZED_INCOME -> new LoanTransactionEnumData(LoanTransactionType.CAPITALIZED_INCOME.getValue().longValue(),
+                    LoanTransactionType.CAPITALIZED_INCOME.getCode(), "Capitalized Income");
         };
     }
 
