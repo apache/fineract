@@ -18,15 +18,21 @@
  */
 package org.apache.fineract.organisation.staff.data;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Collection;
+import lombok.Getter;
 import org.apache.fineract.organisation.office.data.OfficeData;
 
 /**
  * Immutable data object representing staff data.
  */
+@Getter
 public final class StaffData implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private final Long id;
     private final String externalId;

@@ -18,23 +18,23 @@
  */
 package org.apache.fineract.organisation.staff.service;
 
-import java.util.Collection;
+import java.util.List;
 import org.apache.fineract.organisation.staff.data.StaffData;
 
 public interface StaffReadPlatformService {
 
     StaffData retrieveStaff(Long staffId);
 
-    Collection<StaffData> retrieveAllStaffForDropdown(Long officeId);
+    List<StaffData> retrieveAllStaffForDropdown(Long officeId);
 
-    Collection<StaffData> retrieveAllLoanOfficersInOfficeById(Long officeId);
+    List<StaffData> retrieveAllLoanOfficersInOfficeById(Long officeId);
 
     /**
      * returns all staff in offices that are above the provided <code>officeId</code>.
      */
-    Collection<StaffData> retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(Long officeId, boolean loanOfficersOnly);
+    List<StaffData> retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(Long officeId, boolean loanOfficersOnly);
 
-    Collection<StaffData> retrieveAllStaff(Long officeId, boolean loanOfficersOnly, String status);
+    List<StaffData> retrieveAllStaff(Long officeId, boolean loanOfficersOnly, String status);
 
     Object[] hasAssociatedItems(Long staffId);
 }

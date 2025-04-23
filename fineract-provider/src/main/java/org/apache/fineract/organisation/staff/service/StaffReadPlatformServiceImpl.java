@@ -22,7 +22,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -147,7 +146,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
     }
 
     @Override
-    public Collection<StaffData> retrieveAllLoanOfficersInOfficeById(final Long officeId) {
+    public List<StaffData> retrieveAllLoanOfficersInOfficeById(final Long officeId) {
         SQLBuilder extraCriteria = new SQLBuilder();
         extraCriteria.addCriteria(" office_id = ", officeId);
         extraCriteria.addCriteria(" is_loan_officer = ", true);
@@ -155,7 +154,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
     }
 
     @Override
-    public Collection<StaffData> retrieveAllStaffForDropdown(final Long officeId) {
+    public List<StaffData> retrieveAllStaffForDropdown(final Long officeId) {
 
         // adding the Authorization criteria so that a user cannot see an
         // employee who does not belong to his office or a sub office for his
@@ -196,12 +195,12 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
     }
 
     @Override
-    public Collection<StaffData> retrieveAllStaff(final Long officeId, final boolean loanOfficersOnly, final String status) {
+    public List<StaffData> retrieveAllStaff(final Long officeId, final boolean loanOfficersOnly, final String status) {
         final SQLBuilder extraCriteria = getStaffCriteria(officeId, loanOfficersOnly, status);
         return retrieveAllStaff(extraCriteria);
     }
 
-    private Collection<StaffData> retrieveAllStaff(final SQLBuilder extraCriteria) {
+    private List<StaffData> retrieveAllStaff(final SQLBuilder extraCriteria) {
 
         final StaffMapper rm = new StaffMapper();
         String sql = "select " + rm.schema();
@@ -245,7 +244,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
     }
 
     @Override
-    public Collection<StaffData> retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(final Long officeId, final boolean loanOfficersOnly) {
+    public List<StaffData> retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(final Long officeId, final boolean loanOfficersOnly) {
 
         String sql = "select " + STAFF_IN_OFFICE_HIERARCHY_MAPPER.schema(loanOfficersOnly);
         sql = sql + " order by s.lastname";

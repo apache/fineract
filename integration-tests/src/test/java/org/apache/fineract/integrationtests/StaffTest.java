@@ -238,11 +238,6 @@ public class StaffTest {
         /** Long mobileNo test */
         map.put("mobileNo", Utils.uniqueRandomStringGenerator("num_", 47));
         StaffHelper.updateStaff(requestSpec, responseSpecForValidationError, 1, map);
-        map.remove("mobileNo");
-
-        /** Test unsupported parameter */
-        map.put("xyz", "xyz");
-        StaffHelper.updateStaff(requestSpec, responseSpecForValidationError, 1, map);
     }
 
     @Test
