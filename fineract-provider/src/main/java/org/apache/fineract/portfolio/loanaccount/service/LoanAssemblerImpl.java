@@ -292,76 +292,80 @@ public class LoanAssemblerImpl implements LoanAssembler {
     // TODO: Review... it might be better somewhere else and rethink due to the account number generation logic is
     // intertwined with GLIM logic
     @Override
-    public void accountNumberGeneration(JsonCommand command, Loan loan) {
-        if (loan.isAccountNumberRequiresAutoGeneration()) {
-            JsonElement element = command.parsedJson();
-            final AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.LOAN);
-            // TODO: It is really weird to set GLIM info only if account number was not provided
-            // if application is of GLIM type
-            if (loan.getLoanType().isGLIMAccount()) {
-                Group group = loan.getGroup();
-                String accountNumber = "";
-                BigDecimal applicationId = BigDecimal.ZERO;
-                Boolean isLastChildApplication = false;
-                // GLIM specific parameters
-                final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject());
-                BigDecimal applicationIdFromParam = this.fromApiJsonHelper.extractBigDecimalNamed("applicationId", element, locale);
-                BigDecimal totalLoan = this.fromApiJsonHelper.extractBigDecimalNamed("totalLoan", element, locale);
-                if (applicationIdFromParam != null) {
-                    applicationId = applicationIdFromParam;
-                }
+    public void accountNumberGeneration(final JsonCommand command, final Loan loan) {
+        final JsonElement element = command.parsedJson();
 
-                Boolean isLastChildApplicationFromParam = this.fromApiJsonHelper.extractBooleanNamed("lastApplication", element);
-                if (isLastChildApplicationFromParam != null) {
-                    isLastChildApplication = isLastChildApplicationFromParam;
-                }
+        final String accountNo = this.fromApiJsonHelper.extractStringNamed("accountNo", element);
+        final boolean isAccountNumberRequiresAutoGeneration = StringUtils.isBlank(accountNo);
+        if (!isAccountNumberRequiresAutoGeneration) {
+            return;
+        }
 
-                if (this.fromApiJsonHelper.extractBooleanNamed("isParentAccount", element) != null) {
-                    // empty table check
-                    // TODO: This count here is weird... and seems parent-empty and parent not empty looks the same
-                    if (glimRepository.count() != 0) {
-                        // **************Parent-Not an empty
-                        // table********************
-                        createAndSetGLIMAccount(totalLoan, loan, accountNumberFormat, group, applicationId);
-                    } else {
-                        // ************** Parent-empty
-                        // table********************
-                        createAndSetGLIMAccount(totalLoan, loan, accountNumberFormat, group, applicationId);
-                    }
-                } else {
-                    // TODO: This count here is weird...
-                    if (glimRepository.count() != 0) {
-                        // Child-Not an empty table
-                        GroupLoanIndividualMonitoringAccount glimAccount = glimRepository.findOneByIsAcceptingChildAndApplicationId(true,
-                                applicationId);
-                        accountNumber = glimAccount.getAccountNumber() + (glimAccount.getChildAccountsCount() + 1);
-                        loan.updateAccountNo(accountNumber);
-                        this.glimAccountInfoWritePlatformService.incrementChildAccountCount(glimAccount);
-                        loan.setGlim(glimAccount);
-                    } else {
-                        // **************Child-empty
-                        // table********************
-                        // if the glim info is empty set the current account
-                        // as parent
-                        createAndSetGLIMAccount(totalLoan, loan, accountNumberFormat, group, applicationId);
-                    }
-                    // reset in cases of last child application of glim
-                    if (isLastChildApplication) {
-                        this.glimAccountInfoWritePlatformService
-                                .resetIsAcceptingChild(glimRepository.findOneByIsAcceptingChildAndApplicationId(true, applicationId));
-                    }
-                }
-            } else { // for applications other than GLIM
-                loan.updateAccountNo(this.accountNumberGenerator.generate(loan, accountNumberFormat));
+        final AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.LOAN);
+        // TODO: It is really weird to set GLIM info only if account number was not provided
+        // if application is of GLIM type
+        if (loan.getLoanType().isGLIMAccount()) {
+            Group group = loan.getGroup();
+            String accountNumber;
+            BigDecimal applicationId = BigDecimal.ZERO;
+            // GLIM specific parameters
+            final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject());
+            BigDecimal applicationIdFromParam = this.fromApiJsonHelper.extractBigDecimalNamed("applicationId", element, locale);
+            BigDecimal totalLoan = this.fromApiJsonHelper.extractBigDecimalNamed("totalLoan", element, locale);
+            if (applicationIdFromParam != null) {
+                applicationId = applicationIdFromParam;
             }
+
+            Boolean isLastChildApplicationFromParam = this.fromApiJsonHelper.extractBooleanNamed("lastApplication", element);
+            boolean isLastChildApplication = false;
+            if (isLastChildApplicationFromParam != null) {
+                isLastChildApplication = isLastChildApplicationFromParam;
+            }
+
+            if (this.fromApiJsonHelper.extractBooleanNamed("isParentAccount", element) != null) {
+                // empty table check
+                // TODO: This count here is weird... and seems parent-empty and parent not empty looks the same
+                if (glimRepository.count() != 0) {
+                    // **************Parent-Not an empty
+                    // table********************
+                    createAndSetGLIMAccount(totalLoan, loan, accountNumberFormat, group, applicationId);
+                } else {
+                    // ************** Parent-empty
+                    // table********************
+                    createAndSetGLIMAccount(totalLoan, loan, accountNumberFormat, group, applicationId);
+                }
+            } else {
+                // TODO: This count here is weird...
+                if (glimRepository.count() != 0) {
+                    // Child-Not an empty table
+                    GroupLoanIndividualMonitoringAccount glimAccount = glimRepository.findOneByIsAcceptingChildAndApplicationId(true,
+                            applicationId);
+                    accountNumber = glimAccount.getAccountNumber() + (glimAccount.getChildAccountsCount() + 1);
+                    loan.setAccountNumber(accountNumber);
+                    this.glimAccountInfoWritePlatformService.incrementChildAccountCount(glimAccount);
+                    loan.setGlim(glimAccount);
+                } else {
+                    // **************Child-empty
+                    // table********************
+                    // if the glim info is empty set the current account
+                    // as parent
+                    createAndSetGLIMAccount(totalLoan, loan, accountNumberFormat, group, applicationId);
+                }
+                // reset in cases of last child application of glim
+                if (isLastChildApplication) {
+                    this.glimAccountInfoWritePlatformService
+                            .resetIsAcceptingChild(glimRepository.findOneByIsAcceptingChildAndApplicationId(true, applicationId));
+                }
+            }
+        } else { // for applications other than GLIM
+            loan.setAccountNumber(this.accountNumberGenerator.generate(loan, accountNumberFormat));
         }
     }
 
     private void createAndSetGLIMAccount(BigDecimal totalLoan, Loan loan, AccountNumberFormat accountNumberFormat, Group group,
             BigDecimal applicationId) {
-        String accountNumber;
-        accountNumber = this.accountNumberGenerator.generate(loan, accountNumberFormat);
-        loan.updateAccountNo(accountNumber + "1");
+        final String accountNumber = this.accountNumberGenerator.generate(loan, accountNumberFormat);
+        loan.setAccountNumber(accountNumber + "1");
         GroupLoanIndividualMonitoringAccount glimAccount = glimAccountInfoWritePlatformService.createGLIMAccount(accountNumber, group,
                 totalLoan, 1L, true, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(), applicationId);
         loan.setGlim(glimAccount);

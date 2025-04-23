@@ -131,7 +131,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     @Transactional
     @Override
     public CommandProcessingResult submitApplication(final JsonCommand command) {
-
         try {
             // Validations (prior assembling)
             this.loanApplicationValidator.validateForCreate(command);

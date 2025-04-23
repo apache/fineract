@@ -35,7 +35,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
 import jakarta.validation.constraints.NotNull;
@@ -322,9 +321,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     @Embedded
     private LoanSummary summary;
 
-    @Transient
-    private boolean accountNumberRequiresAutoGeneration;
-
     @Setter()
     @Column(name = "principal_amount_proposed", scale = 6, precision = 19, nullable = false)
     private BigDecimal proposedPrincipal;
@@ -506,7 +502,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
         if (StringUtils.isBlank(accountNo)) {
             this.accountNumber = new RandomPasswordGenerator(19).generate();
-            this.accountNumberRequiresAutoGeneration = true;
         } else {
             this.accountNumber = accountNo;
         }
@@ -839,11 +834,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     public void updateLoanProduct(final LoanProduct loanProduct) {
         this.loanProduct = loanProduct;
-    }
-
-    public void updateAccountNo(final String newAccountNo) {
-        this.accountNumber = newAccountNo;
-        this.accountNumberRequiresAutoGeneration = false;
     }
 
     public void updateFund(final Fund fund) {
