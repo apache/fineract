@@ -33,6 +33,7 @@ import org.apache.fineract.infrastructure.event.business.service.BusinessEventNo
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
+import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,6 +49,9 @@ class DefaultLoanLifecycleStateMachineTest {
     @Mock
     private BusinessEventNotifierService businessEventNotifierService;
 
+    @Mock
+    private LoanBalanceService loanBalanceService;
+
     private DefaultLoanLifecycleStateMachine underTest;
 
     private MockedStatic<MoneyHelper> moneyHelperStatic;
@@ -58,7 +62,7 @@ class DefaultLoanLifecycleStateMachineTest {
         moneyHelperStatic = Mockito.mockStatic(MoneyHelper.class);
         moneyHelperStatic.when(MoneyHelper::getMathContext).thenReturn(new MathContext(12, RoundingMode.UP));
         moneyHelperStatic.when(MoneyHelper::getRoundingMode).thenReturn(RoundingMode.UP);
-        underTest = new DefaultLoanLifecycleStateMachine(businessEventNotifierService);
+        underTest = new DefaultLoanLifecycleStateMachine(businessEventNotifierService, loanBalanceService);
     }
 
     @AfterEach

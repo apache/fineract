@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.serialization;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
@@ -31,10 +32,14 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationDateException;
+import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public final class LoanDownPaymentTransactionValidator {
+
+    private final LoanBalanceService loanBalanceService;
 
     public void validateRepaymentDateIsOnNonWorkingDay(final LocalDate repaymentDate, final WorkingDays workingDays,
             final boolean allowTransactionsOnNonWorkingDay) {
@@ -53,7 +58,7 @@ public final class LoanDownPaymentTransactionValidator {
     }
 
     public void validateLoanStatusIsActiveOrFullyPaidOrOverpaid(final Loan loan) {
-        if (!(loan.isOpen() || loan.isClosedObligationsMet() || loan.isOverPaid())) {
+        if (!(loan.isOpen() || loan.isClosedObligationsMet() || loanBalanceService.isOverPaid(loan))) {
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final String defaultUserMessage = "Loan must be Active, Fully Paid or Overpaid";
             final ApiParameterError error = ApiParameterError.generalError("error.msg.loan.must.be.active.fully.paid.or.overpaid",

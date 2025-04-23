@@ -30,6 +30,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionToRepaymentScheduleMapping;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.AbstractLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
+import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
+import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
 
 /**
  * This {@link LoanRepaymentScheduleTransactionProcessor} defaults to having the payment order of Interest first, then
@@ -41,8 +43,9 @@ public class EarlyPaymentLoanRepaymentScheduleTransactionProcessor extends Abstr
 
     public static final String STRATEGY_NAME = "Early Repayment Strategy";
 
-    public EarlyPaymentLoanRepaymentScheduleTransactionProcessor(ExternalIdFactory externalIdFactory) {
-        super(externalIdFactory);
+    public EarlyPaymentLoanRepaymentScheduleTransactionProcessor(final ExternalIdFactory externalIdFactory,
+            final LoanChargeValidator loanChargeValidator, final LoanBalanceService loanBalanceService) {
+        super(externalIdFactory, loanChargeValidator, loanBalanceService);
     }
 
     @Override

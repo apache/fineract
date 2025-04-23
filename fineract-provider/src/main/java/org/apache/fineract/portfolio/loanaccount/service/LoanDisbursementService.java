@@ -244,8 +244,8 @@ public class LoanDisbursementService {
                 if (TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled()) {
                     externalId = ExternalId.generate();
                 }
-                final LoanCharge loanCharge = new LoanCharge(loan, chargeDefinition, principal, null, null, null, expectedDisbursementDate,
-                        null, null, BigDecimal.ZERO, externalId);
+                final LoanCharge loanCharge = loanChargeService.create(loan, chargeDefinition, principal, null, null, null,
+                        expectedDisbursementDate, null, null, BigDecimal.ZERO, externalId);
                 LoanTrancheDisbursementCharge loanTrancheDisbursementCharge = new LoanTrancheDisbursementCharge(loanCharge,
                         disbursementDetails);
                 loanCharge.updateLoanTrancheDisbursementCharge(loanTrancheDisbursementCharge);

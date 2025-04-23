@@ -61,6 +61,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.imp
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.HeavensFamilyLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
+import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -76,8 +77,9 @@ import org.springframework.util.CollectionUtils;
 public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implements LoanRepaymentScheduleTransactionProcessor {
 
     protected final SingleLoanChargeRepaymentScheduleProcessingWrapper loanChargeProcessor = new SingleLoanChargeRepaymentScheduleProcessingWrapper();
-    protected final LoanChargeValidator loanChargeValidator = new LoanChargeValidator();
     protected final ExternalIdFactory externalIdFactory;
+    protected final LoanChargeValidator loanChargeValidator;
+    protected final LoanBalanceService loanBalanceService;
 
     @Override
     public boolean accept(String s) {
@@ -256,7 +258,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             } else {
                 loanTransaction.updateComponentsAndTotal(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
                 final Loan loan = loanTransaction.getLoan();
-                if ((loan.isClosedObligationsMet() || loan.isOverPaid()) && currentInstallment.isObligationsMet()
+                if ((loan.isClosedObligationsMet() || loanBalanceService.isOverPaid(loan)) && currentInstallment.isObligationsMet()
                         && currentInstallment.isTransactionDateWithinPeriod(currentInstallment.getObligationsMetOnDate())) {
                     loanTransaction.updateTransactionDate(currentInstallment.getObligationsMetOnDate());
                 }

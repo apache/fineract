@@ -60,6 +60,7 @@ import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidat
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanTransactionValidator;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualTransactionBusinessEventService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualsProcessingService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanDownPaymentHandlerService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanJournalEntryPoster;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
@@ -91,6 +92,7 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
     private final LoanAccrualsProcessingService loanAccrualsProcessingService;
     private final LoanChargeValidator loanChargeValidator;
     private final LoanJournalEntryPoster journalEntryPoster;
+    private final LoanBalanceService loanBalanceService;
 
     @Override
     public CommandProcessingResult adjustLoanTransaction(Loan loan, LoanTransaction transactionToAdjust, LoanAdjustmentParameter parameter,
@@ -112,7 +114,7 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
             Money unrecognizedIncome = transactionAmountAsMoney.zero();
             Money interestComponent = transactionAmountAsMoney;
             if (loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
-                Money receivableInterest = loan.getReceivableInterest(transactionDate);
+                Money receivableInterest = loanBalanceService.getReceivableInterest(loan, transactionDate);
                 if (transactionAmountAsMoney.isGreaterThan(receivableInterest)) {
                     interestComponent = receivableInterest;
                     unrecognizedIncome = transactionAmountAsMoney.minus(receivableInterest);

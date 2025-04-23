@@ -43,6 +43,10 @@ import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
+import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
+import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanChargeService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionProcessingService;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -62,6 +66,9 @@ public class SingleLoanChargeRepaymentScheduleProcessingWrapperTest {
     private ArgumentCaptor<Money> penaltyChargesDue = ArgumentCaptor.forClass(Money.class);
     private ArgumentCaptor<Money> penaltyChargesWaived = ArgumentCaptor.forClass(Money.class);
     private ArgumentCaptor<Money> penaltyChargesWrittenOff = ArgumentCaptor.forClass(Money.class);
+
+    private final LoanChargeService loanChargeService = new LoanChargeService(mock(LoanChargeValidator.class),
+            mock(LoanTransactionProcessingService.class), mock(LoanLifecycleStateMachine.class), mock(LoanBalanceService.class));
 
     @BeforeAll
     public static void init() {
@@ -135,7 +142,8 @@ public class SingleLoanChargeRepaymentScheduleProcessingWrapperTest {
         when(charge.isPenalty()).thenReturn(penalty);
         Loan loan = mock(Loan.class);
         when(loan.isInterestBearing()).thenReturn(false);
-        return new LoanCharge(loan, charge, new BigDecimal(1000), new BigDecimal(10), ChargeTimeType.SPECIFIED_DUE_DATE,
+
+        return loanChargeService.create(loan, charge, new BigDecimal(1000), new BigDecimal(10), ChargeTimeType.SPECIFIED_DUE_DATE,
                 ChargeCalculationType.FLAT, LocalDate.of(2023, 1, 15), ChargePaymentMode.REGULAR, 1, null, null);
     }
 

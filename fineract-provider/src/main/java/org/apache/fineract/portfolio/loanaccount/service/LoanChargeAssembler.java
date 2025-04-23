@@ -61,6 +61,7 @@ public class LoanChargeAssembler {
     private final LoanChargeRepository loanChargeRepository;
     private final LoanProductRepository loanProductRepository;
     private final ExternalIdFactory externalIdFactory;
+    private final LoanChargeService loanChargeService;
 
     public Set<LoanCharge> fromParsedJson(final JsonElement element, List<LoanDisbursementDetails> disbursementDetails) {
         JsonArray jsonDisbursement = this.fromApiJsonHelper.extractJsonArrayNamed("disbursementData", element);
@@ -210,7 +211,7 @@ public class LoanChargeAssembler {
                                 .orElseThrow(() -> new LoanChargeNotFoundException(loanChargeId));
 
                         if (!loanCharge.isTrancheDisbursementCharge() || disbursementChargeIds.contains(loanChargeId)) {
-                            loanCharge.update(amount, dueDate, numberOfRepayments);
+                            loanChargeService.update(loanCharge, amount, dueDate, numberOfRepayments);
                             loanCharges.add(loanCharge);
                         }
 
@@ -296,7 +297,7 @@ public class LoanChargeAssembler {
             if (percentage == null) {
                 percentage = chargeDefinition.getAmount();
             }
-            loanCharge = LoanCharge.calculatePerInstallmentChargeAmount(loan,
+            loanCharge = loanChargeService.calculatePerInstallmentChargeAmount(loan,
                     ChargeCalculationType.fromInt(chargeDefinition.getChargeCalculation()), percentage);
         }
 
@@ -314,7 +315,7 @@ public class LoanChargeAssembler {
         }
 
         ExternalId externalId = externalIdFactory.createFromCommand(command, "externalId");
-        return new LoanCharge(loan, chargeDefinition, amountPercentageAppliedTo, amount, chargeTime, chargeCalculation, dueDate,
+        return loanChargeService.create(loan, chargeDefinition, amountPercentageAppliedTo, amount, chargeTime, chargeCalculation, dueDate,
                 chargePaymentMode, null, loanCharge, externalId);
     }
 
@@ -324,7 +325,7 @@ public class LoanChargeAssembler {
     public LoanCharge createNewWithoutLoan(final Charge chargeDefinition, final BigDecimal loanPrincipal, final BigDecimal amount,
             final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate dueDate,
             final ChargePaymentMode chargePaymentMode, final Integer numberOfRepayments, final ExternalId externalId) {
-        return new LoanCharge(null, chargeDefinition, loanPrincipal, amount, chargeTime, chargeCalculation, dueDate, chargePaymentMode,
-                numberOfRepayments, BigDecimal.ZERO, externalId);
+        return loanChargeService.create(null, chargeDefinition, loanPrincipal, amount, chargeTime, chargeCalculation, dueDate,
+                chargePaymentMode, numberOfRepayments, BigDecimal.ZERO, externalId);
     }
 }

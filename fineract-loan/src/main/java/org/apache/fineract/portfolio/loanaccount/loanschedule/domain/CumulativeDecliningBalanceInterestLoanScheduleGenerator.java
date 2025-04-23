@@ -25,10 +25,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
+import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionService;
 import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
 import org.springframework.stereotype.Component;
 
@@ -56,11 +56,18 @@ import org.springframework.stereotype.Component;
  * </p>
  */
 @Component
-@RequiredArgsConstructor
 public class CumulativeDecliningBalanceInterestLoanScheduleGenerator extends AbstractCumulativeLoanScheduleGenerator {
 
     private final ScheduledDateGenerator scheduledDateGenerator;
     private final PaymentPeriodsInOneYearCalculator paymentPeriodsInOneYearCalculator;
+
+    public CumulativeDecliningBalanceInterestLoanScheduleGenerator(final ScheduledDateGenerator scheduledDateGenerator,
+            final PaymentPeriodsInOneYearCalculator paymentPeriodsInOneYearCalculator,
+            final LoanTransactionService loanTransactionService) {
+        super(loanTransactionService);
+        this.scheduledDateGenerator = scheduledDateGenerator;
+        this.paymentPeriodsInOneYearCalculator = paymentPeriodsInOneYearCalculator;
+    }
 
     @Override
     public ScheduledDateGenerator getScheduledDateGenerator() {

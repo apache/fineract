@@ -70,4 +70,32 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
 
     @Query(FIND_LOAN_ID_BY_ID)
     Optional<Long> findLoanIdById(@Param("id") Long id);
+
+    @Query("""
+            SELECT CASE WHEN COUNT(lt) > 0 THEN false ELSE true END
+            FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+            AND lt.reversed = false
+            AND lt.dateOf > :transactionDate
+            """)
+    boolean isChronologicallyLatest(@Param("transactionDate") LocalDate transactionDate, @Param("loan") Loan loan);
+
+    @Query("""
+            SELECT MAX(lt.dateOf) FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+            AND lt.reversed = false
+            AND lt.typeOf NOT IN (
+                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.CONTRA,
+                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.MARKED_FOR_RESCHEDULING,
+                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.ACCRUAL,
+                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.ACCRUAL_ADJUSTMENT,
+                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.APPROVE_TRANSFER,
+                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.INITIATE_TRANSFER,
+                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.REJECT_TRANSFER,
+                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.WITHDRAW_TRANSFER,
+                    org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION
+            )
+            """)
+    Optional<LocalDate> findLastTransactionDateForReprocessing(@Param("loan") Loan loan);
+
 }

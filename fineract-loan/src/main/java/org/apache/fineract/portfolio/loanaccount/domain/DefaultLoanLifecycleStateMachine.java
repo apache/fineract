@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanStatusChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
 import org.springframework.stereotype.Component;
 
 // TODO: introduce tests for the state machine
@@ -36,6 +37,7 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
 
     private static final List<LoanStatus> ALLOWED_LOAN_STATUSES = List.of(LoanStatus.values());
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final LoanBalanceService loanBalanceService;
 
     @Override
     public LoanStatus dryTransition(final LoanEvent loanEvent, final Loan loan) {
@@ -45,7 +47,7 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
 
     @Override
     public void transition(final LoanEvent loanEvent, final Loan loan) {
-        loan.updateLoanSummaryDerivedFields();
+        loanBalanceService.updateLoanSummaryDerivedFields(loan);
         internalTransition(loanEvent, loan);
     }
 
@@ -55,7 +57,7 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
             return;
         }
 
-        loan.updateLoanSummaryDerivedFields();
+        loanBalanceService.updateLoanSummaryDerivedFields(loan);
 
         final LoanStatusTransition transition = determineTransition(loan, loan.getStatus(), transactionDate);
 

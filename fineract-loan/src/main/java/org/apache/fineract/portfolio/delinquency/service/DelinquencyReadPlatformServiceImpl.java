@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.portfolio.delinquency.service;
 
+import static org.apache.fineract.portfolio.loanaccount.domain.Loan.EARLIEST_UNPAID_DATE;
+import static org.apache.fineract.portfolio.loanaccount.domain.Loan.NEXT_UNPAID_DUE_DATE;
+
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Comparator;
@@ -27,6 +30,7 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
@@ -51,6 +55,7 @@ import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
 import org.apache.fineract.portfolio.loanaccount.data.DelinquencyPausePeriod;
 import org.apache.fineract.portfolio.loanaccount.data.InstallmentLevelDelinquency;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.jetbrains.annotations.NotNull;
@@ -142,7 +147,7 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
             // loans
             collectionData = loanDelinquencyDomainService.getOverdueCollectionData(loan, effectiveDelinquencyList);
             collectionData.setAvailableDisbursementAmount(loan.getApprovedPrincipal().subtract(loan.getDisbursedAmount()));
-            collectionData.setNextPaymentDueDate(loan.possibleNextRepaymentDate(nextPaymentDueDateConfig));
+            collectionData.setNextPaymentDueDate(possibleNextRepaymentDate(nextPaymentDueDateConfig, loan));
 
             final LoanTransaction lastPayment = loan.getLastPaymentTransaction();
             if (lastPayment != null) {
@@ -226,6 +231,65 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
             return loanDelinquencyActionRepository.findByLoanOrderById(optLoan.get());
         }
         return List.of();
+    }
+
+    private LocalDate possibleNextRepaymentDate(final String nextPaymentDueDateConfig, final Loan loan) {
+        if (nextPaymentDueDateConfig == null) {
+            return null;
+        }
+        return switch (nextPaymentDueDateConfig.toLowerCase()) {
+            case EARLIEST_UNPAID_DATE -> getEarliestUnpaidInstallmentDate(loan);
+            case NEXT_UNPAID_DUE_DATE -> getNextUnpaidInstallmentDueDate(loan);
+            default -> null;
+        };
+    }
+
+    private LocalDate getEarliestUnpaidInstallmentDate(final Loan loan) {
+        LocalDate earliestUnpaidInstallmentDate = DateUtils.getBusinessLocalDate();
+        List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
+        for (final LoanRepaymentScheduleInstallment installment : installments) {
+            if (installment.isNotFullyPaidOff()) {
+                earliestUnpaidInstallmentDate = installment.getDueDate();
+                break;
+            }
+        }
+
+        LocalDate lastTransactionDate = null;
+        for (final LoanTransaction transaction : loan.getLoanTransactions()) {
+            if (transaction.isRepaymentLikeType() && transaction.isGreaterThanZero()) {
+                lastTransactionDate = transaction.getTransactionDate();
+            }
+        }
+
+        LocalDate possibleNextRepaymentDate = earliestUnpaidInstallmentDate;
+        if (DateUtils.isAfter(lastTransactionDate, earliestUnpaidInstallmentDate)) {
+            possibleNextRepaymentDate = lastTransactionDate;
+        }
+
+        return possibleNextRepaymentDate;
+    }
+
+    private LocalDate getNextUnpaidInstallmentDueDate(final Loan loan) {
+        List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
+        LocalDate currentBusinessDate = DateUtils.getBusinessLocalDate();
+        LocalDate expectedMaturityDate = loan.determineExpectedMaturityDate();
+        LocalDate nextUnpaidInstallmentDate = expectedMaturityDate;
+
+        for (final LoanRepaymentScheduleInstallment installment : installments) {
+            boolean isCurrentDateBeforeInstallmentAndLoanPeriod = DateUtils.isBefore(currentBusinessDate, installment.getDueDate())
+                    && DateUtils.isBefore(currentBusinessDate, expectedMaturityDate);
+            if (installment.isDownPayment()) {
+                isCurrentDateBeforeInstallmentAndLoanPeriod = DateUtils.isEqual(currentBusinessDate, installment.getDueDate())
+                        && DateUtils.isBefore(currentBusinessDate, expectedMaturityDate);
+            }
+            if (isCurrentDateBeforeInstallmentAndLoanPeriod) {
+                if (installment.isNotFullyPaidOff()) {
+                    nextUnpaidInstallmentDate = installment.getDueDate();
+                    break;
+                }
+            }
+        }
+        return nextUnpaidInstallmentDate;
     }
 
 }

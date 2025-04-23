@@ -104,11 +104,13 @@ import org.apache.fineract.portfolio.loanaccount.service.InterestRefundServiceDe
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualTransactionBusinessEventService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualsProcessingService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
+import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanDownPaymentHandlerService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanRefundService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanScheduleService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionProcessingService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.portfolio.loanaccount.service.ReprocessLoanTransactionsService;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedInterestRefundTypes;
@@ -147,7 +149,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper;
     private final DelinquencyReadPlatformService delinquencyReadPlatformService;
     private final LoanAccrualsProcessingService loanAccrualsProcessingService;
-    private final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessorFactory;
     private final InterestRefundServiceDelegate interestRefundServiceDelegate;
     private final LoanTransactionValidator loanTransactionValidator;
     private final LoanForeclosureValidator loanForeclosureValidator;
@@ -161,6 +162,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
     private final LoanAccountingBridgeMapper loanAccountingBridgeMapper;
     private final LoanTransactionProcessingService loanTransactionProcessingService;
+    private final LoanBalanceService loanBalanceService;
+    private final LoanTransactionService loanTransactionService;
 
     @Transactional
     @Override
@@ -767,7 +770,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         existingTransactionIds.addAll(loan.findExistingTransactionIds());
         existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
         final ScheduleGeneratorDTO scheduleGeneratorDTO = null;
-        final LoanRepaymentScheduleInstallment foreCloseDetail = loan.fetchLoanForeclosureDetail(foreClosureDate);
+        final LoanRepaymentScheduleInstallment foreCloseDetail = loanBalanceService.fetchLoanForeclosureDetail(loan, foreClosureDate);
 
         loanAccrualsProcessingService.processAccrualsOnLoanForeClosure(loan, foreClosureDate, newTransactions);
 
@@ -875,7 +878,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         LoanTransaction refundTransaction = LoanTransaction.refund(loan, loanTransactionType, transactionAmount, paymentDetail,
                 transactionDate, txnExternalId);
 
-        final boolean isTransactionChronologicallyLatest = loan.isChronologicallyLatestRepaymentOrWaiver(refundTransaction);
+        final boolean isTransactionChronologicallyLatest = loanTransactionService.isChronologicallyLatestRepaymentOrWaiver(loan,
+                refundTransaction);
 
         boolean shouldCreateInterestRefundTransaction = loan.getLoanProductRelatedDetail().getSupportedInterestRefundTypes().stream()
                 .map(LoanSupportedInterestRefundTypes::getTransactionType)
@@ -1002,7 +1006,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final List<LoanRepaymentScheduleInstallment> newInstallments = new ArrayList<>(loan.getRepaymentScheduleInstallments());
         final MonetaryCurrency currency = loan.getCurrency();
         Money totalPrincipal = Money.zero(currency);
-        final Money[] balances = loan.retrieveIncomeForOverlappingPeriod(transactionDate);
+        final Money[] balances = loanBalanceService.retrieveIncomeForOverlappingPeriod(loan, transactionDate);
         boolean isInterestComponent = true;
         for (final LoanRepaymentScheduleInstallment installment : loan.getRepaymentScheduleInstallments()) {
             if (!DateUtils.isAfter(transactionDate, installment.getDueDate())) {

@@ -40,9 +40,10 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.fineract.avro.generator.ByteBufferSerializable;
@@ -135,7 +136,7 @@ public class InvestorBusinessEventSerializerTest {
                 .thenReturn(createTransferData(firstTransferStatus, null));
         Loan loan = Mockito.mock(Loan.class);
         when(loan.getCurrency()).thenReturn(new MonetaryCurrency("EUR", 2, 1));
-        List<LoanCharge> loanCharges = createMockCharges();
+        final Set<LoanCharge> loanCharges = createMockCharges();
         when(loan.getLoanCharges()).thenReturn(loanCharges);
         LoanOwnershipTransferBusinessEvent loanOwnershipTransferBusinessEvent = new LoanOwnershipTransferBusinessEvent(
                 createExternalAssetOwnerTransfer(status, subStatus), loan);
@@ -153,8 +154,8 @@ public class InvestorBusinessEventSerializerTest {
         assertEquals(CUSTOM_DATA_PREFIX + "_2", new String(customData.get("test_key_2").array(), UTF_8));
     }
 
-    private List<LoanCharge> createMockCharges() {
-        List<LoanCharge> loanCharges = new ArrayList<>();
+    private Set<LoanCharge> createMockCharges() {
+        final Set<LoanCharge> loanCharges = new HashSet<>();
         loanCharges.add(loanCharge(1L, "charge a", new BigDecimal("10.00000")));
         loanCharges.add(loanCharge(1L, "charge a", new BigDecimal("15.00000")));
         loanCharges.add(loanCharge(2L, "charge b", BigDecimal.ZERO));

@@ -61,6 +61,8 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
     private final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessorFactory;
     private final LoanTermVariationsMapper loanMapper;
     private final InterestScheduleModelRepositoryWrapper modelRepository;
+    private final LoanTransactionService loanTransactionService;
+    private final LoanBalanceService loanBalanceService;
 
     @Override
     public boolean canProcessLatestTransactionOnly(Loan loan, LoanTransaction loanTransaction,
@@ -86,7 +88,7 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
         ProgressiveTransactionCtx progressiveContext = new ProgressiveTransactionCtx(loan.getCurrency(),
                 loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()),
                 new ChangedTransactionDetail(), savedModel.orElse(null), getTotalRefundInterestAmount(loan));
-        progressiveContext.getAlreadyProcessedTransactions().addAll(loan.retrieveListOfTransactionsForReprocessing());
+        progressiveContext.getAlreadyProcessedTransactions().addAll(loanTransactionService.retrieveListOfTransactionsForReprocessing(loan));
         progressiveContext.setChargedOff(loan.isChargedOff());
         ChangedTransactionDetail result = advancedProcessor.processLatestTransaction(loanTransaction, progressiveContext);
         if (savedModel.isPresent() && !TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
@@ -158,7 +160,9 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
     public Optional<ChangedTransactionDetail> processPostDisbursementTransactions(Loan loan) {
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = getTransactionProcessor(
                 loan.getTransactionProcessingStrategyCode());
-        final List<LoanTransaction> allNonContraTransactionsPostDisbursement = loan.retrieveListOfTransactionsForReprocessing();
+        final List<LoanTransaction> allNonContraTransactionsPostDisbursement = loanTransactionService
+                .retrieveListOfTransactionsForReprocessing(loan);
+
         final List<LoanTransaction> copyTransactions = new ArrayList<>();
 
         if (allNonContraTransactionsPostDisbursement.isEmpty()) {
@@ -173,7 +177,7 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
                 loan.getDisbursementDate(), copyTransactions, loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
                 loan.getActiveCharges());
 
-        loan.updateLoanSummaryDerivedFields();
+        loanBalanceService.updateLoanSummaryDerivedFields(loan);
 
         return Optional.of(changedTransactionDetail);
     }

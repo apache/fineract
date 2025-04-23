@@ -32,6 +32,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionToRepaymentScheduleMapping;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.AbstractLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
+import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
+import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
 
 /**
  * `First due/late penalty, interest, principal, fee, after in advance penalty, interest, principal, fee` style
@@ -48,8 +50,9 @@ public class DuePenIntPriFeeInAdvancePenIntPriFeeLoanRepaymentScheduleTransactio
 
     public static final String STRATEGY_NAME = "Due penalty, interest, principal, fee, In advance penalty, interest, principal, fee";
 
-    public DuePenIntPriFeeInAdvancePenIntPriFeeLoanRepaymentScheduleTransactionProcessor(ExternalIdFactory externalIdFactory) {
-        super(externalIdFactory);
+    public DuePenIntPriFeeInAdvancePenIntPriFeeLoanRepaymentScheduleTransactionProcessor(final ExternalIdFactory externalIdFactory,
+            final LoanChargeValidator loanChargeValidator, final LoanBalanceService loanBalanceService) {
+        super(externalIdFactory, loanChargeValidator, loanBalanceService);
     }
 
     @Override

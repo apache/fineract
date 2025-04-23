@@ -1571,7 +1571,8 @@ public class LoanScheduleAssembler {
         for (LoanScheduleModelPeriod loanScheduleModelPeriod : periods) {
             if (loanScheduleModelPeriod instanceof LoanScheduleModelDisbursementPeriod) {
                 for (final LoanCharge loanCharge : nonCompoundingCharges) {
-                    loanCharge.populateDerivedFields(totalInterest, loanCharge.amountOrPercentage(), null, BigDecimal.ZERO);
+                    loanChargeService.populateDerivedFields(loanCharge, totalInterest, loanCharge.amountOrPercentage(), null,
+                            BigDecimal.ZERO);
                     loanScheduleModelPeriod.addLoanCharges(loanCharge.getAmountOutstanding(), BigDecimal.ZERO);
                 }
             }

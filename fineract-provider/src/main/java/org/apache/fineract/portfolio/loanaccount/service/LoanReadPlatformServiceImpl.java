@@ -179,6 +179,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     private final LoanForeclosureValidator loanForeclosureValidator;
     private final LoanTransactionMapper loanTransactionMapper;
     private final LoanTransactionProcessingService loadTransactionProcessingService;
+    private final LoanBalanceService loanBalanceService;
 
     @Override
     public LoanAccountData retrieveOne(final Long loanId) {
@@ -2088,7 +2089,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
 
         final LocalDate earliestUnpaidInstallmentDate = DateUtils.getBusinessLocalDate();
 
-        final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = loan.fetchLoanForeclosureDetail(transactionDate);
+        final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = loanBalanceService.fetchLoanForeclosureDetail(loan,
+                transactionDate);
         BigDecimal unrecognizedIncomePortion = null;
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.REPAYMENT);
         final Collection<PaymentTypeData> paymentTypeOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
@@ -2236,7 +2238,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         return loanRepositoryWrapper.existsByLoanId(loanId);
     }
 
-    private LoanTransaction deriveDefaultInterestWaiverTransaction(Loan loan) {
+    private LoanTransaction deriveDefaultInterestWaiverTransaction(final Loan loan) {
         final Money totalInterestOutstanding = loan.getTotalInterestOutstandingOnLoan();
         Money possibleInterestToWaive = totalInterestOutstanding.copy();
         LocalDate transactionDate = DateUtils.getBusinessLocalDate();
@@ -2260,4 +2262,5 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         return LoanTransaction.waiver(loan.getOffice(), loan, possibleInterestToWaive, transactionDate, possibleInterestToWaive,
                 possibleInterestToWaive.zero(), ExternalId.empty());
     }
+
 }

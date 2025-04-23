@@ -30,6 +30,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionToRepaymentScheduleMapping;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.AbstractLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
+import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
+import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
 
 /**
  * This {@link LoanRepaymentScheduleTransactionProcessor} defaults to having the payment order of principal first, then
@@ -42,8 +44,9 @@ public class PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionPr
 
     public static final String STRATEGY_NAME = "Principal, Interest, Penalties, Fees Order";
 
-    public PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor(ExternalIdFactory externalIdFactory) {
-        super(externalIdFactory);
+    public PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor(final ExternalIdFactory externalIdFactory,
+            final LoanChargeValidator loanChargeValidator, final LoanBalanceService loanBalanceService) {
+        super(externalIdFactory, loanChargeValidator, loanBalanceService);
     }
 
     @Override

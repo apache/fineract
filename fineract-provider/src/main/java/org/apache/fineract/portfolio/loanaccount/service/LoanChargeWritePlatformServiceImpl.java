@@ -288,9 +288,9 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                 .equals(loan.transactionProcessingStrategy())) {
             // [For Adv payment allocation strategy] check if charge due date is earlier than last transaction
             // date, if yes trigger reprocess else no reprocessing
-            LoanTransaction lastPaymentTransaction = loan.getLastTransactionForReprocessing();
-            if (lastPaymentTransaction != null
-                    && DateUtils.isAfter(loanCharge.getEffectiveDueDate(), lastPaymentTransaction.getTransactionDate())) {
+            final Optional<LocalDate> lastPaymentTransactionDate = loanTransactionRepository.findLastTransactionDateForReprocessing(loan);
+            if (lastPaymentTransactionDate.isPresent()
+                    && DateUtils.isAfter(loanCharge.getEffectiveDueDate(), lastPaymentTransactionDate.get())) {
                 reprocessRequired = false;
             }
         }
@@ -475,7 +475,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         final Map<String, Object> changes = new LinkedHashMap<>(3);
         if (loan.getActiveCharges().contains(loanCharge)) {
             final BigDecimal amount = loanChargeService.calculateAmountPercentageAppliedTo(loan, loanCharge);
-            final Map<String, Object> loanChargeChanges = loanCharge.update(command, amount);
+            final Map<String, Object> loanChargeChanges = loanChargeService.update(command, amount, loanCharge);
             changes.putAll(loanChargeChanges);
             loan.updateSummaryWithTotalFeeChargesDueAtDisbursement(loan.deriveSumTotalOfChargesDueAtDisbursement());
         }

@@ -41,6 +41,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.Loa
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
+import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
+import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.apache.fineract.portfolio.rate.domain.Rate;
@@ -61,7 +63,7 @@ public class LoanBuilder {
     private Staff loanOfficer;
     private CodeValue loanPurpose;
     private LoanRepaymentScheduleTransactionProcessor transactionProcessor = new InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor(
-            mock(ExternalIdFactory.class));
+            mock(ExternalIdFactory.class), mock(LoanChargeValidator.class), mock(LoanBalanceService.class));
     private LoanProductRelatedDetail loanRepaymentScheduleDetail;
     private LoanStatus loanStatus = LoanStatus.SUBMITTED_AND_PENDING_APPROVAL;
     private LoanSubStatus loanSubStatus;

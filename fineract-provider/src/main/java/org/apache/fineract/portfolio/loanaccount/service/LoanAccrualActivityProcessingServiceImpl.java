@@ -55,6 +55,7 @@ public class LoanAccrualActivityProcessingServiceImpl implements LoanAccrualActi
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanTransactionAssembler loanTransactionAssembler;
     private final LoanAccountService loanAccountService;
+    private final LoanBalanceService loanBalanceService;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -93,7 +94,7 @@ public class LoanAccrualActivityProcessingServiceImpl implements LoanAccrualActi
             return;
         }
 
-        LocalDate closureDate = loan.isOverPaid() ? loan.getOverpaidOnDate() : loan.getClosedOnDate();
+        LocalDate closureDate = loanBalanceService.isOverPaid(loan) ? loan.getOverpaidOnDate() : loan.getClosedOnDate();
 
         // Reverse accrual activities posted after the closure date
         loan.getLoanTransactions(t -> t.isAccrualActivity() && !t.isReversed() && t.getDateOf().isAfter(closureDate))

@@ -62,6 +62,7 @@ public class InternalProgressiveLoanApiResource implements InitializingBean {
     private final AdvancedPaymentScheduleTransactionProcessor advancedPaymentScheduleTransactionProcessor;
     private final ProgressiveLoanInterestScheduleModelParserService progressiveLoanInterestScheduleModelParserService;
     private final InterestScheduleModelRepositoryWrapper writePlatformService;
+    private final LoanTransactionService loanTransactionService;
 
     @Override
     @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
@@ -94,7 +95,7 @@ public class InternalProgressiveLoanApiResource implements InitializingBean {
     }
 
     private ProgressiveLoanInterestScheduleModel reprocessTransactionsAndGetModel(final Loan loan) {
-        final List<LoanTransaction> transactionsToReprocess = loan.retrieveListOfTransactionsForReprocessing();
+        final List<LoanTransaction> transactionsToReprocess = loanTransactionService.retrieveListOfTransactionsForReprocessing(loan);
         final LocalDate businessDate = ThreadLocalContextUtil.getBusinessDate();
         final Pair<ChangedTransactionDetail, ProgressiveLoanInterestScheduleModel> changedTransactionDetailProgressiveLoanInterestScheduleModelPair = advancedPaymentScheduleTransactionProcessor
                 .reprocessProgressiveLoanTransactionsTransactional(loan.getDisbursementDate(), businessDate, transactionsToReprocess,

@@ -113,6 +113,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
     private final TransactionTemplate transactionTemplate;
     private final LoanAccountingBridgeMapper loanAccountingBridgeMapper;
     private final LoanChargeService loanChargeService;
+    private final LoanBalanceService loanBalanceService;
 
     /**
      * method adds accrual for batch job "Add Periodic Accrual Transactions" and add accruals api for Loan
@@ -307,7 +308,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
         // TODO implement progressive accrual case
         if (loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()
                 && (loan.getAccruedTill() == null || !DateUtils.isEqual(foreClosureDate, loan.getAccruedTill()))) {
-            final LoanRepaymentScheduleInstallment foreCloseDetail = loan.fetchLoanForeclosureDetail(foreClosureDate);
+            final LoanRepaymentScheduleInstallment foreCloseDetail = loanBalanceService.fetchLoanForeclosureDetail(loan, foreClosureDate);
             MonetaryCurrency currency = loan.getCurrency();
             reverseTransactionsAfter(retrieveListOfAccrualTransactions(loan), foreClosureDate, false);
 
@@ -486,7 +487,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
         Money interest = null;
         final boolean isPastPeriod = isAfterPeriod(tillDate, installment);
         final boolean isInPeriod = isInPeriod(tillDate, installment, false);
-        if (isPastPeriod || loan.isClosed() || loan.isOverPaid()) {
+        if (isPastPeriod || loan.isClosed() || loanBalanceService.isOverPaid(loan)) {
             interest = installment.getInterestCharged(currency).minus(installment.getCreditedInterest());
         } else {
             if (isInPeriod) { // first period first day is not accrued

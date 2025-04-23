@@ -33,18 +33,13 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -56,11 +51,11 @@ import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
-import org.apache.fineract.portfolio.charge.exception.LoanChargeWithoutMandatoryFieldException;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidDetail;
 import org.apache.fineract.portfolio.loanaccount.data.LoanInstallmentChargeData;
 
+@Setter
 @Getter
 @Entity
 @Table(name = "m_loan_charge", uniqueConstraints = { @UniqueConstraint(columnNames = { "external_id" }, name = "external_id") })
@@ -104,7 +99,6 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     @Column(name = "amount_paid_derived", scale = 6, precision = 19)
     private BigDecimal amountPaid;
 
-    @Setter
     @Column(name = "amount_waived_derived", scale = 6, precision = 19)
     private BigDecimal amountWaived;
 
@@ -148,111 +142,6 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @OneToMany(mappedBy = "loanCharge", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<LoanChargePaidBy> loanChargePaidBySet = new HashSet<>();
-
-    protected LoanCharge() {
-        //
-    }
-
-    public LoanCharge(final Loan loan, final Charge chargeDefinition, final BigDecimal loanPrincipal, final BigDecimal amount,
-            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate dueDate,
-            final ChargePaymentMode chargePaymentMode, final Integer numberOfRepayments, final BigDecimal loanCharge,
-            final ExternalId externalId) {
-        this.loan = loan;
-        this.charge = chargeDefinition;
-        this.submittedOnDate = DateUtils.getBusinessLocalDate();
-        this.penaltyCharge = chargeDefinition.isPenalty();
-        this.minCap = chargeDefinition.getMinCap();
-        this.maxCap = chargeDefinition.getMaxCap();
-
-        this.chargeTime = chargeDefinition.getChargeTimeType();
-        if (chargeTime != null) {
-            this.chargeTime = chargeTime.getValue();
-        }
-
-        if (ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.SPECIFIED_DUE_DATE)
-                || ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.OVERDUE_INSTALLMENT)) {
-
-            if (dueDate == null) {
-                final String defaultUserMessage = "Loan charge is missing due date.";
-                throw new LoanChargeWithoutMandatoryFieldException("loanCharge", "dueDate", defaultUserMessage, chargeDefinition.getId(),
-                        chargeDefinition.getName());
-            }
-
-            this.dueDate = dueDate;
-        } else {
-            this.dueDate = null;
-        }
-
-        this.chargeCalculation = chargeDefinition.getChargeCalculation();
-        if (chargeCalculation != null) {
-            this.chargeCalculation = chargeCalculation.getValue();
-        }
-
-        BigDecimal chargeAmount = chargeDefinition.getAmount();
-        if (amount != null) {
-            chargeAmount = amount;
-        }
-
-        this.chargePaymentMode = chargeDefinition.getChargePaymentMode();
-        if (chargePaymentMode != null) {
-            this.chargePaymentMode = chargePaymentMode.getValue();
-        }
-
-        populateDerivedFields(loanPrincipal, chargeAmount, numberOfRepayments, loanCharge);
-        this.paid = determineIfFullyPaid();
-        this.externalId = externalId;
-    }
-
-    public void populateDerivedFields(final BigDecimal amountPercentageAppliedTo, final BigDecimal chargeAmount, Integer numberOfRepayments,
-            BigDecimal loanCharge) {
-
-        switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
-            case INVALID:
-                this.percentage = null;
-                this.amount = null;
-                this.amountPercentageAppliedTo = null;
-                this.amountPaid = null;
-                this.amountOutstanding = BigDecimal.ZERO;
-                this.amountWaived = null;
-                this.amountWrittenOff = null;
-            break;
-            case FLAT:
-                this.percentage = null;
-                this.amountPercentageAppliedTo = null;
-                this.amountPaid = null;
-                if (isInstalmentFee()) {
-                    if (numberOfRepayments == null) {
-                        numberOfRepayments = this.loan.fetchNumberOfInstallmensAfterExceptions();
-                    }
-                    this.amount = chargeAmount.multiply(BigDecimal.valueOf(numberOfRepayments));
-                } else {
-                    this.amount = chargeAmount;
-                }
-                this.amountOutstanding = this.amount;
-                this.amountWaived = null;
-                this.amountWrittenOff = null;
-            break;
-            case PERCENT_OF_AMOUNT:
-            case PERCENT_OF_AMOUNT_AND_INTEREST:
-            case PERCENT_OF_INTEREST:
-            case PERCENT_OF_DISBURSEMENT_AMOUNT:
-                this.percentage = chargeAmount;
-                this.amountPercentageAppliedTo = amountPercentageAppliedTo;
-                if (loanCharge.compareTo(BigDecimal.ZERO) == 0) {
-                    loanCharge = percentageOf(this.amountPercentageAppliedTo);
-                }
-                this.amount = minimumAndMaximumCap(loanCharge);
-                this.amountPaid = null;
-                this.amountOutstanding = calculateOutstanding();
-                this.amountWaived = null;
-                this.amountWrittenOff = null;
-            break;
-        }
-        this.amountOrPercentage = chargeAmount;
-        if (this.loan != null && isInstalmentFee()) {
-            updateInstallmentCharges();
-        }
-    }
 
     public void markAsFullyPaid() {
         this.amountPaid = this.amount;
@@ -340,234 +229,6 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         this.loan = loan;
     }
 
-    public void update(final BigDecimal amount, final LocalDate dueDate, final BigDecimal loanPrincipal, Integer numberOfRepayments,
-            BigDecimal loanCharge) {
-        if (dueDate != null) {
-            this.dueDate = dueDate;
-        }
-
-        if (amount != null) {
-            switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
-                case INVALID:
-                break;
-                case FLAT:
-                    if (isInstalmentFee()) {
-                        if (numberOfRepayments == null) {
-                            numberOfRepayments = this.loan.fetchNumberOfInstallmensAfterExceptions();
-                        }
-                        this.amount = amount.multiply(BigDecimal.valueOf(numberOfRepayments));
-                    } else {
-                        this.amount = amount;
-                    }
-                break;
-                case PERCENT_OF_AMOUNT:
-                case PERCENT_OF_AMOUNT_AND_INTEREST:
-                case PERCENT_OF_INTEREST:
-                case PERCENT_OF_DISBURSEMENT_AMOUNT:
-                    this.percentage = amount;
-                    this.amountPercentageAppliedTo = loanPrincipal;
-                    if (loanCharge.compareTo(BigDecimal.ZERO) == 0) {
-                        loanCharge = percentageOf(this.amountPercentageAppliedTo);
-                    }
-                    this.amount = minimumAndMaximumCap(loanCharge);
-                break;
-            }
-            this.amountOrPercentage = amount;
-            this.amountOutstanding = calculateOutstanding();
-            if (this.loan != null && isInstalmentFee()) {
-                updateInstallmentCharges();
-            }
-        }
-    }
-
-    public void update(final BigDecimal amount, final LocalDate dueDate, final Integer numberOfRepayments) {
-        BigDecimal amountPercentageAppliedTo = BigDecimal.ZERO;
-        if (this.loan != null) {
-            switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
-                case PERCENT_OF_AMOUNT:
-                    // If charge type is specified due date and loan is multi disburment loan.
-                    // Then we need to get as of this loan charge due date how much amount disbursed.
-                    if (this.loan.isMultiDisburmentLoan() && this.isSpecifiedDueDate()) {
-                        for (final LoanDisbursementDetails loanDisbursementDetails : this.loan.getDisbursementDetails()) {
-                            if (!DateUtils.isAfter(loanDisbursementDetails.expectedDisbursementDate(), this.getDueDate())) {
-                                amountPercentageAppliedTo = amountPercentageAppliedTo.add(loanDisbursementDetails.principal());
-                            }
-                        }
-                    } else {
-                        amountPercentageAppliedTo = this.loan.getPrincipal().getAmount();
-                    }
-                break;
-                case PERCENT_OF_AMOUNT_AND_INTEREST:
-                    amountPercentageAppliedTo = this.loan.getPrincipal().getAmount().add(this.loan.getTotalInterest());
-                break;
-                case PERCENT_OF_INTEREST:
-                    amountPercentageAppliedTo = this.loan.getTotalInterest();
-                break;
-                case PERCENT_OF_DISBURSEMENT_AMOUNT:
-                    LoanTrancheDisbursementCharge loanTrancheDisbursementCharge = this.loanTrancheDisbursementCharge;
-                    amountPercentageAppliedTo = loanTrancheDisbursementCharge.getloanDisbursementDetails().principal();
-                break;
-                default:
-                break;
-            }
-        }
-        update(amount, dueDate, amountPercentageAppliedTo, numberOfRepayments, BigDecimal.ZERO);
-    }
-
-    public Map<String, Object> update(final JsonCommand command, final BigDecimal amount) {
-
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
-
-        final String dateFormatAsInput = command.dateFormat();
-        final String localeAsInput = command.locale();
-
-        final String dueDateParamName = "dueDate";
-        if (command.isChangeInLocalDateParameterNamed(dueDateParamName, getDueLocalDate())) {
-            final String valueAsInput = command.stringValueOfParameterNamed(dueDateParamName);
-            actualChanges.put(dueDateParamName, valueAsInput);
-            actualChanges.put("dateFormat", dateFormatAsInput);
-            actualChanges.put("locale", localeAsInput);
-
-            this.dueDate = command.localDateValueOfParameterNamed(dueDateParamName);
-        }
-
-        final String amountParamName = "amount";
-        if (command.isChangeInBigDecimalParameterNamed(amountParamName, this.amount)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(amountParamName);
-            BigDecimal loanCharge = null;
-            actualChanges.put(amountParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
-                case INVALID:
-                break;
-                case FLAT:
-                    if (isInstalmentFee()) {
-                        this.amount = newValue.multiply(BigDecimal.valueOf(this.loan.fetchNumberOfInstallmensAfterExceptions()));
-                    } else {
-                        this.amount = newValue;
-                    }
-                    this.amountOutstanding = calculateOutstanding();
-                break;
-                case PERCENT_OF_AMOUNT:
-                case PERCENT_OF_AMOUNT_AND_INTEREST:
-                case PERCENT_OF_INTEREST:
-                case PERCENT_OF_DISBURSEMENT_AMOUNT:
-                    this.percentage = newValue;
-                    this.amountPercentageAppliedTo = amount;
-                    loanCharge = BigDecimal.ZERO;
-                    if (isInstalmentFee()) {
-                        loanCharge = calculatePerInstallmentChargeAmount(loan, ChargeCalculationType.fromInt(this.chargeCalculation),
-                                this.percentage);
-                    }
-                    if (loanCharge.compareTo(BigDecimal.ZERO) == 0) {
-                        loanCharge = percentageOf(this.amountPercentageAppliedTo);
-                    }
-                    this.amount = minimumAndMaximumCap(loanCharge);
-                    this.amountOutstanding = calculateOutstanding();
-                break;
-            }
-            this.amountOrPercentage = newValue;
-            if (isInstalmentFee()) {
-                updateInstallmentCharges();
-            }
-        }
-        return actualChanges;
-    }
-
-    public static BigDecimal calculatePerInstallmentChargeAmount(final Loan loan, final ChargeCalculationType calculationType,
-            final BigDecimal percentage) {
-        Money amount = Money.zero(loan.getCurrency());
-        List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
-        for (final LoanRepaymentScheduleInstallment installment : installments) {
-            amount = amount.plus(calculateInstallmentChargeAmount(loan, calculationType, percentage, installment));
-        }
-        return amount.getAmount();
-    }
-
-    public BigDecimal calculatePerInstallmentChargeAmount() {
-        Loan loan = this.loan;
-        Money amount = Money.zero(loan.getCurrency());
-        List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
-        for (final LoanRepaymentScheduleInstallment installment : installments) {
-            amount = amount.plus(calculateInstallmentChargeAmount(loan, getChargeCalculation(), getPercentage(), installment));
-        }
-        return amount.getAmount();
-    }
-
-    private List<LoanInstallmentCharge> generateInstallmentLoanCharges(final LoanCharge loanCharge) {
-        Loan loan = this.loan;
-        final List<LoanInstallmentCharge> loanChargePerInstallments = new ArrayList<>();
-        if (loanCharge.isInstalmentFee()) {
-            List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
-            for (final LoanRepaymentScheduleInstallment installment : installments) {
-                if (installment.isRecalculatedInterestComponent()) {
-                    continue;
-                }
-                BigDecimal amount;
-                if (loanCharge.getChargeCalculation().isFlat()) {
-                    amount = loanCharge.amountOrPercentage();
-                } else {
-                    amount = calculateInstallmentChargeAmount(loan, loanCharge.getChargeCalculation(), loanCharge.getPercentage(),
-                            installment).getAmount();
-                }
-                final LoanInstallmentCharge loanInstallmentCharge = new LoanInstallmentCharge(amount, loanCharge, installment);
-                installment.getInstallmentCharges().add(loanInstallmentCharge);
-                loanChargePerInstallments.add(loanInstallmentCharge);
-            }
-        }
-        return loanChargePerInstallments;
-    }
-
-    private static Money calculateInstallmentChargeAmount(final Loan loan, final ChargeCalculationType calculationType,
-            final BigDecimal percentage, final LoanRepaymentScheduleInstallment installment) {
-        Money percentOf = switch (calculationType) {
-            case PERCENT_OF_AMOUNT -> installment.getPrincipal(loan.getCurrency());
-            case PERCENT_OF_AMOUNT_AND_INTEREST ->
-                installment.getPrincipal(loan.getCurrency()).plus(installment.getInterestCharged(loan.getCurrency()));
-            case PERCENT_OF_INTEREST -> installment.getInterestCharged(loan.getCurrency());
-            case PERCENT_OF_DISBURSEMENT_AMOUNT, INVALID, FLAT -> Money.zero(loan.getCurrency());
-
-        };
-        return Money.zero(loan.getCurrency()) //
-                .plus(LoanCharge.percentageOf(percentOf.getAmount(), percentage));
-    }
-
-    private void updateInstallmentCharges() {
-        final Collection<LoanInstallmentCharge> remove = new HashSet<>();
-        final List<LoanInstallmentCharge> newChargeInstallments = generateInstallmentLoanCharges(this);
-        if (this.loanInstallmentCharge.isEmpty()) {
-            this.loanInstallmentCharge.addAll(newChargeInstallments);
-        } else {
-            int index = 0;
-            final List<LoanInstallmentCharge> oldChargeInstallments = new ArrayList<>();
-            if (this.loanInstallmentCharge != null && !this.loanInstallmentCharge.isEmpty()) {
-                oldChargeInstallments.addAll(this.loanInstallmentCharge);
-            }
-            Collections.sort(oldChargeInstallments);
-            final LoanInstallmentCharge[] loanChargePerInstallmentArray = newChargeInstallments
-                    .toArray(new LoanInstallmentCharge[newChargeInstallments.size()]);
-            for (final LoanInstallmentCharge chargePerInstallment : oldChargeInstallments) {
-                if (index == loanChargePerInstallmentArray.length) {
-                    remove.add(chargePerInstallment);
-                    chargePerInstallment.getInstallment().getInstallmentCharges().remove(chargePerInstallment);
-                } else {
-                    LoanInstallmentCharge newLoanInstallmentCharge = loanChargePerInstallmentArray[index++];
-                    newLoanInstallmentCharge.getInstallment().getInstallmentCharges().remove(newLoanInstallmentCharge);
-                    chargePerInstallment.copyFrom(newLoanInstallmentCharge);
-                }
-            }
-            this.loanInstallmentCharge.removeAll(remove);
-            while (index < loanChargePerInstallmentArray.length) {
-                this.loanInstallmentCharge.add(loanChargePerInstallmentArray[index++]);
-            }
-        }
-        Money amount = Money.zero(this.loan.getCurrency());
-        for (LoanInstallmentCharge charge : this.loanInstallmentCharge) {
-            amount = amount.plus(charge.getAmount());
-        }
-        this.amount = amount.getAmount();
-    }
-
     public boolean isDueAtDisbursement() {
         return ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.DISBURSEMENT)
                 || ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.TRANCHE_DISBURSEMENT);
@@ -600,7 +261,7 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return BigDecimal.ZERO.compareTo(calculateOutstanding()) == 0;
     }
 
-    private BigDecimal calculateOutstanding() {
+    public BigDecimal calculateOutstanding() {
         if (this.amount == null) {
             return null;
         }
@@ -645,7 +306,7 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
      * @returns a minimum cap or maximum cap set on charges if the criteria fits else it returns the percentageOf if the
      *          amount is within min and max cap
      */
-    private BigDecimal minimumAndMaximumCap(final BigDecimal percentageOf) {
+    public BigDecimal minimumAndMaximumCap(final BigDecimal percentageOf) {
         BigDecimal minMaxCap;
         if (this.minCap != null) {
             final int minimumCap = percentageOf.compareTo(this.minCap);
@@ -815,11 +476,6 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     public ChargeCalculationType getChargeCalculation() {
         return ChargeCalculationType.fromInt(this.chargeCalculation);
-    }
-
-    public void updateAmount(final BigDecimal amount) {
-        this.amount = amount;
-        calculateOutstanding();
     }
 
     public LoanInstallmentCharge getUnpaidInstallmentLoanCharge() {

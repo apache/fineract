@@ -25,11 +25,14 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelPeriod;
+import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 public class LoanScheduleComponent {
+
+    private final LoanBalanceService loanBalanceService;
 
     public void updateLoanSchedule(Loan loan, final LoanScheduleModel modifiedLoanSchedule) {
         final List<LoanScheduleModelPeriod> periods = modifiedLoanSchedule.getPeriods();
@@ -55,7 +58,7 @@ public class LoanScheduleComponent {
         loan.getRepaymentScheduleInstallments().removeIf(i -> !existInstallment(periods, i.getInstallmentNumber()));
 
         loan.updateLoanScheduleDependentDerivedFields();
-        loan.updateLoanSummaryDerivedFields();
+        loanBalanceService.updateLoanSummaryDerivedFields(loan);
     }
 
     public void updateLoanSchedule(Loan loan, final List<LoanRepaymentScheduleInstallment> installments) {
@@ -72,7 +75,7 @@ public class LoanScheduleComponent {
         loan.getRepaymentScheduleInstallments().removeIf(i -> !existInstallment(installments, i.getInstallmentNumber()));
 
         loan.updateLoanScheduleDependentDerivedFields();
-        loan.updateLoanSummaryDerivedFields();
+        loanBalanceService.updateLoanSummaryDerivedFields(loan);
     }
 
     private LoanRepaymentScheduleInstallment findByInstallmentNumber(final Collection<LoanRepaymentScheduleInstallment> installments,

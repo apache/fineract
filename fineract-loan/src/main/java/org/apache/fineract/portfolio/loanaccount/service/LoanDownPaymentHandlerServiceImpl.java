@@ -62,6 +62,8 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
     private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
     private final LoanTransactionProcessingService loanTransactionProcessingService;
     private final LoanLifecycleStateMachine loanLifecycleStateMachine;
+    private final LoanBalanceService loanBalanceService;
+    private final LoanTransactionService loanTransactionService;
 
     @Override
     public LoanTransaction handleDownPayment(ScheduleGeneratorDTO scheduleGeneratorDTO, JsonCommand command,
@@ -91,7 +93,8 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
 
         loanTransaction.updateLoan(loan);
 
-        final boolean isTransactionChronologicallyLatest = loan.isChronologicallyLatestRepaymentOrWaiver(loanTransaction);
+        final boolean isTransactionChronologicallyLatest = loanTransactionService.isChronologicallyLatestRepaymentOrWaiver(loan,
+                loanTransaction);
 
         if (loanTransaction.isNotZero()) {
             loan.addLoanTransaction(loanTransaction);
@@ -128,6 +131,7 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
                 .fetchLoanRepaymentScheduleInstallmentByDueDate(loanTransaction.getTransactionDate());
 
         boolean reprocessOnPostConditions = false;
+
         boolean processLatest = isTransactionChronologicallyLatest //
                 && adjustedTransaction == null // covers reversals
                 && !loan.isForeclosure() //
@@ -163,7 +167,7 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
         if (loanTransaction.isNotRecoveryRepayment()) {
             loanLifecycleStateMachine.determineAndTransition(loan, loanTransaction.getTransactionDate());
         } else {
-            loan.updateLoanSummaryDerivedFields();
+            loanBalanceService.updateLoanSummaryDerivedFields(loan);
         }
 
         if (loan.getLoanProduct().isMultiDisburseLoan()) {

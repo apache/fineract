@@ -287,6 +287,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final LoanAccountingBridgeMapper loanAccountingBridgeMapper;
     private final LoanMapper loanMapper;
     private final LoanTransactionProcessingService loanTransactionProcessingService;
+    private final LoanBalanceService loanBalanceService;
+    private final LoanTransactionService loanTransactionService;
 
     @Transactional
     @Override
@@ -572,7 +574,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         loanTransactionValidator.validateActivityNotBeforeClientOrGroupTransferDate(loan, LoanEvent.LOAN_DISBURSED,
                 actualDisbursementDate1);
         loanDisbursementService.handleDisbursementTransaction(loan, actualDisbursementDate1, paymentDetail1);
-        loan.updateLoanSummaryDerivedFields();
+        loanBalanceService.updateLoanSummaryDerivedFields(loan);
         final Money interestApplied = Money.of(loan.getCurrency(), loan.getSummary().getTotalInterestCharged());
 
         /*
@@ -591,11 +593,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         if (loan.getLoanProduct().isMultiDisburseLoan() || loan.isProgressiveSchedule()) {
-            final List<LoanTransaction> allNonContraTransactionsPostDisbursement = loan.retrieveListOfTransactionsForReprocessing();
+            final List<LoanTransaction> allNonContraTransactionsPostDisbursement = loanTransactionService
+                    .retrieveListOfTransactionsForReprocessing(loan);
             if (!allNonContraTransactionsPostDisbursement.isEmpty()) {
                 reprocessLoanTransactionsService.reprocessTransactions(loan);
             }
-            loan.updateLoanSummaryDerivedFields();
+            loanBalanceService.updateLoanSummaryDerivedFields(loan);
         }
 
         loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSED, loan);
@@ -972,8 +975,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         newInterestPaymentWaiverTransaction.updateLoan(loan);
 
-        final boolean isTransactionChronologicallyLatest = loan
-                .isChronologicallyLatestRepaymentOrWaiver(newInterestPaymentWaiverTransaction);
+        final boolean isTransactionChronologicallyLatest = loanTransactionService.isChronologicallyLatestRepaymentOrWaiver(loan,
+                newInterestPaymentWaiverTransaction);
 
         if (newInterestPaymentWaiverTransaction.isNotZero()) {
             loan.addLoanTransaction(newInterestPaymentWaiverTransaction);
@@ -1412,7 +1415,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         Money unrecognizedIncome = transactionAmountAsMoney.zero();
         Money interestComponent = transactionAmountAsMoney;
         if (loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
-            Money receivableInterest = loan.getReceivableInterest(transactionDate);
+            Money receivableInterest = loanBalanceService.getReceivableInterest(loan, transactionDate);
             if (transactionAmountAsMoney.isGreaterThan(receivableInterest)) {
                 interestComponent = receivableInterest;
                 unrecognizedIncome = transactionAmountAsMoney.minus(receivableInterest);
@@ -2021,119 +2024,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 businessEventNotifierService.notifyPostBusinessEvent(new LoanRescheduledDueCalendarChangeBusinessEvent(loan));
                 loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
             }
-        }
-    }
-
-    public void updateLoanRepaymentScheduleDates(final Loan loan, final LocalDate meetingStartDate, final String recuringRule,
-            final boolean isHolidayEnabled, final List<Holiday> holidays, final WorkingDays workingDays,
-            final boolean isSkipRepaymentonfirstdayofmonth, final Integer numberofDays) {
-        // first repayment's from date is same as disbursement date.
-        LocalDate tmpFromDate = loan.getDisbursementDate();
-        final PeriodFrequencyType repaymentPeriodFrequencyType = loan.getLoanRepaymentScheduleDetail().getRepaymentPeriodFrequencyType();
-        final Integer loanRepaymentInterval = loan.getLoanRepaymentScheduleDetail().getRepayEvery();
-        final String frequency = CalendarUtils.getMeetingFrequencyFromPeriodFrequencyType(repaymentPeriodFrequencyType);
-
-        LocalDate newRepaymentDate;
-        LocalDate latestRepaymentDate = null;
-        List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
-        for (final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : installments) {
-            LocalDate oldDueDate = loanRepaymentScheduleInstallment.getDueDate();
-
-            // FIXME: AA this won't update repayment dates before current date.
-            if (DateUtils.isAfter(oldDueDate, meetingStartDate) && DateUtils.isDateInTheFuture(oldDueDate)) {
-                newRepaymentDate = CalendarUtils.getNewRepaymentMeetingDate(recuringRule, meetingStartDate, oldDueDate,
-                        loanRepaymentInterval, frequency, workingDays, isSkipRepaymentonfirstdayofmonth, numberofDays);
-
-                final LocalDate maxDateLimitForNewRepayment = getMaxDateLimitForNewRepayment(repaymentPeriodFrequencyType,
-                        loanRepaymentInterval, tmpFromDate);
-
-                if (DateUtils.isAfter(newRepaymentDate, maxDateLimitForNewRepayment)) {
-                    newRepaymentDate = CalendarUtils.getNextRepaymentMeetingDate(recuringRule, meetingStartDate, tmpFromDate,
-                            loanRepaymentInterval, frequency, workingDays, isSkipRepaymentonfirstdayofmonth, numberofDays);
-                }
-
-                if (isHolidayEnabled) {
-                    newRepaymentDate = HolidayUtil.getRepaymentRescheduleDateToIfHoliday(newRepaymentDate, holidays);
-                }
-                if (DateUtils.isBefore(latestRepaymentDate, newRepaymentDate)) {
-                    latestRepaymentDate = newRepaymentDate;
-                }
-
-                loanRepaymentScheduleInstallment.updateDueDate(newRepaymentDate);
-                // reset from date to get actual daysInPeriod
-                loanRepaymentScheduleInstallment.updateFromDate(tmpFromDate);
-                tmpFromDate = newRepaymentDate;// update with new repayment date
-            } else {
-                tmpFromDate = oldDueDate;
-            }
-        }
-        if (latestRepaymentDate != null) {
-            loan.setExpectedMaturityDate(latestRepaymentDate);
-        }
-    }
-
-    private LocalDate getMaxDateLimitForNewRepayment(final PeriodFrequencyType periodFrequencyType, final Integer loanRepaymentInterval,
-            final LocalDate startDate) {
-        LocalDate dueRepaymentPeriodDate = startDate;
-        final int repaidEvery = 2 * loanRepaymentInterval;
-        switch (periodFrequencyType) {
-            case DAYS -> dueRepaymentPeriodDate = startDate.plusDays(repaidEvery);
-            case WEEKS -> dueRepaymentPeriodDate = startDate.plusWeeks(repaidEvery);
-            case MONTHS -> dueRepaymentPeriodDate = startDate.plusMonths(repaidEvery);
-            case YEARS -> dueRepaymentPeriodDate = startDate.plusYears(repaidEvery);
-            case INVALID, WHOLE_TERM -> {
-            }
-        }
-        return dueRepaymentPeriodDate.minusDays(1);// get 2n-1 range date from startDate
-    }
-
-    private void updateLoanRepaymentScheduleDates(final Loan loan, final String recurringRule, final boolean isHolidayEnabled,
-            final List<Holiday> holidays, final WorkingDays workingDays, final LocalDate presentMeetingDate, final LocalDate newMeetingDate,
-            final boolean isSkipRepaymentOnFirstDayOfMonth, final Integer numberOfDays) {
-        // first repayment's from date is same as disbursement date.
-        // meetingStartDate is used as seedDate Capture the seedDate from user and use the seedDate as meetingStart date
-
-        LocalDate tmpFromDate = loan.getDisbursementDate();
-        final PeriodFrequencyType repaymentPeriodFrequencyType = loan.getLoanRepaymentScheduleDetail().getRepaymentPeriodFrequencyType();
-        final Integer loanRepaymentInterval = loan.getLoanRepaymentScheduleDetail().getRepayEvery();
-        final String frequency = CalendarUtils.getMeetingFrequencyFromPeriodFrequencyType(repaymentPeriodFrequencyType);
-
-        LocalDate newRepaymentDate;
-        boolean isFirstTime = true;
-        LocalDate latestRepaymentDate = null;
-        List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
-        for (final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : installments) {
-            LocalDate oldDueDate = loanRepaymentScheduleInstallment.getDueDate();
-            if (!DateUtils.isBefore(oldDueDate, presentMeetingDate)) {
-                if (isFirstTime) {
-                    isFirstTime = false;
-                    newRepaymentDate = newMeetingDate;
-                } else {
-                    // tmpFromDate.plusDays(1) is done to make sure
-                    // getNewRepaymentMeetingDate method returns next meeting
-                    // date and not the same as tmpFromDate
-                    newRepaymentDate = CalendarUtils.getNewRepaymentMeetingDate(recurringRule, tmpFromDate, tmpFromDate.plusDays(1),
-                            loanRepaymentInterval, frequency, workingDays, isSkipRepaymentOnFirstDayOfMonth, numberOfDays);
-                }
-
-                if (isHolidayEnabled) {
-                    newRepaymentDate = HolidayUtil.getRepaymentRescheduleDateToIfHoliday(newRepaymentDate, holidays);
-                }
-                if (DateUtils.isBefore(latestRepaymentDate, newRepaymentDate)) {
-                    latestRepaymentDate = newRepaymentDate;
-                }
-                loanRepaymentScheduleInstallment.updateDueDate(newRepaymentDate);
-                // reset from date to get actual daysInPeriod
-
-                loanRepaymentScheduleInstallment.updateFromDate(tmpFromDate);
-
-                tmpFromDate = newRepaymentDate;// update with new repayment date
-            } else {
-                tmpFromDate = oldDueDate;
-            }
-        }
-        if (latestRepaymentDate != null) {
-            loan.setExpectedMaturityDate(latestRepaymentDate);
         }
     }
 
@@ -2924,7 +2814,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 final ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, null, null);
                 loanScheduleService.regenerateRepaymentScheduleWithInterestRecalculation(loan, scheduleGeneratorDTO);
             }
-            final List<LoanTransaction> loanTransactions = loan.retrieveListOfTransactionsForReprocessing();
+            final List<LoanTransaction> loanTransactions = loanTransactionService.retrieveListOfTransactionsForReprocessing(loan);
             loanTransactions.add(chargeOffTransaction);
             reprocessLoanTransactionsService.reprocessParticularTransactions(loan, loanTransactions);
             loan.addLoanTransaction(chargeOffTransaction);
@@ -3117,9 +3007,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         loan.addLoanTransaction(chargebackTransaction);
         if (loan.isInterestBearing() && loan.isInterestRecalculationEnabled()) {
+            final List<LoanTransaction> transactions = loanTransactionService.retrieveListOfTransactionsForReprocessing(loan);
             loanTransactionProcessingService.reprocessLoanTransactions(loan.getTransactionProcessingStrategyCode(),
-                    loan.getDisbursementDate(), loan.retrieveListOfTransactionsForReprocessing(), loan.getCurrency(),
-                    loan.getRepaymentScheduleInstallments(), loan.getActiveCharges());
+                    loan.getDisbursementDate(), transactions, loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
+                    loan.getActiveCharges());
         } else {
             loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(), chargebackTransaction,
                     new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
@@ -3215,7 +3106,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
             loan.adjustNetDisbursalAmount(loan.getApprovedPrincipal());
             actualChanges.put(ACTUAL_DISBURSEMENT_DATE, "");
-            loan.updateLoanSummaryDerivedFields();
+            loanBalanceService.updateLoanSummaryDerivedFields(loan);
         }
 
         return actualChanges;
@@ -3246,7 +3137,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final LoanRepaymentScheduleProcessingWrapper wrapper = new LoanRepaymentScheduleProcessingWrapper();
         wrapper.reprocess(loan.getCurrency(), loan.getDisbursementDate(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges());
 
-        loan.updateLoanSummaryDerivedFields();
+        loanBalanceService.updateLoanSummaryDerivedFields(loan);
     }
 
     private void reverseExistingTransactions(final Loan loan) {
@@ -3319,7 +3210,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
                         new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
 
-        loan.updateLoanSummaryDerivedFields();
+        loanBalanceService.updateLoanSummaryDerivedFields(loan);
 
         return Optional.of(loanTransaction);
     }
@@ -3383,7 +3274,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 }
                 changes.put("externalId", externalId);
                 loanTransaction = LoanTransaction.writeoff(loan, loan.getOffice(), closureDate, externalId);
-                final boolean isLastTransaction = loan.isChronologicallyLatestTransaction(loanTransaction, loan.getLoanTransactions());
+                final boolean isLastTransaction = loanTransactionRepository.isChronologicallyLatest(loanTransaction.getTransactionDate(),
+                        loan);
                 if (!isLastTransaction) {
                     final String errorMessage = "The closing date of the loan must be on or after latest transaction date.";
                     throw new InvalidLoanStateTransitionException("close.loan", "must.occur.on.or.after.latest.transaction.date",
@@ -3395,7 +3287,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                         new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
                                 new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
 
-                loan.updateLoanSummaryDerivedFields();
+                loanBalanceService.updateLoanSummaryDerivedFields(loan);
             } else if (totalOutstanding.isGreaterThanZero()) {
                 final String errorMessage = "A loan with money outstanding cannot be closed";
                 throw new InvalidLoanStateTransitionException("close", "loan.has.money.outstanding", errorMessage,
@@ -3403,8 +3295,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             }
         }
 
-        if (loan.isOverPaid()) {
-            final Money totalLoanOverpayment = loan.calculateTotalOverpayment();
+        if (loanBalanceService.isOverPaid(loan)) {
+            final Money totalLoanOverpayment = loanBalanceService.calculateTotalOverpayment(loan);
             if (totalLoanOverpayment.isGreaterThanZero() && loan.getInArrearsTolerance().isGreaterThanOrEqualTo(totalLoanOverpayment)) {
                 // TODO - KW - technically should set somewhere that this loan
                 // has 'overpaid' amount
@@ -3474,7 +3366,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
         final LoanDisbursementDetails disbursementDetail = loan.getDisbursementDetails(lastTransactionDate,
                 lastDisbursalTransaction.getAmount());
-        loan.updateLoanToLastDisbursalState(disbursementDetail);
+        loanBalanceService.updateLoanToLastDisbursalState(loan, disbursementDetail);
         loan.getLoanTermVariations()
                 .removeIf(loanTermVariations -> (loanTermVariations.getTermType().isDueDateVariation()
                         && DateUtils.isAfter(loanTermVariations.fetchDateValue(), lastTransactionDate))
@@ -3579,4 +3471,118 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
         return !statusEnum.hasStateOf(actualLoanStatus) || isMultiTrancheDisburse;
     }
+
+    private void updateLoanRepaymentScheduleDates(final Loan loan, final LocalDate meetingStartDate, final String recuringRule,
+            final boolean isHolidayEnabled, final List<Holiday> holidays, final WorkingDays workingDays,
+            final boolean isSkipRepaymentonfirstdayofmonth, final Integer numberofDays) {
+        // first repayment's from date is same as disbursement date.
+        LocalDate tmpFromDate = loan.getDisbursementDate();
+        final PeriodFrequencyType repaymentPeriodFrequencyType = loan.getLoanRepaymentScheduleDetail().getRepaymentPeriodFrequencyType();
+        final Integer loanRepaymentInterval = loan.getLoanRepaymentScheduleDetail().getRepayEvery();
+        final String frequency = CalendarUtils.getMeetingFrequencyFromPeriodFrequencyType(repaymentPeriodFrequencyType);
+
+        LocalDate newRepaymentDate;
+        LocalDate latestRepaymentDate = null;
+        List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
+        for (final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : installments) {
+            LocalDate oldDueDate = loanRepaymentScheduleInstallment.getDueDate();
+
+            // FIXME: AA this won't update repayment dates before current date.
+            if (DateUtils.isAfter(oldDueDate, meetingStartDate) && DateUtils.isDateInTheFuture(oldDueDate)) {
+                newRepaymentDate = CalendarUtils.getNewRepaymentMeetingDate(recuringRule, meetingStartDate, oldDueDate,
+                        loanRepaymentInterval, frequency, workingDays, isSkipRepaymentonfirstdayofmonth, numberofDays);
+
+                final LocalDate maxDateLimitForNewRepayment = getMaxDateLimitForNewRepayment(repaymentPeriodFrequencyType,
+                        loanRepaymentInterval, tmpFromDate);
+
+                if (DateUtils.isAfter(newRepaymentDate, maxDateLimitForNewRepayment)) {
+                    newRepaymentDate = CalendarUtils.getNextRepaymentMeetingDate(recuringRule, meetingStartDate, tmpFromDate,
+                            loanRepaymentInterval, frequency, workingDays, isSkipRepaymentonfirstdayofmonth, numberofDays);
+                }
+
+                if (isHolidayEnabled) {
+                    newRepaymentDate = HolidayUtil.getRepaymentRescheduleDateToIfHoliday(newRepaymentDate, holidays);
+                }
+                if (DateUtils.isBefore(latestRepaymentDate, newRepaymentDate)) {
+                    latestRepaymentDate = newRepaymentDate;
+                }
+
+                loanRepaymentScheduleInstallment.updateDueDate(newRepaymentDate);
+                // reset from date to get actual daysInPeriod
+                loanRepaymentScheduleInstallment.updateFromDate(tmpFromDate);
+                tmpFromDate = newRepaymentDate;// update with new repayment date
+            } else {
+                tmpFromDate = oldDueDate;
+            }
+        }
+        if (latestRepaymentDate != null) {
+            loan.setExpectedMaturityDate(latestRepaymentDate);
+        }
+    }
+
+    private LocalDate getMaxDateLimitForNewRepayment(final PeriodFrequencyType periodFrequencyType, final Integer loanRepaymentInterval,
+            final LocalDate startDate) {
+        LocalDate dueRepaymentPeriodDate = startDate;
+        final int repaidEvery = 2 * loanRepaymentInterval;
+        switch (periodFrequencyType) {
+            case DAYS -> dueRepaymentPeriodDate = startDate.plusDays(repaidEvery);
+            case WEEKS -> dueRepaymentPeriodDate = startDate.plusWeeks(repaidEvery);
+            case MONTHS -> dueRepaymentPeriodDate = startDate.plusMonths(repaidEvery);
+            case YEARS -> dueRepaymentPeriodDate = startDate.plusYears(repaidEvery);
+            case INVALID, WHOLE_TERM -> {
+            }
+        }
+        return dueRepaymentPeriodDate.minusDays(1);// get 2n-1 range date from startDate
+    }
+
+    private void updateLoanRepaymentScheduleDates(final Loan loan, final String recurringRule, final boolean isHolidayEnabled,
+            final List<Holiday> holidays, final WorkingDays workingDays, final LocalDate presentMeetingDate, final LocalDate newMeetingDate,
+            final boolean isSkipRepaymentOnFirstDayOfMonth, final Integer numberOfDays) {
+        // first repayment's from date is same as disbursement date.
+        // meetingStartDate is used as seedDate Capture the seedDate from user and use the seedDate as meetingStart date
+
+        LocalDate tmpFromDate = loan.getDisbursementDate();
+        final PeriodFrequencyType repaymentPeriodFrequencyType = loan.getLoanRepaymentScheduleDetail().getRepaymentPeriodFrequencyType();
+        final Integer loanRepaymentInterval = loan.getLoanRepaymentScheduleDetail().getRepayEvery();
+        final String frequency = CalendarUtils.getMeetingFrequencyFromPeriodFrequencyType(repaymentPeriodFrequencyType);
+
+        LocalDate newRepaymentDate;
+        boolean isFirstTime = true;
+        LocalDate latestRepaymentDate = null;
+        List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
+        for (final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : installments) {
+            LocalDate oldDueDate = loanRepaymentScheduleInstallment.getDueDate();
+            if (!DateUtils.isBefore(oldDueDate, presentMeetingDate)) {
+                if (isFirstTime) {
+                    isFirstTime = false;
+                    newRepaymentDate = newMeetingDate;
+                } else {
+                    // tmpFromDate.plusDays(1) is done to make sure
+                    // getNewRepaymentMeetingDate method returns next meeting
+                    // date and not the same as tmpFromDate
+                    newRepaymentDate = CalendarUtils.getNewRepaymentMeetingDate(recurringRule, tmpFromDate, tmpFromDate.plusDays(1),
+                            loanRepaymentInterval, frequency, workingDays, isSkipRepaymentOnFirstDayOfMonth, numberOfDays);
+                }
+
+                if (isHolidayEnabled) {
+                    newRepaymentDate = HolidayUtil.getRepaymentRescheduleDateToIfHoliday(newRepaymentDate, holidays);
+                }
+                if (DateUtils.isBefore(latestRepaymentDate, newRepaymentDate)) {
+                    latestRepaymentDate = newRepaymentDate;
+                }
+                loanRepaymentScheduleInstallment.updateDueDate(newRepaymentDate);
+                // reset from date to get actual daysInPeriod
+
+                loanRepaymentScheduleInstallment.updateFromDate(tmpFromDate);
+
+                tmpFromDate = newRepaymentDate;// update with new repayment date
+            } else {
+                tmpFromDate = oldDueDate;
+            }
+        }
+        if (latestRepaymentDate != null) {
+            loan.setExpectedMaturityDate(latestRepaymentDate);
+        }
+    }
+
 }

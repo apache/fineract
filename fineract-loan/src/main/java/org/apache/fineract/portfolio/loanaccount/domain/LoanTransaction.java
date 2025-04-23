@@ -925,4 +925,5 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
     public void updateTransactionDate(final LocalDate transactionDate) {
         this.dateOf = transactionDate;
     }
+
 }
