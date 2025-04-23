@@ -71,7 +71,7 @@ public class LoanRefundTransactionTest extends BaseLoanIntegrationTest {
     public void testMerchantIssuedRefundCreatesAndReversesInterestRefund() {
         runAt("01 July 2024", () -> {
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
-            final Long loanId = createLoanForMerchantIssuedRefundWithInterestRefund(clientId);
+            final Long loanId = createAndDisburseLoanForMerchantIssuedRefundWithInterestRefund(clientId);
             final PostLoansLoanIdTransactionsResponse merchantIssuedRefundResponse = loanTransactionHelper.makeMerchantIssuedRefund(loanId,
                     new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("01 July 2024").locale("en")
                             .transactionAmount(100.0));
@@ -103,7 +103,7 @@ public class LoanRefundTransactionTest extends BaseLoanIntegrationTest {
     public void testPayoutRefundCreatesAndReversesInterestRefund() {
         runAt("01 July 2024", () -> {
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
-            final Long loanId = createLoanForPayoutRefundWithInterestRefund(clientId);
+            final Long loanId = createAndDisburseLoanForPayoutRefundWithInterestRefund(clientId);
             final PostLoansLoanIdTransactionsResponse payoutRefundResponse = loanTransactionHelper.makePayoutRefund(loanId,
                     new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("01 July 2024").locale("en")
                             .transactionAmount(100.0));
@@ -129,22 +129,52 @@ public class LoanRefundTransactionTest extends BaseLoanIntegrationTest {
         });
     }
 
-    private Long createLoanForMerchantIssuedRefundWithInterestRefund(Long clientId) {
-        return createLoanForRefundWithInterestRefund(clientId, "MERCHANT_ISSUED_REFUND");
+    @Test
+    public void testMerchantIssuedRefundDoesNotCreateInterestRefundWithLessThanOrEqualToZeroInterest() {
+        runAt("20 April 2025", () -> {
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long loanId = createLoanForRefundWithInterestRefund(clientId, "MERCHANT_ISSUED_REFUND", "05 April 2025", 500.0, 20.99, 6);
+            disburseLoan(loanId, BigDecimal.valueOf(265.91), "05 April 2025");
+            disburseLoan(loanId, BigDecimal.valueOf(1.99), "05 April 2025");
+            disburseLoan(loanId, BigDecimal.valueOf(20.00), "05 April 2025");
+
+            final PostLoansLoanIdTransactionsResponse merchantIssuedRefundResponse1 = loanTransactionHelper.makeMerchantIssuedRefund(loanId,
+                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("06 April 2025").locale("en")
+                            .transactionAmount(6.29));
+
+            final PostLoansLoanIdTransactionsResponse merchantIssuedRefundResponse2 = loanTransactionHelper.makeMerchantIssuedRefund(loanId,
+                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("07 April 2025").locale("en")
+                            .transactionAmount(1.99));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            Assertions.assertTrue(loanDetails.getTransactions().stream()
+                    .filter(transaction -> transaction.getType().getCode().equals("loanTransactionType.interestRefund"))
+                    .allMatch(transaction -> transaction.getAmount().compareTo(0.0) > 0));
+        });
     }
 
-    private Long createLoanForPayoutRefundWithInterestRefund(Long clientId) {
-        return createLoanForRefundWithInterestRefund(clientId, "PAYOUT_REFUND");
+    private Long createAndDisburseLoanForMerchantIssuedRefundWithInterestRefund(Long clientId) {
+        return createAndDisburseLoanForRefundWithInterestRefund(clientId, "MERCHANT_ISSUED_REFUND");
     }
 
-    private Long createLoanForRefundWithInterestRefund(Long clientId, String refundType) {
+    private Long createAndDisburseLoanForPayoutRefundWithInterestRefund(Long clientId) {
+        return createAndDisburseLoanForRefundWithInterestRefund(clientId, "PAYOUT_REFUND");
+    }
+
+    private Long createAndDisburseLoanForRefundWithInterestRefund(Long clientId, String refundType) {
+        Long loanId = createLoanForRefundWithInterestRefund(clientId, refundType, "01 June 2024", 1000.0, 10.0, 4);
+        disburseLoan(loanId, BigDecimal.valueOf(1000.0), "01 June 2024");
+        return loanId;
+    }
+
+    private Long createLoanForRefundWithInterestRefund(Long clientId, String refundType, String date, double amount, double interestRate,
+            int numRepayments) {
         final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(
                 create4IProgressive().supportedInterestRefundTypes(new ArrayList<>()).addSupportedInterestRefundTypesItem(refundType));
-        PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(
-                applyLP2ProgressiveLoanRequest(clientId, loanProductsResponse.getResourceId(), "01 June 2024", 1000.0, 10.0, 4, null));
+        PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applyLP2ProgressiveLoanRequest(clientId,
+                loanProductsResponse.getResourceId(), date, amount, interestRate, numRepayments, null));
         Long loanId = postLoansResponse.getLoanId();
-        loanTransactionHelper.approveLoan(loanId, approveLoanRequest(1000.0, "01 June 2024"));
-        disburseLoan(loanId, BigDecimal.valueOf(1000.0), "01 June 2024");
+        loanTransactionHelper.approveLoan(loanId, approveLoanRequest(amount, date));
         return loanId;
     }
 }

@@ -190,13 +190,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         Money totalInterest = interestRefundService.totalInterestByTransactions(null, loan.getId(), refundTransaction.getTransactionDate(),
                 List.of(), loan.getLoanTransactions().stream().map(AbstractPersistableCustom::getId).toList());
-        Money previouslyRefundedInterests = interestRefundService.getTotalInterestRefunded(loan.getLoanTransactions(), loan.getCurrency(),
-                totalInterest.getMc());
-
         Money newTotalInterest = interestRefundService.totalInterestByTransactions(null, loan.getId(),
                 refundTransaction.getTransactionDate(), List.of(refundTransaction),
                 loan.getLoanTransactions().stream().map(AbstractPersistableCustom::getId).toList());
-        BigDecimal interestRefundAmount = totalInterest.minus(previouslyRefundedInterests).minus(newTotalInterest).getAmount();
+        BigDecimal interestRefundAmount = totalInterest.minus(newTotalInterest).getAmount();
 
         if (MathUtil.isZero(interestRefundAmount)) {
             return null;
