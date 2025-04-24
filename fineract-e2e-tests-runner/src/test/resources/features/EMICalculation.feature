@@ -7836,3 +7836,58 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
       | 5000.0        | 206.05   | 0.0  | 0.0       | 5206.05 | 0.0  | 0.0        | 0.0  | 5206.05     |
+
+  @TestRailId:C3622
+  Scenario: Verify that RecalculationRestFrequencyType SameAsRepaymentPeriod work as intended in case of minimal amount (0.05 cent) of payments
+    When Admin sets the business date to "01 January 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_SARP_TILL_PRECLOSE | 01 January 2025   | 8000           | 86.42                  | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2025" with "8000" amount and expected disbursement date on "01 January 2025"
+    And Admin successfully disburse the loan on "01 January 2025" with "8000" EUR transaction amount
+    When Admin runs inline COB job for Loan
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2025  |           | 8000.0          |               |          | 0.0  |           | 0.0     | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2025 |           | 6887.3          | 1112.7        | 576.13   | 0.0  | 0.0       | 1688.83 | 0.0  | 0.0        | 0.0  | 1688.83     |
+      | 2  | 28   | 01 March 2025    |           | 5694.47         | 1192.83       | 496.0    | 0.0  | 0.0       | 1688.83 | 0.0  | 0.0        | 0.0  | 1688.83     |
+      | 3  | 31   | 01 April 2025    |           | 4415.74         | 1278.73       | 410.1    | 0.0  | 0.0       | 1688.83 | 0.0  | 0.0        | 0.0  | 1688.83     |
+      | 4  | 30   | 01 May 2025      |           | 3044.92         | 1370.82       | 318.01   | 0.0  | 0.0       | 1688.83 | 0.0  | 0.0        | 0.0  | 1688.83     |
+      | 5  | 31   | 01 June 2025     |           | 1575.37         | 1469.55       | 219.28   | 0.0  | 0.0       | 1688.83 | 0.0  | 0.0        | 0.0  | 1688.83     |
+      | 6  | 30   | 01 July 2025     |           | 0.0             | 1575.37       | 113.45   | 0.0  | 0.0       | 1688.82 | 0.0  | 0.0        | 0.0  | 1688.82     |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due      | Paid | In advance | Late | Outstanding |
+      | 8000.0        | 2132.97  | 0.0  | 0.0       | 10132.97 | 0.0  | 0.0        | 0.0  | 10132.97    |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2025  | Disbursement     | 8000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 8000.0       | false    | false    |
+    When Admin sets the business date to "01 February 2025"
+    And Customer makes "AUTOPAY" repayment on "01 February 2025" with 0.01 EUR transaction amount
+    When Admin runs inline COB job for Loan
+    When Admin sets the business date to "01 March 2025"
+    And Customer makes "AUTOPAY" repayment on "01 March 2025" with 0.01 EUR transaction amount
+    When Admin runs inline COB job for Loan
+    When Admin sets the business date to "01 April 2025"
+    And Customer makes "AUTOPAY" repayment on "01 April 2025" with 0.01 EUR transaction amount
+    When Admin runs inline COB job for Loan
+    When Admin sets the business date to "01 May 2025"
+    And Customer makes "AUTOPAY" repayment on "01 May 2025" with 0.01 EUR transaction amount
+    When Admin runs inline COB job for Loan
+    When Admin sets the business date to "01 June 2025"
+    And Customer makes "AUTOPAY" repayment on "01 June 2025" with 0.01 EUR transaction amount
+    When Admin runs inline COB job for Loan
+    When Admin sets the business date to "02 July 2025"
+    When Admin runs inline COB job for Loan
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      |    |      | 01 January 2025  |           | 8000.0          |               |          | 0.0  |           | 0.0     | 0.0  |            |      |             |
+      | 1  | 31   | 01 February 2025 |           | 6887.3          | 1112.7        | 576.13   | 0.0  | 0.0       | 1688.83 | 0.05 | 0.0        | 0.04 | 1688.78     |
+      | 2  | 28   | 01 March 2025    |           | 5774.6          | 1112.7        | 576.13   | 0.0  | 0.0       | 1688.83 | 0.0  | 0.0        | 0.0  | 1688.83     |
+      | 3  | 31   | 01 April 2025    |           | 4661.9          | 1112.7        | 576.13   | 0.0  | 0.0       | 1688.83 | 0.0  | 0.0        | 0.0  | 1688.83     |
+      | 4  | 30   | 01 May 2025      |           | 3549.2          | 1112.7        | 576.13   | 0.0  | 0.0       | 1688.83 | 0.0  | 0.0        | 0.0  | 1688.83     |
+      | 5  | 31   | 01 June 2025     |           | 2436.5          | 1112.7        | 576.13   | 0.0  | 0.0       | 1688.83 | 0.0  | 0.0        | 0.0  | 1688.83     |
+      | 6  | 30   | 01 July 2025     |           | 0.0             | 2436.5        | 576.13   | 0.0  | 0.0       | 3012.63 | 0.0  | 0.0        | 0.0  | 3012.63     |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due      | Paid | In advance | Late | Outstanding |
+      | 8000.0        | 3456.78  | 0.0  | 0.0       | 11456.78 | 0.05 | 0.0        | 0.04 | 11456.73    |

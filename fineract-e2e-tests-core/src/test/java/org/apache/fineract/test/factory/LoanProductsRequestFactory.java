@@ -1053,7 +1053,7 @@ public class LoanProductsRequestFactory {
                 .isLinkedToFloatingInterestRates(false)//
                 .minInterestRatePerPeriod((double) 0)//
                 .interestRatePerPeriod((double) 12)//
-                .maxInterestRatePerPeriod((double) 60)//
+                .maxInterestRatePerPeriod((double) 90)//
                 .interestRateFrequencyType(INTEREST_RATE_FREQUENCY_TYPE_YEAR)//
                 .repaymentEvery(15)//
                 .repaymentStartDateType(1)//
