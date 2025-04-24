@@ -135,6 +135,7 @@ import org.apache.fineract.portfolio.loanaccount.data.PaidInAdvanceData;
 import org.apache.fineract.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeCalculationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeStrategy;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummaryBalancesRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
@@ -1160,7 +1161,8 @@ public class LoansApiResource {
                 LoanScheduleType.getValuesAsEnumOptionDataList(), LoanScheduleProcessingType.getValuesAsEnumOptionDataList(),
                 loanTermVariations, ApiFacingEnum.getValuesAsStringEnumOptionDataList(DaysInYearCustomStrategyType.class),
                 ApiFacingEnum.getValuesAsStringEnumOptionDataList(LoanCapitalizedIncomeCalculationType.class),
-                ApiFacingEnum.getValuesAsStringEnumOptionDataList(LoanCapitalizedIncomeStrategy.class));
+                ApiFacingEnum.getValuesAsStringEnumOptionDataList(LoanCapitalizedIncomeStrategy.class),
+                ApiFacingEnum.getValuesAsStringEnumOptionDataList(LoanCapitalizedIncomeType.class));
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);

@@ -84,6 +84,7 @@ import org.apache.fineract.portfolio.fund.service.FundReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeCalculationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeStrategy;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeOffBehaviour;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
@@ -133,7 +134,7 @@ public class LoanProductsApiResource {
             LoanProductConstants.REPAYMENT_START_DATE_TYPE, LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME,
             LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME,
             LoanProductConstants.CAPITALIZED_INCOME_CALCULATION_TYPE_PARAM_NAME,
-            LoanProductConstants.CAPITALIZED_INCOME_STRATEGY_PARAM_NAME));
+            LoanProductConstants.CAPITALIZED_INCOME_STRATEGY_PARAM_NAME, LoanProductConstants.CAPITALIZED_INCOME_TYPE_PARAM_NAME));
 
     private static final Set<String> PRODUCT_MIX_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList("productId", "productName", "restrictedProducts", "allowedProducts", "productOptions"));
@@ -450,6 +451,8 @@ public class LoanProductsApiResource {
                 .getValuesAsStringEnumOptionDataList(LoanCapitalizedIncomeCalculationType.class);
         final List<StringEnumOptionData> capitalizedIncomeStrategyOptions = ApiFacingEnum
                 .getValuesAsStringEnumOptionDataList(LoanCapitalizedIncomeStrategy.class);
+        final List<StringEnumOptionData> capitalizedIncomeTypeOptions = ApiFacingEnum
+                .getValuesAsStringEnumOptionDataList(LoanCapitalizedIncomeType.class);
 
         return new LoanProductData(productData, chargeOptions, penaltyOptions, paymentTypeOptions, currencyOptions, amortizationTypeOptions,
                 interestTypeOptions, interestCalculationPeriodTypeOptions, repaymentFrequencyTypeOptions, interestRateFrequencyTypeOptions,
@@ -462,7 +465,8 @@ public class LoanProductsApiResource {
                 advancedPaymentAllocationTypes, LoanScheduleType.getValuesAsEnumOptionDataList(),
                 LoanScheduleProcessingType.getValuesAsEnumOptionDataList(), creditAllocationTransactionTypes,
                 creditAllocationAllocationTypes, supportedInterestRefundTypesOptions, chargeOffBehaviourOptions, chargeOffReasonOptions,
-                daysInYearCustomStrategyOptions, capitalizedIncomeCalculationTypeOptions, capitalizedIncomeStrategyOptions);
+                daysInYearCustomStrategyOptions, capitalizedIncomeCalculationTypeOptions, capitalizedIncomeStrategyOptions,
+                capitalizedIncomeTypeOptions);
     }
 
 }

@@ -42,6 +42,7 @@ import org.apache.fineract.portfolio.floatingrates.domain.FloatingRate;
 import org.apache.fineract.portfolio.fund.domain.Fund;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeCalculationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeStrategy;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeOffBehaviour;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
@@ -313,6 +314,8 @@ public class LoanProductAssembler {
                 LoanProductConstants.CAPITALIZED_INCOME_CALCULATION_TYPE_PARAM_NAME, LoanCapitalizedIncomeCalculationType.class);
         final LoanCapitalizedIncomeStrategy capitalizedIncomeStrategy = command.enumValueOfParameterNamed(
                 LoanProductConstants.CAPITALIZED_INCOME_STRATEGY_PARAM_NAME, LoanCapitalizedIncomeStrategy.class);
+        final LoanCapitalizedIncomeType capitalizedIncomeType = command
+                .enumValueOfParameterNamed(LoanProductConstants.CAPITALIZED_INCOME_TYPE_PARAM_NAME, LoanCapitalizedIncomeType.class);
 
         return new LoanProduct(fund, loanTransactionProcessingStrategy, loanProductPaymentAllocationRules, loanProductCreditAllocationRules,
                 name, shortName, description, currency, principal, minPrincipal, maxPrincipal, interestRatePerPeriod,
@@ -334,7 +337,8 @@ public class LoanProductAssembler {
                 overDueDaysForRepaymentEvent, enableDownPayment, disbursedAmountPercentageDownPayment, enableAutoRepaymentForDownPayment,
                 repaymentStartDateType, enableInstallmentLevelDelinquency, loanScheduleType, loanScheduleProcessingType, fixedLength,
                 enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour, interestRecognitionOnDisbursementDate,
-                daysInYearCustomStrategy, enableIncomeCapitalization, capitalizedIncomeCalculationType, capitalizedIncomeStrategy);
+                daysInYearCustomStrategy, enableIncomeCapitalization, capitalizedIncomeCalculationType, capitalizedIncomeStrategy,
+                capitalizedIncomeType);
 
     }
 

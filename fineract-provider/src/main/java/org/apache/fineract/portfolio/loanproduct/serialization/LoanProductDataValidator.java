@@ -51,6 +51,7 @@ import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeCalculationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeStrategy;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeOffBehaviour;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
@@ -193,7 +194,7 @@ public final class LoanProductDataValidator {
             LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME,
             LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME,
             LoanProductConstants.CAPITALIZED_INCOME_CALCULATION_TYPE_PARAM_NAME,
-            LoanProductConstants.CAPITALIZED_INCOME_STRATEGY_PARAM_NAME));
+            LoanProductConstants.CAPITALIZED_INCOME_STRATEGY_PARAM_NAME, LoanProductConstants.CAPITALIZED_INCOME_TYPE_PARAM_NAME));
 
     private static final String[] SUPPORTED_LOAN_CONFIGURABLE_ATTRIBUTES = { LoanProductConstants.amortizationTypeParamName,
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyCodeParamName,
@@ -2688,6 +2689,13 @@ public final class LoanProductDataValidator {
                     .value(capitalizedIncomeStrategy).isOneOfEnumValues(LoanCapitalizedIncomeStrategy.class);
         }
 
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.CAPITALIZED_INCOME_TYPE_PARAM_NAME, element)) {
+            final String capitalizedIncomeType = this.fromApiJsonHelper
+                    .extractStringNamed(LoanProductConstants.CAPITALIZED_INCOME_TYPE_PARAM_NAME, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.CAPITALIZED_INCOME_TYPE_PARAM_NAME).value(capitalizedIncomeType)
+                    .isOneOfEnumValues(LoanCapitalizedIncomeType.class);
+        }
+
         if (AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY.equals(transactionProcessingStrategyCode)
                 && this.fromApiJsonHelper.parameterExists(LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME, element)) {
             Boolean enableIncomeCapitalization = this.fromApiJsonHelper
@@ -2704,6 +2712,11 @@ public final class LoanProductDataValidator {
                         .extractStringNamed(LoanProductConstants.CAPITALIZED_INCOME_STRATEGY_PARAM_NAME, element);
                 baseDataValidator.reset().parameter(LoanProductConstants.CAPITALIZED_INCOME_STRATEGY_PARAM_NAME)
                         .value(capitalizedIncomeStrategy).isOneOfEnumValues(LoanCapitalizedIncomeStrategy.class)
+                        .cantBeBlankWhenParameterProvidedIs(LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME, true);
+                final String capitalizedIncomeType = this.fromApiJsonHelper
+                        .extractStringNamed(LoanProductConstants.CAPITALIZED_INCOME_TYPE_PARAM_NAME, element);
+                baseDataValidator.reset().parameter(LoanProductConstants.CAPITALIZED_INCOME_TYPE_PARAM_NAME).value(capitalizedIncomeType)
+                        .isOneOfEnumValues(LoanCapitalizedIncomeType.class)
                         .cantBeBlankWhenParameterProvidedIs(LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME, true);
                 // Accounting
                 if (AccountingValidations.isAccrualBasedAccounting(accountingRuleType)) {

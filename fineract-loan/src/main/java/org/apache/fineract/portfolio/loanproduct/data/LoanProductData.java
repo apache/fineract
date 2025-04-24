@@ -51,6 +51,7 @@ import org.apache.fineract.portfolio.fund.data.FundData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanInterestRecalculationData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeCalculationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeStrategy;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeOffBehaviour;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
@@ -244,8 +245,10 @@ public class LoanProductData implements Serializable {
     private Boolean enableIncomeCapitalization;
     private StringEnumOptionData capitalizedIncomeCalculationType;
     private StringEnumOptionData capitalizedIncomeStrategy;
+    private final StringEnumOptionData capitalizedIncomeType;
     private List<StringEnumOptionData> capitalizedIncomeCalculationTypeOptions;
     private List<StringEnumOptionData> capitalizedIncomeStrategyOptions;
+    private List<StringEnumOptionData> capitalizedIncomeTypeOptions;
 
     /**
      * Used when returning lookup information about loan product for dropdowns.
@@ -353,6 +356,7 @@ public class LoanProductData implements Serializable {
         final boolean enableIncomeCapitalization = false;
         final StringEnumOptionData capitalizedIncomeCalculationType = null;
         final StringEnumOptionData capitalizedIncomeStrategy = null;
+        final StringEnumOptionData capitalizedIncomeType = null;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -375,7 +379,7 @@ public class LoanProductData implements Serializable {
                 paymentAllocation, creditAllocation, repaymentStartDateType, enableInstallmentLevelDelinquency, loanScheduleType,
                 loanScheduleProcessingType, fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour,
                 interestRecognitionOnDisbursementDate, daysInYearTypeCustomStrategy, enableIncomeCapitalization,
-                capitalizedIncomeCalculationType, capitalizedIncomeStrategy);
+                capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType);
 
     }
 
@@ -483,6 +487,7 @@ public class LoanProductData implements Serializable {
         final boolean enableIncomeCapitalization = false;
         final StringEnumOptionData capitalizedIncomeCalculationType = null;
         final StringEnumOptionData capitalizedIncomeStrategy = null;
+        final StringEnumOptionData capitalizedIncomeType = null;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -505,7 +510,7 @@ public class LoanProductData implements Serializable {
                 paymentAllocation, creditAllocation, repaymentStartDateType, enableInstallmentLevelDelinquency, loanScheduleType,
                 loanScheduleProcessingType, fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour,
                 interestRecognitionOnDisbursementDate, daysInYearTypeCustomStrategy, enableIncomeCapitalization,
-                capitalizedIncomeCalculationType, capitalizedIncomeStrategy);
+                capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType);
 
     }
 
@@ -620,6 +625,7 @@ public class LoanProductData implements Serializable {
         final boolean enableIncomeCapitalization = false;
         final StringEnumOptionData capitalizedIncomeCalculationType = null;
         final StringEnumOptionData capitalizedIncomeStrategy = null;
+        final StringEnumOptionData capitalizedIncomeType = null;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -642,7 +648,7 @@ public class LoanProductData implements Serializable {
                 paymentAllocation, creditAllocation, repaymentStartDateType, enableInstallmentLevelDelinquency, loanScheduleType,
                 loanScheduleProcessingType, fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour,
                 interestRecognitionOnDisbursementDate, daysInYearTypeCustomStrategy, enableIncomeCapitalization,
-                capitalizedIncomeCalculationType, capitalizedIncomeStrategy);
+                capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType);
 
     }
 
@@ -751,6 +757,7 @@ public class LoanProductData implements Serializable {
         final boolean enableIncomeCapitalization = false;
         final StringEnumOptionData capitalizedIncomeCalculationType = null;
         final StringEnumOptionData capitalizedIncomeStrategy = null;
+        final StringEnumOptionData capitalizedIncomeType = null;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -773,7 +780,7 @@ public class LoanProductData implements Serializable {
                 paymentAllocation, creditAllocationData, repaymentStartDateType, enableInstallmentLevelDelinquency, loanScheduleType,
                 loanScheduleProcessingType, fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour,
                 interestRecognitionOnDisbursementDate, daysInYearTypeCustomStrategy, enableIncomeCapitalization,
-                capitalizedIncomeCalculationType, capitalizedIncomeStrategy);
+                capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType);
     }
 
     public static LoanProductData withAccountingDetails(final LoanProductData productData, final Map<String, Object> accountingMappings,
@@ -829,7 +836,8 @@ public class LoanProductData implements Serializable {
             final boolean enableAccrualActivityPosting, final List<StringEnumOptionData> supportedInterestRefundTypes,
             StringEnumOptionData chargeOffBehaviour, final boolean interestRecognitionOnDisbursementDate,
             final StringEnumOptionData daysInYearCustomStrategy, final boolean enableIncomeCapitalization,
-            final StringEnumOptionData capitalizedIncomeCalculationType, final StringEnumOptionData capitalizedIncomeStrategy) {
+            final StringEnumOptionData capitalizedIncomeCalculationType, final StringEnumOptionData capitalizedIncomeStrategy,
+            final StringEnumOptionData capitalizedIncomeType) {
         this.id = id;
         this.name = name;
         this.shortName = shortName;
@@ -889,6 +897,7 @@ public class LoanProductData implements Serializable {
         this.enableIncomeCapitalization = enableIncomeCapitalization;
         this.capitalizedIncomeCalculationType = capitalizedIncomeCalculationType;
         this.capitalizedIncomeStrategy = capitalizedIncomeStrategy;
+        this.capitalizedIncomeType = capitalizedIncomeType;
 
         this.chargeOptions = null;
         this.penaltyOptions = null;
@@ -981,6 +990,7 @@ public class LoanProductData implements Serializable {
         this.capitalizedIncomeCalculationTypeOptions = ApiFacingEnum
                 .getValuesAsStringEnumOptionDataList(LoanCapitalizedIncomeCalculationType.class);
         this.capitalizedIncomeStrategyOptions = ApiFacingEnum.getValuesAsStringEnumOptionDataList(LoanCapitalizedIncomeStrategy.class);
+        this.capitalizedIncomeTypeOptions = ApiFacingEnum.getValuesAsStringEnumOptionDataList(LoanCapitalizedIncomeType.class);
     }
 
     public LoanProductData(final LoanProductData productData, final Collection<ChargeData> chargeOptions,
@@ -1007,7 +1017,8 @@ public class LoanProductData implements Serializable {
             final List<StringEnumOptionData> chargeOffBehaviourOptions, final List<CodeValueData> chargeOffReasonOptions,
             final List<StringEnumOptionData> daysInYearCustomStrategyOptions,
             final List<StringEnumOptionData> capitalizedIncomeCalculationTypeOptions,
-            final List<StringEnumOptionData> capitalizedIncomeStrategyOptions) {
+            final List<StringEnumOptionData> capitalizedIncomeStrategyOptions,
+            final List<StringEnumOptionData> capitalizedIncomeTypeOptions) {
 
         this.id = productData.id;
         this.name = productData.name;
@@ -1174,8 +1185,10 @@ public class LoanProductData implements Serializable {
         this.enableIncomeCapitalization = productData.enableIncomeCapitalization;
         this.capitalizedIncomeCalculationType = productData.capitalizedIncomeCalculationType;
         this.capitalizedIncomeStrategy = productData.capitalizedIncomeStrategy;
+        this.capitalizedIncomeType = productData.capitalizedIncomeType;
         this.capitalizedIncomeCalculationTypeOptions = capitalizedIncomeCalculationTypeOptions;
         this.capitalizedIncomeStrategyOptions = capitalizedIncomeStrategyOptions;
+        this.capitalizedIncomeTypeOptions = capitalizedIncomeTypeOptions;
     }
 
     private Collection<ChargeData> nullIfEmpty(final Collection<ChargeData> charges) {

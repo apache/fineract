@@ -1212,6 +1212,8 @@ final class LoansApiResourceSwagger {
         public StringEnumOptionData capitalizedIncomeCalculationType;
         @Schema(example = "EQUAL_AMORTIZATION")
         public StringEnumOptionData capitalizedIncomeStrategy;
+        @Schema(example = "FEE")
+        public StringEnumOptionData capitalizedIncomeType;
     }
 
     @Schema(description = "GetLoansResponse")
@@ -1321,6 +1323,8 @@ final class LoansApiResourceSwagger {
         public String capitalizedIncomeCalculationType;
         @Schema(example = "EQUAL_AMORTIZATION", allowableValues = "EQUAL_AMORTIZATION")
         public String capitalizedIncomeStrategy;
+        @Schema(example = "FEE")
+        public StringEnumOptionData capitalizedIncomeType;
 
         public List<PostLoansRequestChargeData> charges;
 

@@ -38,6 +38,7 @@ import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeCalculationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeStrategy;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeOffBehaviour;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
@@ -181,6 +182,10 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     @Column(name = "capitalized_income_strategy")
     private LoanCapitalizedIncomeStrategy capitalizedIncomeStrategy;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "capitalized_income_type")
+    private LoanCapitalizedIncomeType capitalizedIncomeType;
+
     public static LoanProductRelatedDetail createFrom(final CurrencyData currencyData, final BigDecimal principal,
             final BigDecimal nominalInterestRatePerPeriod, final PeriodFrequencyType interestRatePeriodFrequencyType,
             final BigDecimal nominalAnnualInterestRate, final InterestMethod interestMethod,
@@ -197,7 +202,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final LoanChargeOffBehaviour chargeOffBehaviour, final boolean interestRecognitionOnDisbursementDate,
             final DaysInYearCustomStrategyType daysInYearCustomStrategy, final boolean enableIncomeCapitalization,
             final LoanCapitalizedIncomeCalculationType capitalizedIncomeCalculationType,
-            final LoanCapitalizedIncomeStrategy capitalizedIncomeStrategy) {
+            final LoanCapitalizedIncomeStrategy capitalizedIncomeStrategy, final LoanCapitalizedIncomeType capitalizedIncomeType) {
 
         final MonetaryCurrency currency = MonetaryCurrency.fromCurrencyData(currencyData);
         return new LoanProductRelatedDetail(currency, principal, nominalInterestRatePerPeriod, interestRatePeriodFrequencyType,
@@ -208,7 +213,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
                 isEqualAmortization, enableDownPayment, disbursedAmountPercentageForDownPayment, enableAutoRepaymentForDownPayment,
                 loanScheduleType, loanScheduleProcessingType, fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes,
                 chargeOffBehaviour, interestRecognitionOnDisbursementDate, daysInYearCustomStrategy, enableIncomeCapitalization,
-                capitalizedIncomeCalculationType, capitalizedIncomeStrategy);
+                capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType);
     }
 
     protected LoanProductRelatedDetail() {
@@ -231,7 +236,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final LoanChargeOffBehaviour chargeOffBehaviour, final boolean interestRecognitionOnDisbursementDate,
             final DaysInYearCustomStrategyType daysInYearCustomStrategy, final boolean enableIncomeCapitalization,
             final LoanCapitalizedIncomeCalculationType capitalizedIncomeCalculationType,
-            final LoanCapitalizedIncomeStrategy capitalizedIncomeStrategy) {
+            final LoanCapitalizedIncomeStrategy capitalizedIncomeStrategy, final LoanCapitalizedIncomeType capitalizedIncomeType) {
         this.currency = currency;
         this.principal = defaultPrincipal;
         this.nominalInterestRatePerPeriod = defaultNominalInterestRatePerPeriod;
@@ -272,6 +277,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         this.enableIncomeCapitalization = enableIncomeCapitalization;
         this.capitalizedIncomeCalculationType = capitalizedIncomeCalculationType;
         this.capitalizedIncomeStrategy = capitalizedIncomeStrategy;
+        this.capitalizedIncomeType = capitalizedIncomeType;
     }
 
     private Integer defaultToNullIfZero(final Integer value) {

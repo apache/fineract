@@ -48,6 +48,7 @@ import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeCalculationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeStrategy;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeOffBehaviour;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
@@ -294,7 +295,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lp.charge_off_behaviour as chargeOffBehaviour, " //
                     + "lp.enable_income_capitalization as enableIncomeCapitalization, " //
                     + "lp.capitalized_income_calculation_type as capitalizedIncomeCalculationType, " //
-                    + "lp.capitalized_income_strategy as capitalizedIncomeStrategy " //
+                    + "lp.capitalized_income_strategy as capitalizedIncomeStrategy, " //
+                    + "lp.capitalized_income_type as capitalizedIncomeType " //
                     + " from m_product_loan lp " + " left join m_fund f on f.id = lp.fund_id "
                     + " left join m_product_loan_recalculation_details lpr on lpr.product_id=lp.id "
                     + " left join m_product_loan_guarantee_details lpg on lpg.loan_product_id=lp.id "
@@ -563,6 +565,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     .getStringEnumOptionData(LoanCapitalizedIncomeCalculationType.class, rs.getString("capitalizedIncomeCalculationType"));
             final StringEnumOptionData capitalizedIncomeStrategy = ApiFacingEnum
                     .getStringEnumOptionData(LoanCapitalizedIncomeStrategy.class, rs.getString("capitalizedIncomeStrategy"));
+            final StringEnumOptionData capitalizedIncome = ApiFacingEnum.getStringEnumOptionData(LoanCapitalizedIncomeType.class,
+                    rs.getString("capitalizedIncomeType"));
 
             return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                     numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -587,7 +591,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     enableInstallmentLevelDelinquency, loanScheduleType.asEnumOptionData(), loanScheduleProcessingType.asEnumOptionData(),
                     fixedLength, enableAccrualActivityPosting, supportedInterestRefundTypes,
                     loanChargeOffBehaviour.getValueAsStringEnumOptionData(), interestRecognitionOnDisbursementDate,
-                    daysInYearCustomStrategy, enableIncomeCapitalization, capitalizedIncomeCalculationType, capitalizedIncomeStrategy);
+                    daysInYearCustomStrategy, enableIncomeCapitalization, capitalizedIncomeCalculationType, capitalizedIncomeStrategy,
+                    capitalizedIncome);
         }
     }
 

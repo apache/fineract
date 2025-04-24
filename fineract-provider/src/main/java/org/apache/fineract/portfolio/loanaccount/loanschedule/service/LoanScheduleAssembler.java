@@ -547,7 +547,8 @@ public class LoanScheduleAssembler {
                 loanProduct.getLoanProductRelatedDetail().getDaysInYearCustomStrategy(),
                 loanProduct.getLoanProductRelatedDetail().isEnableIncomeCapitalization(),
                 loanProduct.getLoanProductRelatedDetail().getCapitalizedIncomeCalculationType(),
-                loanProduct.getLoanProductRelatedDetail().getCapitalizedIncomeStrategy());
+                loanProduct.getLoanProductRelatedDetail().getCapitalizedIncomeStrategy(),
+                loanProduct.getLoanProductRelatedDetail().getCapitalizedIncomeType());
     }
 
     private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,

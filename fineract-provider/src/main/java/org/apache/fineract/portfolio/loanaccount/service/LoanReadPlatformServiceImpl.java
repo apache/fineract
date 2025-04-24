@@ -109,6 +109,7 @@ import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeCalculationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeStrategy;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeOffBehaviour;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
@@ -737,6 +738,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                     + " l.enable_income_capitalization as enableIncomeCapitalization, "
                     + " l.capitalized_income_calculation_type as capitalizedIncomeCalculationType, "
                     + " l.capitalized_income_strategy as capitalizedIncomeStrategy, "
+                    + " l.capitalized_income_type as capitalizedIncomeType, " //
                     + " l.create_standing_instruction_at_disbursement as createStandingInstructionAtDisbursement, "
                     + " lpvi.minimum_gap as minimuminstallmentgap, lpvi.maximum_gap as maximuminstallmentgap, "
                     + " lp.can_use_for_topup as canUseForTopup, l.is_topup as isTopup, topup.closure_loan_id as closureLoanId, "
@@ -1118,6 +1120,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                     .getStringEnumOptionData(LoanCapitalizedIncomeCalculationType.class, rs.getString("capitalizedIncomeCalculationType"));
             final StringEnumOptionData capitalizedIncomeStrategy = ApiFacingEnum
                     .getStringEnumOptionData(LoanCapitalizedIncomeStrategy.class, rs.getString("capitalizedIncomeStrategy"));
+            final StringEnumOptionData capitalizedIncomeType = ApiFacingEnum.getStringEnumOptionData(LoanCapitalizedIncomeType.class,
+                    rs.getString("capitalizedIncomeType"));
 
             return LoanAccountData.basicLoanDetails(id, accountNo, status, externalId, clientId, clientAccountNo, clientName,
                     clientOfficeId, clientExternalId, groupData, loanType, loanProductId, loanProductName, loanProductDescription,
@@ -1138,7 +1142,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                     enableAutoRepaymentForDownPayment, enableInstallmentLevelDelinquency, loanScheduleType.asEnumOptionData(),
                     loanScheduleProcessingType.asEnumOptionData(), fixedLength, chargeOffBehaviour.getValueAsStringEnumOptionData(),
                     interestRecognitionOnDisbursementDate, daysInYearCustomStrategy, enableIncomeCapitalization,
-                    capitalizedIncomeCalculationType, capitalizedIncomeStrategy);
+                    capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType);
         }
     }
 
