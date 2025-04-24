@@ -131,6 +131,11 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
                 || !DateUtils.isEqualBusinessDate(loanTransaction.getTransactionDate()) || currentInstallment == null
                 || !currentInstallment.getTotalOutstanding(loan.getCurrency()).isEqualTo(loanTransaction.getAmount(loan.getCurrency()));
 
+        // TODO FINERACT-2220 fix processLatestTransaction to save model.
+        if (loan.isProgressiveSchedule() && loan.isInterestBearing()) {
+            reprocess = true;
+        }
+
         if (isTransactionChronologicallyLatest && adjustedTransaction == null
                 && (!reprocess || !loan.isInterestBearingAndInterestRecalculationEnabled()) && !loan.isForeclosure()) {
             loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(), loanTransaction,

@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -48,6 +49,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleM
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleParams;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePlan;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.exception.MultiDisbursementOutstandingAmoutException;
+import org.apache.fineract.portfolio.loanaccount.service.InterestScheduleModelRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionProcessingService;
 import org.apache.fineract.portfolio.loanproduct.calc.EMICalculator;
 import org.apache.fineract.portfolio.loanproduct.calc.data.OutstandingDetails;
@@ -61,12 +63,15 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
 
     private final ScheduledDateGenerator scheduledDateGenerator;
     private final EMICalculator emiCalculator;
+    private final InterestScheduleModelRepositoryWrapper interestScheduleModelRepositoryWrapper;
 
     private LoanTransactionProcessingService loanTransactionProcessingService;
 
-    public ProgressiveLoanScheduleGenerator(ScheduledDateGenerator scheduledDateGenerator, EMICalculator emiCalculator) {
+    public ProgressiveLoanScheduleGenerator(ScheduledDateGenerator scheduledDateGenerator, EMICalculator emiCalculator,
+            InterestScheduleModelRepositoryWrapper interestScheduleModelRepositoryWrapper) {
         this.scheduledDateGenerator = scheduledDateGenerator;
         this.emiCalculator = emiCalculator;
+        this.interestScheduleModelRepositoryWrapper = interestScheduleModelRepositoryWrapper;
     }
 
     @Autowired(required = false)
@@ -187,7 +192,10 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
             case NONE -> throw new IllegalStateException("Unexpected PreClosureInterestCalculationStrategy: NONE");
         };
 
-        ProgressiveLoanInterestScheduleModel model = processor.calculateInterestScheduleModel(loan.getId(), onDate);
+        Optional<ProgressiveLoanInterestScheduleModel> savedModel = interestScheduleModelRepositoryWrapper.getSavedModel(loan,
+                transactionDate);
+        ProgressiveLoanInterestScheduleModel model = savedModel
+                .orElseGet(() -> processor.calculateInterestScheduleModel(loan.getId(), onDate));
         OutstandingDetails outstandingAmounts = emiCalculator.getOutstandingAmountsTillDate(model, transactionDate);
         // TODO: We should add all the past due outstanding amounts as well
         OutstandingAmountsDTO result = new OutstandingAmountsDTO(currency) //
@@ -228,7 +236,9 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
         if (installment.isAdditional() || installment.isDownPayment() || installment.isReAged()) {
             return Money.zero(loan.getCurrency());
         }
-        ProgressiveLoanInterestScheduleModel model = processor.calculateInterestScheduleModel(loan.getId(), targetDate);
+        Optional<ProgressiveLoanInterestScheduleModel> savedModel = interestScheduleModelRepositoryWrapper.getSavedModel(loan, targetDate);
+        ProgressiveLoanInterestScheduleModel model = savedModel
+                .orElseGet(() -> processor.calculateInterestScheduleModel(loan.getId(), targetDate));
         return emiCalculator.getPeriodInterestTillDate(model, installment.getDueDate(), targetDate, false);
     }
 
