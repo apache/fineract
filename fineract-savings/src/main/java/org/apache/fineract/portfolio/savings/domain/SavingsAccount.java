@@ -996,16 +996,19 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
             final SavingsAccountTransactionType savingsAccountTransactionType, final boolean backdatedTxnsAllowedTill,
             final Long relaxingDaysConfigForPivotDate, final String refNo) {
         final String resourceTypeName = depositAccountType().resourceName();
-        if (!isNotActive()) { // TODO: MODIFICAR SI AFECTA EN OTRA OPERACION, SE MODIFICO PARA CERRAR EL  "Recurring Deposits "
-            final String defaultUserMessage = "Transaction is not allowed. Account is not active.";
-            final ApiParameterError error = ApiParameterError.parameterError(
-                    "error.msg." + resourceTypeName + ".transaction.account.is.not.active", defaultUserMessage, "transactionDate",
-                    transactionDTO.getTransactionDate().format(transactionDTO.getFormatter()));
+        if (isNotActive()) {
+            // TODO: MODIFICAR SI AFECTA EN OTRA OPERACION, SE MODIFICO PARA CERRAR EL  "Recurring Deposits "
+            if (!SavingsAccountStatusType.fromInt(this.status).isMatured()){
+                final String defaultUserMessage = "Transaction is not allowed. Account is not active.";
+                final ApiParameterError error = ApiParameterError.parameterError(
+                        "error.msg." + resourceTypeName + ".transaction.account.is.not.active", defaultUserMessage, "transactionDate",
+                        transactionDTO.getTransactionDate().format(transactionDTO.getFormatter()));
 
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-            dataValidationErrors.add(error);
+                final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+                dataValidationErrors.add(error);
 
-            throw new PlatformApiDataValidationException(dataValidationErrors);
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         if (DateUtils.isDateInTheFuture(transactionDTO.getTransactionDate())) {
