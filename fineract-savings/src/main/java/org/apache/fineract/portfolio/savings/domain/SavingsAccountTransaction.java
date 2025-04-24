@@ -683,7 +683,7 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
             numberOfDays = newInterval.daysInPeriodInclusiveOfEndDate();
         }
 
-        return EndOfDayBalance.from(balanceDate, openingBalance, endOfDayBalance, numberOfDays);
+        return EndOfDayBalance.from(balanceDate, openingBalance, endOfDayBalance, numberOfDays, currency.getDigitsAfterDecimal());
     }
 
     public EndOfDayBalance toEndOfDayBalance(final Money openingBalance, final LocalDate nextTransactionDate) {
@@ -699,7 +699,7 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
         if (!openingBalance.isEqualTo(endOfDayBalance) && numberOfDays > 1) {
             numberOfDays = numberOfDays - 1;
         }
-        return EndOfDayBalance.from(getTransactionDate(), openingBalance, endOfDayBalance, numberOfDays);
+        return EndOfDayBalance.from(getTransactionDate(), openingBalance, endOfDayBalance, numberOfDays, currency.getDigitsAfterDecimal());
     }
 
     public EndOfDayBalance toEndOfDayBalance(final Money openingBalance) {
@@ -716,7 +716,7 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
             }
         }
 
-        return EndOfDayBalance.from(getTransactionDate(), openingBalance, endOfDayBalance, this.balanceNumberOfDays);
+        return EndOfDayBalance.from(getTransactionDate(), openingBalance, endOfDayBalance, this.balanceNumberOfDays, currency.getDigitsAfterDecimal());
     }
 
     public EndOfDayBalance toEndOfDayBalanceBoundedBy(final Money openingBalance, final LocalDateInterval boundedBy) {
@@ -754,7 +754,7 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
             numberOfDaysOfBalance = spanOfBalance.daysInPeriodInclusiveOfEndDate();
         }
 
-        return EndOfDayBalance.from(balanceStartDate, openingBalance, endOfDayBalance, numberOfDaysOfBalance);
+        return EndOfDayBalance.from(balanceStartDate, openingBalance, endOfDayBalance, numberOfDaysOfBalance, currency.getDigitsAfterDecimal());
     }
 
     public boolean isBalanceInExistencesForOneDayOrMore() {

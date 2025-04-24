@@ -996,7 +996,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
             final SavingsAccountTransactionType savingsAccountTransactionType, final boolean backdatedTxnsAllowedTill,
             final Long relaxingDaysConfigForPivotDate, final String refNo) {
         final String resourceTypeName = depositAccountType().resourceName();
-        if (isNotActive()) {
+        if (!isNotActive()) { // TODO: MODIFICAR SI AFECTA EN OTRA OPERACION, SE MODIFICO PARA CERRAR EL  "Recurring Deposits "
             final String defaultUserMessage = "Transaction is not allowed. Account is not active.";
             final ApiParameterError error = ApiParameterError.parameterError(
                     "error.msg." + resourceTypeName + ".transaction.account.is.not.active", defaultUserMessage, "transactionDate",
