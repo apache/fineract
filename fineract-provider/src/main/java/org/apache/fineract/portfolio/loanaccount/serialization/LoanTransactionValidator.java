@@ -69,6 +69,8 @@ import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeBalance;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeBalanceRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
@@ -105,6 +107,7 @@ public final class LoanTransactionValidator {
     private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final LoanDownPaymentTransactionValidator loanDownPaymentTransactionValidator;
+    private final LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository;
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) {
@@ -1033,5 +1036,92 @@ public final class LoanTransactionValidator {
             throw new InvalidLoanStateTransitionException("close.reschedule", "cannot.be.a.future.date", errorMessage,
                     loan.getRescheduledOnDate());
         }
+    }
+
+    public void validateCapitalizedIncome(final JsonCommand command, final Long loanId) {
+        final String json = command.json();
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
+
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, getCapitalizedIncomeParameters());
+
+        LoanApplicationValidator.validateOrThrow("loan.capitalized.income", baseDataValidator -> {
+            final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
+            validateLoanClientIsActive(loan);
+            validateLoanGroupIsActive(loan);
+
+            // Validate that loan is disbursed
+            if (!loan.isDisbursed()) {
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("capitalized.income.only.after.disbursement",
+                        "Capitalized income can be added to the loan only after Disbursement");
+            }
+
+            // Validate loan is progressive
+            if (!loan.isProgressiveSchedule()) {
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("not.progressive.loan");
+            }
+
+            // Validate income capitalization is enabled
+            if (!loan.getLoanProductRelatedDetail().isEnableIncomeCapitalization()) {
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("income.capitalization.not.enabled");
+            }
+
+            // Validate loan is active
+            if (!loan.getStatus().isActive()) {
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("not.active");
+            }
+
+            final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed("transactionDate", element);
+            baseDataValidator.reset().parameter("transactionDate").value(transactionDate).notNull();
+
+            // Validate transaction date is not before disbursement date
+            if (transactionDate != null && loan.getDisbursementDate() != null && transactionDate.isBefore(loan.getDisbursementDate())) {
+                baseDataValidator.reset().parameter("transactionDate").failWithCode("before.disbursement.date",
+                        "Transaction date cannot be before disbursement date");
+            }
+
+            final BigDecimal transactionAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("transactionAmount", element);
+            baseDataValidator.reset().parameter("transactionAmount").value(transactionAmount).notNull().positiveAmount();
+
+            // Validate total disbursement + capitalized income <= approved amount
+            if (transactionAmount != null) {
+                final BigDecimal totalDisbursed = loan.getDisbursedAmount();
+                final BigDecimal existingCapitalizedIncomeBalance = loanCapitalizedIncomeBalanceRepository.findAllByLoanId(loanId).stream()
+                        .map(LoanCapitalizedIncomeBalance::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+                final BigDecimal approvedAmount = loan.getApprovedPrincipal();
+                final BigDecimal newTotal = totalDisbursed.add(existingCapitalizedIncomeBalance).add(transactionAmount);
+
+                if (newTotal.compareTo(approvedAmount) > 0) {
+                    baseDataValidator.reset().parameter("transactionAmount").failWithCode("exceeds.approved.amount",
+                            "Sum of disbursed amount and capitalized income cannot exceed approved amount");
+                }
+            }
+
+            validatePaymentDetails(baseDataValidator, element);
+            validateNote(baseDataValidator, element);
+            validateExternalId(baseDataValidator, element);
+        });
+    }
+
+    private void validateNote(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
+        final String note = this.fromApiJsonHelper.extractStringNamed("note", element);
+        if (StringUtils.isNotBlank(note)) {
+            baseDataValidator.reset().parameter("note").value(note).notExceedingLengthOf(1000);
+        }
+    }
+
+    private void validateExternalId(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
+        final String externalId = this.fromApiJsonHelper.extractStringNamed("externalId", element);
+        if (StringUtils.isNotBlank(externalId)) {
+            baseDataValidator.reset().parameter("externalId").value(externalId).notExceedingLengthOf(100);
+        }
+    }
+
+    private Set<String> getCapitalizedIncomeParameters() {
+        return new HashSet<>(
+                Arrays.asList("transactionDate", "dateFormat", "locale", "transactionAmount", "paymentTypeId", "note", "externalId"));
     }
 }

@@ -306,6 +306,12 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
         return newTransaction;
     }
 
+    public static LoanTransaction capitalizedIncome(final Loan loan, final Money amount, final PaymentDetail paymentDetail,
+            final LocalDate transactionDate, final ExternalId externalId) {
+        return new LoanTransaction(null, loan.getOffice(), LoanTransactionType.CAPITALIZED_INCOME, paymentDetail, amount.getAmount(),
+                transactionDate, externalId);
+    }
+
     public LoanTransaction copyTransactionPropertiesAndMappings() {
         LoanTransaction newTransaction = copyTransactionProperties(this);
         newTransaction.updateLoanTransactionToRepaymentScheduleMappings(loanTransactionToRepaymentScheduleMappings);

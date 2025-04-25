@@ -285,4 +285,9 @@ public class LoanRequestFactory {
         return new InterestPauseRequestDto().dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE).startDate(DEFAULT_TRANSACTION_DATE)
                 .endDate(DEFAULT_TRANSACTION_DATE);
     }
+
+    public static PostLoansLoanIdTransactionsRequest defaultCapitalizedIncomeRequest() {
+        return new PostLoansLoanIdTransactionsRequest().transactionDate(DEFAULT_TRANSACTION_DATE).dateFormat(DATE_FORMAT)
+                .locale(DEFAULT_LOCALE).note("Capitalized Income");
+    }
 }

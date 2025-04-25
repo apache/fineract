@@ -52,5 +52,6 @@ public interface LoanTransactionApiConstants {
         accrualActivity, //
         interestRefund, //
         accrualAdjustment, //
+        capitalizedIncome, //
     }
 }

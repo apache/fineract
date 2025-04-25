@@ -2996,6 +2996,53 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .build();
     }
 
+    @Transactional
+    @Override
+    public CommandProcessingResult addCapitalizedIncome(final Long loanId, final JsonCommand command) {
+        loanTransactionValidator.validateCapitalizedIncome(command, loanId);
+
+        final Loan loan = loanAssembler.assembleFrom(loanId);
+        final AppUser currentUser = getAppUserIfPresent();
+        final Map<String, Object> changes = new LinkedHashMap<>();
+
+        // Create payment details
+        final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
+
+        // Validate cash payment if applicable
+        if (paymentDetail != null && paymentDetail.getPaymentType() != null && paymentDetail.getPaymentType().getIsCashPayment()) {
+            BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
+            this.cashierTransactionDataValidator.validateOnLoanDisbursal(currentUser, loan.getCurrencyCode(), transactionAmount);
+        }
+
+        // Extract transaction details
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
+        final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
+        final ExternalId txnExternalId = externalIdFactory.createFromCommand(command, "externalId");
+
+        // Create capitalized income transaction
+        final Money capitalizedIncomeAmount = Money.of(loan.getCurrency(), transactionAmount);
+        final LoanTransaction capitalizedIncomeTransaction = LoanTransaction.capitalizedIncome(loan, capitalizedIncomeAmount, paymentDetail,
+                transactionDate, txnExternalId);
+
+        // Update loan with capitalized income
+        capitalizedIncomeTransaction.updateLoan(loan);
+        loan.addLoanTransaction(capitalizedIncomeTransaction);
+        loanTransactionRepository.saveAndFlush(capitalizedIncomeTransaction);
+
+        // Update loan counters and save
+        loan.updateLoanScheduleDependentDerivedFields();
+
+        // Create note if provided
+        createNote(loan, command, changes);
+
+        // Post journal entries
+        final List<Long> existingTransactionIds = new ArrayList<>(loan.findExistingTransactionIds());
+        final List<Long> existingReversedTransactionIds = new ArrayList<>(loan.findExistingReversedTransactionIds());
+        journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+
+        return new CommandProcessingResultBuilder().withEntityId(loan.getId()).withEntityExternalId(loan.getExternalId()).build();
+    }
+
     public void handleChargebackTransaction(final Loan loan, LoanTransaction chargebackTransaction) {
         loanTransactionValidator.validateIfTransactionIsChargeback(chargebackTransaction);
 

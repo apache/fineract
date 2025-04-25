@@ -90,6 +90,7 @@ public class LoanTransactionsApiResource {
     public static final String REAGE = "reAge";
     public static final String REAMORTIZE = "reAmortize";
     public static final String UNDO_REAMORTIZE = "undoReAmortize";
+    public static final String CAPITALIZED_INCOME = "capitalizedIncome";
     private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "type", "date", "currency", "amount", "externalId",
             LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME, LoanApiConstants.REVERSED_ON_DATE_PARAMNAME));
 
@@ -526,6 +527,7 @@ public class LoanTransactionsApiResource {
             case accrualActivity -> LoanTransactionType.ACCRUAL_ACTIVITY;
             case interestRefund -> LoanTransactionType.INTEREST_REFUND;
             case accrualAdjustment -> LoanTransactionType.ACCRUAL_ADJUSTMENT;
+            case capitalizedIncome -> LoanTransactionType.CAPITALIZED_INCOME;
             default ->
                 throw new InvalidLoanTransactionTypeException("transaction", transactionTypeParam.name(), "Unknown transaction type");
         };
@@ -583,6 +585,8 @@ public class LoanTransactionsApiResource {
             commandRequest = builder.reAmortize(resolvedLoanId).build();
         } else if (CommandParameterUtil.is(commandParam, UNDO_REAMORTIZE)) {
             commandRequest = builder.undoReAmortize(resolvedLoanId).build();
+        } else if (CommandParameterUtil.is(commandParam, CAPITALIZED_INCOME)) {
+            commandRequest = builder.addCapitalizedIncome(resolvedLoanId).build();
         }
 
         if (commandRequest == null) {

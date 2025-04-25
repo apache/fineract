@@ -3822,4 +3822,13 @@ public class CommandWrapperBuilder {
         this.href = "/v1/loans/external-id/" + loanExternalId + "/interest-pauses/" + variationId;
         return this;
     }
+
+    public CommandWrapperBuilder addCapitalizedIncome(final Long loanId) {
+        this.actionName = "CAPITALIZEDINCOME";
+        this.entityName = "LOAN";
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId;
+        return this;
+    }
 }
