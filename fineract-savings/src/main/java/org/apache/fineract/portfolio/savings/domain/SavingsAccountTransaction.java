@@ -16,12 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.apache.fineract.portfolio.savings.domain;
 
 import static org.apache.fineract.infrastructure.core.service.DateUtils.getSystemZoneId;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -41,6 +60,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.domain.ExternalIdConverter;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -65,6 +86,10 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
     @ManyToOne(optional = false)
     @JoinColumn(name = "savings_account_id", referencedColumnName = "id", nullable = false)
     private SavingsAccount savingsAccount;
+
+    @Column(name = "external_id", length = 100, nullable = true, unique = true)
+    @Convert(converter = ExternalIdConverter.class)
+    private ExternalId externalId;
 
     @ManyToOne
     @JoinColumn(name = "office_id", nullable = false)
@@ -142,7 +167,7 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
 
     private SavingsAccountTransaction(final SavingsAccount savingsAccount, final Office office, final PaymentDetail paymentDetail,
             final Integer typeOf, final LocalDate transactionLocalDate, final BigDecimal amount, final boolean isReversed,
-            final boolean isManualTransaction, final Boolean lienTransaction, final String refNo) {
+            final boolean isManualTransaction, final Boolean lienTransaction, final String refNo, final ExternalId externalId) {
         this.savingsAccount = savingsAccount;
         this.office = office;
         this.typeOf = typeOf;
@@ -155,186 +180,225 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
         this.isManualTransaction = isManualTransaction;
         this.lienTransaction = lienTransaction;
         this.refNo = refNo;
+        this.externalId = externalId;
     }
 
     private SavingsAccountTransaction(final SavingsAccount savingsAccount, final Office office, final Integer typeOf,
             final LocalDate transactionLocalDate, final Money amount, final boolean isReversed, final boolean isManualTransaction,
-            final Boolean lienTransaction, final String refNo) {
-        this(savingsAccount, office, null, typeOf, transactionLocalDate, amount, isReversed, isManualTransaction, lienTransaction, refNo);
+            final Boolean lienTransaction, final String refNo, final ExternalId externalId) {
+        this(savingsAccount, office, null, typeOf, transactionLocalDate, amount, isReversed, isManualTransaction, lienTransaction, refNo,
+                externalId);
     }
 
     private SavingsAccountTransaction(final SavingsAccount savingsAccount, final Office office, final PaymentDetail paymentDetail,
             final Integer typeOf, final LocalDate transactionLocalDate, final Money amount, final boolean isReversed,
-            final boolean isManualTransaction, final Boolean lienTransaction, final String refNo) {
+            final boolean isManualTransaction, final Boolean lienTransaction, final String refNo, final ExternalId externalId) {
         this(savingsAccount, office, paymentDetail, typeOf, transactionLocalDate, amount.getAmount(), isReversed, isManualTransaction,
-                lienTransaction, refNo);
+                lienTransaction, refNo, externalId);
     }
 
     public static SavingsAccountTransaction deposit(final SavingsAccount savingsAccount, final Office office,
-            final PaymentDetail paymentDetail, final LocalDate date, final Money amount, final String refNo) {
+            final PaymentDetail paymentDetail, final LocalDate date, final Money amount, final String refNo, final ExternalId externalId) {
         final boolean isReversed = false;
         final boolean isManualTransaction = false;
         final Boolean lienTransaction = false;
-        return new SavingsAccountTransaction(savingsAccount, office, paymentDetail, SavingsAccountTransactionType.DEPOSIT.getValue(), date,
-                amount, isReversed, isManualTransaction, lienTransaction, refNo);
+        SavingsAccountTransaction transaction = new SavingsAccountTransaction(savingsAccount, office, paymentDetail,
+                SavingsAccountTransactionType.DEPOSIT.getValue(), date, amount, isReversed, isManualTransaction, lienTransaction, refNo,
+                externalId);
+        transaction.setExternalId(externalId);
+        return transaction;
     }
 
     public static SavingsAccountTransaction deposit(final SavingsAccount savingsAccount, final Office office,
             final PaymentDetail paymentDetail, final LocalDate date, final Money amount,
-            final SavingsAccountTransactionType savingsAccountTransactionType, final String refNo) {
+            final SavingsAccountTransactionType savingsAccountTransactionType, final String refNo, final ExternalId externalId) {
         final boolean isReversed = false;
         final boolean isManualTransaction = false;
         final Boolean lienTransaction = false;
-        return new SavingsAccountTransaction(savingsAccount, office, paymentDetail, savingsAccountTransactionType.getValue(), date, amount,
-                isReversed, isManualTransaction, lienTransaction, refNo);
+        SavingsAccountTransaction transaction = new SavingsAccountTransaction(savingsAccount, office, paymentDetail,
+                savingsAccountTransactionType.getValue(), date, amount, isReversed, isManualTransaction, lienTransaction, refNo,
+                externalId);
+        transaction.setExternalId(externalId);
+        return transaction;
     }
 
     public static SavingsAccountTransaction withdrawal(final SavingsAccount savingsAccount, final Office office,
-            final PaymentDetail paymentDetail, final LocalDate date, final Money amount, final String refNo) {
+            final PaymentDetail paymentDetail, final LocalDate date, final Money amount, final String refNo, final ExternalId externalId) {
         final boolean isReversed = false;
         final boolean isManualTransaction = false;
         final Boolean lienTransaction = false;
-        return new SavingsAccountTransaction(savingsAccount, office, paymentDetail, SavingsAccountTransactionType.WITHDRAWAL.getValue(),
-                date, amount, isReversed, isManualTransaction, lienTransaction, refNo);
+        SavingsAccountTransaction transaction = new SavingsAccountTransaction(savingsAccount, office, paymentDetail,
+                SavingsAccountTransactionType.WITHDRAWAL.getValue(), date, amount, isReversed, isManualTransaction, lienTransaction, refNo,
+                externalId);
+        transaction.setExternalId(externalId);
+        return transaction;
     }
 
     public static SavingsAccountTransaction interestPosting(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
-            final Money amount, final boolean isManualTransaction) {
+            final Money amount, final boolean isManualTransaction, final ExternalId externalId) {
         final boolean isReversed = false;
         final Boolean lienTransaction = false;
         final String refNo = null;
-        return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.INTEREST_POSTING.getValue(), date,
-                amount, isReversed, isManualTransaction, lienTransaction, refNo);
+        SavingsAccountTransaction transaction = new SavingsAccountTransaction(savingsAccount, office,
+                SavingsAccountTransactionType.INTEREST_POSTING.getValue(), date, amount, isReversed, isManualTransaction, lienTransaction,
+                refNo, externalId);
+        transaction.setExternalId(externalId);
+        return transaction;
     }
 
     public static SavingsAccountTransaction overdraftInterest(final SavingsAccount savingsAccount, final Office office,
-            final LocalDate date, final Money amount, final boolean isManualTransaction) {
+            final LocalDate date, final Money amount, final boolean isManualTransaction, final ExternalId externalId) {
         final boolean isReversed = false;
         final Boolean lienTransaction = false;
         final String refNo = null;
-        return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.OVERDRAFT_INTEREST.getValue(), date,
-                amount, isReversed, isManualTransaction, lienTransaction, refNo);
+        SavingsAccountTransaction transaction = new SavingsAccountTransaction(savingsAccount, office,
+                SavingsAccountTransactionType.OVERDRAFT_INTEREST.getValue(), date, amount, isReversed, isManualTransaction, lienTransaction,
+                refNo, externalId);
+        transaction.setExternalId(externalId);
+        return transaction;
     }
 
     public static SavingsAccountTransaction withdrawalFee(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
-            final Money amount, final String refNo) {
+            final Money amount, final String refNo, final ExternalId externalId) {
         final boolean isReversed = false;
         final boolean isManualTransaction = false;
         final Boolean lienTransaction = false;
-        return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.WITHDRAWAL_FEE.getValue(), date, amount,
-                isReversed, isManualTransaction, lienTransaction, refNo);
+        SavingsAccountTransaction transaction = new SavingsAccountTransaction(savingsAccount, office,
+                SavingsAccountTransactionType.WITHDRAWAL_FEE.getValue(), date, amount, isReversed, isManualTransaction, lienTransaction,
+                refNo, externalId);
+        transaction.setExternalId(externalId);
+        return transaction;
     }
 
     public static SavingsAccountTransaction annualFee(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
-            final Money amount) {
+            final Money amount, final String refNo, final ExternalId externalId) {
         final boolean isReversed = false;
         final boolean isManualTransaction = false;
         final Boolean lienTransaction = false;
-        final String refNo = null;
-        return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.ANNUAL_FEE.getValue(), date, amount,
-                isReversed, isManualTransaction, lienTransaction, refNo);
+        SavingsAccountTransaction transaction = new SavingsAccountTransaction(savingsAccount, office,
+                SavingsAccountTransactionType.ANNUAL_FEE.getValue(), date, amount, isReversed, isManualTransaction, lienTransaction, refNo,
+                externalId);
+        transaction.setExternalId(externalId);
+        return transaction;
     }
 
     public static SavingsAccountTransaction charge(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
-            final Money amount) {
+            final Money amount, final String refNo, final ExternalId externalId) {
         final boolean isReversed = false;
         final boolean isManualTransaction = false;
         final Boolean lienTransaction = false;
-        final String refNo = null;
-        return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.PAY_CHARGE.getValue(), date, amount,
-                isReversed, isManualTransaction, lienTransaction, refNo);
+        SavingsAccountTransaction transaction = new SavingsAccountTransaction(savingsAccount, office,
+                SavingsAccountTransactionType.PAY_CHARGE.getValue(), date, amount, isReversed, isManualTransaction, lienTransaction, refNo,
+                externalId);
+        transaction.setExternalId(externalId);
+        return transaction;
     }
 
     public static SavingsAccountTransaction waiver(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
-            final Money amount) {
+            final Money amount, final String refNo, final ExternalId externalId) {
         final boolean isReversed = false;
         final boolean isManualTransaction = false;
         final Boolean lienTransaction = false;
-        final String refNo = null;
-        return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.WAIVE_CHARGES.getValue(), date, amount,
-                isReversed, isManualTransaction, lienTransaction, refNo);
+        SavingsAccountTransaction transaction = new SavingsAccountTransaction(savingsAccount, office,
+                SavingsAccountTransactionType.WAIVE_CHARGES.getValue(), date, amount, isReversed, isManualTransaction, lienTransaction,
+                refNo, externalId);
+        transaction.setExternalId(externalId);
+        return transaction;
     }
 
-    public static SavingsAccountTransaction initiateTransfer(final SavingsAccount savingsAccount, final Office office,
-            final LocalDate date) {
+    public static SavingsAccountTransaction initiateTransfer(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
+            final ExternalId externalId) {
         final boolean isReversed = false;
         final boolean isManualTransaction = false;
         final PaymentDetail paymentDetail = null;
         final Boolean lienTransaction = false;
         final String refNo = null;
-        return new SavingsAccountTransaction(savingsAccount, office, paymentDetail,
+        SavingsAccountTransaction transaction = new SavingsAccountTransaction(savingsAccount, office, paymentDetail,
                 SavingsAccountTransactionType.INITIATE_TRANSFER.getValue(), date, savingsAccount.getSummary().getAccountBalance(),
-                isReversed, isManualTransaction, lienTransaction, refNo);
+                isReversed, isManualTransaction, lienTransaction, refNo, externalId);
+        transaction.setExternalId(externalId);
+        return transaction;
     }
 
-    public static SavingsAccountTransaction approveTransfer(final SavingsAccount savingsAccount, final Office office,
-            final LocalDate date) {
+    public static SavingsAccountTransaction approveTransfer(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
+            final ExternalId externalId) {
         final boolean isReversed = false;
         final boolean isManualTransaction = false;
         final PaymentDetail paymentDetail = null;
         final Boolean lienTransaction = false;
         final String refNo = null;
-        return new SavingsAccountTransaction(savingsAccount, office, paymentDetail,
+        SavingsAccountTransaction transaction = new SavingsAccountTransaction(savingsAccount, office, paymentDetail,
                 SavingsAccountTransactionType.APPROVE_TRANSFER.getValue(), date, savingsAccount.getSummary().getAccountBalance(),
-                isReversed, isManualTransaction, lienTransaction, refNo);
+                isReversed, isManualTransaction, lienTransaction, refNo, externalId);
+        transaction.setExternalId(externalId);
+        return transaction;
     }
 
-    public static SavingsAccountTransaction withdrawTransfer(final SavingsAccount savingsAccount, final Office office,
-            final LocalDate date) {
+    public static SavingsAccountTransaction withdrawTransfer(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
+            final ExternalId externalId) {
         final boolean isReversed = false;
         final boolean isManualTransaction = false;
         final PaymentDetail paymentDetail = null;
         final Boolean lienTransaction = false;
         final String refNo = null;
-        return new SavingsAccountTransaction(savingsAccount, office, paymentDetail,
+        SavingsAccountTransaction transaction = new SavingsAccountTransaction(savingsAccount, office, paymentDetail,
                 SavingsAccountTransactionType.WITHDRAW_TRANSFER.getValue(), date, savingsAccount.getSummary().getAccountBalance(),
-                isReversed, isManualTransaction, lienTransaction, refNo);
+                isReversed, isManualTransaction, lienTransaction, refNo, externalId);
+        transaction.setExternalId(externalId);
+        return transaction;
     }
 
     public static SavingsAccountTransaction withHoldTax(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
-            final Money amount, final Map<TaxComponent, BigDecimal> taxDetails) {
+            final Money amount, final ExternalId externalId, final Map<TaxComponent, BigDecimal> taxDetails) {
         final boolean isReversed = false;
         final boolean isManualTransaction = false;
         final Boolean lienTransaction = false;
         final String refNo = null;
         SavingsAccountTransaction accountTransaction = new SavingsAccountTransaction(savingsAccount, office,
                 SavingsAccountTransactionType.WITHHOLD_TAX.getValue(), date, amount, isReversed, isManualTransaction, lienTransaction,
-                refNo);
+                refNo, externalId);
         updateTaxDetails(taxDetails, accountTransaction);
         return accountTransaction;
     }
 
     public static SavingsAccountTransaction escheat(final SavingsAccount savingsAccount, final LocalDate date,
-            final boolean accountTransaction) {
+            final boolean accountTransaction, final ExternalId externalId) {
         final boolean isReversed = false;
         final PaymentDetail paymentDetail = null;
         final Boolean lienTransaction = false;
         final String refNo = null;
-        return new SavingsAccountTransaction(savingsAccount, savingsAccount.office(), paymentDetail,
+        SavingsAccountTransaction transaction = new SavingsAccountTransaction(savingsAccount, savingsAccount.office(), paymentDetail,
                 SavingsAccountTransactionType.ESCHEAT.getValue(), date, savingsAccount.getSummary().getAccountBalance(), isReversed,
-                accountTransaction, lienTransaction, refNo);
+                accountTransaction, lienTransaction, refNo, externalId);
+        transaction.setExternalId(externalId);
+        return transaction;
     }
 
     public static SavingsAccountTransaction copyTransaction(SavingsAccountTransaction accountTransaction) {
         return new SavingsAccountTransaction(accountTransaction.savingsAccount, accountTransaction.office, accountTransaction.paymentDetail,
                 accountTransaction.typeOf, accountTransaction.getTransactionDate(), accountTransaction.amount, accountTransaction.reversed,
-                accountTransaction.isManualTransaction, accountTransaction.lienTransaction, accountTransaction.refNo);
+                accountTransaction.isManualTransaction, accountTransaction.lienTransaction, accountTransaction.refNo,
+                accountTransaction.externalId);
     }
 
     public static SavingsAccountTransaction holdAmount(final SavingsAccount savingsAccount, final Office office,
-            final PaymentDetail paymentDetail, final LocalDate date, final Money amount, final Boolean lienTransaction) {
+            final PaymentDetail paymentDetail, final LocalDate date, final Money amount, final Boolean lienTransaction,
+            final ExternalId externalId) {
         final boolean isReversed = false;
         final boolean isManualTransaction = false;
         final String refNo = null;
-        return new SavingsAccountTransaction(savingsAccount, office, paymentDetail, SavingsAccountTransactionType.AMOUNT_HOLD.getValue(),
-                date, amount, isReversed, isManualTransaction, lienTransaction, refNo);
+        SavingsAccountTransaction transaction = new SavingsAccountTransaction(savingsAccount, office, paymentDetail,
+                SavingsAccountTransactionType.AMOUNT_HOLD.getValue(), date, amount, isReversed, isManualTransaction, lienTransaction, refNo,
+                externalId);
+        transaction.setExternalId(externalId);
+        return transaction;
     }
 
     public static SavingsAccountTransaction releaseAmount(SavingsAccountTransaction accountTransaction, LocalDate transactionDate) {
         return new SavingsAccountTransaction(accountTransaction.savingsAccount, accountTransaction.office, accountTransaction.paymentDetail,
                 SavingsAccountTransactionType.AMOUNT_RELEASE.getValue(), transactionDate, accountTransaction.amount,
                 accountTransaction.reversed, accountTransaction.isManualTransaction, accountTransaction.lienTransaction,
-                accountTransaction.refNo);
+                accountTransaction.refNo, accountTransaction.externalId);
     }
 
     public static SavingsAccountTransaction reversal(SavingsAccountTransaction accountTransaction) {
@@ -353,6 +417,14 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
                         .add(new SavingsAccountTransactionTaxDetails(accountTransaction, mapEntry.getKey(), mapEntry.getValue()));
             }
         }
+    }
+
+    public ExternalId getExternalId() {
+        return this.externalId;
+    }
+
+    public void setExternalId(ExternalId externalId) {
+        this.externalId = externalId;
     }
 
     public SavingsAccount getSavingsAccount() {
@@ -592,6 +664,11 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
 
     public Map<String, Object> toMapData(final String currencyCode) {
         final Map<String, Object> thisTransactionData = new LinkedHashMap<>();
+        thisTransactionData.put("id", getId());
+
+        if (this.externalId != null) {
+            thisTransactionData.put("externalId", this.externalId.getValue());
+        }
 
         final SavingsAccountTransactionEnumData transactionType = SavingsEnumerations.transactionType(this.typeOf);
 

@@ -50,6 +50,17 @@ public class ExternalId implements Serializable {
     }
 
     /**
+     * Creates a new ExternalId instance
+     *
+     * @param value
+     *            The external ID value as string
+     * @return A new ExternalId instance
+     */
+    public static ExternalId of(String value) {
+        return new ExternalId(value);
+    }
+
+    /**
      * @return Create a new ExternalId object where value is a newly generated UUID
      */
     public static ExternalId generate() {

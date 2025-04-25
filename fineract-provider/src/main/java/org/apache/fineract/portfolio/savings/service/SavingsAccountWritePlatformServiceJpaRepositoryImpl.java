@@ -57,6 +57,7 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
@@ -243,8 +244,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         boolean isRegularTransaction = false;
         if (amountForDeposit.isGreaterThanZero()) {
             boolean isAccountTransfer = false;
+            account.setConfigurationDomainService(this.configurationDomainService);
             this.savingsAccountDomainService.handleDeposit(account, fmt, account.getActivationDate(), amountForDeposit.getAmount(), null,
-                    isAccountTransfer, isRegularTransaction, false);
+                    isAccountTransfer, isRegularTransaction, false, account.getExternalId(ExternalId.empty()));
 
             updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         }
@@ -303,8 +305,10 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
         boolean isAccountTransfer = false;
         boolean isRegularTransaction = true;
+        account.setConfigurationDomainService(this.configurationDomainService);
         final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(account, fmt, transactionDate,
-                transactionAmount, paymentDetail, isAccountTransfer, isRegularTransaction, backdatedTxnsAllowedTill);
+                transactionAmount, paymentDetail, isAccountTransfer, isRegularTransaction, backdatedTxnsAllowedTill,
+                account.getExternalId(ExternalId.empty()));
 
         if (isGsim && (deposit.getId() != null)) {
 
@@ -378,8 +382,10 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final boolean isWithdrawBalance = false;
         final SavingsTransactionBooleanValues transactionBooleanValues = new SavingsTransactionBooleanValues(isAccountTransfer,
                 isRegularTransaction, isApplyWithdrawFee, isInterestTransfer, isWithdrawBalance);
+        account.setConfigurationDomainService(this.configurationDomainService);
         final SavingsAccountTransaction withdrawal = this.savingsAccountDomainService.handleWithdrawal(account, fmt, transactionDate,
-                transactionAmount, paymentDetail, transactionBooleanValues, backdatedTxnsAllowedTill);
+                transactionAmount, paymentDetail, transactionBooleanValues, backdatedTxnsAllowedTill,
+                account.getExternalId(ExternalId.empty()));
 
         if (isGsim && (withdrawal.getId() != null)) {
             GroupSavingsIndividualMonitoring gsim = gsimRepository.findById(account.getGsim().getId()).orElseThrow();
@@ -639,10 +645,13 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         if (isBulk) {
             String transactionRefNo = savingsAccountTransaction.getRefNo();
             savingsAccountTransactions = this.savingsAccountTransactionRepository.findByRefNo(transactionRefNo);
-            reversal = this.savingsAccountDomainService.handleReversal(account, savingsAccountTransactions, backdatedTxnsAllowedTill);
+            account.setConfigurationDomainService(this.configurationDomainService);
+            reversal = this.savingsAccountDomainService.handleReversal(account, savingsAccountTransactions, backdatedTxnsAllowedTill,
+                    account.getExternalId(ExternalId.empty()));
         } else {
+            account.setConfigurationDomainService(this.configurationDomainService);
             reversal = this.savingsAccountDomainService.handleReversal(account, Collections.singletonList(savingsAccountTransaction),
-                    backdatedTxnsAllowedTill);
+                    backdatedTxnsAllowedTill, account.getExternalId(ExternalId.empty()));
         }
         reversalId = reversal.getId();
         return new CommandProcessingResultBuilder() //
@@ -942,9 +951,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             final boolean isInterestTransfer = false;
             final SavingsTransactionBooleanValues transactionBooleanValues = new SavingsTransactionBooleanValues(isAccountTransfer,
                     isRegularTransaction, isApplyWithdrawFee, isInterestTransfer, isWithdrawBalance);
-
+            account.setConfigurationDomainService(this.configurationDomainService);
             this.savingsAccountDomainService.handleWithdrawal(account, fmt, closedDate, transactionAmount, paymentDetail,
-                    transactionBooleanValues, false);
+                    transactionBooleanValues, false, account.getExternalId(ExternalId.empty()));
 
         }
 
@@ -989,8 +998,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
         updateExistingTransactionsDetails(savingsAccount, existingTransactionIds, existingReversedTransactionIds);
 
+        savingsAccount.setConfigurationDomainService(this.configurationDomainService);
         final SavingsAccountTransaction newTransferTransaction = SavingsAccountTransaction.initiateTransfer(savingsAccount,
-                savingsAccount.office(), transferDate);
+                savingsAccount.office(), transferDate, savingsAccount.getExternalId(ExternalId.empty()));
         savingsAccount.addTransaction(newTransferTransaction);
         savingsAccount.setStatus(SavingsAccountStatusType.TRANSFER_IN_PROGRESS.getValue());
         final MathContext mc = MathContext.DECIMAL64;
@@ -1020,8 +1030,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
         updateExistingTransactionsDetails(savingsAccount, existingTransactionIds, existingReversedTransactionIds);
 
+        savingsAccount.setConfigurationDomainService(this.configurationDomainService);
         final SavingsAccountTransaction withdrawtransferTransaction = SavingsAccountTransaction.withdrawTransfer(savingsAccount,
-                savingsAccount.office(), transferDate);
+                savingsAccount.office(), transferDate, savingsAccount.getExternalId(ExternalId.empty()));
         savingsAccount.addTransaction(withdrawtransferTransaction);
         savingsAccount.setStatus(SavingsAccountStatusType.ACTIVE.getValue());
         final MathContext mc = MathContext.DECIMAL64;
@@ -1059,8 +1070,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
         updateExistingTransactionsDetails(savingsAccount, existingTransactionIds, existingReversedTransactionIds);
 
+        savingsAccount.setConfigurationDomainService(this.configurationDomainService);
         final SavingsAccountTransaction acceptTransferTransaction = SavingsAccountTransaction.approveTransfer(savingsAccount,
-                acceptedInOffice, transferDate);
+                acceptedInOffice, transferDate, savingsAccount.getExternalId(ExternalId.empty()));
         savingsAccount.addTransaction(acceptTransferTransaction);
         savingsAccount.setStatus(SavingsAccountStatusType.ACTIVE.getValue());
         if (fieldOfficer != null) {
@@ -1748,7 +1760,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         this.savingsAccountTransactionDataValidator.validateHoldAndAssembleForm(command.json(), account, submittedBy,
                 backdatedTxnsAllowedTill);
-        SavingsAccountTransaction transaction = this.savingsAccountDomainService.handleHold(account, amount, transactionDate, lienAllowed);
+        account.setConfigurationDomainService(this.configurationDomainService);
+        SavingsAccountTransaction transaction = this.savingsAccountDomainService.handleHold(account, amount, transactionDate, lienAllowed,
+                account.getExternalId(ExternalId.empty()));
         account.holdAmount(amount);
         transaction.setRunningBalance(runningBalance);
 

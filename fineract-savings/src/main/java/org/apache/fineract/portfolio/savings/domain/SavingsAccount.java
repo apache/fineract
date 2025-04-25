@@ -344,6 +344,17 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
 
     public transient ConfigurationDomainService configurationDomainService;
 
+    public ExternalId getExternalId(ExternalId externalId) {
+        if (externalId.isEmpty() && configurationDomainService != null && configurationDomainService.isExternalIdAutoGenerationEnabled()) {
+            return ExternalId.generate();
+        }
+        return externalId;
+    }
+
+    public void setConfigurationDomainService(ConfigurationDomainService configurationDomainService) {
+        this.configurationDomainService = configurationDomainService;
+    }
+
     protected SavingsAccount() {
         //
     }
@@ -549,10 +560,12 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
                     if (interestEarnedToBePostedForPeriod.isGreaterThanOrEqualTo(Money.zero(currency))) {
 
                         newPostingTransaction = SavingsAccountTransaction.interestPosting(this, office(), interestPostingTransactionDate,
-                                interestEarnedToBePostedForPeriod, interestPostingPeriod.isUserPosting());
+                                interestEarnedToBePostedForPeriod, interestPostingPeriod.isUserPosting(),
+                                getExternalId(ExternalId.empty()));
                     } else {
                         newPostingTransaction = SavingsAccountTransaction.overdraftInterest(this, office(), interestPostingTransactionDate,
-                                interestEarnedToBePostedForPeriod.negated(), interestPostingPeriod.isUserPosting());
+                                interestEarnedToBePostedForPeriod.negated(), interestPostingPeriod.isUserPosting(),
+                                getExternalId(ExternalId.empty()));
                     }
                     if (backdatedTxnsAllowedTill) {
                         addTransactionToExisting(newPostingTransaction);
@@ -588,11 +601,11 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
                         if (interestEarnedToBePostedForPeriod.isGreaterThanOrEqualTo(Money.zero(currency))) {
                             newPostingTransaction = SavingsAccountTransaction.interestPosting(this, office(),
                                     interestPostingTransactionDate, interestEarnedToBePostedForPeriod,
-                                    interestPostingPeriod.isUserPosting());
+                                    interestPostingPeriod.isUserPosting(), getExternalId(ExternalId.empty()));
                         } else {
                             newPostingTransaction = SavingsAccountTransaction.overdraftInterest(this, office(),
                                     interestPostingTransactionDate, interestEarnedToBePostedForPeriod.negated(),
-                                    interestPostingPeriod.isUserPosting());
+                                    interestPostingPeriod.isUserPosting(), getExternalId(ExternalId.empty()));
                         }
                         if (backdatedTxnsAllowedTill) {
                             addTransactionToExisting(newPostingTransaction);
@@ -713,7 +726,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
             BigDecimal totalTax = TaxUtils.totalTaxAmount(taxSplit);
             if (totalTax.compareTo(BigDecimal.ZERO) > 0) {
                 SavingsAccountTransaction withholdTransaction = SavingsAccountTransaction.withHoldTax(this, office(), date,
-                        Money.of(currency, totalTax), taxSplit);
+                        Money.of(currency, totalTax), ExternalId.empty(), taxSplit);
                 if (backdatedTxnsAllowedTill) {
                     addTransactionToExisting(withholdTransaction);
                 } else {
@@ -740,7 +753,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
                 } else if (totalTax.compareTo(withholdTransaction.getAmount()) != 0) {
                     withholdTransaction.reverse();
                     SavingsAccountTransaction newWithholdTransaction = SavingsAccountTransaction.withHoldTax(this, office(),
-                            withholdTransaction.getTransactionDate(), Money.of(currency, totalTax), taxSplit);
+                            withholdTransaction.getTransactionDate(), Money.of(currency, totalTax), ExternalId.empty(), taxSplit);
                     addTransaction(newWithholdTransaction);
                     isTaxAdded = true;
                 }
@@ -1153,7 +1166,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         final Money amount = Money.of(this.currency, transactionDTO.getTransactionAmount());
 
         final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(this, office(), transactionDTO.getPaymentDetail(),
-                transactionDTO.getTransactionDate(), amount, savingsAccountTransactionType, refNo);
+                transactionDTO.getTransactionDate(), amount, savingsAccountTransactionType, refNo, ExternalId.empty());
 
         if (backdatedTxnsAllowedTill) {
             addTransactionToExisting(transaction);
@@ -1288,7 +1301,8 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
 
         final Money transactionAmountMoney = Money.of(this.currency, transactionDTO.getTransactionAmount());
         final SavingsAccountTransaction transaction = SavingsAccountTransaction.withdrawal(this, office(),
-                transactionDTO.getPaymentDetail(), transactionDTO.getTransactionDate(), transactionAmountMoney, refNo);
+                transactionDTO.getPaymentDetail(), transactionDTO.getTransactionDate(), transactionAmountMoney, refNo,
+                getExternalId(ExternalId.empty()));
 
         if (backdatedTxnsAllowedTill) {
             addTransactionToExisting(transaction);
@@ -3173,11 +3187,14 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         SavingsAccountTransaction chargeTransaction;
 
         if (savingsAccountCharge.isWithdrawalFee()) {
-            chargeTransaction = SavingsAccountTransaction.withdrawalFee(this, office(), transactionDate, transactionAmount, refNo);
+            chargeTransaction = SavingsAccountTransaction.withdrawalFee(this, office(), transactionDate, transactionAmount, refNo,
+                    getExternalId(ExternalId.empty()));
         } else if (savingsAccountCharge.isAnnualFee()) {
-            chargeTransaction = SavingsAccountTransaction.annualFee(this, office(), transactionDate, transactionAmount);
+            chargeTransaction = SavingsAccountTransaction.annualFee(this, office(), transactionDate, transactionAmount, null,
+                    getExternalId(ExternalId.empty()));
         } else {
-            chargeTransaction = SavingsAccountTransaction.charge(this, office(), transactionDate, transactionAmount);
+            chargeTransaction = SavingsAccountTransaction.charge(this, office(), transactionDate, transactionAmount, null,
+                    getExternalId(ExternalId.empty()));
         }
 
         handleChargeTransactions(savingsAccountCharge, chargeTransaction, backdatedTxnsAllowedTill);
@@ -3187,7 +3204,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
     private void handleWaiverChargeTransactions(SavingsAccountCharge savingsAccountCharge, Money transactionAmount,
             boolean backdatedTxnsAllowedTill) {
         final SavingsAccountTransaction chargeTransaction = SavingsAccountTransaction.waiver(this, office(),
-                DateUtils.getBusinessLocalDate(), transactionAmount);
+                DateUtils.getBusinessLocalDate(), transactionAmount, null, ExternalId.empty());
         handleChargeTransactions(savingsAccountCharge, chargeTransaction, backdatedTxnsAllowedTill);
     }
 
@@ -3483,7 +3500,8 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         boolean postReversals = false;
         LocalDate transactionDate = DateUtils.getBusinessLocalDate();
         if (this.getSummary().getAccountBalance(this.getCurrency()).isGreaterThanZero()) {
-            SavingsAccountTransaction transaction = SavingsAccountTransaction.escheat(this, transactionDate, postInterestAsOnDate);
+            SavingsAccountTransaction transaction = SavingsAccountTransaction.escheat(this, transactionDate, postInterestAsOnDate,
+                    ExternalId.empty());
             this.transactions.add(transaction);
         }
         recalculateDailyBalances(Money.zero(this.currency), transactionDate, false, postReversals);

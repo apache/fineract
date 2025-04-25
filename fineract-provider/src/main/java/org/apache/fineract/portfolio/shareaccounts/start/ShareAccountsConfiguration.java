@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.shareaccounts.start;
 
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatRepositoryWrapper;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
@@ -105,8 +106,10 @@ public class ShareAccountsConfiguration {
     @Bean
     @ConditionalOnMissingBean(ShareAccountSchedularService.class)
     public ShareAccountSchedularService shareAccountSchedularService(ShareAccountDividendRepository shareAccountDividendRepository,
-            SavingsAccountDomainService savingsAccountDomainService, SavingsAccountAssembler savingsAccountAssembler) {
-        return new ShareAccountSchedularServiceImpl(shareAccountDividendRepository, savingsAccountDomainService, savingsAccountAssembler);
+            SavingsAccountDomainService savingsAccountDomainService, SavingsAccountAssembler savingsAccountAssembler,
+            ConfigurationDomainService configurationDomainService) {
+        return new ShareAccountSchedularServiceImpl(shareAccountDividendRepository, savingsAccountDomainService, savingsAccountAssembler,
+                configurationDomainService);
     }
 
     @Bean

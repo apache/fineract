@@ -168,36 +168,36 @@ fi
 #   * DEFAULT_JVM_OPTS, JAVA_OPTS, and GRADLE_OPTS environment variables.
 
 # For Cygwin or MSYS, switch paths to Windows format before running java
-if "$cygwin" || "$msys" ; then
-    APP_HOME=$( cygpath --path --mixed "$APP_HOME" )
-    CLASSPATH=$( cygpath --path --mixed "$CLASSPATH" )
-
+# Convert JAVACMD differently for Cygwin and MSYS
+if "$cygwin"; then
     JAVACMD=$( cygpath --unix "$JAVACMD" )
-
-    # Now convert the arguments - kludge to limit ourselves to /bin/sh
-    for arg do
-        if
-            case $arg in                                #(
-              -*)   false ;;                            # don't mess with options #(
-              /?*)  t=${arg#/} t=/${t%%/*}              # looks like a POSIX filepath
-                    [ -e "$t" ] ;;                      #(
-              *)    false ;;
-            esac
-        then
-            arg=$( cygpath --path --ignore --mixed "$arg" )
-        fi
-        # Roll the args list around exactly as many times as the number of
-        # args, so each arg winds up back in the position where it started, but
-        # possibly modified.
-        #
-        # NB: a `for` loop captures its iteration list before it begins, so
-        # changing the positional parameters here affects neither the number of
-        # iterations, nor the values presented in `arg`.
-        shift                   # remove old arg
-        set -- "$@" "$arg"      # push replacement arg
-    done
+elif "$msys"; then
+    # For MSYS/MinGW, keep the Java path as is, with forward slashes
+    # This helps avoid the problematic /cygdrive prefix
+    echo "MinGW environment detected, using direct path: $JAVACMD"
 fi
 
+# Now convert the arguments - kludge to limit ourselves to /bin/sh
+for arg do
+    if case $arg in
+          -*) false ;;  # don't mess with options
+          /?*) t=${arg#/} t=/${t%%/*} # looks like a POSIX filepath
+                [ -e "$t" ] ;;           # check if file exists
+          *) false ;;
+    esac
+    then
+        arg=$( cygpath --path --ignore --mixed "$arg" )
+    fi
+    # Roll the args list around exactly as many times as the number of
+    # args, so each arg winds up back in the position where it started, but
+    # possibly modified.
+    #
+    # NB: a `for` loop captures its iteration list before it begins, so
+    # changing the positional parameters here affects neither the number of
+    # iterations, nor the values presented in `arg`.
+    shift  # remove old arg
+    set -- "$@" "$arg"  # push replacement arg
+done
 
 # Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
 DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'

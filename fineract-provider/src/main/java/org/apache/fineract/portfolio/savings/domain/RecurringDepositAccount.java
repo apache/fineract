@@ -30,6 +30,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.OrderBy;
+import jakarta.persistence.Transient;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
@@ -42,6 +43,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -90,6 +92,24 @@ public class RecurringDepositAccount extends SavingsAccount {
     @OrderBy(value = "installmentNumber, id")
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "account", orphanRemoval = true, fetch = FetchType.LAZY)
     private List<RecurringDepositScheduleInstallment> depositScheduleInstallments = new ArrayList<>();
+
+    @Transient
+    private ConfigurationDomainService configurationDomainService;
+
+    /**
+     * Returns an appropriate ExternalId based on configuration settings. If auto-generation is enabled and provided
+     * externalId is empty, generate a new one.
+     */
+    public ExternalId getExternalId(ExternalId externalId) {
+        if (externalId.isEmpty() && configurationDomainService != null && configurationDomainService.isExternalIdAutoGenerationEnabled()) {
+            return ExternalId.generate();
+        }
+        return externalId;
+    }
+
+    public void setConfigurationDomainService(ConfigurationDomainService configurationDomainService) {
+        this.configurationDomainService = configurationDomainService;
+    }
 
     protected RecurringDepositAccount() {
         //
@@ -394,7 +414,7 @@ public class RecurringDepositAccount extends SavingsAccount {
                         dueDate = latestTransactionDate;
                     }
                     final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(null, office(), null, dueDate,
-                            installment.getDepositAmountOutstanding(getCurrency()), refNo);
+                            installment.getDepositAmountOutstanding(getCurrency()), refNo, getExternalId(ExternalId.empty()));
                     allTransactions.add(transaction);
                 }
             }
@@ -662,7 +682,8 @@ public class RecurringDepositAccount extends SavingsAccount {
             final SavingsAccountTransaction postingTransaction = findInterestPostingTransactionFor(interestPostingTransactionDate);
             if (postingTransaction == null) {
                 final SavingsAccountTransaction newPostingTransaction = SavingsAccountTransaction.interestPosting(this, office(),
-                        interestPostingTransactionDate, interestEarnedToBePostedForPeriod, interestPostingPeriod.isUserPosting());
+                        interestPostingTransactionDate, interestEarnedToBePostedForPeriod, interestPostingPeriod.isUserPosting(),
+                        getExternalId(ExternalId.empty()));
                 addTransaction(newPostingTransaction);
                 recalucateDailyBalanceDetails = true;
             } else {
@@ -670,7 +691,8 @@ public class RecurringDepositAccount extends SavingsAccount {
                 if (correctionRequired) {
                     postingTransaction.reverse();
                     final SavingsAccountTransaction newPostingTransaction = SavingsAccountTransaction.interestPosting(this, office(),
-                            interestPostingTransactionDate, interestEarnedToBePostedForPeriod, interestPostingPeriod.isUserPosting());
+                            interestPostingTransactionDate, interestEarnedToBePostedForPeriod, interestPostingPeriod.isUserPosting(),
+                            getExternalId(ExternalId.empty()));
                     addTransaction(newPostingTransaction);
                     recalucateDailyBalanceDetails = true;
                 }
@@ -703,7 +725,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         if (!remainigInterestToBePosted.isZero()) {
             final boolean postInterestAsOn = false;
             final SavingsAccountTransaction newPostingTransaction = SavingsAccountTransaction.interestPosting(this, office(),
-                    accountCloseDate, remainigInterestToBePosted, postInterestAsOn);
+                    accountCloseDate, remainigInterestToBePosted, postInterestAsOn, getExternalId(ExternalId.empty()));
             addTransaction(newPostingTransaction);
             recalucateDailyBalance = true;
         }
