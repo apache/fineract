@@ -918,6 +918,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADVANCED_CUSTOM_PAYMENT_ALLOCATION_PROGRESSIVE_LOAN_SCHEDULE,
                 responseLoanProductsRequestAdvCustomPaymentAllocationProgressiveLoanSchedule);
 
+        // LP2 + interest recalculation + horizontal + interest refund
+        // (LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_REFUND_FULL)
         String name45 = DefaultLoanProduct.LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_REFUND_FULL.getName();
         PostLoanProductsRequest loanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRefundFull = loanProductsRequestFactory
                 .defaultLoanProductsRequestLP2Emi()//
@@ -2264,6 +2266,8 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_ZERO_INTEREST_CHARGE_OFF_DELINQUENT_REASON_INTEREST_RECALC,
                 responseLoanProductsRequestAdvZeroInterestChargeOffProgressiveDelinquentReasonIntRecalc);
 
+        // LP2 + zero-interest chargeOff behaviour + progressive loan schedule + horizontal + interest recalculation
+        // (LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_INT_REFUND_FULL_ZERO_INT_CHARGE_OFF)
         final String name91 = DefaultLoanProduct.LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_INT_REFUND_FULL_ZERO_INT_CHARGE_OFF.getName();
         final PostLoanProductsRequest loanProductsRequestLP2AdvPaymentIntEmiActualActualIntRefundFullZeroIntChargeOff = loanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRefundFull
                 .name(name91)//
@@ -2275,6 +2279,9 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_INT_REFUND_FULL_ZERO_INT_CHARGE_OFF,
                 responseLoanProductsRequestLP2AdvPaymentIntEmiActualActualIntRefundFullZeroIntChargeOff);
 
+        // LP2 + accelerate maturity chargeOff behaviour + progressive loan schedule + horizontal + interest
+        // recalculation
+        // (LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_INT_REFUND_FULL_ACCELERATE_MATURITY_CHARGE_OFF)
         final String name92 = DefaultLoanProduct.LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_INT_REFUND_FULL_ACCELERATE_MATURITY_CHARGE_OFF
                 .getName();
         final PostLoanProductsRequest loanProductsRequestLP2AdvPaymentIntEmiActualActualIntRefundFullAccelerateMaturityChargeOff = loanProductsRequestLP2AdvancedpaymentInterestEmiActualActualInterestRefundFull
@@ -2286,6 +2293,59 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_INT_REFUND_FULL_ACCELERATE_MATURITY_CHARGE_OFF,
                 responseLoanProductsRequestLP2AdvPaymentIntEmiActualActualIntRefundFullAccelerateMaturityChargeOff);
+
+        // LP2 + no interest recalculation + horizontal + interest refund
+        // (LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_NO_INTEREST_RECALC_REFUND_FULL)
+        String name93 = DefaultLoanProduct.LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_NO_INTEREST_RECALC_REFUND_FULL.getName();
+        PostLoanProductsRequest loanProductsRequestLP2AdvancedPaymentInterestEmiActualActualNoInterestRecalcRefundFull = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2Emi()//
+                .name(name93)//
+                .multiDisburseLoan(true)//
+                .disallowExpectedDisbursements(true)//
+                .maxTrancheCount(10)//
+                .supportedInterestRefundTypes(supportedInterestRefundTypes).paymentAllocation(List.of(//
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                        createPaymentAllocation("GOODWILL_CREDIT", "NEXT_INSTALLMENT"), //
+                        createPaymentAllocation("MERCHANT_ISSUED_REFUND", "NEXT_INSTALLMENT"), //
+                        createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT"), //
+                        createPaymentAllocation("INTEREST_REFUND", "NEXT_INSTALLMENT")));//
+        Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvancedpaymentInterestEmiActualActualNoInterestRecalcRefundFull = loanProductsApi
+                .createLoanProduct(loanProductsRequestLP2AdvancedPaymentInterestEmiActualActualNoInterestRecalcRefundFull).execute();
+        TestContext.INSTANCE.set(
+                TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_NO_INTEREST_RECALC_REFUND_FULL,
+                responseLoanProductsRequestLP2AdvancedpaymentInterestEmiActualActualNoInterestRecalcRefundFull);
+
+        // LP2 + zero-interest chargeOff behaviour + progressive loan schedule + horizontal + no interest recalculation
+        // (LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_NO_INTEREST_RECALC_INT_REFUND_FULL_ZERO_INT_CHARGE_OFF)
+        final String name94 = DefaultLoanProduct.LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_NO_INTEREST_RECALC_INT_REFUND_FULL_ZERO_INT_CHARGE_OFF
+                .getName();
+        final PostLoanProductsRequest loanProductsRequestLP2AdvPaymentIntEmiActualActualNoInterestRecalcIntRefundFullZeroIntChargeOff = loanProductsRequestLP2AdvancedPaymentInterestEmiActualActualNoInterestRecalcRefundFull
+                .name(name94)//
+                .shortName(Utils.randomNameGenerator(SHORT_NAME_PREFIX_EMI, 3))//
+                .chargeOffBehaviour("ZERO_INTEREST");//
+        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvPaymentIntEmiActualActualNoInterestRecalcIntRefundFullZeroIntChargeOff = loanProductsApi
+                .createLoanProduct(loanProductsRequestLP2AdvPaymentIntEmiActualActualNoInterestRecalcIntRefundFullZeroIntChargeOff)
+                .execute();
+        TestContext.INSTANCE.set(
+                TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_NO_INTEREST_RECALC_INT_REFUND_FULL_ZERO_INT_CHARGE_OFF,
+                responseLoanProductsRequestLP2AdvPaymentIntEmiActualActualNoInterestRecalcIntRefundFullZeroIntChargeOff);
+
+        // LP2 + accelerate maturity chargeOff behaviour + progressive loan schedule + horizontal + no interest
+        // recalculation
+        // (LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_NO_INTEREST_RECALC_INT_REFUND_FULL_ACC_MATUR_CHARGE_OFF)
+        final String name95 = DefaultLoanProduct.LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_NO_INTEREST_RECALC_INT_REFUND_FULL_ACC_MATUR_CHARGE_OFF
+                .getName();
+        final PostLoanProductsRequest loanProductsRequestLP2AdvPaymentIntEmiActualActualNoInterestRecalcIntRefundFullAccelerateMaturityChargeOff = loanProductsRequestLP2AdvancedPaymentInterestEmiActualActualNoInterestRecalcRefundFull
+                .name(name95)//
+                .shortName(Utils.randomNameGenerator(SHORT_NAME_PREFIX_EMI, 3))//
+                .chargeOffBehaviour("ACCELERATE_MATURITY");//
+        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2AdvPaymentIntEmiActualActualNoInterestRecalcIntRefundFullAccelerateMaturityChargeOff = loanProductsApi
+                .createLoanProduct(
+                        loanProductsRequestLP2AdvPaymentIntEmiActualActualNoInterestRecalcIntRefundFullAccelerateMaturityChargeOff)
+                .execute();
+        TestContext.INSTANCE.set(
+                TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_NO_INTEREST_RECALC_INT_REFUND_FULL_ACC_MATUR_CHARGE_OFF,
+                responseLoanProductsRequestLP2AdvPaymentIntEmiActualActualNoInterestRecalcIntRefundFullAccelerateMaturityChargeOff);
     }
 
     public static AdvancedPaymentData createPaymentAllocation(String transactionType, String futureInstallmentAllocationRule,
