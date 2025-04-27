@@ -39,7 +39,7 @@ public class FundReadPlatformServiceImpl implements FundReadPlatformService {
     private static final class FundMapper implements RowMapper<FundData> {
 
         public String schema() {
-            return " f.id as id, f.name as name, f.external_id as externalId from m_fund f ";
+            return " f.id as id, f.name as name, f.external_id as externalId, f.is_active as isActive from m_fund f ";
         }
 
         @Override
@@ -48,8 +48,9 @@ public class FundReadPlatformServiceImpl implements FundReadPlatformService {
             final Long id = rs.getLong("id");
             final String name = rs.getString("name");
             final String externalId = rs.getString("externalId");
+            final Boolean isActive = rs.getBoolean("isActive");
 
-            return FundData.instance(id, name, externalId);
+            return FundData.instance(id, name, externalId, isActive);
         }
     }
 
@@ -60,7 +61,7 @@ public class FundReadPlatformServiceImpl implements FundReadPlatformService {
         this.context.authenticatedUser();
 
         final FundMapper rm = new FundMapper();
-        final String sql = "select " + rm.schema() + " order by f.name";
+        final String sql = "select " + rm.schema() + " where f.is_active = true order by f.name";
 
         return this.jdbcTemplate.query(sql, rm); // NOSONAR
     }
@@ -72,7 +73,7 @@ public class FundReadPlatformServiceImpl implements FundReadPlatformService {
             this.context.authenticatedUser();
 
             final FundMapper rm = new FundMapper();
-            final String sql = "select " + rm.schema() + " where f.id = ?";
+            final String sql = "select " + rm.schema() + "where f.is_active = true where f.id = ?";
 
             final FundData selectedFund = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { fundId }); // NOSONAR
 
@@ -80,5 +81,6 @@ public class FundReadPlatformServiceImpl implements FundReadPlatformService {
         } catch (final EmptyResultDataAccessException e) {
             throw new FundNotFoundException(fundId, e);
         }
+
     }
 }

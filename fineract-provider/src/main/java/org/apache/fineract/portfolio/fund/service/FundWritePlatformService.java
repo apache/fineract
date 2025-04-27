@@ -26,4 +26,6 @@ public interface FundWritePlatformService {
     CommandProcessingResult createFund(JsonCommand command);
 
     CommandProcessingResult updateFund(Long fundId, JsonCommand command);
+
+    CommandProcessingResult archiveFund(Long fundId);
 }

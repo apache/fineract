@@ -33,6 +33,7 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -41,10 +42,11 @@ public final class FundCommandFromApiJsonDeserializer {
 
     public static final String NAME = "name";
     public static final String EXTERNAL_ID = "externalId";
+    public static final String IS_ACTIVE = "isActive";
     /**
      * The parameters supported for this command.
      */
-    private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList(NAME, EXTERNAL_ID));
+    private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList(NAME, EXTERNAL_ID, IS_ACTIVE));
     public static final String FUND = "fund";
 
     private final FromJsonHelper fromApiJsonHelper;
@@ -73,6 +75,10 @@ public final class FundCommandFromApiJsonDeserializer {
         final String externalId = this.fromApiJsonHelper.extractStringNamed(EXTERNAL_ID, element);
         baseDataValidator.reset().parameter(EXTERNAL_ID).value(externalId).notExceedingLengthOf(100);
 
+        final Boolean isActive = this.fromApiJsonHelper.extractBooleanNamed(IS_ACTIVE, element);
+        baseDataValidator.reset().parameter(IS_ACTIVE).value(isActive).value(isActive).notNull();
+
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -96,6 +102,11 @@ public final class FundCommandFromApiJsonDeserializer {
         if (this.fromApiJsonHelper.parameterExists(EXTERNAL_ID, element)) {
             final String externalId = this.fromApiJsonHelper.extractStringNamed(EXTERNAL_ID, element);
             baseDataValidator.reset().parameter(EXTERNAL_ID).value(externalId).notExceedingLengthOf(100);
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(IS_ACTIVE, element)) {
+            final Boolean isActive = this.fromApiJsonHelper.extractBooleanNamed(IS_ACTIVE, element);
+            baseDataValidator.reset().parameter(IS_ACTIVE).value(isActive).value(isActive).notNull();
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

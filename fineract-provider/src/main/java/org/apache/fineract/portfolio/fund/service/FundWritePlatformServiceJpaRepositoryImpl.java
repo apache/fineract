@@ -99,6 +99,25 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
         }
     }
 
+    @Transactional
+    @Override
+    @CacheEvict(value = "funds", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('fn')")
+    public CommandProcessingResult archiveFund(final Long fundId) {
+
+        this.context.authenticatedUser();
+
+        final Fund fund = this.fundRepository.findById(fundId)
+                .orElseThrow(() -> new FundNotFoundException(fundId));
+
+        fund.setArchived();
+
+        this.fundRepository.saveAndFlush(fund);
+
+        return new CommandProcessingResultBuilder()
+                .withEntityId(fund.getId())
+                .build();
+    }
+
     /*
      * Guaranteed to throw an exception no matter what the data integrity issue is.
      */

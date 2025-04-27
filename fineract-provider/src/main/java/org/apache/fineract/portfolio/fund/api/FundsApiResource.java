@@ -117,4 +117,20 @@ public class FundsApiResource {
         final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         return toApiJsonSerializer.serialize(result);
     }
+
+    @PUT
+    @Path("{fundId}/archive")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Archive a Fund", description = "Set the isActive instance of fund to false.")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = FundRequest.class)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FundsApiResourceSwagger.PutFundsFundIdResponse.class))) })
+    public String archiveFund(@PathParam("fundId") @Parameter(description = "fundId") final Long fundId,
+                             @Parameter(hidden = true) final FundRequest fundRequest) {
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().archiveFund(fundId)
+                .withJson(toApiJsonSerializer.serialize(fundRequest)).build();
+        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return toApiJsonSerializer.serialize(result);
+    }
 }

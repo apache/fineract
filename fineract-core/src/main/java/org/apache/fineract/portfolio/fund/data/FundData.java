@@ -34,13 +34,17 @@ public final class FundData implements Serializable {
     @SuppressWarnings("unused")
     private final String externalId;
 
-    public static FundData instance(final Long id, final String name, final String externalId) {
-        return new FundData(id, name, externalId);
+    private final Boolean isActive;
+
+    public static FundData instance(final Long id, final String name, final String externalId, final Boolean isActive) {
+        return new FundData(id, name, externalId, isActive);
     }
 
-    private FundData(final Long id, final String name, final String externalId) {
+    private FundData(final Long id, final String name, final String externalId, final Boolean isActive) {
         this.id = id;
         this.name = name;
         this.externalId = externalId;
+        this.isActive = isActive;
     }
+    public String getName(){return this.name; } //for testing
 }

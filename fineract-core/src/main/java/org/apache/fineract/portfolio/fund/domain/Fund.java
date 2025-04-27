@@ -24,9 +24,13 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+
+import javax.swing.text.StyledEditorKit;
 
 @Entity
 @Table(name = "m_fund", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "fund_name_org"),
@@ -39,6 +43,9 @@ public class Fund extends AbstractPersistableCustom<Long> {
     @Column(name = "external_id", length = 100)
     private String externalId;
 
+    @Column(name = "is_active")
+    private Boolean isActive;
+
     public static Fund fromJson(final JsonCommand command) {
 
         final String firstnameParamName = "name";
@@ -47,16 +54,21 @@ public class Fund extends AbstractPersistableCustom<Long> {
         final String lastnameParamName = "externalId";
         final String externalId = command.stringValueOfParameterNamed(lastnameParamName);
 
-        return new Fund(name, externalId);
+        final String archiveParamName = "isActive";
+        final Boolean isActiveValue = command.booleanObjectValueOfParameterNamed(archiveParamName);
+        final Boolean isActive = isActiveValue != null ? isActiveValue : true ;
+
+        return new Fund(name, externalId, isActive);
     }
 
     protected Fund() {
         //
     }
 
-    private Fund(final String fundName, final String externalId) {
+    private Fund(final String fundName, final String externalId, final Boolean isActive) {
         this.name = StringUtils.defaultIfEmpty(fundName, null);
         this.externalId = StringUtils.defaultIfEmpty(externalId, null);
+        this.isActive = BooleanUtils.toBooleanDefaultIfNull(isActive, true);
     }
 
     public Map<String, Object> update(final JsonCommand command) {
@@ -78,5 +90,13 @@ public class Fund extends AbstractPersistableCustom<Long> {
         }
 
         return actualChanges;
+    }
+
+    public void setArchived(){
+        this.isActive = false;
+    }
+
+    public Boolean isActive() {
+        return this.isActive;
     }
 }

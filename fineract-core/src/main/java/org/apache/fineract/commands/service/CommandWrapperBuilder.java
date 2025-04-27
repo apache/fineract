@@ -399,7 +399,15 @@ public class CommandWrapperBuilder {
         this.actionName = "UPDATE";
         this.entityName = "FUND";
         this.entityId = fundId;
-        this.href = "/funds/" + fundId;
+        this.href = "/funds/" + fundId + "/archive";
+        return this;
+    }
+
+    public CommandWrapperBuilder archiveFund(Long fundId) {
+        this.actionName = "UPDATE";
+        this.entityName = "FUND";
+        this.entityId = fundId;
+        this.href = "/fund/" + fundId;
         return this;
     }
 
@@ -3822,4 +3830,6 @@ public class CommandWrapperBuilder {
         this.href = "/v1/loans/external-id/" + loanExternalId + "/interest-pauses/" + variationId;
         return this;
     }
+
+
 }

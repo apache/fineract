@@ -33,4 +33,5 @@ public class FundNotFoundException extends AbstractPlatformResourceNotFoundExcep
     public FundNotFoundException(Long id, EmptyResultDataAccessException e) {
         super("error.msg.fund.id.invalid", "Fund with identifier " + id + " does not exist", id, e);
     }
+
 }

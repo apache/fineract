@@ -32,4 +32,5 @@ public class FundRequest implements Serializable {
 
     private String name;
     private String externalId;
+    private Boolean isActive;
 }
