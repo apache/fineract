@@ -31,7 +31,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.AdvancedPaymentData;
-import org.apache.fineract.client.models.BusinessDateRequest;
+import org.apache.fineract.client.models.BusinessDateUpdateRequest;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
@@ -39,7 +39,6 @@ import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
-import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -87,7 +86,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends BaseL
         try {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
-            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
                     .date("2023.02.15").dateFormat("yyyy.MM.dd").locale("en"));
 
             final Account assetAccount = accountHelper.createAssetAccount();
@@ -167,7 +166,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends BaseL
             assertEquals(250.00, Utils.getDoubleValue(thirdRepaymentInstallment.getTotalOutstandingForPeriod()));
             assertEquals(LocalDate.of(2023, 4, 1), thirdRepaymentInstallment.getDueDate());
 
-            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
                     .date("2023.03.01").dateFormat("yyyy.MM.dd").locale("en"));
             loanTransactionHelper.makeRepayment("01 March 2023", 810.0f, loanId);
 
@@ -288,7 +287,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends BaseL
         try {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
-            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
                     .date("2023.02.15").dateFormat("yyyy.MM.dd").locale("en"));
 
             final Account assetAccount = accountHelper.createAssetAccount();
@@ -368,7 +367,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends BaseL
             assertEquals(250.00, Utils.getDoubleValue(thirdRepaymentInstallment.getTotalOutstandingForPeriod()));
             assertEquals(LocalDate.of(2023, 4, 1), thirdRepaymentInstallment.getDueDate());
 
-            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
                     .date("2023.03.01").dateFormat("yyyy.MM.dd").locale("en"));
             loanTransactionHelper.makeRepayment("28 January 2023", 810.0f, loanId);
 

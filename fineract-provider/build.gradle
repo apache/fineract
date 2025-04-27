@@ -68,6 +68,10 @@ resolve {
     dependsOn(prepareInputYaml)
 }
 
+configurations.configureEach {
+    exclude group: 'org.apache.tomcat.embed', module: 'tomcat-embed-el'
+}
+
 configurations {
     providedRuntime // needed for Spring Boot executable WAR
     providedCompile

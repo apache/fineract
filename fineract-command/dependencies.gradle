@@ -39,7 +39,7 @@ dependencies {
             'org.mapstruct:mapstruct',
             'com.lmax:disruptor',
             'com.ibm.icu:icu4j',
-            'org.yakworks:spring-icu4j',
+            'org.yakworks:spring-icu4j'
             )
     implementation('org.eclipse.persistence:org.eclipse.persistence.jpa') {
         exclude group: 'org.eclipse.persistence', module: 'jakarta.persistence'

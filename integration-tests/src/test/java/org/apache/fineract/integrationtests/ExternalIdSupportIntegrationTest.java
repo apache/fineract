@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-import org.apache.fineract.client.models.BusinessDateRequest;
+import org.apache.fineract.client.models.BusinessDateUpdateRequest;
 import org.apache.fineract.client.models.DeleteLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.DeleteLoansLoanIdResponse;
 import org.apache.fineract.client.models.DelinquencyRangeData;
@@ -62,7 +62,6 @@ import org.apache.fineract.client.models.PutLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.PutLoansLoanIdRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
-import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -832,7 +831,7 @@ public class ExternalIdSupportIntegrationTest extends BaseLoanIntegrationTest {
                 new PutGlobalConfigurationsRequest().enabled(true));
         globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                 new PutGlobalConfigurationsRequest().enabled(true));
-        new BusinessDateHelper().updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+        new BusinessDateHelper().updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
                 .date("2022.10.10").dateFormat("yyyy.MM.dd").locale("en"));
         try {
             ArrayList<Integer> rangeIds = new ArrayList<>();
