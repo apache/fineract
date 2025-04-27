@@ -27,7 +27,7 @@ public class BusinessDataTypeTest {
 
     @Test
     public void typoCheck() {
-        for (BusinessDateType businessDateType : BusinessDateType.values()) {
+        for (var businessDateType : BusinessDateType.values()) {
             switch (businessDateType) {
                 case BUSINESS_DATE -> assertEquals("Business Date", businessDateType.getDescription());
                 case COB_DATE -> assertEquals("Close of Business Date", businessDateType.getDescription());

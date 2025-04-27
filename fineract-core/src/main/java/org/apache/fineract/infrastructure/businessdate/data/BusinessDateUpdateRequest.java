@@ -18,27 +18,35 @@
  */
 package org.apache.fineract.infrastructure.businessdate.data;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.validation.constraints.LocalDate;
+import org.apache.fineract.validation.constraints.Locale;
 
+@Builder
 @Data
 @NoArgsConstructor
-@Accessors(chain = true)
-public class BusinessDateData implements Serializable {
+@AllArgsConstructor
+@LocalDate(dateField = "date", formatField = "dateFormat", localeField = "locale")
+public class BusinessDateUpdateRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
-    private String description;
-    private String type;
-    private LocalDate date;
 
-    public static BusinessDateData instance(BusinessDateType businessDateType, LocalDate value) {
-        return new BusinessDateData().setType(businessDateType.getName()).setDescription(businessDateType.getDescription()).setDate(value);
-    }
-
+    @NotBlank(message = "{org.apache.fineract.businessdate.date-format.not-blank}")
+    private String dateFormat;
+    @NotNull(message = "{org.apache.fineract.businessdate.type.not-null}")
+    private BusinessDateType type;
+    @NotBlank(message = "{org.apache.fineract.businessdate.date.not-blank}")
+    private String date;
+    @NotBlank(message = "{org.apache.fineract.businessdate.locale.not-blank}")
+    @Locale
+    private String locale;
 }

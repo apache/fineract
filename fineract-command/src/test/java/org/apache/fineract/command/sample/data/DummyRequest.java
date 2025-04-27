@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.command.sample.data;
 
-import jakarta.validation.constraints.NotBlank;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.UUID;
@@ -40,6 +39,5 @@ public class DummyRequest implements Serializable {
 
     private UUID id;
 
-    @NotBlank(message = "{org.apache.fineract.dummy.request.content.not-empty}")
     private String content;
 }

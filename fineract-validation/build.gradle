@@ -16,17 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.businessdate.data.request;
+description = 'Fineract Validation'
 
-import java.io.Serial;
-import java.io.Serializable;
+apply plugin: 'java'
+apply plugin: 'eclipse'
 
-public record BusinessDateRequest(String dateFormat, String type, String date, String locale) implements Serializable {
+apply from: 'dependencies.gradle'
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+// If we are running Gradle within Eclipse to enhance classes with OpenJPA,
+// set the classes directory to point to Eclipse's default build directory
+if (project.hasProperty('env') && project.getProperty('env') == 'eclipse') {
+    sourceSets.main.java.outputDir = new File(rootProject.projectDir, "fineract-validation/bin/main")
+}
 
-    public static BusinessDateRequest ofNull() {
-        return new BusinessDateRequest(null, null, null, null);
+if (!(project.hasProperty('env') && project.getProperty('env') == 'dev')) {
+    sourceSets {
+        test {
+            java {
+                exclude '**/core/boot/tests/**'
+            }
+        }
     }
 }

@@ -22,7 +22,6 @@ import static org.apache.fineract.command.core.CommandConstants.COMMAND_REQUEST_
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE;
 
-import jakarta.validation.Valid;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.UUID;
@@ -56,7 +55,7 @@ class DummyApiController {
 
     @PostMapping("/sync")
     DummyResponse dummySync(@RequestHeader(value = COMMAND_REQUEST_ID, required = false) UUID requestId,
-            @RequestHeader(value = "x-fineract-tenant-id", required = false) String tenantId, @Valid @RequestBody DummyRequest request) {
+            @RequestHeader(value = "x-fineract-tenant-id", required = false) String tenantId, @RequestBody DummyRequest request) {
         var command = new DummyCommand();
         command.setId(requestId);
         command.setPayload(request);

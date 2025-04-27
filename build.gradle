@@ -28,6 +28,7 @@ buildscript {
             [
                 'fineract-api',
                 'fineract-core',
+                'fineract-validation',
                 'fineract-command',
                 'fineract-accounting',
                 'fineract-provider',
@@ -424,6 +425,9 @@ configure(project.fineractJavaProjects) {
         api.setCanBeResolved(true)
     }
     tasks.withType(Copy) {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
+    tasks.withType(Jar) {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
     tasks.withType(JavaCompile) {

@@ -29,7 +29,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.client.models.BusinessDateData;
+import org.apache.fineract.client.models.BusinessDateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdLoanChargeData;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
@@ -132,7 +132,7 @@ public class LoanChargeAdjustmentStepDef extends AbstractStepDef {
 
         Long transactionId = getTransactionIdForTransactionMetConditions(transactionDate, transactionAmount, loanDetailsResponse);
 
-        Response<List<BusinessDateData>> businessDateResponse = businessDateManagementApi.getBusinessDates().execute();
+        Response<List<BusinessDateResponse>> businessDateResponse = businessDateManagementApi.getBusinessDates().execute();
         LocalDate businessDate = businessDateResponse.body().get(0).getDate();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
         String businessDateActual = formatter.format(businessDate);
