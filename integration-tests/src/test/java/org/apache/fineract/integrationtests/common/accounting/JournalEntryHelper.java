@@ -27,7 +27,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
+import org.apache.fineract.client.models.JournalEntryCommand;
+import org.apache.fineract.client.models.PostJournalEntriesResponse;
+import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.JSON;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Assertions;
 
@@ -185,4 +189,7 @@ public class JournalEntryHelper {
         return GSON.fromJson(response, GetJournalEntriesTransactionIdResponse.class);
     }
 
+    public static PostJournalEntriesResponse createJournalEntry(String command, JournalEntryCommand request) {
+        return Calls.ok(FineractClientHelper.getFineractClient().journalEntries.createGLJournalEntry(command, request));
+    }
 }

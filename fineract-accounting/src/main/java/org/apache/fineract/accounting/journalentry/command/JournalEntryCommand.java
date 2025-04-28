@@ -52,6 +52,8 @@ public class JournalEntryCommand {
 
     private final SingleDebitOrCreditEntryCommand[] credits;
     private final SingleDebitOrCreditEntryCommand[] debits;
+    private final String locale;
+    private final String dateFormat;
 
     public void validateForCreate() {
 

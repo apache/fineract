@@ -73,7 +73,7 @@ public final class JournalEntryCommandFromApiJsonDeserializer extends AbstractFr
                 element);
         final JsonObject topLevelJsonElement = element.getAsJsonObject();
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
-
+        final String localeStr = locale.getLanguage() + "_" + locale.getCountry() + '_' + locale.getVariant();
         final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed(JournalEntryJsonInputParams.AMOUNT.getValue(), element,
                 locale);
         final Long paymentTypeId = this.fromApiJsonHelper.extractLongNamed(JournalEntryJsonInputParams.PAYMENT_TYPE_ID.getValue(), element);
@@ -97,8 +97,9 @@ public final class JournalEntryCommandFromApiJsonDeserializer extends AbstractFr
                 debits = populateCreditsOrDebitsArray(topLevelJsonElement, locale, JournalEntryJsonInputParams.DEBITS.getValue());
             }
         }
+        String dateFormat = this.fromApiJsonHelper.extractStringNamed(JournalEntryJsonInputParams.DATE_FORMAT.getValue(), element);
         return new JournalEntryCommand(officeId, currencyCode, transactionDate, comments, referenceNumber, accountingRuleId, amount,
-                paymentTypeId, accountNumber, checkNumber, receiptNumber, bankNumber, routingCode, credits, debits);
+                paymentTypeId, accountNumber, checkNumber, receiptNumber, bankNumber, routingCode, credits, debits, localeStr, dateFormat);
     }
 
     /**

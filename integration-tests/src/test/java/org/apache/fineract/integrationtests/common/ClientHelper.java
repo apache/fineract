@@ -107,7 +107,7 @@ public class ClientHelper {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, requestBody, "clientId");
     }
 
-    public PostClientsResponse createClient(final PostClientsRequest request) {
+    public static PostClientsResponse createClient(final PostClientsRequest request) {
         return Calls.ok(FineractClientHelper.getFineractClient().clients.create6(request));
     }
 

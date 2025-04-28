@@ -203,23 +203,23 @@ final class GLAccountsApiResourceSwagger {
         public PutGLAccountsResponsechangesSwagger changes;
     }
 
-    @Schema(description = "DeleteGLAccountsRequest")
-    public static final class DeleteGLAccountsRequest {
+    @Schema(description = "DeleteGLAccountsResponse")
+    public static final class DeleteGLAccountsResponse {
 
-        private DeleteGLAccountsRequest() {
+        private DeleteGLAccountsResponse() {
 
         }
 
-        private static final class DeleteGLAccountsRequestchangesSwagger {
+        private static final class DeleteGLAccountsResponseChangesSwagger {
 
-            private DeleteGLAccountsRequestchangesSwagger() {}
+            private DeleteGLAccountsResponseChangesSwagger() {}
 
         }
 
         @Schema(example = "1")
         public Long resourceId;
 
-        private DeleteGLAccountsRequestchangesSwagger changes;
+        private DeleteGLAccountsResponseChangesSwagger changes;
     }
 
 }

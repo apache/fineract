@@ -28,13 +28,15 @@ public class GLAccountInvalidDeleteException extends AbstractPlatformDomainRuleE
     /*** Enum of reasons for invalid delete **/
     public enum GlAccountInvalidDeleteReason {
 
-        TRANSACTIONS_LOGGED, HAS_CHILDREN;
+        TRANSACTIONS_LOGGED, HAS_CHILDREN, PRODUCT_MAPPING;
 
         public String errorMessage() {
             if (name().equalsIgnoreCase("TRANSACTIONS_LOGGED")) {
                 return "This GL Account cannot be deleted as it has transactions logged against it";
             } else if (name().equalsIgnoreCase("HAS_CHILDREN")) {
                 return "Cannot delete this Header GL Account without first deleting or reassigning its children";
+            } else if (name().equalsIgnoreCase("PRODUCT_MAPPING")) {
+                return "Cannot delete this GL Account as it is mapped to a Product";
             }
             return name();
         }
@@ -44,6 +46,8 @@ public class GLAccountInvalidDeleteException extends AbstractPlatformDomainRuleE
                 return "error.msg.glaccount.glcode.invalid.delete.transactions.logged";
             } else if (name().equalsIgnoreCase("HAS_CHILDREN")) {
                 return "error.msg.glaccount.glcode.invalid.delete.has.children";
+            } else if (name().equalsIgnoreCase("PRODUCT_MAPPING")) {
+                return "error.msg.glaccount.glcode.invalid.delete.product.mapping";
             }
             return name();
         }

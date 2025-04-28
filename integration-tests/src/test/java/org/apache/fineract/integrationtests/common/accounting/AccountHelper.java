@@ -22,8 +22,12 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
+import org.apache.fineract.client.models.DeleteGLAccountsResponse;
+import org.apache.fineract.client.models.GetGLAccountsResponse;
 import org.apache.fineract.client.models.PostGLAccountsRequest;
 import org.apache.fineract.client.models.PostGLAccountsResponse;
+import org.apache.fineract.client.models.PutGLAccountsRequest;
+import org.apache.fineract.client.models.PutGLAccountsResponse;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -142,8 +146,19 @@ public class AccountHelper {
         return accountRunningBalance;
     }
 
-    public PostGLAccountsResponse createGLAccount(final PostGLAccountsRequest request) {
+    public static PostGLAccountsResponse createGLAccount(final PostGLAccountsRequest request) {
         return Calls.ok(FineractClientHelper.getFineractClient().glAccounts.createGLAccount1(request));
     }
 
+    public static DeleteGLAccountsResponse deleteGLAccount(final Long requestId) {
+        return Calls.ok(FineractClientHelper.getFineractClient().glAccounts.deleteGLAccount1(requestId));
+    }
+
+    public static PutGLAccountsResponse updateGLAccount(final Long requestId, final PutGLAccountsRequest request) {
+        return Calls.ok(FineractClientHelper.getFineractClient().glAccounts.updateGLAccount1(requestId, request));
+    }
+
+    public static GetGLAccountsResponse getGLAccount(final Long glAccountId) {
+        return Calls.ok(FineractClientHelper.getFineractClient().glAccounts.retreiveAccount(glAccountId, false));
+    }
 }

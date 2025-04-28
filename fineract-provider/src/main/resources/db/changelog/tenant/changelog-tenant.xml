@@ -193,4 +193,5 @@
     <include file="parts/0172_create_loan_capitalized_income_balance.xml" relativeToChangelogFile="true"/>
     <include file="parts/0173_user_change_pwd.xml" relativeToChangelogFile="true" />
     <include file="parts/0174_loan_product_add_capitalized_income_type.xml" relativeToChangelogFile="true" />
+    <include file="parts/0175_add_fk_acc_product_mapping.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
