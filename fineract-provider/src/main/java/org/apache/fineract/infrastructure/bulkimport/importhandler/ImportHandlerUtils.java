@@ -53,7 +53,8 @@ public final class ImportHandlerUtils {
         Integer noOfEntries = 0;
         // getLastRowNum and getPhysicalNumberOfRows showing false values
         // sometimes
-        while (true) {
+        int maxRows = sheet.getLastRowNum();
+        while (noOfEntries < maxRows) {
             Row row = sheet.getRow(noOfEntries + 1);
             if (row == null) {
                 break;

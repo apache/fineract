@@ -349,7 +349,25 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     @Override
     public CommandProcessingResult depositToFDAccount(final Long savingsId, @SuppressWarnings("unused") final JsonCommand command) {
         // this.context.authenticatedUser();
-        throw new DepositAccountTransactionNotAllowedException(savingsId, "deposit", DepositAccountType.FIXED_DEPOSIT);
+        this.depositAccountTransactionDataValidator.validate(command, DepositAccountType.FIXED_DEPOSIT);
+
+        final FixedDepositAccount account = (FixedDepositAccount) this.depositAccountAssembler.assembleFrom(savingsId,
+                DepositAccountType.FIXED_DEPOSIT);
+        checkClientOrGroupActive(account);
+
+        final Locale locale = command.extractLocale();
+        final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
+
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
+        final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
+
+        final Map<String, Object> changes = new LinkedHashMap<>();
+        final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
+        final SavingsAccountTransaction deposit = this.depositAccountDomainService.handleFDDeposit(account, fmt, transactionDate,
+                transactionAmount, paymentDetail);
+
+        return new CommandProcessingResultBuilder().withEntityId(deposit.getId()).withOfficeId(account.officeId())
+                .withClientId(account.clientId()).withGroupId(account.groupId()).withSavingsId(savingsId).with(changes).build();
 
     }
 

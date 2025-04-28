@@ -66,7 +66,7 @@ public class FixedDepositTransactionImportHandler implements ImportHandler {
     @Override
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
         List<SavingsAccountTransactionData> savingsTransactions = readExcelFile(workbook, locale, dateFormat);
-        return importEntity(workbook, savingsTransactions, dateFormat);
+        return importEntity(workbook, savingsTransactions, dateFormat, locale);
     }
 
     public List<SavingsAccountTransactionData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
@@ -116,13 +116,13 @@ public class FixedDepositTransactionImportHandler implements ImportHandler {
     }
 
     public Count importEntity(final Workbook workbook, final List<SavingsAccountTransactionData> savingsTransactions,
-            final String dateFormat) {
+            final String dateFormat, final String locale) {
         Sheet savingsTransactionSheet = workbook.getSheet(TemplatePopulateImportConstants.FIXED_DEPOSIT_TRANSACTION_SHEET_NAME);
         int successCount = 0;
         int errorCount = 0;
         String errorMessage = "";
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
+        gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat, locale));
         gsonBuilder.registerTypeAdapter(SavingsAccountTransactionEnumData.class, new SavingsAccountTransactionEnumValueSerialiser());
 
         for (SavingsAccountTransactionData transaction : savingsTransactions) {
