@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -86,6 +85,7 @@ import org.apache.fineract.portfolio.collateralmanagement.domain.CollateralManag
 import org.apache.fineract.portfolio.collateralmanagement.service.LoanCollateralAssembler;
 import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
+import org.apache.fineract.portfolio.common.service.Validator;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
 import org.apache.fineract.portfolio.group.exception.ClientNotInGroupException;
@@ -265,7 +265,7 @@ public final class LoanApplicationValidator {
         final Group group = groupId != null ? this.groupRepository.findOneWithNotFoundDetection(groupId) : null;
 
         validateClientOrGroup(client, group, productId);
-        validateOrThrow("loan", baseDataValidator -> {
+        Validator.validateOrThrow("loan", baseDataValidator -> {
             final String loanTypeStr = this.fromApiJsonHelper.extractStringNamed(LoanApiConstants.loanTypeParameterName, element);
             baseDataValidator.reset().parameter(LoanApiConstants.loanTypeParameterName).value(loanTypeStr).notNull();
 
@@ -798,7 +798,7 @@ public final class LoanApplicationValidator {
     }
 
     private void fixedLengthValidations(final JsonElement element) {
-        validateOrThrow("loan", baseDataValidator -> {
+        Validator.validateOrThrow("loan", baseDataValidator -> {
             final String transactionProcessingStrategy = this.fromApiJsonHelper
                     .extractStringNamed(LoanApiConstants.transactionProcessingStrategyCodeParameterName, element);
             final Integer numberOfRepayments = this.fromApiJsonHelper
@@ -896,7 +896,7 @@ public final class LoanApplicationValidator {
             loanProduct = this.loanProductRepository.findById(productId).orElseThrow(() -> new LoanProductNotFoundException(productId));
         }
 
-        validateOrThrow("loan", baseDataValidator -> {
+        Validator.validateOrThrow("loan", baseDataValidator -> {
             final JsonElement element = this.fromApiJsonHelper.parse(json);
             boolean atLeastOneParameterPassedForUpdate = false;
 
@@ -1487,7 +1487,7 @@ public final class LoanApplicationValidator {
     }
 
     private void validateClientOrGroup(Client client, Group group, Long productId) {
-        validateOrThrow("loan", baseDataValidator -> {
+        Validator.validateOrThrow("loan", baseDataValidator -> {
             if (client == null && group == null) {
                 baseDataValidator.reset().parameter(LoanApiConstants.clientIdParameterName).value(client).notNull();
             } else {
@@ -1546,7 +1546,7 @@ public final class LoanApplicationValidator {
         }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, undoSupportedParameters);
 
-        validateOrThrow(LOANAPPLICATION_UNDO, baseDataValidator -> {
+        Validator.validateOrThrow(LOANAPPLICATION_UNDO, baseDataValidator -> {
             final JsonElement element = this.fromApiJsonHelper.parse(json);
 
             final String note = "note";
@@ -1558,7 +1558,7 @@ public final class LoanApplicationValidator {
     }
 
     public void validateMinMaxConstraintValues(final JsonElement element, final LoanProduct loanProduct) {
-        validateOrThrow("loan", baseDataValidator -> {
+        Validator.validateOrThrow("loan", baseDataValidator -> {
             final BigDecimal minPrincipal = loanProduct.getMinPrincipalAmount().getAmount();
             final BigDecimal maxPrincipal = loanProduct.getMaxPrincipalAmount().getAmount();
             final String principalParameterName = LoanApiConstants.principalParameterName;
@@ -1668,7 +1668,7 @@ public final class LoanApplicationValidator {
     }
 
     public void validateLoanMultiDisbursementDate(final JsonElement element, LocalDate expectedDisbursementDate, BigDecimal principal) {
-        validateOrThrow("loan", baseDataValidator -> {
+        Validator.validateOrThrow("loan", baseDataValidator -> {
             validateLoanMultiDisbursementDate(element, baseDataValidator, expectedDisbursementDate, principal);
         });
     }
@@ -1742,7 +1742,7 @@ public final class LoanApplicationValidator {
     }
 
     public void validateLoanForCollaterals(final Loan loan, final BigDecimal total) {
-        validateOrThrow("loan", baseDataValidator -> {
+        Validator.validateOrThrow("loan", baseDataValidator -> {
             if (loan.getProposedPrincipal().compareTo(total) >= 0) {
                 String errorCode = LoanApiConstants.LOAN_COLLATERAL_TOTAL_VALUE_SHOULD_BE_SUFFICIENT;
                 baseDataValidator.reset().parameter(LoanApiConstants.collateralsParameterName).failWithCode(errorCode);
@@ -1996,7 +1996,7 @@ public final class LoanApplicationValidator {
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
 
-        validateOrThrow("loanapplication", baseDataValidator -> {
+        Validator.validateOrThrow("loanapplication", baseDataValidator -> {
             final JsonElement element = this.fromApiJsonHelper.parse(json);
 
             final BigDecimal principal = this.fromApiJsonHelper
@@ -2172,18 +2172,6 @@ public final class LoanApplicationValidator {
     private boolean isLoanRepaymentsSyncWithMeeting(Loan loan, Calendar calendar) {
         return configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled()
                 && loanUtilService.isLoanRepaymentsSyncWithMeeting(loan.group(), calendar);
-    }
-
-    public static void validateOrThrow(String resource, Consumer<DataValidatorBuilder> baseDataValidator) {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder dataValidatorBuilder = new DataValidatorBuilder(dataValidationErrors).resource(resource);
-
-        baseDataValidator.accept(dataValidatorBuilder);
-
-        if (!dataValidationErrors.isEmpty()) {
-            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                    dataValidationErrors);
-        }
     }
 
     public Long resolveOfficeId(Client client, Group group) {

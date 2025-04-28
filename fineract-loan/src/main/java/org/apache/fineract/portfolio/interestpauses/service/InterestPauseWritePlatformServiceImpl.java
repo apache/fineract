@@ -26,20 +26,17 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Consumer;
 import lombok.AllArgsConstructor;
-import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.portfolio.common.service.Validator;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations;
@@ -156,7 +153,7 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
     private void validateInterestPauseDates(Loan loan, LocalDate startDate, LocalDate endDate, String dateFormat, String locale,
             Long currentVariationId) {
 
-        validateOrThrow(baseDataValidator -> {
+        Validator.validateOrThrow("InterestPause", baseDataValidator -> {
             baseDataValidator.reset().parameter("startDate").value(startDate).notBlank();
             baseDataValidator.reset().parameter("endDate").value(endDate).notBlank();
             baseDataValidator.reset().parameter("dateFormat").value(dateFormat).notBlank();
@@ -221,18 +218,6 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
             throw new PlatformApiDataValidationException("validation.msg.invalid.date.format",
                     String.format("Invalid date format. Provided: %s, Expected format: %s, Locale: %s", date, dateFormat, locale),
                     e.getMessage(), e);
-        }
-    }
-
-    private void validateOrThrow(Consumer<DataValidatorBuilder> baseDataValidator) {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder dataValidatorBuilder = new DataValidatorBuilder(dataValidationErrors).resource("InterestPause");
-
-        baseDataValidator.accept(dataValidatorBuilder);
-
-        if (!dataValidationErrors.isEmpty()) {
-            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                    dataValidationErrors);
         }
     }
 }

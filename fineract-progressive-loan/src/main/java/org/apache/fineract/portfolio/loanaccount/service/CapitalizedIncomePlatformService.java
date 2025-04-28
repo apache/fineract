@@ -16,16 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.domain;
+package org.apache.fineract.portfolio.loanaccount.service;
 
-import java.util.List;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface LoanCapitalizedIncomeBalanceRepository
-        extends JpaRepository<LoanCapitalizedIncomeBalance, Long>, JpaSpecificationExecutor<LoanCapitalizedIncomeBalance> {
+public interface CapitalizedIncomePlatformService {
 
-    List<LoanCapitalizedIncomeBalance> findAllByLoanId(Long loanId);
+    @Transactional
+    CommandProcessingResult addCapitalizedIncome(Long loanId, JsonCommand command);
 
-    LoanCapitalizedIncomeBalance findByLoanIdAndLoanTransactionId(Long loanId, Long transactionId);
+    void resetBalance(Long loanId);
 }

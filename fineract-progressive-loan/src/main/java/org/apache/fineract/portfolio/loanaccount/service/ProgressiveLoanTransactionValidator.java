@@ -16,21 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.note.service;
+package org.apache.fineract.portfolio.loanaccount.service;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.portfolio.client.domain.Client;
+import org.apache.fineract.portfolio.loanaccount.serialization.LoanTransactionValidator;
 
-public interface NoteWritePlatformService {
+public interface ProgressiveLoanTransactionValidator extends LoanTransactionValidator {
 
-    CommandProcessingResult createNote(JsonCommand command);
-
-    void createLoanNote(Long loanId, String note);
-
-    CommandProcessingResult updateNote(JsonCommand command);
-
-    CommandProcessingResult deleteNote(JsonCommand command);
-
-    void createAndPersistClientNote(Client client, JsonCommand command);
+    void validateCapitalizedIncome(JsonCommand command, Long loanId);
 }

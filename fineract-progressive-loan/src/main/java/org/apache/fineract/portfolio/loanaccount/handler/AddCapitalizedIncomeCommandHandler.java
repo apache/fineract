@@ -24,7 +24,7 @@ import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.DataIntegrityErrorHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.CapitalizedIncomePlatformService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
@@ -35,7 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "LOAN", action = "CAPITALIZEDINCOME")
 public class AddCapitalizedIncomeCommandHandler implements NewCommandSourceHandler {
 
-    private final LoanWritePlatformService writePlatformService;
+    private final CapitalizedIncomePlatformService capitalizedIncomePlatformService;
     private final DataIntegrityErrorHandler dataIntegrityErrorHandler;
 
     @Transactional
@@ -43,7 +43,7 @@ public class AddCapitalizedIncomeCommandHandler implements NewCommandSourceHandl
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
         try {
-            return this.writePlatformService.addCapitalizedIncome(command.getLoanId(), command);
+            return this.capitalizedIncomePlatformService.addCapitalizedIncome(command.getLoanId(), command);
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             dataIntegrityErrorHandler.handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve, "loan.capitalized.income",
                     "Capitalized Income");

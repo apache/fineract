@@ -1613,7 +1613,7 @@ public class LoanProductsRequestFactory {
                 .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)//
                 .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)//
                 .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.INTEREST)
-                .deferredIncomeLiabilityAccountId(accountTypeResolver.resolve(DefaultAccountType.OVERPAYMENT_ACCOUNT))
+                .deferredIncomeLiabilityAccountId(accountTypeResolver.resolve(DefaultAccountType.DEFERRED_CAPITALIZED_INCOME))
                 .incomeFromCapitalizationAccountId(accountTypeResolver.resolve(DefaultAccountType.INTEREST_INCOME))
                 .enableIncomeCapitalization(true);//
     }

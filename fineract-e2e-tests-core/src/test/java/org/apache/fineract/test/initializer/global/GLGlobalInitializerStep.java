@@ -59,6 +59,7 @@ public class GLGlobalInitializerStep implements FineractGlobalInitializerStep {
     public static final String GLA_NAME_19 = "Goodwill Expense Account";
     public static final String GLA_NAME_20 = "Interest Income Charge Off";
     public static final String GLA_NAME_21 = "Asset transfer";
+    public static final String GLA_NAME_22 = "Deferred Capitalized Income";
     public static final String GLA_GL_CODE_1 = "112601";
     public static final String GLA_GL_CODE_2 = "112603";
     public static final String GLA_GL_CODE_3 = "145800";
@@ -80,6 +81,7 @@ public class GLGlobalInitializerStep implements FineractGlobalInitializerStep {
     public static final String GLA_GL_CODE_19 = "744003";
     public static final String GLA_GL_CODE_20 = "404001";
     public static final String GLA_GL_CODE_21 = "146000";
+    public static final String GLA_GL_CODE_22 = "145024";
 
     private final GeneralLedgerAccountApi glaApi;
 
@@ -149,5 +151,8 @@ public class GLGlobalInitializerStep implements FineractGlobalInitializerStep {
         PostGLAccountsRequest postGLAccountsRequest21 = GLAccountRequestFactory.defaultGLAccountRequest(GLA_NAME_21, GLA_GL_CODE_21,
                 GLA_TYPE_ASSET, GLA_USAGE_DETAIL, true);
         glaApi.createGLAccount1(postGLAccountsRequest21).execute();
+        PostGLAccountsRequest postGLAccountsRequest22 = GLAccountRequestFactory.defaultGLAccountRequest(GLA_NAME_22, GLA_GL_CODE_22,
+                GLA_TYPE_LIABILITY, GLA_USAGE_DETAIL, true);
+        glaApi.createGLAccount1(postGLAccountsRequest22).execute();
     }
 }

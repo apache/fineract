@@ -21,19 +21,31 @@ package org.apache.fineract.test.data.accounttype;
 public enum DefaultAccountType implements AccountType {
 
     // Asset
-    LOANS_RECEIVABLE("Loans Receivable"), INTEREST_FEE_RECEIVABLE("Interest/Fee Receivable"), OTHER_RECEIVABLES(
-            "Other Receivables"), UNC_RECEIVABLE("UNC Receivable"), FUND_RECEIVABLES(
-                    "Fund Receivables"), TRANSFER_IN_SUSPENSE_ACCOUNT("Transfer in suspense account"), ASSET_TRANSFER("Asset transfer"),
+    LOANS_RECEIVABLE("Loans Receivable"), //
+    INTEREST_FEE_RECEIVABLE("Interest/Fee Receivable"), //
+    OTHER_RECEIVABLES("Other Receivables"), //
+    UNC_RECEIVABLE("UNC Receivable"), //
+    FUND_RECEIVABLES("Fund Receivables"), //
+    TRANSFER_IN_SUSPENSE_ACCOUNT("Transfer in suspense account"), //
+    ASSET_TRANSFER("Asset transfer"), //
     // Income
-    DEFERRED_INTEREST_REVENUE("Deferred Interest Revenue"), RETAINED_EARNINGS_PRIOR_YEAR("Retained Earnings Prior Year"), INTEREST_INCOME(
-            "Interest Income"), FEE_INCOME("Fee Income"), FEE_CHARGE_OFF(
-                    "Fee Charge Off"), RECOVERIES("Recoveries"), INTEREST_INCOME_CHARGE_OFF("Interest Income Charge Off"),
+    DEFERRED_INTEREST_REVENUE("Deferred Interest Revenue"), //
+    RETAINED_EARNINGS_PRIOR_YEAR("Retained Earnings Prior Year"), //
+    INTEREST_INCOME("Interest Income"), //
+    FEE_INCOME("Fee Income"), //
+    FEE_CHARGE_OFF("Fee Charge Off"), //
+    RECOVERIES("Recoveries"), //
+    INTEREST_INCOME_CHARGE_OFF("Interest Income Charge Off"), //
     // Liability
-    AA_SUSPENSE_BALANCE("AA Suspense Balance"), SUSPENSE_CLEARING_ACCOUNT("Suspense/Clearing account"), OVERPAYMENT_ACCOUNT(
-            "Overpayment account"),
+    AA_SUSPENSE_BALANCE("AA Suspense Balance"), //
+    SUSPENSE_CLEARING_ACCOUNT("Suspense/Clearing account"), //
+    OVERPAYMENT_ACCOUNT("Overpayment account"), //
+    DEFERRED_CAPITALIZED_INCOME("Deferred Capitalized Income"), //
     // Expense
-    CREDIT_LOSS_BAD_DEBT("Credit Loss/Bad Debt"), CREDIT_LOSS_BAD_DEBT_FRAUD("Credit Loss/Bad Debt-Fraud"), GOODWILL_EXPENSE_ACCOUNT(
-            "Goodwill Expense Account"), WRITTEN_OFF("Written off");
+    CREDIT_LOSS_BAD_DEBT("Credit Loss/Bad Debt"), //
+    CREDIT_LOSS_BAD_DEBT_FRAUD("Credit Loss/Bad Debt-Fraud"), //
+    GOODWILL_EXPENSE_ACCOUNT("Goodwill Expense Account"), //
+    WRITTEN_OFF("Written off"); //
 
     private final String customName;
 

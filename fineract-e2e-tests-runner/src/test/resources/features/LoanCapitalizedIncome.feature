@@ -1,6 +1,7 @@
 @CapitalizedIncomeFeature
 Feature: Capitalized Income
 
+  @TestRailId:C3635
   Scenario: As a user I want to add capitalized income to a progressive loan after disbursement
     When Admin sets the business date to "1 January 2024"
     And Admin creates a client with random data
@@ -18,6 +19,6 @@ Feature: Capitalized Income
       | 01 January 2024  | Down Payment       | 225.0  | 225.0     | 0.0      | 0.0  | 0.0       | 675.0        | false    |
       | 02 January 2024  | Capitalized Income | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 775.0        | false    |
     Then Loan Transactions tab has a "CAPITALIZED_INCOME" transaction with date "02 January 2024" which has the following Journal entries:
-      | Type      | Account code | Account name              | Debit  | Credit |
-      | ASSET     | 112601       | Loans Receivable          | 100.0  |        |
-      | LIABILITY | 145024       | Deferred Income           |        | 100.0  |
+      | Type      | Account code | Account name                 | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable             | 100.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income  |        | 100.0  |

@@ -1124,12 +1124,16 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     public BigDecimal getDisbursedAmount() {
         BigDecimal principal = BigDecimal.ZERO;
-        for (LoanDisbursementDetails disbursementDetail : getDisbursementDetails()) {
-            if (disbursementDetail.actualDisbursementDate() != null) {
-                principal = principal.add(disbursementDetail.principal());
+        if (isMultiDisburmentLoan()) {
+            for (LoanDisbursementDetails disbursementDetail : getDisbursementDetails()) {
+                if (disbursementDetail.actualDisbursementDate() != null) {
+                    principal = principal.add(disbursementDetail.principal());
+                }
             }
+            return principal;
+        } else {
+            return getNetDisbursalAmount();
         }
-        return principal;
     }
 
     public void removeDisbursementDetail() {
@@ -2066,7 +2070,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         Money outstanding = Money.zero(getCurrency());
         List<LoanTransaction> loanTransactions = retrieveListOfTransactionsExcludeAccruals();
         for (LoanTransaction loanTransaction : loanTransactions) {
-            if (loanTransaction.isDisbursement() || loanTransaction.isIncomePosting()) {
+            if (loanTransaction.isDisbursement() || loanTransaction.isIncomePosting() || loanTransaction.isCapitalizedIncome()) {
                 outstanding = outstanding.plus(loanTransaction.getAmount(getCurrency()))
                         .minus(loanTransaction.getOverPaymentPortion(getCurrency()));
                 loanTransaction.updateOutstandingLoanBalance(MathUtil.negativeToZero(outstanding.getAmount()));

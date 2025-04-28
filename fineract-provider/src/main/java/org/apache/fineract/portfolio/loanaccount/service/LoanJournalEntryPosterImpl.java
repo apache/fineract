@@ -29,11 +29,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class LoanJournalEntryPoster {
+public class LoanJournalEntryPosterImpl implements LoanJournalEntryPoster {
 
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final LoanAccountingBridgeMapper loanAccountingBridgeMapper;
 
+    @Override
     public void postJournalEntries(final Loan loan, final List<Long> existingTransactionIds,
             final List<Long> existingReversedTransactionIds) {
         final MonetaryCurrency currency = loan.getCurrency();

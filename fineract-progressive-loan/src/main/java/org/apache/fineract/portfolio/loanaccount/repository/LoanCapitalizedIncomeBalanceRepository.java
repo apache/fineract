@@ -16,21 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.note.service;
+package org.apache.fineract.portfolio.loanaccount.repository;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.portfolio.client.domain.Client;
+import java.util.List;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeBalance;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface NoteWritePlatformService {
+public interface LoanCapitalizedIncomeBalanceRepository
+        extends JpaRepository<LoanCapitalizedIncomeBalance, Long>, JpaSpecificationExecutor<LoanCapitalizedIncomeBalance> {
 
-    CommandProcessingResult createNote(JsonCommand command);
+    List<LoanCapitalizedIncomeBalance> findAllByLoanId(Long loanId);
 
-    void createLoanNote(Long loanId, String note);
-
-    CommandProcessingResult updateNote(JsonCommand command);
-
-    CommandProcessingResult deleteNote(JsonCommand command);
-
-    void createAndPersistClientNote(Client client, JsonCommand command);
+    LoanCapitalizedIncomeBalance findByLoanIdAndLoanTransactionId(Long loanId, Long transactionId);
 }
