@@ -1454,7 +1454,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         LoanStatus actualLoanStatus = getStatus();
         boolean isInRightStatus = actualLoanStatus.isActive() || actualLoanStatus.isApproved() || actualLoanStatus.isClosedObligationsMet()
                 || actualLoanStatus.isOverpaid();
-        return this.loanProduct.isMultiDisburseLoan() && isInRightStatus && isDisbursementAllowed();
+        boolean notDisbursedTrancheExists = loanProduct.isDisallowExpectedDisbursements()
+                || disbursementDetails.stream().anyMatch(it -> it.actualDisbursementDate() == null);
+        return this.loanProduct.isMultiDisburseLoan() && isInRightStatus && isDisbursementAllowed() && notDisbursedTrancheExists;
     }
 
     private boolean hasDisbursementTransaction() {
