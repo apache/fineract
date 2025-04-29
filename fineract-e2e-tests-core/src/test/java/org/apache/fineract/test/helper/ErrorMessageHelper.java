@@ -141,6 +141,10 @@ public final class ErrorMessageHelper {
         return String.format("Adding charge to Loan: %s is not allowed. Loan Account is Charged-off", loanIdStr);
     }
 
+    public static String addCapitalizedIncomeExceedApprovedAmountFailure() {
+        return "Failed data validation due to: exceeds.approved.amount.";
+    }
+
     public static String wrongAmountInRepaymentSchedule(int line, BigDecimal actual, BigDecimal expected) {
         String lineToStr = String.valueOf(line);
         String actualToStr = actual.toString();

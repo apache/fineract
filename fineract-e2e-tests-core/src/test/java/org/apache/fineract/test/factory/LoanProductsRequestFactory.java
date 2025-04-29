@@ -1617,4 +1617,15 @@ public class LoanProductsRequestFactory {
                 .incomeFromCapitalizationAccountId(accountTypeResolver.resolve(DefaultAccountType.INTEREST_INCOME))
                 .enableIncomeCapitalization(true);//
     }
+
+    public PostLoanProductsRequest defaultLoanProductsRequestLP2EmiCapitalizedIncome() {
+        return defaultLoanProductsRequestLP2Emi()//
+                .enableIncomeCapitalization(true)
+                .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)//
+                .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)//
+                .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.INTEREST)//
+                .deferredIncomeLiabilityAccountId(accountTypeResolver.resolve(DefaultAccountType.DEFERRED_CAPITALIZED_INCOME))//
+                .incomeFromCapitalizationAccountId(accountTypeResolver.resolve(DefaultAccountType.INTEREST_INCOME));//
+    }
+
 }
