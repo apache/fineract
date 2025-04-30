@@ -705,4 +705,27 @@ public class LoanCOBCreateAccrualsTest extends BaseLoanIntegrationTest {
             Assertions.assertTrue(found, "Required transaction not found: " + tr + " on loan " + loanDetails.getId());
         });
     }
+
+    @Test
+    public void shouldSkipInterestRecalculationWhenNoOverdueInstallments() {
+        setup();
+        AtomicReference<Long> loanIdRef = new AtomicReference<>();
+        runAt("01 April 2025", () -> {
+            // Create and disburse a loan with a single installment due in the future
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "01 April 2025", 100.0, 0.0, 1,
+                    null);
+            loanIdRef.set(loanId);
+            disburseLoan(loanId, BigDecimal.valueOf(100), "01 April 2025");
+        });
+        runAt("02 April 2025", () -> {
+            Long loanId = loanIdRef.get();
+            // No overdue installments: installment due in the future
+            executeInlineCOB(loanId);
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            // There should be only the disbursement transaction, no accrual/interest recalculation
+            Assertions.assertEquals(1, loanDetails.getTransactions().size(),
+                    "No interest recalculation/accrual should occur if there are no overdue installments");
+            Assertions.assertEquals("Disbursement", loanDetails.getTransactions().get(0).getType().getValue());
+        });
+    }
 }
