@@ -24,10 +24,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidBy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanInstallmentCharge;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanInstallmentChargeUtil;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper;
@@ -42,6 +46,7 @@ public class LoanChargeService {
 
     private final LoanChargeValidator loanChargeValidator;
     private final LoanTransactionProcessingService loanTransactionProcessingService;
+    private final LoanInstallmentChargeUtil loanInstallmentChargeUtil;
     private final LoanLifecycleStateMachine loanLifecycleStateMachine;
 
     public void recalculateAllCharges(final Loan loan) {
@@ -154,6 +159,49 @@ public class LoanChargeService {
         loan.updateLoanSummaryDerivedFields();
 
         loanLifecycleStateMachine.transition(LoanEvent.LOAN_CHARGE_ADDED, loan);
+    }
+
+    public Money waiveLoanCharge(final LoanCharge loanCharge, final MonetaryCurrency currency, final Integer loanInstallmentNumber) {
+        if (loanCharge.isInstalmentFee()) {
+            final LoanInstallmentCharge chargePerInstallment = loanCharge.getInstallmentLoanCharge(loanInstallmentNumber);
+            final Money amountWaived = loanInstallmentChargeUtil.waive(chargePerInstallment, currency);
+            if (loanCharge.getAmountWaived() == null) {
+                loanCharge.setAmountWaived(BigDecimal.ZERO);
+            }
+            loanCharge.setAmountWaived(loanCharge.getAmountWaived().add(amountWaived.getAmount()));
+            loanCharge.setOutstandingAmount(loanCharge.getAmountOutstanding().subtract(amountWaived.getAmount()));
+            if (loanCharge.determineIfFullyPaid()) {
+                loanCharge.setPaid(false);
+                loanCharge.setWaived(true);
+            }
+            return amountWaived;
+        }
+        loanCharge.setAmountWaived(loanCharge.getAmountOutstanding());
+        loanCharge.setOutstandingAmount(BigDecimal.ZERO);
+        loanCharge.setPaid(false);
+        loanCharge.setWaived(true);
+        return loanCharge.getAmountWaived(currency);
+
+    }
+
+    public void reverseLoanChargeWaiver(final LoanChargePaidBy loanChargePaidBy) {
+        LoanCharge loanCharge = loanChargePaidBy.getLoanCharge();
+        if (loanCharge.isInstalmentFee()) {
+            LoanInstallmentCharge chargePerInstallment = loanCharge.getInstallmentLoanCharge(loanChargePaidBy.getInstallmentNumber());
+            Money amountReversed = loanInstallmentChargeUtil.reverseLoanChargeInstallmentWaiver(chargePerInstallment,
+                    loanChargePaidBy.getLoanCharge().getLoan().getCurrency());
+            loanCharge.setAmountWaived(loanCharge.getAmountWaived().subtract(amountReversed.getAmount()));
+            loanCharge.setOutstandingAmount(loanCharge.getAmountOutstanding().add(amountReversed.getAmount()));
+            if (!loanCharge.determineIfFullyPaid()) {
+                loanCharge.setPaid(false);
+                loanCharge.setWaived(false);
+            }
+            return;
+        }
+        loanCharge.setOutstandingAmount(loanCharge.getAmountWaived());
+        loanCharge.setAmountWaived(BigDecimal.ZERO);
+        loanCharge.setPaid(false);
+        loanCharge.setWaived(false);
     }
 
 }

@@ -117,9 +117,11 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     @Column(name = "is_penalty", nullable = false)
     private boolean penaltyCharge = false;
 
+    @Setter
     @Column(name = "is_paid_derived", nullable = false)
     private boolean paid = false;
 
+    @Setter
     @Column(name = "waived", nullable = false)
     private boolean waived = false;
 
@@ -285,29 +287,6 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     public void setOutstandingAmount(final BigDecimal amountOutstanding) {
         this.amountOutstanding = amountOutstanding;
-    }
-
-    public Money waive(final MonetaryCurrency currency, final Integer loanInstallmentNumber) {
-        if (isInstalmentFee()) {
-            final LoanInstallmentCharge chargePerInstallment = getInstallmentLoanCharge(loanInstallmentNumber);
-            final Money amountWaived = chargePerInstallment.waive(currency);
-            if (this.amountWaived == null) {
-                this.amountWaived = BigDecimal.ZERO;
-            }
-            this.amountWaived = this.amountWaived.add(amountWaived.getAmount());
-            this.amountOutstanding = this.amountOutstanding.subtract(amountWaived.getAmount());
-            if (determineIfFullyPaid()) {
-                this.paid = false;
-                this.waived = true;
-            }
-            return amountWaived;
-        }
-        this.amountWaived = this.amountOutstanding;
-        this.amountOutstanding = BigDecimal.ZERO;
-        this.paid = false;
-        this.waived = true;
-        return getAmountWaived(currency);
-
     }
 
     private BigDecimal calculateAmountOutstanding(final MonetaryCurrency currency) {

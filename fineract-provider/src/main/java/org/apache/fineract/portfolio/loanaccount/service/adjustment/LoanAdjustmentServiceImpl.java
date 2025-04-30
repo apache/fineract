@@ -58,6 +58,7 @@ import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidat
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanTransactionValidator;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualTransactionBusinessEventService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualsProcessingService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanChargeService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanDownPaymentHandlerService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanJournalEntryPoster;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
@@ -89,6 +90,7 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
     private final LoanAccrualsProcessingService loanAccrualsProcessingService;
     private final LoanChargeValidator loanChargeValidator;
     private final LoanJournalEntryPoster journalEntryPoster;
+    private final LoanChargeService loanChargeService;
 
     @Override
     public CommandProcessingResult adjustLoanTransaction(Loan loan, LoanTransaction transactionToAdjust, LoanAdjustmentParameter parameter,
@@ -118,6 +120,9 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
             }
             newTransactionDetail = LoanTransaction.waiver(loan.getOffice(), loan, transactionAmountAsMoney, transactionDate,
                     interestComponent, unrecognizedIncome, txnExternalId);
+        }
+        if (transactionToAdjust.isChargesWaiver()) {
+            transactionToAdjust.getLoanChargesPaid().forEach(loanChargeService::reverseLoanChargeWaiver);
         }
 
         LocalDate recalculateFrom = null;

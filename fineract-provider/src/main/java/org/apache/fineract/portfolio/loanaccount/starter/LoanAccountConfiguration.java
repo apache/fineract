@@ -71,6 +71,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepositor
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanInstallmentChargeUtil;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
@@ -456,8 +457,10 @@ public class LoanAccountConfiguration {
     @Bean
     @ConditionalOnMissingBean(LoanChargeService.class)
     public LoanChargeService loanChargeService(LoanChargeValidator loanChargeValidator,
-            LoanTransactionProcessingService loanTransactionProcessingService, LoanLifecycleStateMachine loanLifecycleStateMachine) {
-        return new LoanChargeService(loanChargeValidator, loanTransactionProcessingService, loanLifecycleStateMachine);
+            LoanTransactionProcessingService loanTransactionProcessingService, LoanInstallmentChargeUtil loanInstallmentChargeUtil,
+            LoanLifecycleStateMachine loanLifecycleStateMachine) {
+        return new LoanChargeService(loanChargeValidator, loanTransactionProcessingService, loanInstallmentChargeUtil,
+                loanLifecycleStateMachine);
     }
 
     @Bean

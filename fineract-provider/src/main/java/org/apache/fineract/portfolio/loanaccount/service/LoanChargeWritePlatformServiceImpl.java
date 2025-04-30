@@ -1439,7 +1439,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
     public LoanTransaction waiveLoanCharge(final Loan loan, final LoanCharge loanCharge, final Map<String, Object> changes,
             final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds, final Integer loanInstallmentNumber,
             final ScheduleGeneratorDTO scheduleGeneratorDTO, final Money accruedCharge, final ExternalId externalId) {
-        final Money amountWaived = loanCharge.waive(loan.getCurrency(), loanInstallmentNumber);
+        final Money amountWaived = loanChargeService.waiveLoanCharge(loanCharge, loan.getCurrency(), loanInstallmentNumber);
         changes.put("amount", amountWaived.getAmount());
 
         Money unrecognizedIncome = amountWaived.zero();
