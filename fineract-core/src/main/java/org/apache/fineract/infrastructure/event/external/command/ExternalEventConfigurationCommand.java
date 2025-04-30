@@ -20,9 +20,14 @@ package org.apache.fineract.infrastructure.event.external.command;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Map;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationRequest;
 
-public record ExternalEventConfigurationCommand(Map<String, Boolean> externalEventConfigurations) implements Serializable {
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class ExternalEventConfigurationCommand extends Command<ExternalEventConfigurationRequest> implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;

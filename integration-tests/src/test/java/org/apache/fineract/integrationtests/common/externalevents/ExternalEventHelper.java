@@ -26,10 +26,11 @@ import java.util.List;
 import java.util.Map;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.client.models.CommandProcessingResult;
-import org.apache.fineract.client.models.ExternalEventConfigurationCommand;
+import org.apache.fineract.client.models.ExternalEventConfigurationRequest;
+import org.apache.fineract.client.models.ExternalEventConfigurationResponse;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.JSON;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigKey;
 import org.apache.fineract.infrastructure.event.external.service.validation.ExternalEventDTO;
 import org.apache.fineract.integrationtests.common.ExternalEventConfigurationHelper;
 import org.apache.fineract.integrationtests.common.FineractClientHelper;
@@ -122,13 +123,12 @@ public final class ExternalEventHelper {
     }
 
     public void configureBusinessEvent(String eventName, boolean enabled) {
-        CommandProcessingResult result = Calls
+        ExternalEventConfigurationResponse result = Calls
                 .ok(FineractClientHelper.getFineractClient().externalEventConfigurationApi.updateExternalEventConfigurationsDetails(
-                        new ExternalEventConfigurationCommand().putExternalEventConfigurationsItem(eventName, enabled)));
-        Map<String, Object> changes = result.getChanges();
-        Assertions.assertNotNull(changes);
-        Assertions.assertInstanceOf(Map.class, changes);
-        Map<String, Boolean> updatedConfigurations = (Map<String, Boolean>) changes.get("externalEventConfigurations");
+                        new ExternalEventConfigurationRequest().putExternalEventConfigurationsItem(eventName, enabled)));
+        Map<String, Boolean> updatedConfigurations = result.getChanges().get(ExternalEventConfigKey.externalEventConfigurations.name());
+        Assertions.assertNotNull(updatedConfigurations);
+        Assertions.assertInstanceOf(Map.class, updatedConfigurations);
         Assertions.assertNotNull(updatedConfigurations);
         Assertions.assertEquals(1, updatedConfigurations.size());
         Assertions.assertTrue(updatedConfigurations.containsKey(eventName));

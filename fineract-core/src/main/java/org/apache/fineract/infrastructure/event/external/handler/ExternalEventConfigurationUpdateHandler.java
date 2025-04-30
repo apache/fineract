@@ -18,26 +18,27 @@
  */
 package org.apache.fineract.infrastructure.event.external.handler;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationRequest;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationResponse;
 import org.apache.fineract.infrastructure.event.external.service.ExternalEventConfigurationWritePlatformService;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
+@Component
 @RequiredArgsConstructor
-@Service
-@CommandType(entity = "EXTERNAL_EVENT_CONFIGURATION", action = "UPDATE")
-public class ExternalEventConfigurationUpdateHandler implements NewCommandSourceHandler {
+public class ExternalEventConfigurationUpdateHandler
+        implements CommandHandler<ExternalEventConfigurationRequest, ExternalEventConfigurationResponse> {
 
     private final ExternalEventConfigurationWritePlatformService writePlatformService;
 
     @Transactional
     @Override
-    public CommandProcessingResult processCommand(@NotNull final JsonCommand command) {
+    public ExternalEventConfigurationResponse handle(Command<ExternalEventConfigurationRequest> command) {
         return writePlatformService.updateConfigurations(command);
     }
 }

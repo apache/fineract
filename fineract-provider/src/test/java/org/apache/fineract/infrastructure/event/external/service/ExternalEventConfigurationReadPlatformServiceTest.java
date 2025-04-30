@@ -27,8 +27,8 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationData;
 import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationItemData;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationResponse;
 import org.apache.fineract.infrastructure.event.external.repository.ExternalEventConfigurationRepository;
 import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventConfiguration;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,7 +65,7 @@ public class ExternalEventConfigurationReadPlatformServiceTest {
         when(mapper.map(Mockito.anyList())).thenReturn(configurationDataItems);
 
         // when
-        ExternalEventConfigurationData actualConfiguration = underTest.findAllExternalEventConfigurations();
+        ExternalEventConfigurationResponse actualConfiguration = underTest.findAllExternalEventConfigurations();
         // then
         assertThat(actualConfiguration.getExternalEventConfiguration(), hasSize(2));
         assertThat(actualConfiguration.getExternalEventConfiguration().get(0), any(ExternalEventConfigurationItemData.class));
@@ -79,7 +79,7 @@ public class ExternalEventConfigurationReadPlatformServiceTest {
         List<ExternalEventConfiguration> emptyConfiguration = new ArrayList<>();
         when(repository.findAll()).thenReturn(emptyConfiguration);
         // when
-        ExternalEventConfigurationData actualConfiguration = underTest.findAllExternalEventConfigurations();
+        ExternalEventConfigurationResponse actualConfiguration = underTest.findAllExternalEventConfigurations();
         // then
         assertThat(actualConfiguration.getExternalEventConfiguration(), hasSize(0));
 

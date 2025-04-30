@@ -22,31 +22,28 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import lombok.AllArgsConstructor;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.apache.fineract.infrastructure.event.external.command.ExternalEventConfigurationCommand;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigKey;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationRequest;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationResponse;
 import org.apache.fineract.infrastructure.event.external.repository.ExternalEventConfigurationRepository;
 import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventConfiguration;
-import org.apache.fineract.infrastructure.event.external.serialization.ExternalEventConfigurationCommandFromApiJsonDeserializer;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ExternalEventConfigurationWritePlatformServiceImpl implements ExternalEventConfigurationWritePlatformService {
 
     private final ExternalEventConfigurationRepository repository;
-    private final ExternalEventConfigurationCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
     @Transactional
     @Override
-    public CommandProcessingResult updateConfigurations(final JsonCommand command) {
-        final ExternalEventConfigurationCommand configurationCommand = fromApiJsonDeserializer.commandFromApiJson(command.json());
-        final Map<String, Boolean> commandConfigurations = configurationCommand.externalEventConfigurations();
-        final Map<String, Object> changes = new HashMap<>();
+    public ExternalEventConfigurationResponse updateConfigurations(Command<ExternalEventConfigurationRequest> command) {
+        final Map<String, Boolean> commandConfigurations = command.getPayload().getExternalEventConfigurations();
         final Map<String, Boolean> changedConfigurations = new HashMap<>();
+        final Map<ExternalEventConfigKey, Map<String, Boolean>> changes = new HashMap<>();
         final List<ExternalEventConfiguration> modifiedConfigurations = new ArrayList<>();
 
         for (Map.Entry<String, Boolean> entry : commandConfigurations.entrySet()) {
@@ -62,9 +59,10 @@ public class ExternalEventConfigurationWritePlatformServiceImpl implements Exter
         }
 
         if (!changedConfigurations.isEmpty()) {
-            changes.put("externalEventConfigurations", changedConfigurations);
+            changes.put(ExternalEventConfigKey.externalEventConfigurations, changedConfigurations);
         }
-
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).with(changes).build();
+        final ExternalEventConfigurationResponse response = new ExternalEventConfigurationResponse();
+        response.setChanges(changes);
+        return response;
     }
 }

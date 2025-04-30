@@ -16,13 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.external.service;
+package org.apache.fineract.infrastructure.event.external.data;
 
-import org.apache.fineract.command.core.Command;
-import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationRequest;
-import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationResponse;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Map;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.FieldNameConstants;
 
-public interface ExternalEventConfigurationWritePlatformService {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldNameConstants
+public class ExternalEventConfigurationRequest implements Serializable {
 
-    ExternalEventConfigurationResponse updateConfigurations(Command<ExternalEventConfigurationRequest> command);
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    private Map<String, Boolean> externalEventConfigurations;
+
 }

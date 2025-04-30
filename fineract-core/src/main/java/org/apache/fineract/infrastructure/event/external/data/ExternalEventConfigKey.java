@@ -16,13 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.external.service;
+package org.apache.fineract.infrastructure.event.external.data;
 
-import org.apache.fineract.command.core.Command;
-import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationRequest;
-import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationResponse;
+import lombok.Getter;
 
-public interface ExternalEventConfigurationWritePlatformService {
-
-    ExternalEventConfigurationResponse updateConfigurations(Command<ExternalEventConfigurationRequest> command);
+@Getter
+public enum ExternalEventConfigKey {
+    externalEventConfigurations
 }

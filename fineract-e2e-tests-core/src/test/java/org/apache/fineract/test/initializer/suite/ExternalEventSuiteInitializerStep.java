@@ -24,9 +24,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.client.models.ExternalEventConfigurationCommand;
-import org.apache.fineract.client.models.ExternalEventConfigurationData;
 import org.apache.fineract.client.models.ExternalEventConfigurationItemData;
+import org.apache.fineract.client.models.ExternalEventConfigurationRequest;
+import org.apache.fineract.client.models.ExternalEventConfigurationResponse;
 import org.apache.fineract.client.services.ExternalEventConfigurationApi;
 import org.springframework.stereotype.Component;
 import retrofit2.Response;
@@ -41,7 +41,7 @@ public class ExternalEventSuiteInitializerStep implements FineractSuiteInitializ
     public void initializeForSuite() throws Exception {
         Map<String, Boolean> eventConfigMap = new HashMap<>();
 
-        Response<ExternalEventConfigurationData> response = eventConfigurationApi.retrieveExternalEventConfiguration().execute();
+        Response<ExternalEventConfigurationResponse> response = eventConfigurationApi.retrieveExternalEventConfiguration().execute();
         if (!response.isSuccessful()) {
             String responseBody = response.errorBody().string();
             throw new RuntimeException("Cannot configure external events due to " + lineSeparator() + responseBody);
@@ -52,7 +52,7 @@ public class ExternalEventSuiteInitializerStep implements FineractSuiteInitializ
             eventConfigMap.put(e.getType(), true);
         });
 
-        ExternalEventConfigurationCommand request = new ExternalEventConfigurationCommand().externalEventConfigurations(eventConfigMap);
+        ExternalEventConfigurationRequest request = new ExternalEventConfigurationRequest().externalEventConfigurations(eventConfigMap);
 
         eventConfigurationApi.updateExternalEventConfigurationsDetails(request).execute();
     }
