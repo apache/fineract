@@ -19,14 +19,19 @@
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.common.collect.Streams;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
+import org.apache.fineract.client.models.GetLoansLoanIdLoanChargePaidByData;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
@@ -35,9 +40,11 @@ import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
+import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.junit.jupiter.api.Named;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -265,5 +272,51 @@ public class LoanWaiveChargeTest extends BaseLoanIntegrationTest {
             );
         });
 
+    }
+
+    @Test
+    public void testLoanCannotBeChargedOffWhenUndoingFeeWaiver() {
+        double amount = 1000.0;
+        AtomicLong appliedLoanId = new AtomicLong();
+
+        runAt("01 January 2023", () -> {
+            // Create Client
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            // Create Loan Product
+            PostLoanProductsRequest product = create4IProgressive();
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+
+            Long loanProductId = loanProductResponse.getResourceId();
+
+            // Apply and Approve Loan
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "01 January 2023", amount, 9.9, 4, null);
+            appliedLoanId.set(loanId);
+
+            // disburse Loan
+            disburseLoan(loanId, BigDecimal.valueOf(amount), "01 January 2023");
+        });
+        runAt("23 January 2023", () -> {
+            // create charge
+            double chargeAmount = 5.0;
+            PostChargesResponse chargeResult = createCharge(chargeAmount, "EUR");
+            Long chargeId = chargeResult.getResourceId();
+
+            PostLoansLoanIdChargesResponse loanChargeResult = addLoanCharge(appliedLoanId.get(), chargeId, "23 January 2023", chargeAmount);
+            long loanChargeId = loanChargeResult.getResourceId();
+
+            // waive charge
+            waiveLoanCharge(appliedLoanId.get(), loanChargeId, 1);
+
+            GetLoansLoanIdTransactionsResponse loanTransactions = loanTransactionHelper.getLoanTransactions(appliedLoanId.get());
+            Optional<GetLoansLoanIdLoanChargePaidByData> chargeData = loanTransactions.getContent().stream()
+                    .flatMap(t -> t.getLoanChargePaidByList().stream()).filter(t -> Objects.equals(loanChargeId, t.getChargeId()))
+                    .findAny();
+
+            loanTransactionHelper.reverseLoanTransaction(appliedLoanId.get(), chargeData.get().getTransactionId(), "23 January 2023");
+            CallFailedRuntimeException callFailedRuntimeException = assertThrows(CallFailedRuntimeException.class,
+                    () -> chargeOffLoan(appliedLoanId.get(), "05 January 2023"));
+            assertTrue(callFailedRuntimeException.getMessage().contains("error.msg.loan.monetary.transactions.after.charge.off"));
+        });
     }
 }

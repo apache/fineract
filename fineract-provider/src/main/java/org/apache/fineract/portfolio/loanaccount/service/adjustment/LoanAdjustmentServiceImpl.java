@@ -36,6 +36,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAdjustTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBalanceChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatformService;
@@ -44,6 +45,7 @@ import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
@@ -118,6 +120,16 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
             }
             newTransactionDetail = LoanTransaction.waiver(loan.getOffice(), loan, transactionAmountAsMoney, transactionDate,
                     interestComponent, unrecognizedIncome, txnExternalId);
+        }
+        if (transactionToAdjust.isChargesWaiver()) {
+            transactionToAdjust.getLoanChargesPaid().forEach(loanChargePaidBy -> {
+                LoanCharge loanCharge = loanChargePaidBy.getLoanCharge();
+                MonetaryCurrency currency = loanCharge.getLoan().getCurrency();
+
+                Integer installmentNumber = loanChargePaidBy.getInstallmentNumber();
+
+                loanCharge.undoWaive(currency, installmentNumber);
+            });
         }
 
         LocalDate recalculateFrom = null;
