@@ -19,9 +19,9 @@
 package org.apache.fineract.mix.service;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.mix.data.MixTaxonomyMappingRequest;
+import org.apache.fineract.mix.data.MixTaxonomyMappingResponse;
 import org.apache.fineract.mix.domain.MixTaxonomyMapping;
 import org.apache.fineract.mix.domain.MixTaxonomyMappingRepository;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -35,21 +35,23 @@ public class MixTaxonomyMappingWritePlatformServiceImpl implements MixTaxonomyMa
 
     @Transactional
     @Override
-    public CommandProcessingResult updateMapping(final Long mappingId, final JsonCommand command) {
+    public MixTaxonomyMappingResponse updateMapping(Command<MixTaxonomyMappingRequest> command) {
+        Long mappingId = command.getPayload().getMappingId();
+
         try {
             MixTaxonomyMapping mapping = this.mappingRepository.findById(mappingId).orElse(null);
             if (mapping == null) {
-                mapping = MixTaxonomyMapping.fromJson(command);
-            } else {
-                mapping.update(command);
+                mapping = new MixTaxonomyMapping();
             }
+            mapping.setIdentifier(command.getPayload().getIdentifier());
+            mapping.setConfig(command.getPayload().getConfig());
+            mapping.setCurrency(command.getPayload().getCurrency());
 
-            this.mappingRepository.saveAndFlush(mapping);
+            MixTaxonomyMapping result = this.mappingRepository.saveAndFlush(mapping);
 
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(mapping.getId()).build();
-
+            return new MixTaxonomyMappingResponse(result.getIdentifier(), result.getConfig());
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
-            return CommandProcessingResult.empty();
+            return new MixTaxonomyMappingResponse();
         }
     }
 }

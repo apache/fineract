@@ -18,17 +18,25 @@
  */
 package org.apache.fineract.mix.data;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.Hidden;
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
 
 @Data
 @NoArgsConstructor
-@Accessors(chain = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class MixTaxonomyMappingData {
+@AllArgsConstructor
+public class MixTaxonomyMappingRequest implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    @Hidden
+    private Long mappingId;
 
     private String identifier;
     private String config;
+    private String currency;
 }

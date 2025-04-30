@@ -32,7 +32,7 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.mix.data.MixTaxonomyData;
-import org.apache.fineract.mix.data.MixTaxonomyMappingData;
+import org.apache.fineract.mix.data.MixTaxonomyMappingResponse;
 import org.apache.fineract.mix.data.XBRLData;
 import org.apache.fineract.mix.exception.XBRLMappingInvalidException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +70,7 @@ public class XBRLResultServiceImpl implements XBRLResultService {
 
     @SuppressWarnings("unchecked")
     private HashMap<MixTaxonomyData, BigDecimal> retrieveTaxonomyConfig(final Date startDate, final Date endDate) {
-        final MixTaxonomyMappingData taxonomyMapping = this.readTaxonomyMappingService.retrieveTaxonomyMapping();
+        final MixTaxonomyMappingResponse taxonomyMapping = this.readTaxonomyMappingService.retrieveTaxonomyMapping();
         if (taxonomyMapping == null) {
             return null;
         }

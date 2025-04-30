@@ -18,10 +18,11 @@
  */
 package org.apache.fineract.mix.service;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.mix.data.MixTaxonomyMappingRequest;
+import org.apache.fineract.mix.data.MixTaxonomyMappingResponse;
 
 public interface MixTaxonomyMappingWritePlatformService {
 
-    CommandProcessingResult updateMapping(Long mappingId, JsonCommand command);
+    MixTaxonomyMappingResponse updateMapping(Command<MixTaxonomyMappingRequest> command);
 }

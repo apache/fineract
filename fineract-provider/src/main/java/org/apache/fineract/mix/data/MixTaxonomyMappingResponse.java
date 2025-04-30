@@ -16,11 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.mix.service;
+package org.apache.fineract.mix.data;
 
-import org.apache.fineract.mix.data.MixTaxonomyMappingResponse;
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
-public interface MixTaxonomyMappingReadPlatformService {
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Accessors(chain = true)
+public class MixTaxonomyMappingResponse implements Serializable {
 
-    MixTaxonomyMappingResponse retrieveTaxonomyMapping();
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    private String identifier;
+    private String config;
 }

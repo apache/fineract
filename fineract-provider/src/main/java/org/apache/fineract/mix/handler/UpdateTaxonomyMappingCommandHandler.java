@@ -18,10 +18,11 @@
  */
 package org.apache.fineract.mix.handler;
 
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
 import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.mix.data.MixTaxonomyMappingRequest;
+import org.apache.fineract.mix.data.MixTaxonomyMappingResponse;
 import org.apache.fineract.mix.service.MixTaxonomyMappingWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "XBRLMAPPING", action = "UPDATE")
-public class UpdateTaxonomyMappingCommandHandler implements NewCommandSourceHandler {
+public class UpdateTaxonomyMappingCommandHandler implements CommandHandler<MixTaxonomyMappingRequest, MixTaxonomyMappingResponse> {
 
     private final MixTaxonomyMappingWritePlatformService writeTaxonomyService;
 
@@ -40,8 +41,8 @@ public class UpdateTaxonomyMappingCommandHandler implements NewCommandSourceHand
 
     @Transactional
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writeTaxonomyService.updateMapping(command.entityId(), command);
+    public MixTaxonomyMappingResponse handle(Command<MixTaxonomyMappingRequest> command) {
+        return this.writeTaxonomyService.updateMapping(command);
     }
 
 }

@@ -21,7 +21,7 @@ package org.apache.fineract.mix.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.mix.data.MixTaxonomyMappingData;
+import org.apache.fineract.mix.data.MixTaxonomyMappingResponse;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -31,23 +31,23 @@ public class MixTaxonomyMappingReadPlatformServiceImpl implements MixTaxonomyMap
 
     private final JdbcTemplate jdbcTemplate;
 
-    private static final class TaxonomyMappingMapper implements RowMapper<MixTaxonomyMappingData> {
+    private static final class TaxonomyMappingMapper implements RowMapper<MixTaxonomyMappingResponse> {
 
         public String schema() {
             return "identifier, config " + "from mix_taxonomy_mapping";
         }
 
         @Override
-        public MixTaxonomyMappingData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public MixTaxonomyMappingResponse mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             final String identifier = rs.getString("identifier");
             final String config = rs.getString("config");
-            return new MixTaxonomyMappingData().setIdentifier(identifier).setConfig(config);
+            return new MixTaxonomyMappingResponse().setIdentifier(identifier).setConfig(config);
         }
 
     }
 
     @Override
-    public MixTaxonomyMappingData retrieveTaxonomyMapping() {
+    public MixTaxonomyMappingResponse retrieveTaxonomyMapping() {
         try {
             final TaxonomyMappingMapper rm = new TaxonomyMappingMapper();
             final String sqlString = "select " + rm.schema();
