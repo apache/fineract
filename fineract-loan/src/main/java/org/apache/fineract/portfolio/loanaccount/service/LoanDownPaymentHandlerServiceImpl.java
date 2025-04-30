@@ -127,34 +127,28 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
         final LoanRepaymentScheduleInstallment currentInstallment = loan
                 .fetchLoanRepaymentScheduleInstallmentByDueDate(loanTransaction.getTransactionDate());
 
-        boolean reprocess = loan.isForeclosure() || !isTransactionChronologicallyLatest || adjustedTransaction != null
-                || !DateUtils.isEqualBusinessDate(loanTransaction.getTransactionDate()) || currentInstallment == null
-                || !currentInstallment.getTotalOutstanding(loan.getCurrency()).isEqualTo(loanTransaction.getAmount(loan.getCurrency()));
-
-        // TODO FINERACT-2220 fix processLatestTransaction to save model.
-        if (loan.isProgressiveSchedule() && loan.isInterestBearing()) {
-            reprocess = true;
-        }
-
-        if (isTransactionChronologicallyLatest && adjustedTransaction == null
-                && (!reprocess || !loan.isInterestBearingAndInterestRecalculationEnabled()) && !loan.isForeclosure()) {
+        boolean reprocessOnPostConditions = false;
+        boolean processLatest = isTransactionChronologicallyLatest //
+                && adjustedTransaction == null // covers reversals
+                && !loan.isForeclosure() //
+                && loanTransactionProcessingService.canProcessLatestTransactionOnly(loan, loanTransaction, currentInstallment); //
+        if (processLatest) {
             loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(), loanTransaction,
                     new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
                             new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
-            reprocess = false;
-            if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
+            if (!loan.isProgressiveSchedule() && loan.isInterestBearingAndInterestRecalculationEnabled()) {
                 if (currentInstallment == null || currentInstallment.isNotFullyPaidOff()) {
-                    reprocess = true;
+                    reprocessOnPostConditions = true;
                 } else {
                     final LoanRepaymentScheduleInstallment nextInstallment = loan
                             .fetchRepaymentScheduleInstallment(currentInstallment.getInstallmentNumber() + 1);
                     if (nextInstallment != null && nextInstallment.getTotalPaidInAdvance(loan.getCurrency()).isGreaterThanZero()) {
-                        reprocess = true;
+                        reprocessOnPostConditions = true;
                     }
                 }
             }
         }
-        if (reprocess) {
+        if (!processLatest || reprocessOnPostConditions) {
             if (loan.isCumulativeSchedule() && loan.isInterestBearingAndInterestRecalculationEnabled()) {
                 loanScheduleService.regenerateRepaymentScheduleWithInterestRecalculation(loan, scheduleGeneratorDTO);
             } else if (loan.isProgressiveSchedule() && loan.hasChargeOffTransaction() && loan.hasAccelerateChargeOffStrategy()) {

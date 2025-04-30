@@ -47,8 +47,14 @@ public class ProgressiveTransactionCtx extends TransactionCtx {
     public ProgressiveTransactionCtx(MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments,
             Set<LoanCharge> charges, MoneyHolder overpaymentHolder, ChangedTransactionDetail changedTransactionDetail,
             ProgressiveLoanInterestScheduleModel model) {
+        this(currency, installments, charges, overpaymentHolder, changedTransactionDetail, model, Money.zero(currency));
+    }
+
+    public ProgressiveTransactionCtx(MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments,
+            Set<LoanCharge> charges, MoneyHolder overpaymentHolder, ChangedTransactionDetail changedTransactionDetail,
+            ProgressiveLoanInterestScheduleModel model, Money sumOfInterestRefundAmount) {
         super(currency, installments, charges, overpaymentHolder, changedTransactionDetail);
-        sumOfInterestRefundAmount = model.zero();
+        this.sumOfInterestRefundAmount = sumOfInterestRefundAmount;
         this.model = model;
     }
 }

@@ -1225,6 +1225,10 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                         adjustOverduePrincipalForInstallment(targetDate, currentInstallment, overDuePrincipal, aggregatedOverDuePrincipal,
                                 ctx);
                     }
+                    if (aggregatedOverDuePrincipal.isGreaterThanZero() && (ctx.getModel().lastOverdueBalanceChange() == null
+                            || ctx.getModel().lastOverdueBalanceChange().isBefore(targetDate))) {
+                        ctx.getModel().lastOverdueBalanceChange(targetDate);
+                    }
                 }
             }
         }

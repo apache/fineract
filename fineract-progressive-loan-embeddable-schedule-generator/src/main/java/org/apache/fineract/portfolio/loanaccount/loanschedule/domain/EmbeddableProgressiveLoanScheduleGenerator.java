@@ -72,6 +72,11 @@ public class EmbeddableProgressiveLoanScheduleGenerator {
         }
 
         @Override
+        public boolean hasValidModelForDate(Long loanId, LocalDate targetDate) {
+            return false;
+        }
+
+        @Override
         public Optional<ProgressiveLoanInterestScheduleModel> getSavedModel(Loan loan, LocalDate businessDate) {
             return Optional.empty();
         }

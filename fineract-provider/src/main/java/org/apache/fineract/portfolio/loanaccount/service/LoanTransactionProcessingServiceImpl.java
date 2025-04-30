@@ -38,9 +38,12 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.ProgressiveTransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGenerator;
@@ -60,10 +63,56 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
     private final InterestScheduleModelRepositoryWrapper modelRepository;
 
     @Override
+    public boolean canProcessLatestTransactionOnly(Loan loan, LoanTransaction loanTransaction,
+            LoanRepaymentScheduleInstallment currentInstallment) {
+        if (!loan.isInterestBearingAndInterestRecalculationEnabled()) {
+            return true;
+        }
+        if (!DateUtils.isEqualBusinessDate(loanTransaction.getTransactionDate())) {
+            return false;
+        }
+        if (loan.isProgressiveSchedule()) {
+            return modelRepository.hasValidModelForDate(loan.getId(), loanTransaction.getTransactionDate());
+        }
+        return currentInstallment != null
+                && currentInstallment.getTotalOutstanding(loan.getCurrency()).isEqualTo(loanTransaction.getAmount(loan.getCurrency()));
+    }
+
+    private ChangedTransactionDetail processLatestTransactionProgressiveInterestRecalculation(
+            AdvancedPaymentScheduleTransactionProcessor advancedProcessor, Loan loan, LoanTransaction loanTransaction) {
+        Optional<ProgressiveLoanInterestScheduleModel> savedModel = modelRepository.getSavedModel(loan,
+                loanTransaction.getTransactionDate());
+
+        ProgressiveTransactionCtx progressiveContext = new ProgressiveTransactionCtx(loan.getCurrency(),
+                loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()),
+                new ChangedTransactionDetail(), savedModel.orElse(null), getTotalRefundInterestAmount(loan));
+        progressiveContext.getAlreadyProcessedTransactions().addAll(loan.retrieveListOfTransactionsForReprocessing());
+        progressiveContext.setChargedOff(loan.isChargedOff());
+        ChangedTransactionDetail result = advancedProcessor.processLatestTransaction(loanTransaction, progressiveContext);
+        if (savedModel.isPresent() && !TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
+            modelRepository.writeInterestScheduleModel(loan, savedModel.get());
+        }
+        return result;
+    }
+
+    private Money getTotalRefundInterestAmount(Loan loan) {
+        List<LoanTransactionType> supportedInterestRefundTransactionTypes = loan.getSupportedInterestRefundTransactionTypes();
+        if (supportedInterestRefundTransactionTypes != null && supportedInterestRefundTransactionTypes.isEmpty()) {
+            return Money.zero(loan.getCurrency());
+        }
+        return loan.getLoanTransactions().stream().filter(LoanTransaction::isNotReversed).filter(LoanTransaction::isInterestRefund)
+                .map(t -> t.getAmount(loan.getCurrency())).reduce(Money.zero(loan.getCurrency()), Money::add);
+    }
+
+    @Override
     public ChangedTransactionDetail processLatestTransaction(String transactionProcessingStrategyCode, LoanTransaction loanTransaction,
             TransactionCtx ctx) {
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = getTransactionProcessor(
                 transactionProcessingStrategyCode);
+        if (loanRepaymentScheduleTransactionProcessor instanceof AdvancedPaymentScheduleTransactionProcessor advancedProcessor
+                && loanTransaction.getLoan().isInterestBearingAndInterestRecalculationEnabled()) {
+            return processLatestTransactionProgressiveInterestRecalculation(advancedProcessor, loanTransaction.getLoan(), loanTransaction);
+        }
         return loanRepaymentScheduleTransactionProcessor.processLatestTransaction(loanTransaction, ctx);
     }
 

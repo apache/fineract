@@ -36,6 +36,9 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleD
 
 public interface LoanTransactionProcessingService {
 
+    boolean canProcessLatestTransactionOnly(Loan loan, LoanTransaction loanTransaction,
+            LoanRepaymentScheduleInstallment currentInstallment);
+
     ChangedTransactionDetail processLatestTransaction(String transactionProcessingStrategyCode, LoanTransaction loanTransaction,
             TransactionCtx ctx);
 

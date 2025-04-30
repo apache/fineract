@@ -58,6 +58,7 @@ public class InterestScheduleModelRepositoryWrapperImpl implements InterestSched
         }
         String jsonModel = progressiveLoanInterestScheduleModelParserService.toJson(model);
         try {
+            // Note: FlushMode set because otherwise it could cause a concurrent writing exception
             entityManager.setFlushMode(FlushModeType.COMMIT);
             ProgressiveLoanModel progressiveLoanModel = loanModelRepository.findOneByLoanId(loan.getId()).orElseGet(() -> {
                 ProgressiveLoanModel plm = new ProgressiveLoanModel();
@@ -88,21 +89,41 @@ public class InterestScheduleModelRepositoryWrapperImpl implements InterestSched
     }
 
     @Override
-    public Optional<ProgressiveLoanInterestScheduleModel> getSavedModel(Loan loan, LocalDate businessDate) {
-        Optional<ProgressiveLoanModel> progressiveLoanModel = findOneByLoanId(loan.getId());
-        Optional<ProgressiveLoanInterestScheduleModel> savedModel;
-        if (progressiveLoanModel.isPresent() && !progressiveLoanModel.get().getBusinessDate().isAfter(businessDate)) {
-            savedModel = extractModel(progressiveLoanModel);
-            if (progressiveLoanModel.get().getBusinessDate().isBefore(businessDate) && savedModel.isPresent()) {
-                ProgressiveTransactionCtx ctx = new ProgressiveTransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
-                        Set.of(), new MoneyHolder(loan.getTotalOverpaidAsMoney()), new ChangedTransactionDetail(), savedModel.get());
-                ctx.setChargedOff(loan.isChargedOff());
-                advancedPaymentScheduleTransactionProcessor.recalculateInterestForDate(businessDate, ctx);
-            }
-        } else {
-            savedModel = Optional.empty();
+    public boolean hasValidModelForDate(Long loanId, LocalDate targetDate) {
+        try {
+            // Note: FlushMode set because an unwanted flush caused reverse replay new transactions
+            entityManager.setFlushMode(FlushModeType.COMMIT);
+            Optional<ProgressiveLoanModel> progressiveLoanModel = findOneByLoanId(loanId);
+            LocalDate modelUpdatedTilDate = progressiveLoanModel.map(ProgressiveLoanModel::getBusinessDate).orElse(null);
+            return progressiveLoanModel.isPresent() && !targetDate.isBefore(modelUpdatedTilDate);
+        } finally {
+            entityManager.setFlushMode(FlushModeType.AUTO);
         }
-        return savedModel;
+    }
+
+    @Override
+    public Optional<ProgressiveLoanInterestScheduleModel> getSavedModel(Loan loan, LocalDate businessDate) {
+        try {
+            // Note: FlushMode set because an unwanted flush caused reverse replay new transactions
+            entityManager.setFlushMode(FlushModeType.COMMIT);
+            Optional<ProgressiveLoanModel> progressiveLoanModel = findOneByLoanId(loan.getId());
+            Optional<ProgressiveLoanInterestScheduleModel> savedModel;
+            if (progressiveLoanModel.isPresent() && !progressiveLoanModel.get().getBusinessDate().isAfter(businessDate)) {
+                savedModel = extractModel(progressiveLoanModel);
+                if (savedModel.isPresent() && progressiveLoanModel.get().getBusinessDate().isBefore(businessDate)) {
+                    ProgressiveTransactionCtx ctx = new ProgressiveTransactionCtx(loan.getCurrency(),
+                            loan.getRepaymentScheduleInstallments(), Set.of(), new MoneyHolder(loan.getTotalOverpaidAsMoney()),
+                            new ChangedTransactionDetail(), savedModel.get());
+                    ctx.setChargedOff(loan.isChargedOff());
+                    advancedPaymentScheduleTransactionProcessor.recalculateInterestForDate(businessDate, ctx);
+                }
+            } else {
+                savedModel = Optional.empty();
+            }
+            return savedModel;
+        } finally {
+            entityManager.setFlushMode(FlushModeType.AUTO);
+        }
     }
 
     @Override
