@@ -368,10 +368,11 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             this.calendarInstanceRepository.save(calendarInstance);
             final Calendar calendar = calendarInstance.getCalendar();
             final PeriodFrequencyType frequencyType = CalendarFrequencyType.from(CalendarUtils.getFrequency(calendar.getRecurrence()));
+            final Long relaxingDaysConfigForPivotDate = this.configurationDomainService.retrieveRelaxingDaysConfigForPivotDate();
             Integer frequency = CalendarUtils.getInterval(calendar.getRecurrence());
             frequency = frequency == -1 ? 1 : frequency;
             reinvestedDeposit.generateSchedule(frequencyType, frequency, calendar);
-            reinvestedDeposit.processAccountUponActivation(fmt, postReversals);
+            reinvestedDeposit.processAccountUponActivation(fmt, postReversals, relaxingDaysConfigForPivotDate);
             reinvestedDeposit.updateMaturityDateAndAmount(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
                     financialYearBeginningMonth);
             this.savingsAccountRepository.save(reinvestedDeposit);
@@ -382,10 +383,12 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             savingsTransactionId = withdrawal.getId();
 
         } else if (onClosureType.isTransferToSavings()) {
-            final Long toSavingsId = command.getSavingsId();//command.longValueOfParameterNamed(toSavingsAccountIdParamName);
-            final String transferDescription = command.stringValueOfParameterNamed(transferDescriptionParamName);
-            final SavingsAccount toSavingsAccount = this.depositAccountAssembler.assembleFrom(toSavingsId,
+            final Long toSavingsId = command.longValueOfParameterNamed(toSavingsAccountIdParamName) != null ? command.longValueOfParameterNamed(toSavingsAccountIdParamName) : command.getSavingsId();;
+            final SavingsAccount SavingsAccount = this.depositAccountAssembler.assembleFrom(toSavingsId,
                     DepositAccountType.RECURRING_DEPOSIT);
+            final String transferDescription = command.stringValueOfParameterNamed(transferDescriptionParamName);
+            final SavingsAccount toSavingsAccount = this.depositAccountAssembler.getClientSavingAccount(SavingsAccount.getClient().getId(),
+                    DepositAccountType.SAVINGS_DEPOSIT);
             final boolean isExceptionForBalanceCheck = false;
             final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(closedDate, transactionAmount,
                     PortfolioAccountType.SAVINGS, PortfolioAccountType.SAVINGS, null, null, transferDescription, locale, fmt, null, null,
