@@ -368,6 +368,11 @@ public class DepositAccountAssembler {
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
         return account;
     }
+    public SavingsAccount getClientSavingAccount(final Long clientId, DepositAccountType depositAccountType) {
+        final SavingsAccount account = this.savingsAccountRepository.findSavingId(clientId, depositAccountType);
+        account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
+        return account;
+    }
 
     public void assignSavingAccountHelpers(final SavingsAccount savingsAccount) {
         savingsAccount.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
