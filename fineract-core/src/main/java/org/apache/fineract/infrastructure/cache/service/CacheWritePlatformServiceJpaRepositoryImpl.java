@@ -18,8 +18,9 @@
  */
 package org.apache.fineract.infrastructure.cache.service;
 
-import java.util.Map;
-import org.apache.fineract.infrastructure.cache.domain.CacheType;
+import java.util.Objects;
+import org.apache.fineract.infrastructure.cache.data.SwitchCacheDto;
+import org.apache.fineract.infrastructure.cache.data.SwitchCacheResultDto;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -41,14 +42,14 @@ public class CacheWritePlatformServiceJpaRepositoryImpl implements CacheWritePla
 
     @Transactional
     @Override
-    public Map<String, Object> switchToCache(final CacheType toCacheType) {
+    public SwitchCacheResultDto switchToCache(SwitchCacheDto switchCacheDto) {
 
         final boolean ehCacheEnabled = this.configurationDomainService.isEhcacheEnabled();
 
-        final Map<String, Object> changes = this.cacheService.switchToCache(ehCacheEnabled, toCacheType);
+        final SwitchCacheResultDto changes = this.cacheService.switchToCache(ehCacheEnabled, switchCacheDto.getCacheType());
 
-        if (!changes.isEmpty()) {
-            this.configurationDomainService.updateCache(toCacheType);
+        if (Objects.nonNull(changes)) {
+            this.configurationDomainService.updateCache(switchCacheDto.getCacheType());
         }
 
         return changes;

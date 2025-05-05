@@ -16,12 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.cache.service;
+package org.apache.fineract.infrastructure.cache.data;
 
-import org.apache.fineract.infrastructure.cache.data.SwitchCacheDto;
-import org.apache.fineract.infrastructure.cache.data.SwitchCacheResultDto;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.apache.fineract.infrastructure.cache.domain.CacheType;
 
-public interface CacheWritePlatformService {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class SwitchCacheDto {
 
-    SwitchCacheResultDto switchToCache(SwitchCacheDto switchCacheDto);
+    private CacheType cacheType;
 }

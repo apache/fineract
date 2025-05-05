@@ -130,6 +130,9 @@ public class SecurityConfig {
                             .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/self/registration")).permitAll() //
                             .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/self/registration/user")).permitAll() //
                             .requestMatchers(antMatcher(HttpMethod.PUT, "/api/*/instance-mode")).permitAll() //
+                            // CacheAPI
+                            .requestMatchers(antMatcher(HttpMethod.GET, "/api/*/caches"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "READ_CACHE")
                             .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated() //
                             .requestMatchers(antMatcher("/api/*/twofactor")).fullyAuthenticated() //
                             .requestMatchers(antMatcher("/api/**"))

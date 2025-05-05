@@ -16,38 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.cache.api;
+package org.apache.fineract.infrastructure.cache.command;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.infrastructure.cache.data.CacheRequest;
 
-/**
- * Created by sanyam on 28/7/17.
- */
-final class CacheApiResourceSwagger {
-
-    private CacheApiResourceSwagger() {
-
-    }
-
-    @Schema(description = "PutCachesResponse")
-    public static final class PutCachesResponse {
-
-        private PutCachesResponse() {
-
-        }
-
-        public static final class PutCachechangesSwagger {
-
-            private PutCachechangesSwagger() {
-
-            }
-
-            @Schema(example = "2")
-            public Long cacheType;
-
-        }
-
-        public PutCachechangesSwagger cacheType;
-
-    }
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class UpdateCacheCommand extends Command<CacheRequest> {}

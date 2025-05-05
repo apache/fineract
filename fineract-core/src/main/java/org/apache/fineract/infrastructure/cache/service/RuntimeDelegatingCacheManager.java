@@ -21,14 +21,13 @@ package org.apache.fineract.infrastructure.cache.service;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.infrastructure.cache.CacheApiConstants;
 import org.apache.fineract.infrastructure.cache.CacheEnumerations;
-import org.apache.fineract.infrastructure.cache.data.CacheData;
+import org.apache.fineract.infrastructure.cache.data.CacheResponse;
+import org.apache.fineract.infrastructure.cache.data.SwitchCacheResultDto;
 import org.apache.fineract.infrastructure.cache.domain.CacheType;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.springframework.beans.factory.InitializingBean;
@@ -70,7 +69,7 @@ public class RuntimeDelegatingCacheManager implements CacheManager, Initializing
         return currentCacheManager.getCacheNames();
     }
 
-    public Collection<CacheData> retrieveAll() {
+    public List<CacheResponse> retrieveAll() {
 
         final boolean noCacheEnabled = currentCacheManager == defaultCacheManager;
         final boolean ehCacheEnabled = currentCacheManager == ehCacheManager;
@@ -78,31 +77,25 @@ public class RuntimeDelegatingCacheManager implements CacheManager, Initializing
         final EnumOptionData noCacheType = CacheEnumerations.cacheType(CacheType.NO_CACHE);
         final EnumOptionData singleNodeCacheType = CacheEnumerations.cacheType(CacheType.SINGLE_NODE);
 
-        final CacheData noCache = CacheData.instance(noCacheType, noCacheEnabled);
-        final CacheData singleNodeCache = CacheData.instance(singleNodeCacheType, ehCacheEnabled);
+        final CacheResponse noCache = CacheResponse.instance(noCacheType, noCacheEnabled);
+        final CacheResponse singleNodeCache = CacheResponse.instance(singleNodeCacheType, ehCacheEnabled);
 
         return Arrays.asList(noCache, singleNodeCache);
     }
 
-    public Map<String, Object> switchToCache(final boolean ehcacheEnabled, final CacheType toCacheType) {
-
-        final Map<String, Object> changes = new HashMap<>();
-
-        final boolean noCacheEnabled = !ehcacheEnabled;
-
+    public SwitchCacheResultDto switchToCache(final boolean ehcacheEnabled, final CacheType toCacheType) {
+        SwitchCacheResultDto changes = null;
         switch (toCacheType) {
-            case INVALID -> {
-                log.warn("Invalid cache type used");
-            }
+            case INVALID -> log.warn("Invalid cache type used");
             case NO_CACHE -> {
-                if (!noCacheEnabled) {
-                    changes.put(CacheApiConstants.CACHE_TYPE_PARAMETER, toCacheType.getValue());
+                if (ehcacheEnabled) {
+                    changes = new SwitchCacheResultDto(toCacheType.getValue());
                 }
                 currentCacheManager = defaultCacheManager;
             }
             case SINGLE_NODE -> {
                 if (!ehcacheEnabled) {
-                    changes.put(CacheApiConstants.CACHE_TYPE_PARAMETER, toCacheType.getValue());
+                    changes = new SwitchCacheResultDto(toCacheType.getValue());
                     clearEhCache();
                 }
                 currentCacheManager = ehCacheManager;

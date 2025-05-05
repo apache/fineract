@@ -18,23 +18,19 @@
  */
 package org.apache.fineract.infrastructure.cache.data;
 
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 @Data
 @NoArgsConstructor
-@Accessors(chain = true)
-public final class CacheData {
+@AllArgsConstructor
+public class SwitchCacheResultDto implements Serializable {
 
-    @SuppressWarnings("unused")
-    private EnumOptionData cacheType;
-    @SuppressWarnings("unused")
-    private boolean enabled;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    public static CacheData instance(final EnumOptionData cacheType, final boolean enabled) {
-        return new CacheData().setCacheType(cacheType).setEnabled(enabled);
-    }
-
+    private Integer cacheType;
 }

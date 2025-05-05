@@ -126,6 +126,7 @@ dependencies {
     testImplementation ('org.mockito:mockito-inline')
     implementation('org.apache.avro:avro')
     implementation(
-            project(path: ':fineract-avro-schemas')
+            project(path: ':fineract-avro-schemas'),
+            project(path: ':fineract-command')
             )
 }

@@ -16,13 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.cache.data.request;
+package org.apache.fineract.infrastructure.cache.data;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public record CacheRequest(Long cacheType) implements Serializable {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class CacheRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
+
+    @NotNull(message = "{org.apache.fineract.infrastructure.cache.request.cache-type.not-null}")
+    @Min(value = 1, message = "{org.apache.fineract.infrastructure.cache.request.cache-type.min}")
+    @Max(value = 3, message = "{org.apache.fineract.infrastructure.cache.request.cache-type.max}")
+    private Long cacheType;
 }
