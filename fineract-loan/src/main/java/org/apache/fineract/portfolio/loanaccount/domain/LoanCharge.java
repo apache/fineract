@@ -201,8 +201,8 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         this.externalId = externalId;
     }
 
-    private void populateDerivedFields(final BigDecimal amountPercentageAppliedTo, final BigDecimal chargeAmount,
-            Integer numberOfRepayments, BigDecimal loanCharge) {
+    public void populateDerivedFields(final BigDecimal amountPercentageAppliedTo, final BigDecimal chargeAmount, Integer numberOfRepayments,
+            BigDecimal loanCharge) {
 
         switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
             case INVALID:

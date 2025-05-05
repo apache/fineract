@@ -36,7 +36,7 @@ public final class LoanScheduleModelDisbursementPeriod implements LoanScheduleMo
     private final Integer periodNumber;
     private final LocalDate disbursementDate;
     private final Money principalDisbursed;
-    private final BigDecimal chargesDueAtTimeOfDisbursement;
+    private BigDecimal chargesDueAtTimeOfDisbursement;
     private boolean isEMIFixedSpecificToInstallment = false;
 
     public static LoanScheduleModelDisbursementPeriod disbursement(final LocalDate disbursementDate, final Money principalDisbursed,
@@ -105,7 +105,7 @@ public final class LoanScheduleModelDisbursementPeriod implements LoanScheduleMo
 
     @Override
     public void addLoanCharges(@SuppressWarnings("unused") BigDecimal feeCharge, @SuppressWarnings("unused") BigDecimal penaltyCharge) {
-        return;
+        this.chargesDueAtTimeOfDisbursement = this.chargesDueAtTimeOfDisbursement.add(feeCharge);
     }
 
     @Override

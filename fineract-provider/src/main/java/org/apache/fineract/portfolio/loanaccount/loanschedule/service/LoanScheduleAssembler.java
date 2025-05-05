@@ -35,6 +35,7 @@ import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -110,6 +111,8 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplica
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGenerator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelDisbursementPeriod;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelPeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanaccount.serialization.VariableLoanScheduleFromApiJsonValidator;
@@ -719,7 +722,9 @@ public class LoanScheduleAssembler {
             final List<Holiday> holidays, final WorkingDays workingDays, final JsonElement element,
             List<LoanDisbursementDetails> disbursementDetails) {
 
-        final Set<LoanCharge> loanCharges = this.loanChargeAssembler.fromParsedJson(element, disbursementDetails);
+        Set<LoanCharge> loanCharges = this.loanChargeAssembler.fromParsedJson(element, disbursementDetails);
+        final Set<LoanCharge> nonCompoundingCharges = validateDisbursementPercentageCharges(loanCharges);
+        loanCharges.removeAll(nonCompoundingCharges);
 
         final MathContext mc = MoneyHelper.getMathContext();
         HolidayDetailDTO detailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
@@ -742,7 +747,11 @@ public class LoanScheduleAssembler {
                     loanApplicationTerms.getInterestMethod());
         }
 
-        return loanScheduleGenerator.generate(mc, loanApplicationTerms, loanCharges, detailDTO);
+        LoanScheduleModel loanScheduleModel = loanScheduleGenerator.generate(mc, loanApplicationTerms, loanCharges, detailDTO);
+        if (!nonCompoundingCharges.isEmpty()) {
+            updateDisbursementWithCharges(loanScheduleModel.getPeriods(), nonCompoundingCharges);
+        }
+        return loanScheduleModel;
     }
 
     public LoanScheduleModel assembleForInterestRecalculation(final LoanApplicationTerms loanApplicationTerms, final Long officeId,
@@ -1540,6 +1549,33 @@ public class LoanScheduleAssembler {
         }
 
         return Pair.of(loan, actualChanges);
+    }
+
+    private Set<LoanCharge> validateDisbursementPercentageCharges(final Set<LoanCharge> loanCharges) {
+        Set<LoanCharge> interestCharges = new HashSet<>();
+        if (loanCharges != null) {
+            for (final LoanCharge loanCharge : loanCharges) {
+                if (loanCharge.isDisbursementCharge() && (loanCharge.getChargeCalculation().isPercentageOfInterest()
+                        || loanCharge.getChargeCalculation().isPercentageOfAmountAndInterest())) {
+                    interestCharges.add(loanCharge);
+                }
+            }
+        }
+        return interestCharges;
+    }
+
+    private void updateDisbursementWithCharges(final Collection<LoanScheduleModelPeriod> periods,
+            final Set<LoanCharge> nonCompoundingCharges) {
+        final BigDecimal totalInterest = periods.stream().filter(p -> p.isRepaymentPeriod()).map(LoanScheduleModelPeriod::interestDue)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        for (LoanScheduleModelPeriod loanScheduleModelPeriod : periods) {
+            if (loanScheduleModelPeriod instanceof LoanScheduleModelDisbursementPeriod) {
+                for (final LoanCharge loanCharge : nonCompoundingCharges) {
+                    loanCharge.populateDerivedFields(totalInterest, loanCharge.amountOrPercentage(), null, BigDecimal.ZERO);
+                    loanScheduleModelPeriod.addLoanCharges(loanCharge.getAmountOutstanding(), BigDecimal.ZERO);
+                }
+            }
+        }
     }
 
 }
