@@ -1397,19 +1397,33 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         Money principalPortion = Money.zero(transactionCtx.getCurrency());
         Money interestPortion = Money.zero(transactionCtx.getCurrency());
         Money feeChargesPortion = Money.zero(transactionCtx.getCurrency());
-        Money penaltychargesPortion = Money.zero(transactionCtx.getCurrency());
+        Money penaltyChargesPortion = Money.zero(transactionCtx.getCurrency());
         for (final LoanRepaymentScheduleInstallment currentInstallment : transactionCtx.getInstallments()) {
             principalPortion = principalPortion.plus(currentInstallment.getPrincipalOutstanding(transactionCtx.getCurrency()));
             interestPortion = interestPortion.plus(currentInstallment.getInterestOutstanding(transactionCtx.getCurrency()));
             feeChargesPortion = feeChargesPortion.plus(currentInstallment.getFeeChargesOutstanding(transactionCtx.getCurrency()));
-            penaltychargesPortion = penaltychargesPortion
+            penaltyChargesPortion = penaltyChargesPortion
                     .plus(currentInstallment.getPenaltyChargesOutstanding(transactionCtx.getCurrency()));
         }
 
-        loanTransaction.updateComponentsAndTotal(principalPortion, interestPortion, feeChargesPortion, penaltychargesPortion);
+        loanTransaction.updateComponentsAndTotal(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
+
         if (transactionCtx instanceof ProgressiveTransactionCtx progressiveTransactionCtx) {
             progressiveTransactionCtx.setChargedOff(true);
         }
+
+        if (isAllComponentsZero(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion)
+                && loanTransaction.isNotReversed()) {
+            loanTransaction.reverse();
+
+            if (transactionCtx instanceof ProgressiveTransactionCtx progressiveCtx) {
+                progressiveCtx.setChargedOff(false);
+            }
+        }
+    }
+
+    private boolean isAllComponentsZero(final Money... components) {
+        return Arrays.stream(components).allMatch(Money::isZero);
     }
 
     private void handleAccelerateMaturityChargeOff(final LoanTransaction loanTransaction, final TransactionCtx transactionCtx) {

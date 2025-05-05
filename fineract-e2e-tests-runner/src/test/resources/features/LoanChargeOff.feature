@@ -8211,7 +8211,6 @@ Feature: Charge-off
       | 13 April 2025    | Merchant Issued Refund  | 500.0  | 9.81      | 0.5      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 April 2025    | Accrual                 | 3.21   | 0.0       | 3.21     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 April 2025    | Accrual Adjustment      | 0.24   | 0.0       | 0.24     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 14 April 2025    | Charge-off              | 0.0    | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | true     |
     When Customer makes "GOODWILL_CREDIT" transaction with "AUTOPAY" payment type on "13 April 2025" with 500 EUR transaction amount and system-generated Idempotency key
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date      | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Waived | Outstanding |
@@ -8233,7 +8232,6 @@ Feature: Charge-off
       | 13 April 2025    | Goodwill Credit         | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 April 2025    | Accrual                 | 3.21   | 0.0       | 3.21     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 April 2025    | Accrual Adjustment      | 0.24   | 0.0       | 0.24     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 14 April 2025    | Charge-off              | 0.0    | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | true     |
 
   @TestRailId:C3612
   Scenario: As a user I want to verify that backdated transactions are allowed after charge-off and backdated full repayment, interestRecalculation = true
@@ -8322,7 +8320,6 @@ Feature: Charge-off
       | 13 April 2025    | Merchant Issued Refund  | 500.0  | 3.16      | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 April 2025    | Accrual                 | 3.26   | 0.0       | 3.26     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 April 2025    | Accrual Adjustment      | 0.1    | 0.0       | 0.1      | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 14 April 2025    | Charge-off              | 0.0    | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | true     |
     When Customer makes "GOODWILL_CREDIT" transaction with "AUTOPAY" payment type on "13 April 2025" with 500 EUR transaction amount and system-generated Idempotency key
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date              | Paid date      | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Waived | Outstanding |
@@ -8344,7 +8341,6 @@ Feature: Charge-off
       | 13 April 2025    | Goodwill Credit         | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 April 2025    | Accrual                 | 3.26   | 0.0       | 3.26     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 April 2025    | Accrual Adjustment      | 0.1    | 0.0       | 0.1      | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 14 April 2025    | Charge-off              | 0.0    | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | true     |
 
   @TestRailId:C3618
   Scenario: Charge-off on a fraud loan respects GL mapping based on charge-off reason for buyback
@@ -9001,3 +8997,179 @@ Feature: Charge-off
       | 14 April 2025    | Accrual                | 7.57   | 0.0       | 7.57     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 April 2025    | Charge-off             | 907.57 | 900.0     | 7.57     | 0.0  | 0.0       | 0.0          | false    | true     |
       | 15 April 2025    | Merchant Issued Refund | 900.0  | 900.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    | true     |
+
+  @TestRailId:C3643
+  Scenario: As a user I want to verify that charge-off transaction if the amount balance becomes zero is reversed after backdated full repayment and MIR, interestRecalculation = false
+    When Admin sets the business date to "11 March 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_ZERO_INTEREST_CHARGE_OFF_DELINQUENT_REASON | 11 March 2025     | 500            | 7                      | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "11 March 2025" with "500" amount and expected disbursement date on "11 March 2025"
+    And Admin successfully disburse the loan on "11 March 2025" with "500" EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Waived | Outstanding |
+      |    |      | 11 March 2025    |                  | 500.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |        |             |
+      | 1  | 31   | 11 April 2025    |                  | 417.97          | 82.03         | 2.97     | 0.0  | 0.0       | 85.0  | 0.0   | 0.0        | 0.0  | 0.0    | 85.0        |
+      | 2  | 30   | 11 May 2025      |                  | 335.37          | 82.6          | 2.4      | 0.0  | 0.0       | 85.0  | 0.0   | 0.0        | 0.0  | 0.0    | 85.0        |
+      | 3  | 31   | 11 June 2025     |                  | 252.36          | 83.01         | 1.99     | 0.0  | 0.0       | 85.0  | 0.0   | 0.0        | 0.0  | 0.0    | 85.0        |
+      | 4  | 30   | 11 July 2025     |                  | 168.81          | 83.55         | 1.45     | 0.0  | 0.0       | 85.0  | 0.0   | 0.0        | 0.0  | 0.0    | 85.0        |
+      | 5  | 31   | 11 August 2025   |                  | 84.81           | 84.0          | 1.0      | 0.0  | 0.0       | 85.0  | 0.0   | 0.0        | 0.0  | 0.0    | 85.0        |
+      | 6  | 31   | 11 September 2025|                  | 0.0             | 84.81         | 0.5      | 0.0  | 0.0       | 85.31 | 0.0   | 0.0        | 0.0  | 0.0    | 85.31       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Waived | Outstanding |
+      | 500.0         | 10.31    | 0.0  | 0         | 510.31 | 0.0   | 0          | 0    | 0.0    | 510.31      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 11 March 2025    | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
+    Then Admin can successfully set Fraud flag to the loan
+    When Admin runs inline COB job for Loan
+    When Admin sets the business date to "14 April 2025"
+    And Admin does charge-off the loan with reason "DELINQUENT" on "14 April 2025"
+    Then Loan marked as charged-off on "14 April 2025"
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Waived | Outstanding |
+      |    |      | 11 March 2025     |           | 500.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |        |             |
+      | 1  | 31   | 11 April 2025     |           | 417.97          | 82.03         | 2.97     | 0.0  | 0.0       | 85.0  | 0.0  | 0.0        | 0.0  | 0.0    | 85.0        |
+      | 2  | 30   | 11 May 2025       |           | 333.21          | 84.76         | 0.24     | 0.0  | 0.0       | 85.0  | 0.0  | 0.0        | 0.0  | 0.0    | 85.0        |
+      | 3  | 31   | 11 June 2025      |           | 248.21          | 85.0          | 0.0      | 0.0  | 0.0       | 85.0  | 0.0  | 0.0        | 0.0  | 0.0    | 85.0        |
+      | 4  | 30   | 11 July 2025      |           | 163.21          | 85.0          | 0.0      | 0.0  | 0.0       | 85.0  | 0.0  | 0.0        | 0.0  | 0.0    | 85.0        |
+      | 5  | 31   | 11 August 2025    |           | 78.21           | 85.0          | 0.0      | 0.0  | 0.0       | 85.0  | 0.0  | 0.0        | 0.0  | 0.0    | 85.0        |
+      | 6  | 31   | 11 September 2025 |           | 0.0             | 78.21         | 0.0      | 0.0  | 0.0       | 78.21 | 0.0  | 0.0        | 0.0  | 0.0    | 78.21       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Waived | Outstanding |
+      | 500.0         | 3.21     | 0.0  | 0         | 503.21 | 0    | 0          | 0    | 0.0    | 503.21      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 11 March 2025    | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
+      | 14 April 2025    | Accrual          | 3.21   | 0.0       | 3.21     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 April 2025    | Charge-off       | 503.21 | 500.0     | 3.21     | 0.0  | 0.0       | 0.0          | false    | false    |
+    When Admin runs inline COB job for Loan
+    When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "13 April 2025" with 500 EUR transaction amount and system-generated Idempotency key
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date      | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Waived | Outstanding |
+      |    |      | 11 March 2025     |                | 500.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |        |             |
+      | 1  | 31   | 11 April 2025     | 13 April 2025  | 417.97          | 82.03         | 2.97     | 0.0  | 0.0       | 85.0  | 85.0  | 0.0        | 85.0 | 0.0    | 0.0         |
+      | 2  | 30   | 11 May 2025       | 13 April 2025  | 335.37          | 82.6          | 2.4      | 0.0  | 0.0       | 85.0  | 85.0  | 85.0       | 0.0  | 0.0    | 0.0         |
+      | 3  | 31   | 11 June 2025      | 13 April 2025  | 252.36          | 83.01         | 1.99     | 0.0  | 0.0       | 85.0  | 85.0  | 85.0       | 0.0  | 0.0    | 0.0         |
+      | 4  | 30   | 11 July 2025      | 13 April 2025  | 168.81          | 83.55         | 1.45     | 0.0  | 0.0       | 85.0  | 85.0  | 85.0       | 0.0  | 0.0    | 0.0         |
+      | 5  | 31   | 11 August 2025    | 13 April 2025  | 84.81           | 84.0          | 1.0      | 0.0  | 0.0       | 85.0  | 85.0  | 85.0       | 0.0  | 0.0    | 0.0         |
+      | 6  | 31   | 11 September 2025 |                | 0.0             | 84.81         | 0.0      | 0.0  | 0.0       | 84.81 | 75.0  | 75.0       | 0.0  | 0.0    | 9.81        |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Waived | Outstanding |
+      | 500.0         | 9.81     | 0.0  | 0         | 509.81 | 500.0 | 415.0      | 85.0 | 0.0    | 9.81        |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type    | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 11 March 2025    | Disbursement        | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
+      | 13 April 2025    | Repayment           | 500.0  | 490.19    | 9.81     | 0.0  | 0.0       | 9.81         | false    | false    |
+      | 14 April 2025    | Accrual             | 3.21   | 0.0       | 3.21     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 April 2025    | Accrual Adjustment  | 0.24   | 0.0       | 0.24     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 April 2025    | Charge-off          | 9.81   | 9.81      | 0.0      | 0.0  | 0.0       | 0.0          | false    | true     |
+    When Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "13 April 2025" with 500 EUR transaction amount and system-generated Idempotency key
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date      | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Waived | Outstanding |
+      |    |      | 11 March 2025     |                | 500.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |        |             |
+      | 1  | 31   | 11 April 2025     | 13 April 2025  | 417.97          | 82.03         | 2.97     | 0.0  | 0.0       | 85.0  | 85.0  | 0.0        | 85.0 | 0.0    | 0.0         |
+      | 2  | 30   | 11 May 2025       | 13 April 2025  | 335.37          | 82.6          | 2.4      | 0.0  | 0.0       | 85.0  | 85.0  | 85.0       | 0.0  | 0.0    | 0.0         |
+      | 3  | 31   | 11 June 2025      | 13 April 2025  | 252.36          | 83.01         | 1.99     | 0.0  | 0.0       | 85.0  | 85.0  | 85.0       | 0.0  | 0.0    | 0.0         |
+      | 4  | 30   | 11 July 2025      | 13 April 2025  | 168.81          | 83.55         | 1.45     | 0.0  | 0.0       | 85.0  | 85.0  | 85.0       | 0.0  | 0.0    | 0.0         |
+      | 5  | 31   | 11 August 2025    | 13 April 2025  | 84.81           | 84.0          | 1.0      | 0.0  | 0.0       | 85.0  | 85.0  | 85.0       | 0.0  | 0.0    | 0.0         |
+      | 6  | 31   | 11 September 2025 | 13 April 2025  | 0.0             | 84.81         | 0.5      | 0.0  | 0.0       | 85.31 | 85.31 | 85.31      | 0.0  | 0.0    | 0.0         |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late  | Waived | Outstanding |
+      | 500.0         | 10.31    | 0.0  | 0         | 510.31 | 510.31 | 425.31     | 85.0  | 0.0    | 0.0         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type        | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 11 March 2025    | Disbursement            | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
+      | 13 April 2025    | Repayment               | 500.0  | 490.19    | 9.81     | 0.0  | 0.0       | 9.81         | false    | false    |
+      | 13 April 2025    | Merchant Issued Refund  | 500.0  | 9.81      | 0.5      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 April 2025    | Accrual                 | 3.21   | 0.0       | 3.21     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 April 2025    | Accrual Adjustment      | 0.24   | 0.0       | 0.24     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+  @TestRailId:C3644
+  Scenario: As a user I want to verify that charge-off transaction if the amount balance becomes zero is reversed after backdated full repayment and MIR, interestRecalculation = true
+    When Admin sets the business date to "11 March 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_ZERO_INTEREST_CHARGE_OFF_DELINQUENT_REASON_INTEREST_RECALC | 11 March 2025     | 500            | 7                      | DECLINING_BALANCE | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "11 March 2025" with "500" amount and expected disbursement date on "11 March 2025"
+    And Admin successfully disburse the loan on "11 March 2025" with "500" EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Waived | Outstanding |
+      |    |      | 11 March 2025    |                  | 500.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |        |             |
+      | 1  | 31   | 11 April 2025    |                  | 417.97          | 82.03         | 2.97     | 0.0  | 0.0       | 85.0  | 0.0   | 0.0        | 0.0  | 0.0    | 85.0        |
+      | 2  | 30   | 11 May 2025      |                  | 335.37          | 82.6          | 2.4      | 0.0  | 0.0       | 85.0  | 0.0   | 0.0        | 0.0  | 0.0    | 85.0        |
+      | 3  | 31   | 11 June 2025     |                  | 252.36          | 83.01         | 1.99     | 0.0  | 0.0       | 85.0  | 0.0   | 0.0        | 0.0  | 0.0    | 85.0        |
+      | 4  | 30   | 11 July 2025     |                  | 168.81          | 83.55         | 1.45     | 0.0  | 0.0       | 85.0  | 0.0   | 0.0        | 0.0  | 0.0    | 85.0        |
+      | 5  | 31   | 11 August 2025   |                  | 84.81           | 84.0          | 1.0      | 0.0  | 0.0       | 85.0  | 0.0   | 0.0        | 0.0  | 0.0    | 85.0        |
+      | 6  | 31   | 11 September 2025|                  | 0.0             | 84.81         | 0.5      | 0.0  | 0.0       | 85.31 | 0.0   | 0.0        | 0.0  | 0.0    | 85.31       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Waived | Outstanding |
+      | 500.0         | 10.31    | 0.0  | 0         | 510.31 | 0.0   | 0          | 0    | 0.0    | 510.31      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 11 March 2025    | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
+    Then Admin can successfully set Fraud flag to the loan
+    When Admin runs inline COB job for Loan
+    When Admin sets the business date to "14 April 2025"
+    And Admin does charge-off the loan with reason "DELINQUENT" on "14 April 2025"
+    Then Loan marked as charged-off on "14 April 2025"
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Waived | Outstanding |
+      |    |      | 11 March 2025     |           | 500.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |        |             |
+      | 1  | 31   | 11 April 2025     |           | 417.97          | 82.03         | 2.97     | 0.0  | 0.0       | 85.0  | 0.0  | 0.0        | 0.0  | 0.0    | 85.0        |
+      | 2  | 30   | 11 May 2025       |           | 333.26          | 84.71         | 0.29     | 0.0  | 0.0       | 85.0  | 0.0  | 0.0        | 0.0  | 0.0    | 85.0        |
+      | 3  | 31   | 11 June 2025      |           | 248.26          | 85.0          | 0.0      | 0.0  | 0.0       | 85.0  | 0.0  | 0.0        | 0.0  | 0.0    | 85.0        |
+      | 4  | 30   | 11 July 2025      |           | 163.26          | 85.0          | 0.0      | 0.0  | 0.0       | 85.0  | 0.0  | 0.0        | 0.0  | 0.0    | 85.0        |
+      | 5  | 31   | 11 August 2025    |           | 78.26           | 85.0          | 0.0      | 0.0  | 0.0       | 85.0  | 0.0  | 0.0        | 0.0  | 0.0    | 85.0        |
+      | 6  | 31   | 11 September 2025 |           | 0.0             | 78.26         | 0.0      | 0.0  | 0.0       | 78.26 | 0.0  | 0.0        | 0.0  | 0.0    | 78.26       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Waived | Outstanding |
+      | 500.0         | 3.26     | 0.0  | 0         | 503.26 | 0.0  | 0          | 0    | 0.0    | 503.26      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 11 March 2025    | Disbursement     | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
+      | 14 April 2025    | Accrual          | 3.26   | 0.0       | 3.26     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 April 2025    | Charge-off       | 503.26 | 500.0     | 3.26     | 0.0  | 0.0       | 0.0          | false    | false    |
+    When Admin runs inline COB job for Loan
+    When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "13 April 2025" with 500 EUR transaction amount and system-generated Idempotency key
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date      | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Waived | Outstanding |
+      |    |      | 11 March 2025     |                | 500.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |        |             |
+      | 1  | 31   | 11 April 2025     | 13 April 2025  | 417.97          | 82.03         | 2.97     | 0.0  | 0.0       | 85.0  | 85.0  | 0.0        | 85.0 | 0.0    | 0.0         |
+      | 2  | 30   | 11 May 2025       | 13 April 2025  | 333.16          | 84.81         | 0.19     | 0.0  | 0.0       | 85.0  | 85.0  | 85.0       | 0.0  | 0.0    | 0.0         |
+      | 3  | 31   | 11 June 2025      | 13 April 2025  | 248.16          | 85.0          | 0.0      | 0.0  | 0.0       | 85.0  | 85.0  | 85.0       | 0.0  | 0.0    | 0.0         |
+      | 4  | 30   | 11 July 2025      | 13 April 2025  | 163.16          | 85.0          | 0.0      | 0.0  | 0.0       | 85.0  | 85.0  | 85.0       | 0.0  | 0.0    | 0.0         |
+      | 5  | 31   | 11 August 2025    | 13 April 2025  | 78.16           | 85.0          | 0.0      | 0.0  | 0.0       | 85.0  | 85.0  | 85.0       | 0.0  | 0.0    | 0.0         |
+      | 6  | 31   | 11 September 2025 |                | 0.0             | 78.16         | 0.0      | 0.0  | 0.0       | 78.16 | 75.0  | 75.0       | 0.0  | 0.0    | 3.16        |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Waived | Outstanding |
+      | 500.0         | 3.16     | 0.0  | 0         | 503.16 | 500.0 | 415.0      | 85.0  | 0.0    | 3.16        |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 11 March 2025    | Disbursement       | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
+      | 13 April 2025    | Repayment          | 500.0  | 496.84    | 3.16     | 0.0  | 0.0       | 3.16         | false    | false    |
+      | 14 April 2025    | Accrual            | 3.26   | 0.0       | 3.26     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 April 2025    | Accrual Adjustment | 0.1    | 0.0       | 0.1      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 April 2025    | Charge-off         | 3.16   | 3.16      | 0.0      | 0.0  | 0.0       | 0.0          | false    | true     |
+    When Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "13 April 2025" with 500 EUR transaction amount and system-generated Idempotency key
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date      | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Waived | Outstanding |
+      |    |      | 11 March 2025     |                | 500.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |        |             |
+      | 1  | 31   | 11 April 2025     | 13 April 2025  | 417.97          | 82.03         | 2.97     | 0.0  | 0.0       | 85.0  | 85.0  | 0.0        | 85.0 | 0.0    | 0.0         |
+      | 2  | 30   | 11 May 2025       | 13 April 2025  | 333.16          | 84.81         | 0.19     | 0.0  | 0.0       | 85.0  | 85.0  | 85.0       | 0.0  | 0.0    | 0.0         |
+      | 3  | 31   | 11 June 2025      | 13 April 2025  | 248.16          | 85.0          | 0.0      | 0.0  | 0.0       | 85.0  | 85.0  | 85.0       | 0.0  | 0.0    | 0.0         |
+      | 4  | 30   | 11 July 2025      | 13 April 2025  | 163.16          | 85.0          | 0.0      | 0.0  | 0.0       | 85.0  | 85.0  | 85.0       | 0.0  | 0.0    | 0.0         |
+      | 5  | 31   | 11 August 2025    | 13 April 2025  | 78.16           | 85.0          | 0.0      | 0.0  | 0.0       | 85.0  | 85.0  | 85.0       | 0.0  | 0.0    | 0.0         |
+      | 6  | 31   | 11 September 2025 | 13 April 2025  | 0.0             | 78.16         | 0.0      | 0.0  | 0.0       | 78.16 | 78.16 | 78.16      | 0.0  | 0.0    | 0.0         |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late  | Waived | Outstanding |
+      | 500.0         | 3.16     | 0.0  | 0         | 503.16 | 503.16 | 418.16     | 85.0  | 0.0    | 0.0         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type        | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 11 March 2025    | Disbursement            | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
+      | 13 April 2025    | Repayment               | 500.0  | 496.84    | 3.16     | 0.0  | 0.0       | 3.16         | false    | false    |
+      | 13 April 2025    | Merchant Issued Refund  | 500.0  | 3.16      | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 April 2025    | Accrual                 | 3.26   | 0.0       | 3.26     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 April 2025    | Accrual Adjustment      | 0.1    | 0.0       | 0.1      | 0.0  | 0.0       | 0.0          | false    | false    |
