@@ -49,4 +49,6 @@
   <include relativeToChangelogFile="true" file="parts/1024_accrual_adjustment_transaction_type.xml"/>
   <include relativeToChangelogFile="true" file="parts/1025_store_pre_closure_strategy_to_loan_level.xml"/>
   <include relativeToChangelogFile="true" file="parts/1026_add_interest_recognition_flag.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1027_add_capitalized_income_transaction_type.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1028_add_missing_indexes.xml"/>
 </databaseChangeLog>
