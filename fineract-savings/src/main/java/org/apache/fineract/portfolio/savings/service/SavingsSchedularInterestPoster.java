@@ -111,9 +111,9 @@ public class SavingsSchedularInterestPoster {
                 if (savingsAccountTransactionData.getId() == null) {
                     final String key = savingsAccountTransactionData.getRefNo();
                     final Boolean isNegativeBalance = savingsAccountTransactionData.getIsNegativeBalance();
-                    if (MathUtil.isLessThanZero(savingsAccountTransactionData.getRunningBalance()) && isNegativeBalance && (savingsAccountTransactionData.getFlagValidationInterest() && savingsAccountTransactionData.getFlagValidationOverdraft())) {
+                    /*if (MathUtil.isLessThanZero(savingsAccountTransactionData.getRunningBalance()) && isNegativeBalance && (savingsAccountTransactionData.getFlagValidationInterest() && savingsAccountTransactionData.getFlagValidationOverdraft())) {
                         paramsForGLInsertion.addAll(accuntNegative(savingsAccountData, userId,savingsAccountTransactionData,key,savingsAccountTransactionDataHashMap));
-                    }else{
+                    }else{*/
                         final SavingsAccountTransactionData dataFromFetch = savingsAccountTransactionDataHashMap.get(key);
                         savingsAccountTransactionData.setId(dataFromFetch.getId());
                         if (savingsAccountData.getGlAccountIdForSavingsControl() != 0
@@ -151,7 +151,7 @@ public class SavingsSchedularInterestPoster {
                                     DateUtils.getBusinessLocalDate() });
                         }
 
-                    }
+                    //}
                 }
             }
         }
