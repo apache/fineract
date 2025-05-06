@@ -1627,6 +1627,8 @@ public final class LoanProductsApiResourceSwagger {
         public Boolean isCompoundingToBePostedAsTransaction;
         @Schema(example = "false")
         public Boolean allowCompoundingOnEod;
+        @Schema(example = "false")
+        public Boolean disallowInterestCalculationOnPastDue;
 
         // Accounting
         @Schema(example = "3")
