@@ -24,7 +24,8 @@ dependencies {
     // We also (normally should have) no need to ever use 'compileOnly'.
 
     implementation(
-            project(path: ':fineract-avro-schemas')
+            project(path: ':fineract-avro-schemas'),
+            project(path: ':fineract-command')
             )
 
     // implementation dependencies are directly used (compiled against) in src/main (and src/test)

@@ -16,20 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.test.factory;
+package org.apache.fineract.portfolio.paymenttype.mapper;
 
-import org.apache.fineract.client.models.CreatePaymentTypeRequest;
+import java.util.List;
+import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
+import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
+import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeResponse;
+import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
+import org.mapstruct.Mapper;
 
-public final class PaymentTypesRequestFactory {
+@Mapper(config = MapstructMapperConfig.class)
+public interface PaymentTypeResponseMapper {
 
-    private PaymentTypesRequestFactory() {}
+    PaymentTypeResponse map(PaymentType paymentType);
 
-    public static CreatePaymentTypeRequest defaultPaymentTypeRequest(String name, String description, Boolean isCashPayment,
-            Integer position) {
-        CreatePaymentTypeRequest request = new CreatePaymentTypeRequest();
+    PaymentTypeResponse map(PaymentTypeData source);
 
-        request.name(name).description(description).isCashPayment(isCashPayment).position(position);
-
-        return request;
-    }
+    List<PaymentTypeResponse> map(List<PaymentTypeData> source);
 }

@@ -16,20 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.test.factory;
+package org.apache.fineract.portfolio.paymenttype.validation;
 
-import org.apache.fineract.client.models.CreatePaymentTypeRequest;
+import jakarta.validation.Constraint;
+import jakarta.validation.Payload;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public final class PaymentTypesRequestFactory {
+@Documented
+@Constraint(validatedBy = NotEmptyIfPresentValidator.class)
+@Target({ ElementType.FIELD })
+@Retention(RetentionPolicy.RUNTIME)
+public @interface NotEmptyIfPresent {
 
-    private PaymentTypesRequestFactory() {}
+    String message() default "{org.apache.fineract.portfolio.paymenttype.data.payment-type-response.name.not-empty}";
 
-    public static CreatePaymentTypeRequest defaultPaymentTypeRequest(String name, String description, Boolean isCashPayment,
-            Integer position) {
-        CreatePaymentTypeRequest request = new CreatePaymentTypeRequest();
+    Class<?>[] groups() default {};
 
-        request.name(name).description(description).isCashPayment(isCashPayment).position(position);
-
-        return request;
-    }
+    Class<? extends Payload>[] payload() default {};
 }

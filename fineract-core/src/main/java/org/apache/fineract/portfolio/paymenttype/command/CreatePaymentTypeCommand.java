@@ -16,28 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.paymenttype.handler;
+package org.apache.fineract.portfolio.paymenttype.command;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.apache.fineract.command.core.Command;
-import org.apache.fineract.command.core.CommandHandler;
 import org.apache.fineract.portfolio.paymenttype.data.CreatePaymentTypeRequest;
-import org.apache.fineract.portfolio.paymenttype.data.UpdatablePaymentTypeResponse;
-import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeWriteService;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-@Slf4j
-@Component
-@RequiredArgsConstructor
-public class CreatePaymentTypeCommandHandler implements CommandHandler<CreatePaymentTypeRequest, UpdatablePaymentTypeResponse> {
-
-    private final PaymentTypeWriteService paymentTypeWriteService;
-
-    @Override
-    @Transactional
-    public UpdatablePaymentTypeResponse handle(Command<CreatePaymentTypeRequest> command) {
-        return paymentTypeWriteService.createPaymentType(command.getPayload());
-    }
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class CreatePaymentTypeCommand extends Command<CreatePaymentTypeRequest> {}

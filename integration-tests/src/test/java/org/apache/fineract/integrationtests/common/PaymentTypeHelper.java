@@ -26,12 +26,10 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.client.models.DeletePaymentTypesPaymentTypeIdResponse;
-import org.apache.fineract.client.models.PaymentTypeData;
-import org.apache.fineract.client.models.PaymentTypeRequest;
-import org.apache.fineract.client.models.PostPaymentTypesResponse;
-import org.apache.fineract.client.models.PutPaymentTypesPaymentTypeIdRequest;
-import org.apache.fineract.client.models.PutPaymentTypesPaymentTypeIdResponse;
+import org.apache.fineract.client.models.CreatePaymentTypeRequest;
+import org.apache.fineract.client.models.PaymentTypeResponse;
+import org.apache.fineract.client.models.UpdatablePaymentTypeResponse;
+import org.apache.fineract.client.models.UpdatePaymentTypeRequest;
 import org.apache.fineract.client.util.Calls;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -45,25 +43,25 @@ public final class PaymentTypeHelper {
     private static final String PAYMENTTYPE_URL = "/fineract-provider/api/v1/paymenttypes";
     private static final String CREATE_PAYMENTTYPE_URL = PAYMENTTYPE_URL + "?" + Utils.TENANT_IDENTIFIER;
 
-    public List<PaymentTypeData> getAllPaymentTypes(final Boolean onlyWithCode) {
+    public List<PaymentTypeResponse> getAllPaymentTypes(final Boolean onlyWithCode) {
         log.info("-------------------------------GETTING ALL PAYMENT TYPES-------------------------------------------");
         return Calls.ok(FineractClientHelper.getFineractClient().paymentTypes.getAllPaymentTypes(onlyWithCode));
     }
 
-    public PostPaymentTypesResponse createPaymentType(final PaymentTypeRequest paymentTypeRequest) {
+    public UpdatablePaymentTypeResponse createPaymentType(final CreatePaymentTypeRequest paymentTypeRequest) {
         log.info("---------------------------------CREATING A PAYMENT TYPE---------------------------------------------");
         return Calls.ok(FineractClientHelper.getFineractClient().paymentTypes.createPaymentType(paymentTypeRequest));
     }
 
     public void verifyPaymentTypeCreatedOnServer(final Long generatedPaymentTypeID) {
         log.info("-------------------------------CHECK PAYMENT DETAILS-------------------------------------------");
-        PaymentTypeData response = Calls
+        PaymentTypeResponse response = Calls
                 .ok(FineractClientHelper.getFineractClient().paymentTypes.retrieveOnePaymentType(generatedPaymentTypeID));
         Long responsePaymentTypeID = response.getId();
         assertEquals(generatedPaymentTypeID, responsePaymentTypeID, "ERROR IN CREATING THE PAYMENT TYPE");
     }
 
-    public PaymentTypeData retrieveById(final Long paymentTypeId) {
+    public PaymentTypeResponse retrieveById(final Long paymentTypeId) {
         log.info("-------------------------------GETTING PAYMENT TYPE-------------------------------------------");
         return Calls.ok(FineractClientHelper.getFineractClient().paymentTypes.retrieveOnePaymentType(paymentTypeId));
     }
@@ -80,14 +78,12 @@ public final class PaymentTypeHelper {
         return new Gson().fromJson(jsonData, new TypeToken<PaymentTypeDomain>() {}.getType());
     }
 
-    public PutPaymentTypesPaymentTypeIdResponse updatePaymentType(final Long paymentTypeId,
-            PutPaymentTypesPaymentTypeIdRequest putPaymentTypesPaymentTypeIdRequest) {
+    public UpdatablePaymentTypeResponse updatePaymentType(final Long paymentTypeId, UpdatePaymentTypeRequest paymentTypeRequest) {
         log.info("-------------------------------UPDATING PAYMENT TYPE-------------------------------------------");
-        return Calls.ok(FineractClientHelper.getFineractClient().paymentTypes.updatePaymentType(paymentTypeId,
-                putPaymentTypesPaymentTypeIdRequest));
+        return Calls.ok(FineractClientHelper.getFineractClient().paymentTypes.updatePaymentType(paymentTypeId, paymentTypeRequest));
     }
 
-    public DeletePaymentTypesPaymentTypeIdResponse deletePaymentType(final Long paymentTypeId) {
+    public UpdatablePaymentTypeResponse deletePaymentType(final Long paymentTypeId) {
         log.info("-------------------------------DELETING PAYMENT TYPE-------------------------------------------");
         return Calls.ok(FineractClientHelper.getFineractClient().paymentTypes.deleteCode1(paymentTypeId));
     }

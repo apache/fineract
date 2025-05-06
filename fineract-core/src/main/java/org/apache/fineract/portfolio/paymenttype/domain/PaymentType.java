@@ -21,15 +21,10 @@ package org.apache.fineract.portfolio.paymenttype.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.portfolio.paymenttype.api.PaymentTypeApiResourceConstants;
 
 @Getter
 @Setter
@@ -57,36 +52,5 @@ public class PaymentType extends AbstractPersistableCustom<Long> {
     private Boolean isSystemDefined;
 
     protected PaymentType() {}
-
-    public Map<String, Object> update(final JsonCommand command) {
-
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(3);
-
-        if (command.isChangeInStringParameterNamed(PaymentTypeApiResourceConstants.NAME, this.name)) {
-            final String newValue = command.stringValueOfParameterNamed(PaymentTypeApiResourceConstants.NAME);
-            actualChanges.put(PaymentTypeApiResourceConstants.NAME, newValue);
-            this.name = StringUtils.defaultIfEmpty(newValue, null);
-        }
-
-        if (command.isChangeInStringParameterNamed(PaymentTypeApiResourceConstants.DESCRIPTION, this.description)) {
-            final String newDescription = command.stringValueOfParameterNamed(PaymentTypeApiResourceConstants.DESCRIPTION);
-            actualChanges.put(PaymentTypeApiResourceConstants.DESCRIPTION, newDescription);
-            this.description = StringUtils.defaultIfEmpty(newDescription, null);
-        }
-
-        if (command.isChangeInBooleanParameterNamed(PaymentTypeApiResourceConstants.ISCASHPAYMENT, this.isCashPayment)) {
-            final Boolean newCashPaymentType = command.booleanObjectValueOfParameterNamed(PaymentTypeApiResourceConstants.ISCASHPAYMENT);
-            actualChanges.put(PaymentTypeApiResourceConstants.ISCASHPAYMENT, newCashPaymentType);
-            this.isCashPayment = newCashPaymentType.booleanValue();
-        }
-
-        if (command.isChangeInLongParameterNamed(PaymentTypeApiResourceConstants.POSITION, this.position)) {
-            final Long newPosition = command.longValueOfParameterNamed(PaymentTypeApiResourceConstants.POSITION);
-            actualChanges.put(PaymentTypeApiResourceConstants.POSITION, newPosition);
-            this.position = newPosition;
-        }
-
-        return actualChanges;
-    }
 
 }

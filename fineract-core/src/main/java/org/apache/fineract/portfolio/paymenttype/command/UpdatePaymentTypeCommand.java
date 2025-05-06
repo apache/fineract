@@ -16,20 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.test.factory;
+package org.apache.fineract.portfolio.paymenttype.command;
 
-import org.apache.fineract.client.models.CreatePaymentTypeRequest;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.portfolio.paymenttype.data.UpdatePaymentTypeRequest;
 
-public final class PaymentTypesRequestFactory {
-
-    private PaymentTypesRequestFactory() {}
-
-    public static CreatePaymentTypeRequest defaultPaymentTypeRequest(String name, String description, Boolean isCashPayment,
-            Integer position) {
-        CreatePaymentTypeRequest request = new CreatePaymentTypeRequest();
-
-        request.name(name).description(description).isCashPayment(isCashPayment).position(position);
-
-        return request;
-    }
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class UpdatePaymentTypeCommand extends Command<UpdatePaymentTypeRequest> {}

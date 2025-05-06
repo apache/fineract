@@ -16,20 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.test.factory;
+package org.apache.fineract.portfolio.paymenttype.data;
 
-import org.apache.fineract.client.models.CreatePaymentTypeRequest;
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public final class PaymentTypesRequestFactory {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class UpdatablePaymentTypeResponse implements Serializable {
 
-    private PaymentTypesRequestFactory() {}
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    public static CreatePaymentTypeRequest defaultPaymentTypeRequest(String name, String description, Boolean isCashPayment,
-            Integer position) {
-        CreatePaymentTypeRequest request = new CreatePaymentTypeRequest();
-
-        request.name(name).description(description).isCashPayment(isCashPayment).position(position);
-
-        return request;
-    }
+    private Long resourceId;
 }

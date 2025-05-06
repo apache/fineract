@@ -20,15 +20,12 @@ package org.apache.fineract.portfolio.paymenttype.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -37,16 +34,21 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import java.util.List;
+import java.util.UUID;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.service.CommandWrapperBuilder;
-import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
-import org.apache.fineract.portfolio.paymenttype.data.request.PaymentTypeRequest;
+import org.apache.fineract.command.core.CommandPipeline;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.portfolio.paymenttype.command.CreatePaymentTypeCommand;
+import org.apache.fineract.portfolio.paymenttype.command.DeletePaymentTypeCommand;
+import org.apache.fineract.portfolio.paymenttype.command.UpdatePaymentTypeCommand;
+import org.apache.fineract.portfolio.paymenttype.data.CreatePaymentTypeRequest;
+import org.apache.fineract.portfolio.paymenttype.data.DeletePaymentTypeRequest;
+import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeResponse;
+import org.apache.fineract.portfolio.paymenttype.data.UpdatablePaymentTypeResponse;
+import org.apache.fineract.portfolio.paymenttype.data.UpdatePaymentTypeRequest;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
+import org.apache.fineract.portfolio.paymenttype.mapper.PaymentTypeResponseMapper;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
 import org.springframework.stereotype.Component;
 
@@ -56,20 +58,19 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PaymentTypeApiResource {
 
-    private final PlatformSecurityContext securityContext;
-    private final DefaultToApiJsonSerializer<PaymentTypeData> jsonSerializer;
+    private final CommandPipeline commandPipeline;
+    private final PaymentTypeRepositoryWrapper paymentTypeRepository;
+    private final PaymentTypeResponseMapper paymentTypeResponseMapper;
     private final PaymentTypeReadPlatformService readPlatformService;
-    private final PortfolioCommandSourceWritePlatformService commandWritePlatformService;
-    private final PaymentTypeRepositoryWrapper paymentTypeRepositoryWrapper;
 
     @GET
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Retrieve all Payment Types", description = "Retrieve list of payment types")
-    public List<PaymentTypeData> getAllPaymentTypes(
+    public List<PaymentTypeResponse> getAllPaymentTypes(
             @QueryParam("onlyWithCode") @Parameter(description = "onlyWithCode") final boolean onlyWithCode) {
-        securityContext.authenticatedUser().validateHasReadPermission(PaymentTypeApiResourceConstants.ENTITY_NAME);
-        return onlyWithCode ? readPlatformService.retrieveAllPaymentTypesWithCode() : readPlatformService.retrieveAllPaymentTypes();
+        return onlyWithCode ? paymentTypeResponseMapper.map(readPlatformService.retrieveAllPaymentTypesWithCode())
+                : paymentTypeResponseMapper.map(readPlatformService.retrieveAllPaymentTypes());
     }
 
     @GET
@@ -77,11 +78,9 @@ public class PaymentTypeApiResource {
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Retrieve a Payment Type", description = "Retrieves a payment type")
-    public PaymentTypeData retrieveOnePaymentType(
+    public PaymentTypeResponse retrieveOnePaymentType(
             @PathParam("paymentTypeId") @Parameter(description = "paymentTypeId") final Long paymentTypeId) {
-        securityContext.authenticatedUser().validateHasReadPermission(PaymentTypeApiResourceConstants.ENTITY_NAME);
-        paymentTypeRepositoryWrapper.findOneWithNotFoundDetection(paymentTypeId);
-        return readPlatformService.retrieveOne(paymentTypeId);
+        return paymentTypeResponseMapper.map(paymentTypeRepository.findOneWithNotFoundDetection(paymentTypeId));
     }
 
     @POST
@@ -89,16 +88,16 @@ public class PaymentTypeApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create a Payment Type", description = "Creates a new Payment type\n\n" + "Mandatory Fields: name\n\n"
             + "Optional Fields: Description, isCashPayment,Position")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = PaymentTypeRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PaymentTypeApiResourceSwagger.PostPaymentTypesResponse.class))) })
-    public CommandProcessingResult createPaymentType(@Parameter(hidden = true) PaymentTypeRequest paymentTypeRequest) {
+    public UpdatablePaymentTypeResponse createPaymentType(
+            @HeaderParam("Idempotency-Key") @Valid CreatePaymentTypeRequest paymentTypeRequest) {
+        CreatePaymentTypeCommand commandPaymentType = new CreatePaymentTypeCommand();
+        commandPaymentType.setId(UUID.randomUUID());
+        commandPaymentType.setCreatedAt(DateUtils.getAuditOffsetDateTime());
+        commandPaymentType.setPayload(paymentTypeRequest);
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createPaymentType()
-                .withJson(jsonSerializer.serialize(paymentTypeRequest)).build();
+        Supplier<UpdatablePaymentTypeResponse> result = commandPipeline.send(commandPaymentType);
 
-        CommandProcessingResult result = commandWritePlatformService.logCommandSource(commandRequest);
-        return result;
+        return result.get();
     }
 
     @PUT
@@ -106,18 +105,17 @@ public class PaymentTypeApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Payment Type", description = "Updates a Payment Type")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = PaymentTypeApiResourceSwagger.PutPaymentTypesPaymentTypeIdRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PaymentTypeApiResourceSwagger.PutPaymentTypesPaymentTypeIdResponse.class))) })
-    public CommandProcessingResult updatePaymentType(
-            @PathParam("paymentTypeId") @Parameter(description = "paymentTypeId") final Long paymentTypeId,
-            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
+    public UpdatablePaymentTypeResponse updatePaymentType(
+            @HeaderParam("Idempotency-Key") @PathParam("paymentTypeId") @Parameter(description = "paymentTypeId") final Long paymentTypeId,
+            @Valid UpdatePaymentTypeRequest paymentTypeRequest) {
+        final UpdatePaymentTypeCommand commandPaymentType = new UpdatePaymentTypeCommand();
+        commandPaymentType.setId(UUID.randomUUID());
+        commandPaymentType.setCreatedAt(DateUtils.getAuditOffsetDateTime());
+        commandPaymentType.setPayload(paymentTypeRequest.setId(paymentTypeId));
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updatePaymentType(paymentTypeId).withJson(apiRequestBodyAsJson)
-                .build();
+        final Supplier<UpdatablePaymentTypeResponse> result = commandPipeline.send(commandPaymentType);
 
-        final CommandProcessingResult result = commandWritePlatformService.logCommandSource(commandRequest);
-        return result;
+        return result.get();
     }
 
     @DELETE
@@ -125,16 +123,15 @@ public class PaymentTypeApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Payment Type", description = "Deletes payment type")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PaymentTypeApiResourceSwagger.DeletePaymentTypesPaymentTypeIdResponse.class))) })
-    public CommandProcessingResult deleteCode(
-            @PathParam("paymentTypeId") @Parameter(description = "paymentTypeId") final Long paymentTypeId) {
+    public UpdatablePaymentTypeResponse deleteCode(
+            @HeaderParam("Idempotency-Key") @PathParam("paymentTypeId") @Parameter(description = "paymentTypeId") final Long paymentTypeId) {
+        final DeletePaymentTypeCommand commandPaymentType = new DeletePaymentTypeCommand();
+        commandPaymentType.setId(UUID.randomUUID());
+        commandPaymentType.setCreatedAt(DateUtils.getAuditOffsetDateTime());
+        commandPaymentType.setPayload(new DeletePaymentTypeRequest(paymentTypeId));
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deletePaymentType(paymentTypeId).build();
+        final Supplier<UpdatablePaymentTypeResponse> result = commandPipeline.send(commandPaymentType);
 
-        final CommandProcessingResult result = commandWritePlatformService.logCommandSource(commandRequest);
-
-        return result;
+        return result.get();
     }
-
 }

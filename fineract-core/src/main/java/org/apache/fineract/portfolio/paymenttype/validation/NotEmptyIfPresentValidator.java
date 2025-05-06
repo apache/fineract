@@ -16,20 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.test.factory;
+package org.apache.fineract.portfolio.paymenttype.validation;
 
-import org.apache.fineract.client.models.CreatePaymentTypeRequest;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
-public final class PaymentTypesRequestFactory {
+public class NotEmptyIfPresentValidator implements ConstraintValidator<NotEmptyIfPresent, String> {
 
-    private PaymentTypesRequestFactory() {}
-
-    public static CreatePaymentTypeRequest defaultPaymentTypeRequest(String name, String description, Boolean isCashPayment,
-            Integer position) {
-        CreatePaymentTypeRequest request = new CreatePaymentTypeRequest();
-
-        request.name(name).description(description).isCashPayment(isCashPayment).position(position);
-
-        return request;
+    @Override
+    public boolean isValid(String value, ConstraintValidatorContext context) {
+        return value == null || !value.trim().isEmpty();
     }
 }

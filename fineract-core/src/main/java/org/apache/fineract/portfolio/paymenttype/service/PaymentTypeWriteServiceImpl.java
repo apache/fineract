@@ -18,15 +18,14 @@
  */
 package org.apache.fineract.portfolio.paymenttype.service;
 
-import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.apache.fineract.portfolio.paymenttype.api.PaymentTypeApiResourceConstants;
-import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeDataValidator;
+import org.apache.fineract.portfolio.paymenttype.data.CreatePaymentTypeRequest;
+import org.apache.fineract.portfolio.paymenttype.data.DeletePaymentTypeRequest;
+import org.apache.fineract.portfolio.paymenttype.data.UpdatablePaymentTypeResponse;
+import org.apache.fineract.portfolio.paymenttype.data.UpdatePaymentTypeRequest;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepository;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
@@ -39,46 +38,38 @@ public class PaymentTypeWriteServiceImpl implements PaymentTypeWriteService {
 
     private final PaymentTypeRepository repository;
     private final PaymentTypeRepositoryWrapper repositoryWrapper;
-    private final PaymentTypeDataValidator fromApiJsonDeserializer;
 
     @Override
     @CacheEvict(value = "payment_types", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('payment_types')")
-    public CommandProcessingResult createPaymentType(JsonCommand command) {
-        this.fromApiJsonDeserializer.validateForCreate(command.json());
-        String name = command.stringValueOfParameterNamed(PaymentTypeApiResourceConstants.NAME);
-        String description = command.stringValueOfParameterNamed(PaymentTypeApiResourceConstants.DESCRIPTION);
-        Boolean isCashPayment = command.booleanObjectValueOfParameterNamed(PaymentTypeApiResourceConstants.ISCASHPAYMENT);
-        Long position = command.longValueOfParameterNamed(PaymentTypeApiResourceConstants.POSITION);
-        String codeName = command.stringValueOfParameterNamed(PaymentTypeApiResourceConstants.CODE_NAME);
-        Boolean isSystemDefined = command.booleanObjectValueOfParameterNamed(PaymentTypeApiResourceConstants.IS_SYSTEM_DEFINED);
-        if (isSystemDefined == null) {
-            isSystemDefined = false;
-        }
+    public UpdatablePaymentTypeResponse createPaymentType(CreatePaymentTypeRequest paymentTypeRequest) {
+        boolean isSystemDefined = Optional.ofNullable(paymentTypeRequest.getIsSystemDefined()).orElse(false);
+        Long position = Optional.ofNullable(paymentTypeRequest.getPosition()).map(Long::valueOf).orElse(null);
 
-        PaymentType newPaymentType = new PaymentType(name, description, isCashPayment, position, codeName, isSystemDefined);
+        PaymentType newPaymentType = new PaymentType(paymentTypeRequest.getName(), paymentTypeRequest.getDescription(),
+                paymentTypeRequest.getIsCashPayment(), position, paymentTypeRequest.getCodeName(), isSystemDefined);
+
         this.repository.saveAndFlush(newPaymentType);
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(newPaymentType.getId()).build();
+
+        return new UpdatablePaymentTypeResponse(newPaymentType.getId());
     }
 
     @Override
     @CacheEvict(value = "payment_types", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('payment_types')")
-    public CommandProcessingResult updatePaymentType(Long paymentTypeId, JsonCommand command) {
+    public UpdatablePaymentTypeResponse updatePaymentType(UpdatePaymentTypeRequest paymentTypeRequest) {
+        final PaymentType paymentType = this.repositoryWrapper.findOneWithNotFoundDetection(paymentTypeRequest.getId());
+        paymentType.setName(paymentTypeRequest.getName());
+        paymentType.setDescription(paymentTypeRequest.getDescription());
+        paymentType.setIsCashPayment(paymentTypeRequest.getIsCashPayment());
+        paymentType.setPosition(Optional.ofNullable(paymentTypeRequest.getPosition()).map(Integer::longValue).orElse(null));
 
-        this.fromApiJsonDeserializer.validateForUpdate(command.json());
-        final PaymentType paymentType = this.repositoryWrapper.findOneWithNotFoundDetection(paymentTypeId);
-        final Map<String, Object> changes = paymentType.update(command);
-
-        if (!changes.isEmpty()) {
-            this.repository.save(paymentType);
-        }
-
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(command.entityId()).build();
+        this.repository.save(paymentType);
+        return new UpdatablePaymentTypeResponse(paymentType.getId());
     }
 
     @Override
     @CacheEvict(value = "payment_types", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('payment_types')")
-    public CommandProcessingResult deletePaymentType(Long paymentTypeId) {
-        final PaymentType paymentType = this.repositoryWrapper.findOneWithNotFoundDetection(paymentTypeId);
+    public UpdatablePaymentTypeResponse deletePaymentType(DeletePaymentTypeRequest deletePaymentTypeRequest) {
+        final PaymentType paymentType = this.repositoryWrapper.findOneWithNotFoundDetection(deletePaymentTypeRequest.getId());
         try {
             this.repository.delete(paymentType);
             this.repository.flush();
@@ -86,7 +77,7 @@ public class PaymentTypeWriteServiceImpl implements PaymentTypeWriteService {
             final Throwable throwable = e.getMostSpecificCause();
             handleDataIntegrityIssues(throwable, e);
         }
-        return new CommandProcessingResultBuilder().withEntityId(paymentType.getId()).build();
+        return new UpdatablePaymentTypeResponse(paymentType.getId());
     }
 
     private void handleDataIntegrityIssues(final Throwable realCause, final Exception dve) {

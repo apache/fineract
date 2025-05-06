@@ -18,10 +18,6 @@
  */
 package org.apache.fineract.portfolio.paymenttype.api;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 public final class PaymentTypeApiResourceConstants {
 
     private PaymentTypeApiResourceConstants() {
@@ -38,6 +34,4 @@ public final class PaymentTypeApiResourceConstants {
     public static final String POSITION = "position";
     public static final String CODE_NAME = "code_name";
     public static final String IS_SYSTEM_DEFINED = "system_defined";
-
-    static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(ID, NAME, DESCRIPTION, ISCASHPAYMENT));
 }

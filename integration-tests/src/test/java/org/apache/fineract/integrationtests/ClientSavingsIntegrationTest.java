@@ -40,9 +40,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import org.apache.fineract.client.models.PaymentTypeRequest;
-import org.apache.fineract.client.models.PostPaymentTypesResponse;
+import org.apache.fineract.client.models.CreatePaymentTypeRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
+import org.apache.fineract.client.models.UpdatablePaymentTypeResponse;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
@@ -2663,9 +2663,9 @@ public class ClientSavingsIntegrationTest {
         Boolean isCashPayment = false;
         Integer position = 1;
 
-        PostPaymentTypesResponse paymentTypesResponse = paymentTypeHelper.createPaymentType(
-                new PaymentTypeRequest().name(name).description(description).isCashPayment(isCashPayment).position(position));
-        Long paymentTypeIdOne = paymentTypesResponse.getResourceId();
+        UpdatablePaymentTypeResponse paymentTypeResponse = paymentTypeHelper.createPaymentType(
+                new CreatePaymentTypeRequest().name(name).description(description).isCashPayment(isCashPayment).position(position));
+        Long paymentTypeIdOne = paymentTypeResponse.getResourceId();
         Assertions.assertNotNull(paymentTypeIdOne);
 
         final Integer chargeIdOne = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
@@ -2685,9 +2685,9 @@ public class ClientSavingsIntegrationTest {
 
         String paymentTypeNameTwo = PaymentTypeHelper.randomNameGenerator("P_T", 5);
 
-        PostPaymentTypesResponse paymentTypesResponseTwo = paymentTypeHelper.createPaymentType(
-                new PaymentTypeRequest().name(paymentTypeNameTwo).description(description).isCashPayment(isCashPayment).position(position));
-        Long paymentTypeIdTwo = paymentTypesResponseTwo.getResourceId();
+        UpdatablePaymentTypeResponse paymentTypeResponseTwo = paymentTypeHelper.createPaymentType(new CreatePaymentTypeRequest()
+                .name(paymentTypeNameTwo).description(description).isCashPayment(isCashPayment).position(position));
+        Long paymentTypeIdTwo = paymentTypeResponseTwo.getResourceId();
         Assertions.assertNotNull(paymentTypeIdTwo);
 
         final Integer chargeIdTwo = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,

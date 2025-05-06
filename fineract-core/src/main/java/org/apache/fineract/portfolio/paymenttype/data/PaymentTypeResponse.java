@@ -16,15 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.paymenttype.data.request;
+package org.apache.fineract.portfolio.paymenttype.data;
 
 import java.io.Serial;
 import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public record PaymentTypeRequest(String name, String description, Boolean isCashPayment, Integer position, String codeName,
-        Boolean isSystemDefined) implements Serializable {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class PaymentTypeResponse implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
+    private Long id;
+    private String name;
+    private String description;
+    private Boolean isCashPayment;
+    private Integer position;
+    private String codeName;
+    private Boolean isSystemDefined;
 }

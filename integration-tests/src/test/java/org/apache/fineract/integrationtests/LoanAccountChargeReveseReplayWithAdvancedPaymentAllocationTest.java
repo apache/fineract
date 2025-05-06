@@ -35,16 +35,16 @@ import java.util.List;
 import java.util.UUID;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.AllowAttributeOverrides;
+import org.apache.fineract.client.models.CreatePaymentTypeRequest;
 import org.apache.fineract.client.models.GetLoanPaymentChannelToFundSourceMappings;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.LoanProductChargeData;
 import org.apache.fineract.client.models.LoanProductChargeToGLAccountMapper;
-import org.apache.fineract.client.models.PaymentTypeRequest;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
-import org.apache.fineract.client.models.PostPaymentTypesResponse;
+import org.apache.fineract.client.models.UpdatablePaymentTypeResponse;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
@@ -362,9 +362,9 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest exte
         Boolean isCashPayment = false;
         Integer position = 1;
 
-        PostPaymentTypesResponse paymentTypesResponse = paymentTypeHelper.createPaymentType(
-                new PaymentTypeRequest().name(paymentTypeName).description(description).isCashPayment(isCashPayment).position(position));
-        Long paymentTypeIdOne = paymentTypesResponse.getResourceId();
+        UpdatablePaymentTypeResponse paymentTypeResponse = paymentTypeHelper.createPaymentType(new CreatePaymentTypeRequest()
+                .name(paymentTypeName).description(description).isCashPayment(isCashPayment).position(position));
+        Long paymentTypeIdOne = paymentTypeResponse.getResourceId();
         Assertions.assertNotNull(paymentTypeIdOne);
 
         List<GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings = new ArrayList<>();

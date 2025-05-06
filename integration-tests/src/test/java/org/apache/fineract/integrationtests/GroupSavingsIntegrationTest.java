@@ -35,8 +35,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import org.apache.fineract.client.models.PaymentTypeRequest;
-import org.apache.fineract.client.models.PostPaymentTypesResponse;
+import org.apache.fineract.client.models.CreatePaymentTypeRequest;
+import org.apache.fineract.client.models.UpdatablePaymentTypeResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GroupHelper;
@@ -368,9 +368,9 @@ public class GroupSavingsIntegrationTest {
         Boolean isCashPayment = true;
         Integer position = 1;
 
-        PostPaymentTypesResponse paymentTypesResponse = paymentTypeHelper.createPaymentType(
-                new PaymentTypeRequest().name(name).description(description).isCashPayment(isCashPayment).position(position));
-        Long paymentTypeId = paymentTypesResponse.getResourceId();
+        UpdatablePaymentTypeResponse paymentTypeResponse = paymentTypeHelper.createPaymentType(
+                new CreatePaymentTypeRequest().name(name).description(description).isCashPayment(isCashPayment).position(position));
+        Long paymentTypeId = paymentTypeResponse.getResourceId();
         Assertions.assertNotNull(paymentTypeId);
 
         List<Map<String, Object>> savingsArray = new ArrayList<>();

@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.paymenttype.starter;
 
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeDataValidator;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepository;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
 import org.apache.fineract.portfolio.paymenttype.mapper.PaymentTypeMapper;
@@ -43,8 +42,7 @@ public class PaymentTypeConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(PaymentTypeWriteService.class)
-    PaymentTypeWriteService paymentTypeWriteService(PaymentTypeRepository repository, PaymentTypeRepositoryWrapper repositoryWrapper,
-            PaymentTypeDataValidator fromApiJsonDeserializer) {
-        return new PaymentTypeWriteServiceImpl(repository, repositoryWrapper, fromApiJsonDeserializer);
+    PaymentTypeWriteService paymentTypeWriteService(PaymentTypeRepository repository, PaymentTypeRepositoryWrapper repositoryWrapper) {
+        return new PaymentTypeWriteServiceImpl(repository, repositoryWrapper);
     }
 }

@@ -34,9 +34,9 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import org.apache.fineract.client.models.PaymentTypeData;
-import org.apache.fineract.client.models.PaymentTypeRequest;
-import org.apache.fineract.client.models.PostPaymentTypesResponse;
+import org.apache.fineract.client.models.CreatePaymentTypeRequest;
+import org.apache.fineract.client.models.PaymentTypeResponse;
+import org.apache.fineract.client.models.UpdatablePaymentTypeResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
@@ -140,13 +140,13 @@ public class RepaymentWithPostDatedChecksTest {
         Boolean isCashPayment = false;
         Integer position = 1;
 
-        PostPaymentTypesResponse paymentTypesResponse = paymentTypeHelper.createPaymentType(
-                new PaymentTypeRequest().name(name).description(description).isCashPayment(isCashPayment).position(position));
-        Long paymentTypeId = paymentTypesResponse.getResourceId();
+        UpdatablePaymentTypeResponse paymentTypeResponse = paymentTypeHelper.createPaymentType(
+                new CreatePaymentTypeRequest().name(name).description(description).isCashPayment(isCashPayment).position(position));
+        Long paymentTypeId = paymentTypeResponse.getResourceId();
         Assertions.assertNotNull(paymentTypeId);
         paymentTypeHelper.verifyPaymentTypeCreatedOnServer(paymentTypeId);
-        PaymentTypeData paymentTypeResponse = paymentTypeHelper.retrieveById(paymentTypeId);
-        Assertions.assertEquals(name, paymentTypeResponse.getName());
+        PaymentTypeResponse retrievePaymentType = paymentTypeHelper.retrieveById(paymentTypeId);
+        Assertions.assertEquals(name, retrievePaymentType.getName());
 
         // Repay for the installment 1 using post dated check
         HashMap postDatedCheck = this.loanTransactionHelper.getPostDatedCheck(loanID, Integer.valueOf(1));
