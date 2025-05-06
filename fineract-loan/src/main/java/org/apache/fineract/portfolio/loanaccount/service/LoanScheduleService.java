@@ -101,7 +101,7 @@ public class LoanScheduleService {
         final Set<LoanCharge> charges = loan.getActiveCharges();
         for (final LoanCharge loanCharge : charges) {
             if (!loanCharge.isDueAtDisbursement()) {
-                loan.updateOverdueScheduleInstallment(loanCharge);
+                loanChargeService.updateOverdueScheduleInstallment(loan, loanCharge);
                 if (loanCharge.getDueLocalDate() == null || (!DateUtils.isBefore(lastRepaymentDate, loanCharge.getDueLocalDate())
                         || loan.getLoanProductRelatedDetail().getLoanScheduleType().equals(LoanScheduleType.PROGRESSIVE))) {
                     if ((loanCharge.isInstalmentFee() || !loanCharge.isWaived()) && (loanCharge.getDueLocalDate() == null

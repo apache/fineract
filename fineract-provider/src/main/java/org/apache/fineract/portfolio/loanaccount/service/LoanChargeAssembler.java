@@ -296,8 +296,8 @@ public class LoanChargeAssembler {
             if (percentage == null) {
                 percentage = chargeDefinition.getAmount();
             }
-            loanCharge = loan.calculatePerInstallmentChargeAmount(ChargeCalculationType.fromInt(chargeDefinition.getChargeCalculation()),
-                    percentage);
+            loanCharge = LoanCharge.calculatePerInstallmentChargeAmount(loan,
+                    ChargeCalculationType.fromInt(chargeDefinition.getChargeCalculation()), percentage);
         }
 
         // If charge type is specified due date and loan is multi disburment

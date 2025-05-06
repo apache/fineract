@@ -204,7 +204,7 @@ public class LoanDisbursementService {
                 }
             } else if (disbursedOn.equals(loan.getActualDisbursementDate())
                     && loan.isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct()) {
-                loan.handleChargeAppliedTransaction(charge, disbursedOn);
+                loanChargeService.handleChargeAppliedTransaction(loan, charge, disbursedOn);
             }
         }
 
@@ -273,7 +273,7 @@ public class LoanDisbursementService {
         } else {
             if (!loanChargeIds.isEmpty() && loanChargeIds.size() != chargeIdLength) {
                 for (Long chargeId : loanChargeIds) {
-                    final LoanCharge deleteCharge = loan.fetchLoanChargesById(chargeId);
+                    final LoanCharge deleteCharge = loanChargeService.fetchLoanChargesById(loan, chargeId);
                     if (loan.getCharges().contains(deleteCharge)) {
                         loanChargeValidator.validateLoanIsNotClosed(loan, deleteCharge);
                         loanChargeValidator.validateLoanChargeIsNotWaived(loan, deleteCharge);

@@ -530,7 +530,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
         final CurrencyData currencyData = applicationCurrency.toData();
 
-        final LoanTransaction waiveOfInterest = loan.deriveDefaultInterestWaiverTransaction();
+        final LoanTransaction waiveOfInterest = deriveDefaultInterestWaiverTransaction(loan);
 
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.WAIVE_INTEREST);
 
@@ -2234,5 +2234,30 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     @Override
     public boolean existsByLoanId(Long loanId) {
         return loanRepositoryWrapper.existsByLoanId(loanId);
+    }
+
+    private LoanTransaction deriveDefaultInterestWaiverTransaction(Loan loan) {
+        final Money totalInterestOutstanding = loan.getTotalInterestOutstandingOnLoan();
+        Money possibleInterestToWaive = totalInterestOutstanding.copy();
+        LocalDate transactionDate = DateUtils.getBusinessLocalDate();
+
+        if (totalInterestOutstanding.isGreaterThanZero()) {
+            // find earliest known instance of overdue interest and default to
+            // that
+            List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
+            for (final LoanRepaymentScheduleInstallment scheduledRepayment : installments) {
+
+                final Money outstandingForPeriod = scheduledRepayment.getInterestOutstanding(loan.getCurrency());
+                if (scheduledRepayment.isOverdueOn(DateUtils.getBusinessLocalDate()) && scheduledRepayment.isNotFullyPaidOff()
+                        && outstandingForPeriod.isGreaterThanZero()) {
+                    transactionDate = scheduledRepayment.getDueDate();
+                    possibleInterestToWaive = outstandingForPeriod;
+                    break;
+                }
+            }
+        }
+
+        return LoanTransaction.waiver(loan.getOffice(), loan, possibleInterestToWaive, transactionDate, possibleInterestToWaive,
+                possibleInterestToWaive.zero(), ExternalId.empty());
     }
 }

@@ -474,7 +474,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
 
         final Map<String, Object> changes = new LinkedHashMap<>(3);
         if (loan.getActiveCharges().contains(loanCharge)) {
-            final BigDecimal amount = loan.calculateAmountPercentageAppliedTo(loanCharge);
+            final BigDecimal amount = loanChargeService.calculateAmountPercentageAppliedTo(loan, loanCharge);
             final Map<String, Object> loanChargeChanges = loanCharge.update(command, amount);
             changes.putAll(loanChargeChanges);
             loan.updateSummaryWithTotalFeeChargesDueAtDisbursement(loan.deriveSumTotalOfChargesDueAtDisbursement());
@@ -1115,7 +1115,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         // the loan product uses Upfront Accruals, or only when the loan are closed too,
         if ((loan.getStatus().isActive() && loan.isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct())
                 || loan.getStatus().isOverpaid() || loan.getStatus().isClosedObligationsMet()) {
-            final LoanTransaction applyLoanChargeTransaction = loan.handleChargeAppliedTransaction(loanCharge, null);
+            final LoanTransaction applyLoanChargeTransaction = loanChargeService.handleChargeAppliedTransaction(loan, loanCharge, null);
             if (applyLoanChargeTransaction != null) {
                 this.loanTransactionRepository.saveAndFlush(applyLoanChargeTransaction);
                 businessEventNotifierService
@@ -1123,7 +1123,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
             }
         } else if (configurationDomainService.isImmediateChargeAccrualPostMaturityEnabled()
                 && DateUtils.getBusinessLocalDate().isAfter(loan.getMaturityDate())) {
-            final LoanTransaction loanTransaction = loan.createChargeAppliedTransaction(loanCharge, null);
+            final LoanTransaction loanTransaction = loanChargeService.createChargeAppliedTransaction(loan, loanCharge, null);
             this.loanTransactionRepository.saveAndFlush(loanTransaction);
             businessEventNotifierService.notifyPostBusinessEvent(new LoanAccrualTransactionCreatedBusinessEvent(loanTransaction));
         }

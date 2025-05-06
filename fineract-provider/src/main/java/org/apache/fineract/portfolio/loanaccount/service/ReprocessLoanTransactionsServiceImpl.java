@@ -21,14 +21,18 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.interestpauses.service.LoanAccountTransfersService;
 import org.apache.fineract.portfolio.loanaccount.data.TransactionChangeData;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidBy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
@@ -83,7 +87,7 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
             loan.updateSummaryWithTotalFeeChargesDueAtDisbursement(loan.deriveSumTotalOfChargesDueAtDisbursement());
         }
 
-        loan.removeOrModifyTransactionAssociatedWithLoanChargeIfDueAtDisbursement(loanCharge);
+        removeOrModifyTransactionAssociatedWithLoanChargeIfDueAtDisbursement(loan, loanCharge);
 
         if (!loanCharge.isDueAtDisbursement() && loanCharge.isPaidOrPartiallyPaid(loan.getCurrency())) {
             /*
@@ -98,6 +102,39 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
         }
         loan.getLoanCharges().remove(loanCharge);
         loan.updateLoanSummaryDerivedFields();
+    }
+
+    private void removeOrModifyTransactionAssociatedWithLoanChargeIfDueAtDisbursement(final Loan loan, final LoanCharge loanCharge) {
+        if (loanCharge.isDueAtDisbursement()) {
+            LoanTransaction transactionToRemove = null;
+            List<LoanTransaction> transactions = loan.getLoanTransactions();
+            for (final LoanTransaction transaction : transactions) {
+                if (transaction.isRepaymentAtDisbursement()
+                        && doesLoanChargePaidByContainLoanCharge(transaction.getLoanChargesPaid(), loanCharge)) {
+                    final MonetaryCurrency currency = loan.getCurrency();
+                    final Money chargeAmount = Money.of(currency, loanCharge.amount());
+                    if (transaction.isGreaterThan(chargeAmount)) {
+                        final Money principalPortion = Money.zero(currency);
+                        final Money interestPortion = Money.zero(currency);
+                        final Money penaltyChargesPortion = Money.zero(currency);
+
+                        transaction.updateComponentsAndTotal(principalPortion, interestPortion, chargeAmount, penaltyChargesPortion);
+
+                    } else {
+                        transactionToRemove = transaction;
+                    }
+                }
+            }
+
+            if (transactionToRemove != null) {
+                loan.removeLoanTransaction(transactionToRemove);
+            }
+        }
+    }
+
+    private boolean doesLoanChargePaidByContainLoanCharge(Set<LoanChargePaidBy> loanChargePaidBys, LoanCharge loanCharge) {
+        return loanChargePaidBys.stream() //
+                .anyMatch(loanChargePaidBy -> loanChargePaidBy.getLoanCharge().equals(loanCharge));
     }
 
     @Override

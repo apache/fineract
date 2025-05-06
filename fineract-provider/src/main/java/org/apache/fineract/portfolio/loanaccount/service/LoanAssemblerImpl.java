@@ -832,7 +832,7 @@ public class LoanAssemblerImpl implements LoanAssembler {
 
         final String chargesParamName = "charges";
         if (changes.containsKey(chargesParamName)) {
-            loan.updateLoanCharges(possiblyModifiedLoanCharges);
+            loanChargeService.updateLoanCharges(loan, possiblyModifiedLoanCharges);
         }
 
         // update installment level delinquency

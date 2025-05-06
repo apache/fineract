@@ -198,7 +198,7 @@ class LoanChargeWritePlatformServiceImplTest {
         when(loan.getLoanCharges()).thenReturn(new HashSet<>());
         when(loan.getDisbursementDate()).thenReturn(LocalDate.now(ZoneId.systemDefault()));
         when(loan.getRepaymentScheduleInstallments()).thenReturn(new ArrayList<>());
-        when(loan.calculateAmountPercentageAppliedTo(any(LoanCharge.class))).thenReturn(BigDecimal.TEN);
+        when(loanChargeService.calculateAmountPercentageAppliedTo(any(Loan.class), any(LoanCharge.class))).thenReturn(BigDecimal.TEN);
         when(loan.fetchNumberOfInstallmensAfterExceptions()).thenReturn(5);
         when(loan.updateSummaryWithTotalFeeChargesDueAtDisbursement(any(BigDecimal.class))).thenReturn(null);
         when(loan.deriveSumTotalOfChargesDueAtDisbursement()).thenReturn(BigDecimal.ZERO);
@@ -219,8 +219,8 @@ class LoanChargeWritePlatformServiceImplTest {
     void shouldHandleAccrualBasedOnConfigurationAndDates(boolean isAccrualEnabled, LocalDate businessDate, LocalDate maturityDate, boolean isAccrualExpected) {
         when(configurationDomainService.isImmediateChargeAccrualPostMaturityEnabled()).thenReturn(isAccrualEnabled);
         when(loan.getMaturityDate()).thenReturn(maturityDate);
-        when(loan.handleChargeAppliedTransaction(loanCharge, null)).thenReturn(loanTransaction);
-        when(loan.createChargeAppliedTransaction(loanCharge, null)).thenReturn(loanTransaction);
+        when(loanChargeService.handleChargeAppliedTransaction(loan, loanCharge, null)).thenReturn(loanTransaction);
+        when(loanChargeService.createChargeAppliedTransaction(loan, loanCharge, null)).thenReturn(loanTransaction);
 
         if (isAccrualExpected) {
             when(loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()).thenReturn(true);

@@ -112,6 +112,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
     private final ThreadPoolTaskExecutor taskExecutor;
     private final TransactionTemplate transactionTemplate;
     private final LoanAccountingBridgeMapper loanAccountingBridgeMapper;
+    private final LoanChargeService loanChargeService;
 
     /**
      * method adds accrual for batch job "Add Periodic Accrual Transactions" and add accruals api for Loan
@@ -733,7 +734,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
                 continue;
             }
             final BigDecimal chargeAmount = MathUtil.toBigDecimal(chargePortion);
-            final LoanCharge loanCharge = loan.fetchLoanChargesById(accrualCharge.getLoanChargeId());
+            final LoanCharge loanCharge = loanChargeService.fetchLoanChargesById(loan, accrualCharge.getLoanChargeId());
             final LoanChargePaidBy paidBy = new LoanChargePaidBy(transaction, loanCharge, chargeAmount, installment.getInstallmentNumber());
             loanCharge.getLoanChargePaidBySet().add(paidBy);
             transaction.getLoanChargesPaid().add(paidBy);
@@ -845,7 +846,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
                     Money chargeAmount = loanCharge.getAmount(loan.getCurrency());
                     if (chargeAmount.isNotEqualTo(accrualTransaction.getAmount(loan.getCurrency()))) {
                         accrualTransaction.reverse();
-                        loan.handleChargeAppliedTransaction(loanCharge, accrualTransaction.getTransactionDate());
+                        loanChargeService.handleChargeAppliedTransaction(loan, loanCharge, accrualTransaction.getTransactionDate());
                     }
                 }
             }
