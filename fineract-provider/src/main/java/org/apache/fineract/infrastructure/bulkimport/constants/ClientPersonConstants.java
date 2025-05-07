@@ -31,8 +31,8 @@ public final class ClientPersonConstants {
     public static final int STAFF_NAME_COL = 4;// E
     public static final int EXTERNAL_ID_COL = 5;// F
     public static final int ACTIVE_COL = 6;// G
-    public static final int ACTIVATION_DATE_COL = 7;// H
-    public static final int SUBMITTED_ON_COL = 8; // I
+    public static final int SUBMITTED_ON_COL = 7;// H
+    public static final int ACTIVATION_DATE_COL = 8; // I
     public static final int MOBILE_NO_COL = 9;// J
     public static final int DOB_COL = 10;// K
     public static final int CLIENT_TYPE_COL = 11;// L

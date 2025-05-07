@@ -131,7 +131,8 @@ public class SavingsWorkbookPopulator extends AbstractWorkbookPopulator {
         writeString(SavingsConstants.INTEREST_CALCULATION_COL, rowHeader, "Interest Calculated*");
         writeString(SavingsConstants.INTEREST_CALCULATION_DAYS_IN_YEAR_COL, rowHeader, "# Days in Year*");
         writeString(SavingsConstants.MIN_OPENING_BALANCE_COL, rowHeader, "Min Opening Balance");
-        writeString(SavingsConstants.LOCKIN_PERIOD_COL, rowHeader, "Locked In For*");
+        writeString(SavingsConstants.LOCKIN_PERIOD_COL, rowHeader, "Locked In For");
+        writeString(SavingsConstants.LOCKIN_PERIOD_FREQUENCY_COL, rowHeader, "Locked periodod frecuency*");
         writeString(SavingsConstants.APPLY_WITHDRAWAL_FEE_FOR_TRANSFERS, rowHeader, "Apply Withdrawal Fee For Transfers");
 
         writeString(SavingsConstants.LOOKUP_CLIENT_NAME_COL, rowHeader, "Client Name");
