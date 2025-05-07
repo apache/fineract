@@ -909,6 +909,16 @@ public class LoanTransactionHelper {
                 "repayment"));
     }
 
+    public PostLoansLoanIdTransactionsResponse addCapitalizedIncome(final Long loanId, final PostLoansLoanIdTransactionsRequest request) {
+        return Calls
+                .ok(FineractClientHelper.getFineractClient().loanTransactions.executeLoanTransaction(loanId, request, "capitalizedIncome"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse addCapitalizedIncome(final Long loanId, final String transactionDate, final double amount) {
+        return addCapitalizedIncome(loanId, new PostLoansLoanIdTransactionsRequest().transactionAmount(amount)
+                .transactionDate(transactionDate).dateFormat("dd MMMM yyyy").locale("en"));
+    }
+
     // TODO: Rewrite to use fineract-client instead!
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
