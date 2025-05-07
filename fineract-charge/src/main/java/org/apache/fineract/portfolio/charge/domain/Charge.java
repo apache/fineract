@@ -262,7 +262,7 @@ public class Charge extends AbstractPersistableCustom<Long> {
             }
         }
 
-        if (isPercentageOfApprovedAmount()) {
+        if (isPercentageOfDisbursementAmount() || isPercentageOfApprovedAmount()) {
             this.minCap = minCap;
             this.maxCap = maxCap;
         }
