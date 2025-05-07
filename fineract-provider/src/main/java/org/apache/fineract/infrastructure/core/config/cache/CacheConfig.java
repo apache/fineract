@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.spi.CachingProvider;
@@ -37,6 +38,8 @@ import org.ehcache.config.builders.ResourcePoolsBuilder;
 import org.ehcache.jsr107.Eh107Configuration;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.util.ConfigurationBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.jcache.JCacheCacheManager;
@@ -78,11 +81,12 @@ public class CacheConfig {
                 defaultTimeToLive);
         // Scan all packages (entire classpath)
         Reflections reflections = new Reflections(
-                new org.reflections.util.ConfigurationBuilder().forPackages("").addScanners(Scanners.MethodsAnnotated));
+                new ConfigurationBuilder().setUrls(ClasspathHelper.forJavaClassPath()).addScanners(Scanners.MethodsAnnotated));
         // Find all methods annotated with @Cacheable
         Set<Method> annotatedMethods = reflections.getMethodsAnnotatedWith(Cacheable.class);
         Set<String> cacheNames = annotatedMethods.stream().map(method -> method.getAnnotation(Cacheable.class))
-                .flatMap(annotation -> Arrays.stream(annotation.value())).collect(Collectors.toSet());
+                .flatMap(annotation -> Stream.concat(Arrays.stream(annotation.value()), Arrays.stream(annotation.cacheNames())))
+                .collect(Collectors.toSet());
         // Register the caches into the cache manager
         cacheNames.forEach(cacheName -> {
             if (cacheManager.getCache(cacheName) == null) {
