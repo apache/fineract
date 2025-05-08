@@ -38,6 +38,7 @@ import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
+import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -619,7 +620,8 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanInte
                 .getInstallmentLevelDelinquency();
 
         assertThat(loan.getDelinquent().getDelinquentDays()).isEqualTo(loanLevelDelinquentDays);
-        assertThat(loan.getDelinquent().getDelinquentAmount()).isEqualByComparingTo(Double.valueOf(loanLevelDelinquentAmount));
+        assertThat(Utils.getDoubleValue(loan.getDelinquent().getDelinquentAmount()))
+                .isEqualByComparingTo(Double.valueOf(loanLevelDelinquentAmount));
 
         if (expectedInstallmentLevelDelinquencyData != null && expectedInstallmentLevelDelinquencyData.length > 0) {
             assertThat(installmentLevelDelinquency).isNotNull();

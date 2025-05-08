@@ -2688,7 +2688,7 @@ public class LoanTransactionHelper {
             log.info("  Id {} code {} date {} amount {}", transaction.getId(), transaction.getType().getCode(), transaction.getDate(),
                     transaction.getAmount());
             if (transactionType.equals(transaction.getType().getCode())) {
-                transactionsAmount += transaction.getAmount();
+                transactionsAmount += Utils.getDoubleValue(transaction.getAmount());
             }
         }
         assertEquals(amountExpected, transactionsAmount);
@@ -2707,7 +2707,7 @@ public class LoanTransactionHelper {
             }
         }
         assertEquals(transactionExpected, Utils.dateFormatter.format(lastTransaction.getDate()));
-        assertEquals(amountExpected, lastTransaction.getAmount());
+        assertEquals(amountExpected, Utils.getDoubleValue(lastTransaction.getAmount()));
         return lastTransaction.getId();
     }
 
@@ -2722,7 +2722,7 @@ public class LoanTransactionHelper {
         if (getLoansLoanIdSummary != null) {
             log.info("Loan with Principal Outstanding Balance {} expected {}", getLoansLoanIdSummary.getPrincipalOutstanding(),
                     amountExpected);
-            assertEquals(amountExpected, getLoansLoanIdSummary.getPrincipalOutstanding());
+            assertEquals(amountExpected, Utils.getDoubleValue(getLoansLoanIdSummary.getPrincipalOutstanding()));
         }
     }
 
@@ -2730,7 +2730,7 @@ public class LoanTransactionHelper {
         GetLoansLoanIdSummary getLoansLoanIdSummary = getLoansLoanIdResponse.getSummary();
         if (getLoansLoanIdSummary != null) {
             log.info("Loan with Fees Outstanding Balance {} expected {}", getLoansLoanIdSummary.getFeeChargesOutstanding(), amountExpected);
-            assertEquals(amountExpected, getLoansLoanIdSummary.getFeeChargesOutstanding());
+            assertEquals(amountExpected, Utils.getDoubleValue(getLoansLoanIdSummary.getFeeChargesOutstanding()));
         }
     }
 
@@ -2738,14 +2738,14 @@ public class LoanTransactionHelper {
         GetLoansLoanIdSummary getLoansLoanIdSummary = getLoansLoanIdResponse.getSummary();
         assertNotNull(getLoansLoanIdSummary);
         log.info("Loan with Fees Outstanding Balance {} expected {}", getLoansLoanIdSummary.getFeeChargesOutstanding(), amountExpected);
-        assertEquals(amountExpected, getLoansLoanIdSummary.getPenaltyChargesOutstanding());
+        assertEquals(amountExpected, Utils.getDoubleValue(getLoansLoanIdSummary.getPenaltyChargesOutstanding()));
     }
 
     public void validateLoanTotalOustandingBalance(GetLoansLoanIdResponse getLoansLoanIdResponse, Double amountExpected) {
         GetLoansLoanIdSummary getLoansLoanIdSummary = getLoansLoanIdResponse.getSummary();
         if (getLoansLoanIdSummary != null) {
             log.info("Loan with Total Outstanding Balance {} expected {}", getLoansLoanIdSummary.getTotalOutstanding(), amountExpected);
-            assertEquals(amountExpected, getLoansLoanIdSummary.getTotalOutstanding());
+            assertEquals(amountExpected, Utils.getDoubleValue(getLoansLoanIdSummary.getTotalOutstanding()));
         }
     }
 

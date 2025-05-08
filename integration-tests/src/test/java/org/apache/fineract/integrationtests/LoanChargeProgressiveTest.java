@@ -27,6 +27,7 @@ import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -78,8 +79,8 @@ public class LoanChargeProgressiveTest extends BaseLoanIntegrationTest {
             final PostChargesResponse chargeResponse = createCharge(20.0d, "EUR");
             addLoanCharge(loanId, chargeResponse.getResourceId(), "03 October 2024", 20.0d);
             final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
-            Assertions.assertTrue(
-                    loanDetails.getTransactions().stream().anyMatch(t -> t.getType().getAccrual() && t.getAmount().equals(20.0d)));
+            Assertions.assertTrue(loanDetails.getTransactions().stream()
+                    .anyMatch(t -> t.getType().getAccrual() && Utils.getDoubleValue(t.getAmount()).equals(20.0d)));
         });
         runAt("04 October 2024", () -> {
             globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_IMMEDIATE_CHARGE_ACCRUAL_POST_MATURITY,
@@ -87,7 +88,7 @@ public class LoanChargeProgressiveTest extends BaseLoanIntegrationTest {
             executeInlineCOB(loanId);
             final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
             Assertions.assertTrue(loanDetails.getTransactions().stream()
-                    .anyMatch(t -> t.getType().getAccrual() && t.getFeeChargesPortion().equals(20.0d)));
+                    .anyMatch(t -> t.getType().getAccrual() && Utils.getDoubleValue(t.getFeeChargesPortion()).equals(20.0d)));
         });
     }
 

@@ -33,6 +33,7 @@ import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -468,8 +469,9 @@ public class LoanCOBCreateAccrualsTest extends BaseLoanIntegrationTest {
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
 
             // No unexpected big accruals or any accrual adjustments
-            Assertions.assertTrue(loanDetails.getTransactions().stream().noneMatch(t -> (t.getType().getAccrual() && t.getAmount() > 0.31)
-                    || "loanTransactionType.accrualAdjustment".equals(t.getType().getCode())));
+            Assertions.assertTrue(
+                    loanDetails.getTransactions().stream().noneMatch(t -> (t.getType().getAccrual() && t.getAmount().doubleValue() > 0.31)
+                            || "loanTransactionType.accrualAdjustment".equals(t.getType().getCode())));
 
             // Accruals around installment due dates are as expected
             validateTransactionsExist(loanDetails, //
@@ -691,16 +693,17 @@ public class LoanCOBCreateAccrualsTest extends BaseLoanIntegrationTest {
 
     private void validateTransactionsExist(GetLoansLoanIdResponse loanDetails, TransactionExt... transactions) {
         Arrays.stream(transactions).forEach(tr -> {
-            boolean found = loanDetails.getTransactions().stream().anyMatch(item -> Objects.equals(item.getAmount(), tr.amount) //
-                    && Objects.equals(item.getType().getValue(), tr.type) //
-                    && Objects.equals(item.getDate(), LocalDate.parse(tr.date, dateTimeFormatter)) //
-                    && Objects.equals(item.getOutstandingLoanBalance(), tr.outstandingPrincipal) //
-                    && Objects.equals(item.getPrincipalPortion(), tr.principalPortion) //
-                    && Objects.equals(item.getInterestPortion(), tr.interestPortion) //
-                    && Objects.equals(item.getFeeChargesPortion(), tr.feePortion) //
-                    && Objects.equals(item.getPenaltyChargesPortion(), tr.penaltyPortion) //
-                    && Objects.equals(item.getOverpaymentPortion(), tr.overpaymentPortion) //
-                    && Objects.equals(item.getUnrecognizedIncomePortion(), tr.unrecognizedPortion) //
+            boolean found = loanDetails.getTransactions().stream()
+                    .anyMatch(item -> Objects.equals(Utils.getDoubleValue(item.getAmount()), tr.amount) //
+                            && Objects.equals(item.getType().getValue(), tr.type) //
+                            && Objects.equals(item.getDate(), LocalDate.parse(tr.date, dateTimeFormatter)) //
+                            && Objects.equals(Utils.getDoubleValue(item.getOutstandingLoanBalance()), tr.outstandingPrincipal) //
+                            && Objects.equals(Utils.getDoubleValue(item.getPrincipalPortion()), tr.principalPortion) //
+                            && Objects.equals(Utils.getDoubleValue(item.getInterestPortion()), tr.interestPortion) //
+                            && Objects.equals(Utils.getDoubleValue(item.getFeeChargesPortion()), tr.feePortion) //
+                            && Objects.equals(Utils.getDoubleValue(item.getPenaltyChargesPortion()), tr.penaltyPortion) //
+                            && Objects.equals(Utils.getDoubleValue(item.getOverpaymentPortion()), tr.overpaymentPortion) //
+                            && Objects.equals(Utils.getDoubleValue(item.getUnrecognizedIncomePortion()), tr.unrecognizedPortion) //
             );
             Assertions.assertTrue(found, "Required transaction not found: " + tr + " on loan " + loanDetails.getId());
         });

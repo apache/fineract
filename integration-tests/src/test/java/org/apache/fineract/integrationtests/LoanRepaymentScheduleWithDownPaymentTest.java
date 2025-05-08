@@ -110,9 +110,9 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         LocalDate expectedRepaymentDueDate = LocalDate.of(2022, 10, 3);
 
         assertTrue(periods.stream() //
-                .anyMatch(period -> expectedDownPaymentAmount.equals(period.getTotalDueForPeriod()) //
+                .anyMatch(period -> expectedDownPaymentAmount.equals(Utils.getDoubleValue(period.getTotalDueForPeriod())) //
                         && expectedDownPaymentDueDate.equals(period.getDueDate())));
-        assertTrue(periods.stream().anyMatch(period -> expectedRepaymentAmount.equals(period.getTotalDueForPeriod())
+        assertTrue(periods.stream().anyMatch(period -> expectedRepaymentAmount.equals(Utils.getDoubleValue(period.getTotalDueForPeriod()))
                 && expectedRepaymentDueDate.equals(period.getDueDate())));
     }
 
@@ -157,11 +157,11 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         LocalDate expectedRepaymentDueDate = LocalDate.of(2022, 10, 3);
 
         assertTrue(periods.stream() //
-                .anyMatch(period -> expectedDownPaymentAmount.equals(period.getTotalPaidForPeriod()) //
+                .anyMatch(period -> expectedDownPaymentAmount.equals(Utils.getDoubleValue(period.getTotalPaidForPeriod())) //
                         && expectedDownPaymentDueDate.equals(period.getDueDate())));
-        assertEquals(expectedRepaymentAmount, summary.getTotalOutstanding());
+        assertEquals(expectedRepaymentAmount, Utils.getDoubleValue(summary.getTotalOutstanding()));
         assertEquals(expectedDownPaymentAmount, summary.getTotalRepaymentTransaction());
-        assertTrue(periods.stream().anyMatch(period -> expectedRepaymentAmount.equals(period.getTotalDueForPeriod())
+        assertTrue(periods.stream().anyMatch(period -> expectedRepaymentAmount.equals(Utils.getDoubleValue(period.getTotalDueForPeriod()))
                 && expectedRepaymentDueDate.equals(period.getDueDate())));
     }
 
@@ -205,9 +205,9 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         LocalDate expectedRepaymentDueDate = LocalDate.of(2022, 10, 3);
 
         assertTrue(periods.stream() //
-                .anyMatch(period -> expectedDownPaymentAmount.equals(period.getTotalDueForPeriod()) //
+                .anyMatch(period -> expectedDownPaymentAmount.equals(Utils.getDoubleValue(period.getTotalDueForPeriod())) //
                         && expectedDownPaymentDueDate.equals(period.getDueDate())));
-        assertTrue(periods.stream().anyMatch(period -> expectedRepaymentAmount.equals(period.getTotalDueForPeriod())
+        assertTrue(periods.stream().anyMatch(period -> expectedRepaymentAmount.equals(Utils.getDoubleValue(period.getTotalDueForPeriod()))
                 && expectedRepaymentDueDate.equals(period.getDueDate())));
     }
 
@@ -253,12 +253,12 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         LocalDate expectedRepaymentDueDate = LocalDate.of(2022, 10, 3);
 
         assertTrue(periods.stream() //
-                .anyMatch(period -> expectedFirstDownPaymentAmount.equals(period.getTotalDueForPeriod()) //
+                .anyMatch(period -> expectedFirstDownPaymentAmount.equals(Utils.getDoubleValue(period.getTotalDueForPeriod())) //
                         && expectedFirstDownPaymentDueDate.equals(period.getDueDate())));
         assertTrue(periods.stream() //
-                .anyMatch(period -> expectedSecondDownPaymentAmount.equals(period.getTotalDueForPeriod())
+                .anyMatch(period -> expectedSecondDownPaymentAmount.equals(Utils.getDoubleValue(period.getTotalDueForPeriod()))
                         && expectedSecondDownPaymentDueDate.equals(period.getDueDate())));
-        assertTrue(periods.stream().anyMatch(period -> expectedRepaymentAmount.equals(period.getTotalDueForPeriod())
+        assertTrue(periods.stream().anyMatch(period -> expectedRepaymentAmount.equals(Utils.getDoubleValue(period.getTotalDueForPeriod()))
                 && expectedRepaymentDueDate.equals(period.getDueDate())));
     }
 
@@ -306,15 +306,15 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         Double expectedTotalRepaymentAmount = expectedFirstDownPaymentAmount + expectedSecondDownPaymentAmount;
 
         assertTrue(periods.stream() //
-                .anyMatch(period -> expectedFirstDownPaymentAmount.equals(period.getTotalPaidForPeriod()) //
+                .anyMatch(period -> expectedFirstDownPaymentAmount.equals(Utils.getDoubleValue(period.getTotalPaidForPeriod())) //
                         && expectedFirstDownPaymentDueDate.equals(period.getDueDate())));
         assertTrue(periods.stream() //
-                .anyMatch(period -> expectedSecondDownPaymentAmount.equals(period.getTotalPaidForPeriod())
+                .anyMatch(period -> expectedSecondDownPaymentAmount.equals(Utils.getDoubleValue(period.getTotalPaidForPeriod()))
                         && expectedSecondDownPaymentDueDate.equals(period.getDueDate())));
-        assertTrue(periods.stream().anyMatch(period -> expectedRepaymentAmount.equals(period.getTotalDueForPeriod())
+        assertTrue(periods.stream().anyMatch(period -> expectedRepaymentAmount.equals(Utils.getDoubleValue(period.getTotalDueForPeriod()))
                 && expectedRepaymentDueDate.equals(period.getDueDate())));
-        assertEquals(expectedRepaymentAmount, summary.getTotalOutstanding());
-        assertEquals(expectedTotalRepaymentAmount, summary.getTotalRepaymentTransaction());
+        assertEquals(expectedRepaymentAmount, Utils.getDoubleValue(summary.getTotalOutstanding()));
+        assertEquals(expectedTotalRepaymentAmount, Utils.getDoubleValue(summary.getTotalRepaymentTransaction()));
     }
 
     @Test
@@ -529,14 +529,14 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         LocalDate expectedRepaymentDueDate = LocalDate.of(2022, 10, 3);
 
         assertTrue(periods.stream() //
-                .anyMatch(period -> expectedDownPaymentAmount.equals(period.getTotalDueForPeriod()) //
+                .anyMatch(period -> expectedDownPaymentAmount.equals(Utils.getDoubleValue(period.getTotalDueForPeriod())) //
                         && expectedDownPaymentDueDate.equals(period.getDueDate()) //
-                        && Double.valueOf(0.00).equals(period.getFeeChargesDue())));
+                        && Double.valueOf(0.00).equals(Utils.getDoubleValue(period.getFeeChargesDue()))));
         assertTrue(periods.stream() //
-                .anyMatch(period -> expectedTotalDueForRepaymentInstallment.equals(period.getTotalDueForPeriod()) //
-                        && expectedRepaymentAmount.equals(period.getPrincipalDue()) //
+                .anyMatch(period -> expectedTotalDueForRepaymentInstallment.equals(Utils.getDoubleValue(period.getTotalDueForPeriod())) //
+                        && expectedRepaymentAmount.equals(Utils.getDoubleValue(period.getPrincipalDue())) //
                         && expectedRepaymentDueDate.equals(period.getDueDate()) //
-                        && feeAmount.equals(period.getFeeChargesDue())));
+                        && feeAmount.equals(Utils.getDoubleValue(period.getFeeChargesDue()))));
     }
 
     @Test
@@ -694,16 +694,16 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         LocalDate expectedRepaymentDueDate = LocalDate.of(2022, 10, 3);
 
         assertTrue(periods.stream() //
-                .anyMatch(period -> expectedDownPaymentAmount.equals(period.getTotalDueForPeriod()) //
+                .anyMatch(period -> expectedDownPaymentAmount.equals(Utils.getDoubleValue(period.getTotalDueForPeriod())) //
                         && expectedDownPaymentDueDate.equals(period.getDueDate()) //
-                        && Double.valueOf(0.00).equals(period.getFeeChargesDue()) //
-                        && Double.valueOf(0.00).equals(period.getInterestDue())));
+                        && Double.valueOf(0.00).equals(Utils.getDoubleValue(period.getFeeChargesDue())) //
+                        && Double.valueOf(0.00).equals(Utils.getDoubleValue(period.getInterestDue()))));
         assertTrue(periods.stream() //
-                .anyMatch(period -> expectedTotalDueForRepaymentInstallment.equals(period.getTotalDueForPeriod()) //
-                        && expectedRepaymentAmount.equals(period.getPrincipalDue()) //
+                .anyMatch(period -> expectedTotalDueForRepaymentInstallment.equals(Utils.getDoubleValue(period.getTotalDueForPeriod())) //
+                        && expectedRepaymentAmount.equals(Utils.getDoubleValue(period.getPrincipalDue())) //
                         && expectedRepaymentDueDate.equals(period.getDueDate()) //
-                        && feeAmount.equals(period.getFeeChargesDue()) //
-                        && Double.valueOf(10.0).equals(period.getInterestDue())));
+                        && feeAmount.equals(Utils.getDoubleValue(period.getFeeChargesDue())) //
+                        && Double.valueOf(10.0).equals(Utils.getDoubleValue(period.getInterestDue()))));
     }
 
     @Test
@@ -864,10 +864,11 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
             LocalDate expectedRepaymentDueDate = LocalDate.of(2022, 10, 3);
 
             assertTrue(periods.stream() //
-                    .anyMatch(period -> expectedDownPaymentAmount.equals(period.getTotalDueForPeriod()) //
+                    .anyMatch(period -> expectedDownPaymentAmount.equals(Utils.getDoubleValue(period.getTotalDueForPeriod())) //
                             && expectedDownPaymentDueDate.equals(period.getDueDate())));
-            assertTrue(periods.stream().anyMatch(period -> expectedRepaymentAmount.equals(period.getTotalDueForPeriod())
-                    && expectedRepaymentDueDate.equals(period.getDueDate())));
+            assertTrue(
+                    periods.stream().anyMatch(period -> expectedRepaymentAmount.equals(Utils.getDoubleValue(period.getTotalDueForPeriod()))
+                            && expectedRepaymentDueDate.equals(period.getDueDate())));
             assertNotNull(loanDetails.getDelinquencyRange());
             assertEquals(2, loanDetails.getDelinquent().getDelinquentDays());
         } finally {
@@ -1662,12 +1663,13 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         Double expectedTotalRepaymentTransactionAmount = 0.00;
 
         assertTrue(periods.stream() //
-                .anyMatch(period -> expectedDownPaymentAmount.equals(period.getTotalOutstandingForPeriod()) //
+                .anyMatch(period -> expectedDownPaymentAmount.equals(Utils.getDoubleValue(period.getTotalOutstandingForPeriod())) //
                         && expectedDownPaymentDueDate.equals(period.getDueDate())));
-        assertEquals(expectedTotalOutstandingAmount, summary.getTotalOutstanding());
+        assertEquals(expectedTotalOutstandingAmount, Utils.getDoubleValue(summary.getTotalOutstanding()));
         assertEquals(expectedTotalRepaymentTransactionAmount, summary.getTotalRepaymentTransaction());
-        assertTrue(periods.stream().anyMatch(period -> expectedRepaymentAmount.equals(period.getTotalOutstandingForPeriod())
-                && expectedRepaymentDueDate.equals(period.getDueDate())));
+        assertTrue(periods.stream()
+                .anyMatch(period -> expectedRepaymentAmount.equals(Utils.getDoubleValue(period.getTotalOutstandingForPeriod()))
+                        && expectedRepaymentDueDate.equals(period.getDueDate())));
     }
 
     private void checkNoDownPaymentTransaction(final Integer loanID) {

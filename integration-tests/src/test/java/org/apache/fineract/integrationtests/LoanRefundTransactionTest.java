@@ -149,7 +149,7 @@ public class LoanRefundTransactionTest extends BaseLoanIntegrationTest {
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
             Assertions.assertTrue(loanDetails.getTransactions().stream()
                     .filter(transaction -> transaction.getType().getCode().equals("loanTransactionType.interestRefund"))
-                    .allMatch(transaction -> transaction.getAmount().compareTo(0.0) > 0));
+                    .allMatch(transaction -> transaction.getAmount().doubleValue() > 0.0));
         });
     }
 

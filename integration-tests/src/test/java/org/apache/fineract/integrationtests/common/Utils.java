@@ -39,6 +39,8 @@ import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.io.File;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.security.SecureRandom;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -568,5 +570,9 @@ public final class Utils {
 
     public static long getDifferenceInMonths(final LocalDate localDateBefore, final LocalDate localDateAfter) {
         return MONTHS.between(localDateBefore, localDateAfter);
+    }
+
+    public static Double getDoubleValue(BigDecimal amount) {
+        return amount == null ? null : amount.setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
 }

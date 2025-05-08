@@ -42,9 +42,9 @@ final class LoansApiResourceSwagger {
         @Schema(example = "[2012, 4, 3]")
         public LocalDate approvalDate;
         @Schema(example = "200.000000")
-        public Double approvalAmount;
+        public BigDecimal approvalAmount;
         @Schema(example = "200.000000")
-        public Double netDisbursalAmount;
+        public BigDecimal netDisbursalAmount;
 
         public GetLoanCurrency currency;
     }
@@ -289,29 +289,29 @@ final class LoansApiResourceSwagger {
             @Schema(example = "30")
             public Long loanTermInDays;
             @Schema(example = "200.000000")
-            public Double totalPrincipalDisbursed;
+            public BigDecimal totalPrincipalDisbursed;
             @Schema(example = "200.00")
-            public Double totalPrincipalExpected;
+            public BigDecimal totalPrincipalExpected;
             @Schema(example = "200.00")
-            public Double totalPrincipalPaid;
+            public BigDecimal totalPrincipalPaid;
             @Schema(example = "0.00")
-            public Double totalInterestCharged;
+            public BigDecimal totalInterestCharged;
             @Schema(example = "0.00")
-            public Double totalFeeChargesCharged;
+            public BigDecimal totalFeeChargesCharged;
             @Schema(example = "0.00")
-            public Double totalPenaltyChargesCharged;
+            public BigDecimal totalPenaltyChargesCharged;
             @Schema(example = "0.00")
-            public Double totalWaived;
+            public BigDecimal totalWaived;
             @Schema(example = "0.00")
-            public Double totalWrittenOff;
+            public BigDecimal totalWrittenOff;
             @Schema(example = "200.00")
-            public Double totalRepaymentExpected;
+            public BigDecimal totalRepaymentExpected;
             @Schema(example = "200.00")
-            public Double totalPaidInAdvance;
+            public BigDecimal totalPaidInAdvance;
             @Schema(example = "0.00")
-            public Double totalPaidLate;
+            public BigDecimal totalPaidLate;
             @Schema(example = "0.00")
-            public Double totalOutstanding;
+            public BigDecimal totalOutstanding;
             public List<GetLoansLoanIdRepaymentPeriod> periods;
         }
 
@@ -332,71 +332,71 @@ final class LoansApiResourceSwagger {
             @Schema(example = "30")
             public Long daysInPeriod;
             @Schema(example = "200.000000")
-            public Double principalOriginalDue;
+            public BigDecimal principalOriginalDue;
             @Schema(example = "200.000000")
-            public Double principalDue;
+            public BigDecimal principalDue;
             @Schema(example = "200.000000")
-            public Double principalPaid;
+            public BigDecimal principalPaid;
             @Schema(example = "0.000000")
-            public Double principalWrittenOff;
+            public BigDecimal principalWrittenOff;
             @Schema(example = "20.000000")
-            public Double principalOutstanding;
+            public BigDecimal principalOutstanding;
             @Schema(example = "20.000000")
-            public Double principalLoanBalanceOutstanding;
+            public BigDecimal principalLoanBalanceOutstanding;
             @Schema(example = "0.000000")
-            public Double interestOriginalDue;
+            public BigDecimal interestOriginalDue;
             @Schema(example = "0.000000")
-            public Double interestDue;
+            public BigDecimal interestDue;
             @Schema(example = "0.000000")
-            public Double interestPaid;
+            public BigDecimal interestPaid;
             @Schema(example = "0.000000")
-            public Double interestWaived;
+            public BigDecimal interestWaived;
             @Schema(example = "0.000000")
-            public Double interestWrittenOff;
+            public BigDecimal interestWrittenOff;
             @Schema(example = "0.000000")
-            public Double interestOutstanding;
+            public BigDecimal interestOutstanding;
             @Schema(example = "0.000000")
-            public Double feeChargesDue;
+            public BigDecimal feeChargesDue;
             @Schema(example = "20.000000")
-            public Double feeChargesPaid;
+            public BigDecimal feeChargesPaid;
             @Schema(example = "20.000000")
-            public Double feeChargesWaived;
+            public BigDecimal feeChargesWaived;
             @Schema(example = "20.000000")
-            public Double feeChargesWrittenOff;
+            public BigDecimal feeChargesWrittenOff;
             @Schema(example = "20.000000")
-            public Double feeChargesOutstanding;
+            public BigDecimal feeChargesOutstanding;
             @Schema(example = "20.000000")
-            public Double penaltyChargesDue;
+            public BigDecimal penaltyChargesDue;
             @Schema(example = "20.000000")
-            public Double penaltyChargesPaid;
+            public BigDecimal penaltyChargesPaid;
             @Schema(example = "20.000000")
-            public Double penaltyChargesWaived;
+            public BigDecimal penaltyChargesWaived;
             @Schema(example = "20.000000")
-            public Double penaltyChargesWrittenOff;
+            public BigDecimal penaltyChargesWrittenOff;
             @Schema(example = "20.000000")
-            public Double penaltyChargesOutstanding;
+            public BigDecimal penaltyChargesOutstanding;
             @Schema(example = "20.000000")
-            public Double totalOriginalDueForPeriod;
+            public BigDecimal totalOriginalDueForPeriod;
             @Schema(example = "20.000000")
-            public Double totalDueForPeriod;
+            public BigDecimal totalDueForPeriod;
             @Schema(example = "20.000000")
-            public Double totalPaidForPeriod;
+            public BigDecimal totalPaidForPeriod;
             @Schema(example = "20.000000")
-            public Double totalPaidInAdvanceForPeriod;
+            public BigDecimal totalPaidInAdvanceForPeriod;
             @Schema(example = "20.000000")
-            public Double totalPaidLateForPeriod;
+            public BigDecimal totalPaidLateForPeriod;
             @Schema(example = "20.000000")
-            public Double totalWaivedForPeriod;
+            public BigDecimal totalWaivedForPeriod;
             @Schema(example = "20.000000")
-            public Double totalWrittenOffForPeriod;
+            public BigDecimal totalWrittenOffForPeriod;
             @Schema(example = "200.000000")
-            public Double totalOutstandingForPeriod;
+            public BigDecimal totalOutstandingForPeriod;
             @Schema(example = "20.000000")
-            public Double totalActualCostOfLoanForPeriod;
+            public BigDecimal totalActualCostOfLoanForPeriod;
             @Schema(example = "200.000000")
-            public Double totalInstallmentAmountForPeriod;
+            public BigDecimal totalInstallmentAmountForPeriod;
             @Schema(example = "2.000000")
-            public Double totalCredits;
+            public BigDecimal totalCredits;
             @Schema(example = "true")
             public Boolean downPaymentPeriod;
         }
@@ -412,15 +412,15 @@ final class LoansApiResourceSwagger {
             @Schema(example = "[2022, 07, 01]")
             public LocalDate actualDisbursementDate;
             @Schema(example = "22000.000000")
-            public Double principal;
+            public BigDecimal principal;
             @Schema(example = "22000.000000")
-            public Double netDisbursalAmount;
+            public BigDecimal netDisbursalAmount;
             @Schema(example = "1")
             public String loanChargeId;
             @Schema(example = "22000.000000")
-            public Double chargeAmount;
+            public BigDecimal chargeAmount;
             @Schema(example = "22000.000000")
-            public Double waivedChargeAmount;
+            public BigDecimal waivedChargeAmount;
             @Schema(example = "dd MMMM yyyy")
             public String dateFormat;
             @Schema(example = "de_DE")
@@ -517,77 +517,81 @@ final class LoansApiResourceSwagger {
 
             public GetLoansLoanIdCurrency currency;
             @Schema(example = "1000000.000000")
-            public Double principalDisbursed;
-            @Schema(example = "0.000000")
-            public Double principalPaid;
-            @Schema(example = "0.00")
-            public Double principalAdjustments;
-            @Schema(example = "0.000000")
-            public Double principalWrittenOff;
+            public BigDecimal totalPrincipal;
             @Schema(example = "1000000.000000")
-            public Double principalOutstanding;
+            public BigDecimal principalDisbursed;
+            @Schema(example = "1000000.000000")
+            public BigDecimal totalPrincipalFromCapitalizedIncome;
+            @Schema(example = "0.000000")
+            public BigDecimal principalPaid;
+            @Schema(example = "0.00")
+            public BigDecimal principalAdjustments;
+            @Schema(example = "0.000000")
+            public BigDecimal principalWrittenOff;
+            @Schema(example = "1000000.000000")
+            public BigDecimal principalOutstanding;
             @Schema(example = "833333.300000")
-            public Double principalOverdue;
+            public BigDecimal principalOverdue;
             @Schema(example = "240000.000000")
-            public Double interestCharged;
+            public BigDecimal interestCharged;
             @Schema(example = "0.000000")
-            public Double interestPaid;
+            public BigDecimal interestPaid;
             @Schema(example = "0.000000")
-            public Double interestWaived;
+            public BigDecimal interestWaived;
             @Schema(example = "0.000000")
-            public Double interestWrittenOff;
+            public BigDecimal interestWrittenOff;
             @Schema(example = "240000.000000")
-            public Double interestOutstanding;
+            public BigDecimal interestOutstanding;
             @Schema(example = "200000.000000")
-            public Double interestOverdue;
+            public BigDecimal interestOverdue;
             @Schema(example = "0.00")
-            public Double feeAdjustments;
+            public BigDecimal feeAdjustments;
             @Schema(example = "18000.000000")
-            public Double feeChargesCharged;
+            public BigDecimal feeChargesCharged;
             @Schema(example = "0.000000")
-            public Double feeChargesDueAtDisbursementCharged;
+            public BigDecimal feeChargesDueAtDisbursementCharged;
             @Schema(example = "0.000000")
-            public Double feeChargesPaid;
+            public BigDecimal feeChargesPaid;
             @Schema(example = "0.000000")
-            public Double feeChargesWaived;
+            public BigDecimal feeChargesWaived;
             @Schema(example = "0.000000")
-            public Double feeChargesWrittenOff;
+            public BigDecimal feeChargesWrittenOff;
             @Schema(example = "18000.000000")
-            public Double feeChargesOutstanding;
+            public BigDecimal feeChargesOutstanding;
             @Schema(example = "15000.000000")
-            public Double feeChargesOverdue;
+            public BigDecimal feeChargesOverdue;
             @Schema(example = "0.00")
-            public Double penaltyAdjustments;
+            public BigDecimal penaltyAdjustments;
             @Schema(example = "0.000000")
-            public Double penaltyChargesCharged;
+            public BigDecimal penaltyChargesCharged;
             @Schema(example = "0.000000")
-            public Double penaltyChargesPaid;
+            public BigDecimal penaltyChargesPaid;
             @Schema(example = "0.000000")
-            public Double penaltyChargesWaived;
+            public BigDecimal penaltyChargesWaived;
             @Schema(example = "0.000000")
-            public Double penaltyChargesWrittenOff;
+            public BigDecimal penaltyChargesWrittenOff;
             @Schema(example = "0.000000")
-            public Double penaltyChargesOutstanding;
+            public BigDecimal penaltyChargesOutstanding;
             @Schema(example = "0.000000")
-            public Double penaltyChargesOverdue;
+            public BigDecimal penaltyChargesOverdue;
             @Schema(example = "1258000.000000")
-            public Double totalExpectedRepayment;
+            public BigDecimal totalExpectedRepayment;
             @Schema(example = "0.000000")
-            public Double totalRepayment;
+            public BigDecimal totalRepayment;
             @Schema(example = "258000.000000")
-            public Double totalExpectedCostOfLoan;
+            public BigDecimal totalExpectedCostOfLoan;
             @Schema(example = "0.000000")
-            public Double totalCostOfLoan;
+            public BigDecimal totalCostOfLoan;
             @Schema(example = "0.000000")
-            public Double totalWaived;
+            public BigDecimal totalWaived;
             @Schema(example = "0.000000")
-            public Double totalWrittenOff;
+            public BigDecimal totalWrittenOff;
             @Schema(example = "1258000.000000")
-            public Double totalOutstanding;
+            public BigDecimal totalOutstanding;
             @Schema(example = "1048333.30000")
-            public Double totalOverdue;
+            public BigDecimal totalOverdue;
             @Schema(example = "2456.30000")
-            public Double totalRecovered;
+            public BigDecimal totalRecovered;
             @Schema(example = "[2012, 5, 10]")
             public LocalDate overdueSinceDate;
             @Schema(example = "1")
@@ -597,9 +601,9 @@ final class LoansApiResourceSwagger {
             public GetLoansLoanIdLinkedAccount linkedAccount;
             public Set<GetLoansLoanIdDisbursementDetails> disbursementDetails;
             @Schema(example = "1100.000000")
-            public Double fixedEmiAmount;
+            public BigDecimal fixedEmiAmount;
             @Schema(example = "35000.000000")
-            public Double maxOutstandingLoanBalance;
+            public BigDecimal maxOutstandingLoanBalance;
             @Schema(example = "false")
             public Boolean canDisburse;
             @Schema(example = "true")
@@ -607,33 +611,33 @@ final class LoansApiResourceSwagger {
             @Schema(example = "false")
             public Boolean isNPA;
             @Schema(example = "0.000000")
-            public Double totalMerchantRefund;
+            public BigDecimal totalMerchantRefund;
             @Schema(example = "0.000000")
-            public Double totalMerchantRefundReversed;
+            public BigDecimal totalMerchantRefundReversed;
             @Schema(example = "0.000000")
-            public Double totalPayoutRefund;
+            public BigDecimal totalPayoutRefund;
             @Schema(example = "0.000000")
-            public Double totalPayoutRefundReversed;
+            public BigDecimal totalPayoutRefundReversed;
             @Schema(example = "0.000000")
-            public Double totalGoodwillCredit;
+            public BigDecimal totalGoodwillCredit;
             @Schema(example = "0.000000")
-            public Double totalGoodwillCreditReversed;
+            public BigDecimal totalGoodwillCreditReversed;
             @Schema(example = "0.000000")
-            public Double totalChargeAdjustment;
+            public BigDecimal totalChargeAdjustment;
             @Schema(example = "0.000000")
-            public Double totalChargeAdjustmentReversed;
+            public BigDecimal totalChargeAdjustmentReversed;
             @Schema(example = "0.000000")
-            public Double totalChargeback;
+            public BigDecimal totalChargeback;
             @Schema(example = "0.000000")
-            public Double totalCreditBalanceRefund;
+            public BigDecimal totalCreditBalanceRefund;
             @Schema(example = "0.000000")
-            public Double totalCreditBalanceRefundReversed;
+            public BigDecimal totalCreditBalanceRefundReversed;
             @Schema(example = "0.000000")
-            public Double totalRepaymentTransaction;
+            public BigDecimal totalRepaymentTransaction;
             @Schema(example = "0.000000")
-            public Double totalInterestPaymentWaiver;
+            public BigDecimal totalInterestPaymentWaiver;
             @Schema(example = "0.000000")
-            public Double totalRepaymentTransactionReversed;
+            public BigDecimal totalRepaymentTransactionReversed;
             @Schema(example = "0.000000")
             public BigDecimal totalUnpaidPayableDueInterest;
             @Schema(example = "0.000000")
@@ -754,7 +758,7 @@ final class LoansApiResourceSwagger {
                 @Schema(example = "11")
                 public Long id;
                 @Schema(example = "100.000000")
-                public Double amount;
+                public BigDecimal amount;
                 @Schema(example = "9679")
                 public Integer installmentNumber;
                 @Schema(example = "1")
@@ -810,7 +814,7 @@ final class LoansApiResourceSwagger {
                 @Schema(example = "CHARGEBACK")
                 public String relationType;
                 @Schema(example = "100.00")
-                public Double amount;
+                public BigDecimal amount;
                 @Schema(example = "Repayment Adjustment Chargeback")
                 public String paymentType;
 
@@ -831,27 +835,27 @@ final class LoansApiResourceSwagger {
             @Schema(description = "Payment detail")
             public GetLoansLoanIdPaymentDetailData paymentDetailData;
             @Schema(example = "100.000000")
-            public Double amount;
+            public BigDecimal amount;
             @Schema(example = "100.000000")
-            public Double netDisbursalAmount;
+            public BigDecimal netDisbursalAmount;
             @Schema(example = "100.000000")
-            public Double principalPortion;
+            public BigDecimal principalPortion;
             @Schema(example = "100.000000")
-            public Double interestPortion;
+            public BigDecimal interestPortion;
             @Schema(example = "100.000000")
-            public Double feeChargesPortion;
+            public BigDecimal feeChargesPortion;
             @Schema(example = "100.000000")
-            public Double penaltyChargesPortion;
+            public BigDecimal penaltyChargesPortion;
             @Schema(example = "100.000000")
-            public Double overpaymentPortion;
+            public BigDecimal overpaymentPortion;
             @Schema(example = "100.000000")
-            public Double unrecognizedIncomePortion;
+            public BigDecimal unrecognizedIncomePortion;
             @Schema(example = "3")
             public String externalId;
             @Schema(example = "100.000000")
-            public Double fixedEmiAmount;
+            public BigDecimal fixedEmiAmount;
             @Schema(example = "100.000000")
-            public Double outstandingLoanBalance;
+            public BigDecimal outstandingLoanBalance;
             @Schema(example = "[2022, 07, 01]")
             public LocalDate submittedOnDate;
             public boolean manuallyReversed;
@@ -870,7 +874,7 @@ final class LoansApiResourceSwagger {
             @Schema(example = "de_DE")
             public String locale;
             @Schema(example = "100.000000")
-            public Double transactionAmount;
+            public BigDecimal transactionAmount;
             @Schema(example = "[2022, 07, 01]")
             public LocalDate transactionDate;
             @Schema(example = "101")
@@ -924,19 +928,19 @@ final class LoansApiResourceSwagger {
                 @Schema(example = "[2022, 07, 01]")
                 public LocalDate dueDate;
                 @Schema(example = "13.560000")
-                public Double amount;
+                public BigDecimal amount;
                 @Schema(example = "13.560000")
-                public Double amountOutstanding;
+                public BigDecimal amountOutstanding;
                 @Schema(example = "13.560000")
-                public Double amountWaived;
+                public BigDecimal amountWaived;
                 @Schema(example = "false")
                 public boolean paid;
                 @Schema(example = "false")
                 public boolean waived;
                 @Schema(example = "13.560000")
-                public Double amountAccrued;
+                public BigDecimal amountAccrued;
                 @Schema(example = "13.560000")
-                public Double amountUnrecognized;
+                public BigDecimal amountUnrecognized;
             }
 
             @Schema(example = "3")
@@ -952,23 +956,23 @@ final class LoansApiResourceSwagger {
             @Schema(description = "Enum option data")
             public GetLoansLoanIdEnumOptionData chargeCalculationType;
             @Schema(example = "3.400000")
-            public Double percentage;
+            public BigDecimal percentage;
             @Schema(example = "13.560000")
-            public Double amountPercentageAppliedTo;
+            public BigDecimal amountPercentageAppliedTo;
             @Schema(description = "currency")
             public GetLoansLoanIdCurrency currency;
             @Schema(example = "102.000000")
-            public Double amount;
+            public BigDecimal amount;
             @Schema(example = "12.000000")
-            public Double amountPaid;
+            public BigDecimal amountPaid;
             @Schema(example = "14.000000")
-            public Double amountWaived;
+            public BigDecimal amountWaived;
             @Schema(example = "102.000000")
-            public Double amountWrittenOff;
+            public BigDecimal amountWrittenOff;
             @Schema(example = "102.000000")
-            public Double amountOutstanding;
+            public BigDecimal amountOutstanding;
             @Schema(example = "102.000000")
-            public Double amountOrPercentage;
+            public BigDecimal amountOrPercentage;
             @Schema(example = "false")
             public boolean penalty;
             @Schema(description = "Enum option data")
@@ -982,15 +986,15 @@ final class LoansApiResourceSwagger {
             @Schema(example = "3")
             public Long loanId;
             @Schema(example = "30.000000")
-            public Double minCap;
+            public BigDecimal minCap;
             @Schema(example = "30.000000")
-            public Double maxCap;
+            public BigDecimal maxCap;
             @Schema(description = "List of GetLoansLoanIdLoanInstallmentChargeData")
             public List<GetLoansLoanIdLoanInstallmentChargeData> installmentChargeData;
             @Schema(example = "30.000000")
-            private Double amountAccrued;
+            private BigDecimal amountAccrued;
             @Schema(example = "30.000000")
-            private Double amountUnrecognized;
+            private BigDecimal amountUnrecognized;
             @Schema(example = "3ert3453")
             private String externalId;
         }
@@ -1000,7 +1004,7 @@ final class LoansApiResourceSwagger {
             private GetLoansLoanIdDelinquencySummary() {}
 
             @Schema(example = "100.000000")
-            public Double availableDisbursementAmount;
+            public BigDecimal availableDisbursementAmount;
             @Schema(example = "12")
             public Integer pastDueDays;
             @Schema(example = "[2022, 07, 01]")
@@ -1010,7 +1014,7 @@ final class LoansApiResourceSwagger {
             @Schema(example = "[2022, 07, 01]")
             public LocalDate delinquentDate;
             @Schema(example = "100.000000")
-            public Double delinquentAmount;
+            public BigDecimal delinquentAmount;
             @Schema(example = "80.000000")
             public BigDecimal delinquentPrincipal;
             @Schema(example = "10.000000")
@@ -1022,12 +1026,12 @@ final class LoansApiResourceSwagger {
             @Schema(example = "[2022, 07, 01]")
             public LocalDate lastPaymentDate;
             @Schema(example = "100.000000")
-            public Double lastPaymentAmount;
+            public BigDecimal lastPaymentAmount;
 
             @Schema(example = "[2022, 07, 01]")
             public LocalDate lastRepaymentDate;
             @Schema(example = "100.000000")
-            public Double lastRepaymentAmount;
+            public BigDecimal lastRepaymentAmount;
 
             @Schema(description = "List of GetLoansLoanIdDelinquencyPausePeriod")
             public List<GetLoansLoanIdDelinquencyPausePeriod> delinquencyPausePeriods;
@@ -1094,7 +1098,7 @@ final class LoansApiResourceSwagger {
             @Schema(example = "[2024, 1, 1]")
             public LocalDate termVariationApplicableFrom;
             @Schema(example = "200.000000")
-            public Double decimalValue;
+            public BigDecimal decimalValue;
             @Schema(example = "[2024, 1, 1]")
             public LocalDate dateValue;
             @Schema(example = "false")
@@ -1139,11 +1143,11 @@ final class LoansApiResourceSwagger {
         @Schema(example = "1000000.00")
         public BigDecimal principal;
         @Schema(example = "1000.000000")
-        public Double approvedPrincipal;
+        public BigDecimal approvedPrincipal;
         @Schema(example = "1001.000000")
-        public Double proposedPrincipal;
+        public BigDecimal proposedPrincipal;
         @Schema(example = "200.000000")
-        public Double netDisbursalAmount;
+        public BigDecimal netDisbursalAmount;
         @Schema(example = "12")
         public Integer termFrequency;
         public GetLoansLoanIdTermPeriodFrequencyType termPeriodFrequencyType;
@@ -1185,7 +1189,7 @@ final class LoansApiResourceSwagger {
         @Schema(example = "false")
         public Boolean enableInstallmentLevelDelinquency;
         @Schema(example = "250.000000")
-        public Double totalOverpaid;
+        public BigDecimal totalOverpaid;
         public LocalDate lastClosedBusinessDate;
         @Schema(example = "[2013, 11, 1]")
         public LocalDate overpaidOnDate;
@@ -1240,7 +1244,7 @@ final class LoansApiResourceSwagger {
             @Schema(example = "1 November 2023")
             public String expectedDisbursementDate;
             @Schema(example = "1000.00")
-            public Double principal;
+            public BigDecimal principal;
         }
 
         private PostLoansRequest() {}
@@ -1387,7 +1391,7 @@ final class LoansApiResourceSwagger {
         @Schema(example = "0")
         public Long totalPrincipalPaid;
         @Schema(example = "13471.52")
-        public Double totalInterestCharged;
+        public BigDecimal totalInterestCharged;
         @Schema(example = "0")
         public Long totalFeeChargesCharged;
         @Schema(example = "0")
@@ -1397,7 +1401,7 @@ final class LoansApiResourceSwagger {
         @Schema(example = "0")
         public Long totalWrittenOff;
         @Schema(example = "113471.52")
-        public Double totalRepaymentExpected;
+        public BigDecimal totalRepaymentExpected;
         @Schema(example = "0")
         public Long totalRepayment;
         @Schema(example = "0")
@@ -1616,7 +1620,7 @@ final class LoansApiResourceSwagger {
             @Schema(example = "[2012, 4, 3]")
             public LocalDate expectedDisbursementDate;
             @Schema(example = "22000")
-            public Double principal;
+            public BigDecimal principal;
         }
 
         @Schema(example = "2")

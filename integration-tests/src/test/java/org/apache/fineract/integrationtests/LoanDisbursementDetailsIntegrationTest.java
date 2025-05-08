@@ -314,7 +314,7 @@ public class LoanDisbursementDetailsIntegrationTest {
         getLoansLoanIdResponse = this.loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
         this.loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
-        final Double limit = 2.0;
+        final BigDecimal limit = BigDecimal.TWO;
         evaluateEqualInstallmentsForRepaymentSchedule(getLoansLoanIdResponse.getRepaymentSchedule(), limit);
         log.info("-----------MULTI DISBURSAL LOAN EQUAL INSTALLMENTS SUCCESSFULLY-------");
     }
@@ -665,9 +665,9 @@ public class LoanDisbursementDetailsIntegrationTest {
         return collateral;
     }
 
-    public void evaluateEqualInstallmentsForRepaymentSchedule(GetLoansLoanIdRepaymentSchedule getLoanRepaymentSchedule, Double limit) {
-        Double totalOutstandingForPeriod = 0.0;
-        Double totalInstallmentAmountForPeriod = 0.0;
+    public void evaluateEqualInstallmentsForRepaymentSchedule(GetLoansLoanIdRepaymentSchedule getLoanRepaymentSchedule, BigDecimal limit) {
+        BigDecimal totalOutstandingForPeriod = BigDecimal.ZERO;
+        BigDecimal totalInstallmentAmountForPeriod = BigDecimal.ZERO;
         if (getLoanRepaymentSchedule != null) {
             log.info("Loan with {} periods", getLoanRepaymentSchedule.getPeriods().size());
             for (GetLoansLoanIdRepaymentPeriod period : getLoanRepaymentSchedule.getPeriods()) {
@@ -678,8 +678,9 @@ public class LoanDisbursementDetailsIntegrationTest {
                         totalOutstandingForPeriod = period.getTotalOutstandingForPeriod();
                         totalInstallmentAmountForPeriod = period.getTotalInstallmentAmountForPeriod();
                     } else {
-                        assertTrue(Math.abs(period.getTotalOutstandingForPeriod() - totalOutstandingForPeriod) <= limit);
-                        assertTrue(Math.abs(period.getTotalInstallmentAmountForPeriod() - totalInstallmentAmountForPeriod) <= limit);
+                        assertTrue(period.getTotalOutstandingForPeriod().subtract(totalOutstandingForPeriod).abs().compareTo(limit) <= 0);
+                        assertTrue(period.getTotalInstallmentAmountForPeriod().subtract(totalInstallmentAmountForPeriod).abs()
+                                .compareTo(limit) <= 0);
                     }
                 }
             }

@@ -28,6 +28,7 @@ import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
+import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -231,12 +232,14 @@ public class LoanDelinquencyForNonActiveAccountsTest extends BaseLoanIntegration
                 .getInstallmentLevelDelinquency();
 
         assertThat(loan.getDelinquent().getDelinquentDays()).isEqualTo(loanLevelDelinquentDays);
-        assertThat(loan.getDelinquent().getDelinquentAmount()).isEqualByComparingTo(Double.valueOf(loanLevelDelinquentAmount));
+        assertThat(Utils.getDoubleValue(loan.getDelinquent().getDelinquentAmount()))
+                .isEqualByComparingTo(Double.valueOf(loanLevelDelinquentAmount));
         if (expectedLastRepaymentDate != null && expectedLastRepaymentAmount != null) {
             assertThat(loan.getDelinquent().getLastRepaymentDate()).isNotNull();
             Assertions.assertEquals(expectedLastRepaymentDate, loan.getDelinquent().getLastRepaymentDate().format(dateTimeFormatter));
             assertThat(loan.getDelinquent().getLastRepaymentAmount()).isNotNull();
-            assertThat(loan.getDelinquent().getLastRepaymentAmount()).isEqualByComparingTo(Double.valueOf(expectedLastRepaymentAmount));
+            assertThat(Utils.getDoubleValue(loan.getDelinquent().getLastRepaymentAmount()))
+                    .isEqualByComparingTo(Double.valueOf(expectedLastRepaymentAmount));
         }
 
         if (expectedInstallmentLevelDelinquencyData != null && expectedInstallmentLevelDelinquencyData.length > 0) {

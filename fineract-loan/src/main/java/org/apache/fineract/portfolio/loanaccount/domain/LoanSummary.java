@@ -38,6 +38,12 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 public class LoanSummary {
 
     // derived totals fields
+    @Column(name = "total_principal_derived", scale = 6, precision = 19)
+    private BigDecimal totalPrincipal;
+
+    @Column(name = "capitalized_income_derived", scale = 6, precision = 19)
+    private BigDecimal totalPrincipalFromCapitalizedIncome;
+
     @Column(name = "principal_disbursed_derived", scale = 6, precision = 19)
     private BigDecimal totalPrincipalDisbursed;
 
@@ -166,6 +172,8 @@ public class LoanSummary {
         this.totalPenaltyChargesWaived = BigDecimal.ZERO;
         this.totalPenaltyChargesWrittenOff = BigDecimal.ZERO;
         this.totalPrincipalAdjustments = BigDecimal.ZERO;
+        this.totalPrincipal = BigDecimal.ZERO;
+        this.totalPrincipalFromCapitalizedIncome = BigDecimal.ZERO;
         this.totalPrincipalDisbursed = BigDecimal.ZERO;
         this.totalPrincipalOutstanding = BigDecimal.ZERO;
         this.totalPrincipalRepaid = BigDecimal.ZERO;
@@ -176,17 +184,22 @@ public class LoanSummary {
     }
 
     public void updateSummary(final MonetaryCurrency currency, final Money principal,
-            final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, Set<LoanCharge> charges) {
+            final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, Set<LoanCharge> charges,
+            List<LoanTransaction> capitalizedIncomeTransactions) {
+        final BigDecimal principalFromCapitalizedIncome = capitalizedIncomeTransactions.stream().filter(LoanTransaction::isNotReversed)
+                .map(LoanTransaction::getPrincipalPortion).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         this.totalPrincipalDisbursed = principal.getAmount();
+        this.totalPrincipalFromCapitalizedIncome = principalFromCapitalizedIncome;
+        this.totalPrincipal = principal.plus(principalFromCapitalizedIncome).getAmount();
         this.totalPrincipalAdjustments = calculateTotalPrincipalAdjusted(repaymentScheduleInstallments, currency).getAmount();
         this.totalFeeAdjustments = calculateTotalFeeAdjusted(repaymentScheduleInstallments, currency).getAmount();
         this.totalPenaltyAdjustments = calculateTotalPenaltyAdjusted(repaymentScheduleInstallments, currency).getAmount();
         this.totalPrincipalRepaid = calculateTotalPrincipalRepaid(repaymentScheduleInstallments, currency).getAmount();
         this.totalPrincipalWrittenOff = calculateTotalPrincipalWrittenOff(repaymentScheduleInstallments, currency).getAmount();
 
-        this.totalPrincipalOutstanding = principal.plus(this.totalPrincipalAdjustments).minus(this.totalPrincipalRepaid)
-                .minus(this.totalPrincipalWrittenOff).getAmount();
+        this.totalPrincipalOutstanding = principal.plus(principalFromCapitalizedIncome).plus(this.totalPrincipalAdjustments)
+                .minus(this.totalPrincipalRepaid).minus(this.totalPrincipalWrittenOff).getAmount();
 
         final Money totalInterestCharged = calculateTotalInterestCharged(repaymentScheduleInstallments, currency);
         this.totalInterestCharged = totalInterestCharged.getAmount();
@@ -225,7 +238,7 @@ public class LoanSummary {
         this.totalPenaltyChargesOutstanding = totalPenaltyChargesCharged.minus(this.totalPenaltyChargesRepaid)
                 .minus(this.totalPenaltyChargesWaived).minus(this.totalPenaltyChargesWrittenOff).getAmount();
 
-        final Money totalExpectedRepayment = Money.of(currency, this.totalPrincipalDisbursed).plus(this.totalInterestCharged)
+        final Money totalExpectedRepayment = Money.of(currency, this.totalPrincipal).plus(this.totalInterestCharged)
                 .plus(this.totalFeeChargesCharged).plus(this.totalPenaltyChargesCharged);
         this.totalExpectedRepayment = totalExpectedRepayment.getAmount();
 

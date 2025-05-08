@@ -161,7 +161,7 @@ public class LoanChargeAdjustmentStepDef extends AbstractStepDef {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
             String dateActual = formatter.format(date);
 
-            Double amountActual = transactions.get(i).getAmount();
+            Double amountActual = transactions.get(i).getAmount().doubleValue();
 
             if (dateActual.equals(transactionDate) && amountActual.equals(transactionAmount)) {
                 transactionMetConditions = transactions.get(i);

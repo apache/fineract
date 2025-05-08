@@ -16,21 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.note.service;
+package org.apache.fineract.portfolio.loanaccount.data;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.portfolio.client.domain.Client;
+import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-public interface NoteWritePlatformService {
+@Getter
+@AllArgsConstructor
+public class LoanSchedulePeriodDataWrapper {
 
-    CommandProcessingResult createNote(JsonCommand command);
-
-    void createLoanTransactionNote(Long loanTransactionId, String note);
-
-    CommandProcessingResult updateNote(JsonCommand command);
-
-    CommandProcessingResult deleteNote(JsonCommand command);
-
-    void createAndPersistClientNote(Client client, JsonCommand command);
+    private final LoanPrincipalRelatedDataHolder data;
+    private final LocalDate date;
+    private final boolean isDisbursement;
 }

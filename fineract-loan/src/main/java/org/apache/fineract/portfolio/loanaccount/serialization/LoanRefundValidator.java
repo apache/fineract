@@ -104,7 +104,10 @@ public final class LoanRefundValidator {
         if (loan.getLoanProduct().isMultiDisburseLoan() && adjustedTransaction == null) {
             final BigDecimal totalDisbursed = loan.getDisbursedAmount();
             final BigDecimal totalPrincipalAdjusted = loan.getSummary().getTotalPrincipalAdjustments();
-            final BigDecimal totalPrincipalCredited = totalDisbursed.add(totalPrincipalAdjusted);
+            final BigDecimal totalPrincipalFromCapitalizedIncome = loan.getLoanTransactions(LoanTransaction::isCapitalizedIncome).stream()
+                    .filter(LoanTransaction::isNotReversed).map(LoanTransaction::getPrincipalPortion)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            final BigDecimal totalPrincipalCredited = totalDisbursed.add(totalPrincipalAdjusted).add(totalPrincipalFromCapitalizedIncome);
             if (totalPrincipalCredited.compareTo(loan.getSummary().getTotalPrincipalRepaid()) < 0) {
                 final String errorMessage = "The transaction amount cannot exceed threshold.";
                 throw new InvalidLoanStateTransitionException("transaction", "amount.exceeds.threshold", errorMessage);

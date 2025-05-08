@@ -78,7 +78,7 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
                     transaction(100.0, "Disbursement", "01 January 2024"), //
                     transaction(50.0, "Capitalized Income", "01 January 2024"), //
                     transaction(0.55, "Capitalized Income Amortization", "01 January 2024"), //
-                    transaction(0.02, "Accrual", "02 January 2024"), //
+                    transaction(0.03, "Accrual", "02 January 2024"), //
                     transaction(0.55, "Capitalized Income Amortization", "02 January 2024") //
             );
 
@@ -89,8 +89,8 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
                     journalEntry(50, deferredIncomeLiabilityAccount, "CREDIT"), //
                     journalEntry(0.55, deferredIncomeLiabilityAccount, "DEBIT"), //
                     journalEntry(0.55, feeIncomeAccount, "CREDIT"), //
-                    journalEntry(0.02, interestReceivableAccount, "DEBIT"), //
-                    journalEntry(0.02, interestIncomeAccount, "CREDIT"), //
+                    journalEntry(0.03, interestReceivableAccount, "DEBIT"), //
+                    journalEntry(0.03, interestIncomeAccount, "CREDIT"), //
                     journalEntry(0.55, deferredIncomeLiabilityAccount, "DEBIT"), //
                     journalEntry(0.55, feeIncomeAccount, "CREDIT") //
             );

@@ -19,7 +19,9 @@
 package org.apache.fineract.integrationtests;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
+import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansResponse;
@@ -246,6 +248,40 @@ public class LoanSummaryTest extends BaseLoanIntegrationTest {
                     loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
             inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
         });
+    }
+
+    @Test
+    public void testCapitalizedIncomeExistsInRepaymentScheduleAndModifiesPrincipal() {
+        runAt("01 March 2023", () -> {
+            final PostLoanProductsResponse loanProductsResponse = loanProductHelper
+                    .createLoanProduct(create4IProgressiveWithCapitalizedIncome());
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applyLP2ProgressiveLoanRequest(clientId,
+                    loanProductsResponse.getResourceId(), "01 March 2023", 10000.00, 12.00, 4, null));
+            loanId = postLoansResponse.getLoanId();
+            loanTransactionHelper.approveLoan(loanId, approveLoanRequest(10000.00, "01 March 2023"));
+            disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 March 2023");
+        });
+        runAt("02 March 2023", () -> {
+            loanTransactionHelper.addCapitalizedIncome(loanId, "02 March 2023", 100.00);
+        });
+
+        BigDecimal thousand = BigDecimal.valueOf(1000.0);
+        BigDecimal hundred = BigDecimal.valueOf(100.0);
+        BigDecimal thousandOneHundred = BigDecimal.valueOf(1100.0);
+
+        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+
+        Assertions.assertEquals(thousand, loanDetails.getPrincipal().setScale(1, RoundingMode.HALF_UP));
+        Assertions.assertEquals(thousand, loanDetails.getSummary().getPrincipalDisbursed().setScale(1, RoundingMode.HALF_UP));
+        Assertions.assertEquals(hundred,
+                loanDetails.getSummary().getTotalPrincipalFromCapitalizedIncome().setScale(1, RoundingMode.HALF_UP));
+        Assertions.assertEquals(thousandOneHundred, loanDetails.getSummary().getTotalPrincipal().setScale(1, RoundingMode.HALF_UP));
+        Assertions.assertEquals(thousandOneHundred, loanDetails.getSummary().getPrincipalOutstanding().setScale(1, RoundingMode.HALF_UP));
+
+        List<GetLoansLoanIdRepaymentPeriod> periods = loanDetails.getRepaymentSchedule().getPeriods();
+        Assertions.assertEquals(6, periods.size());
+        Assertions.assertEquals(thousand, periods.get(0).getPrincipalLoanBalanceOutstanding().setScale(1, RoundingMode.HALF_UP));
+        Assertions.assertEquals(hundred, periods.get(1).getPrincipalLoanBalanceOutstanding().setScale(1, RoundingMode.HALF_UP));
     }
 
 }

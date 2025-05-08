@@ -1121,9 +1121,9 @@ public class LoanStepDef extends AbstractStepDef {
         ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
 
         GetLoansLoanIdDelinquencySummary delinquent = loanDetailsResponse.body().getDelinquent();
-        String lastPaymentAmountActual = String.valueOf(delinquent.getLastPaymentAmount());
+        String lastPaymentAmountActual = new Utils.DoubleFormatter(delinquent.getLastPaymentAmount().doubleValue()).format();
         String lastPaymentDateActual = FORMATTER.format(delinquent.getLastPaymentDate());
-        String lastRepaymentAmountActual = String.valueOf(delinquent.getLastRepaymentAmount());
+        String lastRepaymentAmountActual = new Utils.DoubleFormatter(delinquent.getLastRepaymentAmount().doubleValue()).format();
         String lastRepaymentDateActual = FORMATTER.format(delinquent.getLastRepaymentDate());
 
         assertThat(lastPaymentAmountActual)
@@ -1832,7 +1832,7 @@ public class LoanStepDef extends AbstractStepDef {
         ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
         testContext().set(TestContextKey.LOAN_RESPONSE, loanDetailsResponse);
 
-        Double totalOutstandingActual = loanDetailsResponse.body().getSummary().getTotalOutstanding();
+        Double totalOutstandingActual = loanDetailsResponse.body().getSummary().getTotalOutstanding().doubleValue();
         assertThat(totalOutstandingActual)
                 .as(ErrorMessageHelper.wrongAmountInTotalOutstanding(totalOutstandingActual, totalOutstandingExpected))
                 .isEqualTo(totalOutstandingExpected);
@@ -1847,8 +1847,8 @@ public class LoanStepDef extends AbstractStepDef {
         ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
         testContext().set(TestContextKey.LOAN_RESPONSE, loanDetailsResponse);
 
-        Double totalOverpaidActual = loanDetailsResponse.body().getTotalOverpaid();
-        Double totalOutstandingActual = loanDetailsResponse.body().getSummary().getTotalOutstanding();
+        Double totalOverpaidActual = loanDetailsResponse.body().getTotalOverpaid().doubleValue();
+        Double totalOutstandingActual = loanDetailsResponse.body().getSummary().getTotalOutstanding().doubleValue();
         double totalOutstandingExpected = 0.0;
         assertThat(totalOutstandingActual)
                 .as(ErrorMessageHelper.wrongAmountInTotalOutstanding(totalOutstandingActual, totalOutstandingExpected))
@@ -1867,7 +1867,7 @@ public class LoanStepDef extends AbstractStepDef {
         ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
         testContext().set(TestContextKey.LOAN_RESPONSE, loanDetailsResponse);
 
-        Double totalOverdueActual = loanDetailsResponse.body().getSummary().getTotalOverdue();
+        Double totalOverdueActual = loanDetailsResponse.body().getSummary().getTotalOverdue().doubleValue();
         assertThat(totalOverdueActual).as(ErrorMessageHelper.wrongAmountInTotalOverdue(totalOverdueActual, totalOverdueExpected))
                 .isEqualTo(totalOverdueExpected);
     }
@@ -1881,7 +1881,7 @@ public class LoanStepDef extends AbstractStepDef {
         ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
         testContext().set(TestContextKey.LOAN_RESPONSE, loanDetailsResponse);
 
-        Double lastPaymentAmountActual = loanDetailsResponse.body().getDelinquent().getLastPaymentAmount();
+        Double lastPaymentAmountActual = loanDetailsResponse.body().getDelinquent().getLastPaymentAmount().doubleValue();
         assertThat(lastPaymentAmountActual)
                 .as(ErrorMessageHelper.wrongLastPaymentAmount(lastPaymentAmountActual, lastPaymentAmountExpected))
                 .isEqualTo(lastPaymentAmountExpected);
@@ -2173,12 +2173,13 @@ public class LoanStepDef extends AbstractStepDef {
             actualValues.add(t.getDueDate() == null ? null : FORMATTER.format(t.getDueDate()));
             actualValues.add(t.getChargeCalculationType().getValue() == null ? null : t.getChargeCalculationType().getValue());
 
-            actualValues.add(t.getAmount() == null ? null : new Utils.DoubleFormatter(t.getAmount()).format());
+            actualValues.add(t.getAmount() == null ? null : new Utils.DoubleFormatter(t.getAmount().doubleValue()).format());
 
-            actualValues.add(t.getAmountPaid() == null ? null : new Utils.DoubleFormatter(t.getAmountPaid()).format());
-            actualValues.add(t.getAmountWaived() == null ? null : new Utils.DoubleFormatter(t.getAmountWaived()).format());
+            actualValues.add(t.getAmountPaid() == null ? null : new Utils.DoubleFormatter(t.getAmountPaid().doubleValue()).format());
+            actualValues.add(t.getAmountWaived() == null ? null : new Utils.DoubleFormatter(t.getAmountWaived().doubleValue()).format());
 
-            actualValues.add(t.getAmountOutstanding() == null ? null : new Utils.DoubleFormatter(t.getAmountOutstanding()).format());
+            actualValues.add(
+                    t.getAmountOutstanding() == null ? null : new Utils.DoubleFormatter(t.getAmountOutstanding().doubleValue()).format());
             return actualValues;
         }).collect(Collectors.toList());
     }
@@ -2681,9 +2682,9 @@ public class LoanStepDef extends AbstractStepDef {
         ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
 
         GetLoansLoanIdDelinquencySummary delinquent = loanDetailsResponse.body().getDelinquent();
-        String lastPaymentAmountActual = String.valueOf(delinquent.getLastPaymentAmount());
+        String lastPaymentAmountActual = new Utils.DoubleFormatter(delinquent.getLastPaymentAmount().doubleValue()).format();
         String lastPaymentDateActual = FORMATTER.format(delinquent.getLastPaymentDate());
-        String lastRepaymentAmountActual = String.valueOf(delinquent.getLastRepaymentAmount());
+        String lastRepaymentAmountActual = new Utils.DoubleFormatter(delinquent.getLastRepaymentAmount().doubleValue()).format();
         String lastRepaymentDateActual = FORMATTER.format(delinquent.getLastRepaymentDate());
 
         assertThat(lastPaymentAmountActual)
@@ -2923,7 +2924,7 @@ public class LoanStepDef extends AbstractStepDef {
         ErrorHelper.checkSuccessfulApiCall(loanDetails);
 
         Double expectedAmountParsed = Double.parseDouble(expectedAmount);
-        Double totalRepaymentTransaction = loanDetails.body().getSummary().getTotalRepaymentTransaction();
+        Double totalRepaymentTransaction = loanDetails.body().getSummary().getTotalRepaymentTransaction().doubleValue();
 
         assertThat(totalRepaymentTransaction)
                 .as(ErrorMessageHelper.wrongAmountInTotalRepaymentTransaction(totalRepaymentTransaction, expectedAmountParsed))
@@ -3310,8 +3311,8 @@ public class LoanStepDef extends AbstractStepDef {
         final Double disbursementPrincipalAmount = Double.valueOf(loanData.get(19));
 
         List<PostLoansDisbursementData> disbursementDetail = new ArrayList<>();
-        disbursementDetail.add(
-                new PostLoansDisbursementData().expectedDisbursementDate(expectedDisbursementDate).principal(disbursementPrincipalAmount));
+        disbursementDetail.add(new PostLoansDisbursementData().expectedDisbursementDate(expectedDisbursementDate)
+                .principal(BigDecimal.valueOf(disbursementPrincipalAmount)));
 
         createFullyCustomizedLoanWithChargesExpectsTrancheDisbursementDetails(loanData, disbursementDetail);
     }
@@ -3325,9 +3326,9 @@ public class LoanStepDef extends AbstractStepDef {
 
         List<PostLoansDisbursementData> disbursementDetail = new ArrayList<>();
         disbursementDetail.add(new PostLoansDisbursementData().expectedDisbursementDate(expectedDisbursementDateFirstDisbursal)
-                .principal(disbursementPrincipalAmountFirstDisbursal));
+                .principal(BigDecimal.valueOf(disbursementPrincipalAmountFirstDisbursal)));
         disbursementDetail.add(new PostLoansDisbursementData().expectedDisbursementDate(expectedDisbursementDateSecondDisbursal)
-                .principal(disbursementPrincipalAmountSecondDisbursal));
+                .principal(BigDecimal.valueOf(disbursementPrincipalAmountSecondDisbursal)));
 
         createFullyCustomizedLoanWithChargesExpectsTrancheDisbursementDetails(loanData, disbursementDetail);
     }
@@ -3418,8 +3419,8 @@ public class LoanStepDef extends AbstractStepDef {
         final Double disbursementPrincipalAmount = Double.valueOf(loanData.get(17));
 
         List<PostLoansDisbursementData> disbursementDetail = new ArrayList<>();
-        disbursementDetail.add(
-                new PostLoansDisbursementData().expectedDisbursementDate(expectedDisbursementDate).principal(disbursementPrincipalAmount));
+        disbursementDetail.add(new PostLoansDisbursementData().expectedDisbursementDate(expectedDisbursementDate)
+                .principal(BigDecimal.valueOf(disbursementPrincipalAmount)));
 
         createFullyCustomizedLoanExpectsTrancheDisbursementDetails(loanData, disbursementDetail);
     }
@@ -3433,9 +3434,9 @@ public class LoanStepDef extends AbstractStepDef {
 
         List<PostLoansDisbursementData> disbursementDetail = new ArrayList<>();
         disbursementDetail.add(new PostLoansDisbursementData().expectedDisbursementDate(expectedDisbursementDateFirstDisbursal)
-                .principal(disbursementPrincipalAmountFirstDisbursal));
+                .principal(BigDecimal.valueOf(disbursementPrincipalAmountFirstDisbursal)));
         disbursementDetail.add(new PostLoansDisbursementData().expectedDisbursementDate(expectedDisbursementDateSecondDisbursal)
-                .principal(disbursementPrincipalAmountSecondDisbursal));
+                .principal(BigDecimal.valueOf(disbursementPrincipalAmountSecondDisbursal)));
 
         createFullyCustomizedLoanExpectsTrancheDisbursementDetails(loanData, disbursementDetail);
     }
@@ -3698,16 +3699,20 @@ public class LoanStepDef extends AbstractStepDef {
             switch (headerName) {
                 case "Transaction date" -> actualValues.add(t.getDate() == null ? null : FORMATTER.format(t.getDate()));
                 case "Transaction Type" -> actualValues.add(t.getType().getValue() == null ? null : t.getType().getValue());
-                case "Amount" -> actualValues.add(t.getAmount() == null ? null : String.valueOf(t.getAmount()));
-                case "Principal" -> actualValues.add(t.getPrincipalPortion() == null ? null : String.valueOf(t.getPrincipalPortion()));
-                case "Interest" -> actualValues.add(t.getInterestPortion() == null ? null : String.valueOf(t.getInterestPortion()));
-                case "Fees" -> actualValues.add(t.getFeeChargesPortion() == null ? null : String.valueOf(t.getFeeChargesPortion()));
-                case "Penalties" ->
-                    actualValues.add(t.getPenaltyChargesPortion() == null ? null : String.valueOf(t.getPenaltyChargesPortion()));
-                case "Loan Balance" ->
-                    actualValues.add(t.getOutstandingLoanBalance() == null ? null : String.valueOf(t.getOutstandingLoanBalance()));
-                case "Overpayment" ->
-                    actualValues.add(t.getOverpaymentPortion() == null ? null : String.valueOf(t.getOverpaymentPortion()));
+                case "Amount" ->
+                    actualValues.add(t.getAmount() == null ? null : new Utils.DoubleFormatter(t.getAmount().doubleValue()).format());
+                case "Principal" -> actualValues.add(
+                        t.getPrincipalPortion() == null ? null : new Utils.DoubleFormatter(t.getPrincipalPortion().doubleValue()).format());
+                case "Interest" -> actualValues.add(
+                        t.getInterestPortion() == null ? null : new Utils.DoubleFormatter(t.getInterestPortion().doubleValue()).format());
+                case "Fees" -> actualValues.add(t.getFeeChargesPortion() == null ? null
+                        : new Utils.DoubleFormatter(t.getFeeChargesPortion().doubleValue()).format());
+                case "Penalties" -> actualValues.add(t.getPenaltyChargesPortion() == null ? null
+                        : new Utils.DoubleFormatter(t.getPenaltyChargesPortion().doubleValue()).format());
+                case "Loan Balance" -> actualValues.add(t.getOutstandingLoanBalance() == null ? null
+                        : new Utils.DoubleFormatter(t.getOutstandingLoanBalance().doubleValue()).format());
+                case "Overpayment" -> actualValues.add(t.getOverpaymentPortion() == null ? null
+                        : new Utils.DoubleFormatter(t.getOverpaymentPortion().doubleValue()).format());
                 case "Reverted" -> actualValues.add(t.getManuallyReversed() == null ? null : String.valueOf(t.getManuallyReversed()));
                 case "Replayed" -> {
                     boolean hasReplayed = t.getTransactionRelations().stream().anyMatch(e -> "REPLAYED".equals(e.getRelationType()));
@@ -3748,27 +3753,27 @@ public class LoanStepDef extends AbstractStepDef {
                 case "Paid date" -> actualValues.add(repaymentPeriod.getObligationsMetOnDate() == null ? null
                         : FORMATTER.format(repaymentPeriod.getObligationsMetOnDate()));
                 case "Balance of loan" -> actualValues.add(repaymentPeriod.getPrincipalLoanBalanceOutstanding() == null ? null
-                        : String.valueOf(repaymentPeriod.getPrincipalLoanBalanceOutstanding()));
-                case "Principal due" ->
-                    actualValues.add(repaymentPeriod.getPrincipalDue() == null ? null : String.valueOf(repaymentPeriod.getPrincipalDue()));
-                case "Interest" ->
-                    actualValues.add(repaymentPeriod.getInterestDue() == null ? null : String.valueOf(repaymentPeriod.getInterestDue()));
+                        : new Utils.DoubleFormatter(repaymentPeriod.getPrincipalLoanBalanceOutstanding().doubleValue()).format());
+                case "Principal due" -> actualValues.add(repaymentPeriod.getPrincipalDue() == null ? null
+                        : new Utils.DoubleFormatter(repaymentPeriod.getPrincipalDue().doubleValue()).format());
+                case "Interest" -> actualValues.add(repaymentPeriod.getInterestDue() == null ? null
+                        : new Utils.DoubleFormatter(repaymentPeriod.getInterestDue().doubleValue()).format());
                 case "Fees" -> actualValues.add(repaymentPeriod.getFeeChargesDue() == null ? null
-                        : new Utils.DoubleFormatter(repaymentPeriod.getFeeChargesDue()).format());
+                        : new Utils.DoubleFormatter(repaymentPeriod.getFeeChargesDue().doubleValue()).format());
                 case "Penalties" -> actualValues.add(repaymentPeriod.getPenaltyChargesDue() == null ? null
-                        : new Utils.DoubleFormatter(repaymentPeriod.getPenaltyChargesDue()).format());
+                        : new Utils.DoubleFormatter(repaymentPeriod.getPenaltyChargesDue().doubleValue()).format());
                 case "Due" -> actualValues.add(repaymentPeriod.getTotalDueForPeriod() == null ? null
-                        : new Utils.DoubleFormatter(repaymentPeriod.getTotalDueForPeriod()).format());
-                case "Paid" -> actualValues.add(
-                        repaymentPeriod.getTotalPaidForPeriod() == null ? null : String.valueOf(repaymentPeriod.getTotalPaidForPeriod()));
+                        : new Utils.DoubleFormatter(repaymentPeriod.getTotalDueForPeriod().doubleValue()).format());
+                case "Paid" -> actualValues.add(repaymentPeriod.getTotalPaidForPeriod() == null ? null
+                        : new Utils.DoubleFormatter(repaymentPeriod.getTotalPaidForPeriod().doubleValue()).format());
                 case "In advance" -> actualValues.add(repaymentPeriod.getTotalPaidInAdvanceForPeriod() == null ? null
-                        : String.valueOf(repaymentPeriod.getTotalPaidInAdvanceForPeriod()));
+                        : new Utils.DoubleFormatter(repaymentPeriod.getTotalPaidInAdvanceForPeriod().doubleValue()).format());
                 case "Late" -> actualValues.add(repaymentPeriod.getTotalPaidLateForPeriod() == null ? null
-                        : String.valueOf(repaymentPeriod.getTotalPaidLateForPeriod()));
+                        : new Utils.DoubleFormatter(repaymentPeriod.getTotalPaidLateForPeriod().doubleValue()).format());
                 case "Waived" -> actualValues.add(repaymentPeriod.getTotalWaivedForPeriod() == null ? null
-                        : String.valueOf(repaymentPeriod.getTotalWaivedForPeriod()));
+                        : new Utils.DoubleFormatter(repaymentPeriod.getTotalWaivedForPeriod().doubleValue()).format());
                 case "Outstanding" -> actualValues.add(repaymentPeriod.getTotalOutstandingForPeriod() == null ? null
-                        : new Utils.DoubleFormatter(repaymentPeriod.getTotalOutstandingForPeriod()).format());
+                        : new Utils.DoubleFormatter(repaymentPeriod.getTotalOutstandingForPeriod().doubleValue()).format());
                 default -> throw new IllegalStateException(String.format("Header name %s cannot be found", headerName));
             }
         }
@@ -3784,7 +3789,7 @@ public class LoanStepDef extends AbstractStepDef {
         List<GetLoansLoanIdRepaymentPeriod> periods = repaymentSchedule.getPeriods();
         for (GetLoansLoanIdRepaymentPeriod period : periods) {
             if (null != period.getTotalPaidForPeriod()) {
-                paidActual += period.getTotalPaidForPeriod();
+                paidActual += period.getTotalPaidForPeriod().doubleValue();
             }
         }
         BigDecimal paidActualBd = new BigDecimal(paidActual).setScale(2, RoundingMode.HALF_DOWN);
@@ -3793,45 +3798,45 @@ public class LoanStepDef extends AbstractStepDef {
             String headerName = header.get(i);
             String expectedValue = expectedAmounts.get(i);
             switch (headerName) {
-                case "Principal due" -> assertThat(repaymentSchedule.getTotalPrincipalExpected())//
-                        .as(ErrorMessageHelper.wrongAmountInRepaymentSchedulePrincipal(repaymentSchedule.getTotalPrincipalExpected(),
-                                Double.valueOf(expectedValue)))//
+                case "Principal due" -> assertThat(repaymentSchedule.getTotalPrincipalExpected().doubleValue())//
+                        .as(ErrorMessageHelper.wrongAmountInRepaymentSchedulePrincipal(
+                                repaymentSchedule.getTotalPrincipalExpected().doubleValue(), Double.valueOf(expectedValue)))//
                         .isEqualTo(Double.valueOf(expectedValue));//
-                case "Interest" -> assertThat(repaymentSchedule.getTotalInterestCharged())//
-                        .as(ErrorMessageHelper.wrongAmountInRepaymentScheduleInterest(repaymentSchedule.getTotalInterestCharged(),
-                                Double.valueOf(expectedValue)))//
+                case "Interest" -> assertThat(repaymentSchedule.getTotalInterestCharged().doubleValue())//
+                        .as(ErrorMessageHelper.wrongAmountInRepaymentScheduleInterest(
+                                repaymentSchedule.getTotalInterestCharged().doubleValue(), Double.valueOf(expectedValue)))//
                         .isEqualTo(Double.valueOf(expectedValue));//
-                case "Fees" -> assertThat(repaymentSchedule.getTotalFeeChargesCharged())//
-                        .as(ErrorMessageHelper.wrongAmountInRepaymentScheduleFees(repaymentSchedule.getTotalFeeChargesCharged(),
-                                Double.valueOf(expectedValue)))//
+                case "Fees" -> assertThat(repaymentSchedule.getTotalFeeChargesCharged().doubleValue())//
+                        .as(ErrorMessageHelper.wrongAmountInRepaymentScheduleFees(
+                                repaymentSchedule.getTotalFeeChargesCharged().doubleValue(), Double.valueOf(expectedValue)))//
                         .isEqualTo(Double.valueOf(expectedValue));//
-                case "Penalties" -> assertThat(repaymentSchedule.getTotalPenaltyChargesCharged())//
-                        .as(ErrorMessageHelper.wrongAmountInRepaymentSchedulePenalties(repaymentSchedule.getTotalPenaltyChargesCharged(),
-                                Double.valueOf(expectedValue)))//
+                case "Penalties" -> assertThat(repaymentSchedule.getTotalPenaltyChargesCharged().doubleValue())//
+                        .as(ErrorMessageHelper.wrongAmountInRepaymentSchedulePenalties(
+                                repaymentSchedule.getTotalPenaltyChargesCharged().doubleValue(), Double.valueOf(expectedValue)))//
                         .isEqualTo(Double.valueOf(expectedValue));//
-                case "Due" -> assertThat(repaymentSchedule.getTotalRepaymentExpected())//
-                        .as(ErrorMessageHelper.wrongAmountInRepaymentScheduleDue(repaymentSchedule.getTotalRepaymentExpected(),
-                                Double.valueOf(expectedValue)))//
+                case "Due" -> assertThat(repaymentSchedule.getTotalRepaymentExpected().doubleValue())//
+                        .as(ErrorMessageHelper.wrongAmountInRepaymentScheduleDue(
+                                repaymentSchedule.getTotalRepaymentExpected().doubleValue(), Double.valueOf(expectedValue)))//
                         .isEqualTo(Double.valueOf(expectedValue));//
                 case "Paid" -> assertThat(paidActualBd.doubleValue())//
                         .as(ErrorMessageHelper.wrongAmountInRepaymentSchedulePaid(paidActualBd.doubleValue(),
                                 Double.valueOf(expectedValue)))//
                         .isEqualTo(Double.valueOf(expectedValue));//
-                case "In advance" -> assertThat(repaymentSchedule.getTotalPaidInAdvance())//
-                        .as(ErrorMessageHelper.wrongAmountInRepaymentScheduleInAdvance(repaymentSchedule.getTotalPaidInAdvance(),
+                case "In advance" -> assertThat(repaymentSchedule.getTotalPaidInAdvance().doubleValue())//
+                        .as(ErrorMessageHelper.wrongAmountInRepaymentScheduleInAdvance(
+                                repaymentSchedule.getTotalPaidInAdvance().doubleValue(), Double.valueOf(expectedValue)))//
+                        .isEqualTo(Double.valueOf(expectedValue));//
+                case "Late" -> assertThat(repaymentSchedule.getTotalPaidLate().doubleValue())//
+                        .as(ErrorMessageHelper.wrongAmountInRepaymentScheduleLate(repaymentSchedule.getTotalPaidLate().doubleValue(),
                                 Double.valueOf(expectedValue)))//
                         .isEqualTo(Double.valueOf(expectedValue));//
-                case "Late" -> assertThat(repaymentSchedule.getTotalPaidLate())//
-                        .as(ErrorMessageHelper.wrongAmountInRepaymentScheduleLate(repaymentSchedule.getTotalPaidLate(),
+                case "Waived" -> assertThat(repaymentSchedule.getTotalWaived().doubleValue())//
+                        .as(ErrorMessageHelper.wrongAmountInRepaymentScheduleWaived(repaymentSchedule.getTotalWaived().doubleValue(),
                                 Double.valueOf(expectedValue)))//
                         .isEqualTo(Double.valueOf(expectedValue));//
-                case "Waived" -> assertThat(repaymentSchedule.getTotalWaived())//
-                        .as(ErrorMessageHelper.wrongAmountInRepaymentScheduleWaived(repaymentSchedule.getTotalWaived(),
-                                Double.valueOf(expectedValue)))//
-                        .isEqualTo(Double.valueOf(expectedValue));//
-                case "Outstanding" -> assertThat(repaymentSchedule.getTotalOutstanding())//
-                        .as(ErrorMessageHelper.wrongAmountInRepaymentScheduleOutstanding(repaymentSchedule.getTotalOutstanding(),
-                                Double.valueOf(expectedValue)))//
+                case "Outstanding" -> assertThat(repaymentSchedule.getTotalOutstanding().doubleValue())//
+                        .as(ErrorMessageHelper.wrongAmountInRepaymentScheduleOutstanding(
+                                repaymentSchedule.getTotalOutstanding().doubleValue(), Double.valueOf(expectedValue)))//
                         .isEqualTo(Double.valueOf(expectedValue));//
             }
         }
@@ -3853,7 +3858,7 @@ public class LoanStepDef extends AbstractStepDef {
                 case "Applicable From" -> actualValues.add(emiVariation.getTermVariationApplicableFrom() == null ? null
                         : FORMATTER.format(emiVariation.getTermVariationApplicableFrom()));
                 case "Decimal Value" ->
-                    actualValues.add(emiVariation.getDecimalValue() == null ? null : String.valueOf(emiVariation.getDecimalValue()));
+                    actualValues.add(emiVariation.getDecimalValue() == null ? null : new Utils.DoubleFormatter(emiVariation.getDecimalValue().doubleValue()).format());
                 case "Date Value" ->
                     actualValues.add(emiVariation.getDateValue() == null ? null : FORMATTER.format(emiVariation.getDateValue()));
                 case "Is Specific To Installment" -> actualValues.add(String.valueOf(emiVariation.getIsSpecificToInstallment()));

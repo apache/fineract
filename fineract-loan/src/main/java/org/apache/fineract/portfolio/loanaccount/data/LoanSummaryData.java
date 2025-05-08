@@ -34,6 +34,8 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 public class LoanSummaryData {
 
     private final CurrencyData currency;
+    private final BigDecimal totalPrincipal;
+    private final BigDecimal totalPrincipalFromCapitalizedIncome;
     private final BigDecimal principalDisbursed;
     private final BigDecimal principalAdjustments;
     private final BigDecimal principalPaid;
