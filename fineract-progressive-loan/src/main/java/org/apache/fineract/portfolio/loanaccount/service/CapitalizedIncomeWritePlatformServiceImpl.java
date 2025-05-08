@@ -30,6 +30,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -54,6 +55,8 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
     private final NoteWritePlatformService noteWritePlatformService;
     private final ExternalIdFactory externalIdFactory;
     private final LoanCapitalizedIncomeBalanceRepository capitalizedIncomeBalanceRepository;
+    private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
+    private final LoanBalanceService loanBalanceService;
 
     @Transactional
     @Override
@@ -74,21 +77,24 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
         final Money capitalizedIncomeAmount = calculateCapitalizedIncomeAmount(loan, transactionAmount);
         final LoanTransaction capitalizedIncomeTransaction = LoanTransaction.capitalizedIncome(loan, capitalizedIncomeAmount, paymentDetail,
                 transactionDate, txnExternalId);
-        // TODO: Transaction reverse-replay + loan repayment schedule update (follow-up story)
         // Update loan with capitalized income
         loan.addLoanTransaction(capitalizedIncomeTransaction);
+        // Recalculate loan transactions
+        recalculateLoanTransactions(loan, transactionDate, capitalizedIncomeTransaction);
         // Create capitalized income balances
         createCapitalizedIncomeBalance(capitalizedIncomeTransaction);
         // Save and flush (PK is set)
         loanTransactionRepository.saveAndFlush(capitalizedIncomeTransaction);
+        // Create capitalized income balances
+        createCapitalizedIncomeBalance(capitalizedIncomeTransaction);
         // Update loan counters and save
         loan.updateLoanScheduleDependentDerivedFields();
-        // Update outstanding loan balances
-        loan.updateLoanOutstandingBalances();
+        // Update loan summary data
+        loanBalanceService.updateLoanSummaryDerivedFields(loan);
         // Create a note if provided
         final String noteText = command.stringValueOfParameterNamed("note");
         if (noteText != null && !noteText.isEmpty()) {
-            noteWritePlatformService.createLoanNote(loanId, noteText);
+            noteWritePlatformService.createLoanTransactionNote(capitalizedIncomeTransaction.getId(), noteText);
         }
         // Post journal entries
         journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
@@ -97,6 +103,14 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
                 .withEntityId(capitalizedIncomeTransaction.getId()) //
                 .withEntityExternalId(capitalizedIncomeTransaction.getExternalId()) //
                 .build();
+    }
+
+    private void recalculateLoanTransactions(Loan loan, LocalDate transactionDate, LoanTransaction capitalizedIncomeTransaction) {
+        if (loan.isInterestBearingAndInterestRecalculationEnabled() || DateUtils.isBeforeBusinessDate(transactionDate)) {
+            reprocessLoanTransactionsService.reprocessTransactions(loan);
+        } else {
+            reprocessLoanTransactionsService.processLatestTransaction(capitalizedIncomeTransaction, loan);
+        }
     }
 
     @Override

@@ -18,15 +18,29 @@
  */
 package org.apache.fineract.portfolio.loanaccount.repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeBalance;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepaymentPeriodData;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 
 public interface LoanCapitalizedIncomeBalanceRepository
         extends JpaRepository<LoanCapitalizedIncomeBalance, Long>, JpaSpecificationExecutor<LoanCapitalizedIncomeBalance> {
 
+    String FIND_BALANCE_REPAYMENT_SCHEDULE_DATA = "SELECT new org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepaymentPeriodData(lcib.loanTransaction.id, lcib.loan.id, lcib.loanTransaction.dateOf, lcib.loanTransaction.reversed, lcib.amount, lcib.unrecognizedAmount, lcib.loanTransaction.feeChargesPortion) FROM LoanCapitalizedIncomeBalance lcib ";
+
     List<LoanCapitalizedIncomeBalance> findAllByLoanId(Long loanId);
 
     LoanCapitalizedIncomeBalance findByLoanIdAndLoanTransactionId(Long loanId, Long transactionId);
+
+    @Query(FIND_BALANCE_REPAYMENT_SCHEDULE_DATA + " WHERE lcib.loan.id = :loanId")
+    List<LoanTransactionRepaymentPeriodData> findRepaymentPeriodDataByLoanId(Long loanId);
+
+    @Query("SELECT SUM(lcib.amount) FROM LoanCapitalizedIncomeBalance lcib WHERE lcib.loan.id = :loanId")
+    BigDecimal calculateCapitalizedIncome(Long loanId);
+
+    @Query("SELECT SUM(lcib.amountAdjustment) FROM LoanCapitalizedIncomeBalance lcib WHERE lcib.loan.id = :loanId")
+    BigDecimal calculateCapitalizedIncomeAdjustment(Long loanId);
 }

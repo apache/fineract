@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -35,7 +36,10 @@ import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationTransact
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class LoanBalanceService {
+
+    private final CapitalizedIncomeBalanceService capitalizedIncomeBalanceService;
 
     public Money calculateTotalOverpayment(final Loan loan) {
         Money totalPaidInRepayments = loan.getTotalPaidInRepayments();
@@ -97,7 +101,10 @@ public class LoanBalanceService {
             loan.setTotalRecovered(recoveredAmount.getAmountDefaultedToNullIfZero());
 
             final Money principal = loan.getLoanRepaymentScheduleDetail().getPrincipal();
-            loan.getSummary().updateSummary(loan.getCurrency(), principal, loan.getRepaymentScheduleInstallments(), loan.getLoanCharges());
+            final Money capitalizedIncome = capitalizedIncomeBalanceService.calculateCapitalizedIncome(loan);
+            final Money capitalizedIncomeAdjustment = capitalizedIncomeBalanceService.calculateCapitalizedIncomeAdjustment(loan);
+            loan.getSummary().updateSummary(loan.getCurrency(), principal, loan.getRepaymentScheduleInstallments(), loan.getLoanCharges(),
+                    capitalizedIncome, capitalizedIncomeAdjustment);
             loan.updateLoanOutstandingBalances();
         }
     }

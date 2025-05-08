@@ -188,12 +188,12 @@ Feature: Capitalized Income
       | Type      | Account code | Account name                 | Debit  | Credit |
       | ASSET     | 112601       | Loans Receivable             | 100.0  |        |
       | LIABILITY | 145024       | Deferred Capitalized Income  |        | 100.0  |
-    When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "2 January 2024" with 900.17 EUR transaction amount and system-generated Idempotency key
+    When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "2 January 2024" with 1000.17 EUR transaction amount and system-generated Idempotency key
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement                    | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
       | 02 January 2024  | Capitalized Income              | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
-      | 02 January 2024  | Repayment                       | 900.17 | 900.0     | 0.17     | 0.0  | 0.0       | 100.0        | false    |
+      | 02 January 2024  | Repayment                       | 1000.17| 1000.0    | 0.17     | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Accrual                         | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Capitalized Income Amortization | 100.0  | 0.0       | 100.0    | 0.0  | 0.0       | 0.0          | false    |
     Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "02 January 2024" which has the following Journal entries:
@@ -222,12 +222,12 @@ Feature: Capitalized Income
       | Type      | Account code | Account name                 | Debit  | Credit |
       | ASSET     | 112601       | Loans Receivable             | 100.0  |        |
       | LIABILITY | 145024       | Deferred Capitalized Income  |        | 100.0  |
-    When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "2 January 2024" with 1000 EUR transaction amount and system-generated Idempotency key
+    When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "2 January 2024" with 1100 EUR transaction amount and system-generated Idempotency key
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement                    | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
       | 02 January 2024  | Capitalized Income              | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
-      | 02 January 2024  | Repayment                       | 1000.0 | 900.0     | 0.17     | 0.0  | 0.0       | 100.0        | false    |
+      | 02 January 2024  | Repayment                       | 1100.0 | 1000.0    | 0.17     | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Accrual                         | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Capitalized Income Amortization | 100.0  | 0.0       | 100.0    | 0.0  | 0.0       | 0.0          | false    |
     Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "02 January 2024" which has the following Journal entries:
@@ -262,7 +262,7 @@ Feature: Capitalized Income
       | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement                    | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
       | 02 January 2024  | Capitalized Income              | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
-      | 02 January 2024  | Close (as written-off)          | 905.25 | 900.0     | 5.25     | 0.0  | 0.0       | 100.0        | false    |
+      | 02 January 2024  | Close (as written-off)          | 1005.81| 1000.0    | 5.81     | 0.0  | 0.0       | 0.0          | false    |
       | 02 January 2024  | Capitalized Income Amortization | 100.0  | 0.0       | 100.0    | 0.0  | 0.0       | 0.0          | false    |
     Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "02 January 2024" which has the following Journal entries:
       | Type      | Account code | Account name                 | Debit  | Credit |
@@ -555,16 +555,16 @@ Feature: Capitalized Income
     And Admin does charge-off the loan with reason "DELINQUENT" on "03 February 2024"
     Then Loan Transactions tab has a "CHARGE_OFF" transaction with date "03 February 2024" which has the following Journal entries:
       | Type    | Account code | Account name               | Debit | Credit |
-      | ASSET   | 112601       | Loans Receivable           |       | 900.0  |
-      | ASSET   | 112603       | Interest/Fee Receivable    |       | 4.0    |
-      | EXPENSE | 744007       | Credit Loss/Bad Debt       | 900.0 |        |
-      | INCOME  | 404001       | Interest Income Charge Off | 4.0   |        |
+      | ASSET   | 112601       | Loans Receivable           |       | 1000.0 |
+      | ASSET   | 112603       | Interest/Fee Receivable    |       | 4.58   |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt       | 1000.0|        |
+      | INCOME  | 404001       | Interest Income Charge Off | 4.58  |        |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement                    | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
       | 02 January 2024  | Capitalized Income              | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
-      | 03 February 2024 | Accrual                         | 4.0    | 0.0       | 4.0      | 0.0  | 0.0       | 0.0          | false    |
-      | 03 February 2024 | Charge-off                      | 904.0  | 900.0     | 4.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 03 February 2024 | Accrual                         | 4.58   | 0.0       | 4.58     | 0.0  | 0.0       | 0.0          | false    |
+      | 03 February 2024 | Charge-off                      | 1004.58| 1000.0    | 4.58     | 0.0  | 0.0       | 0.0          | false    |
       | 03 February 2024 | Capitalized Income Amortization | 100.0  | 0.0       | 100.0    | 0.0  | 0.0       | 0.0          | false    |
     Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "03 February 2024" which has the following Journal entries:
       | Type      | Account code | Account name                 | Debit  | Credit |
@@ -597,16 +597,16 @@ Feature: Capitalized Income
     And Admin does charge-off the loan on "03 February 2024"
     Then Loan Transactions tab has a "CHARGE_OFF" transaction with date "03 February 2024" which has the following Journal entries:
       | Type    | Account code | Account name               | Debit | Credit |
-      | ASSET   | 112601       | Loans Receivable           |       | 900.0  |
-      | ASSET   | 112603       | Interest/Fee Receivable    |       | 4.0    |
-      | EXPENSE | 744037       | Credit Loss/Bad Debt-Fraud | 900.0 |        |
-      | INCOME  | 404001       | Interest Income Charge Off | 4.0   |        |
+      | ASSET   | 112601       | Loans Receivable           |       | 1000.0 |
+      | ASSET   | 112603       | Interest/Fee Receivable    |       | 4.58   |
+      | EXPENSE | 744037       | Credit Loss/Bad Debt-Fraud | 1000.0|        |
+      | INCOME  | 404001       | Interest Income Charge Off | 4.58  |        |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement                    | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
       | 02 January 2024  | Capitalized Income              | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
-      | 03 February 2024 | Accrual                         | 4.0    | 0.0       | 4.0      | 0.0  | 0.0       | 0.0          | false    |
-      | 03 February 2024 | Charge-off                      | 904.0  | 900.0     | 4.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 03 February 2024 | Accrual                         | 4.58   | 0.0       | 4.58     | 0.0  | 0.0       | 0.0          | false    |
+      | 03 February 2024 | Charge-off                      | 1004.58| 1000.0    | 4.58     | 0.0  | 0.0       | 0.0          | false    |
       | 03 February 2024 | Capitalized Income Amortization | 100.0  | 0.0       | 100.0    | 0.0  | 0.0       | 0.0          | false    |
     Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "03 February 2024" which has the following Journal entries:
       | Type      | Account code | Account name                 | Debit  | Credit |
@@ -639,16 +639,16 @@ Feature: Capitalized Income
     And Admin does charge-off the loan with reason "DELINQUENT" on "03 February 2024"
     Then Loan Transactions tab has a "CHARGE_OFF" transaction with date "03 February 2024" which has the following Journal entries:
       | Type    | Account code | Account name               | Debit | Credit |
-      | ASSET   | 112601       | Loans Receivable           |       | 900.0  |
-      | ASSET   | 112603       | Interest/Fee Receivable    |       | 4.0    |
-      | EXPENSE | 744007       | Credit Loss/Bad Debt       | 900.0 |        |
-      | INCOME  | 404001       | Interest Income Charge Off | 4.0   |        |
+      | ASSET   | 112601       | Loans Receivable           |       | 1000.0 |
+      | ASSET   | 112603       | Interest/Fee Receivable    |       | 4.58   |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt       | 1000.0|        |
+      | INCOME  | 404001       | Interest Income Charge Off | 4.58  |        |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement                    | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
       | 02 January 2024  | Capitalized Income              | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
-      | 03 February 2024 | Accrual                         | 4.0    | 0.0       | 4.0      | 0.0  | 0.0       | 0.0          | false    |
-      | 03 February 2024 | Charge-off                      | 904.0  | 900.0     | 4.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 03 February 2024 | Accrual                         | 4.58   | 0.0       | 4.58     | 0.0  | 0.0       | 0.0          | false    |
+      | 03 February 2024 | Charge-off                      | 1004.58| 1000.0    | 4.58     | 0.0  | 0.0       | 0.0          | false    |
       | 03 February 2024 | Capitalized Income Amortization | 100.0  | 0.0       | 100.0    | 0.0  | 0.0       | 0.0          | false    |
     Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "03 February 2024" which has the following Journal entries:
       | Type      | Account code | Account name                 | Debit  | Credit |
@@ -681,16 +681,16 @@ Feature: Capitalized Income
     And Admin does charge-off the loan with reason "DELINQUENT" on "03 February 2024"
     Then Loan Transactions tab has a "CHARGE_OFF" transaction with date "03 February 2024" which has the following Journal entries:
       | Type    | Account code | Account name               | Debit | Credit |
-      | ASSET   | 112601       | Loans Receivable           |       | 900.0  |
-      | ASSET   | 112603       | Interest/Fee Receivable    |       | 4.0    |
-      | EXPENSE | 744007       | Credit Loss/Bad Debt       | 900.0 |        |
-      | INCOME  | 404001       | Interest Income Charge Off | 4.0   |        |
+      | ASSET   | 112601       | Loans Receivable           |       | 1000.0 |
+      | ASSET   | 112603       | Interest/Fee Receivable    |       | 4.58   |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt       | 1000.0|        |
+      | INCOME  | 404001       | Interest Income Charge Off | 4.58  |        |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement                    | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
       | 02 January 2024  | Capitalized Income              | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
-      | 03 February 2024 | Accrual                         | 4.0    | 0.0       | 4.0      | 0.0  | 0.0       | 0.0          | false    |
-      | 03 February 2024 | Charge-off                      | 904.0  | 900.0     | 4.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 03 February 2024 | Accrual                         | 4.58   | 0.0       | 4.58     | 0.0  | 0.0       | 0.0          | false    |
+      | 03 February 2024 | Charge-off                      | 1004.58| 1000.0    | 4.58     | 0.0  | 0.0       | 0.0          | false    |
       | 03 February 2024 | Capitalized Income Amortization | 100.0  | 0.0       | 100.0    | 0.0  | 0.0       | 0.0          | false    |
     Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "03 February 2024" which has the following Journal entries:
       | Type      | Account code | Account name                 | Debit  | Credit |
@@ -700,20 +700,20 @@ Feature: Capitalized Income
     Then Admin does a charge-off undo the loan
     Then Loan Transactions tab has a "CHARGE_OFF" transaction with date "03 February 2024" which has the following Journal entries:
       | Type    | Account code | Account name               | Debit | Credit |
-      | ASSET   | 112601       | Loans Receivable           |       | 900.0  |
-      | ASSET   | 112603       | Interest/Fee Receivable    |       | 4.0    |
-      | EXPENSE | 744007       | Credit Loss/Bad Debt       | 900.0 |        |
-      | INCOME  | 404001       | Interest Income Charge Off | 4.0   |        |
-      | ASSET   | 112601       | Loans Receivable           | 900.0 |        |
-      | ASSET   | 112603       | Interest/Fee Receivable    | 4.0   |        |
-      | EXPENSE | 744007       | Credit Loss/Bad Debt       |       | 900.0  |
-      | INCOME  | 404001       | Interest Income Charge Off |       | 4.0    |
+      | ASSET   | 112601       | Loans Receivable           |       | 1000.0 |
+      | ASSET   | 112603       | Interest/Fee Receivable    |       | 4.58   |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt       | 1000.0|        |
+      | INCOME  | 404001       | Interest Income Charge Off | 4.58  |        |
+      | ASSET   | 112601       | Loans Receivable           | 1000.0|        |
+      | ASSET   | 112603       | Interest/Fee Receivable    | 4.58  |        |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt       |       | 1000.0 |
+      | INCOME  | 404001       | Interest Income Charge Off |       | 4.58   |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement                    | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
       | 02 January 2024  | Capitalized Income              | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
-      | 03 February 2024 | Accrual                         | 4.0    | 0.0       | 4.0      | 0.0  | 0.0       | 0.0          | false    |
-      | 03 February 2024 | Charge-off                      | 904.0  | 900.0     | 4.0      | 0.0  | 0.0       | 0.0          | true     |
+      | 03 February 2024 | Accrual                         | 4.58   | 0.0       | 4.58     | 0.0  | 0.0       | 0.0          | false    |
+      | 03 February 2024 | Charge-off                      | 1004.58| 1000.0    | 4.58     | 0.0  | 0.0       | 0.0          | true     |
     Then Reversed loan capitalized income amortization transaction has the following Journal entries:
       | Type      | Account code | Account name                 | Debit  | Credit |
       | EXPENSE   | 744007       | Credit Loss/Bad Debt         |        | 100.0  |

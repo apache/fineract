@@ -458,6 +458,30 @@
                 "null",
                 "bigdecimal"
             ]
+        },
+        {
+            "default": null,
+            "name": "totalPrincipal",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "totalCapitalizedIncome",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "totalCapitalizedIncomeAdjustment",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
         }
     ]
 }

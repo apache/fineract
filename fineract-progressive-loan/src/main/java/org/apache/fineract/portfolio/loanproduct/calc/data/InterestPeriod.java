@@ -62,6 +62,8 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
     private Money balanceCorrectionAmount;
     private Money outstandingLoanBalance;
 
+    private Money capitalizedIncomePrincipal;
+
     @JsonExclude
     private final MathContext mc;
     private final boolean isPaused;
@@ -70,38 +72,38 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
         return new InterestPeriod(repaymentPeriod, interestPeriod.getFromDate(), interestPeriod.getDueDate(),
                 interestPeriod.getRateFactor(), interestPeriod.getRateFactorTillPeriodDueDate(), interestPeriod.getCreditedPrincipal(),
                 interestPeriod.getCreditedInterest(), interestPeriod.getDisbursementAmount(), interestPeriod.getBalanceCorrectionAmount(),
-                interestPeriod.getOutstandingLoanBalance(), mc, interestPeriod.isPaused());
+                interestPeriod.getOutstandingLoanBalance(), interestPeriod.getCapitalizedIncomePrincipal(), mc, interestPeriod.isPaused());
     }
 
     public static InterestPeriod empty(@NotNull RepaymentPeriod repaymentPeriod, MathContext mc) {
-        return new InterestPeriod(repaymentPeriod, null, null, null, null, null, null, null, null, null, mc, false);
+        return new InterestPeriod(repaymentPeriod, null, null, null, null, null, null, null, null, null,null, mc, false);
     }
 
     public static InterestPeriod copy(@NotNull RepaymentPeriod repaymentPeriod, @NotNull InterestPeriod interestPeriod) {
         return new InterestPeriod(repaymentPeriod, interestPeriod.getFromDate(), interestPeriod.getDueDate(),
                 interestPeriod.getRateFactor(), interestPeriod.getRateFactorTillPeriodDueDate(), interestPeriod.getCreditedPrincipal(),
                 interestPeriod.getCreditedInterest(), interestPeriod.getDisbursementAmount(), interestPeriod.getBalanceCorrectionAmount(),
-                interestPeriod.getOutstandingLoanBalance(), interestPeriod.getMc(), interestPeriod.isPaused());
+                interestPeriod.getOutstandingLoanBalance(), interestPeriod.getCapitalizedIncomePrincipal(), interestPeriod.getMc(), interestPeriod.isPaused());
     }
 
     public static InterestPeriod withEmptyAmounts(@NotNull RepaymentPeriod repaymentPeriod, @NotNull LocalDate fromDate,
             LocalDate dueDate) {
         final Money zero = repaymentPeriod.getEmi().zero();
-        return new InterestPeriod(repaymentPeriod, fromDate, dueDate, BigDecimal.ZERO, BigDecimal.ZERO, zero, zero, zero, zero, zero,
+        return new InterestPeriod(repaymentPeriod, fromDate, dueDate, BigDecimal.ZERO, BigDecimal.ZERO, zero, zero, zero, zero, zero, zero,
                 zero.getMc(), false);
     }
 
     public static InterestPeriod withEmptyAmounts(@NotNull RepaymentPeriod repaymentPeriod, @NotNull LocalDate fromDate, LocalDate dueDate,
             boolean isPaused) {
         final Money zero = repaymentPeriod.getEmi().zero();
-        return new InterestPeriod(repaymentPeriod, fromDate, dueDate, BigDecimal.ZERO, BigDecimal.ZERO, zero, zero, zero, zero, zero,
+        return new InterestPeriod(repaymentPeriod, fromDate, dueDate, BigDecimal.ZERO, BigDecimal.ZERO, zero, zero, zero, zero, zero, zero,
                 zero.getMc(), isPaused);
     }
 
     public static InterestPeriod withPausedAndEmptyAmounts(@NotNull RepaymentPeriod repaymentPeriod, @NotNull LocalDate fromDate,
             LocalDate dueDate) {
         final Money zero = repaymentPeriod.getEmi().zero();
-        return new InterestPeriod(repaymentPeriod, fromDate, dueDate, BigDecimal.ZERO, BigDecimal.ZERO, zero, zero, zero, zero, zero,
+        return new InterestPeriod(repaymentPeriod, fromDate, dueDate, BigDecimal.ZERO, BigDecimal.ZERO, zero, zero, zero, zero, zero, zero,
                 zero.getMc(), true);
     }
 
@@ -124,6 +126,10 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
 
     public void addCreditedInterestAmount(final Money creditedInterest) {
         this.creditedInterest = MathUtil.plus(this.creditedInterest, creditedInterest, mc);
+    }
+
+    public void addCapitalizedIncomePrincipalAmount(final Money capitalizedIncomePrincipal) {
+        this.capitalizedIncomePrincipal = MathUtil.plus(this.capitalizedIncomePrincipal, capitalizedIncomePrincipal, mc);
     }
 
     public BigDecimal getCalculatedDueInterest() {
@@ -156,6 +162,7 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
                 InterestPeriod previousInterestPeriod = previousRepaymentPeriod.get().getLastInterestPeriod();
                 this.outstandingLoanBalance = MathUtil.negativeToZero(previousInterestPeriod.getOutstandingLoanBalance()//
                         .plus(previousInterestPeriod.getDisbursementAmount(), mc)//
+                        .plus(previousInterestPeriod.getCapitalizedIncomePrincipal(), mc)//
                         .plus(previousInterestPeriod.getBalanceCorrectionAmount(), mc)//
                         .minus(previousRepaymentPeriod.get().getDuePrincipal(), mc)//
                         .plus(previousRepaymentPeriod.get().getPaidPrincipal(), mc), mc);//
@@ -165,6 +172,7 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
             InterestPeriod previousInterestPeriod = getRepaymentPeriod().getInterestPeriods().get(index - 1);
             this.outstandingLoanBalance = MathUtil.negativeToZero(previousInterestPeriod.getOutstandingLoanBalance() //
                     .plus(previousInterestPeriod.getBalanceCorrectionAmount(), mc) //
+                    .plus(previousInterestPeriod.getCapitalizedIncomePrincipal(), mc) //
                     .plus(previousInterestPeriod.getDisbursementAmount(), mc)); //
         }
     }
@@ -173,7 +181,7 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
      * Include principal like amounts (all disbursement amount + credited principal)
      */
     public Money getCreditedAmounts() {
-        return getDisbursementAmount().plus(getCreditedPrincipal(), mc);
+        return getDisbursementAmount().plus(getCreditedPrincipal(), mc).plus(getCapitalizedIncomePrincipal(), mc);
     }
 
     public boolean isFirstInterestPeriod() {
