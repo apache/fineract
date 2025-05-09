@@ -650,6 +650,10 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
         return LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION.equals(getTypeOf()) && isNotReversed();
     }
 
+    public boolean isCapitalizedIncomeAdjustment() {
+        return LoanTransactionType.CAPITALIZED_INCOME_ADJUSTMENT.equals(getTypeOf()) && isNotReversed();
+    }
+
     public boolean isWaiver() {
         return isInterestWaiver() || isChargesWaiver();
     }

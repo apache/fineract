@@ -25,16 +25,24 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.TransactionType;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+@Slf4j
 public class LoanTransactionTest extends BaseLoanIntegrationTest {
+
+    private final String capitalizedIncomeCommand = "capitalizedIncome";
+    private final String capitalizedIncomeAdjustmentCommand = "capitalizedIncomeAdjustment";
 
     @Test
     public void testGetLoanTransactionsFiltering() {
@@ -94,23 +102,67 @@ public class LoanTransactionTest extends BaseLoanIntegrationTest {
     public void testGetLoanTransactionTemplateForCapitalizedIncome() {
         final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
 
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
+        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
+                .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                        .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
+                        .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
+                        .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
 
         final String loanExternalIdStr = UUID.randomUUID().toString();
 
-        final String command = "capitalizedIncome";
         runAt("20 December 2024", () -> {
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "20 December 2024",
                     430.0, 7.0, 6, (request) -> request.externalId(loanExternalIdStr));
 
-            disburseLoan(loanId, BigDecimal.valueOf(430), "20 December 2024");
+            disburseLoan(loanId, BigDecimal.valueOf(230), "20 December 2024");
 
             final GetLoansLoanIdTransactionsTemplateResponse transactionTemplate = loanTransactionHelper.retrieveTransactionTemplate(loanId,
-                    command, null, null, null);
+                    capitalizedIncomeCommand, null, null, null);
 
             assertNotNull(transactionTemplate);
-            assertEquals("loanTransactionType." + command, transactionTemplate.getType().getCode());
+            assertEquals("loanTransactionType." + capitalizedIncomeCommand, transactionTemplate.getType().getCode());
+            assertEquals(transactionTemplate.getAmount(), 200);
             assertThat(transactionTemplate.getPaymentTypeOptions().size() > 0);
+        });
+    }
+
+    @Test
+    public void testGetLoanTransactionTemplateForCapitalizedIncomeAdjustment() {
+        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+
+        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
+                .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                        .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
+                        .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
+                        .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
+
+        final String loanExternalIdStr = UUID.randomUUID().toString();
+
+        runAt("20 December 2024", () -> {
+            final Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(),
+                    "20 December 2024", 430.0, 7.0, 6, (request) -> request.externalId(loanExternalIdStr));
+
+            disburseLoan(loanId, BigDecimal.valueOf(230), "20 December 2024");
+
+            PostLoansLoanIdTransactionsResponse loanTransactionResponse = loanTransactionHelper.executeLoanTransaction(loanId,
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("20 December 2024").locale("en")
+                            .transactionAmount(150.0),
+                    capitalizedIncomeCommand);
+            assertNotNull(loanTransactionResponse);
+            final Long transactionId = loanTransactionResponse.getResourceId();
+            assertNotNull(transactionId);
+            log.info("Loan Id {} with transaction id {}", loanId, transactionId);
+
+            final GetLoansLoanIdTransactionsTemplateResponse transactionTemplate = loanTransactionHelper.retrieveTransactionTemplate(loanId,
+                    capitalizedIncomeAdjustmentCommand, null, null, null, transactionId);
+
+            assertNotNull(transactionTemplate);
+            assertEquals("loanTransactionType." + capitalizedIncomeAdjustmentCommand, transactionTemplate.getType().getCode());
+            assertEquals(transactionTemplate.getAmount(), 150);
         });
     }
 

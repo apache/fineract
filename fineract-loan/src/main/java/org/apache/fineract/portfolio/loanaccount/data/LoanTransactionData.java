@@ -313,6 +313,36 @@ public class LoanTransactionData implements Serializable {
                 null, null, outstandingLoanBalance, null, manuallyReversed, ExternalId.empty(), null, loanId);
     }
 
+    public static LoanTransactionData loanTransactionDataForCreditTemplate(final LoanTransactionEnumData transactionType,
+            final LocalDate transactionDate, final BigDecimal transactionAmount, final Collection<PaymentTypeData> paymentOptions,
+            final CurrencyData currency) {
+        final Long id = null;
+        final Long loanId = null;
+        final ExternalId externalLoanId = ExternalId.empty();
+        final ExternalId externalId = ExternalId.empty();
+        final Long officeId = null;
+        final String officeName = null;
+        final PaymentDetailData paymentDetailData = null;
+        final BigDecimal unrecognizedIncomePortion = null;
+        final BigDecimal principalPortion = null;
+        final BigDecimal interestPortion = null;
+        final BigDecimal feeChargesPortion = null;
+        final BigDecimal penaltyChargesPortion = null;
+        final BigDecimal overpaymentPortion = null;
+        final BigDecimal netDisbursalAmount = null;
+        final BigDecimal fixedEmiAmount = null;
+        final BigDecimal outstandingLoanBalance = null;
+        final AccountTransferData transfer = null;
+        final LocalDate submittedOnDate = null;
+        final LocalDate possibleNextRepaymentDate = null;
+        final boolean manuallyReversed = false;
+        return new LoanTransactionData(id, officeId, officeName, transactionType, paymentDetailData, currency, transactionDate,
+                transactionAmount, netDisbursalAmount, principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion,
+                overpaymentPortion, unrecognizedIncomePortion, paymentOptions, transfer, externalId, fixedEmiAmount, outstandingLoanBalance,
+                submittedOnDate, manuallyReversed, possibleNextRepaymentDate, loanId, externalLoanId);
+
+    }
+
     public static LoanTransactionData loanTransactionDataForDisbursalTemplate(final LoanTransactionEnumData transactionType,
             final LocalDate expectedDisbursedOnLocalDateForTemplate, final BigDecimal disburseAmountForTemplate,
             final BigDecimal netDisbursalAmount, final Collection<PaymentTypeData> paymentOptions, final BigDecimal retriveLastEmiAmount,

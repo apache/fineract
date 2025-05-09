@@ -50,6 +50,7 @@ import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
@@ -107,6 +108,7 @@ import org.apache.fineract.portfolio.loanaccount.data.PaidInAdvanceData;
 import org.apache.fineract.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeBalance;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeCalculationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeStrategy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeType;
@@ -126,6 +128,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanSc
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanaccount.mapper.LoanTransactionMapper;
+import org.apache.fineract.portfolio.loanaccount.repository.LoanCapitalizedIncomeBalanceRepository;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanForeclosureValidator;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrategyData;
@@ -180,6 +183,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     private final LoanTransactionMapper loanTransactionMapper;
     private final LoanTransactionProcessingService loadTransactionProcessingService;
     private final LoanBalanceService loanBalanceService;
+    private final LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository;
 
     @Override
     public LoanAccountData retrieveOne(final Long loanId) {
@@ -451,10 +455,52 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         return loanDetails;
     }
 
+    private CurrencyData retriveLoanCurrencyData(final Long loanId) {
+        final LoanCurrencyDataMapper loanCurrencyMapper = new LoanCurrencyDataMapper(sqlGenerator);
+        final String sql = "select " + loanCurrencyMapper.schema() + " where l.id = ?";
+
+        return this.jdbcTemplate.queryForObject(sql, loanCurrencyMapper, loanId);
+    }
+
     @Override
-    public LoanTransactionData retrieveLoanTransactionTemplate(final Long loanId, LoanTransactionType transactionType) {
-        return LoanTransactionData.templateOnTop(retrieveLoanTransactionTemplate(loanId),
-                LoanEnumerations.transactionType(transactionType));
+    public LoanTransactionData retrieveLoanTransactionTemplate(final Long loanId, final LoanTransactionType transactionType,
+            final Long transactionId) {
+
+        LoanTransactionData loanTransactionData = null;
+        Collection<PaymentTypeData> paymentOptions = null;
+        BigDecimal transactionAmount = BigDecimal.ZERO;
+        switch (transactionType) {
+            case CAPITALIZED_INCOME:
+                final Loan loan = loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
+                if (loan.getLoanProduct().getLoanProductRelatedDetail().isEnableIncomeCapitalization()) {
+                    final BigDecimal capitalizedIncomeBalance = loanCapitalizedIncomeBalanceRepository.findAllByLoanId(loanId).stream()
+                            .map(LoanCapitalizedIncomeBalance::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+                    transactionAmount = loan.getApprovedPrincipal().subtract(loan.getDisbursedAmount()).subtract(capitalizedIncomeBalance);
+                }
+                paymentOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
+                loanTransactionData = LoanTransactionData.loanTransactionDataForCreditTemplate(
+                        LoanEnumerations.transactionType(transactionType), DateUtils.getBusinessLocalDate(), transactionAmount,
+                        paymentOptions, retriveLoanCurrencyData(loanId));
+
+            break;
+            case CAPITALIZED_INCOME_ADJUSTMENT:
+                final LoanCapitalizedIncomeBalance loanCapitalizedIncomeBalance = loanCapitalizedIncomeBalanceRepository
+                        .findByLoanIdAndLoanTransactionId(loanId, transactionId);
+
+                transactionAmount = (loanCapitalizedIncomeBalance == null) ? BigDecimal.ZERO
+                        : loanCapitalizedIncomeBalance.getAmount()
+                                .subtract(MathUtil.nullToZero(loanCapitalizedIncomeBalance.getAmountAdjustment()));
+                loanTransactionData = LoanTransactionData.loanTransactionDataForCreditTemplate(
+                        LoanEnumerations.transactionType(transactionType), DateUtils.getBusinessLocalDate(), transactionAmount,
+                        paymentOptions, retriveLoanCurrencyData(loanId));
+            break;
+            default:
+                loanTransactionData = LoanTransactionData.templateOnTop(retrieveLoanTransactionTemplate(loanId),
+                        LoanEnumerations.transactionType(transactionType));
+            break;
+        }
+
+        return loanTransactionData;
     }
 
     @Override
@@ -644,6 +690,33 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             throw new LoanNotFoundException(loanExternalId);
         }
         return loanId;
+    }
+
+    private static final class LoanCurrencyDataMapper implements RowMapper<CurrencyData> {
+
+        private final DatabaseSpecificSQLGenerator sqlGenerator;
+
+        LoanCurrencyDataMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
+            this.sqlGenerator = sqlGenerator;
+        }
+
+        public String schema() {
+            return " l.currency_code as currencyCode, l.currency_digits as currencyDigits, l.currency_multiplesof as inMultiplesOf, rc."
+                    + sqlGenerator.escape("name")
+                    + " as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode from m_loan l join m_currency rc on rc."
+                    + sqlGenerator.escape("code") + " = l.currency_code ";
+        }
+
+        @Override
+        public CurrencyData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+            final String currencyCode = rs.getString("currencyCode");
+            final String currencyName = rs.getString("currencyName");
+            final String currencyNameCode = rs.getString("currencyNameCode");
+            final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
+            final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
+            final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
+            return new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf, currencyDisplaySymbol, currencyNameCode);
+        }
     }
 
     private static final class LoanMapper implements RowMapper<LoanAccountData> {

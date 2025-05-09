@@ -579,7 +579,7 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId1 = loanResponse.body().getLoanId();
         Response<GetLoansLoanIdTransactionsTemplateResponse> response = loanTransactionsApi
-                .retrieveTransactionTemplate(loanId1, "prepayLoan", DATE_FORMAT, transactionDate, DEFAULT_LOCALE).execute();
+                .retrieveTransactionTemplate(loanId1, "prepayLoan", DATE_FORMAT, transactionDate, DEFAULT_LOCALE, null).execute();
         Double transactionAmount = response.body().getAmount();
 
         log.debug("%n--- Loan Pay-off with amount: {} ---", transactionAmount);

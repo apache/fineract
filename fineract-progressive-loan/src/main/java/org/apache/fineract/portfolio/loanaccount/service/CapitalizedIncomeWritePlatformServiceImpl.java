@@ -93,7 +93,10 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
         // Post journal entries
         journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
 
-        return new CommandProcessingResultBuilder().withEntityId(loan.getId()).withEntityExternalId(loan.getExternalId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(capitalizedIncomeTransaction.getId()) //
+                .withEntityExternalId(capitalizedIncomeTransaction.getExternalId()) //
+                .build();
     }
 
     @Override

@@ -902,6 +902,11 @@ public class LoanTransactionHelper {
         return postLoanTransaction(createLoanTransactionURL(MAKE_REPAYMENT_COMMAND, loanID), getRepaymentBodyAsJSON(date, amountToBePaid));
     }
 
+    public PostLoansLoanIdTransactionsResponse executeLoanTransaction(final Long loanId, final PostLoansLoanIdTransactionsRequest request,
+            final String command) {
+        return Calls.ok(FineractClientHelper.getFineractClient().loanTransactions.executeLoanTransaction(loanId, request, command));
+    }
+
     public PostLoansLoanIdTransactionsResponse makeLoanRepayment(final Long loanId, final PostLoansLoanIdTransactionsRequest request) {
         return Calls.ok(FineractClientHelper.getFineractClient().loanTransactions.executeLoanTransaction(loanId, request, "repayment"));
     }
@@ -2332,7 +2337,7 @@ public class LoanTransactionHelper {
     public GetLoansLoanIdTransactionsTemplateResponse getPrepaymentAmount(final Long loanId, final String transactionDate,
             String dateformat) {
         return Calls.ok(FineractClientHelper.getFineractClient().loanTransactions.retrieveTransactionTemplate(loanId, "prepayLoan",
-                dateformat, transactionDate, "en"));
+                dateformat, transactionDate, "en", null));
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -2807,15 +2812,21 @@ public class LoanTransactionHelper {
     }
 
     public GetLoansLoanIdTransactionsTemplateResponse retrieveTransactionTemplate(Long loanId, String command, String dateFormat,
+            String transactionDate, String locale, Long transactionId) {
+        return Calls.ok(FineractClientHelper.getFineractClient().loanTransactions.retrieveTransactionTemplate(loanId, command, dateFormat,
+                transactionDate, locale, transactionId));
+    }
+
+    public GetLoansLoanIdTransactionsTemplateResponse retrieveTransactionTemplate(Long loanId, String command, String dateFormat,
             String transactionDate, String locale) {
         return Calls.ok(FineractClientHelper.getFineractClient().loanTransactions.retrieveTransactionTemplate(loanId, command, dateFormat,
-                transactionDate, locale));
+                transactionDate, locale, null));
     }
 
     public GetLoansLoanIdTransactionsTemplateResponse retrieveTransactionTemplate(String loanExternalIdStr, String command,
             String dateFormat, String transactionDate, String locale) {
         return Calls.ok(FineractClientHelper.getFineractClient().loanTransactions.retrieveTransactionTemplate1(loanExternalIdStr, command,
-                dateFormat, transactionDate, locale));
+                dateFormat, transactionDate, locale, null));
     }
 
     public GetLoansApprovalTemplateResponse getLoanApprovalTemplate(String loanExternalIdStr) {

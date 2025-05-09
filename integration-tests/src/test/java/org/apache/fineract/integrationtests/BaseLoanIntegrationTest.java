@@ -276,7 +276,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     }
 
     protected GetLoansLoanIdTransactionsTemplateResponse getPrepayAmount(Long loanId, String date) {
-        return ok(fineractClient().loanTransactions.retrieveTransactionTemplate(loanId, "prepayLoan", DATETIME_PATTERN, date, "en"));
+        return ok(fineractClient().loanTransactions.retrieveTransactionTemplate(loanId, "prepayLoan", DATETIME_PATTERN, date, "en", null));
     }
 
     protected Long verifyPrepayAmountByRepayment(Long loanId, String date) {
