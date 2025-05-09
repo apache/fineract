@@ -107,6 +107,7 @@ public class AccountingProcessorHelper {
         boolean isLoanMarkedAsChargeOff = accountingBridgeData.isChargeOff();
         boolean isLoanMarkedAsFraud = accountingBridgeData.isFraud();
         final Long chargeOffReasonCodeValue = accountingBridgeData.getChargeOffReasonCodeValue();
+        final boolean isLoanMarkedAsWrittenOff = accountingBridgeData.isWrittenOff();
         final boolean cashBasedAccountingEnabled = accountingBridgeData.isCashBasedAccountingEnabled();
         final boolean upfrontAccrualBasedAccountingEnabled = accountingBridgeData.isUpfrontAccrualBasedAccountingEnabled();
         final boolean periodicAccrualBasedAccountingEnabled = accountingBridgeData.isPeriodicAccrualBasedAccountingEnabled();
@@ -169,7 +170,7 @@ public class AccountingProcessorHelper {
 
         return new LoanDTO(loanId, loanProductId, officeId, currencyCode, cashBasedAccountingEnabled, upfrontAccrualBasedAccountingEnabled,
                 periodicAccrualBasedAccountingEnabled, newLoanTransactions, isLoanMarkedAsChargeOff, isLoanMarkedAsFraud,
-                chargeOffReasonCodeValue);
+                chargeOffReasonCodeValue, isLoanMarkedAsWrittenOff);
     }
 
     public ProductToGLAccountMapping getChargeOffMappingByCodeValue(Long loanProductId, PortfolioProductType productType,

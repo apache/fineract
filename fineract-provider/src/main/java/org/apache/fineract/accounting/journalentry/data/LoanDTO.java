@@ -46,4 +46,5 @@ public class LoanDTO {
     @Setter
     private boolean markedAsFraud;
     private Long chargeOffReasonCodeValue;
+    private boolean markedAsWrittenOff;
 }

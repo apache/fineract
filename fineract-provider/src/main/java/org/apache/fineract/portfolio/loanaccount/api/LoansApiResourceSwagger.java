@@ -722,6 +722,10 @@ final class LoansApiResourceSwagger {
                 public boolean chargeAdjustment;
                 @Schema(example = "false")
                 public boolean chargeoff;
+                @Schema(example = "false")
+                public boolean capitalizedIncome;
+                @Schema(example = "false")
+                public boolean capitalizedIncomeAmortization;
             }
 
             static final class GetLoansLoanIdPaymentDetailData {

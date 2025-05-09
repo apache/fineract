@@ -68,6 +68,7 @@ public class LoanTransactionEnumData implements Serializable {
     private final boolean interestRefund;
     private final boolean accrualAdjustment;
     private final boolean capitalizedIncome;
+    private final boolean capitalizedIncomeAmortization;
 
     public LoanTransactionEnumData(final Long id, final String code, final String value) {
         this.id = id;
@@ -105,6 +106,7 @@ public class LoanTransactionEnumData implements Serializable {
         this.interestRefund = Long.valueOf(LoanTransactionType.INTEREST_REFUND.getValue()).equals(this.id);
         this.accrualAdjustment = Long.valueOf(LoanTransactionType.ACCRUAL_ADJUSTMENT.getValue()).equals(this.id);
         this.capitalizedIncome = Long.valueOf(LoanTransactionType.CAPITALIZED_INCOME.getValue()).equals(this.id);
+        this.capitalizedIncomeAmortization = Long.valueOf(LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION.getValue()).equals(this.id);
     }
 
     public boolean isRepaymentType() {

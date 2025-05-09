@@ -327,6 +327,9 @@ public final class LoanEnumerations {
                     LoanTransactionType.ACCRUAL_ADJUSTMENT.getCode(), "Accrual Adjustment");
             case CAPITALIZED_INCOME -> new LoanTransactionEnumData(LoanTransactionType.CAPITALIZED_INCOME.getValue().longValue(),
                     LoanTransactionType.CAPITALIZED_INCOME.getCode(), "Capitalized Income");
+            case CAPITALIZED_INCOME_AMORTIZATION ->
+                new LoanTransactionEnumData(LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION.getValue().longValue(),
+                        LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION.getCode(), "Capitalized Income Amortization");
         };
     }
 

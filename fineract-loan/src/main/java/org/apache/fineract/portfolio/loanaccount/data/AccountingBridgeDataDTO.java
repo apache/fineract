@@ -44,6 +44,7 @@ public class AccountingBridgeDataDTO {
     private boolean isChargeOff;
     private boolean isFraud;
     private Long chargeOffReasonCodeValue;
+    private boolean isWrittenOff;
     private List<AccountingBridgeLoanTransactionDTO> newLoanTransactions = new ArrayList<>();
 
 }

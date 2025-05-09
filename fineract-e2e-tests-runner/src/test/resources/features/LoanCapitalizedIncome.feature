@@ -167,3 +167,105 @@ Feature: Capitalized Income
       | Type      | Account code | Account name                 | Debit  | Credit |
       | ASSET     | 112601       | Loans Receivable             | 300.0  |        |
       | LIABILITY | 145024       | Deferred Capitalized Income  |        | 300.0  |
+
+  @TestRailId:C3646
+  Scenario: As a user I want to add capitalized income to a progressive loan after disbursement and then make a full repayment - amortization in case of loan close event
+    When Admin sets the business date to "1 January 2024"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME | 01 January 2024   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "1 January 2024" with "1000" amount and expected disbursement date on "1 January 2024"
+    And Admin successfully disburse the loan on "1 January 2024" with "900" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    When Admin sets the business date to "2 January 2024"
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "2 January 2024" with "100" EUR transaction amount
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement       | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
+      | 02 January 2024  | Capitalized Income | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+    Then Loan Transactions tab has a "CAPITALIZED_INCOME" transaction with date "02 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                 | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable             | 100.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income  |        | 100.0  |
+    When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "2 January 2024" with 900.17 EUR transaction amount and system-generated Idempotency key
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement                    | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
+      | 02 January 2024  | Capitalized Income              | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 02 January 2024  | Repayment                       | 900.17 | 900.0     | 0.17     | 0.0  | 0.0       | 100.0        | false    |
+      | 02 January 2024  | Accrual                         | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    |
+      | 02 January 2024  | Capitalized Income Amortization | 100.0  | 0.0       | 100.0    | 0.0  | 0.0       | 0.0          | false    |
+    Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "02 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                 | Debit  | Credit |
+      | INCOME    | 404000       | Interest Income              |        | 100.0  |
+      | LIABILITY | 145024       | Deferred Capitalized Income  | 100.0  |        |
+    Then LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "02 January 2024"
+
+  @TestRailId:C3647
+  Scenario: As a user I want to add capitalized income to a progressive loan after disbursement and then overpay loan - amortization in case of loan close event
+    When Admin sets the business date to "1 January 2024"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME | 01 January 2024   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "1 January 2024" with "1000" amount and expected disbursement date on "1 January 2024"
+    And Admin successfully disburse the loan on "1 January 2024" with "900" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    When Admin sets the business date to "2 January 2024"
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "2 January 2024" with "100" EUR transaction amount
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement       | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
+      | 02 January 2024  | Capitalized Income | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+    Then Loan Transactions tab has a "CAPITALIZED_INCOME" transaction with date "02 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                 | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable             | 100.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income  |        | 100.0  |
+    When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "2 January 2024" with 1000 EUR transaction amount and system-generated Idempotency key
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement                    | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
+      | 02 January 2024  | Capitalized Income              | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 02 January 2024  | Repayment                       | 1000.0 | 900.0     | 0.17     | 0.0  | 0.0       | 100.0        | false    |
+      | 02 January 2024  | Accrual                         | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    |
+      | 02 January 2024  | Capitalized Income Amortization | 100.0  | 0.0       | 100.0    | 0.0  | 0.0       | 0.0          | false    |
+    Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "02 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                 | Debit  | Credit |
+      | INCOME    | 404000       | Interest Income              |        | 100.0  |
+      | LIABILITY | 145024       | Deferred Capitalized Income  | 100.0  |        |
+    Then LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "02 January 2024"
+
+  @TestRailId:C3651
+  Scenario: As a user I want to add capitalized income to a progressive loan after disbursement and then write off loan - amortization in case of loan close event
+    When Admin sets the business date to "1 January 2024"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME | 01 January 2024   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "1 January 2024" with "1000" amount and expected disbursement date on "1 January 2024"
+    And Admin successfully disburse the loan on "1 January 2024" with "900" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    When Admin sets the business date to "2 January 2024"
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "2 January 2024" with "100" EUR transaction amount
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement       | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
+      | 02 January 2024  | Capitalized Income | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+    Then Loan Transactions tab has a "CAPITALIZED_INCOME" transaction with date "02 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                 | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable             | 100.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income  |        | 100.0  |
+    And Admin does write-off the loan on "02 January 2024"
+    Then Loan status will be "CLOSED_WRITTEN_OFF"
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement                    | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
+      | 02 January 2024  | Capitalized Income              | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 02 January 2024  | Close (as written-off)          | 905.25 | 900.0     | 5.25     | 0.0  | 0.0       | 100.0        | false    |
+      | 02 January 2024  | Capitalized Income Amortization | 100.0  | 0.0       | 100.0    | 0.0  | 0.0       | 0.0          | false    |
+    Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "02 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                 | Debit  | Credit |
+      | EXPENSE   | e4           | Written off                  |        | 100.0  |
+      | LIABILITY | 145024       | Deferred Capitalized Income  | 100.0  |        |
+    Then LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "02 January 2024"

@@ -194,4 +194,5 @@
     <include file="parts/0173_user_change_pwd.xml" relativeToChangelogFile="true" />
     <include file="parts/0174_loan_product_add_capitalized_income_type.xml" relativeToChangelogFile="true" />
     <include file="parts/0175_add_fk_acc_product_mapping.xml" relativeToChangelogFile="true" />
+    <include file="parts/0176_add_capitalized_income_amortization_transaction.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

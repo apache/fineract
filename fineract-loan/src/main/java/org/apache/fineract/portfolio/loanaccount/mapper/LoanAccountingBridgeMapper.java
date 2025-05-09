@@ -55,12 +55,14 @@ public class LoanAccountingBridgeMapper {
         AccountingBridgeDataDTO beforeChargeOff = new AccountingBridgeDataDTO(loan.getId(), loan.productId(), loan.getOfficeId(),
                 currencyCode, loan.getSummary().getTotalInterestCharged(), loan.isCashBasedAccountingEnabledOnLoanProduct(),
                 loan.isUpfrontAccrualAccountingEnabledOnLoanProduct(), loan.isPeriodicAccrualAccountingEnabledOnLoanProduct(),
-                isAccountTransfer, false, loan.isFraud(), loan.fetchChargeOffReasonId(), newLoanTransactionsBeforeChargeOff);
+                isAccountTransfer, false, loan.isFraud(), loan.fetchChargeOffReasonId(), loan.isClosedWrittenOff(),
+                newLoanTransactionsBeforeChargeOff);
 
         AccountingBridgeDataDTO afterChargeOff = new AccountingBridgeDataDTO(loan.getId(), loan.productId(), loan.getOfficeId(),
                 currencyCode, loan.getSummary().getTotalInterestCharged(), loan.isCashBasedAccountingEnabledOnLoanProduct(),
                 loan.isUpfrontAccrualAccountingEnabledOnLoanProduct(), loan.isPeriodicAccrualAccountingEnabledOnLoanProduct(),
-                isAccountTransfer, true, loan.isFraud(), loan.fetchChargeOffReasonId(), newLoanTransactionsAfterChargeOff);
+                isAccountTransfer, true, loan.isFraud(), loan.fetchChargeOffReasonId(), loan.isClosedWrittenOff(),
+                newLoanTransactionsAfterChargeOff);
 
         List<AccountingBridgeDataDTO> result = new ArrayList<>();
         result.add(beforeChargeOff);
@@ -83,7 +85,8 @@ public class LoanAccountingBridgeMapper {
         return new AccountingBridgeDataDTO(loan.getId(), loan.productId(), loan.getOfficeId(), currencyCode,
                 loan.getSummary().getTotalInterestCharged(), loan.isCashBasedAccountingEnabledOnLoanProduct(),
                 loan.isUpfrontAccrualAccountingEnabledOnLoanProduct(), loan.isPeriodicAccrualAccountingEnabledOnLoanProduct(),
-                isAccountTransfer, loan.isChargedOff(), loan.isFraud(), loan.fetchChargeOffReasonId(), newLoanTransactions);
+                isAccountTransfer, loan.isChargedOff(), loan.isFraud(), loan.fetchChargeOffReasonId(), loan.isClosedWrittenOff(),
+                newLoanTransactions);
     }
 
     public AccountingBridgeLoanTransactionDTO mapToLoanTransactionData(final LoanTransaction transaction, final String currencyCode) {
