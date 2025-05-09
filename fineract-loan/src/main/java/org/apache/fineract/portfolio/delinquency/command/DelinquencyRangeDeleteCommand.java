@@ -16,31 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.command.core;
+package org.apache.fineract.portfolio.delinquency.command;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.OffsetDateTime;
-import java.util.UUID;
 import lombok.Data;
-import lombok.experimental.FieldNameConstants;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeDeleteRequest;
 
 @Data
-@FieldNameConstants
-public class Command<T> implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
-
-    private UUID id;
-
-    private OffsetDateTime createdAt;
-
-    private String tenantId;
-
-    private String username;
-
-    private T payload;
-
-    private String idempotencyKey;
-}
+@EqualsAndHashCode(callSuper = true)
+public class DelinquencyRangeDeleteCommand extends Command<DelinquencyRangeDeleteRequest> {}

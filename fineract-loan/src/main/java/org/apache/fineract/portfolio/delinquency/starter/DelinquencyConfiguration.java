@@ -38,8 +38,6 @@ import org.apache.fineract.portfolio.delinquency.service.DelinquencyWritePlatfor
 import org.apache.fineract.portfolio.delinquency.service.LoanDelinquencyDomainService;
 import org.apache.fineract.portfolio.delinquency.service.LoanDelinquencyDomainServiceImpl;
 import org.apache.fineract.portfolio.delinquency.validator.DelinquencyActionParseAndValidator;
-import org.apache.fineract.portfolio.delinquency.validator.DelinquencyBucketParseAndValidator;
-import org.apache.fineract.portfolio.delinquency.validator.DelinquencyRangeParseAndValidator;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionReadService;
@@ -69,8 +67,7 @@ public class DelinquencyConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(DelinquencyWritePlatformService.class)
-    public DelinquencyWritePlatformService delinquencyWritePlatformService(DelinquencyBucketParseAndValidator dataValidatorBucket,
-            DelinquencyRangeParseAndValidator dataValidatorRange, DelinquencyRangeRepository repositoryRange,
+    public DelinquencyWritePlatformService delinquencyWritePlatformService(DelinquencyRangeRepository repositoryRange,
             DelinquencyBucketRepository repositoryBucket, DelinquencyBucketMappingsRepository repositoryBucketMappings,
             LoanDelinquencyTagHistoryRepository loanDelinquencyTagRepository, LoanRepositoryWrapper loanRepository,
             LoanProductRepository loanProductRepository, BusinessEventNotifierService businessEventNotifierService,
@@ -80,8 +77,8 @@ public class DelinquencyConfiguration {
             DelinquencyActionParseAndValidator delinquencyActionParseAndValidator,
             DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper,
             DelinquencyWritePlatformServiceHelper delinquencyWritePlatformServiceHelper) {
-        return new DelinquencyWritePlatformServiceImpl(dataValidatorBucket, dataValidatorRange, repositoryRange, repositoryBucket,
-                repositoryBucketMappings, loanDelinquencyTagRepository, loanRepository, loanProductRepository, loanDelinquencyDomainService,
+        return new DelinquencyWritePlatformServiceImpl(repositoryRange, repositoryBucket, repositoryBucketMappings,
+                loanDelinquencyTagRepository, loanRepository, loanProductRepository, loanDelinquencyDomainService,
                 loanInstallmentDelinquencyTagRepository, delinquencyReadPlatformService, loanDelinquencyActionRepository,
                 delinquencyActionParseAndValidator, delinquencyEffectivePauseHelper, businessEventNotifierService,
                 delinquencyWritePlatformServiceHelper);

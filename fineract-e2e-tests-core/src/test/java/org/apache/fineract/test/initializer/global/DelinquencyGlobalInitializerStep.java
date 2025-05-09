@@ -23,8 +23,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.client.models.DelinquencyBucketRequest;
-import org.apache.fineract.client.models.DelinquencyRangeRequest;
+import org.apache.fineract.client.models.DelinquencyBucketCreateRequest;
+import org.apache.fineract.client.models.DelinquencyRangeCreateRequest;
 import org.apache.fineract.client.services.DelinquencyRangeAndBucketsManagementApi;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -38,6 +38,7 @@ public class DelinquencyGlobalInitializerStep implements FineractGlobalInitializ
     public static final String DEFAULT_LOCALE = "en";
     public static final List<Integer> DEFAULT_DELINQUENCY_RANGES = Arrays.asList(1, 3, 30, 60, 90, 120, 150, 180, 240);
     public static final String DEFAULT_DELINQUENCY_BUCKET_NAME = "Default delinquency bucket";
+    public static final String IDEMPOTENCY_KEY_DEFAULT = "";
 
     private final DelinquencyRangeAndBucketsManagementApi delinquencyApi;
 
@@ -49,7 +50,7 @@ public class DelinquencyGlobalInitializerStep implements FineractGlobalInitializ
 
     public void setDefaultDelinquencyRanges() throws IOException {
         for (int i = 0; i < DEFAULT_DELINQUENCY_RANGES.size() - 1; i++) {
-            DelinquencyRangeRequest postDelinquencyRangeRequest = new DelinquencyRangeRequest();
+            DelinquencyRangeCreateRequest postDelinquencyRangeRequest = new DelinquencyRangeCreateRequest();
             postDelinquencyRangeRequest.classification("Delinquency range " + DEFAULT_DELINQUENCY_RANGES.get(i).toString());
             postDelinquencyRangeRequest.locale(DEFAULT_LOCALE);
             if (DEFAULT_DELINQUENCY_RANGES.get(i) == 1) {
@@ -60,16 +61,16 @@ public class DelinquencyGlobalInitializerStep implements FineractGlobalInitializ
                 postDelinquencyRangeRequest.maximumAgeDays(DEFAULT_DELINQUENCY_RANGES.get(i + 1));
             }
 
-            delinquencyApi.createDelinquencyRange(postDelinquencyRangeRequest).execute();
+            delinquencyApi.createDelinquencyRange(postDelinquencyRangeRequest, IDEMPOTENCY_KEY_DEFAULT).execute();
         }
 
-        DelinquencyRangeRequest lastRange = new DelinquencyRangeRequest();
+        DelinquencyRangeCreateRequest lastRange = new DelinquencyRangeCreateRequest();
         lastRange.classification("Delinquency range " + DEFAULT_DELINQUENCY_RANGES.get(DEFAULT_DELINQUENCY_RANGES.size() - 1).toString());
         lastRange.locale(DEFAULT_LOCALE);
         lastRange.minimumAgeDays(DEFAULT_DELINQUENCY_RANGES.get(DEFAULT_DELINQUENCY_RANGES.size() - 1) + 1);
         lastRange.maximumAgeDays(null);
 
-        delinquencyApi.createDelinquencyRange(lastRange).execute();
+        delinquencyApi.createDelinquencyRange(lastRange, IDEMPOTENCY_KEY_DEFAULT).execute();
     }
 
     public void setDefaultDelinquencyBucket() throws IOException {
@@ -80,10 +81,10 @@ public class DelinquencyGlobalInitializerStep implements FineractGlobalInitializ
         }
         rangesNr.add((long) DEFAULT_DELINQUENCY_RANGES.size());
 
-        DelinquencyBucketRequest postDelinquencyBucketRequest = new DelinquencyBucketRequest();
+        DelinquencyBucketCreateRequest postDelinquencyBucketRequest = new DelinquencyBucketCreateRequest();
         postDelinquencyBucketRequest.name(DEFAULT_DELINQUENCY_BUCKET_NAME);
         postDelinquencyBucketRequest.ranges(rangesNr);
 
-        delinquencyApi.createDelinquencyBucket(postDelinquencyBucketRequest).execute();
+        delinquencyApi.createDelinquencyBucket(postDelinquencyBucketRequest, IDEMPOTENCY_KEY_DEFAULT).execute();
     }
 }

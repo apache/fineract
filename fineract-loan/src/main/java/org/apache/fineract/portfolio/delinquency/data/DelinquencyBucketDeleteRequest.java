@@ -16,24 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.delinquency.api;
+package org.apache.fineract.portfolio.delinquency.data;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.Serial;
 import java.io.Serializable;
-import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Setter
-@Getter
+@Data
 @NoArgsConstructor
-public class DelinquencyRangeRequest implements Serializable {
+@AllArgsConstructor
+public class DelinquencyBucketDeleteRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private String classification;
-    private Integer minimumAgeDays;
-    private Integer maximumAgeDays;
-    private String locale;
+    @Schema(example = "1")
+    private Long resourceId;
+
 }

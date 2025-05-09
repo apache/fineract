@@ -18,31 +18,35 @@
  */
 package org.apache.fineract.portfolio.delinquency.data;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.PositiveOrZero;
+import java.io.Serial;
 import java.io.Serializable;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
-@ToString
-@AllArgsConstructor
+@Builder
+@Data
 @NoArgsConstructor
-@Getter
-@Setter
-public class DelinquencyRangeData implements Serializable {
+@AllArgsConstructor
+public class DelinquencyRangeCreateRequest implements Serializable {
 
-    private Long id;
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    @NotEmpty(message = "{org.apache.fineract.portfolio.delinquency.data.delinquency-range-request.classification.not-empty}")
     private String classification;
+
+    @NotEmpty(message = "{org.apache.fineract.portfolio.delinquency.data.delinquency-range-request.minimumAgeDays.not-empty}")
+    @PositiveOrZero(message = "{org.apache.fineract.portfolio.delinquency.data.delinquency-range-request.minimumagedays.positive}")
     private Integer minimumAgeDays;
+
+    @PositiveOrZero(message = "{org.apache.fineract.portfolio.delinquency.data.delinquency-range-request.maximumagedays.positive}")
     private Integer maximumAgeDays;
 
-    public static DelinquencyRangeData instance(String classification, Integer minimumAgeDays, Integer maximumAgeDays) {
-        return new DelinquencyRangeData(null, classification, minimumAgeDays, maximumAgeDays);
-    }
-
-    public static DelinquencyRangeData reference(Long id) {
-        return new DelinquencyRangeData(id, "", 0, 0);
-    }
+    @NotEmpty(message = "{org.apache.fineract.portfolio.delinquency.data.delinquency-range-request.locale.not-empty}")
+    private String locale;
 
 }

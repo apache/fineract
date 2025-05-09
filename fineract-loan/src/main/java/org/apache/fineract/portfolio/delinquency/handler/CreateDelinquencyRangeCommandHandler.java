@@ -19,10 +19,11 @@
 package org.apache.fineract.portfolio.delinquency.handler;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
 import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeCreateRequest;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeCreateResponse;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyWritePlatformService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,13 +31,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @CommandType(entity = "DELINQUENCY_RANGE", action = "CREATE")
-public class CreateDelinquencyRangeCommandHandler implements NewCommandSourceHandler {
+public class CreateDelinquencyRangeCommandHandler implements CommandHandler<DelinquencyRangeCreateRequest, DelinquencyRangeCreateResponse> {
 
     private final DelinquencyWritePlatformService writePlatformService;
 
     @Transactional
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+    public DelinquencyRangeCreateResponse handle(Command<DelinquencyRangeCreateRequest> command) {
         return this.writePlatformService.createDelinquencyRange(command);
     }
 }

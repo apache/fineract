@@ -27,61 +27,6 @@ public final class DelinquencyApiResourceSwagger {
 
     private DelinquencyApiResourceSwagger() {}
 
-    @Schema(description = "PostDelinquencyRangeResponse")
-    public static final class PostDelinquencyRangeResponse {
-
-        private PostDelinquencyRangeResponse() {}
-
-        @Schema(example = "1")
-        public Long resourceId;
-    }
-
-    @Schema(description = "PutDelinquencyRangeResponse")
-    public static final class PutDelinquencyRangeResponse {
-
-        private PutDelinquencyRangeResponse() {}
-
-        @Schema(example = "1")
-        public Long resourceId;
-        public DelinquencyRangeRequest changes;
-    }
-
-    @Schema(description = "DeleteDelinquencyRangeResponse")
-    public static final class DeleteDelinquencyRangeResponse {
-
-        private DeleteDelinquencyRangeResponse() {}
-
-        @Schema(example = "1")
-        public Long resourceId;
-    }
-
-    @Schema(description = "PostDelinquencyBucketResponse")
-    public static final class PostDelinquencyBucketResponse {
-
-        private PostDelinquencyBucketResponse() {}
-
-        @Schema(example = "1")
-        public Long resourceId;
-    }
-
-    @Schema(description = "PutDelinquencyBucketResponse")
-    public static final class PutDelinquencyBucketResponse {
-
-        private PutDelinquencyBucketResponse() {}
-
-        @Schema(example = "1")
-        public Long resourceId;
-    }
-
-    @Schema(description = "DeleteDelinquencyBucketResponse")
-    public static final class DeleteDelinquencyBucketResponse {
-
-        private DeleteDelinquencyBucketResponse() {}
-
-        @Schema(example = "1")
-        public Long resourceId;
-    }
-
     @Schema(description = "GetDelinquencyTagHistoryResponse")
     public static final class GetDelinquencyTagHistoryResponse {
 

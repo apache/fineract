@@ -19,10 +19,11 @@
 package org.apache.fineract.portfolio.delinquency.handler;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
 import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketCreateRequest;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketCreateResponse;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyWritePlatformService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,13 +31,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @CommandType(entity = "DELINQUENCY_BUCKET", action = "CREATE")
-public class CreateDelinquencyBucketCommandHandler implements NewCommandSourceHandler {
+public class CreateDelinquencyBucketCommandHandler
+        implements CommandHandler<DelinquencyBucketCreateRequest, DelinquencyBucketCreateResponse> {
 
     private final DelinquencyWritePlatformService writePlatformService;
 
     @Transactional
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+    public DelinquencyBucketCreateResponse handle(Command<DelinquencyBucketCreateRequest> command) {
         return this.writePlatformService.createDelinquencyBucket(command);
     }
 }

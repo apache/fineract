@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -35,8 +36,20 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAccount
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanDelinquencyRangeChangeBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.delinquency.api.DelinquencyApiConstants;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketCreateRequest;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketCreateResponse;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketDeleteRequest;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketDeleteResponse;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketUpdateRequest;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketUpdateResponse;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeCreateRequest;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeCreateResponse;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeDeleteRequest;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeDeleteResponse;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeUpdateRequest;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeUpdateResponse;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketMappings;
@@ -53,8 +66,6 @@ import org.apache.fineract.portfolio.delinquency.exception.DelinquencyBucketAges
 import org.apache.fineract.portfolio.delinquency.exception.DelinquencyRangeInvalidAgesException;
 import org.apache.fineract.portfolio.delinquency.helper.DelinquencyEffectivePauseHelper;
 import org.apache.fineract.portfolio.delinquency.validator.DelinquencyActionParseAndValidator;
-import org.apache.fineract.portfolio.delinquency.validator.DelinquencyBucketParseAndValidator;
-import org.apache.fineract.portfolio.delinquency.validator.DelinquencyRangeParseAndValidator;
 import org.apache.fineract.portfolio.delinquency.validator.LoanDelinquencyActionData;
 import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanDelinquencyData;
@@ -68,8 +79,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlatformService {
 
-    private final DelinquencyBucketParseAndValidator dataValidatorBucket;
-    private final DelinquencyRangeParseAndValidator dataValidatorRange;
     private final DelinquencyRangeRepository repositoryRange;
     private final DelinquencyBucketRepository repositoryBucket;
     private final DelinquencyBucketMappingsRepository repositoryBucketMappings;
@@ -86,26 +95,29 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
     private final DelinquencyWritePlatformServiceHelper delinquencyHelper;
 
     @Override
-    public CommandProcessingResult createDelinquencyRange(JsonCommand command) {
-        DelinquencyRangeData data = dataValidatorRange.validateAndParseUpdate(command);
-        Map<String, Object> changes = new HashMap<>();
-        DelinquencyRange delinquencyRange = createDelinquencyRange(data, changes);
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(delinquencyRange.getId()).with(changes)
-                .build();
+    public DelinquencyRangeCreateResponse createDelinquencyRange(Command<DelinquencyRangeCreateRequest> command) {
+        DelinquencyRangeData data = DelinquencyRangeData.instance(command.getPayload().getClassification(),
+                command.getPayload().getMinimumAgeDays(), command.getPayload().getMaximumAgeDays());
+        DelinquencyRange delinquencyRange = createDelinquencyRange(data);
+
+        return new DelinquencyRangeCreateResponse(delinquencyRange.getId());
     }
 
     @Override
-    public CommandProcessingResult updateDelinquencyRange(Long delinquencyRangeId, JsonCommand command) {
-        DelinquencyRangeData data = dataValidatorRange.validateAndParseUpdate(command);
+    public DelinquencyRangeUpdateResponse updateDelinquencyRange(Command<DelinquencyRangeUpdateRequest> command) {
+        Long delinquencyRangeId = command.getPayload().getId();
+        DelinquencyRangeData data = DelinquencyRangeData.instance(command.getPayload().getClassification(),
+                command.getPayload().getMinimumAgeDays(), command.getPayload().getMaximumAgeDays());
+
         DelinquencyRange delinquencyRange = this.repositoryRange.getReferenceById(delinquencyRangeId);
-        Map<String, Object> changes = new HashMap<>();
+        DelinquencyRangeData changes = new DelinquencyRangeData();
         delinquencyRange = updateDelinquencyRange(delinquencyRange, data, changes);
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(delinquencyRange.getId()).with(changes)
-                .build();
+        return new DelinquencyRangeUpdateResponse(delinquencyRange.getId(), changes);
     }
 
     @Override
-    public CommandProcessingResult deleteDelinquencyRange(Long delinquencyRangeId, JsonCommand command) {
+    public DelinquencyRangeDeleteResponse deleteDelinquencyRange(Command<DelinquencyRangeDeleteRequest> command) {
+        Long delinquencyRangeId = command.getPayload().getResourceId();
         final DelinquencyRange delinquencyRange = repositoryRange.getReferenceById(delinquencyRangeId);
         if (delinquencyRange != null) {
             final Long delinquencyRangeLinked = this.loanDelinquencyTagRepository.countByDelinquencyRange(delinquencyRange);
@@ -114,33 +126,38 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
                         "Data integrity issue with resource: " + delinquencyRange.getId());
             }
             repositoryRange.delete(delinquencyRange);
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(delinquencyRange.getId()).build();
         }
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(delinquencyRangeId).build();
+        return new DelinquencyRangeDeleteResponse(delinquencyRangeId);
     }
 
     @Override
-    public CommandProcessingResult createDelinquencyBucket(JsonCommand command) {
-        DelinquencyBucketData data = dataValidatorBucket.validateAndParseUpdate(command);
-        Map<String, Object> changes = new HashMap<>();
-        DelinquencyBucket delinquencyBucket = createDelinquencyBucket(data, changes);
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(delinquencyBucket.getId()).with(changes)
-                .build();
+    public DelinquencyBucketCreateResponse createDelinquencyBucket(Command<DelinquencyBucketCreateRequest> command) {
+        ArrayList<DelinquencyRangeData> ranges = new ArrayList<>();
+        command.getPayload().getRanges().stream().forEach(e -> ranges.add(DelinquencyRangeData.reference(e)));
+        DelinquencyBucketData data = new DelinquencyBucketData(null, command.getPayload().getName(), ranges);
+        DelinquencyBucket delinquencyBucket = createDelinquencyBucket(data);
+        return new DelinquencyBucketCreateResponse(delinquencyBucket.getId());
     }
 
     @Override
-    public CommandProcessingResult updateDelinquencyBucket(Long delinquencyBucketId, JsonCommand command) {
-        DelinquencyBucketData data = dataValidatorBucket.validateAndParseUpdate(command);
+    public DelinquencyBucketUpdateResponse updateDelinquencyBucket(Command<DelinquencyBucketUpdateRequest> command) {
+        Long delinquencyBucketId = command.getPayload().getId();
+
+        ArrayList<DelinquencyRangeData> ranges = new ArrayList<>();
+        command.getPayload().getRanges().stream().forEach(e -> ranges.add(DelinquencyRangeData.reference(e)));
+        DelinquencyBucketData data = new DelinquencyBucketData(delinquencyBucketId, command.getPayload().getName(), ranges);
         DelinquencyBucket delinquencyBucket = this.repositoryBucket.getReferenceById(delinquencyBucketId);
 
         Map<String, Object> changes = new HashMap<>();
         delinquencyBucket = updateDelinquencyBucket(delinquencyBucket, data, changes);
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(delinquencyBucket.getId()).with(changes)
-                .build();
+
+        return new DelinquencyBucketUpdateResponse(delinquencyBucket.getId(), changes);
     }
 
     @Override
-    public CommandProcessingResult deleteDelinquencyBucket(Long delinquencyBucketId, JsonCommand command) {
+    public DelinquencyBucketDeleteResponse deleteDelinquencyBucket(Command<DelinquencyBucketDeleteRequest> command) {
+        Long delinquencyBucketId = command.getPayload().getResourceId();
+
         final DelinquencyBucket delinquencyBucket = repositoryBucket.getReferenceById(delinquencyBucketId);
         if (delinquencyBucket != null) {
             Long delinquencyBucketLinked = this.loanProductRepository.countByDelinquencyBucket(delinquencyBucket);
@@ -150,7 +167,7 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
             }
             repositoryBucket.delete(delinquencyBucket);
         }
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(delinquencyBucketId).build();
+        return new DelinquencyBucketDeleteResponse(delinquencyBucketId);
     }
 
     @Override
@@ -296,7 +313,7 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
         }
     }
 
-    private DelinquencyRange createDelinquencyRange(DelinquencyRangeData data, Map<String, Object> changes) {
+    private DelinquencyRange createDelinquencyRange(DelinquencyRangeData data) {
         Optional<DelinquencyRange> delinquencyRange = repositoryRange.findByClassification(data.getClassification());
 
         if (delinquencyRange.isEmpty()) {
@@ -314,26 +331,30 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
     }
 
     private DelinquencyRange updateDelinquencyRange(DelinquencyRange delinquencyRange, DelinquencyRangeData data,
-            Map<String, Object> changes) {
+            DelinquencyRangeData changes) {
+        boolean isChanged = false;
         if (!data.getClassification().equalsIgnoreCase(delinquencyRange.getClassification())) {
             delinquencyRange.setClassification(data.getClassification());
-            changes.put(DelinquencyApiConstants.CLASSIFICATION_PARAM_NAME, data.getClassification());
+            changes.setClassification(data.getClassification());
+            isChanged = true;
         }
         if (!data.getMinimumAgeDays().equals(delinquencyRange.getMinimumAgeDays())) {
             delinquencyRange.setMinimumAgeDays(data.getMinimumAgeDays());
-            changes.put(DelinquencyApiConstants.MINIMUMAGEDAYS_PARAM_NAME, data.getMinimumAgeDays());
+            changes.setMinimumAgeDays(data.getMinimumAgeDays());
+            isChanged = true;
         }
         if (!data.getMaximumAgeDays().equals(delinquencyRange.getMaximumAgeDays())) {
             delinquencyRange.setMaximumAgeDays(data.getMaximumAgeDays());
-            changes.put(DelinquencyApiConstants.MAXIMUMAGEDAYS_PARAM_NAME, data.getMaximumAgeDays());
+            changes.setMaximumAgeDays(data.getMaximumAgeDays());
+            isChanged = true;
         }
-        if (!changes.isEmpty()) {
+        if (isChanged) {
             delinquencyRange = repositoryRange.saveAndFlush(delinquencyRange);
         }
         return delinquencyRange;
     }
 
-    private DelinquencyBucket createDelinquencyBucket(DelinquencyBucketData data, Map<String, Object> changes) {
+    private DelinquencyBucket createDelinquencyBucket(DelinquencyBucketData data) {
         Optional<DelinquencyBucket> delinquencyBucket = repositoryBucket.findByName(data.getName());
 
         if (delinquencyBucket.isEmpty()) {

@@ -19,10 +19,11 @@
 package org.apache.fineract.portfolio.delinquency.handler;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
 import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketDeleteRequest;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketDeleteResponse;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyWritePlatformService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,13 +31,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @CommandType(entity = "DELINQUENCY_BUCKET", action = "DELETE")
-public class DeleteDelinquencyBucketCommandHandler implements NewCommandSourceHandler {
+public class DeleteDelinquencyBucketCommandHandler
+        implements CommandHandler<DelinquencyBucketDeleteRequest, DelinquencyBucketDeleteResponse> {
 
     private final DelinquencyWritePlatformService writePlatformService;
 
     @Transactional
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.deleteDelinquencyBucket(command.entityId(), command);
+    public DelinquencyBucketDeleteResponse handle(Command<DelinquencyBucketDeleteRequest> command) {
+        return this.writePlatformService.deleteDelinquencyBucket(command);
     }
 }

@@ -16,31 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.command.core;
+package org.apache.fineract.portfolio.delinquency.data;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.OffsetDateTime;
-import java.util.UUID;
+import java.util.Map;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.experimental.FieldNameConstants;
+import lombok.NoArgsConstructor;
 
 @Data
-@FieldNameConstants
-public class Command<T> implements Serializable {
+@NoArgsConstructor
+@AllArgsConstructor
+public class DelinquencyBucketUpdateResponse implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private UUID id;
-
-    private OffsetDateTime createdAt;
-
-    private String tenantId;
-
-    private String username;
-
-    private T payload;
-
-    private String idempotencyKey;
+    @Schema(example = "1")
+    public Long resourceId;
+    public Map<String, Object> changes;
 }

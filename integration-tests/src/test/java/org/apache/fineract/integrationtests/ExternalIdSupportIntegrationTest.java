@@ -43,8 +43,6 @@ import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
-import org.apache.fineract.client.models.PostDelinquencyBucketResponse;
-import org.apache.fineract.client.models.PostDelinquencyRangeResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
@@ -76,6 +74,8 @@ import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyRangesHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketCreateResponse;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeCreateResponse;
 import org.junit.jupiter.api.Test;
 
 public class ExternalIdSupportIntegrationTest extends BaseLoanIntegrationTest {
@@ -838,7 +838,7 @@ public class ExternalIdSupportIntegrationTest extends BaseLoanIntegrationTest {
             ArrayList<Integer> rangeIds = new ArrayList<>();
             // First Range
             String jsonRange = DelinquencyRangesHelper.getAsJSON(1, 3);
-            PostDelinquencyRangeResponse delinquencyRangeResponse = DelinquencyRangesHelper.createDelinquencyRange(requestSpec,
+            DelinquencyRangeCreateResponse delinquencyRangeResponse = DelinquencyRangesHelper.createDelinquencyRange(requestSpec,
                     responseSpec, jsonRange);
             rangeIds.add(Math.toIntExact(delinquencyRangeResponse.getResourceId()));
             jsonRange = DelinquencyRangesHelper.getAsJSON(4, 60);
@@ -851,7 +851,7 @@ public class ExternalIdSupportIntegrationTest extends BaseLoanIntegrationTest {
             rangeIds.add(Math.toIntExact(delinquencyRangeResponse.getResourceId()));
 
             String jsonBucket = DelinquencyBucketsHelper.getAsJSON(rangeIds);
-            PostDelinquencyBucketResponse delinquencyBucketResponse = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec,
+            DelinquencyBucketCreateResponse delinquencyBucketResponse = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec,
                     responseSpec, jsonBucket);
 
             final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()

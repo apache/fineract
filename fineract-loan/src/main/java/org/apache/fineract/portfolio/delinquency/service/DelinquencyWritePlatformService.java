@@ -19,25 +19,38 @@
 package org.apache.fineract.portfolio.delinquency.service;
 
 import java.util.List;
+import org.apache.fineract.command.core.Command;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketCreateRequest;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketCreateResponse;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketDeleteRequest;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketDeleteResponse;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketUpdateRequest;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketUpdateResponse;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeCreateRequest;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeCreateResponse;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeDeleteRequest;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeDeleteResponse;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeUpdateRequest;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeUpdateResponse;
 import org.apache.fineract.portfolio.delinquency.validator.LoanDelinquencyActionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 
 public interface DelinquencyWritePlatformService {
 
-    CommandProcessingResult createDelinquencyRange(JsonCommand command);
+    DelinquencyRangeCreateResponse createDelinquencyRange(Command<DelinquencyRangeCreateRequest> command);
 
-    CommandProcessingResult updateDelinquencyRange(Long delinquencyRangeId, JsonCommand command);
+    DelinquencyRangeUpdateResponse updateDelinquencyRange(Command<DelinquencyRangeUpdateRequest> command);
 
-    CommandProcessingResult deleteDelinquencyRange(Long delinquencyRangeId, JsonCommand command);
+    DelinquencyRangeDeleteResponse deleteDelinquencyRange(Command<DelinquencyRangeDeleteRequest> command);
 
-    CommandProcessingResult createDelinquencyBucket(JsonCommand command);
+    DelinquencyBucketCreateResponse createDelinquencyBucket(Command<DelinquencyBucketCreateRequest> command);
 
-    CommandProcessingResult updateDelinquencyBucket(Long delinquencyBucketId, JsonCommand command);
+    DelinquencyBucketUpdateResponse updateDelinquencyBucket(Command<DelinquencyBucketUpdateRequest> command);
 
-    CommandProcessingResult deleteDelinquencyBucket(Long delinquencyBucketId, JsonCommand command);
+    DelinquencyBucketDeleteResponse deleteDelinquencyBucket(Command<DelinquencyBucketDeleteRequest> command);
 
     CommandProcessingResult applyDelinquencyTagToLoan(Long loanId, JsonCommand command);
 

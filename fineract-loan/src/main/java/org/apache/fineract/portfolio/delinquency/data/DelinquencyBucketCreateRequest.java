@@ -16,31 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.command.core;
+package org.apache.fineract.portfolio.delinquency.data;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.OffsetDateTime;
-import java.util.UUID;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.experimental.FieldNameConstants;
+import lombok.NoArgsConstructor;
 
+@Builder
 @Data
-@FieldNameConstants
-public class Command<T> implements Serializable {
+@NoArgsConstructor
+@AllArgsConstructor
+public class DelinquencyBucketCreateRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private UUID id;
+    @NotEmpty(message = "{org.apache.fineract.portfolio.delinquency.data.delinquency-bucket-request.name.not-empty}")
+    private String name;
 
-    private OffsetDateTime createdAt;
+    @NotEmpty(message = "{org.apache.fineract.portfolio.delinquency.data.delinquency-bucket-request.ranges.not-empty}")
+    private List<@NotNull Long> ranges;
 
-    private String tenantId;
-
-    private String username;
-
-    private T payload;
-
-    private String idempotencyKey;
 }

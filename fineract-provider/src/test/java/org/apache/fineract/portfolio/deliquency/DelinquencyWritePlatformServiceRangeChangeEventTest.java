@@ -68,8 +68,6 @@ import org.apache.fineract.portfolio.delinquency.service.DelinquencyWritePlatfor
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyWritePlatformServiceImpl;
 import org.apache.fineract.portfolio.delinquency.service.LoanDelinquencyDomainService;
 import org.apache.fineract.portfolio.delinquency.validator.DelinquencyActionParseAndValidator;
-import org.apache.fineract.portfolio.delinquency.validator.DelinquencyBucketParseAndValidator;
-import org.apache.fineract.portfolio.delinquency.validator.DelinquencyRangeParseAndValidator;
 import org.apache.fineract.portfolio.delinquency.validator.LoanDelinquencyActionData;
 import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanDelinquencyData;
@@ -92,10 +90,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class DelinquencyWritePlatformServiceRangeChangeEventTest {
 
-    @Mock
-    private DelinquencyBucketParseAndValidator dataValidatorBucket;
-    @Mock
-    private DelinquencyRangeParseAndValidator dataValidatorRange;
     @Mock
     private DelinquencyRangeRepository repositoryRange;
     @Mock
@@ -136,8 +130,8 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
 
         delinquencyWritePlatformServiceHelper = Mockito.spy(new DelinquencyWritePlatformServiceHelper(businessEventNotifierService,
                 loanDelinquencyTagRepository, repositoryRange, loanInstallmentDelinquencyTagRepository));
-        underTest = new DelinquencyWritePlatformServiceImpl(dataValidatorBucket, dataValidatorRange, repositoryRange, repositoryBucket,
-                repositoryBucketMappings, loanDelinquencyTagRepository, loanRepository, loanProductRepository, loanDelinquencyDomainService,
+        underTest = new DelinquencyWritePlatformServiceImpl(repositoryRange, repositoryBucket, repositoryBucketMappings,
+                loanDelinquencyTagRepository, loanRepository, loanProductRepository, loanDelinquencyDomainService,
                 loanInstallmentDelinquencyTagRepository, delinquencyReadPlatformService, loanDelinquencyActionRepository,
                 delinquencyActionParseAndValidator, delinquencyEffectivePauseHelper, businessEventNotifierService,
                 delinquencyWritePlatformServiceHelper);
