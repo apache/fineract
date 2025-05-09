@@ -71,7 +71,7 @@ public class SavingsApiConstants {
     public static final String dateFormatParamName = "dateFormat";
     public static final String monthDayFormatParamName = "monthDayFormat";
     public static final String staffIdParamName = "savingsOfficerId";
-
+    public static final String accountIdParamName = "accountId";
     // savings product and account parameters
     public static final String idParamName = "id";
     public static final String isGSIM = "isGSIM";
@@ -170,6 +170,9 @@ public class SavingsApiConstants {
     public static final String amountOutstandingParamName = "amountOutstanding";
     public static final String amountOrPercentageParamName = "amountOrPercentage";
     public static final String amountParamName = "amount";
+    public static final String isManualTransaction = "isManualTransaction";
+    public static final String lienTransaction = "lienTransaction";
+    public static final String chargesPaidByData = "chargesPaidByData";
     public static final String amountPaidParamName = "amountPaid";
     public static final String chargeOptionsParamName = "chargeOptions";
     public static final String chargePaymentModeParamName = "chargePaymentMode";
