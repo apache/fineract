@@ -16,16 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.external.service.serialization.mapper.generic;
+package org.apache.fineract.organisation.monetary.data;
 
-import org.apache.fineract.avro.generic.v1.CurrencyDataV1;
-import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroMapperConfig;
-import org.apache.fineract.organisation.monetary.data.CurrencyData;
-import org.mapstruct.Mapper;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.FieldNameConstants;
 
-@Mapper(config = AvroMapperConfig.class)
-public interface CurrencyDataMapper {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldNameConstants
+public class CurrencyUpdateDto {
 
-    CurrencyDataV1 map(CurrencyData source);
-
+    private List<String> currencies;
 }

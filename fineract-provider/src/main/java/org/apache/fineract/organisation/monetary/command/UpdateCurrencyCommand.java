@@ -16,26 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.monetary.handler;
+package org.apache.fineract.organisation.monetary.command;
 
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.apache.fineract.command.core.Command;
-import org.apache.fineract.command.core.CommandHandler;
 import org.apache.fineract.organisation.monetary.data.CurrencyUpdateDto;
-import org.apache.fineract.organisation.monetary.data.CurrencyUpdateResultDto;
-import org.apache.fineract.organisation.monetary.service.CurrencyWritePlatformService;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-@Component
-@RequiredArgsConstructor
-public class UpdateCurrencyCommandHandler implements CommandHandler<CurrencyUpdateDto, CurrencyUpdateResultDto> {
-
-    private final CurrencyWritePlatformService writePlatformService;
-
-    @Override
-    @Transactional
-    public CurrencyUpdateResultDto handle(Command<CurrencyUpdateDto> command) {
-        return writePlatformService.updateAllowedCurrencies(command.getPayload());
-    }
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class UpdateCurrencyCommand extends Command<CurrencyUpdateDto> {}

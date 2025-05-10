@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.client.models.CurrencyRequest;
-import org.apache.fineract.client.models.PutCurrenciesResponse;
+import org.apache.fineract.client.models.CurrencyResponse;
 import org.apache.fineract.client.services.CurrencyApi;
 import org.apache.fineract.test.support.TestContext;
 import org.apache.fineract.test.support.TestContextKey;
@@ -43,8 +43,7 @@ public class CurrencyGlobalInitializerStep implements FineractGlobalInitializerS
     @Override
     public void initialize() throws Exception {
         CurrencyRequest currencyRequest = new CurrencyRequest();
-        Response<PutCurrenciesResponse> putCurrenciesResponse = currencyApi.updateCurrencies(currencyRequest.currencies(CURRENCIES))
-                .execute();
+        Response<CurrencyResponse> putCurrenciesResponse = currencyApi.updateCurrencies(currencyRequest.currencies(CURRENCIES)).execute();
         TestContext.INSTANCE.set(TestContextKey.PUT_CURRENCIES_RESPONSE, putCurrenciesResponse);
     }
 }

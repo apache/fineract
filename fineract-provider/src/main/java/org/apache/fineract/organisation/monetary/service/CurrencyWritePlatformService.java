@@ -18,11 +18,11 @@
  */
 package org.apache.fineract.organisation.monetary.service;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.organisation.monetary.data.CurrencyUpdateDto;
+import org.apache.fineract.organisation.monetary.data.CurrencyUpdateResultDto;
 
 public interface CurrencyWritePlatformService {
 
-    CommandProcessingResult updateAllowedCurrencies(JsonCommand command);
+    CurrencyUpdateResultDto updateAllowedCurrencies(CurrencyUpdateDto command);
 
 }

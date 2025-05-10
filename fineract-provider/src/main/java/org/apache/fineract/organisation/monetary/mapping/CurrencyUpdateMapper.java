@@ -16,26 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.monetary.handler;
+package org.apache.fineract.organisation.monetary.mapping;
 
-import lombok.RequiredArgsConstructor;
-import org.apache.fineract.command.core.Command;
-import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroMapperConfig;
+import org.apache.fineract.organisation.monetary.data.CurrencyRequest;
+import org.apache.fineract.organisation.monetary.data.CurrencyResponse;
 import org.apache.fineract.organisation.monetary.data.CurrencyUpdateDto;
 import org.apache.fineract.organisation.monetary.data.CurrencyUpdateResultDto;
-import org.apache.fineract.organisation.monetary.service.CurrencyWritePlatformService;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-@Component
-@RequiredArgsConstructor
-public class UpdateCurrencyCommandHandler implements CommandHandler<CurrencyUpdateDto, CurrencyUpdateResultDto> {
+@Mapper(config = AvroMapperConfig.class)
+public interface CurrencyUpdateMapper {
 
-    private final CurrencyWritePlatformService writePlatformService;
+    CurrencyUpdateDto map(CurrencyRequest currencyRequest);
 
-    @Override
-    @Transactional
-    public CurrencyUpdateResultDto handle(Command<CurrencyUpdateDto> command) {
-        return writePlatformService.updateAllowedCurrencies(command.getPayload());
-    }
+    @Mapping(target = "changes.currencies", source = "currencies")
+    CurrencyResponse map(CurrencyUpdateResultDto currencyUpdateResultDto);
 }

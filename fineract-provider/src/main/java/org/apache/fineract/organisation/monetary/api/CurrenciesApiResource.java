@@ -19,28 +19,26 @@
 package org.apache.fineract.organisation.monetary.api;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import java.util.UUID;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.service.CommandWrapperBuilder;
-import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.command.core.CommandPipeline;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.organisation.monetary.command.UpdateCurrencyCommand;
 import org.apache.fineract.organisation.monetary.data.ApplicationCurrencyConfigurationData;
-import org.apache.fineract.organisation.monetary.data.request.CurrencyRequest;
+import org.apache.fineract.organisation.monetary.data.CurrencyRequest;
+import org.apache.fineract.organisation.monetary.data.CurrencyResponse;
+import org.apache.fineract.organisation.monetary.data.CurrencyUpdateResultDto;
+import org.apache.fineract.organisation.monetary.mapping.CurrencyUpdateMapper;
 import org.apache.fineract.organisation.monetary.service.OrganisationCurrencyReadPlatformService;
 import org.springframework.stereotype.Component;
 
@@ -50,12 +48,9 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CurrenciesApiResource {
 
-    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "CURRENCY";
-
-    private final PlatformSecurityContext context;
     private final OrganisationCurrencyReadPlatformService readPlatformService;
-    private final DefaultToApiJsonSerializer<ApplicationCurrencyConfigurationData> toApiJsonSerializer;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final CommandPipeline commandPipeline;
+    private final CurrencyUpdateMapper currencyUpdateMapper;
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -63,9 +58,6 @@ public class CurrenciesApiResource {
     @Operation(summary = "Retrieve Currency Configuration", description = "Returns the list of currencies permitted for use AND the list of currencies not selected (but available for selection).\n"
             + "\n" + "Example Requests:\n" + "\n" + "currencies\n" + "\n" + "\n" + "currencies?fields=selectedCurrencyOptions")
     public ApplicationCurrencyConfigurationData retrieveCurrencies() {
-
-        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
-
         return this.readPlatformService.retrieveCurrencyConfiguration();
     }
 
@@ -73,16 +65,13 @@ public class CurrenciesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update Currency Configuration", description = "Updates the list of currencies permitted for use.")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CurrencyRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CurrenciesApiResourceSwagger.PutCurrenciesResponse.class))) })
-    public CommandProcessingResult updateCurrencies(@Parameter(hidden = true) CurrencyRequest currencyRequest) {
+    public CurrencyResponse updateCurrencies(@HeaderParam("Idempotency-Key") @Valid CurrencyRequest currencyRequest) {
+        var commandUpdate = new UpdateCurrencyCommand();
+        commandUpdate.setId(UUID.randomUUID());
+        commandUpdate.setCreatedAt(DateUtils.getAuditOffsetDateTime());
+        commandUpdate.setPayload(currencyUpdateMapper.map(currencyRequest));
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .updateCurrencies() //
-                .withJson(toApiJsonSerializer.serialize(currencyRequest)) //
-                .build();
-
-        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        final Supplier<CurrencyUpdateResultDto> result = commandPipeline.send(commandUpdate);
+        return currencyUpdateMapper.map(result.get());
     }
 }

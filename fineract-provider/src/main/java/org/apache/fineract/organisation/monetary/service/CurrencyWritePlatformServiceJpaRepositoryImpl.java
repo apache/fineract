@@ -18,23 +18,17 @@
  */
 package org.apache.fineract.organisation.monetary.service;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.organisation.monetary.data.CurrencyUpdateDto;
+import org.apache.fineract.organisation.monetary.data.CurrencyUpdateResultDto;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.OrganisationCurrency;
 import org.apache.fineract.organisation.monetary.domain.OrganisationCurrencyRepository;
 import org.apache.fineract.organisation.monetary.exception.CurrencyInUseException;
-import org.apache.fineract.organisation.monetary.serialization.CurrencyCommandFromApiJsonDeserializer;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsProductReadPlatformService;
@@ -43,39 +37,26 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWritePlatformService {
 
-    private final PlatformSecurityContext context;
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
     private final OrganisationCurrencyRepository organisationCurrencyRepository;
-    private final CurrencyCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final LoanProductReadPlatformService loanProductService;
     private final SavingsProductReadPlatformService savingsProductService;
     private final ChargeReadPlatformService chargeService;
 
     @Transactional
     @Override
-    public CommandProcessingResult updateAllowedCurrencies(final JsonCommand command) {
-
-        this.context.authenticatedUser();
-
-        this.fromApiJsonDeserializer.validateForUpdate(command.json());
-
-        final String[] currencies = command.arrayValueOfParameterNamed("currencies");
-
-        final Map<String, Object> changes = new LinkedHashMap<>();
-        final List<String> allowedCurrencyCodes = new ArrayList<>();
+    public CurrencyUpdateResultDto updateAllowedCurrencies(CurrencyUpdateDto currencyUpdateDto) {
+        final List<String> requestCurrencies = currencyUpdateDto.getCurrencies();
         final Set<OrganisationCurrency> allowedCurrencies = new HashSet<>();
-        for (final String currencyCode : currencies) {
-
+        for (final String currencyCode : requestCurrencies) {
             final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currencyCode);
-
             final OrganisationCurrency allowedCurrency = currency.toOrganisationCurrency();
 
-            allowedCurrencyCodes.add(currencyCode);
             allowedCurrencies.add(allowedCurrency);
         }
 
         for (OrganisationCurrency priorCurrency : this.organisationCurrencyRepository.findAll()) {
-            if (!allowedCurrencyCodes.contains(priorCurrency.getCode())) {
+            if (!requestCurrencies.contains(priorCurrency.getCode())) {
                 // Check if it's safe to remove this currency.
                 if (!loanProductService.retrieveAllLoanProductsForCurrency(priorCurrency.getCode()).isEmpty()
                         || !savingsProductService.retrieveAllForCurrency(priorCurrency.getCode()).isEmpty()
@@ -85,14 +66,8 @@ public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWr
             }
         }
 
-        changes.put("currencies", allowedCurrencyCodes.toArray(new String[allowedCurrencyCodes.size()]));
-
         this.organisationCurrencyRepository.deleteAll();
         this.organisationCurrencyRepository.saveAll(allowedCurrencies);
-
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .with(changes) //
-                .build();
+        return new CurrencyUpdateResultDto(requestCurrencies);
     }
 }
