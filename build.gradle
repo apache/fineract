@@ -57,6 +57,7 @@ buildscript {
                 'fineract-api',
                 'fineract-client',
                 'fineract-core',
+                'fineract-command',
                 'fineract-accounting',
                 'fineract-provider',
                 'fineract-investor',
