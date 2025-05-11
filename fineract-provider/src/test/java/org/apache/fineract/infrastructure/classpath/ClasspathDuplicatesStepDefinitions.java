@@ -88,56 +88,82 @@ public class ClasspathDuplicatesStepDefinitions implements En {
     private boolean skipJAR(String jarPath) {
         // ./gradlew test finds classes from the Gradle Wrapper (which don't
         // show up in-IDE), exclude those
-        return jarPath.contains("/.gradle/wrapper/dists/") || jarPath.contains("/JetBrains/");
+        return jarPath.contains("/.gradle/wrapper/dists/") //
+                || jarPath.contains("/JetBrains/"); //
     }
 
     private boolean isHarmlessDuplicate(String resourcePath) {
-        return resourcePath.equals("META-INF/MANIFEST.MF") || resourcePath.equals("META-INF/INDEX.LIST")
-                || resourcePath.equals("META-INF/ORACLE_J.SF") || resourcePath.toUpperCase().startsWith("META-INF/ASL")
-                || resourcePath.toUpperCase().startsWith("META-INF/NOTICE") || resourcePath.toUpperCase().startsWith("META-INF/LICENSE")
-                || resourcePath.toUpperCase().startsWith("META-INF/COPYRIGHT") || resourcePath.toUpperCase().startsWith("LICENSE")
-                || resourcePath.toUpperCase().startsWith("LICENSE/NOTICE")
+        return resourcePath.equals("META-INF/MANIFEST.MF") //
+                || resourcePath.equals("OSGI-INF/MANIFEST.MF") //
+                || resourcePath.equals("META-INF/INDEX.LIST") //
+                || resourcePath.equals("META-INF/ORACLE_J.SF") //
+                || resourcePath.toUpperCase().startsWith("META-INF/ASL") //
+                || resourcePath.toUpperCase().startsWith("META-INF/NOTICE") //
+                || resourcePath.toUpperCase().startsWith("META-INF/LICENSE") //
+                || resourcePath.toUpperCase().startsWith("META-INF/COPYRIGHT") //
+                || resourcePath.toUpperCase().startsWith("LICENSE") //
+                || resourcePath.toUpperCase().startsWith("LICENSE/NOTICE") //
                 // list formerly in ClasspathHellDuplicatesCheckRule (moved here
                 // in INFRAUTILS-52)
-                || resourcePath.endsWith(".txt") || resourcePath.endsWith("LICENSE") || resourcePath.endsWith("license.html")
-                || resourcePath.endsWith("AL2.0") || resourcePath.endsWith("LGPL2.1") || resourcePath.endsWith("about.html")
-                || resourcePath.endsWith("readme.html") || resourcePath.startsWith("META-INF/services")
-                || resourcePath.equals("META-INF/DEPENDENCIES") || resourcePath.equals("META-INF/git.properties")
-                || resourcePath.equals("META-INF/io.netty.versions.properties") || resourcePath.equals("META-INF/jersey-module-version")
-                || resourcePath.startsWith("OSGI-INF/blueprint/")
+                || resourcePath.endsWith(".txt") //
+                || resourcePath.endsWith("LICENSE") //
+                || resourcePath.endsWith("license.html") //
+                || resourcePath.endsWith("AL2.0") //
+                || resourcePath.endsWith("LGPL2.1") //
+                || resourcePath.endsWith("about.html") //
+                || resourcePath.endsWith("readme.html") //
+                || resourcePath.startsWith("META-INF/services") //
+                || resourcePath.equals("META-INF/DEPENDENCIES") //
+                || resourcePath.equals("META-INF/git.properties") //
+                || resourcePath.equals("META-INF/io.netty.versions.properties") //
+                || resourcePath.equals("META-INF/jersey-module-version") //
+                || resourcePath.startsWith("OSGI-INF/blueprint/") //
                 // in Akka's JARs
-                || resourcePath.startsWith("org/opendaylight/blueprint/") || resourcePath.endsWith("reference.conf")
+                || resourcePath.startsWith("org/opendaylight/blueprint/") //
+                || resourcePath.endsWith("reference.conf") //
                 // json-schema-core and json-schema-validator depend on each
                 // other and include these files
-                || resourcePath.equals("draftv4/schema") || resourcePath.equals("draftv3/schema") //
-                || resourcePath.equals("WEB-INF/web.xml") || resourcePath.equals("META-INF/web-fragment.xml")
-                || resourcePath.equals("META-INF/eclipse.inf") || resourcePath.equals("META-INF/ECLIPSE_.SF")
-                || resourcePath.equals("META-INF/ECLIPSE_.RSA") || resourcePath.equals("META-INF/BC2048KE.DSA")
-                || resourcePath.equals("META-INF/BC1024KE.DSA") || resourcePath.equals("META-INF/BC2048KE.SF")
-                || resourcePath.equals("META-INF/BC1024KE.SF") || resourcePath.equals("OSGI-INF/bundle.info")
-                || resourcePath.equals("META-INF/DUMMY.SF") || resourcePath.equals("META-INF/DUMMY.DSA")
-                || resourcePath.equals("META-INF/FastDoubleParser-NOTICE") || resourcePath.equals("META-INF/validation-mapping-1.0.xsd")
-                || resourcePath.equals("META-INF/validation-mapping-1.1.xsd") || resourcePath.equals("META-INF/validation-mapping-2.0.xsd")
-                || resourcePath.equals("META-INF/validation-mapping-3.0.xsd")
-                || resourcePath.equals("META-INF/validation-configuration-1.0.xsd")
-                || resourcePath.equals("META-INF/validation-configuration-1.1.xsd")
-                || resourcePath.equals("META-INF/validation-configuration-2.0.xsd")
-                || resourcePath.equals("META-INF/validation-configuration-3.0.xsd")
+                || resourcePath.equals("draftv4/schema") //
+                || resourcePath.equals("draftv3/schema") //
+                || resourcePath.equals("WEB-INF/web.xml") //
+                || resourcePath.equals("META-INF/web-fragment.xml") //
+                || resourcePath.equals("META-INF/eclipse.inf") //
+                || resourcePath.equals("META-INF/ECLIPSE_.SF") //
+                || resourcePath.equals("META-INF/ECLIPSE_.RSA") //
+                || resourcePath.equals("META-INF/BC2048KE.DSA") //
+                || resourcePath.equals("META-INF/BC1024KE.DSA") //
+                || resourcePath.equals("META-INF/BC2048KE.SF") //
+                || resourcePath.equals("META-INF/BC1024KE.SF") //
+                || resourcePath.equals("OSGI-INF/bundle.info") //
+                || resourcePath.equals("META-INF/DUMMY.SF") //
+                || resourcePath.equals("META-INF/DUMMY.DSA") //
+                || resourcePath.equals("META-INF/FastDoubleParser-NOTICE") //
+                || resourcePath.equals("META-INF/validation-mapping-1.0.xsd") //
+                || resourcePath.equals("META-INF/validation-mapping-1.1.xsd") //
+                || resourcePath.equals("META-INF/validation-mapping-2.0.xsd") //
+                || resourcePath.equals("META-INF/validation-mapping-3.0.xsd") //
+                || resourcePath.equals("META-INF/validation-configuration-1.0.xsd") //
+                || resourcePath.equals("META-INF/validation-configuration-1.1.xsd") //
+                || resourcePath.equals("META-INF/validation-configuration-2.0.xsd") //
+                || resourcePath.equals("META-INF/validation-configuration-3.0.xsd") //
                 // Spring Framework knows what they are do..
-                || resourcePath.startsWith("META-INF/spring") || resourcePath.startsWith("META-INF/additional-spring")
-                || resourcePath.startsWith("META-INF/terracotta") || resourcePath.startsWith("com/fasterxml/jackson/core/io/doubleparser")
+                || resourcePath.startsWith("META-INF/spring") //
+                || resourcePath.startsWith("META-INF/additional-spring") //
+                || resourcePath.startsWith("META-INF/terracotta") //
+                || resourcePath.startsWith("com/fasterxml/jackson/core/io/doubleparser") //
                 // Groovy is groovy
-                || resourcePath.startsWith("META-INF/groovy")
-                || resourcePath.startsWith("org/springframework/batch/core/scope/context/JobSynchronizationManager")
-                || resourcePath.startsWith("org/springframework/batch/core/scope/context/StepSynchronizationManager")
+                || resourcePath.startsWith("META-INF/groovy") //
+                || resourcePath.startsWith("org/springframework/batch/core/scope/context/JobSynchronizationManager") //
+                || resourcePath.startsWith("org/springframework/batch/core/scope/context/StepSynchronizationManager") //
                 // Something doesn't to be a perfectly clean in Maven Surefire:
-                || resourcePath.startsWith("META-INF/maven/") || resourcePath.contains("surefire")
+                || resourcePath.startsWith("META-INF/maven/") //
+                || resourcePath.contains("surefire") //
                 // org.slf4j.impl.StaticLoggerBinder.class in testutils for the
                 // LogCaptureRule
-                || resourcePath.equals("org/slf4j/impl/StaticLoggerBinder.class")
+                || resourcePath.equals("org/slf4j/impl/StaticLoggerBinder.class") //
                 // INFRAUTILS-35: JavaLaunchHelper is both in java and
                 // libinstrument.dylib (?) on Mac OS X
-                || resourcePath.contains("JavaLaunchHelper")
+                || resourcePath.contains("JavaLaunchHelper") //
                 // jakarta.annotation is a big mess... :( E.g.
                 // jakarta.annotation.Resource (and some others)
                 // are present both in rt.jar AND jakarta.annotation-api-1.3.2.jar
@@ -150,7 +176,7 @@ public class ClasspathDuplicatesStepDefinitions implements En {
                 // own JAR for jakarta.annotation
                 // and have it contain ONLY what is not already in package
                 // jakarta.annotation in rt.jar.. but for now:
-                || resourcePath.equals("jakarta.annotation/Resource$AuthenticationType.class")
+                || resourcePath.equals("jakarta.annotation/Resource$AuthenticationType.class") //
                 // NEUTRON-205: jakarta.inject is a mess :( because of
                 // jakarta.inject:jakarta.inject (which we widely use in ODL)
                 // VS. org.glassfish.hk2.external:jakarta.inject (which Glassfish
@@ -163,18 +189,21 @@ public class ClasspathDuplicatesStepDefinitions implements En {
                 // (2.25.1) has a non-optional Package-Import
                 // for jakarta.inject, but we made jakarta.inject:jakarta.inject
                 // <optional>true in odlparent, and don't bundle it.
-                || resourcePath.startsWith("jakarta.inject/")
+                || resourcePath.startsWith("jakarta.inject/") //
                 // Java 9 modules
-                || resourcePath.endsWith("module-info.class") || resourcePath.contains("findbugs")
+                || resourcePath.endsWith("module-info.class") //
+                || resourcePath.contains("findbugs") //
                 // list newly introduced in INFRAUTILS-52, because classgraph
                 // scans more than JHades did
-                || resourcePath.equals("plugin.properties") || resourcePath.equals(".api_description")
+                || resourcePath.equals("plugin.properties") //
+                || resourcePath.equals(".api_description") //
                 // errorprone with Java 11 integration leaks to classpath, which
                 // causes a conflict between
                 // checkerframework/checker-qual and checkerframework/dataflow
-                || resourcePath.startsWith("org/checkerframework/dataflow/qual/")
+                || resourcePath.startsWith("org/checkerframework/dataflow/qual/") //
                 // Pentaho reports harmless duplicates
-                || resourcePath.endsWith("overview.html") || resourcePath.endsWith("classic-engine.properties")
-                || resourcePath.endsWith("loader.properties");
+                || resourcePath.endsWith("overview.html") //
+                || resourcePath.endsWith("classic-engine.properties") //
+                || resourcePath.endsWith("loader.properties"); //
     }
 }

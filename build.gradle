@@ -672,8 +672,9 @@ configure(project.fineractJavaProjects) {
                 'org.junit.jupiter:junit-jupiter-engine',
                 'org.junit.jupiter:junit-jupiter-params',
                 'org.junit.platform:junit-platform-runner', // required to be able to run tests directly under Eclipse, see FINERACT-943 & FINERACT-1021
-                'org.bouncycastle:bcpkix-jdk15to18',
-                'org.bouncycastle:bcprov-jdk15to18',
+                'org.bouncycastle:bcpkix-jdk18on',
+                'org.bouncycastle:bcprov-jdk18on',
+                'org.bouncycastle:bcutil-jdk18on',
                 'org.awaitility:awaitility',
                 )
 
@@ -780,8 +781,9 @@ configure(project.fineractCustomProjects) {
                 'org.junit.jupiter:junit-jupiter-api',
                 'org.junit.jupiter:junit-jupiter-engine',
                 'org.junit.platform:junit-platform-runner', // required to be able to run tests directly under Eclipse, see FINERACT-943 & FINERACT-1021
-                'org.bouncycastle:bcpkix-jdk15to18',
-                'org.bouncycastle:bcprov-jdk15to18',
+                'org.bouncycastle:bcpkix-jdk18on',
+                'org.bouncycastle:bcprov-jdk18on',
+                'org.bouncycastle:bcutil-jdk18on',
                 'org.awaitility:awaitility',
                 'io.github.classgraph:classgraph',
                 'io.cucumber:cucumber-core',

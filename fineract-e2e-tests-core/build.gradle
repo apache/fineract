@@ -67,7 +67,7 @@ dependencies {
     testImplementation 'com.github.spotbugs:spotbugs-annotations'
 
     testImplementation 'com.squareup.retrofit2:retrofit:2.11.0'
-    testImplementation 'commons-httpclient:commons-httpclient:3.1'
+    testImplementation 'org.apache.httpcomponents:httpclient:4.5.14'
     testImplementation 'org.apache.commons:commons-lang3:3.17.0'
     testImplementation 'com.googlecode.json-simple:json-simple:1.1.1'
     testImplementation 'com.google.code.gson:gson:2.11.0'

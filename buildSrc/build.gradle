@@ -45,10 +45,14 @@ dependencies {
     implementation 'com.sun.activation:jakarta.activation'
     implementation 'com.sun.mail:jakarta.mail'
     implementation 'org.freemarker:freemarker'
-    implementation 'org.tmatesoft.svnkit:svnkit'
-    implementation 'org.bouncycastle:bcprov-jdk15on'
-    implementation 'org.bouncycastle:bcpg-jdk15on'
+    implementation ('com.tmatesoft.svnkit:svnkit') {
+        exclude group: 'net.i2p.crypto', module: 'eddsa'
+    }
+    implementation 'org.bouncycastle:bcprov-jdk18on'
+    implementation 'org.bouncycastle:bcutil-jdk18on'
+    implementation 'org.bouncycastle:bcpg-jdk18on'
     implementation 'org.eclipse.jgit:org.eclipse.jgit'
+    implementation 'org.eclipse.jgit:org.eclipse.jgit.gpg.bc'
     implementation 'org.eclipse.jgit:org.eclipse.jgit.ssh.apache'
     implementation 'com.vdurmont:semver4j'
     implementation 'org.beryx:text-io'
