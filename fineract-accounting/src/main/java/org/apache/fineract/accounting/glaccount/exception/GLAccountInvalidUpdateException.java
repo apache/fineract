@@ -31,17 +31,17 @@ public class GLAccountInvalidUpdateException extends AbstractPlatformDomainRuleE
         TRANSANCTIONS_LOGGED;
 
         public String errorMessage() {
-            if (name().toString().equalsIgnoreCase("TRANSANCTIONS_LOGGED")) {
+            if (name().equalsIgnoreCase("TRANSANCTIONS_LOGGED")) {
                 return "This Usage of this (detail) GL Account as it already has transactions logged against it";
             }
-            return name().toString();
+            return name();
         }
 
         public String errorCode() {
-            if (name().toString().equalsIgnoreCase("TRANSANCTIONS_LOGGED")) {
+            if (name().equalsIgnoreCase("TRANSANCTIONS_LOGGED")) {
                 return "error.msg.glaccount.glcode.invalid.update.transactions.logged";
             }
-            return name().toString();
+            return name();
         }
     }
 
