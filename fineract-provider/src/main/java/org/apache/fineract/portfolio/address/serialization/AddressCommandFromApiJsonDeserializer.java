@@ -33,7 +33,7 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.portfolio.address.data.FieldConfigurationData;
+import org.apache.fineract.portfolio.address.data.FieldConfigurationResponse;
 import org.apache.fineract.portfolio.address.service.FieldConfigurationReadPlatformService;
 import org.springframework.stereotype.Component;
 
@@ -63,11 +63,13 @@ public class AddressCommandFromApiJsonDeserializer {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("Address");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
-        final List<FieldConfigurationData> configurationData = new ArrayList<>(this.readservice.retrieveFieldConfigurationList("ADDRESS"));
+        final List<FieldConfigurationResponse> configurationData = new ArrayList<>(
+                this.readservice.retrieveFieldConfigurationList("ADDRESS"));
         // validate the json fields from the configuration data fields
-        final List<FieldConfigurationData> configData = configurationData.stream().filter(FieldConfigurationData::isEnabled).toList();
+        final List<FieldConfigurationResponse> configData = configurationData.stream().filter(FieldConfigurationResponse::getIsEnabled)
+                .toList();
 
-        final Set<String> supportedParameters = configData.stream().map(FieldConfigurationData::field).collect(Collectors.toSet());
+        final Set<String> supportedParameters = configData.stream().map(FieldConfigurationResponse::getField).collect(Collectors.toSet());
 
         supportedParameters.add("locale");
         supportedParameters.add("dateFormat");
@@ -76,19 +78,20 @@ public class AddressCommandFromApiJsonDeserializer {
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
         configData.forEach(fieldConfiguration -> {
-            final String field = fieldConfiguration.field().equals("addressType") ? "addressTypeId" : fieldConfiguration.field();
+            final String field = fieldConfiguration.getField().equals("addressType") ? "addressTypeId" : fieldConfiguration.getField();
             final String fieldValue = this.fromApiJsonHelper.extractStringNamed(field, element);
 
-            if (fieldConfiguration.field().equals("addressType") && fromNewClient) {
+            if (fieldConfiguration.getField().equals("addressType") && fromNewClient) {
                 baseDataValidator.reset().parameter(field).value(fieldValue).notBlank();
             } else {
-                if (fieldConfiguration.isMandatory() && fromNewClient) {
+                if (fieldConfiguration.getIsMandatory() && fromNewClient) {
                     baseDataValidator.reset().parameter(field).value(fieldValue).notBlank();
                 }
             }
 
-            if (!fieldConfiguration.validationRegex().isEmpty()) {
-                baseDataValidator.reset().parameter(field).value(fieldValue).matchesRegularExpression(fieldConfiguration.validationRegex());
+            if (!fieldConfiguration.getValidationRegex().isEmpty()) {
+                baseDataValidator.reset().parameter(field).value(fieldValue)
+                        .matchesRegularExpression(fieldConfiguration.getValidationRegex());
             }
         });
 

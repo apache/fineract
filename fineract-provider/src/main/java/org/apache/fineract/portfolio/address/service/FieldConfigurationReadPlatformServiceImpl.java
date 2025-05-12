@@ -22,7 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.portfolio.address.data.FieldConfigurationData;
+import org.apache.fineract.portfolio.address.data.FieldConfigurationResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -40,7 +40,7 @@ public class FieldConfigurationReadPlatformServiceImpl implements FieldConfigura
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    private static final class FieldMapper implements RowMapper<FieldConfigurationData> {
+    private static final class FieldMapper implements RowMapper<FieldConfigurationResponse> {
 
         public String schema() {
             return "fld.id as fieldConfigurationId,fld.entity as entity,fld.subentity as subentity,fld.field as field,fld.is_enabled as is_enabled,"
@@ -48,7 +48,7 @@ public class FieldConfigurationReadPlatformServiceImpl implements FieldConfigura
         }
 
         @Override
-        public FieldConfigurationData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public FieldConfigurationResponse mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             final long fieldConfigurationId = rs.getLong("fieldConfigurationId");
             final String entity = rs.getString("entity");
             final String subentity = rs.getString("subentity");
@@ -57,13 +57,14 @@ public class FieldConfigurationReadPlatformServiceImpl implements FieldConfigura
             final boolean is_mandatory = rs.getBoolean("is_mandatory");
             final String validation_regex = rs.getString("validation_regex");
 
-            return new FieldConfigurationData(fieldConfigurationId, entity, subentity, field, is_enabled, is_mandatory, validation_regex);
+            return new FieldConfigurationResponse(fieldConfigurationId, entity, subentity, field, is_enabled, is_mandatory,
+                    validation_regex);
 
         }
     }
 
     @Override
-    public List<FieldConfigurationData> retrieveFieldConfiguration(final String entity) {
+    public List<FieldConfigurationResponse> retrieveFieldConfiguration(final String entity) {
         this.context.authenticatedUser();
 
         final FieldMapper rm = new FieldMapper();
@@ -73,7 +74,7 @@ public class FieldConfigurationReadPlatformServiceImpl implements FieldConfigura
     }
 
     @Override
-    public List<FieldConfigurationData> retrieveFieldConfigurationList(final String entity) {
+    public List<FieldConfigurationResponse> retrieveFieldConfigurationList(final String entity) {
         this.context.authenticatedUser();
 
         final FieldMapper rm = new FieldMapper();

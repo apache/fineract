@@ -29,8 +29,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.portfolio.address.data.FieldConfigurationData;
+import org.apache.fineract.portfolio.address.data.FieldConfigurationResponse;
 import org.apache.fineract.portfolio.address.service.FieldConfigurationReadPlatformService;
 import org.springframework.stereotype.Component;
 
@@ -42,16 +41,13 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class EntityFieldConfigurationApiResource {
 
-    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "Address";
-    private final PlatformSecurityContext context;
     private final FieldConfigurationReadPlatformService readPlatformServicefld;
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieves the Entity Field Configuration", description = "It retrieves all the Entity Field Configuration")
-    public List<FieldConfigurationData> getAddresses(@PathParam("entity") @Parameter(description = "entity") final String entityname) {
-        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
+    public List<FieldConfigurationResponse> getAddresses(@PathParam("entity") @Parameter(description = "entity") final String entityname) {
         return this.readPlatformServicefld.retrieveFieldConfiguration(entityname);
     }
 

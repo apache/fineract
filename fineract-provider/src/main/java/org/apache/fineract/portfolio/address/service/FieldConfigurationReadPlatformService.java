@@ -19,11 +19,11 @@
 package org.apache.fineract.portfolio.address.service;
 
 import java.util.List;
-import org.apache.fineract.portfolio.address.data.FieldConfigurationData;
+import org.apache.fineract.portfolio.address.data.FieldConfigurationResponse;
 
 public interface FieldConfigurationReadPlatformService {
 
-    List<FieldConfigurationData> retrieveFieldConfiguration(String entity);
+    List<FieldConfigurationResponse> retrieveFieldConfiguration(String entity);
 
-    List<FieldConfigurationData> retrieveFieldConfigurationList(String entity);
+    List<FieldConfigurationResponse> retrieveFieldConfigurationList(String entity);
 }

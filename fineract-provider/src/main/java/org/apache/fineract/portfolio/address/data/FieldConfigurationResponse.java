@@ -20,11 +20,26 @@ package org.apache.fineract.portfolio.address.data;
 
 import java.io.Serial;
 import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public record FieldConfigurationData(Long fieldConfigurationId, String entity, String subentity, String field, boolean isEnabled,
-        boolean isMandatory, String validationRegex) implements Serializable {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class FieldConfigurationResponse implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
+
+    private Long fieldConfigurationId;
+    private String entity;
+    private String subentity;
+    private String field;
+    private Boolean isEnabled;
+    private Boolean isMandatory;
+    private String validationRegex;
 
 }
