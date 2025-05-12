@@ -45,6 +45,7 @@ import java.util.Locale;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.AdvancedPaymentData;
+import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.DeleteLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.DeleteLoansLoanIdResponse;
 import org.apache.fineract.client.models.DisbursementDetail;
@@ -66,6 +67,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.GetLoansResponse;
+import org.apache.fineract.client.models.InterestPauseRequestDto;
 import org.apache.fineract.client.models.PaymentTypeData;
 import org.apache.fineract.client.models.PostAddAndDeleteDisbursementDetailRequest;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
@@ -104,6 +106,7 @@ import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
+import retrofit2.Response;
 
 @Slf4j
 @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -917,6 +920,12 @@ public class LoanTransactionHelper {
     public PostLoansLoanIdTransactionsResponse addCapitalizedIncome(final Long loanId, final String transactionDate, final double amount) {
         return addCapitalizedIncome(loanId, new PostLoansLoanIdTransactionsRequest().transactionAmount(amount)
                 .transactionDate(transactionDate).dateFormat("dd MMMM yyyy").locale("en"));
+    }
+
+    public Response<CommandProcessingResult> createInterestPause(Long loanId, String startDate, String endDate) {
+        log.info("Creating interest pause for Loan {} from {} to {}", loanId, startDate, endDate);
+        return Calls.executeU(FineractClientHelper.getFineractClient().loanInterestPauseApi.createInterestPause(loanId,
+                new InterestPauseRequestDto().startDate(startDate).endDate(endDate).dateFormat(DATE_FORMAT).locale("en")));
     }
 
     // TODO: Rewrite to use fineract-client instead!

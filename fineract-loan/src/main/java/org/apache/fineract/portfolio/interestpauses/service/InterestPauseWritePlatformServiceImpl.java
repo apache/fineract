@@ -184,6 +184,11 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
                     "Interest pause is only supported for progressive loans.");
         }
 
+        if (!loan.isInterestBearing()) {
+            throw new GeneralPlatformDomainRuleException("loan.must.be.interest.bearing",
+                    "Interest pause is only supported for interest bearing loans.");
+        }
+
         if (!loan.getLoanRepaymentScheduleDetail().isInterestRecalculationEnabled()) {
             throw new GeneralPlatformDomainRuleException("loan.must.have.recalculate.interest.enabled",
                     "Interest pause is only supported for loans with recalculate interest enabled.");
