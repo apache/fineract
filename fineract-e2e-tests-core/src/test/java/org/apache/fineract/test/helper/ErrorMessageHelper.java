@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.client.models.BatchResponse;
@@ -73,6 +74,10 @@ public final class ErrorMessageHelper {
 
     public static String disburseChargedOffLoanFailure() {
         return "Loan: [0-9]* disbursement is not allowed on charged-off loan.";
+    }
+
+    public static String disburseIsNotAllowedFailure() {
+        return "Loan Disbursal is not allowed. Loan Account is not in approved and not disbursed state.";
     }
 
     public static String loanSubmitDateInFutureFailureMsg() {
@@ -909,5 +914,19 @@ public final class ErrorMessageHelper {
 
     public static String wrongValueInTotalPages(Integer actual, Integer expected) {
         return String.format("Wrong value for Total pages. %nActual value is: %s %nExpected value is: %s", actual, expected);
+    }
+
+    public static String wrongValueInLineInDisbursementDetailsTab(String resourceId, int line, Set<List<String>> actualList,
+            List<String> expected) {
+        String actual = actualList.stream().map(Object::toString).collect(Collectors.joining(System.lineSeparator()));
+        return String.format("%nWrong value in Loan Tranche Details tab of resource %s line %s." //
+                + "%nActual values in line (with the same date) are: %n%s %nExpected values in line: %n%s", resourceId, line, actual,
+                expected);
+    }
+
+    public static String nrOfLinesWrongInLoanTrancheDetailsTab(String resourceId, int actual, int expected) {
+        return String.format("%nNumber of lines does not match in Loan Tranche Details tab and expected datatable of resource %s." //
+                + "%nNumber of disbursement details tab lines: %s %nNumber of expected datatable lines: %s%n", resourceId, actual,
+                expected);
     }
 }

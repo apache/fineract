@@ -21,8 +21,11 @@ package org.apache.fineract.test.factory;
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.client.models.DisbursementDetail;
 import org.apache.fineract.client.models.InterestPauseRequestDto;
+import org.apache.fineract.client.models.PostAddAndDeleteDisbursementDetailRequest;
 import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
@@ -181,6 +184,12 @@ public class LoanRequestFactory {
     public static PostLoansLoanIdRequest defaultLoanDisburseRequest() {
         return new PostLoansLoanIdRequest().actualDisbursementDate(DATE_SUBMIT_STRING).transactionAmount(DEFAULT_DISBURSED_AMOUNT)
                 .paymentTypeId(Math.toIntExact(DEFAULT_PAYMENT_TYPE_ID)).dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE);
+    }
+
+    public static PostAddAndDeleteDisbursementDetailRequest defaultLoanDisbursementDetailRequest(
+            List<DisbursementDetail> disbursementData) {
+        return new PostAddAndDeleteDisbursementDetailRequest().disbursementData(disbursementData).dateFormat(DATE_FORMAT)
+                .locale(DEFAULT_LOCALE);
     }
 
     public static PostLoansLoanIdTransactionsRequest defaultPaymentTransactionRequest() {

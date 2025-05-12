@@ -4265,7 +4265,7 @@ Feature: LoanCharge
 
   @Skip
   @TestRailId:C3561
-  Scenario: Verify amount+interest disbursement charge for tranche interest bearing progressive loan that doesn't expects tranches with undo disbursement - UC8.2.7
+  Scenario: Verify amount+interest disbursement charge for tranche interest bearing progressive loan that doesn't expect tranches with undo disbursement - UC8.2.7
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin updates charge "LOAN_DISBURSEMENT_CHARGE" with "PERCENTAGE_LOAN_AMOUNT_PLUS_INTEREST" calculation type and 2.0 % of transaction amount
@@ -4343,7 +4343,7 @@ Feature: LoanCharge
 
   @Skip
   @TestRailId:C3562
-  Scenario: Verify interest disbursement charge for tranche interest bearing progressive loan that doesn't expects tranches with undo last disbursement - UC8.2.8
+  Scenario: Verify interest disbursement charge for tranche interest bearing progressive loan that doesn't expect tranches with undo last disbursement - UC8.2.8
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
     When Admin updates charge "LOAN_DISBURSEMENT_CHARGE" with "PERCENTAGE_INTEREST" calculation type and 2.0 % of transaction amount
