@@ -150,6 +150,9 @@ public interface LoanApiConstants {
     String loanIdToClose = "loanIdToClose";
     String topupAmount = "topupAmount";
 
+    String statusAttributeName = "status";
+    String subStatusAttributeName = "subStatus";
+
     String datatables = "datatables";
 
     String isEqualAmortizationParam = "isEqualAmortization";
@@ -175,6 +178,7 @@ public interface LoanApiConstants {
     String CHARGEBACK_TRANSACTION_COMMAND = "chargeback";
     String MARK_AS_FRAUD_COMMAND = "markAsFraud";
     String CAPITALIZED_INCOME_TRANSACTION_COMMAND = "capitalizedIncome";
+    String CONTRACT_TERMINATION_COMMAND = "contractTermination";
 
     // Data Validator names
     String LOAN_FRAUD_DATAVALIDATOR_PREFIX = "loans.fraud";

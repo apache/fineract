@@ -106,7 +106,7 @@ public class ExternalEventConfigurationValidationServiceTest {
                 "LoanTransactionInterestPaymentWaiverPostBusinessEvent", "LoanTransactionAccrualActivityPostBusinessEvent",
                 "LoanTransactionAccrualActivityPreBusinessEvent", "LoanTransactionInterestRefundPostBusinessEvent",
                 "LoanTransactionInterestRefundPreBusinessEvent", "LoanAccrualAdjustmentTransactionBusinessEvent",
-                "LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent");
+                "LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent", "LoanTransactionContractTerminationPostBusinessEvent");
 
         List<FineractPlatformTenant> tenants = Arrays
                 .asList(new FineractPlatformTenant(1L, "default", "Default Tenant", "Europe/Budapest", null));
@@ -193,7 +193,7 @@ public class ExternalEventConfigurationValidationServiceTest {
                 "LoanTransactionInterestPaymentWaiverPostBusinessEvent", "LoanTransactionAccrualActivityPostBusinessEvent",
                 "LoanTransactionAccrualActivityPreBusinessEvent", "LoanTransactionInterestRefundPostBusinessEvent",
                 "LoanTransactionInterestRefundPreBusinessEvent", "LoanAccrualAdjustmentTransactionBusinessEvent",
-                "LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent");
+                "LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent", "LoanTransactionContractTerminationPostBusinessEvent");
 
         List<FineractPlatformTenant> tenants = Arrays
                 .asList(new FineractPlatformTenant(1L, "default", "Default Tenant", "Europe/Budapest", null));

@@ -906,6 +906,11 @@ public class LoanTransactionHelper {
         return Calls.ok(FineractClientHelper.getFineractClient().loanTransactions.executeLoanTransaction(loanId, request, "repayment"));
     }
 
+    public PostLoansLoanIdTransactionsResponse executeLoanTransaction(final Long loanId, final PostLoansLoanIdTransactionsRequest request,
+            final String command) {
+        return Calls.ok(FineractClientHelper.getFineractClient().loanTransactions.executeLoanTransaction(loanId, request, command));
+    }
+
     public PostLoansLoanIdTransactionsResponse makeLoanRepayment(final Long loanId, final PostLoansLoanIdTransactionsRequest request,
             final String user, final String pass) {
         return Calls.ok(FineractClientHelper.createNewFineractClient(user, pass).loanTransactions.executeLoanTransaction(loanId, request,
@@ -2866,6 +2871,10 @@ public class LoanTransactionHelper {
 
     public PostLoansLoanIdResponse disburseLoan(Long loanId, PostLoansLoanIdRequest request) {
         return Calls.ok(FineractClientHelper.getFineractClient().loans.stateTransitions(loanId, request, "disburse"));
+    }
+
+    public PostLoansLoanIdResponse moveLoanState(Long loanId, PostLoansLoanIdRequest request, String command) {
+        return Calls.ok(FineractClientHelper.getFineractClient().loans.stateTransitions(loanId, request, command));
     }
 
     /**

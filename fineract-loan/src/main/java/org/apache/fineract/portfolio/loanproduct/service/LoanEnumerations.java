@@ -330,6 +330,8 @@ public final class LoanEnumerations {
             case CAPITALIZED_INCOME_AMORTIZATION ->
                 new LoanTransactionEnumData(LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION.getValue().longValue(),
                         LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION.getCode(), "Capitalized Income Amortization");
+            case CONTRACT_TERMINATION -> new LoanTransactionEnumData(LoanTransactionType.CONTRACT_TERMINATION.getValue().longValue(),
+                    LoanTransactionType.CONTRACT_TERMINATION.getCode(), "Contract Termination");
         };
     }
 

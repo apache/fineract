@@ -1,0 +1,153 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.apache.fineract.portfolio.loanaccount.service.contracttermination;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
+import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBalanceChangedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionContractTerminationPostBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
+import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanSubStatus;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
+import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
+import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
+import org.apache.fineract.portfolio.loanaccount.service.ReprocessLoanTransactionsService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@Transactional
+@RequiredArgsConstructor
+public class LoanContractTerminationServiceImpl {
+
+    private final LoanAssembler loanAssembler;
+    private final LoanRepository loanRepository;
+    private final LoanTransactionRepository loanTransactionRepository;
+    private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
+    private final LoanUtilService loanUtilService;
+    private final ExternalIdFactory externalIdFactory;
+    private final BusinessEventNotifierService businessEventNotifierService;
+
+    public CommandProcessingResult applyContractTermination(JsonCommand command) {
+
+        Loan loan = loanAssembler.assembleFrom(command.getLoanId());
+        // validate client or group is active
+        loanUtilService.checkClientOrGroupActive(loan);
+
+        // validate Account Status
+        validateAccountStatus(loan, LoanEvent.LOAN_CONTRACT_TERMINATION);
+
+        final ExternalId externalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
+
+        Map<String, Object> changes = new LinkedHashMap<>();
+
+        LoanTransaction contractTermination = LoanTransaction.contractTermination(loan, DateUtils.getBusinessLocalDate(), externalId);
+        loanTransactionRepository.save(contractTermination);
+
+        loanUtilService.persistNote(loan, command, changes);
+
+        // Mark Contract Termination, Update Loan SubStatus
+        loan.setLoanSubStatus(LoanSubStatus.CONTRACT_TERMINATION);
+        loanRepository.save(loan);
+        changes.put(LoanApiConstants.subStatusAttributeName, loan.getLoanSubStatus().getCode());
+
+        if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
+            final List<LoanTransaction> loanTransactions = loan.retrieveListOfTransactionsForReprocessing();
+            loanTransactions.add(contractTermination);
+            reprocessLoanTransactionsService.reprocessParticularTransactions(loan, loanTransactions);
+            loan.addLoanTransaction(contractTermination);
+        } else {
+            reprocessLoanTransactionsService.processLatestTransaction(contractTermination, loan);
+            loan.addLoanTransaction(contractTermination);
+        }
+
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanTransactionContractTerminationPostBusinessEvent(contractTermination));
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(contractTermination.getId()) //
+                .withEntityExternalId(contractTermination.getExternalId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(command.getLoanId()) //
+                .with(changes).build();
+    }
+
+    public void validateAccountStatus(final Loan loan, final LoanEvent event) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+
+        switch (event) {
+            case LOAN_CONTRACT_TERMINATION -> {
+                if (!loan.isOpen()) {
+                    final String defaultUserMessage = "Contract termination can not be applied, Loan Account is not Active.";
+                    final ApiParameterError error = ApiParameterError.generalError("error.msg.loan.account.is.not.active.state",
+                            defaultUserMessage);
+                    dataValidationErrors.add(error);
+                }
+
+                if (loan.getLoanProduct().getLoanProductRelatedDetail().getLoanScheduleType().equals(LoanScheduleType.CUMULATIVE)) {
+                    final String defaultUserMessage = "Contract termination can not be applied, Loan product schedule type is not Progressive.";
+                    final ApiParameterError error = ApiParameterError.generalError(
+                            "error.msg.loan.contract.termination.is.only.supported.for.progressive.loan.schedule.type", defaultUserMessage);
+                    dataValidationErrors.add(error);
+                }
+
+                if (loan.isChargedOff()) {
+                    final String defaultUserMessage = "Contract termination can not be applied, Loan Account is Charge-Off.";
+                    final ApiParameterError error = ApiParameterError.generalError("error.msg.loan.account.is.charge-off",
+                            defaultUserMessage);
+                    dataValidationErrors.add(error);
+                }
+
+                if (loan.isContractTermination()) {
+                    final String defaultUserMessage = "Contract termination can not be applied, Loan Account is already terminated.";
+                    final ApiParameterError error = ApiParameterError
+                            .generalError("error.msg.loan.account.is.already.contract.termination.substate", defaultUserMessage);
+                    dataValidationErrors.add(error);
+                }
+            }
+            default -> {
+            }
+        }
+
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+    }
+
+}
