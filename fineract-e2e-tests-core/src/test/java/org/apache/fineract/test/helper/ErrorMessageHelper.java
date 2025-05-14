@@ -521,6 +521,13 @@ public final class ErrorMessageHelper {
                 resourceId, line, actual, expected);
     }
 
+    public static String wrongValueInLineInJournalEntry(String resourceId, int line, List<List<String>> actualList, List<String> expected) {
+        String actual = actualList.stream().map(Object::toString).collect(Collectors.joining(System.lineSeparator()));
+        return String.format("%nWrong value in Journal entries of resource %s line %s." //
+                + "%nActual values for the possible transactions in line (with the same date) are: %n%s %nExpected values in line: %n%s",
+                resourceId, line, actual, expected);
+    }
+
     public static String wrongDataInJournalEntriesGlAccountType(int line, String actual, String expected) {
         return String.format("Wrong data in Journal entries, line %s / GL account type. " //
                 + "Actual value is: %s - But expected value is: %s", line, actual, expected);

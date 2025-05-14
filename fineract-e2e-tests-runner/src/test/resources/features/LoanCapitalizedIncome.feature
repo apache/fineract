@@ -269,6 +269,7 @@ Feature: Capitalized Income
       | EXPENSE   | e4           | Written off                  |        | 100.0  |
       | LIABILITY | 145024       | Deferred Capitalized Income  | 100.0  |        |
     Then LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "02 January 2024"
+
   @TestRailId:C3648
   Scenario: Verify capitalized income: daily amortization - Capitalized Income type: interest
     When Admin sets the business date to "01 January 2024"
@@ -528,3 +529,194 @@ Feature: Capitalized Income
       | INCOME    | 404000       | Interest Income             |       | 0.55   |
       | LIABILITY | 145024       | Deferred Capitalized Income | 0.55  |        |
     And Loan Capitalized Income Amortization Transaction Created Business Event is created on "31 March 2024"
+
+  @TestRailId:C3661
+  Scenario: As a user I want to add capitalized income to a progressive loan after disbursement and then charge-off the loan with "delinquent" reason - amortization in case of loan charge-off event
+    When Admin sets the business date to "1 January 2024"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_ZERO_INTEREST_CHARGE_OFF_DELINQUENT_REASON_INTEREST_RECALC_CAPITALIZED_INCOME | 01 January 2024   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "1 January 2024" with "1000" amount and expected disbursement date on "1 January 2024"
+    And Admin successfully disburse the loan on "1 January 2024" with "900" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    When Admin sets the business date to "2 January 2024"
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "2 January 2024" with "100" EUR transaction amount
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement       | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
+      | 02 January 2024  | Capitalized Income | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+    Then Loan Transactions tab has a "CAPITALIZED_INCOME" transaction with date "02 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                 | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable             | 100.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income  |        | 100.0  |
+    Then Admin can successfully set Fraud flag to the loan
+    When Admin sets the business date to "03 February 2024"
+    And Admin does charge-off the loan with reason "DELINQUENT" on "03 February 2024"
+    Then Loan Transactions tab has a "CHARGE_OFF" transaction with date "03 February 2024" which has the following Journal entries:
+      | Type    | Account code | Account name               | Debit | Credit |
+      | ASSET   | 112601       | Loans Receivable           |       | 900.0  |
+      | ASSET   | 112603       | Interest/Fee Receivable    |       | 4.0    |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt       | 900.0 |        |
+      | INCOME  | 404001       | Interest Income Charge Off | 4.0   |        |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement                    | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
+      | 02 January 2024  | Capitalized Income              | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 03 February 2024 | Accrual                         | 4.0    | 0.0       | 4.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 03 February 2024 | Charge-off                      | 904.0  | 900.0     | 4.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 03 February 2024 | Capitalized Income Amortization | 100.0  | 0.0       | 100.0    | 0.0  | 0.0       | 0.0          | false    |
+    Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "03 February 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                 | Debit  | Credit |
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt         |        | 100.0  |
+      | LIABILITY | 145024       | Deferred Capitalized Income  | 100.0  |        |
+    Then LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "03 February 2024"
+
+  @TestRailId:C3662
+  Scenario: As a user I want to add capitalized income to a progressive loan after disbursement and then charge-off a fraud loan - amortization in case of loan charge-off event
+    When Admin sets the business date to "1 January 2024"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_ZERO_INTEREST_CHARGE_OFF_DELINQUENT_REASON_INTEREST_RECALC_CAPITALIZED_INCOME | 01 January 2024   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "1 January 2024" with "1000" amount and expected disbursement date on "1 January 2024"
+    And Admin successfully disburse the loan on "1 January 2024" with "900" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    When Admin sets the business date to "2 January 2024"
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "2 January 2024" with "100" EUR transaction amount
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement       | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
+      | 02 January 2024  | Capitalized Income | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+    Then Loan Transactions tab has a "CAPITALIZED_INCOME" transaction with date "02 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                 | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable             | 100.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income  |        | 100.0  |
+    Then Admin can successfully set Fraud flag to the loan
+    When Admin sets the business date to "03 February 2024"
+    And Admin does charge-off the loan on "03 February 2024"
+    Then Loan Transactions tab has a "CHARGE_OFF" transaction with date "03 February 2024" which has the following Journal entries:
+      | Type    | Account code | Account name               | Debit | Credit |
+      | ASSET   | 112601       | Loans Receivable           |       | 900.0  |
+      | ASSET   | 112603       | Interest/Fee Receivable    |       | 4.0    |
+      | EXPENSE | 744037       | Credit Loss/Bad Debt-Fraud | 900.0 |        |
+      | INCOME  | 404001       | Interest Income Charge Off | 4.0   |        |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement                    | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
+      | 02 January 2024  | Capitalized Income              | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 03 February 2024 | Accrual                         | 4.0    | 0.0       | 4.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 03 February 2024 | Charge-off                      | 904.0  | 900.0     | 4.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 03 February 2024 | Capitalized Income Amortization | 100.0  | 0.0       | 100.0    | 0.0  | 0.0       | 0.0          | false    |
+    Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "03 February 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                 | Debit  | Credit |
+      | EXPENSE   | 744037       | Credit Loss/Bad Debt-Fraud   |        | 100.0  |
+      | LIABILITY | 145024       | Deferred Capitalized Income  | 100.0  |        |
+    Then LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "03 February 2024"
+
+  @TestRailId:C3663
+  Scenario: As a user I want to add capitalized income to a progressive loan after disbursement and then charge-off the loan - amortization in case of loan charge-off event
+    When Admin sets the business date to "1 January 2024"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_ZERO_INTEREST_CHARGE_OFF_DELINQUENT_REASON_INTEREST_RECALC_CAPITALIZED_INCOME | 01 January 2024   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "1 January 2024" with "1000" amount and expected disbursement date on "1 January 2024"
+    And Admin successfully disburse the loan on "1 January 2024" with "900" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    When Admin sets the business date to "2 January 2024"
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "2 January 2024" with "100" EUR transaction amount
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement       | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
+      | 02 January 2024  | Capitalized Income | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+    Then Loan Transactions tab has a "CAPITALIZED_INCOME" transaction with date "02 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                 | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable             | 100.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income  |        | 100.0  |
+    Then Admin can successfully set Fraud flag to the loan
+    When Admin sets the business date to "03 February 2024"
+    And Admin does charge-off the loan with reason "DELINQUENT" on "03 February 2024"
+    Then Loan Transactions tab has a "CHARGE_OFF" transaction with date "03 February 2024" which has the following Journal entries:
+      | Type    | Account code | Account name               | Debit | Credit |
+      | ASSET   | 112601       | Loans Receivable           |       | 900.0  |
+      | ASSET   | 112603       | Interest/Fee Receivable    |       | 4.0    |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt       | 900.0 |        |
+      | INCOME  | 404001       | Interest Income Charge Off | 4.0   |        |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement                    | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
+      | 02 January 2024  | Capitalized Income              | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 03 February 2024 | Accrual                         | 4.0    | 0.0       | 4.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 03 February 2024 | Charge-off                      | 904.0  | 900.0     | 4.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 03 February 2024 | Capitalized Income Amortization | 100.0  | 0.0       | 100.0    | 0.0  | 0.0       | 0.0          | false    |
+    Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "03 February 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                 | Debit  | Credit |
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt         |        | 100.0  |
+      | LIABILITY | 145024       | Deferred Capitalized Income  | 100.0  |        |
+    Then LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "03 February 2024"
+
+  @TestRailId:C3664
+  Scenario: As a user I want to add capitalized income to a progressive loan after disbursement and then undo the charge-off transaction with "delinquent" reason - amortization in case of loan charge-off event should also be reversed
+    When Admin sets the business date to "1 January 2024"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_ZERO_INTEREST_CHARGE_OFF_DELINQUENT_REASON_INTEREST_RECALC_CAPITALIZED_INCOME | 01 January 2024   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "1 January 2024" with "1000" amount and expected disbursement date on "1 January 2024"
+    And Admin successfully disburse the loan on "1 January 2024" with "900" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    When Admin sets the business date to "2 January 2024"
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "2 January 2024" with "100" EUR transaction amount
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement       | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
+      | 02 January 2024  | Capitalized Income | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+    Then Loan Transactions tab has a "CAPITALIZED_INCOME" transaction with date "02 January 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                 | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable             | 100.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income  |        | 100.0  |
+    Then Admin can successfully set Fraud flag to the loan
+    When Admin sets the business date to "03 February 2024"
+    And Admin does charge-off the loan with reason "DELINQUENT" on "03 February 2024"
+    Then Loan Transactions tab has a "CHARGE_OFF" transaction with date "03 February 2024" which has the following Journal entries:
+      | Type    | Account code | Account name               | Debit | Credit |
+      | ASSET   | 112601       | Loans Receivable           |       | 900.0  |
+      | ASSET   | 112603       | Interest/Fee Receivable    |       | 4.0    |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt       | 900.0 |        |
+      | INCOME  | 404001       | Interest Income Charge Off | 4.0   |        |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement                    | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
+      | 02 January 2024  | Capitalized Income              | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 03 February 2024 | Accrual                         | 4.0    | 0.0       | 4.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 03 February 2024 | Charge-off                      | 904.0  | 900.0     | 4.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 03 February 2024 | Capitalized Income Amortization | 100.0  | 0.0       | 100.0    | 0.0  | 0.0       | 0.0          | false    |
+    Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "03 February 2024" which has the following Journal entries:
+      | Type      | Account code | Account name                 | Debit  | Credit |
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt         |        | 100.0  |
+      | LIABILITY | 145024       | Deferred Capitalized Income  | 100.0  |        |
+    Then LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "03 February 2024"
+    Then Admin does a charge-off undo the loan
+    Then Loan Transactions tab has a "CHARGE_OFF" transaction with date "03 February 2024" which has the following Journal entries:
+      | Type    | Account code | Account name               | Debit | Credit |
+      | ASSET   | 112601       | Loans Receivable           |       | 900.0  |
+      | ASSET   | 112603       | Interest/Fee Receivable    |       | 4.0    |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt       | 900.0 |        |
+      | INCOME  | 404001       | Interest Income Charge Off | 4.0   |        |
+      | ASSET   | 112601       | Loans Receivable           | 900.0 |        |
+      | ASSET   | 112603       | Interest/Fee Receivable    | 4.0   |        |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt       |       | 900.0  |
+      | INCOME  | 404001       | Interest Income Charge Off |       | 4.0    |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement                    | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
+      | 02 January 2024  | Capitalized Income              | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 03 February 2024 | Accrual                         | 4.0    | 0.0       | 4.0      | 0.0  | 0.0       | 0.0          | false    |
+      | 03 February 2024 | Charge-off                      | 904.0  | 900.0     | 4.0      | 0.0  | 0.0       | 0.0          | true     |
+    Then Reversed loan capitalized income amortization transaction has the following Journal entries:
+      | Type      | Account code | Account name                 | Debit  | Credit |
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt         |        | 100.0  |
+      | LIABILITY | 145024       | Deferred Capitalized Income  | 100.0  |        |
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt         | 100.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income  |        | 100.0  |

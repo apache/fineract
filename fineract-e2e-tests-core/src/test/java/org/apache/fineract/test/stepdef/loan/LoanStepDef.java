@@ -1661,6 +1661,17 @@ public class LoanStepDef extends AbstractStepDef {
         ErrorHelper.checkSuccessfulApiCall(chargeOffResponse);
 
         Long transactionId = chargeOffResponse.body().getResourceId();
+
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
+        final Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        assert loanDetailsResponse.body() != null;
+        final List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.body().getTransactions();
+        final Optional<GetLoansLoanIdTransactions> transactionsMatch = transactions.stream()
+                .filter(t -> formatter.format(t.getDate()).equals(transactionDate) && t.getType().getCapitalizedIncomeAmortization())
+                .findFirst();
+        if (transactionsMatch.isPresent()) {
+            testContext().set(TestContextKey.LOAN_CAPITALIZED_INCOME_AMORTIZATION_ID, transactionsMatch.get().getId());
+        }
         eventAssertion.assertEvent(LoanChargeOffEvent.class, transactionId).extractingData(LoanTransactionDataV1::getLoanId)
                 .isEqualTo(loanId).extractingData(LoanTransactionDataV1::getId).isEqualTo(chargeOffResponse.body().getResourceId());
     }

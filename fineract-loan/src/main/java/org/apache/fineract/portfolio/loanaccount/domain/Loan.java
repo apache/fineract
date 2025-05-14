@@ -2167,7 +2167,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     public LoanTransaction getLastUserTransaction() {
         return getLoanTransactions().stream() //
-                .filter(t -> t.isNotReversed() && !(t.isAccrual() || t.isAccrualAdjustment() || t.isIncomePosting())) //
+                .filter(t -> t.isNotReversed()
+                        && !(t.isAccrual() || t.isAccrualAdjustment() || t.isIncomePosting() || t.isCapitalizedIncomeAmortization())) //
                 .reduce((first, second) -> second) //
                 .orElse(null);
     }

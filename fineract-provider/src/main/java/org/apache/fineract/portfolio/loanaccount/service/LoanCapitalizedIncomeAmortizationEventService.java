@@ -24,9 +24,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.event.business.BusinessEventListener;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBalanceChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanCloseBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanChargeOffPostBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanUndoChargeOffBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -39,6 +42,9 @@ public class LoanCapitalizedIncomeAmortizationEventService {
     public void addListeners() {
         businessEventNotifierService.addPreBusinessEventListener(LoanCloseBusinessEvent.class, new LoanCloseListener());
         businessEventNotifierService.addPostBusinessEventListener(LoanBalanceChangedBusinessEvent.class, new LoanBalanceChangedListener());
+        businessEventNotifierService.addPostBusinessEventListener(LoanChargeOffPostBusinessEvent.class, new LoanChargeOffEventListener());
+        businessEventNotifierService.addPostBusinessEventListener(LoanUndoChargeOffBusinessEvent.class,
+                new LoanUndoChargeOffEventListener());
     }
 
     private final class LoanCloseListener implements BusinessEventListener<LoanCloseBusinessEvent> {
@@ -65,6 +71,34 @@ public class LoanCapitalizedIncomeAmortizationEventService {
                     && (status.isClosedObligationsMet() || status.isClosedWrittenOff() || status.isOverpaid())) {
                 log.debug("Loan balance change on capitalized income amortization for loan {}", loan.getId());
                 loanCapitalizedIncomeAmortizationProcessingService.processCapitalizedIncomeAmortizationOnLoanClosure(loan);
+            }
+        }
+    }
+
+    private final class LoanChargeOffEventListener implements BusinessEventListener<LoanChargeOffPostBusinessEvent> {
+
+        @Override
+        public void onBusinessEvent(final LoanChargeOffPostBusinessEvent event) {
+            final LoanTransaction loanTransaction = event.get();
+            final Loan loan = loanTransaction.getLoan();
+            if (loan.getLoanProductRelatedDetail().isEnableIncomeCapitalization() && loan.isChargedOff() && loanTransaction.isChargeOff()) {
+                log.debug("Loan charge-off on capitalized income amortization for loan {}", loan.getId());
+                loanCapitalizedIncomeAmortizationProcessingService.processCapitalizedIncomeAmortizationOnLoanChargeOff(loan);
+            }
+        }
+    }
+
+    private final class LoanUndoChargeOffEventListener implements BusinessEventListener<LoanUndoChargeOffBusinessEvent> {
+
+        @Override
+        public void onBusinessEvent(final LoanUndoChargeOffBusinessEvent event) {
+            final LoanTransaction loanTransaction = event.get();
+            final Loan loan = loanTransaction.getLoan();
+            final LoanStatus status = loan.getStatus();
+            if (loan.getLoanProductRelatedDetail().isEnableIncomeCapitalization() && loanTransaction.getTypeOf().isChargeOff()
+                    && !(loan.isChargedOff() || status.isClosedObligationsMet() || status.isClosedWrittenOff() || status.isOverpaid())) {
+                log.debug("Loan undo charge-off on capitalized income amortization for loan {}", loan.getId());
+                loanCapitalizedIncomeAmortizationProcessingService.processCapitalizedIncomeAmortizationOnLoanUndoChargeOff(loanTransaction);
             }
         }
     }
