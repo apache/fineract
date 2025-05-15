@@ -72,7 +72,7 @@ public final class SavingsAccountTransactionData implements Serializable {
     private final LocalDate submittedOnDate;
     private final boolean interestedPostedAsOn;
     private final String submittedByUsername;
-    private final String note;
+    private String note;
     private final boolean isManualTransaction;
     private final Boolean isReversal;
     private final Long originalTransactionId;
@@ -255,8 +255,8 @@ public final class SavingsAccountTransactionData implements Serializable {
     }
 
     public static SavingsAccountTransactionData importInstance(BigDecimal transactionAmount, LocalDate transactionDate, Long paymentTypeId,
-            String accountNumber, String checkNumber, String routingCode, String receiptNumber, String bankNumber, Long savingsAccountId,
-            SavingsAccountTransactionEnumData transactionType, Integer rowIndex, String locale, String dateFormat) {
+            String accountNumber, String checkNumber, String routingCode, String receiptNumber, String bankNumber, String note,
+            Long savingsAccountId, SavingsAccountTransactionEnumData transactionType, Integer rowIndex, String locale, String dateFormat) {
         SavingsAccountTransactionData data = createImport(transactionType, null, savingsAccountId, accountNumber, transactionDate,
                 transactionAmount, false, transactionDate, false, false);
         data.rowIndex = rowIndex;
@@ -265,6 +265,7 @@ public final class SavingsAccountTransactionData implements Serializable {
         data.routingCode = routingCode;
         data.receiptNumber = receiptNumber;
         data.bankNumber = bankNumber;
+        data.note = note;
         data.locale = locale;
         data.dateFormat = dateFormat;
         return data;

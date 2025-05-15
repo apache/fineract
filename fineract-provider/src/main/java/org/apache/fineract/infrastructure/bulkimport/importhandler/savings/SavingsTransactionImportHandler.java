@@ -109,8 +109,9 @@ public class SavingsTransactionImportHandler implements ImportHandler {
         String routingCode = ImportHandlerUtils.readAsString(TransactionConstants.ROUTING_CODE_COL, row);
         String receiptNumber = ImportHandlerUtils.readAsString(TransactionConstants.RECEIPT_NO_COL, row);
         String bankNumber = ImportHandlerUtils.readAsString(TransactionConstants.BANK_NO_COL, row);
+        String note = ImportHandlerUtils.readAsString(TransactionConstants.NOTE_COL, row);
         return SavingsAccountTransactionData.importInstance(amount, transactionDate, paymentTypeId, accountNumber, checkNumber, routingCode,
-                receiptNumber, bankNumber, savingsAccountId, savingsAccountTransactionEnumData, row.getRowNum(), locale, dateFormat);
+                receiptNumber, bankNumber, note, savingsAccountId, savingsAccountTransactionEnumData, row.getRowNum(), locale, dateFormat);
 
     }
 

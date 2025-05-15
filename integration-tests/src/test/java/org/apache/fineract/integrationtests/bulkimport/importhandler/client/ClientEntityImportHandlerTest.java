@@ -125,7 +125,6 @@ public class ClientEntityImportHandlerTest {
         Date submittedDate = simpleDateFormat.parse("28 September 2017");
         firstClientRow.createCell(ClientEntityConstants.SUBMITTED_ON_COL).setCellValue(submittedDate);
         firstClientRow.createCell(ClientEntityConstants.ADDRESS_ENABLED).setCellValue("False");
-
         File directory = new File(System.getProperty("user.home") + File.separator + "Fineract" + File.separator + "bulkimport"
                 + File.separator + "integration_tests" + File.separator + "importhandler" + File.separator + "client");
         if (!directory.exists()) {

@@ -116,7 +116,7 @@ public final class CalendarData implements Serializable {
         this.dateFormat = dateFormat;
         this.locale = locale;
         this.description = "";
-        this.typeId = "1";
+        this.typeId = "4";
         this.id = null;
         this.calendarInstanceId = null;
         this.entityId = null;
