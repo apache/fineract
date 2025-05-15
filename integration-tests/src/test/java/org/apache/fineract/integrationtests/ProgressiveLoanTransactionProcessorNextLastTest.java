@@ -85,8 +85,8 @@ public class ProgressiveLoanTransactionProcessorNextLastTest extends BaseLoanInt
             loanTransactionHelper.makeLoanRepayment(loanId, "Repayment", "1 March 2024", 26.0);
             verifyRepaymentSchedule(loanId, installment(100.0, null, "01 January 2024"),
                     installment(14.97, 5.03, 0.0, true, "01 February 2024"), installment(15.7, 4.3, 0.0, true, "01 March 2024"),
-                    installment(17.03, 2.97, 20.0, false, "01 April 2024"), installment(17.96, 2.04, 20.0, false, "01 May 2024"),
-                    installment(18.94, 1.06, 20.0, false, "01 June 2024"), installment(15.4, 0.02, 0.42, false, "01 July 2024"));
+                    installment(17.03, 2.97, 14.0, false, "01 April 2024"), installment(17.63, 2.37, 20.0, false, "01 May 2024"),
+                    installment(18.59, 1.41, 20.0, false, "01 June 2024"), installment(16.08, 0.39, 7.47, false, "01 July 2024"));
         });
         runAt("2 March 2024", () -> {
             Long loanId = loanIdRef.get();
@@ -94,26 +94,26 @@ public class ProgressiveLoanTransactionProcessorNextLastTest extends BaseLoanInt
             loanTransactionHelper.makeLoanRepayment(loanId, "Repayment", "2 March 2024", 7.0);
             verifyRepaymentSchedule(loanId, installment(100.0, null, "01 January 2024"),
                     installment(14.97, 5.03, 0.0, true, "01 February 2024"), installment(15.7, 4.3, 0.0, true, "01 March 2024"),
-                    installment(17.4, 2.6, 13.0, false, "01 April 2024"), installment(17.98, 2.02, 20.0, false, "01 May 2024"),
-                    installment(18.95, 1.04, 19.99, false, "01 June 2024"), installment(15.0, 0.0, 0.0, true, "01 July 2024"));
+                    installment(17.4, 2.6, 7.0, false, "01 April 2024"), installment(17.65, 2.35, 20.0, false, "01 May 2024"),
+                    installment(18.62, 1.38, 20.0, false, "01 June 2024"), installment(15.66, 0.36, 7.02, false, "01 July 2024"));
             // verify multiple partial repayment for "current" installment
             loanTransactionHelper.makeLoanRepayment(loanId, "Repayment", "2 March 2024", 7.0);
             verifyRepaymentSchedule(loanId, installment(100.0, null, "01 January 2024"),
                     installment(14.97, 5.03, 0.0, true, "01 February 2024"), installment(15.7, 4.3, 0.0, true, "01 March 2024"),
-                    installment(17.77, 2.23, 6.0, false, "01 April 2024"), installment(18.0, 2.0, 20.0, false, "01 May 2024"),
-                    installment(18.56, 1.02, 19.58, false, "01 June 2024"), installment(15.0, 0.0, 0.0, true, "01 July 2024"));
+                    installment(19.9, 0.1, 0.0, true, "01 April 2024"), installment(15.65, 4.35, 20.0, false, "01 May 2024"),
+                    installment(18.64, 1.36, 20.0, false, "01 June 2024"), installment(15.14, 0.34, 6.48, false, "01 July 2024"));
             // verify next then last installment logic.
             loanTransactionHelper.makeLoanRepayment(loanId, "Repayment", "2 March 2024", 22.0);
             verifyRepaymentSchedule(loanId, installment(100.0, null, "01 January 2024"),
                     installment(14.97, 5.03, 0.0, true, "01 February 2024"), installment(15.7, 4.3, 0.0, true, "01 March 2024"),
                     installment(19.9, 0.1, 0.0, true, "01 April 2024"), installment(18.02, 1.98, 20.0, false, "01 May 2024"),
-                    installment(16.41, 0.02, 0.43, false, "01 June 2024"), installment(15.0, 0.0, 0.0, true, "01 July 2024"));
+                    installment(11.41, 0.02, 0.43, false, "01 June 2024"), installment(20.0, 0.0, 0.0, true, "01 July 2024"));
             // verify last installment logic.
             loanTransactionHelper.makeLoanRepayment(loanId, "Repayment", "2 March 2024", 22.0);
             verifyRepaymentSchedule(loanId, installment(100.0, null, "01 January 2024"),
                     installment(14.97, 5.03, 0.0, true, "01 February 2024"), installment(15.7, 4.3, 0.0, true, "01 March 2024"),
-                    installment(19.9, 0.1, 0.0, true, "01 April 2024"), installment(14.43, 0.0, 0.0, true, "01 May 2024"),
-                    installment(20.0, 0.0, 0.0, true, "01 June 2024"), installment(15.0, 0.0, 0.0, true, "01 July 2024"));
+                    installment(19.9, 0.1, 0.0, true, "01 April 2024"), installment(9.43, 0.0, 0.0, true, "01 May 2024"),
+                    installment(20.0, 0.0, 0.0, true, "01 June 2024"), installment(20.0, 0.0, 0.0, true, "01 July 2024"));
         });
     }
 
