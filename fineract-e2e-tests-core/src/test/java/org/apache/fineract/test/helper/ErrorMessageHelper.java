@@ -126,7 +126,7 @@ public final class ErrorMessageHelper {
                 loanIdStr);
     }
 
-    public static String chargeOffUndoFailureDueToMonetaryActivityBefore(Long loanId) {
+    public static String chargeOffFailureDueToMonetaryActivityBefore(Long loanId) {
         String loanIdStr = String.valueOf(loanId);
         return String.format("Loan: %s charge-off cannot be executed. Loan has monetary activity after the charge-off transaction date!",
                 loanIdStr);
@@ -928,5 +928,13 @@ public final class ErrorMessageHelper {
         return String.format("%nNumber of lines does not match in Loan Tranche Details tab and expected datatable of resource %s." //
                 + "%nNumber of disbursement details tab lines: %s %nNumber of expected datatable lines: %s%n", resourceId, actual,
                 expected);
+    }
+
+    public static String addInterestPauseForNotInterestBearingLoanFailure() {
+        return "Interest pause is only supported for interest bearing loans.";
+    }
+
+    public static String addInterestPauseForNotInactiveLoanFailure() {
+        return "Operations on interest pauses are restricted to active loans.";
     }
 }

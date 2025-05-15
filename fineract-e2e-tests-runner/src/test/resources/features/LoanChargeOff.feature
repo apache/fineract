@@ -635,7 +635,7 @@ Feature: Charge-off
     When Admin sets the business date to "22 February 2023"
     When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "22 February 2023" with 200 EUR transaction amount and system-generated Idempotency key
     When Admin sets the business date to "23 February 2023"
-    Then Charge-off undo is not possible on "21 February 2023"
+    Then Charge-off transaction is not possible on "21 February 2023"
     Then Loan Repayment schedule has 1 periods, with the following data for periods:
       | Nr | Days | Date            | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
       |    |      | 01 January 2023 |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0   |            |       |             |
@@ -664,7 +664,7 @@ Feature: Charge-off
     When Admin sets the business date to "24 February 2023"
     When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "24 February 2023" with 200 EUR transaction amount and system-generated Idempotency key
     When Admin sets the business date to "25 February 2023"
-    Then Charge-off undo is not possible on "23 February 2023"
+    Then Charge-off transaction is not possible on "23 February 2023"
     Then Loan Repayment schedule has 1 periods, with the following data for periods:
       | Nr | Days | Date            | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
       |    |      | 01 January 2023 |           | 1000.0          |               |          | 0.0  |           | 0.0    | 0.0   |            |       |             |
@@ -7982,7 +7982,7 @@ Feature: Charge-off
       | 01 January 2024  | Disbursement       | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 22 January 2024  | Accrual            | 0.4    | 0.0       | 0.4      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 23 January 2024  | Repayment          | 17.01  | 16.6      | 0.41     | 0.0  | 0.0       | 83.4         | false    | false    |
-    Then Charge-off undo is not possible on "05 January 2024"
+    Then Charge-off transaction is not possible on "05 January 2024"
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -8040,7 +8040,7 @@ Feature: Charge-off
       | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement       | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 23 January 2024  | Goodwill Credit    | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 90.0         | false    | false    |
-    Then Charge-off undo is not possible on "05 January 2024"
+    Then Charge-off transaction is not possible on "05 January 2024"
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date  | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |            | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
@@ -8082,7 +8082,7 @@ Feature: Charge-off
     When Admin sets the business date to "23 January 2024"
     When Admin adds "LOAN_SNOOZE_FEE" due date charge with "23 January 2024" due date and 5 EUR transaction amount
     And Admin waives charge
-    Then Charge-off undo is not possible on "05 January 2024"
+    Then Charge-off transaction is not possible on "05 January 2024"
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Waived | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |        |             |
@@ -8102,8 +8102,8 @@ Feature: Charge-off
     And Loan Charges tab has the following data:
       | Name       | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
       | Snooze fee | false     | Specified due date | 23 January 2024 | Flat             | 5.0  | 0.0  | 5.0    | 0.0         |
-# --- check if it's forbidden to do charge-щаа before transaction with later date ---#
-    Then Charge-off undo is not possible on "05 January 2024"
+# --- check if it's forbidden to do charge-off before transaction with later date ---#
+    Then Charge-off transaction is not possible on "05 January 2024"
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Waived | Outstanding |
       |    |      | 01 January 2024  |                  | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |        |             |
@@ -8165,7 +8165,7 @@ Feature: Charge-off
     And Loan Charges tab has the following data:
       | Name    | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
       | NSF fee | true      | Specified due date | 23 January 2024 | Flat             | 5.0  | 0.0  | 0.0    | 5.0         |
-    Then Charge-off undo is not possible on "05 January 2024" due to monetary activity before
+    Then Charge-off transaction is not possible on "05 January 2024" due to monetary activity before
 # --- waive charge --- #
     Then Admin waives charge
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
@@ -8187,7 +8187,7 @@ Feature: Charge-off
     And Loan Charges tab has the following data:
       | Name    | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
       | NSF fee | true      | Specified due date | 23 January 2024 | Flat             | 5.0  | 0.0  | 5.0    | 0.0         |
-    Then Charge-off undo is not possible on "05 January 2024"
+    Then Charge-off transaction is not possible on "05 January 2024"
 # --- undo waive charge ---#
     Then Admin makes waive undone for charge
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
@@ -8209,7 +8209,7 @@ Feature: Charge-off
     And Loan Charges tab has the following data:
       | Name    | isPenalty | Payment due at     | Due as of       | Calculation type | Due  | Paid | Waived | Outstanding |
       | NSF fee | true      | Specified due date | 23 January 2024 | Flat             | 5.0  | 0.0  | 0.0    | 5.0         |
-    Then Charge-off undo is not possible on "05 January 2024" due to monetary activity before
+    Then Charge-off transaction is not possible on "05 January 2024" due to monetary activity before
 
   @TestRailId:C3611
   Scenario: As a user I want to verify that backdated transactions are allowed after charge-off and backdated full repayment, interestRecalculation = false
