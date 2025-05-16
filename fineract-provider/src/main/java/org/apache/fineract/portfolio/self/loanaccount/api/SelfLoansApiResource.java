@@ -56,15 +56,18 @@ import org.apache.fineract.portfolio.loanaccount.exception.NotSupportedLoanTempl
 import org.apache.fineract.portfolio.loanaccount.guarantor.api.GuarantorsApiResource;
 import org.apache.fineract.portfolio.loanaccount.guarantor.data.GuarantorData;
 import org.apache.fineract.portfolio.self.client.service.AppuserClientMapperReadService;
+import org.apache.fineract.portfolio.self.config.SelfServiceModuleIsEnabledCondition;
 import org.apache.fineract.portfolio.self.loanaccount.data.SelfLoansDataValidator;
 import org.apache.fineract.portfolio.self.loanaccount.service.AppuserLoansMapperReadService;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/self/loans")
 @Component
 @Tag(name = "Self Loans", description = "")
 @RequiredArgsConstructor
+@Conditional(SelfServiceModuleIsEnabledCondition.class)
 public class SelfLoansApiResource {
 
     private final PlatformSecurityContext context;

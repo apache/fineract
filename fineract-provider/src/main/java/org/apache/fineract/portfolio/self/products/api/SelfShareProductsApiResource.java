@@ -33,12 +33,15 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.accounts.constants.ShareAccountApiConstants;
 import org.apache.fineract.portfolio.products.api.ProductsApiResource;
 import org.apache.fineract.portfolio.self.client.service.AppuserClientMapperReadService;
+import org.apache.fineract.portfolio.self.config.SelfServiceModuleIsEnabledCondition;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/self/products/share")
 @Component
 @Tag(name = "Self Share Products", description = "")
 @RequiredArgsConstructor
+@Conditional(SelfServiceModuleIsEnabledCondition.class)
 public class SelfShareProductsApiResource {
 
     private final ProductsApiResource productsApiResource;

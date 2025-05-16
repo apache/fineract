@@ -33,12 +33,15 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.api.SavingsProductsApiResource;
 import org.apache.fineract.portfolio.self.client.service.AppuserClientMapperReadService;
+import org.apache.fineract.portfolio.self.config.SelfServiceModuleIsEnabledCondition;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/self/savingsproducts")
 @Component
 @Tag(name = "Self Savings Products", description = "")
 @RequiredArgsConstructor
+@Conditional(SelfServiceModuleIsEnabledCondition.class)
 public class SelfSavingsProductsApiResource {
 
     private final SavingsProductsApiResource savingsProductsApiResource;

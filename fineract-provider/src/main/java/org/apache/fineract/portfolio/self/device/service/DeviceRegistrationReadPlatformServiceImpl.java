@@ -16,17 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.gcm.service;
+package org.apache.fineract.portfolio.self.device.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.gcm.domain.DeviceRegistrationData;
-import org.apache.fineract.infrastructure.gcm.exception.DeviceRegistrationNotFoundException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.data.ClientData;
+import org.apache.fineract.portfolio.self.device.domain.DeviceRegistrationData;
+import org.apache.fineract.portfolio.self.device.exception.DeviceRegistrationNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;

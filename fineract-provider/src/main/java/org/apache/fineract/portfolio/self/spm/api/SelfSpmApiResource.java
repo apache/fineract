@@ -28,8 +28,10 @@ import jakarta.ws.rs.core.MediaType;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.self.config.SelfServiceModuleIsEnabledCondition;
 import org.apache.fineract.spm.api.SpmApiResource;
 import org.apache.fineract.spm.data.SurveyData;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @Tag(name = "Self Spm", description = "")
 @RequiredArgsConstructor
+@Conditional(SelfServiceModuleIsEnabledCondition.class)
 public class SelfSpmApiResource {
 
     private final PlatformSecurityContext securityContext;

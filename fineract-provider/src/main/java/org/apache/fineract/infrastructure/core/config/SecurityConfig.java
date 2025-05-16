@@ -19,11 +19,13 @@
 
 package org.apache.fineract.infrastructure.core.config;
 
+import static org.apache.fineract.infrastructure.security.vote.SelfServiceUserAuthorizationManager.selfServiceUserAuthManager;
 import static org.springframework.security.authorization.AuthenticatedAuthorizationManager.fullyAuthenticated;
 import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasAuthority;
 import static org.springframework.security.authorization.AuthorizationManagers.allOf;
 import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import org.apache.fineract.commands.domain.CommandSourceRepository;
@@ -60,14 +62,17 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -123,20 +128,27 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http //
                 .securityMatcher(antMatcher("/api/**")).authorizeHttpRequests((auth) -> {
+                    List<AuthorizationManager<RequestAuthorizationContext>> authorizationManagers = new ArrayList<>();
+                    authorizationManagers.add(fullyAuthenticated());
+                    authorizationManagers.add(hasAuthority("TWOFACTOR_AUTHENTICATED"));
+                    if (fineractProperties.getModule().getSelfService().isEnabled()) {
+                        auth.requestMatchers(antMatcher(HttpMethod.POST, "/api/*/self/authentication")).permitAll() //
+                                .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/self/registration")).permitAll() //
+                                .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/self/registration/user")).permitAll(); //
+                        authorizationManagers.add(selfServiceUserAuthManager());
+                    }
                     auth.requestMatchers(antMatcher(HttpMethod.OPTIONS, "/api/**")).permitAll() //
                             .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/echo")).permitAll() //
                             .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/authentication")).permitAll() //
-                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/self/authentication")).permitAll() //
-                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/self/registration")).permitAll() //
-                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/self/registration/user")).permitAll() //
                             .requestMatchers(antMatcher(HttpMethod.PUT, "/api/*/instance-mode")).permitAll() //
                             .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated() //
                             .requestMatchers(antMatcher("/api/*/twofactor")).fullyAuthenticated() //
                             .requestMatchers(antMatcher("/api/**"))
-                            .access(allOf(fullyAuthenticated(), hasAuthority("TWOFACTOR_AUTHENTICATED"))); //
+                            .access(allOf(authorizationManagers.toArray(new AuthorizationManager[0]))); //
                 }).httpBasic((httpBasic) -> httpBasic.authenticationEntryPoint(basicAuthenticationEntryPoint())) //
-                .cors(Customizer.withDefaults()).csrf((csrf) -> csrf.disable()) // NOSONAR only creating a service that
-                                                                                // is used by non-browser clients
+                .cors(Customizer.withDefaults()).csrf(AbstractHttpConfigurer::disable) // NOSONAR only creating a
+                                                                                       // service that
+                // is used by non-browser clients
                 .sessionManagement((smc) -> smc.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //
                 .addFilterBefore(tenantAwareBasicAuthenticationFilter(), SecurityContextHolderFilter.class) //
                 .addFilterAfter(requestResponseFilter(), ExceptionTranslationFilter.class) //

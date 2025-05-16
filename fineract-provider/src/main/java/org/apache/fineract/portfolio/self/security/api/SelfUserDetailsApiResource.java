@@ -30,7 +30,9 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.security.api.UserDetailsApiResource;
+import org.apache.fineract.portfolio.self.config.SelfServiceModuleIsEnabledCondition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/self/userdetails")
@@ -38,6 +40,7 @@ import org.springframework.stereotype.Component;
 @ConditionalOnProperty("fineract.security.oauth.enabled")
 @Tag(name = "Self User Details", description = "")
 @RequiredArgsConstructor
+@Conditional(SelfServiceModuleIsEnabledCondition.class)
 public class SelfUserDetailsApiResource {
 
     private final UserDetailsApiResource userDetailsApiResource;

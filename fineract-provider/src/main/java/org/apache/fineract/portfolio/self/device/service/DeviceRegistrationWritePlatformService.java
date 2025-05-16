@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.gcm.service;
+package org.apache.fineract.portfolio.self.device.service;
 
-import org.apache.fineract.infrastructure.gcm.domain.DeviceRegistration;
+import org.apache.fineract.portfolio.self.device.domain.DeviceRegistration;
 
 public interface DeviceRegistrationWritePlatformService {
 

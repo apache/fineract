@@ -33,7 +33,9 @@ import jakarta.ws.rs.core.MediaType;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.security.api.AuthenticationApiResource;
 import org.apache.fineract.infrastructure.security.api.AuthenticationApiResourceSwagger;
+import org.apache.fineract.portfolio.self.config.SelfServiceModuleIsEnabledCondition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -41,6 +43,7 @@ import org.springframework.stereotype.Component;
 @Path("/v1/self/authentication")
 @Tag(name = "Self Authentication", description = "Authenticates the credentials provided and returns the set roles and permissions allowed")
 @RequiredArgsConstructor
+@Conditional(SelfServiceModuleIsEnabledCondition.class)
 public class SelfAuthenticationApiResource {
 
     private final AuthenticationApiResource authenticationApiResource;

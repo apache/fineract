@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.gcm.domain;
+package org.apache.fineract.portfolio.self.device.domain;
 
 import java.time.OffsetDateTime;
 import lombok.Getter;
