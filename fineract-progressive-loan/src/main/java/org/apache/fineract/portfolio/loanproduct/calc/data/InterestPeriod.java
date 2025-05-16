@@ -76,14 +76,15 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
     }
 
     public static InterestPeriod empty(@NotNull RepaymentPeriod repaymentPeriod, MathContext mc) {
-        return new InterestPeriod(repaymentPeriod, null, null, null, null, null, null, null, null, null,null, mc, false);
+        return new InterestPeriod(repaymentPeriod, null, null, null, null, null, null, null, null, null, null, mc, false);
     }
 
     public static InterestPeriod copy(@NotNull RepaymentPeriod repaymentPeriod, @NotNull InterestPeriod interestPeriod) {
         return new InterestPeriod(repaymentPeriod, interestPeriod.getFromDate(), interestPeriod.getDueDate(),
                 interestPeriod.getRateFactor(), interestPeriod.getRateFactorTillPeriodDueDate(), interestPeriod.getCreditedPrincipal(),
                 interestPeriod.getCreditedInterest(), interestPeriod.getDisbursementAmount(), interestPeriod.getBalanceCorrectionAmount(),
-                interestPeriod.getOutstandingLoanBalance(), interestPeriod.getCapitalizedIncomePrincipal(), interestPeriod.getMc(), interestPeriod.isPaused());
+                interestPeriod.getOutstandingLoanBalance(), interestPeriod.getCapitalizedIncomePrincipal(), interestPeriod.getMc(),
+                interestPeriod.isPaused());
     }
 
     public static InterestPeriod withEmptyAmounts(@NotNull RepaymentPeriod repaymentPeriod, @NotNull LocalDate fromDate,

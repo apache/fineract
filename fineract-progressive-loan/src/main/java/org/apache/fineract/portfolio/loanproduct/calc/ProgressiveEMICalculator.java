@@ -255,8 +255,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
     private void addCredit(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate transactionDate, Money creditedPrincipalAmount,
             Money creditedInterestAmount) {
-        scheduleModel.changeOutstandingBalanceAndUpdateInterestPeriods(transactionDate, scheduleModel.zero(), creditedPrincipalAmount, scheduleModel.zero())
-                .ifPresent(repaymentPeriod -> {
+        scheduleModel.changeOutstandingBalanceAndUpdateInterestPeriods(transactionDate, scheduleModel.zero(), creditedPrincipalAmount,
+                scheduleModel.zero()).ifPresent(repaymentPeriod -> {
                     addCreditedAmountsToInterestPeriod(scheduleModel, transactionDate, creditedPrincipalAmount, creditedInterestAmount);
                     calculateRateFactorForRepaymentPeriod(repaymentPeriod, scheduleModel);
                     calculateOutstandingBalance(scheduleModel);

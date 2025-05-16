@@ -18,10 +18,12 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import jakarta.persistence.FlushModeType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.persistence.FlushModeHandler;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -40,6 +42,7 @@ import org.springframework.stereotype.Service;
 public class LoanBalanceService {
 
     private final CapitalizedIncomeBalanceService capitalizedIncomeBalanceService;
+    private final FlushModeHandler flushModeHandler;
 
     public Money calculateTotalOverpayment(final Loan loan) {
         Money totalPaidInRepayments = loan.getTotalPaidInRepayments();
@@ -85,28 +88,30 @@ public class LoanBalanceService {
     }
 
     public void updateLoanSummaryDerivedFields(final Loan loan) {
-        if (loan.isNotDisbursed()) {
-            if (loan.getSummary() != null) {
-                loan.getSummary().zeroFields();
-            }
-            loan.setTotalOverpaid(null);
-        } else {
-            final Money overpaidBy = calculateTotalOverpayment(loan);
-            loan.setTotalOverpaid(null);
-            if (!overpaidBy.isLessThanZero()) {
-                loan.setTotalOverpaid(overpaidBy.getAmountDefaultedToNullIfZero());
-            }
+        flushModeHandler.withFlushMode(FlushModeType.COMMIT, () -> {
+            if (loan.isNotDisbursed()) {
+                if (loan.getSummary() != null) {
+                    loan.getSummary().zeroFields();
+                }
+                loan.setTotalOverpaid(null);
+            } else {
+                final Money overpaidBy = calculateTotalOverpayment(loan);
+                loan.setTotalOverpaid(null);
+                if (!overpaidBy.isLessThanZero()) {
+                    loan.setTotalOverpaid(overpaidBy.getAmountDefaultedToNullIfZero());
+                }
 
-            final Money recoveredAmount = loan.calculateTotalRecoveredPayments();
-            loan.setTotalRecovered(recoveredAmount.getAmountDefaultedToNullIfZero());
+                final Money recoveredAmount = loan.calculateTotalRecoveredPayments();
+                loan.setTotalRecovered(recoveredAmount.getAmountDefaultedToNullIfZero());
 
-            final Money principal = loan.getLoanRepaymentScheduleDetail().getPrincipal();
-            final Money capitalizedIncome = capitalizedIncomeBalanceService.calculateCapitalizedIncome(loan);
-            final Money capitalizedIncomeAdjustment = capitalizedIncomeBalanceService.calculateCapitalizedIncomeAdjustment(loan);
-            loan.getSummary().updateSummary(loan.getCurrency(), principal, loan.getRepaymentScheduleInstallments(), loan.getLoanCharges(),
-                    capitalizedIncome, capitalizedIncomeAdjustment);
-            loan.updateLoanOutstandingBalances();
-        }
+                final Money principal = loan.getLoanRepaymentScheduleDetail().getPrincipal();
+                final Money capitalizedIncome = capitalizedIncomeBalanceService.calculateCapitalizedIncome(loan);
+                final Money capitalizedIncomeAdjustment = capitalizedIncomeBalanceService.calculateCapitalizedIncomeAdjustment(loan);
+                loan.getSummary().updateSummary(loan.getCurrency(), principal, loan.getRepaymentScheduleInstallments(),
+                        loan.getLoanCharges(), capitalizedIncome, capitalizedIncomeAdjustment);
+                loan.updateLoanOutstandingBalances();
+            }
+        });
     }
 
     public void updateLoanToLastDisbursalState(final Loan loan, final LoanDisbursementDetails disbursementDetail) {
