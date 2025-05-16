@@ -89,14 +89,15 @@ public class SelfClientsApiResource {
             @QueryParam("status") @Parameter(description = "status") final String status,
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
-            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder) {
+            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder,
+            @QueryParam("legalForm") final Integer legalForm) {
 
         final Long officeId = null;
         final String externalId = null;
         final String hierarchy = null;
         final Boolean orphansOnly = null;
-        return this.clientApiResource.retrieveAll(uriInfo, officeId, externalId, displayName, firstname, lastname, status, hierarchy,
-                offset, limit, orderBy, sortOrder, orphansOnly, true);
+        return this.clientApiResource.retrieveAll(uriInfo, officeId, externalId, displayName, firstname, lastname, status, legalForm,
+                hierarchy, offset, limit, orderBy, sortOrder, orphansOnly, true);
     }
 
     @GET

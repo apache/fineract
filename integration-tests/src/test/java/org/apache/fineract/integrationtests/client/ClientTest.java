@@ -63,7 +63,7 @@ public class ClientTest extends IntegrationTest {
 
     Optional<Long> retrieveFirst() {
         GetClientsResponse clients = ok(
-                fineractClient().clients.retrieveAll21(null, null, null, null, null, null, null, 0, 1, null, null, false));
+                fineractClient().clients.retrieveAll21(null, null, null, null, null, null, null, 0, 1, null, null, false, null));
         if (clients.getTotalFilteredRecords() != null && clients.getTotalFilteredRecords() > 0) {
             return clients.getPageItems().stream().findFirst().map(item -> item.getId());
         }

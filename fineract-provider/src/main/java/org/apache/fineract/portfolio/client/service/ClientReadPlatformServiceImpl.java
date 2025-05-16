@@ -195,6 +195,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             extraCriteria += " and c.id NOT IN (select client_id from m_group_client) ";
         }
 
+        if (searchParameters.hasLegalForm()) {
+            paramList.add(searchParameters.getLegalForm());
+            extraCriteria += " and c.legal_form_enum = ? ";
+        }
+
         if (StringUtils.isNotBlank(extraCriteria)) {
             extraCriteria = extraCriteria.substring(4);
         }
