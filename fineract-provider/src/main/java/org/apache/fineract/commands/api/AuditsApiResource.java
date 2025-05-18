@@ -119,10 +119,38 @@ public class AuditsApiResource {
         extraCriteria.addNonNullCriteria("aud.resource_id = ", auditRequest.getResourceId());
         extraCriteria.addNonNullCriteria("aud.maker_id = ", auditRequest.getMakerId());
         extraCriteria.addNonNullCriteria("aud.checker_id = ", auditRequest.getCheckerId());
-        extraCriteria.addNonNullCriteria("aud.made_on_date >= ", auditRequest.getMakerDateTimeFrom());
-        extraCriteria.addNonNullCriteria("aud.made_on_date <= ", auditRequest.getMakerDateTimeTo());
-        extraCriteria.addNonNullCriteria("aud.checked_on_date >= ", auditRequest.getCheckerDateTimeFrom());
-        extraCriteria.addNonNullCriteria("aud.checked_on_date <= ", auditRequest.getCheckerDateTimeTo());
+        if (auditRequest.getMakerDateTimeFrom() != null) {
+            extraCriteria.addSubOperation((SQLBuilder criteria) -> {
+                criteria.addNonNullCriteria("aud.made_on_date >= ", auditRequest.getMakerDateTimeFrom(),
+                        SQLBuilder.WhereLogicalOperator.NONE);
+                criteria.addNonNullCriteria("aud.made_on_date_utc >= ", auditRequest.getMakerDateTimeFrom(),
+                        SQLBuilder.WhereLogicalOperator.OR);
+            });
+        }
+        if (auditRequest.getMakerDateTimeTo() != null) {
+            extraCriteria.addSubOperation((SQLBuilder criteria) -> {
+                criteria.addNonNullCriteria("aud.made_on_date <= ", auditRequest.getMakerDateTimeTo(),
+                        SQLBuilder.WhereLogicalOperator.NONE);
+                criteria.addNonNullCriteria("aud.made_on_date_utc <= ", auditRequest.getMakerDateTimeTo(),
+                        SQLBuilder.WhereLogicalOperator.OR);
+            });
+        }
+        if (auditRequest.getCheckerDateTimeFrom() != null) {
+            extraCriteria.addSubOperation((SQLBuilder criteria) -> {
+                criteria.addNonNullCriteria("aud.checked_on_date >= ", auditRequest.getCheckerDateTimeFrom(),
+                        SQLBuilder.WhereLogicalOperator.NONE);
+                criteria.addNonNullCriteria("aud.checked_on_date_utc >= ", auditRequest.getCheckerDateTimeFrom(),
+                        SQLBuilder.WhereLogicalOperator.OR);
+            });
+        }
+        if (auditRequest.getCheckerDateTimeTo() != null) {
+            extraCriteria.addSubOperation((SQLBuilder criteria) -> {
+                criteria.addNonNullCriteria("aud.checked_on_date <= ", auditRequest.getCheckerDateTimeTo(),
+                        SQLBuilder.WhereLogicalOperator.NONE);
+                criteria.addNonNullCriteria("aud.checked_on_date_utc <= ", auditRequest.getCheckerDateTimeTo(),
+                        SQLBuilder.WhereLogicalOperator.OR);
+            });
+        }
         extraCriteria.addNonNullCriteria("aud.status = ", auditRequest.getStatus());
         extraCriteria.addNonNullCriteria("aud.office_id = ", auditRequest.getOfficeId());
         extraCriteria.addNonNullCriteria("aud.group_id = ", auditRequest.getGroupId());

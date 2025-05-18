@@ -21,10 +21,12 @@ package org.apache.fineract.commands.data.request;
 import jakarta.ws.rs.QueryParam;
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 @Setter
 @Getter
@@ -43,15 +45,15 @@ public class AuditRequest implements Serializable {
     @QueryParam("makerId")
     private Long makerId;
     @QueryParam("makerDateTimeFrom")
-    private ZonedDateTime makerDateTimeFrom;
+    private String makerDateTimeFrom;
     @QueryParam("makerDateTimeTo")
-    private ZonedDateTime makerDateTimeTo;
+    private String makerDateTimeTo;
     @QueryParam("checkerId")
     private Long checkerId;
     @QueryParam("checkerDateTimeFrom")
-    private ZonedDateTime checkerDateTimeFrom;
+    private String checkerDateTimeFrom;
     @QueryParam("checkerDateTimeTo")
-    private ZonedDateTime checkerDateTimeTo;
+    private String checkerDateTimeTo;
     @QueryParam("status")
     private String status;
     @QueryParam("clientId")
@@ -66,5 +68,24 @@ public class AuditRequest implements Serializable {
     private Long savingsAccountId;
     @QueryParam("processingResult")
     private String processingResult;
+    @QueryParam("dateFormat")
+    private String dateFormat;
+    @QueryParam("locale")
+    private String locale;
 
+    public LocalDateTime getMakerDateTimeFrom() {
+        return DateUtils.convertDateTimeStringToLocalDateTime(makerDateTimeFrom, dateFormat, locale, LocalTime.MIN);
+    }
+
+    public LocalDateTime getMakerDateTimeTo() {
+        return DateUtils.convertDateTimeStringToLocalDateTime(makerDateTimeTo, dateFormat, locale, LocalTime.MAX);
+    }
+
+    public LocalDateTime getCheckerDateTimeFrom() {
+        return DateUtils.convertDateTimeStringToLocalDateTime(checkerDateTimeFrom, dateFormat, locale, LocalTime.MIN);
+    }
+
+    public LocalDateTime getCheckerDateTimeTo() {
+        return DateUtils.convertDateTimeStringToLocalDateTime(checkerDateTimeTo, dateFormat, locale, LocalTime.MAX);
+    }
 }

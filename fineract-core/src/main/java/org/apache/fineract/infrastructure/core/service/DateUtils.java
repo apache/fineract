@@ -23,18 +23,22 @@ import static java.time.temporal.ChronoUnit.DAYS;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAccessor;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 
 public final class DateUtils {
 
@@ -465,5 +469,30 @@ public final class DateUtils {
             formatter = locale == null ? DateTimeFormatter.ofPattern(format) : DateTimeFormatter.ofPattern(format, locale);
         }
         return formatter;
+    }
+
+    public static LocalDateTime convertDateTimeStringToLocalDateTime(String dateTimeStr, String dateFormat, String localeStr,
+            LocalTime fallbackTime) {
+        if (dateTimeStr == null || dateTimeStr.isBlank()) {
+            return null;
+        }
+        final Locale locale = localeStr == null ? null : JsonParserHelper.localeFromString(localeStr);
+        DateTimeFormatter formatter = getDateFormatter(dateFormat, locale);
+        TemporalAccessor parsed = formatter.parse(dateTimeStr);
+
+        boolean hasTime = parsed.isSupported(ChronoField.HOUR_OF_DAY) && parsed.isSupported(ChronoField.MINUTE_OF_HOUR);
+
+        try {
+            if (hasTime) {
+                return LocalDateTime.from(parsed);
+            } else {
+                LocalDate date = LocalDate.from(parsed);
+                return LocalDateTime.of(date, fallbackTime);
+            }
+        } catch (final DateTimeParseException e) {
+            final List<ApiParameterError> errors = List.of(ApiParameterError.parameterError("validation.msg.invalid.date.pattern",
+                    "The parameter date (" + dateTimeStr + ") format is invalid", "date", dateTimeStr));
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", errors, e);
+        }
     }
 }
