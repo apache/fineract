@@ -32,12 +32,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.data.BusinessStepNameAndOrder;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.AfterStep;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.lang.NonNull;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -51,7 +51,7 @@ public abstract class AbstractLoanItemProcessor implements ItemProcessor<Loan, L
 
     @SuppressWarnings({ "unchecked" })
     @Override
-    public Loan process(@NotNull Loan item) throws Exception {
+    public Loan process(@NonNull Loan item) throws Exception {
         Set<BusinessStepNameAndOrder> businessSteps = (Set<BusinessStepNameAndOrder>) executionContext.get(LoanCOBConstant.BUSINESS_STEPS);
         if (businessSteps == null) {
             throw new IllegalStateException("No business steps found in the execution context");
@@ -70,7 +70,7 @@ public abstract class AbstractLoanItemProcessor implements ItemProcessor<Loan, L
     }
 
     @AfterStep
-    public ExitStatus afterStep(@NotNull StepExecution stepExecution) {
+    public ExitStatus afterStep(@NonNull StepExecution stepExecution) {
         return ExitStatus.COMPLETED;
     }
 

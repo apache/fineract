@@ -29,10 +29,10 @@ import org.apache.fineract.cob.data.LoanCOBParameter;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.BeforeStep;
 import org.springframework.batch.item.ExecutionContext;
+import org.springframework.lang.NonNull;
 
 @Slf4j
 public class LoanItemReader extends AbstractLoanItemReader {
@@ -51,7 +51,7 @@ public class LoanItemReader extends AbstractLoanItemReader {
 
     @BeforeStep
     @SuppressWarnings({ "unchecked" })
-    public void beforeStep(@NotNull StepExecution stepExecution) {
+    public void beforeStep(@NonNull StepExecution stepExecution) {
         ExecutionContext executionContext = stepExecution.getExecutionContext();
         LoanCOBParameter loanCOBParameter = (LoanCOBParameter) executionContext.get(LoanCOBConstant.LOAN_COB_PARAMETER);
         List<Long> loanIds;

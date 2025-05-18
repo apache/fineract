@@ -58,7 +58,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
@@ -192,7 +192,7 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
         }
     }
 
-    @NotNull
+    @NonNull
     private static Collector<InstallmentLevelDelinquency, ?, InstallmentLevelDelinquency> delinquentAmountSummingCollector() {
         return Collectors.reducing(new InstallmentLevelDelinquency(), (item1, item2) -> {
             final InstallmentLevelDelinquency result = new InstallmentLevelDelinquency();
@@ -213,7 +213,7 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
         collectionData.setDelinquencyPausePeriods(result);
     }
 
-    @NotNull
+    @NonNull
     private static DelinquencyPausePeriod toDelinquencyPausePeriod(LocalDate businessDate, LoanDelinquencyActionData lda) {
         return new DelinquencyPausePeriod(!lda.getStartDate().isAfter(businessDate) && !businessDate.isAfter(lda.getEndDate()),
                 lda.getStartDate(), lda.getEndDate());

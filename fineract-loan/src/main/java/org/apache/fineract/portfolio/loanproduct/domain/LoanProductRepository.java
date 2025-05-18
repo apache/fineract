@@ -21,11 +21,11 @@ package org.apache.fineract.portfolio.loanproduct.domain;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.NonNull;
 
 public interface LoanProductRepository extends JpaRepository<LoanProduct, Long>, JpaSpecificationExecutor<LoanProduct> {
 
@@ -40,5 +40,5 @@ public interface LoanProductRepository extends JpaRepository<LoanProduct, Long>,
 
     @Override
     @Query("SELECT CASE WHEN COUNT(loanProduct)>0 THEN TRUE ELSE FALSE END FROM LoanProduct loanProduct WHERE loanProduct.id = :loanProductId")
-    boolean existsById(@NotNull @Param("loanProductId") Long loanProductId);
+    boolean existsById(@NonNull @Param("loanProductId") Long loanProductId);
 }

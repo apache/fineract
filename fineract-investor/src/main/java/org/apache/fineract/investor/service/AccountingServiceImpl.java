@@ -44,7 +44,7 @@ import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.PortfolioProductType;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -97,7 +97,7 @@ public class AccountingServiceImpl implements AccountingService {
         });
     }
 
-    @NotNull
+    @NonNull
     private List<JournalEntry> createJournalEntries(final Loan loan, final ExternalAssetOwnerTransfer transfer,
             final boolean isReversalOrder) {
         this.helper.checkForBranchClosures(loan.getOffice().getId(), transfer.getSettlementDate());

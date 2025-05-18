@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +34,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
+import org.springframework.lang.NonNull;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressFBWarnings(value = "RV_EXCEPTION_NOT_THROWN", justification = "False positive")
@@ -112,7 +112,7 @@ class KafkaExternalEventProducerTest {
         Mockito.verifyNoMoreInteractions(kafkaTemplate);
     }
 
-    @NotNull
+    @NonNull
     private static FineractProperties createProperties() {
         FineractProperties props = new FineractProperties();
 

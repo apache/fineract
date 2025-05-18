@@ -27,7 +27,7 @@ import java.util.Map;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -67,7 +67,7 @@ public class CreditAllocationsJsonParser {
         }
     }
 
-    @NotNull
+    @NonNull
     private List<AllocationType> getAllocationTypes(JsonArray allocationOrder) {
         if (allocationOrder != null) {
             List<Pair<Integer, AllocationType>> parsedListWithOrder = allocationOrder.asList().stream().map(json -> {

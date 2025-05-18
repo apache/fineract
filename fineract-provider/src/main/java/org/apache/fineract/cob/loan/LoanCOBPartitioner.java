@@ -33,7 +33,6 @@ import org.apache.fineract.cob.data.LoanCOBParameter;
 import org.apache.fineract.cob.data.LoanCOBPartition;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
@@ -42,6 +41,7 @@ import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.partition.support.Partitioner;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.NonNull;
 import org.springframework.util.StopWatch;
 
 @Slf4j
@@ -65,7 +65,7 @@ public class LoanCOBPartitioner implements Partitioner {
     @Setter
     private Boolean isCatchUp;
 
-    @NotNull
+    @NonNull
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
         int partitionSize = propertyService.getPartitionSize(LoanCOBConstant.JOB_NAME);

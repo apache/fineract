@@ -19,9 +19,9 @@
 package org.apache.fineract.infrastructure.springbatch;
 
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.integration.async.StepExecutionInterceptor;
 import org.springframework.batch.integration.partition.StepExecutionRequest;
+import org.springframework.lang.NonNull;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.GenericMessage;
@@ -29,7 +29,7 @@ import org.springframework.messaging.support.GenericMessage;
 public class OutputChannelInterceptor extends StepExecutionInterceptor {
 
     @Override
-    public Message<?> preSend(Message<?> message, @NotNull MessageChannel channel) {
+    public Message<?> preSend(Message<?> message, @NonNull MessageChannel channel) {
         StepExecutionRequest stepExecutionRequest = (StepExecutionRequest) message.getPayload();
         ContextualMessage contextualMessage = new ContextualMessage();
         contextualMessage.setStepExecutionRequest(stepExecutionRequest);

@@ -46,12 +46,12 @@ import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyAction;
 import org.apache.fineract.portfolio.delinquency.helper.DelinquencyEffectivePauseHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.mockito.Mockito;
+import org.springframework.lang.NonNull;
 
 class DelinquencyActionParseAndValidatorTest {
 
@@ -380,7 +380,7 @@ class DelinquencyActionParseAndValidatorTest {
         Assertions.assertEquals(localDate("19 September 2022"), parsedDelinquencyAction.getEndDate());
     }
 
-    @NotNull
+    @NonNull
     private JsonCommand delinquencyAction(@Nullable String action, @Nullable String startDate, @Nullable String endDate)
             throws JsonProcessingException {
         Map<String, Object> map = new HashMap<>();
@@ -396,7 +396,7 @@ class DelinquencyActionParseAndValidatorTest {
         return LocalDate.parse(date, DATE_TIME_FORMATTER);
     }
 
-    @NotNull
+    @NonNull
     private JsonCommand createJsonCommand(Map<String, Object> jsonMap) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonMap);

@@ -20,7 +20,7 @@ package org.apache.fineract.portfolio.loanproduct.calc.data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.lang.NonNull;
 
 public record InterestRate(//
         LocalDate effectiveFrom, //
@@ -28,7 +28,7 @@ public record InterestRate(//
 ) implements Comparable<InterestRate> {
 
     @Override
-    public int compareTo(@NotNull InterestRate o) {
+    public int compareTo(@NonNull InterestRate o) {
         return this.effectiveFrom().compareTo(o.effectiveFrom());
     }
 }

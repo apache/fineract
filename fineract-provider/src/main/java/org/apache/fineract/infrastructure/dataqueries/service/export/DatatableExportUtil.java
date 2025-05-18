@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.lang.NonNull;
 
 public final class DatatableExportUtil {
 
@@ -70,7 +70,7 @@ public final class DatatableExportUtil {
         }
     }
 
-    @NotNull
+    @NonNull
     private static String generateReportFileName(int maxLength, String folder, String extension, String reportName,
             Map<String, String> reportParams) {
         String extensionWithDot = extension.startsWith(".") ? extension : "." + extension;

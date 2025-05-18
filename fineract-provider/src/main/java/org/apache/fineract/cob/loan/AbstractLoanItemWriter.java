@@ -24,9 +24,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.data.RepositoryItemWriter;
+import org.springframework.lang.NonNull;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -35,7 +35,7 @@ public abstract class AbstractLoanItemWriter extends RepositoryItemWriter<Loan> 
     private final LoanLockingService loanLockingService;
 
     @Override
-    public void write(@NotNull Chunk<? extends Loan> items) throws Exception {
+    public void write(@NonNull Chunk<? extends Loan> items) throws Exception {
         if (!items.isEmpty()) {
             super.write(items);
             List<Long> loanIds = items.getItems().stream().map(AbstractPersistableCustom::getId).toList();

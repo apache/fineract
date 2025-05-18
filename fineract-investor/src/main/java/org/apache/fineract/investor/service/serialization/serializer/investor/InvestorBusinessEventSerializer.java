@@ -48,7 +48,7 @@ import org.apache.fineract.investor.domain.InvestorBusinessEvent;
 import org.apache.fineract.investor.service.ExternalAssetOwnersReadService;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -116,7 +116,7 @@ public class InvestorBusinessEventSerializer extends AbstractBusinessEventWithCu
         return builder.build();
     }
 
-    @NotNull
+    @NonNull
     private static String getType(ExternalTransferStatus transferStatus) {
         if (transferStatus == BUYBACK || transferStatus == BUYBACK_INTERMEDIATE) {
             return "BUYBACK";

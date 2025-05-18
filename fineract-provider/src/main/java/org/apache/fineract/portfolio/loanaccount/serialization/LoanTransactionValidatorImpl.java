@@ -90,7 +90,7 @@ import org.apache.fineract.portfolio.loanaccount.exception.LoanRepaymentSchedule
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 @Component("loanTransactionValidator")
@@ -912,7 +912,7 @@ public final class LoanTransactionValidatorImpl implements LoanTransactionValida
         }
     }
 
-    private static @NotNull BigDecimal collectTotalCollateral(Set<LoanCollateralManagement> loanCollateralManagements) {
+    private static @NonNull BigDecimal collectTotalCollateral(Set<LoanCollateralManagement> loanCollateralManagements) {
         BigDecimal totalCollateral = BigDecimal.ZERO;
 
         for (LoanCollateralManagement loanCollateralManagement : loanCollateralManagements) {
@@ -924,7 +924,7 @@ public final class LoanTransactionValidatorImpl implements LoanTransactionValida
         return totalCollateral;
     }
 
-    private static @NotNull Set<String> getDisbursementParameters(boolean isAccountTransfer) {
+    private static @NonNull Set<String> getDisbursementParameters(boolean isAccountTransfer) {
         Set<String> disbursementParameters;
 
         if (isAccountTransfer) {

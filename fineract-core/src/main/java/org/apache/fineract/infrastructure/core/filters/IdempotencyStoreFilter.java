@@ -32,7 +32,7 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.apache.fineract.commands.service.SynchronousCommandProcessingService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.lang.NonNull;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
@@ -45,8 +45,8 @@ public class IdempotencyStoreFilter extends OncePerRequestFilter {
     private final FineractProperties fineractProperties;
 
     @Override
-    protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response,
-            @NotNull FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain) throws ServletException, IOException {
         Mutable<ContentCachingResponseWrapper> wrapper = new MutableObject<>();
         if (helper.isAllowedContentTypeRequest(request)) {
             wrapper.setValue(new ContentCachingResponseWrapper(response));

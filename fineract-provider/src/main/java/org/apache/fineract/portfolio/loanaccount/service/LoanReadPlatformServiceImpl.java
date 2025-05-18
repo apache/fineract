@@ -137,13 +137,13 @@ import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
@@ -1228,7 +1228,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         }
 
         @Override
-        public LoanScheduleData extractData(@NotNull final ResultSet rs) throws SQLException, DataAccessException {
+        public LoanScheduleData extractData(@NonNull final ResultSet rs) throws SQLException, DataAccessException {
             BigDecimal waivedChargeAmount = BigDecimal.ZERO;
             for (DisbursementData disbursementDetail : disbursementData) {
                 waivedChargeAmount = waivedChargeAmount.add(disbursementDetail.getWaivedChargeAmount());
