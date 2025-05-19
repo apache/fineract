@@ -1305,7 +1305,7 @@ class ProgressiveEMICalculatorTest {
         final LocalDate startDay = LocalDate.of(2024, 1, 1);
 
         emiCalculator.payInterest(interestModel, dueDate, startDay.plusDays(3), toMoney(0.56));
-        emiCalculator.chargebackInterest(interestModel, startDay.plusDays(3), toMoney(0.0));
+        emiCalculator.creditInterest(interestModel, startDay.plusDays(3), toMoney(0.0));
         emiCalculator.addBalanceCorrection(interestModel, startDay.plusDays(3), toMoney(0.0));
 
         checkDailyInterest(interestModel, dueDate, startDay, 1, 0.19, 0.19);
@@ -2403,7 +2403,7 @@ class ProgressiveEMICalculatorTest {
             emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 1), toMoney(0.49));
 
             // full chargeback on duedate
-            emiCalculator.chargebackPrincipal(interestSchedule, LocalDate.of(2024, 3, 1), toMoney(17.01));
+            emiCalculator.creditPrincipal(interestSchedule, LocalDate.of(2024, 3, 1), toMoney(17.01));
 
             checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
             checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
@@ -2456,7 +2456,7 @@ class ProgressiveEMICalculatorTest {
             emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 1), toMoney(0.49));
 
             // partial chargeback
-            emiCalculator.chargebackPrincipal(interestSchedule, LocalDate.of(2024, 3, 1), toMoney(15.0));
+            emiCalculator.creditPrincipal(interestSchedule, LocalDate.of(2024, 3, 1), toMoney(15.0));
 
             checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
             checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
@@ -2467,7 +2467,7 @@ class ProgressiveEMICalculatorTest {
             checkPeriod(interestSchedule, 5, 0, 17.09, 0.005833333333, 0.0991083333276, 0.1, 16.99, 0.0);
 
             // full chargeback
-            emiCalculator.chargebackPrincipal(interestSchedule, LocalDate.of(2024, 3, 1), toMoney(17.01));
+            emiCalculator.creditPrincipal(interestSchedule, LocalDate.of(2024, 3, 1), toMoney(17.01));
 
             checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
             checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
@@ -2520,7 +2520,7 @@ class ProgressiveEMICalculatorTest {
             emiCalculator.payInterest(interestSchedule, LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 1), toMoney(0.49));
 
             // full chargeback on duedate
-            emiCalculator.chargebackPrincipal(interestSchedule, LocalDate.of(2024, 3, 15), toMoney(17.01));
+            emiCalculator.creditPrincipal(interestSchedule, LocalDate.of(2024, 3, 15), toMoney(17.01));
 
             checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
             checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
@@ -2579,8 +2579,8 @@ class ProgressiveEMICalculatorTest {
 
         // chargeback
         txnDate = LocalDate.of(2024, 3, 1);
-        emiCalculator.chargebackPrincipal(interestSchedule, txnDate, toMoney(16.52));
-        emiCalculator.chargebackInterest(interestSchedule, txnDate, toMoney(0.49));
+        emiCalculator.creditPrincipal(interestSchedule, txnDate, toMoney(16.52));
+        emiCalculator.creditInterest(interestSchedule, txnDate, toMoney(0.49));
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
         checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
@@ -2637,8 +2637,8 @@ class ProgressiveEMICalculatorTest {
 
         // chargeback
         txnDate = LocalDate.of(2024, 7, 1);
-        emiCalculator.chargebackPrincipal(interestSchedule, txnDate, toMoney(16.52));
-        emiCalculator.chargebackInterest(interestSchedule, txnDate, toMoney(0.49));
+        emiCalculator.creditPrincipal(interestSchedule, txnDate, toMoney(16.52));
+        emiCalculator.creditInterest(interestSchedule, txnDate, toMoney(0.49));
 
         checkPeriod(interestSchedule, 5, 0, 17.00, 0.005833333333, 0.0985833333276, 0.59, 33.42, 0.0);
     }
@@ -2689,8 +2689,8 @@ class ProgressiveEMICalculatorTest {
 
         // chargeback
         txnDate = LocalDate.of(2024, 3, 1);
-        emiCalculator.chargebackPrincipal(interestSchedule, txnDate, toMoney(14.51));
-        emiCalculator.chargebackInterest(interestSchedule, txnDate, toMoney(0.49));
+        emiCalculator.creditPrincipal(interestSchedule, txnDate, toMoney(14.51));
+        emiCalculator.creditInterest(interestSchedule, txnDate, toMoney(0.49));
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
         checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
@@ -2747,7 +2747,7 @@ class ProgressiveEMICalculatorTest {
 
         // chargeback
         txnDate = LocalDate.of(2024, 3, 1);
-        emiCalculator.chargebackPrincipal(interestSchedule, txnDate, toMoney(15.0));
+        emiCalculator.creditPrincipal(interestSchedule, txnDate, toMoney(15.0));
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
         checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
@@ -2804,10 +2804,10 @@ class ProgressiveEMICalculatorTest {
 
         // chargeback 1st
         txnDate = LocalDate.of(2024, 3, 1);
-        emiCalculator.chargebackPrincipal(interestSchedule, txnDate, toMoney(15.0));
+        emiCalculator.creditPrincipal(interestSchedule, txnDate, toMoney(15.0));
         // chargeback 2nd
-        emiCalculator.chargebackPrincipal(interestSchedule, txnDate, toMoney(16.52));
-        emiCalculator.chargebackInterest(interestSchedule, txnDate, toMoney(0.49));
+        emiCalculator.creditPrincipal(interestSchedule, txnDate, toMoney(16.52));
+        emiCalculator.creditInterest(interestSchedule, txnDate, toMoney(0.49));
 
         checkPeriod(interestSchedule, 0, 0, 17.01, 0.0, 0.0, 0.58, 16.43, 83.57);
         checkPeriod(interestSchedule, 0, 1, 17.01, 0.005833333333, 0.5833333333, 0.58, 16.43, 83.57);
@@ -3098,8 +3098,8 @@ class ProgressiveEMICalculatorTest {
 
         // chargeback
         txnDate = LocalDate.of(2024, 3, 15);
-        emiCalculator.chargebackPrincipal(interestSchedule, txnDate, toMoney(16.52));
-        emiCalculator.chargebackInterest(interestSchedule, txnDate, toMoney(0.49));
+        emiCalculator.creditPrincipal(interestSchedule, txnDate, toMoney(16.52));
+        emiCalculator.creditInterest(interestSchedule, txnDate, toMoney(0.49));
 
         PeriodDueDetails dueAmounts = emiCalculator.getDueAmounts(interestSchedule, LocalDate.of(2024, 4, 1), txnDate);
         Assertions.assertEquals(33.09, toDouble(interestSchedule.repaymentPeriods().get(2).getDuePrincipal()));
@@ -3172,10 +3172,10 @@ class ProgressiveEMICalculatorTest {
 
         // chargeback
         txnDate = LocalDate.of(2024, 3, 15);
-        emiCalculator.chargebackPrincipal(interestScheduleExpected, txnDate, toMoney(16.52));
-        emiCalculator.chargebackInterest(interestScheduleExpected, txnDate, toMoney(0.49));
-        emiCalculator.chargebackPrincipal(interestScheduleActual, txnDate, toMoney(16.52));
-        emiCalculator.chargebackInterest(interestScheduleActual, txnDate, toMoney(0.49));
+        emiCalculator.creditPrincipal(interestScheduleExpected, txnDate, toMoney(16.52));
+        emiCalculator.creditInterest(interestScheduleExpected, txnDate, toMoney(0.49));
+        emiCalculator.creditPrincipal(interestScheduleActual, txnDate, toMoney(16.52));
+        emiCalculator.creditInterest(interestScheduleActual, txnDate, toMoney(0.49));
 
         verifyAllPeriods(interestScheduleExpected, interestScheduleActual);
         interestScheduleActual = copyJson(interestScheduleExpected);

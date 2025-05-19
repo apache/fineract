@@ -304,8 +304,7 @@ public class ProgressiveLoanInterestScheduleModel {
     }
 
     /**
-     * Gives back the total due interest amount in the whole repayment schedule. Also includes chargeback interest
-     * amount.
+     * Gives back the total due interest amount in the whole repayment schedule. Also includes credited interest amount.
      *
      * @return
      */
@@ -315,7 +314,7 @@ public class ProgressiveLoanInterestScheduleModel {
 
     /**
      * Gives back the total due principal amount in the whole repayment schedule based on disbursements. Do not contain
-     * chargeback principal amount.
+     * credited principal amount.
      *
      * @return
      */
@@ -342,12 +341,12 @@ public class ProgressiveLoanInterestScheduleModel {
     }
 
     /**
-     * Gives back the total chargeback principal amount in the whole repayment schedule.
+     * Gives back the total credited principal amount in the whole repayment schedule.
      *
      * @return
      */
-    public Money getTotalChargebackPrincipal() {
-        return MathUtil.negativeToZero(repaymentPeriods().stream().map(RepaymentPeriod::getChargebackPrincipal).reduce(zero, Money::plus),
+    public Money getTotalCreditedPrincipal() {
+        return MathUtil.negativeToZero(repaymentPeriods().stream().map(RepaymentPeriod::getCreditedPrincipal).reduce(zero, Money::plus),
                 mc);
     }
 

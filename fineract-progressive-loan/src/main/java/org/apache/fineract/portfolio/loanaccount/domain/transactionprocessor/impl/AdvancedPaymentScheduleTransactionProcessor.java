@@ -431,8 +431,108 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         processCreditTransaction(loanTransaction, ctx);
     }
 
-    protected void handleCreditBalanceRefund(LoanTransaction transaction, TransactionCtx ctx) {
-        super.handleCreditBalanceRefund(transaction, ctx.getCurrency(), ctx.getInstallments(), ctx.getOverpaymentHolder());
+    protected void handleCreditBalanceRefund(LoanTransaction loanTransaction, TransactionCtx ctx) {
+        MonetaryCurrency currency = ctx.getCurrency();
+        List<LoanRepaymentScheduleInstallment> installments = ctx.getInstallments();
+        MoneyHolder overpaymentHolder = ctx.getOverpaymentHolder();
+
+        if (ctx instanceof ProgressiveTransactionCtx progressiveTransactionCtx
+                && loanTransaction.getLoan().isInterestBearingAndInterestRecalculationEnabled()) {
+            var model = progressiveTransactionCtx.getModel();
+
+            // Copy and paste Logic from super.handleCreditBalanceRefund
+            loanTransaction.resetDerivedComponents();
+            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings = new ArrayList<>();
+            final Comparator<LoanRepaymentScheduleInstallment> byDate = Comparator.comparing(LoanRepaymentScheduleInstallment::getDueDate);
+            List<LoanRepaymentScheduleInstallment> installmentToBeProcessed = installments.stream().filter(i -> !i.isDownPayment())
+                    .sorted(byDate).toList();
+            final Money zeroMoney = Money.zero(currency);
+            Money transactionAmount = loanTransaction.getAmount(currency);
+            Money principalPortion = MathUtil.negativeToZero(loanTransaction.getAmount(currency).minus(overpaymentHolder.getMoneyObject()));
+            Money repaidAmount = MathUtil.negativeToZero(transactionAmount.minus(principalPortion));
+            loanTransaction.setOverPayments(repaidAmount);
+            overpaymentHolder.setMoneyObject(overpaymentHolder.getMoneyObject().minus(repaidAmount));
+            loanTransaction.updateComponents(principalPortion, zeroMoney, zeroMoney, zeroMoney);
+
+            if (principalPortion.isGreaterThanZero()) {
+                final LocalDate transactionDate = loanTransaction.getTransactionDate();
+                boolean loanTransactionMapped = false;
+                LocalDate pastDueDate = null;
+                for (final LoanRepaymentScheduleInstallment currentInstallment : installmentToBeProcessed) {
+                    pastDueDate = currentInstallment.getDueDate();
+                    if (!currentInstallment.isAdditional() && DateUtils.isAfter(currentInstallment.getDueDate(), transactionDate)) {
+
+                        emiCalculator.creditPrincipal(model, transactionDate, transactionAmount);
+                        updateRepaymentPeriods(loanTransaction, progressiveTransactionCtx);
+
+                        if (repaidAmount.isGreaterThanZero()) {
+                            emiCalculator.payPrincipal(model, currentInstallment.getDueDate(), transactionDate, repaidAmount);
+                            updateRepaymentPeriods(loanTransaction, progressiveTransactionCtx);
+                            currentInstallment.payPrincipalComponent(transactionDate, repaidAmount);
+                            transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(loanTransaction,
+                                    currentInstallment, repaidAmount, zeroMoney, zeroMoney, zeroMoney));
+                        }
+                        loanTransactionMapped = true;
+                        break;
+
+                        // If already exists an additional installment just update the due date and
+                        // principal from the Loan chargeback / CBR transaction
+                    } else if (currentInstallment.isAdditional()) {
+                        if (DateUtils.isAfter(transactionDate, currentInstallment.getDueDate())) {
+                            currentInstallment.updateDueDate(transactionDate);
+                        }
+
+                        currentInstallment.updateCredits(transactionDate, transactionAmount);
+                        if (repaidAmount.isGreaterThanZero()) {
+                            currentInstallment.payPrincipalComponent(loanTransaction.getTransactionDate(), repaidAmount);
+                            transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(loanTransaction,
+                                    currentInstallment, repaidAmount, zeroMoney, zeroMoney, zeroMoney));
+                        }
+                        loanTransactionMapped = true;
+                        break;
+                    }
+                }
+
+                // New installment will be added (N+1 scenario)
+                if (!loanTransactionMapped) {
+                    if (transactionDate.equals(pastDueDate)) {
+                        // Transaction is on Maturity date, no additional installment is needed
+                        LoanRepaymentScheduleInstallment currentInstallment = installmentToBeProcessed
+                                .get(installmentToBeProcessed.size() - 1);
+
+                        emiCalculator.creditPrincipal(model, transactionDate, transactionAmount);
+                        updateRepaymentPeriods(loanTransaction, progressiveTransactionCtx);
+
+                        if (repaidAmount.isGreaterThanZero()) {
+                            emiCalculator.payPrincipal(model, currentInstallment.getDueDate(), transactionDate, repaidAmount);
+                            updateRepaymentPeriods(loanTransaction, progressiveTransactionCtx);
+                            currentInstallment.payPrincipalComponent(transactionDate, repaidAmount);
+                            transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(loanTransaction,
+                                    currentInstallment, repaidAmount, zeroMoney, zeroMoney, zeroMoney));
+                        }
+                    } else {
+                        // transaction is after maturity date, create an additional installment
+                        Loan loan = loanTransaction.getLoan();
+                        LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(loan, (installments.size() + 1),
+                                pastDueDate, transactionDate, transactionAmount.getAmount(), zeroMoney.getAmount(), zeroMoney.getAmount(),
+                                zeroMoney.getAmount(), false, null);
+                        installment.markAsAdditional();
+                        installment.addToCreditedPrincipal(transactionAmount.getAmount());
+                        loan.addLoanRepaymentScheduleInstallment(installment);
+
+                        if (repaidAmount.isGreaterThanZero()) {
+                            installment.payPrincipalComponent(loanTransaction.getTransactionDate(), repaidAmount);
+                            transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(loanTransaction, installment,
+                                    repaidAmount, zeroMoney, zeroMoney, zeroMoney));
+                        }
+                    }
+                }
+
+                loanTransaction.updateLoanTransactionToRepaymentScheduleMappings(transactionMappings);
+            }
+        } else {
+            super.handleCreditBalanceRefund(loanTransaction, currency, installments, overpaymentHolder);
+        }
     }
 
     private boolean hasNoCustomCreditAllocationRule(LoanTransaction loanTransaction) {
@@ -549,11 +649,11 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             // handle charge back before or on last installments due date
 
             if (chargebackAllocation.get(PRINCIPAL).isGreaterThanZero()) {
-                emiCalculator.chargebackPrincipal(model, loanTransaction.getTransactionDate(), chargebackAllocation.get(PRINCIPAL));
+                emiCalculator.creditPrincipal(model, loanTransaction.getTransactionDate(), chargebackAllocation.get(PRINCIPAL));
             }
 
             if (chargebackAllocation.get(INTEREST).isGreaterThanZero()) {
-                emiCalculator.chargebackInterest(model, loanTransaction.getTransactionDate(), chargebackAllocation.get(INTEREST));
+                emiCalculator.creditInterest(model, loanTransaction.getTransactionDate(), chargebackAllocation.get(INTEREST));
             }
 
             // update repayment periods until maturity date, for principal and interest portions
@@ -2164,8 +2264,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             if (installment != null) {
                 installment.updatePrincipal(rm.getDuePrincipal().getAmount());
                 installment.updateInterestCharged(rm.getDueInterest().getAmount());
-                installment.setCreditedInterest(rm.getChargebackInterest().getAmount());
-                installment.setCreditedPrincipal(rm.getChargebackPrincipal().getAmount());
+                installment.setCreditedInterest(rm.getCreditedInterest().getAmount());
+                installment.setCreditedPrincipal(rm.getCreditedPrincipal().getAmount());
                 installment.updateObligationsMet(ctx.getCurrency(), loanTransaction.getTransactionDate());
             }
         });

@@ -6037,10 +6037,10 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
     Then Loan Repayment schedule has 1 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
       |    |      | 01 January 2021  |           | 1000.0          |               |          | 0.0  |           | 0.0     | 0.0    |            |      |             |
-      | 1  | 31   | 01 February 2021 |           | 0.0             | 1085.63       | 5.7      | 0.0  | 0.0       | 1091.33 | 1005.7 | 1005.7     | 0.0  | 85.63       |
+      | 1  | 31   | 01 February 2021 |           | 0.0             | 1085.63       | 5.9      | 0.0  | 0.0       | 1091.53 | 1005.7 | 1005.7     | 0.0  | 85.83       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
-      | 1085.63       | 5.7      | 0.0  | 0.0       | 1091.33 | 1005.7 | 1005.7     | 0.0  | 85.63       |
+      | 1085.63       | 5.9      | 0.0  | 0.0       | 1091.53 | 1005.7 | 1005.7     | 0.0  | 85.83       |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2021  | Disbursement           | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |

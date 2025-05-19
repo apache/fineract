@@ -24,6 +24,10 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.InlineJobRequest;
+import org.apache.fineract.client.models.InlineJobResponse;
+import org.apache.fineract.client.util.Calls;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 
 @Slf4j
@@ -50,6 +54,11 @@ public class InlineLoanCOBHelper {
         log.info("------------------EXECUTE INLINE COB----------------------");
         log.info("------------------Loan IDs: {}----------------------", loanIds);
         return Utils.performServerPost(requestSpec, responseSpec, EXECUTE_INLINE_COB_API, buildInlineCOBRequest(loanIds));
+    }
+
+    public InlineJobResponse executeInlineCOB(Long loanId) {
+        return Calls.ok(FineractClientHelper.getFineractClient().inlineJobApi.executeInlineJob("LOAN_COB",
+                new InlineJobRequest().addLoanIdsItem(loanId)));
     }
 
     // TODO: Rewrite to use fineract-client instead!

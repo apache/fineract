@@ -146,7 +146,7 @@ public final class RepaymentPeriod {
     }
 
     /**
-     * Gives back calculated due interest + chargeback interest
+     * Gives back calculated due interest + credited interest
      *
      * @return
      */
@@ -169,28 +169,29 @@ public final class RepaymentPeriod {
     }
 
     /**
-     * Gives back due interest + chargeback interest OR paid interest
+     * Gives back due interest + credited interest OR paid interest
      *
      * @return
      */
     public Money getDueInterest() {
         if (dueInterestCalculation == null) {
             // Due interest might be the maximum paid if there is pay-off or early repayment
-            dueInterestCalculation = Memo.of(
-                    () -> MathUtil.max(getPaidPrincipal().isGreaterThan(getCalculatedDuePrincipal()) ? getPaidInterest()
-                            : MathUtil.min(getCalculatedDueInterest(), getEmiPlusChargeback(), false), getPaidInterest(), false),
-                    () -> new Object[] { paidPrincipal, paidInterest, interestPeriods });
+            dueInterestCalculation = Memo
+                    .of(() -> MathUtil.max(
+                            getPaidPrincipal().isGreaterThan(getCalculatedDuePrincipal()) ? getPaidInterest()
+                                    : MathUtil.min(getCalculatedDueInterest(), getEmiPlusCreditedAmounts(), false),
+                            getPaidInterest(), false), () -> new Object[] { paidPrincipal, paidInterest, interestPeriods });
         }
         return dueInterestCalculation.get();
     }
 
     /**
-     * Gives back an EMI amount which includes chargeback amounts as well
+     * Gives back an EMI amount which includes credited amounts as well
      *
      * @return
      */
-    public Money getEmiPlusChargeback() {
-        return getEmi().plus(getTotalChargebackAmount(), mc); //
+    public Money getEmiPlusCreditedAmounts() {
+        return getEmi().plus(getTotalCreditedAmount(), mc); //
     }
 
     /**
@@ -199,48 +200,49 @@ public final class RepaymentPeriod {
      * @return
      */
     public Money getCalculatedDuePrincipal() {
-        return MathUtil.negativeToZero(getEmiPlusChargeback().minus(getCalculatedDueInterest(), mc), mc);
+        return MathUtil.negativeToZero(getEmiPlusCreditedAmounts().minus(getCalculatedDueInterest(), mc), mc);
     }
 
     /**
-     * Sum of chargeback principals
+     * Sum of credited principals
      *
      * @return
      */
-    public Money getChargebackPrincipal() {
+    public Money getCreditedPrincipal() {
         return MathUtil.negativeToZero(interestPeriods.stream() //
-                .map(InterestPeriod::getChargebackPrincipal) //
+                .map(InterestPeriod::getCreditedPrincipal) //
                 .reduce(getZero(mc), (value, previous) -> value.plus(previous, mc)), mc); //
     }
 
     /**
-     * Sum of chargeback interests
+     * Sum of credited interests
      *
      * @return
      */
-    public Money getChargebackInterest() {
+    public Money getCreditedInterest() {
         return MathUtil.negativeToZero(interestPeriods.stream() //
-                .map(InterestPeriod::getChargebackInterest) //
+                .map(InterestPeriod::getCreditedInterest) //
                 .reduce(getZero(mc), (value, previous) -> value.plus(previous, mc)), mc); //
     }
 
     /**
-     * Gives back due principal + chargeback principal or paid principal
+     * Gives back due principal + credited principal or paid principal
      *
      * @return
      */
     public Money getDuePrincipal() {
         // Due principal might be the maximum paid if there is pay-off or early repayment
-        return MathUtil.max(MathUtil.negativeToZero(getEmiPlusChargeback().minus(getDueInterest(), mc), mc), getPaidPrincipal(), false);
+        return MathUtil.max(MathUtil.negativeToZero(getEmiPlusCreditedAmounts().minus(getDueInterest(), mc), mc), getPaidPrincipal(),
+                false);
     }
 
     /**
-     * Gives back sum of all chargeback principal + chargeback interest
+     * Gives back sum of all credited principal + credited interest
      *
      * @return
      */
-    public Money getTotalChargebackAmount() {
-        return getChargebackPrincipal().plus(getChargebackInterest(), mc);
+    public Money getTotalCreditedAmount() {
+        return getCreditedPrincipal().plus(getCreditedInterest(), mc);
     }
 
     /**
@@ -253,7 +255,7 @@ public final class RepaymentPeriod {
     }
 
     public boolean isFullyPaid() {
-        return getEmiPlusChargeback().isEqualTo(getTotalPaidAmount());
+        return getEmiPlusCreditedAmounts().isEqualTo(getTotalPaidAmount());
     }
 
     /**

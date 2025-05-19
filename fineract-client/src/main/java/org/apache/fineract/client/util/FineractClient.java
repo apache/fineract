@@ -79,6 +79,7 @@ import org.apache.fineract.client.services.GroupsApi;
 import org.apache.fineract.client.services.HolidaysApi;
 import org.apache.fineract.client.services.HooksApi;
 import org.apache.fineract.client.services.ImagesApi;
+import org.apache.fineract.client.services.InlineJobApi;
 import org.apache.fineract.client.services.InterestRateChartApi;
 import org.apache.fineract.client.services.InterestRateSlabAKAInterestBandsApi;
 import org.apache.fineract.client.services.JournalEntriesApi;
@@ -300,6 +301,7 @@ public final class FineractClient {
     public final ExternalAssetOwnersApi externalAssetOwners;
     public final ExternalAssetOwnerLoanProductAttributesApi externalAssetOwnerLoanProductAttributes;
     public final LoanAccountLockApi loanAccountLockApi;
+    public final InlineJobApi inlineJobApi;
 
     private FineractClient(OkHttpClient okHttpClient, Retrofit retrofit) {
         this.okHttpClient = okHttpClient;
@@ -424,6 +426,7 @@ public final class FineractClient {
         workingDays = retrofit.create(WorkingDaysApi.class);
         loanInterestPauseApi = retrofit.create(LoanInterestPauseApi.class);
         progressiveLoanApi = retrofit.create(ProgressiveLoanApi.class);
+        inlineJobApi = retrofit.create(InlineJobApi.class);
     }
 
     public static Builder builder() {
