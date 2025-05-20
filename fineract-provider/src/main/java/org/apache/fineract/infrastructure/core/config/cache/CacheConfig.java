@@ -80,13 +80,24 @@ public class CacheConfig {
         javax.cache.configuration.Configuration<Object, Object> defaultTemplate = generateCacheConfiguration(defaultMaxEntries,
                 defaultTimeToLive);
         // Scan all packages (entire classpath)
-        Reflections reflections = new Reflections(
-                new ConfigurationBuilder().setUrls(ClasspathHelper.forJavaClassPath()).addScanners(Scanners.MethodsAnnotated));
+        Reflections reflections = new Reflections(new ConfigurationBuilder().setUrls(ClasspathHelper.forJavaClassPath())
+                .addScanners(Scanners.MethodsAnnotated, Scanners.TypesAnnotated));
         // Find all methods annotated with @Cacheable
         Set<Method> annotatedMethods = reflections.getMethodsAnnotatedWith(Cacheable.class);
         Set<String> cacheNames = annotatedMethods.stream().map(method -> method.getAnnotation(Cacheable.class))
                 .flatMap(annotation -> Stream.concat(Arrays.stream(annotation.value()), Arrays.stream(annotation.cacheNames())))
                 .collect(Collectors.toSet());
+        // Find all types annotated with @Cacheable
+        Set<Class<?>> annotatedClasses = reflections.getTypesAnnotatedWith(Cacheable.class);
+        cacheNames.addAll(annotatedClasses.stream().map(clazz -> clazz.getAnnotation(Cacheable.class))
+                .flatMap(annotation -> Stream.concat(Arrays.stream(annotation.value()), Arrays.stream(annotation.cacheNames())))
+                .collect(Collectors.toSet()));
+        // Find all types annotated with @CacheConfig
+        Set<Class<?>> annotatedCacheConfigClasses = reflections
+                .getTypesAnnotatedWith(org.springframework.cache.annotation.CacheConfig.class);
+        cacheNames.addAll(annotatedCacheConfigClasses.stream()
+                .map(clazz -> clazz.getAnnotation(org.springframework.cache.annotation.CacheConfig.class))
+                .flatMap(annotation -> Arrays.stream(annotation.cacheNames())).collect(Collectors.toSet()));
         // Register the caches into the cache manager
         cacheNames.forEach(cacheName -> {
             if (cacheManager.getCache(cacheName) == null) {
