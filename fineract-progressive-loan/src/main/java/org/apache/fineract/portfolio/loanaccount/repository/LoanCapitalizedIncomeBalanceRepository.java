@@ -43,4 +43,7 @@ public interface LoanCapitalizedIncomeBalanceRepository
 
     @Query("SELECT SUM(lcib.amountAdjustment) FROM LoanCapitalizedIncomeBalance lcib WHERE lcib.loan.id = :loanId")
     BigDecimal calculateCapitalizedIncomeAdjustment(Long loanId);
+
+    @Query("SELECT lcib FROM LoanCapitalizedIncomeBalance lcib, LoanTransaction lt, LoanTransactionRelation ltr WHERE lt.loan.id = lcib.loan.id AND ltr.fromTransaction.id =:transactionId AND ltr.toTransaction.id=lt.id AND lcib.loanTransaction.id = lt.id")
+    LoanCapitalizedIncomeBalance findBalanceForAdjustment(Long transactionId);
 }

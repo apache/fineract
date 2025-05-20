@@ -27,5 +27,8 @@ public interface CapitalizedIncomePlatformService {
     @Transactional
     CommandProcessingResult addCapitalizedIncome(Long loanId, JsonCommand command);
 
+    @Transactional
+    CommandProcessingResult capitalizedIncomeAdjustment(Long loanId, Long capitalizedIncomeTransactionId, JsonCommand command);
+
     void resetBalance(Long loanId);
 }

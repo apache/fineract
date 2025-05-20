@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
 import org.apache.fineract.portfolio.common.service.Validator;
@@ -45,6 +47,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.repository.LoanCapitalizedIncomeBalanceRepository;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanTransactionValidator;
@@ -57,6 +60,7 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
     private final LoanTransactionValidator loanTransactionValidator;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository;
+    private final LoanTransactionRepository loanTransactionRepository;
 
     @Override
     public void validateCapitalizedIncome(final JsonCommand command, final Long loanId) {
@@ -118,6 +122,78 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
                 if (newTotal.compareTo(approvedAmount) > 0) {
                     baseDataValidator.reset().parameter("transactionAmount").failWithCode("exceeds.approved.amount",
                             "Sum of disbursed amount and capitalized income cannot exceed approved amount");
+                }
+            }
+
+            validatePaymentDetails(baseDataValidator, element);
+            validateNote(baseDataValidator, element);
+            validateExternalId(baseDataValidator, element);
+        });
+    }
+
+    @Override
+    public void validateCapitalizedIncomeAdjustment(JsonCommand command, Long loanId, Long capitalizedIncomeTransactionId) {
+        final String json = command.json();
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
+
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, getCapitalizedIncomeAdjustmentParameters());
+
+        Validator.validateOrThrow("loan.capitalized.incomeAdjustment", baseDataValidator -> {
+            final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
+            validateLoanClientIsActive(loan);
+            validateLoanGroupIsActive(loan);
+
+            // Validate loan is progressive
+            if (!loan.isProgressiveSchedule()) {
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("not.progressive.loan");
+            }
+
+            // Validate income capitalization is enabled
+            if (!loan.getLoanProductRelatedDetail().isEnableIncomeCapitalization()) {
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("income.capitalization.not.enabled");
+            }
+
+            // Validate loan is active
+            if (!loan.getStatus().isActive()) {
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("not.active");
+            }
+
+            final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed("transactionDate", element);
+            baseDataValidator.reset().parameter("transactionDate").value(transactionDate).notNull();
+
+            // Validate transaction date is not before disbursement date
+            if (transactionDate != null && loan.getDisbursementDate() != null && transactionDate.isBefore(loan.getDisbursementDate())) {
+                baseDataValidator.reset().parameter("transactionDate").failWithCode("before.disbursement.date",
+                        "Transaction date cannot be before disbursement date");
+            }
+
+            final BigDecimal transactionAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("transactionAmount", element);
+            baseDataValidator.reset().parameter("transactionAmount").value(transactionAmount).notNull().positiveAmount();
+
+            Optional<LoanTransaction> capitalizedIncomeTransactionOpt = loanTransactionRepository.findById(capitalizedIncomeTransactionId);
+            if (capitalizedIncomeTransactionOpt.isEmpty()) {
+                baseDataValidator.reset().parameter("capitalizedIncomeTransactionId").failWithCode("loan.transaction.not.found",
+                        "Capitalized Income transaction not found.");
+            } else {
+                // Validate not before capitalized income transaction
+                if (transactionDate != null && transactionDate.isBefore(capitalizedIncomeTransactionOpt.get().getTransactionDate())) {
+                    baseDataValidator.reset().parameter("transactionDate").failWithCode("before.capitalizedIncome.transaction.date",
+                            "Transaction date cannot be before capitalized income transaction date");
+
+                }
+                if (transactionAmount != null) {
+                    LoanCapitalizedIncomeBalance capitalizedIncomeBalance = loanCapitalizedIncomeBalanceRepository
+                            .findByLoanIdAndLoanTransactionId(loanId, capitalizedIncomeTransactionId);
+                    if (MathUtil.isLessThan(capitalizedIncomeBalance.getAmount()
+                            .subtract(MathUtil.nullToZero(capitalizedIncomeBalance.getAmountAdjustment())), transactionAmount)) {
+                        baseDataValidator.reset().parameter("transactionAmount").value(transactionAmount).failWithCode(
+                                "cannot.be.more.than.remaining.amount",
+                                " Capitalized income adjustment amount cannot be more than remaining amount");
+                    }
                 }
             }
 
@@ -277,6 +353,11 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
     }
 
     private Set<String> getCapitalizedIncomeParameters() {
+        return new HashSet<>(
+                Arrays.asList("transactionDate", "dateFormat", "locale", "transactionAmount", "paymentTypeId", "note", "externalId"));
+    }
+
+    private Set<String> getCapitalizedIncomeAdjustmentParameters() {
         return new HashSet<>(
                 Arrays.asList("transactionDate", "dateFormat", "locale", "transactionAmount", "paymentTypeId", "note", "externalId"));
     }

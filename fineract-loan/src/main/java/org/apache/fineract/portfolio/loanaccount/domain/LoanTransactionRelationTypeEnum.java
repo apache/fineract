@@ -24,7 +24,9 @@ public enum LoanTransactionRelationTypeEnum {
     CHARGEBACK(1, "loanTransactionRelationType.chargeback"), //
     CHARGE_ADJUSTMENT(2, "loanTransactionRelationType.chargeAdjustment"), //
     REPLAYED(3, "loanTransactionRelationType.replayed"), //
-    RELATED(4, "loanTransactionRelationType.related");
+    RELATED(4, "loanTransactionRelationType.related"), //
+    ADJUSTMENT(5, "loanTransactionRelationType.adjustment"), //
+    ;
 
     private final Integer value;
     private final String code;

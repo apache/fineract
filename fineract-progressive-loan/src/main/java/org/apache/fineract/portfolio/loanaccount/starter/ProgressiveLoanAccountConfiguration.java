@@ -60,9 +60,10 @@ public class ProgressiveLoanAccountConfiguration {
     @ConditionalOnMissingBean(ProgressiveLoanTransactionValidator.class)
     public ProgressiveLoanTransactionValidator progressiveLoanTransactionValidator(FromJsonHelper fromApiJsonHelper,
             LoanTransactionValidator loanTransactionValidator, LoanRepositoryWrapper loanRepositoryWrapper,
-            LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository) {
+            LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository,
+            LoanTransactionRepository loanTransactionRepository) {
         return new ProgressiveLoanTransactionValidatorImpl(fromApiJsonHelper, loanTransactionValidator, loanRepositoryWrapper,
-                loanCapitalizedIncomeBalanceRepository);
+                loanCapitalizedIncomeBalanceRepository, loanTransactionRepository);
     }
 
     @Bean

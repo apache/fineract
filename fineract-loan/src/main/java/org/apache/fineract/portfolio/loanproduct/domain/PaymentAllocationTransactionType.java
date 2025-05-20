@@ -42,7 +42,8 @@ public enum PaymentAllocationTransactionType {
     CHARGE_PAYMENT(LoanTransactionType.CHARGE_PAYMENT, "Charge payment"), //
     REFUND_FOR_ACTIVE_LOAN(LoanTransactionType.REFUND_FOR_ACTIVE_LOAN, "Refund for active loan"), //
     INTEREST_PAYMENT_WAIVER(LoanTransactionType.INTEREST_PAYMENT_WAIVER, "Interest payment waiver"), //
-    INTEREST_REFUND(LoanTransactionType.INTEREST_REFUND, "Interest refund");
+    INTEREST_REFUND(LoanTransactionType.INTEREST_REFUND, "Interest refund"), //
+    CAPITALIZED_INCOME_ADJUSTMENT(LoanTransactionType.CAPITALIZED_INCOME_ADJUSTMENT, "Capitalized income adjustment");
 
     private final LoanTransactionType loanTransactionType;
     private final String humanReadableName;

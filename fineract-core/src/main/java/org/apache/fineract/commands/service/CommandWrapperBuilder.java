@@ -3831,4 +3831,13 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId;
         return this;
     }
+
+    public CommandWrapperBuilder capitalizedIncomeAdjustment(final Long loanId, final Long transactionId) {
+        this.actionName = "CAPITALIZEDINCOMEADJUSTMENT";
+        this.entityName = "LOAN";
+        this.entityId = transactionId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/transactions/" + transactionId;
+        return this;
+    }
 }
