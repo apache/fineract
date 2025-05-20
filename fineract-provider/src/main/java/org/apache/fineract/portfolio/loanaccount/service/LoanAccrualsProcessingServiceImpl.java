@@ -358,7 +358,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
         if (progressiveAccrual && accruedTill != null && !DateUtils.isAfter(tillDate, accruedTill)) {
             if (isFinal) {
                 reverseTransactionsAfter(existingAccruals, accrualDate, addJournal);
-            } else if (existingAccruals.stream().anyMatch(t -> !t.isReversed() && !DateUtils.isBefore(t.getDateOf(), accrualDate))) {
+            } else if (isExistAccrualAfterDate(existingAccruals, accrualDate) && hasNoActiveChargeOnDate(loan, accrualDate)) {
                 return;
             }
         }
@@ -443,6 +443,14 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
                     false, false, null, false, newTransactionDTOs);
             this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
         }
+    }
+
+    private boolean isExistAccrualAfterDate(List<LoanTransaction> existingAccruals, LocalDate accrualDate) {
+        return existingAccruals.stream().anyMatch(t -> !t.isReversed() && !DateUtils.isBefore(t.getDateOf(), accrualDate));
+    }
+
+    private boolean hasNoActiveChargeOnDate(Loan loan, LocalDate accrualDate) {
+        return loan.getLoanCharges(t -> t.isActive() && DateUtils.isEqual(t.getDueDate(), accrualDate)).isEmpty();
     }
 
     private AccrualPeriodsData calculateAccrualAmounts(@NotNull final Loan loan, @NotNull final LocalDate tillDate, final boolean periodic,
