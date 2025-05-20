@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -25,7 +26,18 @@ import org.springframework.data.repository.query.Param;
 
 public interface LoanChargePaidByRepository extends JpaRepository<LoanChargePaidBy, Long>, JpaSpecificationExecutor<LoanCharge> {
 
-    @Query("select lp from LoanChargePaidBy lp where lp.loanCharge=:loanCharge and lp.installmentNumber=:installmentNumber")
-    LoanChargePaidBy getLoanChargePaidByLoanCharge(@Param("loanCharge") LoanCharge loanCharge,
-            @Param("installmentNumber") Integer installmentNo);
+    @Query("""
+            SELECT lcpb
+            FROM LoanChargePaidBy lcpb
+            JOIN lcpb.loanTransaction lt
+            JOIN lcpb.loanCharge lc
+            WHERE lt.loan = :loan
+                AND lt.reversed = false
+                AND (lt.typeOf = org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.ACCRUAL
+                    OR lt.typeOf = org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.ACCRUAL_ADJUSTMENT)
+                AND (lt.feeChargesPortion > 0 OR lt.penaltyChargesPortion > 0)
+                AND lcpb.installmentNumber IS NULL
+            """)
+    List<LoanChargePaidBy> findChargePaidByMappingsWithoutInstallmentNumber(@Param("loan") Loan loan);
+
 }

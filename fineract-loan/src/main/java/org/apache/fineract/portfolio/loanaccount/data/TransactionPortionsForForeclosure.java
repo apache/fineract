@@ -16,13 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
+package org.apache.fineract.portfolio.loanaccount.data;
 
-import java.util.List;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import java.math.BigDecimal;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 
-public interface LoanAccrualTransactionBusinessEventService {
+public interface TransactionPortionsForForeclosure {
 
-    void raiseBusinessEventForAccrualTransactions(Loan loan, List<Long> existingTransactionIds);
+    LoanTransactionType getTransactionType();
+
+    BigDecimal getInterestPortion();
+
+    BigDecimal getFeeChargesPortion();
+
+    BigDecimal getPenaltyChargesPortion();
 
 }

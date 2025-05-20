@@ -28,11 +28,11 @@ import org.springframework.lang.NonNull;
 
 public interface LoanAccrualsProcessingService {
 
-    void addPeriodicAccruals(@NotNull LocalDate tilldate) throws MultiException;
+    void addPeriodicAccruals(@NotNull LocalDate tillDate) throws MultiException;
 
-    void addPeriodicAccruals(@NotNull LocalDate tilldate, @NotNull Loan loan) throws MultiException;
+    void addPeriodicAccruals(@NotNull LocalDate tillDate, @NotNull Loan loan) throws MultiException;
 
-    void addAccruals(@NotNull LocalDate tilldate) throws MultiException;
+    void addAccruals(@NotNull LocalDate tillDate) throws MultiException;
 
     void reprocessExistingAccruals(@NotNull Loan loan);
 

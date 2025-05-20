@@ -16,13 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
+package org.apache.fineract.portfolio.loanaccount.data;
 
-import java.util.List;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import java.math.BigDecimal;
 
-public interface LoanAccrualTransactionBusinessEventService {
-
-    void raiseBusinessEventForAccrualTransactions(Loan loan, List<Long> existingTransactionIds);
-
+public record CumulativeIncomeFromIncomePosting(BigDecimal interestAmount, BigDecimal feeAmount, BigDecimal penaltyAmount) {
 }

@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import static org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.ACCRUAL;
+import static org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.ACCRUAL_ADJUSTMENT;
+
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualAdjustmentTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualTransactionCreatedBusinessEvent;
@@ -37,17 +41,17 @@ public class LoanAccrualTransactionBusinessEventServiceImpl implements LoanAccru
 
     @Override
     public void raiseBusinessEventForAccrualTransactions(final Loan loan, final List<Long> existingTransactionIds) {
-        final List<LoanTransactionType> transactionTypes = List.of(LoanTransactionType.ACCRUAL, LoanTransactionType.ACCRUAL_ADJUSTMENT);
-        final List<LoanTransaction> transactions = existingTransactionIds.isEmpty()
-                ? loanTransactionRepository.findNewTransactionsByLoanIdAndType(loan.getId(), transactionTypes)
-                : loanTransactionRepository.findNewTransactionsByLoanIdAndTypeAndNotInIds(loan.getId(), transactionTypes,
-                        existingTransactionIds);
+        final Set<LoanTransactionType> accrualTypes = Set.of(ACCRUAL, ACCRUAL_ADJUSTMENT);
+        final List<LoanTransaction> accrualTransactions = existingTransactionIds.isEmpty()
+                ? loanTransactionRepository.findNonReversedByLoanAndTypes(loan, accrualTypes)
+                : loanTransactionRepository.findNonReversedByLoanAndTypesAndNotInIds(loan, accrualTypes, existingTransactionIds);
 
-        for (final LoanTransaction transaction : transactions) {
+        accrualTransactions.forEach(transaction -> {
             final LoanTransactionBusinessEvent businessEvent = transaction.isAccrual()
                     ? new LoanAccrualTransactionCreatedBusinessEvent(transaction)
                     : new LoanAccrualAdjustmentTransactionBusinessEvent(transaction);
             businessEventNotifierService.notifyPostBusinessEvent(businessEvent);
-        }
+        });
     }
+
 }
