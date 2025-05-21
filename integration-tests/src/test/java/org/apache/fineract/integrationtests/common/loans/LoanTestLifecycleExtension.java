@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.integrationtests.common.loans;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -83,8 +85,8 @@ public class LoanTestLifecycleExtension implements AfterEachCallback {
                         new PostLoansLoanIdRequest().rejectedOnDate(dateFormatter.format(details.getTimeline().getSubmittedOnDate()))
                                 .locale("en").dateFormat(DATE_FORMAT));
             });
-            // loanIds = LoanTransactionHelper.getLoanIdsByStatusId(300);
-            // assertEquals(0, loanIds.size());
+            loanIds = LoanTransactionHelper.getLoanIdsByStatusId(300);
+            assertEquals(0, loanIds.size());
         });
     }
 }
