@@ -142,6 +142,7 @@ import org.apache.fineract.test.messaging.event.loan.transaction.LoanChargeAdjus
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanChargeOffEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanChargeOffUndoEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionAccrualActivityPostEvent;
+import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionContractTerminationPostBusinessEvent;
 import org.apache.fineract.test.messaging.store.EventStore;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
@@ -4219,5 +4220,43 @@ public class LoanStepDef extends AbstractStepDef {
 
         testContext().set(TestContextKey.LOAN_CAPITALIZED_INCOME_ADJUSTMENT_RESPONSE, adjustmentResponse);
         ErrorHelper.checkFailedApiCall(adjustmentResponse, 400);
+    }
+
+    @And("Admin successfully terminates loan contract")
+    public void makeLoanContractTermination() throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        assert loanResponse.body() != null;
+        final long loanId = loanResponse.body().getLoanId();
+
+        final PostLoansLoanIdRequest contractTerminationRequest = LoanRequestFactory.defaultLoanContractTerminationRequest();
+
+        final Response<PostLoansLoanIdResponse> loanContractTerminationResponse = loansApi
+                .stateTransitions(loanId, contractTerminationRequest, "contractTermination").execute();
+        testContext().set(TestContextKey.LOAN_CONTRACT_TERMINATION_RESPONSE, loanContractTerminationResponse);
+        ErrorHelper.checkSuccessfulApiCall(loanContractTerminationResponse);
+
+        assert loanContractTerminationResponse.body() != null;
+        final Long transactionId = loanContractTerminationResponse.body().getResourceId();
+        eventAssertion.assertEvent(LoanTransactionContractTerminationPostBusinessEvent.class, transactionId)
+                .extractingData(LoanTransactionDataV1::getLoanId).isEqualTo(loanId).extractingData(LoanTransactionDataV1::getId)
+                .isEqualTo(transactionId);
+    }
+
+    @Then("LoanTransactionContractTerminationPostBusinessEvent is raised on {string}")
+    public void checkLoanTransactionContractTerminationPostBusinessEvent(final String date) throws IOException {
+        final Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanCreateResponse.body().getLoanId();
+
+        final Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        final List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.body().getTransactions();
+        final GetLoansLoanIdTransactions loanContractTerminationTransaction = transactions.stream()
+                .filter(t -> date.equals(FORMATTER.format(t.getDate())) && "Contract Termination".equals(t.getType().getValue()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(String.format("No Contract Termination transaction found on %s", date)));
+        final Long loanContractTerminationTransactionId = loanContractTerminationTransaction.getId();
+
+        eventAssertion.assertEventRaised(LoanTransactionContractTerminationPostBusinessEvent.class, loanContractTerminationTransactionId);
     }
 }

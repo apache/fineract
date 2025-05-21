@@ -23,7 +23,9 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 public enum LoanSubStatus {
 
     INVALID(0, "loanSubStatusType.invalid"), //
-    FORECLOSED(100, "loanSubStatusType.foreclosed");
+    FORECLOSED(100, "loanSubStatusType.foreclosed"), //
+    CONTRACT_TERMINATION(900, "loanSubStatusType.contractTermination"), //
+    ;
 
     private final Integer value;
     private final String code;
@@ -34,6 +36,9 @@ public enum LoanSubStatus {
         switch (statusValue) {
             case 100:
                 enumeration = LoanSubStatus.FORECLOSED;
+            break;
+            case 900:
+                enumeration = LoanSubStatus.CONTRACT_TERMINATION;
             break;
         }
         return enumeration;
@@ -60,6 +65,10 @@ public enum LoanSubStatus {
         return this.value.equals(LoanSubStatus.FORECLOSED.getValue());
     }
 
+    public boolean isContractTermination() {
+        return this.value.equals(LoanSubStatus.CONTRACT_TERMINATION.getValue());
+    }
+
     public static EnumOptionData loanSubStatus(final int id) {
         return loanSubStatusEnum(LoanSubStatus.fromInt(id));
     }
@@ -71,6 +80,10 @@ public enum LoanSubStatus {
             case FORECLOSED:
                 optionData = new EnumOptionData(LoanSubStatus.FORECLOSED.getValue().longValue(),
                         codePrefix + LoanSubStatus.FORECLOSED.getCode(), "Foreclosed");
+            break;
+            case CONTRACT_TERMINATION:
+                optionData = new EnumOptionData(LoanSubStatus.CONTRACT_TERMINATION.getValue().longValue(),
+                        codePrefix + LoanSubStatus.CONTRACT_TERMINATION.getCode(), "Contract Termination");
             break;
             default:
                 optionData = new EnumOptionData(LoanSubStatus.INVALID.getValue().longValue(), LoanSubStatus.INVALID.getCode(), "Invalid");

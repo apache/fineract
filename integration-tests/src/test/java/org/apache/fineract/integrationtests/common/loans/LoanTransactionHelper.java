@@ -2909,6 +2909,10 @@ public class LoanTransactionHelper {
         return Calls.ok(FineractClientHelper.getFineractClient().loans.stateTransitions(loanId, request, "disburse"));
     }
 
+    public PostLoansLoanIdResponse moveLoanState(Long loanId, PostLoansLoanIdRequest request, String command) {
+        return Calls.ok(FineractClientHelper.getFineractClient().loans.stateTransitions(loanId, request, command));
+    }
+
     /**
      * Disburse loan on provided date and amount.
      *

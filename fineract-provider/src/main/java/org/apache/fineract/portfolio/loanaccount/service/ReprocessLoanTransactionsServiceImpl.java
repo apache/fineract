@@ -70,8 +70,9 @@ public class ReprocessLoanTransactionsServiceImpl implements ReprocessLoanTransa
     }
 
     private Predicate<LoanTransaction> loanTransactionForReprocessingPredicate() {
-        return transaction -> transaction.isNotReversed() && (transaction.isChargeOff() || transaction.isReAge()
-                || transaction.isAccrualActivity() || transaction.isReAmortize() || !transaction.isNonMonetaryTransaction());
+        return transaction -> transaction.isNotReversed()
+                && (transaction.isChargeOff() || transaction.isReAge() || transaction.isAccrualActivity() || transaction.isReAmortize()
+                        || !transaction.isNonMonetaryTransaction() || transaction.isContractTermination());
     }
 
     @Override

@@ -92,6 +92,7 @@ public class LoanTransactionsApiResource {
     public static final String UNDO_REAMORTIZE = "undoReAmortize";
     public static final String CAPITALIZED_INCOME = "capitalizedIncome";
     public static final String CAPITALIZED_INCOME_ADJUSTMENT = "capitalizedIncomeAdjustment";
+    public static final String CONTRACT_TERMINATION = "contractTermination";
     private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "type", "date", "currency", "amount", "externalId",
             LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME, LoanApiConstants.REVERSED_ON_DATE_PARAMNAME));
 
@@ -534,6 +535,7 @@ public class LoanTransactionsApiResource {
             case capitalizedIncome -> LoanTransactionType.CAPITALIZED_INCOME;
             case capitalizedIncomeAmortization -> LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION;
             case capitalizedIncomeAdjustment -> LoanTransactionType.CAPITALIZED_INCOME_ADJUSTMENT;
+            case contractTermination -> LoanTransactionType.CONTRACT_TERMINATION;
             default ->
                 throw new InvalidLoanTransactionTypeException("transaction", transactionTypeParam.name(), "Unknown transaction type");
         };
@@ -647,7 +649,8 @@ public class LoanTransactionsApiResource {
             transactionData = this.loanReadPlatformService.retrieveDisbursalTemplate(resolvedLoanId, false);
         } else if (CommandParameterUtil.is(commandParam, "recoverypayment")) {
             transactionData = this.loanReadPlatformService.retrieveRecoveryPaymentTemplate(resolvedLoanId);
-        } else if (CommandParameterUtil.is(commandParam, "prepayLoan")) {
+        } else if (CommandParameterUtil.is(commandParam, "prepayLoan")
+                || CommandParameterUtil.is(commandParam, LoanApiConstants.CONTRACT_TERMINATION_COMMAND)) {
             LocalDate transactionDate;
             if (transactionDateParam == null) {
                 transactionDate = DateUtils.getBusinessLocalDate();

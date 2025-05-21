@@ -219,4 +219,6 @@ public abstract class TestContextKey {
     public static final String LOAN_DISBURSEMENT_DETAIL_RESPONSE = "loanDisbursementDetailResponse";
     public static final String LOAN_CAPITALIZED_INCOME_AMORTIZATION_ID = "loanCapitalizedIncomeAmortizationId";
     public static final String LOAN_CAPITALIZED_INCOME_ADJUSTMENT_RESPONSE = "loanCapitalizedIncomeAdjustmentResponse";
+    public static final String DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALCULATION_CONTRACT_TERMINATION = "loanProductCreateResponseLP2AdvancedPaymentInterestDailyInterestRecalculationContractTermination";
+    public static final String LOAN_CONTRACT_TERMINATION_RESPONSE = "loanContractTerminationResponse";
 }

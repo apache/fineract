@@ -22,7 +22,24 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-    <!-- Sequence is starting from 5000 to make it easier to move existing liquibase changesets here -->
-    <include file="parts/5001_create_progressive_loan_model.xml" relativeToChangelogFile="true"/>
-    <include file="parts/5002_add_contract_termination_transaction.xml" relativeToChangelogFile="true"/>
+    <changeSet id="1" author="fineract">
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="LoanTransactionContractTerminationPostBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+        <insert tableName="r_enum_value">
+            <column name="enum_name" value="transaction_type_enum"/>
+            <column name="enum_id" valueNumeric="38"/>
+            <column name="enum_message_property" value="Contract Termination"/>
+            <column name="enum_value" value="Contract Termination"/>
+            <column name="enum_type" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="CONTRACT_TERMINATION_LOAN"/>
+            <column name="entity_name" value="LOAN"/>
+            <column name="action_name" value="CONTRACT_TERMINATION"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>
