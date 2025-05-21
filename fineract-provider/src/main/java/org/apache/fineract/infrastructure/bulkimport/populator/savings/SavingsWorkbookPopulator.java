@@ -31,6 +31,7 @@ import org.apache.fineract.portfolio.savings.data.SavingsProductData;
 import org.apache.poi.hssf.usermodel.HSSFDataValidationHelper;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.ss.SpreadsheetVersion;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataValidation;
 import org.apache.poi.ss.usermodel.DataValidationConstraint;
@@ -158,6 +159,7 @@ public class SavingsWorkbookPopulator extends AbstractWorkbookPopulator {
         dateCellStyle.setDataFormat(df);
         for (Integer rowNo = 1; rowNo < 1000; rowNo++) {
             Row row = worksheet.createRow(rowNo);
+            setFormatStyle(worksheet, row);
             writeFormula(SavingsConstants.CURRENCY_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"Currency_\",$D" + (rowNo + 1)
                     + "))),\"\",INDIRECT(CONCATENATE(\"Currency_\",$D" + (rowNo + 1) + ")))");
             writeFormula(SavingsConstants.DECIMAL_PLACES_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"Decimal_Places_\",$D" + (rowNo + 1)
@@ -188,6 +190,18 @@ public class SavingsWorkbookPopulator extends AbstractWorkbookPopulator {
             writeFormula(SavingsConstants.OVER_DRAFT_LIMIT_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"Overdraft_Limit_\",$D" + (rowNo + 1)
                     + "))),\"\",INDIRECT(CONCATENATE(\"Overdraft_Limit_\",$D" + (rowNo + 1) + ")))");
         }
+    }
+
+    private void setFormatStyle(Sheet worksheet, Row row) {
+        Workbook workbook = worksheet.getWorkbook();
+        CellStyle dateCellStyle = workbook.createCellStyle();
+        short df = workbook.createDataFormat().getFormat("dd/MM/yyyy");
+        dateCellStyle.setDataFormat(df);
+        Cell submittedOnCell = row.getCell(SavingsConstants.SUBMITTED_ON_DATE_COL);
+        if (submittedOnCell == null) {
+            submittedOnCell = row.createCell(SavingsConstants.SUBMITTED_ON_DATE_COL);
+        }
+        submittedOnCell.setCellStyle(dateCellStyle);
     }
 
     private void setRules(Sheet worksheet, String dateFormat) {

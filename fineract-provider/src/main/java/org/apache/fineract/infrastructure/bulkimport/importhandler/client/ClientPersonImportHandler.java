@@ -90,9 +90,9 @@ public class ClientPersonImportHandler implements ImportHandler {
             officeId = null;
         }
         String staffName = ImportHandlerUtils.readAsString(ClientPersonConstants.STAFF_NAME_COL, row);
-        Long staffId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME), staffName);
-        if (staffId == 0L) {
-            staffId = null;
+        Long staffId = null;
+        if (staffName != null) {
+            staffId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME), staffName);
         }
         ExternalId externalId = externalIdFactory.create(ImportHandlerUtils.readAsString(ClientPersonConstants.EXTERNAL_ID_COL, row));
         LocalDate submittedOn = ImportHandlerUtils.readAsDate(ClientPersonConstants.SUBMITTED_ON_COL, row);

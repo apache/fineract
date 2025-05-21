@@ -32,7 +32,10 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.poi.hssf.usermodel.HSSFDataValidationHelper;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.ss.SpreadsheetVersion;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.DataValidation;
 import org.apache.poi.ss.usermodel.DataValidationConstraint;
 import org.apache.poi.ss.usermodel.DataValidationHelper;
@@ -69,6 +72,7 @@ public class RecurringDepositTransactionWorkbookPopulator extends AbstractWorkbo
         populateSavingsTable(savingsTransactionSheet, dateFormat);
         setRules(savingsTransactionSheet, dateFormat);
         setDefaults(savingsTransactionSheet);
+        setTextFormatStyle(workbook, savingsTransactionSheet, TransactionConstants.SAVINGS_ACCOUNT_NO_COL);
     }
 
     private void setDefaults(Sheet worksheet) {
@@ -78,11 +82,33 @@ public class RecurringDepositTransactionWorkbookPopulator extends AbstractWorkbo
                 row = worksheet.createRow(rowNo);
             }
             writeFormula(TransactionConstants.PRODUCT_COL, row,
-                    "IF(ISERROR(VLOOKUP($C" + (rowNo + 1) + ",$Q$2:$S$" + (savingsAccounts.size() + 1) + ",2,FALSE)),\"\",VLOOKUP($C"
-                            + (rowNo + 1) + ",$Q$2:$S$" + (savingsAccounts.size() + 1) + ",2,FALSE))");
+                    "IF(ISERROR(VLOOKUP($C" + (rowNo + 1) + ",$R$2:$S$" + (savingsAccounts.size() + 1) + ",2,FALSE)),\"\",VLOOKUP($C"
+                            + (rowNo + 1) + ",$R$2:$T$" + (savingsAccounts.size() + 1) + ",2,FALSE))");
             writeFormula(TransactionConstants.OPENING_BALANCE_COL, row,
-                    "IF(ISERROR(VLOOKUP($C" + (rowNo + 1) + ",$Q$2:$S$" + (savingsAccounts.size() + 1) + ",3,FALSE)),\"\",VLOOKUP($C"
-                            + (rowNo + 1) + ",$Q$2:$S$" + (savingsAccounts.size() + 1) + ",3,FALSE))");
+                    "IF(ISERROR(VLOOKUP($C" + (rowNo + 1) + ",$R$2:$T$" + (savingsAccounts.size() + 1) + ",3,FALSE)),\"\",VLOOKUP($C"
+                            + (rowNo + 1) + ",$R$2:$T$" + (savingsAccounts.size() + 1) + ",3,FALSE))");
+        }
+    }
+
+    private void setTextFormatStyle(Workbook workbook, Sheet worksheet, int... textCols) {
+        CellStyle textCellStyle = workbook.createCellStyle();
+        CreationHelper createHelper = workbook.getCreationHelper();
+        short textFmt = createHelper.createDataFormat().getFormat("@");
+        textCellStyle.setDataFormat(textFmt);
+
+        for (int rowIndex = 1; rowIndex < SpreadsheetVersion.EXCEL97.getMaxRows(); rowIndex++) {
+            Row row = worksheet.getRow(rowIndex);
+            if (row == null) {
+                row = worksheet.createRow(rowIndex);
+            }
+            for (int col : textCols) {
+                Cell cell = row.getCell(col);
+                if (cell == null) {
+                    cell = row.createCell(col);
+                }
+                cell.setCellType(CellType.STRING);
+                cell.setCellStyle(textCellStyle);
+            }
         }
     }
 
@@ -114,7 +140,7 @@ public class RecurringDepositTransactionWorkbookPopulator extends AbstractWorkbo
         DataValidationConstraint paymentTypeConstraint = validationHelper.createFormulaListConstraint("PaymentTypes");
         DataValidationConstraint transactionDateConstraint = validationHelper.createDateConstraint(
                 DataValidationConstraint.OperatorType.BETWEEN,
-                "=DATEVALUE(VLOOKUP($C1,$Q$2:$T$" + (savingsAccounts.size() + 1) + ",4,FALSE))", "=TODAY()", dateFormat);
+                "=DATEVALUE(VLOOKUP($C1,$R$2:$T$" + (savingsAccounts.size() + 1) + ",4,FALSE))", "=TODAY()", dateFormat);
 
         DataValidation officeValidation = validationHelper.createValidation(officeNameConstraint, officeNameRange);
         DataValidation clientValidation = validationHelper.createValidation(clientNameConstraint, clientNameRange);
@@ -180,8 +206,8 @@ public class RecurringDepositTransactionWorkbookPopulator extends AbstractWorkbo
         for (int j = 0; j < clientsWithActiveSavings.size(); j++) {
             Name name = savingsTransactionWorkbook.createName();
             setSanitized(name, "Account_" + clientsWithActiveSavings.get(j) + "_" + clientIdsWithActiveSavings.get(j) + "_");
-            name.setRefersToFormula(TemplatePopulateImportConstants.SAVINGS_TRANSACTION_SHEET_NAME + "!$Q$"
-                    + clientNameToBeginEndIndexes.get(clientsWithActiveSavings.get(j))[0] + ":$Q$"
+            name.setRefersToFormula(TemplatePopulateImportConstants.SAVINGS_TRANSACTION_SHEET_NAME + "!$R$"
+                    + clientNameToBeginEndIndexes.get(clientsWithActiveSavings.get(j))[0] + ":$R$"
                     + clientNameToBeginEndIndexes.get(clientsWithActiveSavings.get(j))[1]);
         }
 
@@ -234,6 +260,7 @@ public class RecurringDepositTransactionWorkbookPopulator extends AbstractWorkbo
         worksheet.setColumnWidth(TransactionConstants.RECEIPT_NO_COL, 3000);
         worksheet.setColumnWidth(TransactionConstants.ROUTING_CODE_COL, 3000);
         worksheet.setColumnWidth(TransactionConstants.BANK_NO_COL, 3000);
+        worksheet.setColumnWidth(TransactionConstants.NOTE_COL, 3000);
         worksheet.setColumnWidth(TransactionConstants.LOOKUP_CLIENT_NAME_COL, 5000);
         worksheet.setColumnWidth(TransactionConstants.LOOKUP_ACCOUNT_NO_COL, 3000);
         worksheet.setColumnWidth(TransactionConstants.LOOKUP_PRODUCT_COL, 3000);
@@ -253,6 +280,7 @@ public class RecurringDepositTransactionWorkbookPopulator extends AbstractWorkbo
         writeString(TransactionConstants.RECEIPT_NO_COL, rowHeader, "Receipt No");
         writeString(TransactionConstants.ROUTING_CODE_COL, rowHeader, "Routing Code");
         writeString(TransactionConstants.BANK_NO_COL, rowHeader, "Bank No");
+        writeString(TransactionConstants.NOTE_COL, rowHeader, "Note");
         writeString(TransactionConstants.LOOKUP_CLIENT_NAME_COL, rowHeader, "Lookup Client");
         writeString(TransactionConstants.LOOKUP_ACCOUNT_NO_COL, rowHeader, "Lookup Account");
         writeString(TransactionConstants.LOOKUP_PRODUCT_COL, rowHeader, "Lookup Product");

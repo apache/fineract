@@ -94,6 +94,8 @@ public class ClientEntityWorkbookPopulator extends AbstractWorkbookPopulator {
 
             setFormatActivationAndSubmittedDate(row, ClientEntityConstants.ACTIVATION_DATE_COL, dateCellStyle);
             setFormatActivationAndSubmittedDate(row, ClientEntityConstants.SUBMITTED_ON_COL, dateCellStyle);
+            setFormatActivationAndSubmittedDate(row, ClientEntityConstants.INCOPORATION_VALID_TILL_COL, dateCellStyle);
+            setFormatActivationAndSubmittedDate(row, ClientEntityConstants.INCOPORATION_DATE_COL, dateCellStyle);
         }
     }
 
@@ -221,7 +223,7 @@ public class ClientEntityWorkbookPopulator extends AbstractWorkbookPopulator {
         writeString(ClientEntityConstants.CLIENT_CLASSIFICATION_COL, rowHeader, "Client Classification ");
         writeString(ClientEntityConstants.INCOPORATION_NUMBER_COL, rowHeader, "Incorporation Number");
         writeString(ClientEntityConstants.MAIN_BUSINESS_LINE, rowHeader, "Main Business Line");
-        writeString(ClientEntityConstants.CONSTITUTION_COL, rowHeader, "Constitution");
+        writeString(ClientEntityConstants.CONSTITUTION_COL, rowHeader, "Constitution*");
         writeString(ClientEntityConstants.REMARKS_COL, rowHeader, "Remarks");
         writeString(ClientEntityConstants.EXTERNAL_ID_COL, rowHeader, "External ID ");
         writeString(ClientEntityConstants.SUBMITTED_ON_COL, rowHeader, "Submitted On Date");

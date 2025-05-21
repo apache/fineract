@@ -186,7 +186,7 @@ public class SavingsAccountDataValidator {
             if (lockinPeriodFrequency != null) {
                 final Integer lockinPeriodFrequencyType = this.fromApiJsonHelper
                         .extractIntegerSansLocaleNamed(lockinPeriodFrequencyTypeParamName, element);
-                baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(lockinPeriodFrequencyType).notNull()
+                baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(lockinPeriodFrequencyType).ignoreIfNull()
                         .inMinMaxRange(0, 3);
             }
         }

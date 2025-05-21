@@ -217,16 +217,32 @@ public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
                         List<String> accountNameAndTagAr = Splitter.on('-').splitToList(accountNameandTag);
                         writeString(ChartOfAcountsConstants.LOOKUP_ACCOUNT_NAME_COL, row, accountNameAndTagAr.get(0));
                         writeString(ChartOfAcountsConstants.LOOKUP_ACCOUNT_ID_COL, row, accountNameAndTagAr.get(1));
-                        writeString(ChartOfAcountsConstants.LOOKUP_TAG_COL, row, accountNameAndTagAr.get(2));
-                        writeString(ChartOfAcountsConstants.LOOKUP_TAG_ID_COL, row, accountNameAndTagAr.get(3));
+                        if (accountNameAndTagAr.get(2).equals("null")) {
+                            writeString(ChartOfAcountsConstants.LOOKUP_TAG_COL, row, "");
+                        } else {
+                            writeString(ChartOfAcountsConstants.LOOKUP_TAG_COL, row, accountNameAndTagAr.get(2));
+                        }
+                        if (accountNameAndTagAr.get(3).equals("0")) {
+                            writeString(ChartOfAcountsConstants.LOOKUP_TAG_ID_COL, row, "");
+                        } else {
+                            writeString(ChartOfAcountsConstants.LOOKUP_TAG_ID_COL, row, accountNameAndTagAr.get(3));
+                        }
                         rowIndex++;
                     } else {
                         row = chartOfAccountsSheet.createRow(rowIndex);
                         List<String> accountNameAndTagAr = Splitter.on('-').splitToList(accountNameandTag);
                         writeString(ChartOfAcountsConstants.LOOKUP_ACCOUNT_NAME_COL, row, accountNameAndTagAr.get(0));
                         writeString(ChartOfAcountsConstants.LOOKUP_ACCOUNT_ID_COL, row, accountNameAndTagAr.get(1));
-                        writeString(ChartOfAcountsConstants.LOOKUP_TAG_COL, row, accountNameAndTagAr.get(2));
-                        writeString(ChartOfAcountsConstants.LOOKUP_TAG_ID_COL, row, accountNameAndTagAr.get(3));
+                        if (accountNameAndTagAr.get(2).equals("null")) {
+                            writeString(ChartOfAcountsConstants.LOOKUP_TAG_COL, row, "");
+                        } else {
+                            writeString(ChartOfAcountsConstants.LOOKUP_TAG_COL, row, accountNameAndTagAr.get(2));
+                        }
+                        if (accountNameAndTagAr.get(3).equals("0")) {
+                            writeString(ChartOfAcountsConstants.LOOKUP_TAG_ID_COL, row, "");
+                        } else {
+                            writeString(ChartOfAcountsConstants.LOOKUP_TAG_ID_COL, row, accountNameAndTagAr.get(3));
+                        }
                         rowIndex++;
                     }
                 }
