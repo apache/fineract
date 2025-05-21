@@ -253,7 +253,7 @@ public final class RepaymentPeriod {
     }
 
     public boolean isFullyPaid() {
-        return getEmi().isEqualTo(getTotalPaidAmount());
+        return getEmiPlusChargeback().isEqualTo(getTotalPaidAmount());
     }
 
     /**

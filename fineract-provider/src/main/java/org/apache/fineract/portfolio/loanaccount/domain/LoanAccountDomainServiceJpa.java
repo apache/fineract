@@ -92,7 +92,6 @@ import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanRefundRequestData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
 import org.apache.fineract.portfolio.loanaccount.mapper.LoanAccountingBridgeMapper;
@@ -109,6 +108,7 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanChargeService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanDownPaymentHandlerService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanRefundService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanScheduleService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionProcessingService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.portfolio.loanaccount.service.ReprocessLoanTransactionsService;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedInterestRefundTypes;
@@ -160,6 +160,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final LoanAccountService loanAccountService;
     private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
     private final LoanAccountingBridgeMapper loanAccountingBridgeMapper;
+    private final LoanTransactionProcessingService loanTransactionProcessingService;
 
     @Transactional
     @Override
@@ -889,28 +890,21 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             }
         }
 
-        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = transactionProcessorFactory
-                .determineProcessor(loan.getTransactionProcessingStrategyCode());
-
         final LoanRepaymentScheduleInstallment currentInstallment = loan.fetchLoanRepaymentScheduleInstallmentByDueDate(transactionDate);
 
-        boolean reprocess = loan.isInterestBearingAndInterestRecalculationEnabled() //
-                || loan.isForeclosure() //
-                || !isTransactionChronologicallyLatest //
-                || !DateUtils.isEqualBusinessDate(transactionDate) //
-                || currentInstallment == null //
-                || !currentInstallment.getTotalOutstanding(loan.getCurrency()).isEqualTo(refundTransaction.getAmount(loan.getCurrency())); //
-
-        if (!reprocess) {
-            loan.getLoanTransactions().add(refundTransaction);
-            loanRepaymentScheduleTransactionProcessor.processLatestTransaction(refundTransaction,
+        boolean processLatest = isTransactionChronologicallyLatest //
+                && !loan.isForeclosure() //
+                && loanTransactionProcessingService.canProcessLatestTransactionOnly(loan, refundTransaction, currentInstallment); //
+        if (processLatest) {
+            loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(), refundTransaction,
                     new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
                             new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
+            loan.getLoanTransactions().add(refundTransaction);
             if (interestRefundTransaction != null) {
+                loanTransactionProcessingService.processLatestTransaction(loan.getTransactionProcessingStrategyCode(),
+                        interestRefundTransaction, new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
+                                loan.getActiveCharges(), new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
                 loan.addLoanTransaction(interestRefundTransaction);
-                loanRepaymentScheduleTransactionProcessor.processLatestTransaction(interestRefundTransaction,
-                        new TransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges(),
-                                new MoneyHolder(loan.getTotalOverpaidAsMoney()), null));
             }
         } else {
             if (loan.isCumulativeSchedule() && loan.isInterestBearingAndInterestRecalculationEnabled()) {
@@ -924,12 +918,12 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             }
 
             reprocessLoanTransactionsService.reprocessTransactions(loan);
+        }
 
-            // Store and flush newly created transaction to generate PK
-            loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(refundTransaction);
-            if (interestRefundTransaction != null) {
-                loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(interestRefundTransaction);
-            }
+        // Store and flush newly created transaction to generate PK
+        loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(refundTransaction);
+        if (interestRefundTransaction != null) {
+            loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(interestRefundTransaction);
         }
 
         loanLifecycleStateMachine.determineAndTransition(loan, transactionDate);

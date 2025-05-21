@@ -27,8 +27,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.service.ExternalServicesPropertiesReadPlatformService;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.gcm.GcmConstants;
-import org.apache.fineract.infrastructure.gcm.domain.DeviceRegistration;
-import org.apache.fineract.infrastructure.gcm.domain.DeviceRegistrationRepositoryWrapper;
 import org.apache.fineract.infrastructure.gcm.domain.Message;
 import org.apache.fineract.infrastructure.gcm.domain.Message.Priority;
 import org.apache.fineract.infrastructure.gcm.domain.Notification;
@@ -38,6 +36,8 @@ import org.apache.fineract.infrastructure.gcm.domain.Sender;
 import org.apache.fineract.infrastructure.sms.domain.SmsMessage;
 import org.apache.fineract.infrastructure.sms.domain.SmsMessageRepository;
 import org.apache.fineract.infrastructure.sms.domain.SmsMessageStatusType;
+import org.apache.fineract.portfolio.self.device.domain.DeviceRegistration;
+import org.apache.fineract.portfolio.self.device.domain.DeviceRegistrationRepositoryWrapper;
 import org.springframework.stereotype.Service;
 
 @Service

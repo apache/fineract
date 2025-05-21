@@ -469,7 +469,7 @@ public final class BatchHelper {
         final String dateString = LocalDate.now(Utils.getZoneIdOfTenant()).format(DateTimeFormatter.ofPattern(dateFormat));
 
         final String body = String.format(
-                "{\"chargeId\": \"%d\", \"locale\": \"en\", \"amount\": \"11.15\", " + "\"dateFormat\": \"%s\", \"dueDate\": \"%s\"}",
+                "{\"chargeId\": \"%d\", \"locale\": \"en\", \"amount\": \"100.0\", " + "\"dateFormat\": \"%s\", \"dueDate\": \"%s\"}",
                 chargeId, dateFormat, dateString);
         br.setBody(body);
 

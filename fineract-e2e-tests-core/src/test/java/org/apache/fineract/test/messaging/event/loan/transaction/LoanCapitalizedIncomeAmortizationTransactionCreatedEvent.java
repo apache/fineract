@@ -16,15 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.gcm.service;
+package org.apache.fineract.test.messaging.event.loan.transaction;
 
-import org.apache.fineract.infrastructure.gcm.domain.DeviceRegistration;
+public class LoanCapitalizedIncomeAmortizationTransactionCreatedEvent extends AbstractLoanTransactionEvent {
 
-public interface DeviceRegistrationWritePlatformService {
-
-    DeviceRegistration registerDevice(Long clientId, String registrationId);
-
-    DeviceRegistration updateDeviceRegistration(Long id, Long clientId, String registrationId);
-
-    void deleteDeviceRegistration(Long id);
+    @Override
+    public String getEventName() {
+        return "LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent";
+    }
 }

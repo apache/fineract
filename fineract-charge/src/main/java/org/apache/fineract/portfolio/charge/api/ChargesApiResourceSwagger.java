@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.charge.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.math.BigDecimal;
 import java.util.Set;
 
 /**
@@ -110,6 +111,8 @@ final class ChargesApiResourceSwagger {
         public GetChargesAppliesToResponse chargeAppliesTo;
         public GetChargesCalculationTypeResponse chargeCalculationType;
         public GetChargesPaymentModeResponse chargePaymentMode;
+        public BigDecimal minCap;
+        public BigDecimal maxCap;
     }
 
     @Schema(description = "PostChargesRequest")
@@ -139,6 +142,10 @@ final class ChargesApiResourceSwagger {
         public String monthDayFormat;
         @Schema(example = "false")
         public boolean penalty;
+        @Schema(example = "23.43")
+        public BigDecimal minCap;
+        @Schema(example = "45.56")
+        public BigDecimal maxCap;
     }
 
     @Schema(description = "PostChargesResponse")
@@ -196,9 +203,9 @@ final class ChargesApiResourceSwagger {
         @Schema(example = "1")
         public Long paymentTypeId;
         @Schema(example = "10.0")
-        public Double minCap;
+        public BigDecimal minCap;
         @Schema(example = "120.0")
-        public Double maxCap;
+        public BigDecimal maxCap;
     }
 
     @Schema(description = "PutChargesChargeIdResponse")

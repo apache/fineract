@@ -56,12 +56,15 @@ import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.service.AccountTransferEnumerations;
 import org.apache.fineract.portfolio.self.account.data.SelfBeneficiariesTPTData;
 import org.apache.fineract.portfolio.self.account.service.SelfBeneficiariesTPTReadPlatformService;
+import org.apache.fineract.portfolio.self.config.SelfServiceModuleIsEnabledCondition;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/self/beneficiaries/tpt")
 @Component
 @Tag(name = "Self Third Party Transfer", description = "")
 @RequiredArgsConstructor
+@Conditional(SelfServiceModuleIsEnabledCondition.class)
 public class SelfBeneficiariesTPTApiResource {
 
     private final PlatformSecurityContext context;

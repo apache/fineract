@@ -345,8 +345,8 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
                 .isInterestRecalculationEnabled(true)//
                 .interestRecalculationCompoundingMethod(0)//
                 .rescheduleStrategyMethod(RescheduleStrategyMethod.ADJUST_LAST_UNPAID_PERIOD)//
-                .recalculationRestFrequencyType(RecalculationRestFrequencyType.SAME_AS_REPAYMENT_PERIOD)//
-                .recalculationRestFrequencyInterval(0)//
+                .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY)//
+                .recalculationRestFrequencyInterval(1)//
                 .isArrearsBasedOnOriginalSchedule(false)//
                 .isCompoundingToBePostedAsTransaction(false)//
                 .preClosureInterestCalculationStrategy(1)//

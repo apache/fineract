@@ -65,9 +65,11 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom<Long> imple
     @Column(name = "amount_through_charge_payment", scale = 6, precision = 19, nullable = true)
     private BigDecimal amountThroughChargePayment;
 
+    @Setter
     @Column(name = "is_paid_derived", nullable = false)
     private boolean paid = false;
 
+    @Setter
     @Column(name = "waived", nullable = false)
     private boolean waived = false;
 
@@ -97,16 +99,26 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom<Long> imple
         this.paid = determineIfFullyPaid();
     }
 
-    public Money waive(final MonetaryCurrency currency) {
+    public void waive() {
         this.amountWaived = this.amountOutstanding;
         this.amountOutstanding = BigDecimal.ZERO;
         this.paid = false;
         this.waived = true;
-        return getAmountWaived(currency);
+    }
+
+    public void undoWaive() {
+        this.amountOutstanding = this.amountWaived;
+        this.amountWaived = BigDecimal.ZERO;
+        this.paid = false;
+        this.waived = false;
     }
 
     public Money getAmountWaived(final MonetaryCurrency currency) {
         return Money.of(currency, this.amountWaived);
+    }
+
+    public Money getAmountOutstanding(final MonetaryCurrency currency) {
+        return Money.of(currency, this.amountOutstanding);
     }
 
     private boolean determineIfFullyPaid() {

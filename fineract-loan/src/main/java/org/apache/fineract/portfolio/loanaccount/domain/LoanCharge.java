@@ -117,9 +117,11 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     @Column(name = "is_penalty", nullable = false)
     private boolean penaltyCharge = false;
 
+    @Setter
     @Column(name = "is_paid_derived", nullable = false)
     private boolean paid = false;
 
+    @Setter
     @Column(name = "waived", nullable = false)
     private boolean waived = false;
 
@@ -290,7 +292,8 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     public Money waive(final MonetaryCurrency currency, final Integer loanInstallmentNumber) {
         if (isInstalmentFee()) {
             final LoanInstallmentCharge chargePerInstallment = getInstallmentLoanCharge(loanInstallmentNumber);
-            final Money amountWaived = chargePerInstallment.waive(currency);
+            chargePerInstallment.waive();
+            final Money amountWaived = chargePerInstallment.getAmountWaived(currency);
             if (this.amountWaived == null) {
                 this.amountWaived = BigDecimal.ZERO;
             }
@@ -308,6 +311,25 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         this.waived = true;
         return getAmountWaived(currency);
 
+    }
+
+    public void undoWaive(final MonetaryCurrency currency, final Integer loanInstallmentNumber) {
+        if (isInstalmentFee()) {
+            final LoanInstallmentCharge chargePerInstallment = getInstallmentLoanCharge(loanInstallmentNumber);
+            chargePerInstallment.undoWaive();
+            Money amountReversed = chargePerInstallment.getAmountOutstanding(currency);
+            this.amountWaived = this.amountWaived.subtract(amountReversed.getAmount());
+            this.amountOutstanding = this.amountOutstanding.add(amountReversed.getAmount());
+            if (!determineIfFullyPaid()) {
+                this.paid = false;
+                this.waived = false;
+            }
+            return;
+        }
+        this.amountOutstanding = this.amountWaived;
+        this.amountWaived = BigDecimal.ZERO;
+        this.paid = false;
+        this.waived = false;
     }
 
     private BigDecimal calculateAmountOutstanding(final MonetaryCurrency currency) {

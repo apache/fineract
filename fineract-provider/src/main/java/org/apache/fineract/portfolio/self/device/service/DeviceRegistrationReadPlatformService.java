@@ -16,19 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.gcm.domain;
+package org.apache.fineract.portfolio.self.device.service;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import java.util.Collection;
+import org.apache.fineract.portfolio.self.device.domain.DeviceRegistrationData;
 
-public interface DeviceRegistrationRepository
-        extends JpaRepository<DeviceRegistration, Long>, JpaSpecificationExecutor<DeviceRegistration> {
+public interface DeviceRegistrationReadPlatformService {
 
-    String FIND_DEVICE_REGISTRATION_BY_CLIENT = "select dr from DeviceRegistration dr where dr.client.id =:clientId ";
+    Collection<DeviceRegistrationData> retrieveAllDeviceRegiistrations();
 
-    @Query(FIND_DEVICE_REGISTRATION_BY_CLIENT)
-    DeviceRegistration findDeviceRegistrationByClientId(@Param("clientId") Long clientId);
+    DeviceRegistrationData retrieveDeviceRegiistration(Long id);
 
+    DeviceRegistrationData retrieveDeviceRegiistrationByClientId(Long clientId);
 }

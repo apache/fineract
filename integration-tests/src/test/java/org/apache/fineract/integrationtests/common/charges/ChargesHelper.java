@@ -24,6 +24,7 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.GetChargesResponse;
 import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.JSON;
@@ -809,5 +810,9 @@ public final class ChargesHelper {
 
     public PostChargesResponse createCharges(ChargeRequest request) {
         return Calls.ok(FineractClientHelper.getFineractClient().charges.createCharge(request));
+    }
+
+    public GetChargesResponse retrieveCharge(final Long chargeId) {
+        return Calls.ok(FineractClientHelper.getFineractClient().charges.retrieveCharge(chargeId));
     }
 }

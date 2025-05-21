@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.gcm.api;
+package org.apache.fineract.portfolio.self.device.api;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -36,17 +36,20 @@ import java.util.Collection;
 import java.util.HashMap;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
-import org.apache.fineract.infrastructure.gcm.domain.DeviceRegistration;
-import org.apache.fineract.infrastructure.gcm.domain.DeviceRegistrationData;
-import org.apache.fineract.infrastructure.gcm.service.DeviceRegistrationReadPlatformService;
-import org.apache.fineract.infrastructure.gcm.service.DeviceRegistrationWritePlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.self.config.SelfServiceModuleIsEnabledCondition;
+import org.apache.fineract.portfolio.self.device.domain.DeviceRegistration;
+import org.apache.fineract.portfolio.self.device.domain.DeviceRegistrationData;
+import org.apache.fineract.portfolio.self.device.service.DeviceRegistrationReadPlatformService;
+import org.apache.fineract.portfolio.self.device.service.DeviceRegistrationWritePlatformService;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/self/device/registration")
 @Component
 @Tag(name = "Device Registration", description = "")
 @RequiredArgsConstructor
+@Conditional(SelfServiceModuleIsEnabledCondition.class)
 public class DeviceRegistrationApiResource {
 
     private final PlatformSecurityContext context;

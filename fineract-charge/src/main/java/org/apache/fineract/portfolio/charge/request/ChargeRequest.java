@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.charge.request;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -48,5 +49,7 @@ public class ChargeRequest implements Serializable {
     private String feeFrequency;
     private Long paymentTypeId;
     private Boolean enablePaymentType;
+    private BigDecimal minCap;
+    private BigDecimal maxCap;
 
 }

@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
@@ -134,6 +135,82 @@ public class JournalEntriesStepDef extends AbstractStepDef {
             }
             assertThat(containsAnyExpected)
                     .as(ErrorMessageHelper.wrongValueInLineInJournalEntries(resourceId, i, possibleActualValuesList, expectedValues))
+                    .isTrue();
+        }
+    }
+
+    @Then("Reversed loan capitalized income amortization transaction has the following Journal entries:")
+    public void capitalizedIncomeAmortizationJournalEntryDataCheck(final DataTable table) {
+        final long capitalizedIncomeAmortizationId = testContext().get(TestContextKey.LOAN_CAPITALIZED_INCOME_AMORTIZATION_ID);
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        assert loanResponse.body() != null;
+        final long loanId = loanResponse.body().getLoanId();
+        final String resourceId = String.valueOf(loanId);
+
+        List<JournalEntryTransactionItem> journalLinesActualList;
+        final String transactionId = "L" + capitalizedIncomeAmortizationId;
+        Response<GetJournalEntriesTransactionIdResponse> journalEntryDataResponse = null;
+        try {
+            journalEntryDataResponse = journalEntriesApi.retrieveAll1(//
+                    null, //
+                    null, //
+                    null, //
+                    null, //
+                    null, //
+                    null, //
+                    null, //
+                    transactionId, //
+                    null, //
+                    null, //
+                    null, //
+                    null, //
+                    null, //
+                    null, //
+                    null, //
+                    loanId, //
+                    null, //
+                    null, //
+                    true//
+            ).execute();
+            ErrorHelper.checkSuccessfulApiCall(journalEntryDataResponse);
+        } catch (IOException e) {
+            log.error("Exception", e);
+        }
+        assert journalEntryDataResponse != null;
+        assert journalEntryDataResponse.body() != null;
+        journalLinesActualList = journalEntryDataResponse.body().getPageItems();
+
+        final List<List<String>> data = table.asLists();
+        for (int i = 1; i < data.size(); i++) {
+            final List<List<String>> possibleActualValuesList = new ArrayList<>();
+            final List<String> expectedValues = data.get(i);
+            boolean containsAnyExpected = false;
+
+            for (int j = 0; j < Objects.requireNonNull(journalLinesActualList).size(); j++) {
+                final JournalEntryTransactionItem journalLinesActual = journalLinesActualList.get(j);
+                final List<String> actualValues = new ArrayList<>();
+                assert journalLinesActual.getGlAccountType() != null;
+                actualValues.add(
+                        journalLinesActual.getGlAccountType().getValue() == null ? null : journalLinesActual.getGlAccountType().getValue());
+                actualValues.add(journalLinesActual.getGlAccountCode() == null ? null : journalLinesActual.getGlAccountCode());
+                actualValues.add(journalLinesActual.getGlAccountName() == null ? null : journalLinesActual.getGlAccountName());
+                assert journalLinesActual.getEntryType() != null;
+                actualValues
+                        .add("DEBIT".equals(journalLinesActual.getEntryType().getValue()) ? String.valueOf(journalLinesActual.getAmount())
+                                : null);
+                actualValues
+                        .add("CREDIT".equals(journalLinesActual.getEntryType().getValue()) ? String.valueOf(journalLinesActual.getAmount())
+                                : null);
+                possibleActualValuesList.add(actualValues);
+
+                final boolean containsExpectedValues = possibleActualValuesList.stream()
+                        .anyMatch(actualValue -> actualValue.equals(expectedValues));
+                if (containsExpectedValues) {
+                    containsAnyExpected = true;
+                }
+            }
+            assertThat(containsAnyExpected)
+                    .as(ErrorMessageHelper.wrongValueInLineInJournalEntry(resourceId, i, possibleActualValuesList, expectedValues))
                     .isTrue();
         }
     }

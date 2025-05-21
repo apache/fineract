@@ -548,11 +548,18 @@ public class FineractProperties {
     public static class FineractModulesProperties {
 
         private FineractInvestorModuleProperties investor;
+        private FineractSelfServiceModuleProperties selfService;
     }
 
     @Getter
     @Setter
     public static class FineractInvestorModuleProperties extends AbstractFineractModuleProperties {
+
+    }
+
+    @Getter
+    @Setter
+    public static class FineractSelfServiceModuleProperties extends AbstractFineractModuleProperties {
 
     }
 

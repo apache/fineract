@@ -33,6 +33,8 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanproduct.api.LoanProductsApiResource;
 import org.apache.fineract.portfolio.self.client.service.AppuserClientMapperReadService;
+import org.apache.fineract.portfolio.self.config.SelfServiceModuleIsEnabledCondition;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/self/loanproducts")
@@ -114,6 +116,7 @@ import org.springframework.stereotype.Component;
         + "If Specified as true, arrears will be identified based on original schedule.\n" + "allowAttributeOverrides\n"
         + "Specifies if select attributes may be overridden for individual loan accounts.")
 @RequiredArgsConstructor
+@Conditional(SelfServiceModuleIsEnabledCondition.class)
 public class SelfLoanProductsApiResource {
 
     private final LoanProductsApiResource loanProductsApiResource;

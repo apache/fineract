@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.integrationtests.common;
 
+import static org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType.BUSINESS_DATE;
+
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
@@ -28,13 +30,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.BusinessDateData;
 import org.apache.fineract.client.models.BusinessDateRequest;
 import org.apache.fineract.client.models.BusinessDateResponse;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 
 @Slf4j
 public final class BusinessDateHelper {
 
+    private static final String DATETIME_PATTERN = "dd MMMM yyyy";
     private static final Gson GSON = new JSON().getGson();
 
     public BusinessDateHelper() {}
@@ -51,7 +56,7 @@ public final class BusinessDateHelper {
         return Utils.performServerPost(requestSpec, responseSpec, BUSINESS_DATE_API, buildBusinessDateRequest(type, date), "changes");
     }
 
-    public BusinessDateResponse updateBusinessDate(final BusinessDateRequest request) {
+    public static BusinessDateResponse updateBusinessDate(final BusinessDateRequest request) {
         log.info("------------------UPDATE BUSINESS DATE----------------------");
         log.info("------------------Type: {}, date: {}----------------------", request.getType(), request.getDate());
         return Calls.ok(FineractClientHelper.getFineractClient().businessDateManagement.updateBusinessDate(request));
@@ -89,6 +94,19 @@ public final class BusinessDateHelper {
         map.put("locale", "en");
         log.info("map :  {}", map);
         return new Gson().toJson(map);
+    }
+
+    public static void runAt(String date, Runnable runnable) {
+        try {
+            new GlobalConfigurationHelper().updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
+            updateBusinessDate(
+                    new BusinessDateRequest().type(BUSINESS_DATE.getName()).date(date).dateFormat(DATETIME_PATTERN).locale("en"));
+            runnable.run();
+        } finally {
+            new GlobalConfigurationHelper().updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+        }
     }
 
 }

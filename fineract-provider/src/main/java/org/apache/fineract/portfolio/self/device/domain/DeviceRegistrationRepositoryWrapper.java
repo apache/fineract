@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.gcm.domain;
+package org.apache.fineract.portfolio.self.device.domain;
 
-import org.apache.fineract.infrastructure.gcm.exception.DeviceRegistrationNotFoundException;
+import org.apache.fineract.portfolio.self.device.exception.DeviceRegistrationNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

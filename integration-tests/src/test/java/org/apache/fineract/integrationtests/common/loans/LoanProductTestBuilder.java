@@ -127,8 +127,8 @@ public class LoanProductTestBuilder {
     private String interestRecalculationCompoundingMethod = "0";
     private String preCloseInterestCalculationStrategy = INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE;
     private String rescheduleStrategyMethod = "1";
-    private String recalculationRestFrequencyType = "1";
-    private String recalculationRestFrequencyInterval = "0";
+    private String recalculationRestFrequencyType = "2";
+    private String recalculationRestFrequencyInterval = "1";
     private String recalculationCompoundingFrequencyType = null;
     private String recalculationCompoundingFrequencyInterval = null;
     private String minimumDaysBetweenDisbursalAndFirstRepayment = null;

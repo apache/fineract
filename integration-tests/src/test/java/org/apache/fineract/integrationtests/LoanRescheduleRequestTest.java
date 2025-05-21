@@ -265,7 +265,7 @@ public class LoanRescheduleRequestTest extends BaseLoanIntegrationTest {
         runAt("15 February 2023", () -> {
 
             loanResponse.set(applyForLoanApplication(client.getClientId(), commonLoanProductId, BigDecimal.valueOf(500.0), 45, 15, 3,
-                    BigDecimal.ZERO, "01 January 2023", "01 January 2023"));
+                    BigDecimal.TEN, "01 January 2023", "01 January 2023"));
 
             loanTransactionHelper.approveLoan(loanResponse.get().getLoanId(),
                     new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(500)).dateFormat(DATETIME_PATTERN)

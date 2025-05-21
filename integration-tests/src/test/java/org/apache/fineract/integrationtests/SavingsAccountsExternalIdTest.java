@@ -144,7 +144,7 @@ public class SavingsAccountsExternalIdTest extends IntegrationTest {
         request.dateFormat(dateFormat);
         request.setLocale(locale);
         request.setActivatedOnDate(formattedDate);
-        Response<DeleteSavingsAccountsAccountIdResponse> response = okR(fineractClient().savingsAccounts.delete20(EXTERNAL_ID));
+        Response<DeleteSavingsAccountsAccountIdResponse> response = okR(fineractClient().savingsAccounts.delete19(EXTERNAL_ID));
 
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.body()).isNotNull();

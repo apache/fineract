@@ -33,7 +33,7 @@ public class SelfServiceUserAuthorizationManager implements AuthorizationManager
             AppUser user = (AppUser) authentication.get().getPrincipal();
 
             String pathURL = fi.getRequest().getRequestURL().toString();
-            boolean isSelfServiceRequest = (pathURL != null && pathURL.contains("/self/"));
+            boolean isSelfServiceRequest = pathURL.contains("/self/");
 
             boolean notAllowed = ((isSelfServiceRequest && !user.isSelfServiceUser())
                     || (!isSelfServiceRequest && user.isSelfServiceUser()));

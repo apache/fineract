@@ -168,7 +168,7 @@ final class ClientsApiResourceSwagger {
 
         @Schema(example = "2")
         public Integer totalFilteredRecords;
-        public Set<GetClientsPageItemsResponse> pageItems;
+        public List<GetClientsPageItemsResponse> pageItems;
     }
 
     @Schema(description = "GetClientsClientIdResponse")

@@ -18,26 +18,28 @@
  */
 package org.apache.fineract.integrationtests.client;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.time.LocalDate;
 import org.apache.fineract.client.models.GetClientsClientIdResponse;
+import org.apache.fineract.client.models.GetClientsResponse;
 import org.apache.fineract.client.models.PageClientSearchData;
 import org.apache.fineract.client.models.PostClientsClientIdIdentifiersRequest;
 import org.apache.fineract.client.models.PostClientsClientIdIdentifiersResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
+import org.apache.fineract.client.models.PostOfficesRequest;
+import org.apache.fineract.client.models.PostOfficesResponse;
 import org.apache.fineract.client.models.SortOrder;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class ClientSearchTest {
+public class ClientSearchTest extends IntegrationTest {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -267,6 +269,39 @@ public class ClientSearchTest {
         // then
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent().get(0).getMobileNo()).isEqualTo(request1.getMobileNo());
+    }
+
+    @Test
+    public void testClientSearchByLegalForm() {
+        // given
+        PostOfficesResponse newOffice = ok(
+                fineractClient().offices.createOffice(new PostOfficesRequest().name(Utils.randomStringGenerator("TestOffice_", 6))
+                        .parentId(1L).openingDate(LocalDate.of(1970, 1, 1)).dateFormat("yyyy-MM-dd").locale("en_US")));
+        PostClientsRequest individualClientRequest = ClientHelper.defaultClientCreationRequest();
+        individualClientRequest.setLegalFormId(1L);
+        individualClientRequest.setOfficeId(newOffice.getOfficeId());
+        PostClientsResponse individualClientResponse = clientHelper.createClient(individualClientRequest);
+
+        PostClientsRequest entityClientRequest = ClientHelper.defaultClientCreationRequest();
+        entityClientRequest.setOfficeId(newOffice.getOfficeId());
+        entityClientRequest.setLegalFormId(2L);
+        PostClientsResponse entityClientResponse = clientHelper.createClient(entityClientRequest);
+
+        PostClientsRequest secondEntityClientRequest = ClientHelper.defaultClientCreationRequest();
+        secondEntityClientRequest.setOfficeId(newOffice.getOfficeId());
+        secondEntityClientRequest.setLegalFormId(2L);
+        PostClientsResponse secondEntityClientResponse = clientHelper.createClient(secondEntityClientRequest);
+        // when
+        GetClientsResponse individualClients = ok(fineractClient().clients.retrieveAll21(newOffice.getOfficeId(), null, null, null, null,
+                null, null, null, null, null, null, null, 1));
+        GetClientsResponse entityClients = ok(fineractClient().clients.retrieveAll21(newOffice.getOfficeId(), null, null, null, null, null,
+                null, null, null, "id", null, null, 2));
+        // then
+        assertThat(individualClients.getTotalFilteredRecords()).isEqualTo(1);
+        assertThat(individualClients.getPageItems().get(0).getId()).isEqualTo(individualClientResponse.getClientId());
+        assertThat(entityClients.getTotalFilteredRecords()).isEqualTo(2);
+        assertThat(entityClients.getPageItems().get(0).getId()).isEqualTo(entityClientResponse.getClientId());
+        assertThat(entityClients.getPageItems().get(1).getId()).isEqualTo(secondEntityClientResponse.getClientId());
     }
 
 }

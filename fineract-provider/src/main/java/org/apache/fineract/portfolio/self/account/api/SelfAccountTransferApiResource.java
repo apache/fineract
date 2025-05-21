@@ -57,13 +57,16 @@ import org.apache.fineract.portfolio.self.account.exception.BeneficiaryTransferL
 import org.apache.fineract.portfolio.self.account.exception.DailyTPTTransactionAmountLimitExceededException;
 import org.apache.fineract.portfolio.self.account.service.SelfAccountTransferReadService;
 import org.apache.fineract.portfolio.self.account.service.SelfBeneficiariesTPTReadPlatformService;
+import org.apache.fineract.portfolio.self.config.SelfServiceModuleIsEnabledCondition;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/self/accounttransfers")
 @Component
 @Tag(name = "Self Account transfer", description = "")
 @RequiredArgsConstructor
+@Conditional(SelfServiceModuleIsEnabledCondition.class)
 public class SelfAccountTransferApiResource {
 
     private final PlatformSecurityContext context;

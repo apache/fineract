@@ -36,5 +36,7 @@ public interface InterestScheduleModelRepositoryWrapper {
     Optional<ProgressiveLoanInterestScheduleModel> readProgressiveLoanInterestScheduleModel(Long loanId,
             LoanProductMinimumRepaymentScheduleRelatedDetail detail, Integer installmentAmountInMultipliesOf);
 
+    boolean hasValidModelForDate(Long loanId, LocalDate targetDate);
+
     Optional<ProgressiveLoanInterestScheduleModel> getSavedModel(Loan loan, LocalDate businessDate);
 }
