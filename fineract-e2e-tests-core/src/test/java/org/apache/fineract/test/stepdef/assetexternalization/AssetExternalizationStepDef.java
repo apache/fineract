@@ -341,11 +341,6 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
                 transferExternalId = testContext().get(TestContextKey.ASSET_EXTERNALIZATION_SALES_TRANSFER_EXTERNAL_ID_FROM_RESPONSE);
             }
 
-            expectedValues.add(ownerExternalIdStored);
-            expectedValues.add(loanId == null ? null : String.valueOf(loanId));
-            expectedValues.add(loanExternalId);
-            expectedValues.add(transferExternalId);
-
             List<List<String>> actualValuesList = content.stream().map(t -> {
                 List<String> actualValues = new ArrayList<>();
                 actualValues.add(t.getSettlementDate() == null ? null : FORMATTER.format(t.getSettlementDate()));
@@ -354,12 +349,42 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
                 actualValues.add(t.getEffectiveFrom() == null ? null : FORMATTER.format(t.getEffectiveFrom()));
                 actualValues.add(t.getEffectiveTo() == null ? null : FORMATTER.format(t.getEffectiveTo()));
                 actualValues.add(transactionType);
+                if (expectedValues.size() > 6) {
+                    actualValues.add(
+                            t.getDetails() != null ? t.getDetails().getTotalOutstanding().setScale(2, RoundingMode.HALF_DOWN).toString()
+                                    : null);
+                }
+                if (expectedValues.size() > 7) {
+                    actualValues.add(t.getDetails() != null
+                            ? t.getDetails().getTotalPrincipalOutstanding().setScale(2, RoundingMode.HALF_DOWN).toString()
+                            : null);
+                }
+                if (expectedValues.size() > 8) {
+                    actualValues.add(t.getDetails() != null
+                            ? t.getDetails().getTotalInterestOutstanding().setScale(2, RoundingMode.HALF_DOWN).toString()
+                            : null);
+                }
+                if (expectedValues.size() > 9) {
+                    actualValues.add(t.getDetails() != null
+                            ? t.getDetails().getTotalFeeChargesOutstanding().setScale(2, RoundingMode.HALF_DOWN).toString()
+                            : null);
+                }
+                if (expectedValues.size() > 10) {
+                    actualValues.add(t.getDetails() != null
+                            ? t.getDetails().getTotalPenaltyChargesOutstanding().setScale(2, RoundingMode.HALF_DOWN).toString()
+                            : null);
+                }
                 actualValues.add(t.getOwner().getExternalId() == null ? null : t.getOwner().getExternalId());
                 actualValues.add(loanId == null ? null : String.valueOf(t.getLoan().getLoanId()));
                 actualValues.add(loanExternalId == null ? null : t.getLoan().getExternalId());
                 actualValues.add(t.getTransferExternalId());
                 return actualValues;
             }).collect(Collectors.toList());
+
+            expectedValues.add(ownerExternalIdStored);
+            expectedValues.add(loanId == null ? null : String.valueOf(loanId));
+            expectedValues.add(loanExternalId);
+            expectedValues.add(transferExternalId);
 
             boolean containsExpectedValues = actualValuesList.stream().anyMatch(actualValues -> actualValues.equals(expectedValues));
 

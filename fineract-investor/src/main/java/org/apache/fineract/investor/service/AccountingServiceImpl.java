@@ -55,6 +55,7 @@ public class AccountingServiceImpl implements AccountingService {
     private final ExternalAssetOwnerTransferJournalEntryMappingRepository externalAssetOwnerTransferJournalEntryMappingRepository;
     private final ExternalAssetOwnerJournalEntryMappingRepository externalAssetOwnerJournalEntryMappingRepository;
     private final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepository;
+    private final ExternalAssetOwnerTransferOutstandingInterestCalculation externalAssetOwnerTransferOutstandingInterestCalculation;
 
     @Override
     public void createJournalEntriesForSaleAssetTransfer(final Loan loan, final ExternalAssetOwnerTransfer transfer,
@@ -104,7 +105,8 @@ public class AccountingServiceImpl implements AccountingService {
         final Long transactionId = transfer.getId();
         final LocalDate transactionDate = transfer.getSettlementDate();
         final BigDecimal principalAmount = loan.getSummary().getTotalPrincipalOutstanding();
-        final BigDecimal interestAmount = loan.getSummary().getTotalInterestOutstanding();
+        // We have different strategies to calculate oustanding interest
+        final BigDecimal interestAmount = externalAssetOwnerTransferOutstandingInterestCalculation.calculateOutstandingInterest(loan);
         final BigDecimal feesAmount = loan.getSummary().getTotalFeeChargesOutstanding();
         final BigDecimal penaltiesAmount = loan.getSummary().getTotalPenaltyChargesOutstanding();
         final BigDecimal overPaymentAmount = loan.getTotalOverpaid();

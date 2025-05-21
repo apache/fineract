@@ -21,28 +21,13 @@ package org.apache.fineract.portfolio.charge.util;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
-import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountChargeData;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountChargeData;
 
 public final class ConvertChargeDataToSpecificChargeData {
 
     private ConvertChargeDataToSpecificChargeData() {}
-
-    public static LoanChargeData toLoanChargeData(final ChargeData chargeData) {
-
-        BigDecimal percentage = null;
-        if (chargeData.getChargeCalculationType().getId() == 2) {
-            percentage = chargeData.getAmount();
-        }
-
-        return LoanChargeData.newLoanChargeDetails(chargeData.getId(), chargeData.getName(), chargeData.getCurrency(),
-                chargeData.getAmount(), percentage, chargeData.getChargeTimeType(), chargeData.getChargeCalculationType(),
-                chargeData.isPenalty(), chargeData.getChargePaymentMode(), chargeData.getMinCap(), chargeData.getMaxCap(),
-                ExternalId.empty());
-    }
 
     public static SavingsAccountChargeData toSavingsAccountChargeData(final ChargeData chargeData) {
 

@@ -42,14 +42,13 @@ import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
 import org.apache.fineract.portfolio.accountdetails.data.LoanAccountSummaryData;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
-import org.apache.fineract.portfolio.charge.util.ConvertChargeDataToSpecificChargeData;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
 import org.apache.fineract.portfolio.floatingrates.data.InterestRatePeriodData;
 import org.apache.fineract.portfolio.fund.data.FundData;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
-import org.apache.fineract.portfolio.loanaccount.guarantor.data.GuarantorData;
+import org.apache.fineract.portfolio.loanaccount.guarantor.data.IGuarantor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductBorrowerCycleVariationData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
@@ -146,7 +145,7 @@ public class LoanAccountData {
     private Collection<LoanTransactionData> transactions;
     private Collection<LoanChargeData> charges;
     private Collection<LoanCollateralManagementData> collateral;
-    private Collection<GuarantorData> guarantors;
+    private Collection<? extends IGuarantor> guarantors;
     private CalendarData meeting;
     private Collection<NoteData> notes;
     private Collection<DisbursementData> disbursementDetails;
@@ -356,7 +355,7 @@ public class LoanAccountData {
         final Collection<LoanChargeData> charges = new ArrayList<LoanChargeData>();
         for (final ChargeData charge : product.charges()) {
             if (!charge.isOverdueInstallmentCharge()) {
-                charges.add(ConvertChargeDataToSpecificChargeData.toLoanChargeData(charge));
+                charges.add(toLoanChargeData(charge));
             }
         }
 
@@ -530,7 +529,7 @@ public class LoanAccountData {
      */
     public LoanAccountData associationsAndTemplate(final LoanScheduleData repaymentSchedule,
             final Collection<LoanTransactionData> transactions, final Collection<LoanChargeData> charges,
-            final Collection<LoanCollateralManagementData> collateral, final Collection<GuarantorData> guarantors,
+            final Collection<LoanCollateralManagementData> collateral, final Collection<? extends IGuarantor> guarantors,
             final CalendarData calendarData, final Collection<LoanProductData> productOptions,
             final Collection<EnumOptionData> termFrequencyTypeOptions, final Collection<EnumOptionData> repaymentFrequencyTypeOptions,
             final Collection<EnumOptionData> repaymentFrequencyNthDayTypeOptions,
@@ -679,5 +678,18 @@ public class LoanAccountData {
 
     public boolean isActive() {
         return LoanStatus.fromInt(getStatus().getId().intValue()).isActive();
+    }
+
+    public static LoanChargeData toLoanChargeData(final ChargeData chargeData) {
+
+        BigDecimal percentage = null;
+        if (chargeData.getChargeCalculationType().getId() == 2) {
+            percentage = chargeData.getAmount();
+        }
+
+        return LoanChargeData.newLoanChargeDetails(chargeData.getId(), chargeData.getName(), chargeData.getCurrency(),
+                chargeData.getAmount(), percentage, chargeData.getChargeTimeType(), chargeData.getChargeCalculationType(),
+                chargeData.isPenalty(), chargeData.getChargePaymentMode(), chargeData.getMinCap(), chargeData.getMaxCap(),
+                ExternalId.empty());
     }
 }

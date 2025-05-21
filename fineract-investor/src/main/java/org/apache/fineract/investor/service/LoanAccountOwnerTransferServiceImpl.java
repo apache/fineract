@@ -35,7 +35,6 @@ import static org.apache.fineract.investor.data.ExternalTransferSubStatus.UNSOLD
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
@@ -63,6 +62,7 @@ public class LoanAccountOwnerTransferServiceImpl implements LoanAccountOwnerTran
     private final ExternalAssetOwnerTransferLoanMappingRepository externalAssetOwnerTransferLoanMappingRepository;
     private final AccountingService accountingService;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final ExternalAssetOwnerTransferOutstandingInterestCalculation externalAssetOwnerTransferOutstandingInterestCalculation;
 
     @Override
     public void handleLoanClosedOrOverpaid(Loan loan) {
@@ -166,14 +166,13 @@ public class LoanAccountOwnerTransferServiceImpl implements LoanAccountOwnerTran
             ExternalAssetOwnerTransfer externalAssetOwnerTransfer) {
         ExternalAssetOwnerTransferDetails details = new ExternalAssetOwnerTransferDetails();
         details.setExternalAssetOwnerTransfer(externalAssetOwnerTransfer);
-        details.setTotalOutstanding(Objects.requireNonNullElse(loan.getSummary().getTotalOutstanding(), BigDecimal.ZERO));
-        details.setTotalPrincipalOutstanding(Objects.requireNonNullElse(loan.getSummary().getTotalPrincipalOutstanding(), BigDecimal.ZERO));
-        details.setTotalInterestOutstanding(Objects.requireNonNullElse(loan.getSummary().getTotalInterestOutstanding(), BigDecimal.ZERO));
-        details.setTotalFeeChargesOutstanding(
-                Objects.requireNonNullElse(loan.getSummary().getTotalFeeChargesOutstanding(), BigDecimal.ZERO));
-        details.setTotalPenaltyChargesOutstanding(
-                Objects.requireNonNullElse(loan.getSummary().getTotalPenaltyChargesOutstanding(), BigDecimal.ZERO));
-        details.setTotalOverpaid(Objects.requireNonNullElse(loan.getTotalOverpaid(), BigDecimal.ZERO));
+        details.setTotalPrincipalOutstanding(loan.getSummary().getTotalPrincipalOutstanding());
+        // We have different strategies to calculate oustanding interest
+        final BigDecimal interestAmount = externalAssetOwnerTransferOutstandingInterestCalculation.calculateOutstandingInterest(loan);
+        details.setTotalInterestOutstanding(interestAmount);
+        details.setTotalFeeChargesOutstanding(loan.getSummary().getTotalFeeChargesOutstanding());
+        details.setTotalPenaltyChargesOutstanding(loan.getSummary().getTotalPenaltyChargesOutstanding());
+        details.setTotalOverpaid(loan.getTotalOverpaid());
         return details;
     }
 

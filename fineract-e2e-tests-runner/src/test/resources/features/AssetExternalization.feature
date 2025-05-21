@@ -1679,3 +1679,100 @@ Feature: Asset Externalization
       | INCOME        | 404000        | Interest Income         | CREDIT    | 0.33    |
       | ASSET         | 112603        | Interest/Fee Receivable | DEBIT     | 0.33    |
       | INCOME        | 404000        | Interest Income         | CREDIT    | 0.33    |
+
+  @TestRailId:C3690 @AssetExternalizationJournalEntry
+  Scenario: Verify that Asset externalization SALES and BUYBACK has the correct Journal entries with PAYABLE_OUTSTANDING_INTEREST strategy
+    When Global config "outstanding-interest-calculation-strategy-for-external-asset-transfer" value set to "PAYABLE_OUTSTANDING_INTEREST"
+    When Admin sets the business date to "1 May 2023"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                     | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL | 01 May 2023       | 1000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "1 May 2023" with "1000" amount and expected disbursement date on "1 May 2023"
+    When Admin successfully disburse the loan on "1 May 2023" with "1000" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | sale             | 2023-05-21     | 1                  |
+    Then Asset externalization response has the correct Loan ID, transferExternalId
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 1 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status  | effectiveFrom | effectiveTo | Transaction type | totalOutstanding | totalPrincipalOutstanding | totalInterestOutstanding | totalFeeChargesOutstanding | totalPenaltyChargesOutstanding |
+      | 2023-05-21     | 1                  | PENDING | 2023-05-01    | 9999-12-31  | SALE             |                  |                           |                          |                            |                                |
+    When Admin adds "LOAN_SNOOZE_FEE" due date charge with "10 May 2023" due date and 10 EUR transaction amount
+    When Admin sets the business date to "10 May 2023"
+    When Admin runs inline COB job for Loan
+    When Admin sets the business date to "22 May 2023"
+    When Admin runs inline COB job for Loan
+    Then LoanOwnershipTransferBusinessEvent is created
+    Then LoanAccountSnapshotBusinessEvent is created
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 2 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status  | effectiveFrom | effectiveTo | Transaction type | totalOutstanding | totalPrincipalOutstanding | totalInterestOutstanding | totalFeeChargesOutstanding | totalPenaltyChargesOutstanding |
+      | 2023-05-21     | 1                  | PENDING | 2023-05-01    | 2023-05-21  | SALE             |                  |                           |                          |                            |                                |
+      | 2023-05-21     | 1                  | ACTIVE  | 2023-05-22    | 9999-12-31  | SALE             | 1016.58          | 1000.00                   | 6.58                     | 10.00                      | 0.00                           |
+    Then The latest asset externalization transaction with "ACTIVE" status has the following TRANSFER Journal entries:
+      | glAccountType | glAccountCode | glAccountName           | entryType | amount  |
+      | ASSET         | 112601        | Loans Receivable        | CREDIT    | 1000.00 |
+      | ASSET         | 112603        | Interest/Fee Receivable | CREDIT    | 16.58   |
+      | ASSET         | 146000        | Asset transfer          | DEBIT     | 1016.58 |
+      | ASSET         | 112601        | Loans Receivable        | DEBIT     | 1000.00 |
+      | ASSET         | 112603        | Interest/Fee Receivable | DEBIT     | 16.58   |
+      | ASSET         | 146000        | Asset transfer          | CREDIT    | 1016.58 |
+    Then The asset external owner has the following OWNER Journal entries:
+      | glAccountType | glAccountCode | glAccountName           | entryType | amount  |
+      | ASSET         | 112601        | Loans Receivable        | DEBIT     | 1000.00 |
+      | ASSET         | 112603        | Interest/Fee Receivable | DEBIT     | 16.58   |
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | buyback          | 2023-05-30     |                    |
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 3 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status  | effectiveFrom | effectiveTo | Transaction type | totalOutstanding | totalPrincipalOutstanding | totalInterestOutstanding | totalFeeChargesOutstanding | totalPenaltyChargesOutstanding |
+      | 2023-05-21     | 1                  | PENDING | 2023-05-01    | 2023-05-21  | SALE             |                  |                           |                          |                            |                                |
+      | 2023-05-21     | 1                  | ACTIVE  | 2023-05-22    | 9999-12-31  | SALE             | 1016.58          | 1000.00                   | 6.58                     | 10.00                      | 0.00                           |
+      | 2023-05-30     | 1                  | BUYBACK | 2023-05-22    | 9999-12-31  | BUYBACK          |                  |                           |                          |                            |                                |
+    When Admin adds "LOAN_NSF_FEE" due date charge with "25 May 2023" due date and 20 EUR transaction amount
+    When Admin sets the business date to "26 May 2023"
+    When Admin runs inline COB job for Loan
+    When Admin sets the business date to "31 May 2023"
+    When Admin runs inline COB job for Loan
+    Then LoanOwnershipTransferBusinessEvent is created
+    Then LoanAccountSnapshotBusinessEvent is created
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 3 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status  | effectiveFrom | effectiveTo | Transaction type | totalOutstanding | totalPrincipalOutstanding | totalInterestOutstanding | totalFeeChargesOutstanding | totalPenaltyChargesOutstanding |
+      | 2023-05-21     | 1                  | PENDING | 2023-05-01    | 2023-05-21  | SALE             |                  |                           |                          |                            |                                |
+      | 2023-05-21     | 1                  | ACTIVE  | 2023-05-22    | 2023-05-30  | SALE             | 1016.58          | 1000.00                   | 6.58                     | 10.00                      | 0.00                           |
+      | 2023-05-30     | 1                  | BUYBACK | 2023-05-22    | 2023-05-30  | BUYBACK          | 1039.53          | 1000.00                   | 9.53                     | 10.00                      | 20.00                          |
+    Then The latest asset externalization transaction with "BUYBACK" status has the following TRANSFER Journal entries:
+      | glAccountType | glAccountCode | glAccountName           | entryType | amount  |
+      | ASSET         | 112601        | Loans Receivable        | DEBIT     | 1000.00 |
+      | ASSET         | 112603        | Interest/Fee Receivable | DEBIT     | 39.53   |
+      | ASSET         | 146000        | Asset transfer          | CREDIT    | 1039.53 |
+      | ASSET         | 112601        | Loans Receivable        | CREDIT    | 1000.00 |
+      | ASSET         | 112603        | Interest/Fee Receivable | CREDIT    | 39.53   |
+      | ASSET         | 146000        | Asset transfer          | DEBIT     | 1039.53 |
+    Then The asset external owner has the following OWNER Journal entries:
+      | glAccountType | glAccountCode | glAccountName           | entryType | amount  |
+      | ASSET         | 112601        | Loans Receivable        | DEBIT     | 1000.00 |
+      | ASSET         | 112603        | Interest/Fee Receivable | DEBIT     | 16.58   |
+      | ASSET         | 112603        | Interest/Fee Receivable | DEBIT     | 0.33    |
+      | INCOME        | 404000        | Interest Income         | CREDIT    | 0.33    |
+      | ASSET         | 112603        | Interest/Fee Receivable | DEBIT     | 0.33    |
+      | INCOME        | 404000        | Interest Income         | CREDIT    | 0.33    |
+      | ASSET         | 112603        | Interest/Fee Receivable | DEBIT     | 0.33    |
+      | INCOME        | 404000        | Interest Income         | CREDIT    | 0.33    |
+      | ASSET         | 112603        | Interest/Fee Receivable | DEBIT     | 0.33    |
+      | INCOME        | 404000        | Interest Income         | CREDIT    | 0.33    |
+      | ASSET         | 112603        | Interest/Fee Receivable | DEBIT     | 0.33    |
+      | INCOME        | 404000        | Interest Income         | CREDIT    | 0.33    |
+      | ASSET         | 112603        | Interest/Fee Receivable | DEBIT     | 0.33    |
+      | INCOME        | 404000        | Interest Income         | CREDIT    | 0.33    |
+      | ASSET         | 112603        | Interest/Fee Receivable | DEBIT     | 0.33    |
+      | INCOME        | 404000        | Interest Income         | CREDIT    | 0.33    |
+      | ASSET         | 112603        | Interest/Fee Receivable | DEBIT     | 0.33    |
+      | INCOME        | 404000        | Interest Income         | CREDIT    | 0.33    |
+      | ASSET         | 112603        | Interest/Fee Receivable | DEBIT     | 0.33    |
+      | INCOME        | 404000        | Interest Income         | CREDIT    | 0.33    |
+      | ASSET         | 112603        | Interest/Fee Receivable | DEBIT     | 0.33    |
+      | INCOME        | 404000        | Interest Income         | CREDIT    | 0.33    |
+      | ASSET         | 112603        | Interest/Fee Receivable | DEBIT     | 0.33    |
+      | INCOME        | 404000        | Interest Income         | CREDIT    | 0.33    |
+    When Global config "outstanding-interest-calculation-strategy-for-external-asset-transfer" value set to "TOTAL_OUTSTANDING_INTEREST"

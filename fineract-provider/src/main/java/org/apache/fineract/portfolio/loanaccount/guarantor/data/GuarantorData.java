@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.loanaccount.guarantor.data;
 
 import java.io.Serial;
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -34,7 +33,7 @@ import org.apache.fineract.portfolio.loanaccount.guarantor.domain.GuarantorType;
 import org.apache.fineract.portfolio.loanaccount.guarantor.service.GuarantorEnumerations;
 
 @Getter
-public class GuarantorData implements Serializable {
+public class GuarantorData implements IGuarantor {
 
     @Serial
     private static final long serialVersionUID = 1L;

@@ -25,18 +25,20 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 
 @Getter
-@Setter
 @Table(name = "m_external_asset_owner_transfer_details")
 @NoArgsConstructor
 @Entity
 public class ExternalAssetOwnerTransferDetails extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
+    @Setter
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "asset_owner_transfer_id", referencedColumnName = "id")
     private ExternalAssetOwnerTransfer externalAssetOwnerTransfer;
@@ -58,4 +60,33 @@ public class ExternalAssetOwnerTransferDetails extends AbstractAuditableWithUTCD
 
     @Column(name = "total_overpaid_derived", scale = 6, precision = 19, nullable = false)
     private BigDecimal totalOverpaid;
+
+    public void setTotalPrincipalOutstanding(BigDecimal totalPrincipalOutstanding) {
+        this.totalPrincipalOutstanding = Objects.requireNonNullElse(totalPrincipalOutstanding, BigDecimal.ZERO);
+        updateTotalOutstanding();
+    }
+
+    public void setTotalInterestOutstanding(BigDecimal totalInterestOutstanding) {
+        this.totalInterestOutstanding = Objects.requireNonNullElse(totalInterestOutstanding, BigDecimal.ZERO);
+        updateTotalOutstanding();
+    }
+
+    public void setTotalFeeChargesOutstanding(BigDecimal totalFeeChargesOutstanding) {
+        this.totalFeeChargesOutstanding = Objects.requireNonNullElse(totalFeeChargesOutstanding, BigDecimal.ZERO);
+        updateTotalOutstanding();
+    }
+
+    public void setTotalPenaltyChargesOutstanding(BigDecimal totalPenaltyChargesOutstanding) {
+        this.totalPenaltyChargesOutstanding = Objects.requireNonNullElse(totalPenaltyChargesOutstanding, BigDecimal.ZERO);
+        updateTotalOutstanding();
+    }
+
+    private void updateTotalOutstanding() {
+        this.totalOutstanding = MathUtil.add(getTotalPrincipalOutstanding(), getTotalInterestOutstanding(), getTotalFeeChargesOutstanding(),
+                getTotalPenaltyChargesOutstanding());
+    }
+
+    public void setTotalOverpaid(BigDecimal totalOverpaid) {
+        this.totalOverpaid = Objects.requireNonNullElse(totalOverpaid, BigDecimal.ZERO);
+    }
 }

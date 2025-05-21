@@ -145,4 +145,5 @@ public interface ConfigurationDomainService {
 
     boolean isImmediateChargeAccrualPostMaturityEnabled();
 
+    String getAssetOwnerTransferOustandingInterestStrategy();
 }

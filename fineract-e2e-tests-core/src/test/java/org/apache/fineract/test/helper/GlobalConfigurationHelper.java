@@ -74,4 +74,10 @@ public class GlobalConfigurationHelper {
         boolean isEnabled = BooleanUtils.toBoolean(updatedConfiguration.body().getEnabled());
         assertThat(isEnabled).isEqualTo(true);
     }
+
+    public GlobalConfigurationPropertyData getGlobalConfiguration(String configKey) throws IOException {
+        Response<GlobalConfigurationPropertyData> configuration = globalConfigurationApi.retrieveOneByName(configKey).execute();
+        ErrorHelper.checkSuccessfulApiCall(configuration);
+        return configuration.body();
+    }
 }

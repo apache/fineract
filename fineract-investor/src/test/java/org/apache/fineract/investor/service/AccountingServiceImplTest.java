@@ -27,11 +27,14 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -51,22 +54,39 @@ import org.apache.fineract.investor.domain.ExternalAssetOwnerJournalEntryMapping
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferJournalEntryMapping;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferJournalEntryMappingRepository;
+import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummary;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class AccountingServiceImplTest {
+
+    private static final MockedStatic<MoneyHelper> MONEY_HELPER = mockStatic(MoneyHelper.class);
+
+    @BeforeAll
+    public static void init() {
+        MONEY_HELPER.when(MoneyHelper::getRoundingMode).thenReturn(RoundingMode.HALF_EVEN);
+        MONEY_HELPER.when(MoneyHelper::getMathContext).thenReturn(new MathContext(12, RoundingMode.HALF_EVEN));
+    }
+
+    @AfterAll
+    public static void destruct() {
+        MONEY_HELPER.close();
+    }
 
     @BeforeEach
     public void setUp() {
@@ -517,6 +537,9 @@ class AccountingServiceImplTest {
         @Mock
         private FinancialActivityAccountRepositoryWrapper financialActivityAccountRepository;
 
+        @Mock
+        private ExternalAssetOwnerTransferOutstandingInterestCalculation externalAssetOwnerTransferOutstandingInterestCalculation;
+
         @InjectMocks
         private AccountingServiceImpl testSubject;
 
@@ -540,7 +563,6 @@ class AccountingServiceImplTest {
 
             LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
             when(loanSummary.getTotalPrincipalOutstanding()).thenReturn(BigDecimal.ONE);
-            when(loanSummary.getTotalInterestOutstanding()).thenReturn(BigDecimal.ONE);
             when(loanSummary.getTotalFeeChargesOutstanding()).thenReturn(BigDecimal.ONE);
             when(loanSummary.getTotalPenaltyChargesOutstanding()).thenReturn(BigDecimal.ONE);
             when(loan.getSummary()).thenReturn(loanSummary);

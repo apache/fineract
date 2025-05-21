@@ -41,6 +41,7 @@ import org.apache.fineract.client.models.GetClientsClientIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdDelinquencyPausePeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
+import org.apache.fineract.client.models.GlobalConfigurationPropertyData;
 import org.apache.fineract.client.models.PageExternalTransferData;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
@@ -53,6 +54,7 @@ import org.apache.fineract.test.data.AssetExternalizationTransferStatus;
 import org.apache.fineract.test.data.AssetExternalizationTransferStatusReason;
 import org.apache.fineract.test.data.TransactionType;
 import org.apache.fineract.test.helper.ErrorMessageHelper;
+import org.apache.fineract.test.helper.GlobalConfigurationHelper;
 import org.apache.fineract.test.messaging.EventAssertion;
 import org.apache.fineract.test.messaging.event.assetexternalization.LoanAccountSnapshotEvent;
 import org.apache.fineract.test.messaging.event.assetexternalization.LoanOwnershipTransferEvent;
@@ -90,15 +92,14 @@ public class EventCheckHelper {
 
     @Autowired
     private ClientApi clientApi;
-
     @Autowired
     private LoansApi loansApi;
-
     @Autowired
     private EventAssertion eventAssertion;
-
     @Autowired
     private ExternalAssetOwnersApi externalAssetOwnersApi;
+    @Autowired
+    private GlobalConfigurationHelper configurationHelper;
 
     public void clientEventCheck(Response<PostClientsResponse> clientCreationResponse) throws IOException {
         Response<GetClientsClientIdResponse> clientDetails = clientApi.retrieveOne11(clientCreationResponse.body().getClientId(), false)
@@ -412,14 +413,24 @@ public class EventCheckHelper {
         ExternalTransferData filtered = content.stream().filter(t -> transferId.equals(t.getTransferId())).reduce((first, second) -> second)
                 .orElseThrow(() -> new IllegalStateException("No element found"));
 
+        BigDecimal totalOutstandingBalanceAmountExpected = zeroConversion(filtered.getDetails().getTotalOutstanding());
+        BigDecimal outstandingInterestPortionExpected = zeroConversion(filtered.getDetails().getTotalInterestOutstanding());
+
+        GlobalConfigurationPropertyData outstandingInterestStrategy = configurationHelper
+                .getGlobalConfiguration("outstanding-interest-calculation-strategy-for-external-asset-transfer");
+        if ("PAYABLE_OUTSTANDING_INTEREST".equals(outstandingInterestStrategy.getStringValue())) {
+            Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "all", null, null).execute();
+            totalOutstandingBalanceAmountExpected = BigDecimal.valueOf(loanDetails.body().getSummary().getTotalOutstanding());
+            outstandingInterestPortionExpected = BigDecimal.valueOf(loanDetails.body().getSummary().getInterestOutstanding());
+        }
+
         String ownerExternalIdExpected = filtered.getStatus().getValue().equals("BUYBACK") ? null : filtered.getOwner().getExternalId();
         String settlementDateExpected = filtered.getStatus().getValue().equals("BUYBACK") ? null
                 : FORMATTER_EVENTS.format(filtered.getSettlementDate());
-        BigDecimal totalOutstandingBalanceAmountExpected = zeroConversion(filtered.getDetails().getTotalOutstanding());
         BigDecimal outstandingPrincipalPortionExpected = zeroConversion(filtered.getDetails().getTotalPrincipalOutstanding());
         BigDecimal outstandingFeePortionExpected = zeroConversion(filtered.getDetails().getTotalFeeChargesOutstanding());
         BigDecimal outstandingPenaltyPortionExpected = zeroConversion(filtered.getDetails().getTotalPenaltyChargesOutstanding());
-        BigDecimal outstandingInterestPortionExpected = zeroConversion(filtered.getDetails().getTotalInterestOutstanding());
+
         BigDecimal overPaymentPortionExpected = zeroConversion(filtered.getDetails().getTotalOverpaid());
 
         eventAssertion.assertEvent(LoanAccountSnapshotEvent.class, loanId).extractingData(LoanAccountDataV1::getId).isEqualTo(loanId)
