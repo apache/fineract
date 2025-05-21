@@ -108,6 +108,8 @@ final class LoanTransactionsApiResourceSwagger {
         public List<GetLoanProductsChargeOffReasonOptions> chargeOffReasonOptions;
 
         public List<GetPaymentTypeOptions> paymentTypeOptions;
+        @Schema(example = "200.000000")
+        public Double netDisbursalAmount;
     }
 
     public static final class GetLoanCurrency {

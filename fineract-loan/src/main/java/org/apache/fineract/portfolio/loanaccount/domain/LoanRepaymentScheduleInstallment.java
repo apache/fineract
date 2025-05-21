@@ -30,6 +30,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
@@ -1025,7 +1026,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     }
 
     public void copyFrom(final LoanRepaymentScheduleInstallment installment) {
-        if (getId().equals(installment.getId())) {
+        if (nonNullAndEqual(getId(), installment.getId())) {
             return;
         }
         // Reset balances
@@ -1148,5 +1149,9 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
             });
         }
         setLoanTransactionToRepaymentScheduleMappings(retainedTransactionRepaymentScheduleMapping);
+    }
+
+    private static boolean nonNullAndEqual(Object a, Object b) {
+        return a != null && b != null && Objects.equals(a, b);
     }
 }

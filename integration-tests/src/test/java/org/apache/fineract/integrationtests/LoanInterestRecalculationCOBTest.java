@@ -455,7 +455,8 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
     public void verifyLoanInstallmentRecalculatedIfThereIsOverdueInstallmentOn4IProgressiveLoanCOBStep() {
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
         runAt("1 January 2023", () -> {
-            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(create4IProgressive());
+            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(
+                    create4IProgressive().recalculationRestFrequencyType(RecalculationRestFrequencyType.SAME_AS_REPAYMENT_PERIOD));
 
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2023", 8000.0, 10.0,
                     4, null);
@@ -532,7 +533,8 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
     public void verifyLoanInstallmentRecalculatedIfThereIsOverdueInstallmentOn4IProgressiveLoanCOBStepLatePaidPaidOnTimeLatePaidPayoffOnTime() {
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
         runAt("1 January 2023", () -> {
-            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(create4IProgressive());
+            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(
+                    create4IProgressive().recalculationRestFrequencyType(RecalculationRestFrequencyType.SAME_AS_REPAYMENT_PERIOD));
 
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2023", 8000.0, 10.0,
                     4, null);
@@ -875,7 +877,8 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
     public void verifyLoanInstallmentRecalculatedIfThereIsOverdueInstallmentOn4IProgressiveLoanCOBStepOnePaid() {
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
         runAt("1 January 2023", () -> {
-            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(create4IProgressive());
+            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(
+                    create4IProgressive().recalculationRestFrequencyType(RecalculationRestFrequencyType.SAME_AS_REPAYMENT_PERIOD));
 
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2023", 8000.0, 10.0,
                     4, null);
@@ -997,7 +1000,8 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
     public void verifyLoanInstallmentRecalculatedIfThereIsOverdueInstallmentOnProgressiveLoanJob() {
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
         runAt("1 January 2023", () -> {
-            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(create4IProgressive());
+            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(
+                    create4IProgressive().recalculationRestFrequencyType(RecalculationRestFrequencyType.SAME_AS_REPAYMENT_PERIOD));
 
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2023", 8000.0, 10.0,
                     4, null);

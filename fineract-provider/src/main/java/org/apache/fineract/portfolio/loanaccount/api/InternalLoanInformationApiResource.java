@@ -18,12 +18,6 @@
  */
 package org.apache.fineract.portfolio.loanaccount.api;
 
-import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.CREATED_BY;
-import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.CREATED_DATE;
-import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.LAST_MODIFIED_BY;
-import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.LAST_MODIFIED_DATE;
-
-import com.google.gson.Gson;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -33,17 +27,13 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
-import java.util.HashMap;
+import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.boot.FineractProfiles;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
@@ -62,12 +52,8 @@ public class InternalLoanInformationApiResource implements InitializingBean {
 
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final LoanTransactionRepository loanTransactionRepository;
-    private final ToApiJsonSerializer<Map> toApiJsonSerializerForMap;
-    private final ToApiJsonSerializer<List> toApiJsonSerializerForList;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final AdvancedPaymentDataMapper advancedPaymentDataMapper;
-    private final LoanAccountDomainService loanAccountDomainService;
-    private final Gson gson = new Gson();
 
     @Override
     @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
@@ -87,7 +73,7 @@ public class InternalLoanInformationApiResource implements InitializingBean {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
-    public String getLoanAuditFields(@Context final UriInfo uriInfo, @PathParam("loanId") Long loanId) {
+    public AuditData getLoanAuditFields(@Context final UriInfo uriInfo, @PathParam("loanId") Long loanId) {
         log.warn("------------------------------------------------------------");
         log.warn("                                                            ");
         log.warn("Fetching loan with {}", loanId);
@@ -95,11 +81,8 @@ public class InternalLoanInformationApiResource implements InitializingBean {
         log.warn("------------------------------------------------------------");
 
         final Loan loan = loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
-        Map<String, Object> auditFields = new HashMap<>(
-                Map.of(CREATED_BY, loan.getCreatedBy().orElse(null), CREATED_DATE, loan.getCreatedDate().orElse(null), LAST_MODIFIED_BY,
-                        loan.getLastModifiedBy().orElse(null), LAST_MODIFIED_DATE, loan.getLastModifiedDate().orElse(null)));
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializerForMap.serialize(settings, auditFields);
+        return new AuditData(loan.getCreatedBy().orElse(null), loan.getCreatedDate().orElse(null), loan.getLastModifiedBy().orElse(null),
+                loan.getLastModifiedDate().orElse(null));
     }
 
     @GET
@@ -107,7 +90,7 @@ public class InternalLoanInformationApiResource implements InitializingBean {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
-    public String getLoanTransactionAuditFields(@Context final UriInfo uriInfo, @PathParam("loanId") Long loanId,
+    public AuditData getLoanTransactionAuditFields(@Context final UriInfo uriInfo, @PathParam("loanId") Long loanId,
             @PathParam("transactionId") Long transactionId) {
         log.warn("------------------------------------------------------------");
         log.warn("                                                            ");
@@ -116,11 +99,8 @@ public class InternalLoanInformationApiResource implements InitializingBean {
         log.warn("------------------------------------------------------------");
 
         final LoanTransaction transaction = loanTransactionRepository.findById(transactionId).orElseThrow();
-        Map<String, Object> auditFields = new HashMap<>(Map.of(CREATED_BY, transaction.getCreatedBy().orElse(null), CREATED_DATE,
-                transaction.getCreatedDate().orElse(null), LAST_MODIFIED_BY, transaction.getLastModifiedBy().orElse(null),
-                LAST_MODIFIED_DATE, transaction.getLastModifiedDate().orElse(null)));
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializerForMap.serialize(settings, auditFields);
+        return new AuditData(transaction.getCreatedBy().orElse(null), transaction.getCreatedDate().orElse(null),
+                transaction.getLastModifiedBy().orElse(null), transaction.getLastModifiedDate().orElse(null));
     }
 
     @GET
@@ -128,16 +108,14 @@ public class InternalLoanInformationApiResource implements InitializingBean {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
-    public String getLoansByStatus(@Context final UriInfo uriInfo, @PathParam("statusId") Integer statusId) {
+    public List<Long> getLoansByStatus(@Context final UriInfo uriInfo, @PathParam("statusId") Integer statusId) {
         log.warn("------------------------------------------------------------");
         log.warn("                                                            ");
         log.warn("Fetching loans by status {}", statusId);
         log.warn("                                                            ");
         log.warn("------------------------------------------------------------");
 
-        final List<Long> loanIds = loanRepositoryWrapper.findLoanIdsByStatusId(statusId);
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializerForList.serialize(settings, loanIds);
+        return loanRepositoryWrapper.findLoanIdsByStatusId(statusId);
     }
 
     @GET
@@ -155,5 +133,8 @@ public class InternalLoanInformationApiResource implements InitializingBean {
 
         final Loan loan = loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
         return advancedPaymentDataMapper.mapLoanPaymentAllocationRule(loan.getPaymentAllocationRules());
+    }
+
+    private record AuditData(Long createdBy, OffsetDateTime createdDate, Long lastModifiedBy, OffsetDateTime lastModifiedDate) {
     }
 }

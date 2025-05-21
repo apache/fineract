@@ -279,7 +279,7 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
             writeOffTransaction.reverse();
         }
 
-        if (newTransactionDetail.isRepaymentLikeType() || newTransactionDetail.isInterestWaiver()) {
+        if (newTransactionDetail.isRepaymentLikeType() || newTransactionDetail.isWaiver()) {
             loanDownPaymentHandlerService.handleRepaymentOrRecoveryOrWaiverTransaction(loan, newTransactionDetail, transactionForAdjustment,
                     scheduleGeneratorDTO);
         }

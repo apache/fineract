@@ -2983,6 +2983,10 @@ public class LoanTransactionHelper {
         return new Gson().fromJson(get, new TypeToken<ArrayList<Integer>>() {}.getType());
     }
 
+    public static List<Long> getLoanIdsByStatusId(Integer statusId) {
+        return Calls.ok(FineractClientHelper.getFineractClient().legacy.getLoansByStatus(statusId));
+    }
+
     public PutLoanProductsProductIdResponse updateLoanProduct(Long id, PutLoanProductsProductIdRequest requestModifyLoan) {
         return Calls.ok(FineractClientHelper.getFineractClient().loanProducts.updateLoanProduct(id, requestModifyLoan));
     }
