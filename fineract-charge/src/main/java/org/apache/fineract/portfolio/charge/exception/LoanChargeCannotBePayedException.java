@@ -25,7 +25,11 @@ public class LoanChargeCannotBePayedException extends AbstractPlatformDomainRule
     /*** enum of reasons of why Loan Charge cannot be waived **/
     public enum LoanChargeCannotBePayedReason {
 
-        ALREADY_PAID, ALREADY_WAIVED, LOAN_INACTIVE, CHARGE_NOT_ACCOUNT_TRANSFER, CHARGE_NOT_PAYABLE;
+        ALREADY_PAID, //
+        ALREADY_WAIVED, //
+        LOAN_INACTIVE, //
+        CHARGE_NOT_ACCOUNT_TRANSFER, //
+        CHARGE_NOT_PAYABLE; //
 
         public String errorMessage() {
             if (name().toString().equalsIgnoreCase("ALREADY_PAID")) {

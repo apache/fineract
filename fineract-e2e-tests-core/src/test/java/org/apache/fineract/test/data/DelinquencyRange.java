@@ -20,10 +20,17 @@ package org.apache.fineract.test.data;
 
 public enum DelinquencyRange {
 
-    NO_DELINQUENCY("NO_DELINQUENCY"), RANGE_1("Delinquency range 1"), RANGE_3("Delinquency range 3"), RANGE_30(
-            "Delinquency range 30"), RANGE_60("Delinquency range 60"), RANGE_90("Delinquency range 90"), RANGE_120(
-                    "Delinquency range 120"), RANGE_150("Delinquency range 150"), RANGE_180(
-                            "Delinquency range 180"), RANGE_210("Delinquency range 210"), RANGE_240("Delinquency range 240");
+    NO_DELINQUENCY("NO_DELINQUENCY"), //
+    RANGE_1("Delinquency range 1"), //
+    RANGE_3("Delinquency range 3"), //
+    RANGE_30("Delinquency range 30"), //
+    RANGE_60("Delinquency range 60"), //
+    RANGE_90("Delinquency range 90"), //
+    RANGE_120("Delinquency range 120"), //
+    RANGE_150("Delinquency range 150"), //
+    RANGE_180("Delinquency range 180"), //
+    RANGE_210("Delinquency range 210"), //
+    RANGE_240("Delinquency range 240"); //
 
     public final String value;
 

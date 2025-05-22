@@ -20,7 +20,8 @@ package org.apache.fineract.test.data;
 
 public enum InterestType {
 
-    DECLINING_BALANCE(0), FLAT(1);
+    DECLINING_BALANCE(0), //
+    FLAT(1); //
 
     public final Integer value;
 

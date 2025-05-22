@@ -29,8 +29,8 @@ public enum DepositAccountOnClosureType {
     INVALID(0, "depositAccountClosureType.invalid"), //
     WITHDRAW_DEPOSIT(100, "depositAccountClosureType.withdrawDeposit"), //
     TRANSFER_TO_SAVINGS(200, "depositAccountClosureType.transferToSavings"), //
-    REINVEST_PRINCIPAL_AND_INTEREST(300, "depositAccountClosureType.reinvestPrincipalAndInterest"), REINVEST_PRINCIPAL_ONLY(400,
-            "depositAccountClosureType.reinvestPrincipalOnly"); //
+    REINVEST_PRINCIPAL_AND_INTEREST(300, "depositAccountClosureType.reinvestPrincipalAndInterest"), //
+    REINVEST_PRINCIPAL_ONLY(400, "depositAccountClosureType.reinvestPrincipalOnly"); //
 
     private final Integer value;
     private final String code;

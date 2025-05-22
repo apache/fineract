@@ -18,6 +18,13 @@
  */
 package org.apache.fineract.investor.data;
 
-public enum ExternalTransferStatus {
-    ACTIVE, ACTIVE_INTERMEDIATE, DECLINED, PENDING, PENDING_INTERMEDIATE, BUYBACK, BUYBACK_INTERMEDIATE, CANCELLED
+public enum ExternalTransferStatus { //
+    ACTIVE, //
+    ACTIVE_INTERMEDIATE, //
+    DECLINED, //
+    PENDING, //
+    PENDING_INTERMEDIATE, //
+    BUYBACK, //
+    BUYBACK_INTERMEDIATE, //
+    CANCELLED //
 }

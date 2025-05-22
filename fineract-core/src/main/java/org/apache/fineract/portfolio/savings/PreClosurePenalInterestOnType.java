@@ -25,7 +25,8 @@ import java.util.Arrays;
  */
 public enum PreClosurePenalInterestOnType {
 
-    INVALID(0, "preClosurePenalInterestOnType.invalid"), WHOLE_TERM(1, "preClosurePenalInterestOnType.wholeTerm"), //
+    INVALID(0, "preClosurePenalInterestOnType.invalid"), //
+    WHOLE_TERM(1, "preClosurePenalInterestOnType.wholeTerm"), //
     TILL_PREMATURE_WITHDRAWAL(2, "preClosurePenalInterestOnType.tillPrematureWithdrawal"); //
 
     private final Integer value;

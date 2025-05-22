@@ -20,8 +20,13 @@ package org.apache.fineract.test.data;
 
 public enum AccountTypeIncomeOptions {
 
-    DEFERRED_INTEREST_REVENUE(7), RETAINED_EARNINGS_PRIOR_YEAR(8), INTEREST_INCOME(9), FEE_INCOME(10), FEE_CHARGE_OFF(11), RECOVERIES(
-            15), INTEREST_INCOME_CHARGE_OFF(20);
+    DEFERRED_INTEREST_REVENUE(7), //
+    RETAINED_EARNINGS_PRIOR_YEAR(8), //
+    INTEREST_INCOME(9), //
+    FEE_INCOME(10), //
+    FEE_CHARGE_OFF(11), //
+    RECOVERIES(15), //
+    INTEREST_INCOME_CHARGE_OFF(20); //
 
     public final Integer value;
 

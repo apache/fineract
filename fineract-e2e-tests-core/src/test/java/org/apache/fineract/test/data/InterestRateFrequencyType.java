@@ -20,7 +20,10 @@ package org.apache.fineract.test.data;
 
 public enum InterestRateFrequencyType {
 
-    DAY(1), MONTH(2), YEAR(3), WHOLE_TERM(4);
+    DAY(1), //
+    MONTH(2), //
+    YEAR(3), //
+    WHOLE_TERM(4); //
 
     public final Integer value;
 

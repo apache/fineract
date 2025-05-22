@@ -20,7 +20,9 @@ package org.apache.fineract.test.data;
 
 public enum AssetExternalizationTransferStatus {
 
-    EXECUTED("EXECUTED"), CANCELLED("CANCELLED"), DECLINED("DECLINED");
+    EXECUTED("EXECUTED"), //
+    CANCELLED("CANCELLED"), //
+    DECLINED("DECLINED"); //
 
     public final String value;
 

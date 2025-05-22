@@ -25,8 +25,11 @@ import org.springframework.util.StringUtils;
 
 public enum CalendarFrequencyType {
 
-    INVALID(0, "calendarFrequencyType.invalid"), DAILY(1, "calendarFrequencyType.daily"), WEEKLY(2,
-            "calendarFrequencyType.weekly"), MONTHLY(3, "calendarFrequencyType.monthly"), YEARLY(4, "calendarFrequencyType.yearly");
+    INVALID(0, "calendarFrequencyType.invalid"), //
+    DAILY(1, "calendarFrequencyType.daily"), //
+    WEEKLY(2, "calendarFrequencyType.weekly"), //
+    MONTHLY(3, "calendarFrequencyType.monthly"), //
+    YEARLY(4, "calendarFrequencyType.yearly"); //
 
     private final Integer value;
     private final String code;

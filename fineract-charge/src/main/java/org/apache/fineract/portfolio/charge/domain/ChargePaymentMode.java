@@ -21,7 +21,7 @@ package org.apache.fineract.portfolio.charge.domain;
 public enum ChargePaymentMode {
 
     REGULAR(0, "chargepaymentmode.regular"), //
-    ACCOUNT_TRANSFER(1, "chargepaymentmode.accounttransfer");
+    ACCOUNT_TRANSFER(1, "chargepaymentmode.accounttransfer"); //
 
     private final Integer value;
     private final String code;

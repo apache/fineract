@@ -20,14 +20,18 @@ package org.apache.fineract.test.data;
 
 public enum TransactionProcessingStrategyCode {
 
-    PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER("mifos-standard-strategy"), HEAVENSFAMILY_UNIQUE("heavensfamily-strategy"), CREOCORE_UNIQUE(
-            "creocore-strategy"), OVERDUE_DUE_FEE_INT_PRINCIPAL("rbi-india-strategy"), PRINCIPAL_INTEREST_PENALTIES_FEES_ORDER(
-                    "principal-interest-penalties-fees-order-strategy"), INTEREST_PRINCIPAL_PENALTIES_FEES_ORDER(
-                            "interest-principal-penalties-fees-order-strategy"), EARLY_REPAYMENT_STRATEGY(
-                                    "early-repayment-strategy"), DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST(
-                                            "due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy"), DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE(
-                                                    "due-penalty-interest-principal-fee-in-advance-penalty-interest-principal-fee-strategy"), ADVANCED_PAYMENT_ALLOCATION(
-                                                            "advanced-payment-allocation-strategy");
+    PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER("mifos-standard-strategy"), //
+    HEAVENSFAMILY_UNIQUE("heavensfamily-strategy"), //
+    CREOCORE_UNIQUE("creocore-strategy"), //
+    OVERDUE_DUE_FEE_INT_PRINCIPAL("rbi-india-strategy"), //
+    PRINCIPAL_INTEREST_PENALTIES_FEES_ORDER("principal-interest-penalties-fees-order-strategy"), //
+    INTEREST_PRINCIPAL_PENALTIES_FEES_ORDER("interest-principal-penalties-fees-order-strategy"), //
+    EARLY_REPAYMENT_STRATEGY("early-repayment-strategy"), //
+    DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST(
+            "due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy"), //
+    DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE(
+            "due-penalty-interest-principal-fee-in-advance-penalty-interest-principal-fee-strategy"), //
+    ADVANCED_PAYMENT_ALLOCATION("advanced-payment-allocation-strategy"); //
 
     public final String value;
 

@@ -26,7 +26,8 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 @AllArgsConstructor
 public enum ActionContext {
 
-    DEFAULT(0, "Default context", BusinessDateType.BUSINESS_DATE), COB(1, "Close of Business context", BusinessDateType.COB_DATE);
+    DEFAULT(0, "Default context", BusinessDateType.BUSINESS_DATE), //
+    COB(1, "Close of Business context", BusinessDateType.COB_DATE); //
 
     private final int order;
     private final String description;

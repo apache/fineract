@@ -20,7 +20,11 @@ package org.apache.fineract.test.data;
 
 public enum GLAType {
 
-    ASSET(1), LIABILITY(2), EQUITY(3), INCOME(4), EXPENSE(5);
+    ASSET(1), //
+    LIABILITY(2), //
+    EQUITY(3), //
+    INCOME(4), //
+    EXPENSE(5); //
 
     public final Integer value;
 

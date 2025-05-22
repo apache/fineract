@@ -20,7 +20,10 @@ package org.apache.fineract.test.data;
 
 public enum InterestRecalculationCompoundingMethod {
 
-    NONE(0), INTEREST(1), FEE(2), FEE_AND_INTEREST(3);
+    NONE(0), //
+    INTEREST(1), //
+    FEE(2), //
+    FEE_AND_INTEREST(3); //
 
     public final Integer value;
 

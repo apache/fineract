@@ -23,7 +23,8 @@ public enum ChargeAppliesTo {
     INVALID(0, "chargeAppliesTo.invalid"), //
     LOAN(1, "chargeAppliesTo.loan"), //
     SAVINGS(2, "chargeAppliesTo.savings"), //
-    CLIENT(3, "chargeAppliesTo.client"), SHARES(4, "chargeAppliesTo.shares");
+    CLIENT(3, "chargeAppliesTo.client"), //
+    SHARES(4, "chargeAppliesTo.shares"); //
 
     private final Integer value;
     private final String code;

@@ -22,8 +22,9 @@ import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRu
 
 public enum ImportFormatType {
 
-    XLSX("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"), XLS("application/vnd.ms-excel"), ODS(
-            "application/vnd.oasis.opendocument.spreadsheet");
+    XLSX("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"), //
+    XLS("application/vnd.ms-excel"), //
+    ODS("application/vnd.oasis.opendocument.spreadsheet"); //
 
     private final String format;
 

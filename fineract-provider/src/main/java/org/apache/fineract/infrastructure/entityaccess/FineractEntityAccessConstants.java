@@ -31,8 +31,11 @@ public final class FineractEntityAccessConstants {
      ***/
     public enum EntityAccessJSONinputParams {
 
-        ENTITY_TYPE("entityType"), ENTITY_ID("entityId"), ENTITY_ACCESS_TYPE_ID("entityAccessTypeId"), SECOND_ENTITY_TYPE(
-                "secondEntityType"), SECOND_ENTITY_ID("secondEntityId");
+        ENTITY_TYPE("entityType"), //
+        ENTITY_ID("entityId"), //
+        ENTITY_ACCESS_TYPE_ID("entityAccessTypeId"), //
+        SECOND_ENTITY_TYPE("secondEntityType"), //
+        SECOND_ENTITY_ID("secondEntityId"); //
 
         private final String value;
 

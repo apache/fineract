@@ -34,7 +34,7 @@ public enum LoanStatus {
     CLOSED_OBLIGATIONS_MET(600, "loanStatusType.closed.obligations.met"), //
     CLOSED_WRITTEN_OFF(601, "loanStatusType.closed.written.off"), //
     CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT(602, "loanStatusType.closed.reschedule.outstanding.amount"), //
-    OVERPAID(700, "loanStatusType.overpaid");
+    OVERPAID(700, "loanStatusType.overpaid"); //
 
     private final Integer value;
     private final String code;

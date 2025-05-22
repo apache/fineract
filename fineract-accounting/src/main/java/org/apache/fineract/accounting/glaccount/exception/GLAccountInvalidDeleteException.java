@@ -28,7 +28,9 @@ public class GLAccountInvalidDeleteException extends AbstractPlatformDomainRuleE
     /*** Enum of reasons for invalid delete **/
     public enum GlAccountInvalidDeleteReason {
 
-        TRANSACTIONS_LOGGED, HAS_CHILDREN, PRODUCT_MAPPING;
+        TRANSACTIONS_LOGGED, //
+        HAS_CHILDREN, //
+        PRODUCT_MAPPING; //
 
         public String errorMessage() {
             if (name().equalsIgnoreCase("TRANSACTIONS_LOGGED")) {

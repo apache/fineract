@@ -25,7 +25,10 @@ public class SavingsAccountChargeCannotBeWaivedException extends AbstractPlatfor
     /*** enum of reasons of why Savings Account Charge cannot be waived **/
     public enum SavingsAccountChargeCannotBeWaivedReason {
 
-        ALREADY_PAID, ALREADY_WAIVED, SAVINGS_ACCOUNT_NOT_ACTIVE, SAVINGS_ACCOUNT_CLOSED;
+        ALREADY_PAID, //
+        ALREADY_WAIVED, //
+        SAVINGS_ACCOUNT_NOT_ACTIVE, //
+        SAVINGS_ACCOUNT_CLOSED; //
 
         public String errorMessage() {
             if (name().toString().equalsIgnoreCase("ALREADY_PAID")) {

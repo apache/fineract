@@ -20,7 +20,11 @@ package org.apache.fineract.test.data;
 
 public enum ChargeCalculationType {
 
-    FLAT(1), PERCENTAGE_AMOUNT(2), PERCENTAGE_LOAN_AMOUNT_PLUS_INTEREST(3), PERCENTAGE_INTEREST(4), PERCENTAGE_DISBURSEMENT_AMOUNT(5);
+    FLAT(1), //
+    PERCENTAGE_AMOUNT(2), //
+    PERCENTAGE_LOAN_AMOUNT_PLUS_INTEREST(3), //
+    PERCENTAGE_INTEREST(4), //
+    PERCENTAGE_DISBURSEMENT_AMOUNT(5); //
 
     public final Integer value;
 

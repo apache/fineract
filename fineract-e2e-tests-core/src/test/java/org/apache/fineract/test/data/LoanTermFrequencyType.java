@@ -20,7 +20,10 @@ package org.apache.fineract.test.data;
 
 public enum LoanTermFrequencyType {
 
-    DAYS(0), WEEKS(1), MONTHS(2), YEARS(4);
+    DAYS(0), //
+    WEEKS(1), //
+    MONTHS(2), //
+    YEARS(4); //
 
     public final Integer value;
 

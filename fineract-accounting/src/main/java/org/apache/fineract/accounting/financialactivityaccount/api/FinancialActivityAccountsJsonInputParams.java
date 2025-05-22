@@ -26,7 +26,8 @@ import java.util.Set;
  ***/
 public enum FinancialActivityAccountsJsonInputParams {
 
-    FINANCIAL_ACTIVITY_ID("financialActivityId"), GL_ACCOUNT_ID("glAccountId");
+    FINANCIAL_ACTIVITY_ID("financialActivityId"), //
+    GL_ACCOUNT_ID("glAccountId"); //
 
     private final String value;
 

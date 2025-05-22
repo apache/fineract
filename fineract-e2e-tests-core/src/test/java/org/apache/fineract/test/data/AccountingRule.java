@@ -20,7 +20,10 @@ package org.apache.fineract.test.data;
 
 public enum AccountingRule {
 
-    NONE(1), CASH_BASED(2), ACCRUAL_PERIODIC(3), ACCRUAL_UPFRONT(4);
+    NONE(1), //
+    CASH_BASED(2), //
+    ACCRUAL_PERIODIC(3), //
+    ACCRUAL_UPFRONT(4); //
 
     public final Integer value;
 

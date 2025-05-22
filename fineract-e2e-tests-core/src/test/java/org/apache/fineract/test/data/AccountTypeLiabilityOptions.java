@@ -20,7 +20,9 @@ package org.apache.fineract.test.data;
 
 public enum AccountTypeLiabilityOptions {
 
-    AA_SUSPENSE_BALANCE(5), SUSPENSE_CLEARING_ACCOUNT(6), OVERPAYMENT_ACCOUNT(17);
+    AA_SUSPENSE_BALANCE(5), //
+    SUSPENSE_CLEARING_ACCOUNT(6), //
+    OVERPAYMENT_ACCOUNT(17); //
 
     public final Integer value;
 

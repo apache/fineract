@@ -20,7 +20,8 @@ package org.apache.fineract.test.data;
 
 public enum CurrencyOptions {
 
-    EUR("EUR"), USD("USD");
+    EUR("EUR"), //
+    USD("USD"); //
 
     public final String value;
 

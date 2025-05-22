@@ -29,7 +29,8 @@ public class GLClosureInvalidException extends AbstractPlatformDomainRuleExcepti
     /*** enum of reasons for invalid Accounting Closure **/
     public enum GlClosureInvalidReason {
 
-        FUTURE_DATE, ACCOUNTING_CLOSED;
+        FUTURE_DATE, //
+        ACCOUNTING_CLOSED; //
 
         public String errorMessage() {
             if (name().equalsIgnoreCase("FUTURE_DATE")) {

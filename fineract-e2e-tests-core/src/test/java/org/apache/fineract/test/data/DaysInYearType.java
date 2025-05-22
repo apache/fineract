@@ -20,7 +20,10 @@ package org.apache.fineract.test.data;
 
 public enum DaysInYearType {
 
-    ACTUAL(1), DAYS360(360), DAYS364(364), DAYS365(365);
+    ACTUAL(1), //
+    DAYS360(360), //
+    DAYS364(364), //
+    DAYS365(365); //
 
     public final Integer value;
 

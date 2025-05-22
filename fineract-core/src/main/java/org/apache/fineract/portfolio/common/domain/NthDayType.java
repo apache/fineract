@@ -20,8 +20,14 @@ package org.apache.fineract.portfolio.common.domain;
 
 public enum NthDayType {
 
-    ONE(1, "nthDayType.one"), TWO(2, "nthDayType.two"), THREE(3, "nthDayType.three"), FOUR(4, "nthDayType.four"), FIVE(5,
-            "nthDayType.five"), LAST(-1, "nthDayType.last"), ONDAY(-2, "nthDayType.onday"), INVALID(0, "nthDayType.invalid");
+    ONE(1, "nthDayType.one"), //
+    TWO(2, "nthDayType.two"), //
+    THREE(3, "nthDayType.three"), //
+    FOUR(4, "nthDayType.four"), //
+    FIVE(5, "nthDayType.five"), //
+    LAST(-1, "nthDayType.last"), //
+    ONDAY(-2, "nthDayType.onday"), //
+    INVALID(0, "nthDayType.invalid"); //
 
     private final Integer value;
     private final String code;

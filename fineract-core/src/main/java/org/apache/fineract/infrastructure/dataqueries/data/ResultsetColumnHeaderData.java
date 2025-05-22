@@ -241,7 +241,18 @@ public final class ResultsetColumnHeaderData implements Serializable {
 
     // Enum representing the different ways a column can be displayed.
     public enum DisplayType {
-        TEXT, STRING, INTEGER, FLOAT, DECIMAL, DATE, TIME, DATETIME, BOOLEAN, BINARY, CODELOOKUP, CODEVALUE;
+        TEXT, //
+        STRING, //
+        INTEGER, //
+        FLOAT, //
+        DECIMAL, //
+        DATE, //
+        TIME, //
+        DATETIME, //
+        BOOLEAN, //
+        BINARY, //
+        CODELOOKUP, //
+        CODEVALUE; //
     }
 
 }

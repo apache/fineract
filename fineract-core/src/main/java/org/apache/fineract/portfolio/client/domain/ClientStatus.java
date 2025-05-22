@@ -30,7 +30,9 @@ public enum ClientStatus {
     ACTIVE(300, "clientStatusType.active"), //
     TRANSFER_IN_PROGRESS(303, "clientStatusType.transfer.in.progress"), //
     TRANSFER_ON_HOLD(304, "clientStatusType.transfer.on.hold"), //
-    CLOSED(600, "clientStatusType.closed"), REJECTED(700, "clientStatusType.rejected"), WITHDRAWN(800, "clientStatusType.withdraw");
+    CLOSED(600, "clientStatusType.closed"), //
+    REJECTED(700, "clientStatusType.rejected"), //
+    WITHDRAWN(800, "clientStatusType.withdraw"); //
 
     private final Integer value;
     private final String code;

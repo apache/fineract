@@ -992,7 +992,8 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     }
 
     public enum PaymentAction {
-        PAY, UNPAY
+        PAY, //
+        UNPAY //
     }
 
     public boolean isTransactionDateWithinPeriod(LocalDate referenceDate) {

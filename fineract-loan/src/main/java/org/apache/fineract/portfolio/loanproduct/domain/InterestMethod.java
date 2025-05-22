@@ -20,7 +20,9 @@ package org.apache.fineract.portfolio.loanproduct.domain;
 
 public enum InterestMethod {
 
-    DECLINING_BALANCE(0, "interestType.declining.balance"), FLAT(1, "interestType.flat"), INVALID(2, "interestType.invalid");
+    DECLINING_BALANCE(0, "interestType.declining.balance"), //
+    FLAT(1, "interestType.flat"), //
+    INVALID(2, "interestType.invalid"); //
 
     private final Integer value;
     private final String code;

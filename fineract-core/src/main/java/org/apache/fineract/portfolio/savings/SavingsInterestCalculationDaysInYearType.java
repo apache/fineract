@@ -32,7 +32,7 @@ public enum SavingsInterestCalculationDaysInYearType {
 
     INVALID(0, "savingsInterestCalculationDaysInYearType.invalid"), //
     DAYS_360(360, "savingsInterestCalculationDaysInYearType.days360"), //
-    DAYS_365(365, "savingsInterestCalculationDaysInYearType.days365");
+    DAYS_365(365, "savingsInterestCalculationDaysInYearType.days365"); //
 
     private final Integer value;
     private final String code;

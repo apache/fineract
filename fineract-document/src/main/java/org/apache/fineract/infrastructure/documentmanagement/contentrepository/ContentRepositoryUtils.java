@@ -38,7 +38,9 @@ public final class ContentRepositoryUtils {
 
     public enum ImageMIMEtype {
 
-        GIF("image/gif"), JPEG("image/jpeg"), PNG("image/png");
+        GIF("image/gif"), //
+        JPEG("image/jpeg"), //
+        PNG("image/png"); //
 
         private final String value;
 
@@ -68,7 +70,10 @@ public final class ContentRepositoryUtils {
 
     public enum ImageFileExtension {
 
-        GIF(".gif"), JPEG(".jpeg"), JPG(".jpg"), PNG(".png");
+        GIF(".gif"), //
+        JPEG(".jpeg"), //
+        JPG(".jpg"), //
+        PNG(".png"); //
 
         private final String value;
 
@@ -100,8 +105,9 @@ public final class ContentRepositoryUtils {
 
     public enum ImageDataURIsuffix {
 
-        GIF("data:" + ImageMIMEtype.GIF.getValue() + ";base64,"), JPEG("data:" + ImageMIMEtype.JPEG.getValue() + ";base64,"), PNG(
-                "data:" + ImageMIMEtype.PNG.getValue() + ";base64,");
+        GIF("data:" + ImageMIMEtype.GIF.getValue() + ";base64,"), //
+        JPEG("data:" + ImageMIMEtype.JPEG.getValue() + ";base64,"), //
+        PNG("data:" + ImageMIMEtype.PNG.getValue() + ";base64,");
 
         private final String value;
 

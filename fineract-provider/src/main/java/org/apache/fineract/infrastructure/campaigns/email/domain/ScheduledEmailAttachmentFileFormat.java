@@ -20,8 +20,10 @@ package org.apache.fineract.infrastructure.campaigns.email.domain;
 
 public enum ScheduledEmailAttachmentFileFormat {
 
-    INVALID(0, "EmailAttachmentFileFormat.invalid", "invalid"), XLS(1, "EmailAttachmentFileFormat.xls", "xls"), PDF(2,
-            "EmailAttachmentFileFormat.pdf", "pdf"), CSV(3, "EmailAttachmentFileFormat.csv", "csv");
+    INVALID(0, "EmailAttachmentFileFormat.invalid", "invalid"), //
+    XLS(1, "EmailAttachmentFileFormat.xls", "xls"), //
+    PDF(2, "EmailAttachmentFileFormat.pdf", "pdf"), //
+    CSV(3, "EmailAttachmentFileFormat.csv", "csv"); //
 
     private final String code;
     private final String value;

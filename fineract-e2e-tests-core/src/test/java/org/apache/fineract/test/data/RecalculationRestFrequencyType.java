@@ -20,7 +20,10 @@ package org.apache.fineract.test.data;
 
 public enum RecalculationRestFrequencyType {
 
-    SAME_AS_REPAYMENT(1), DAILY(2), WEEKLY(3), MONTHLY(4);
+    SAME_AS_REPAYMENT(1), //
+    DAILY(2), //
+    WEEKLY(3), //
+    MONTHLY(4); //
 
     public final Integer value;
 

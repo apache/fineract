@@ -20,7 +20,10 @@ package org.apache.fineract.test.data;
 
 public enum ChargeProductAppliesTo {
 
-    LOAN(1), SAVINGS(2), CLIENT(3), SHARES(4);
+    LOAN(1), //
+    SAVINGS(2), //
+    CLIENT(3), //
+    SHARES(4); //
 
     public final Integer value;
 

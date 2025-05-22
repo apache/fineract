@@ -20,7 +20,8 @@ package org.apache.fineract.test.data;
 
 public enum GLAUsage {
 
-    DETAIL(1), HEADER(2);
+    DETAIL(1), //
+    HEADER(2); //
 
     public final Integer value;
 

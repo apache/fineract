@@ -54,10 +54,10 @@ import org.apache.fineract.infrastructure.core.api.ApiFacingEnum;
 public enum DaysInYearCustomStrategyType implements ApiFacingEnum<DaysInYearCustomStrategyType> {
 
     /** Always considers 366 days in a leap year. */
-    FULL_LEAP_YEAR("DaysInYearCustomStrategyType.fullLeapYear", "Full Leap Year"),
+    FULL_LEAP_YEAR("DaysInYearCustomStrategyType.fullLeapYear", "Full Leap Year"), //
 
     /** Considers 366 days only if the period includes February 29th; otherwise, uses 365 days. */
-    FEB_29_PERIOD_ONLY("DaysInYearCustomStrategyType.feb29PeriodOnly", "Feb 29 Period Only"),;
+    FEB_29_PERIOD_ONLY("DaysInYearCustomStrategyType.feb29PeriodOnly", "Feb 29 Period Only"); //
 
     private final String code;
     private final String humanReadableName;

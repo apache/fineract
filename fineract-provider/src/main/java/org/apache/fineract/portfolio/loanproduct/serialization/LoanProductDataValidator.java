@@ -1428,7 +1428,7 @@ public final class LoanProductDataValidator {
                     .isOneOfTheseValues(1, 360, 364, 365);
         }
 
-        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.DAYS_IN_YEAR_TYPE_PARAMETER_NAME, element)) {
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.DAYS_IN_MONTH_TYPE_PARAMETER_NAME, element)) {
             final Integer daysInMonthType = this.fromApiJsonHelper
                     .extractIntegerNamed(LoanProductConstants.DAYS_IN_MONTH_TYPE_PARAMETER_NAME, element, Locale.getDefault());
             baseDataValidator.reset().parameter(LoanProductConstants.DAYS_IN_MONTH_TYPE_PARAMETER_NAME).value(daysInMonthType).notNull()

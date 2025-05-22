@@ -29,7 +29,7 @@ public enum DepositAccountType {
     SAVINGS_DEPOSIT(100, "depositAccountType.savingsDeposit"), //
     FIXED_DEPOSIT(200, "depositAccountType.fixedDeposit"), //
     RECURRING_DEPOSIT(300, "depositAccountType.recurringDeposit"), //
-    CURRENT_DEPOSIT(400, "depositAccountType.currentDeposit");
+    CURRENT_DEPOSIT(400, "depositAccountType.currentDeposit"); //
 
     private final Integer value;
     private final String code;

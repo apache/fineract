@@ -27,13 +27,14 @@ import java.util.Arrays;
  */
 public enum SavingsCompoundingInterestPeriodType {
 
-    INVALID(0, "savingsCompoundingInterestPeriodType.invalid"), DAILY(1, "savingsCompoundingInterestPeriodType.daily"),
-    // WEEKLY(2, "savingsCompoundingInterestPeriodType.weekly"),
-    // BIWEEKLY(3, "savingsCompoundingInterestPeriodType.biweekly"),
-    MONTHLY(4, "savingsCompoundingInterestPeriodType.monthly"),
-
-    QUATERLY(5, "savingsCompoundingInterestPeriodType.quarterly"), BI_ANNUAL(6, "savingsCompoundingInterestPeriodType.biannual"), ANNUAL(7,
-            "savingsCompoundingInterestPeriodType.annual");
+    INVALID(0, "savingsCompoundingInterestPeriodType.invalid"), //
+    DAILY(1, "savingsCompoundingInterestPeriodType.daily"), //
+    // WEEKLY(2, "savingsCompoundingInterestPeriodType.weekly"), //
+    // BIWEEKLY(3, "savingsCompoundingInterestPeriodType.biweekly"), //
+    MONTHLY(4, "savingsCompoundingInterestPeriodType.monthly"), //
+    QUATERLY(5, "savingsCompoundingInterestPeriodType.quarterly"), //
+    BI_ANNUAL(6, "savingsCompoundingInterestPeriodType.biannual"), //
+    ANNUAL(7, "savingsCompoundingInterestPeriodType.annual"); //
 
     // NO_COMPOUNDING_SIMPLE_INTEREST(8, "savingsCompoundingInterestPeriodType.nocompounding");
 

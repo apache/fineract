@@ -26,8 +26,14 @@ import org.apache.fineract.test.support.EnumResolver;
 @Getter
 public enum DatatableColumnType {
 
-    STRING("string"), NUMBER("number"), BOOLEAN("boolean"), DECIMAL("decimal"), DATE("date"), DATETIME("datetime"), TEXT("text"), DROPDOWN(
-            "dropdown");
+    STRING("string"), //
+    NUMBER("number"), //
+    BOOLEAN("boolean"), //
+    DECIMAL("decimal"), //
+    DATE("date"), //
+    DATETIME("datetime"), //
+    TEXT("text"), //
+    DROPDOWN("dropdown"); //
 
     private final String typeString;
 

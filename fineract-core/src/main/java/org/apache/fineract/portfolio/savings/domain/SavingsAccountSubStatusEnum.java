@@ -25,9 +25,11 @@ public enum SavingsAccountSubStatusEnum {
 
     NONE(0, "SavingsAccountSubStatusEnum.none"), //
     INACTIVE(100, "SavingsAccountSubStatusEnum.inactive"), //
-    DORMANT(200, "SavingsAccountSubStatusEnum.dormant"), ESCHEAT(300, "SavingsAccountSubStatusEnum.escheat"), BLOCK(400,
-            "SavingsAccountSubStatusEnum.block"), BLOCK_CREDIT(500,
-                    "SavingsAccountSubStatusEnum.blockCredit"), BLOCK_DEBIT(600, "SavingsAccountSubStatusEnum.blockDebit");
+    DORMANT(200, "SavingsAccountSubStatusEnum.dormant"), //
+    ESCHEAT(300, "SavingsAccountSubStatusEnum.escheat"), //
+    BLOCK(400, "SavingsAccountSubStatusEnum.block"), //
+    BLOCK_CREDIT(500, "SavingsAccountSubStatusEnum.blockCredit"), //
+    BLOCK_DEBIT(600, "SavingsAccountSubStatusEnum.blockDebit"); //
 
     private final Integer value;
     private final String code;

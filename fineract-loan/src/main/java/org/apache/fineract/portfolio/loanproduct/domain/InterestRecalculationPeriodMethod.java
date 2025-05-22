@@ -40,7 +40,7 @@ public enum InterestRecalculationPeriodMethod {
     WEEKLY(2, "interestRecalculationPeriodMethod.weekly"), //
     FORTNIGHTLY(3, "interestRecalculationPeriodMethod.fortnightly"), //
     MONTHLY(4, "interestRecalculationPeriodMethod.monthly"), //
-    SAME_AS_REPAYMENT_PERIOD(5, "interestRecalculationPeriodMethod.same.as.repayment.period");
+    SAME_AS_REPAYMENT_PERIOD(5, "interestRecalculationPeriodMethod.same.as.repayment.period"); //
 
     private final Integer value;
     private final String code;

@@ -22,8 +22,11 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public enum GLAccountType {
 
-    ASSET(1, "accountType.asset"), LIABILITY(2, "accountType.liability"), EQUITY(3, "accountType.equity"), INCOME(4,
-            "accountType.income"), EXPENSE(5, "accountType.expense");
+    ASSET(1, "accountType.asset"), //
+    LIABILITY(2, "accountType.liability"), //
+    EQUITY(3, "accountType.equity"), //
+    INCOME(4, "accountType.income"), //
+    EXPENSE(5, "accountType.expense"); //
 
     private final Integer value;
     private final String code;

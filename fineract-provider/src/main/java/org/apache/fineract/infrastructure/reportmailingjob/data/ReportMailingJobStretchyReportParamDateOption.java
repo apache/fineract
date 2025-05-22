@@ -25,10 +25,10 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public enum ReportMailingJobStretchyReportParamDateOption {
 
-    INVALID(0, "ReportMailingJobStretchyReportParamDateOption.INVALID", "Invalid"), TODAY(1,
-            "ReportMailingJobStretchyReportParamDateOption.TODAY", "Today"), YESTERDAY(2,
-                    "ReportMailingJobStretchyReportParamDateOption.YESTERDAY",
-                    "Yesterday"), TOMORROW(3, "ReportMailingJobStretchyReportParamDateOption.TOMORROW", "Tomorrow");
+    INVALID(0, "ReportMailingJobStretchyReportParamDateOption.INVALID", "Invalid"), //
+    TODAY(1, "ReportMailingJobStretchyReportParamDateOption.TODAY", "Today"), //
+    YESTERDAY(2, "ReportMailingJobStretchyReportParamDateOption.YESTERDAY", "Yesterday"), //
+    TOMORROW(3, "ReportMailingJobStretchyReportParamDateOption.TOMORROW", "Tomorrow"); //
 
     private final String code;
     private final String value;

@@ -20,7 +20,9 @@ package org.apache.fineract.test.data;
 
 public enum AccountTypeExpenseOptions {
 
-    CREDIT_LOSS_BAD_DEBT(12), CREDIT_LOSS_BAD_DEBT_FRAUD(13), WRITTEN_OFF(16);
+    CREDIT_LOSS_BAD_DEBT(12), //
+    CREDIT_LOSS_BAD_DEBT_FRAUD(13), //
+    WRITTEN_OFF(16); //
 
     public final Integer value;
 

@@ -26,7 +26,12 @@ import java.util.Set;
  ***/
 public enum GLClosureJsonInputParams {
 
-    ID("id"), OFFICE_ID("officeId"), CLOSING_DATE("closingDate"), COMMENTS("comments"), LOCALE("locale"), DATE_FORMAT("dateFormat");
+    ID("id"), //
+    OFFICE_ID("officeId"), //
+    CLOSING_DATE("closingDate"), //
+    COMMENTS("comments"), //
+    LOCALE("locale"), //
+    DATE_FORMAT("dateFormat"); //
 
     private final String value;
 

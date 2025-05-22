@@ -30,7 +30,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 @RequiredArgsConstructor
 public enum CreditAllocationTransactionType {
 
-    CHARGEBACK(LoanTransactionType.CHARGEBACK, "Chargeback");
+    CHARGEBACK(LoanTransactionType.CHARGEBACK, "Chargeback"); //
 
     private final LoanTransactionType loanTransactionType;
     private final String humanReadableName;

@@ -23,8 +23,10 @@ import java.util.Map;
 
 public enum CalendarType {
 
-    COLLECTION(1, "calendarType.collection"), TRAINING(2, "calendarType.training"), AUDIT(3, "calendarType.audit"), GENERAL(4,
-            "calendarType.general");
+    COLLECTION(1, "calendarType.collection"), //
+    TRAINING(2, "calendarType.training"), //
+    AUDIT(3, "calendarType.audit"), //
+    GENERAL(4, "calendarType.general"); //
 
     private final Integer value;
     private final String code;

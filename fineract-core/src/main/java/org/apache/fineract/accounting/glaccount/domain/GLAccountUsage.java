@@ -23,7 +23,8 @@ import java.util.Map;
 
 public enum GLAccountUsage {
 
-    DETAIL(1, "accountUsage.detail"), HEADER(2, "accountUsage.header");
+    DETAIL(1, "accountUsage.detail"), //
+    HEADER(2, "accountUsage.header"); //
 
     private final Integer value;
     private final String code;

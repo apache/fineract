@@ -28,7 +28,7 @@ public class GLAccountInvalidUpdateException extends AbstractPlatformDomainRuleE
     /*** Enum of reasons for invalid delete **/
     public enum GlAccountInvalidUpdateReason {
 
-        TRANSANCTIONS_LOGGED;
+        TRANSANCTIONS_LOGGED; //
 
         public String errorMessage() {
             if (name().equalsIgnoreCase("TRANSANCTIONS_LOGGED")) {

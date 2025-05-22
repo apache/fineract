@@ -359,7 +359,7 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom<Long> {
             this.secondReminder = newValue;
         }
 
-        final String timeFormat = command.stringValueOfParameterNamed(CalendarSupportedParameters.Time_Format.getValue());
+        final String timeFormat = command.stringValueOfParameterNamed(CalendarSupportedParameters.TIME_FORMAT.getValue());
         final String time = CalendarSupportedParameters.MEETING_TIME.getValue();
         if (command.isChangeInTimeParameterNamed(CalendarSupportedParameters.MEETING_TIME.getValue(), this.meetingtime, timeFormat)) {
             final String newValue = command.stringValueOfParameterNamed(CalendarSupportedParameters.MEETING_TIME.getValue());

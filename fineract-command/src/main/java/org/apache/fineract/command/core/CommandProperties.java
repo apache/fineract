@@ -52,6 +52,8 @@ public final class CommandProperties implements Serializable {
     private ProducerType producerType = ProducerType.SINGLE;
 
     public enum CommandExecutorType {
-        sync, async, disruptor
+        sync, //
+        async, //
+        disruptor //
     }
 }

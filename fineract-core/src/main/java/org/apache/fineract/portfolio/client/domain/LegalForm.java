@@ -26,9 +26,8 @@ import lombok.Getter;
 @Getter
 public enum LegalForm {
 
-    PERSON(1, "legalFormType.person", "Person"),
-
-    ENTITY(2, "legalFormType.entity", "Entity");
+    PERSON(1, "legalFormType.person", "Person"), //
+    ENTITY(2, "legalFormType.entity", "Entity"); //
 
     private final Integer value;
     private final String code;

@@ -497,7 +497,10 @@ public final class AccountingConstants {
      ***/
     public enum CashAccountsForShares {
 
-        SHARES_REFERENCE(1), SHARES_SUSPENSE(2), INCOME_FROM_FEES(3), SHARES_EQUITY(4);
+        SHARES_REFERENCE(1), //
+        SHARES_SUSPENSE(2), //
+        INCOME_FROM_FEES(3), //
+        SHARES_EQUITY(4); //
 
         private final Integer value;
 

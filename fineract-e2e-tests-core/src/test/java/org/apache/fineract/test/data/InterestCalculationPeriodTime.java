@@ -20,7 +20,8 @@ package org.apache.fineract.test.data;
 
 public enum InterestCalculationPeriodTime {
 
-    DAILY(0), SAME_AS_REPAYMENT_PERIOD(1);
+    DAILY(0), //
+    SAME_AS_REPAYMENT_PERIOD(1); //
 
     public final Integer value;
 

@@ -23,7 +23,9 @@ import java.util.Map;
 
 public enum CalendarRemindBy {
 
-    SMS(1, "calendarRemindBy.sms"), EMAIL(2, "calendarRemindBy.email"), SYSTEMALERT(3, "calendarRemindBy.systemalert");
+    SMS(1, "calendarRemindBy.sms"), //
+    EMAIL(2, "calendarRemindBy.email"), //
+    SYSTEMALERT(3, "calendarRemindBy.systemalert"); //
 
     private final Integer value;
     private final String code;

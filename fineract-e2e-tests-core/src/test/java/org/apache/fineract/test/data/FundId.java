@@ -20,7 +20,8 @@ package org.apache.fineract.test.data;
 
 public enum FundId {
 
-    LENDER_A(1L), LENDER_B(2L);
+    LENDER_A(1L), //
+    LENDER_B(2L); //
 
     public final Long value;
 

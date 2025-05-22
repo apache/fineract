@@ -202,7 +202,8 @@ public class ImagesApiResource {
     /*** Entities for document Management **/
     public enum EntityTypeForImages {
 
-        STAFF, CLIENTS;
+        STAFF, //
+        CLIENTS; //
 
         @Override
         public String toString() {

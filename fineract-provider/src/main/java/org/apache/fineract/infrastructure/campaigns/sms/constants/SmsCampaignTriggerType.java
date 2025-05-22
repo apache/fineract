@@ -24,8 +24,10 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 @Getter
 public enum SmsCampaignTriggerType {
 
-    INVALID(-1, "triggerType.invalid"), DIRECT(1, "triggerType.direct"), SCHEDULE(2, "triggerType.schedule"), TRIGGERED(3,
-            "triggerType.triggered");
+    INVALID(-1, "triggerType.invalid"), //
+    DIRECT(1, "triggerType.direct"), //
+    SCHEDULE(2, "triggerType.schedule"), //
+    TRIGGERED(3, "triggerType.triggered"); //
 
     private final Integer value;
     private final String code;

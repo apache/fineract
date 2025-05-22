@@ -20,7 +20,8 @@ package org.apache.fineract.test.data;
 
 public enum PreClosureInterestCalculationRule {
 
-    TILL_PRE_CLOSE_DATE(1), TILL_REST_FREQUENCY_DATE(2);
+    TILL_PRE_CLOSE_DATE(1), //
+    TILL_REST_FREQUENCY_DATE(2); //
 
     public final Integer value;
 

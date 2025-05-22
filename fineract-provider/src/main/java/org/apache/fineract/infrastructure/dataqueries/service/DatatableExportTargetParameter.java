@@ -22,7 +22,11 @@ import jakarta.ws.rs.core.MultivaluedMap;
 
 public enum DatatableExportTargetParameter {
 
-    CSV("exportCSV"), PDF("exportPDF"), S3("exportS3"), JSON("exportJSON"), PRETTY_JSON("pretty");
+    CSV("exportCSV"), //
+    PDF("exportPDF"), //
+    S3("exportS3"), //
+    JSON("exportJSON"), //
+    PRETTY_JSON("pretty"); //
 
     private final String value;
 

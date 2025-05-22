@@ -29,8 +29,9 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class EmiChangeOperation {
 
-    public enum Action {
-        DISBURSEMENT, INTEREST_RATE_CHANGE
+    public enum Action { //
+        DISBURSEMENT, //
+        INTEREST_RATE_CHANGE //
     }
 
     private final Action action;

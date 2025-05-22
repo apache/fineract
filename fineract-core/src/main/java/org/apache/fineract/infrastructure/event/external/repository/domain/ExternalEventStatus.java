@@ -19,5 +19,6 @@
 package org.apache.fineract.infrastructure.event.external.repository.domain;
 
 public enum ExternalEventStatus {
-    TO_BE_SENT, SENT
+    TO_BE_SENT, //
+    SENT //
 }

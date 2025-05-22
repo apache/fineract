@@ -390,7 +390,13 @@ public final class CalendarUtils {
 
     public enum DayNameEnum {
 
-        MO(1, "Monday"), TU(2, "Tuesday"), WE(3, "Wednesday"), TH(4, "Thursday"), FR(5, "Friday"), SA(6, "Saturday"), SU(7, "Sunday");
+        MO(1, "Monday"), //
+        TU(2, "Tuesday"), //
+        WE(3, "Wednesday"), //
+        TH(4, "Thursday"), //
+        FR(5, "Friday"), //
+        SA(6, "Saturday"), //
+        SU(7, "Sunday"); //
 
         private final String code;
         private final Integer value;
@@ -420,7 +426,13 @@ public final class CalendarUtils {
 
     public enum NthDayNameEnum {
 
-        ONE(1, "First"), TWO(2, "Second"), THREE(3, "Third"), FOUR(4, "Fourth"), FIVE(5, "Fifth"), LAST(-1, "Last"), INVALID(0, "Invalid");
+        ONE(1, "First"), //
+        TWO(2, "Second"), //
+        THREE(3, "Third"), //
+        FOUR(4, "Fourth"), //
+        FIVE(5, "Fifth"), //
+        LAST(-1, "Last"), //
+        INVALID(0, "Invalid"); //
 
         private final String code;
         private final Integer value;

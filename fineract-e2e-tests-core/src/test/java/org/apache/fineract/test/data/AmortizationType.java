@@ -20,7 +20,8 @@ package org.apache.fineract.test.data;
 
 public enum AmortizationType {
 
-    EQUAL_PRINCIPAL_PAYMENTS(0), EQUAL_INSTALLMENTS(1);
+    EQUAL_PRINCIPAL_PAYMENTS(0), //
+    EQUAL_INSTALLMENTS(1); //
 
     public final Integer value;
 

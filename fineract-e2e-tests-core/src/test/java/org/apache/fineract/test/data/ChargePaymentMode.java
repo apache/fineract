@@ -20,7 +20,8 @@ package org.apache.fineract.test.data;
 
 public enum ChargePaymentMode {
 
-    REGULAR(0), ACCOUNT_TRANSFER(1);
+    REGULAR(0), //
+    ACCOUNT_TRANSFER(1); //
 
     public final Integer value;
 

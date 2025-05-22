@@ -22,7 +22,7 @@ public enum InterestCalculationPeriodMethod {
 
     DAILY(0, "interestCalculationPeriodType.daily"), //
     SAME_AS_REPAYMENT_PERIOD(1, "interestCalculationPeriodType.same.as.repayment.period"), //
-    INVALID(2, "interestCalculationPeriodType.invalid");
+    INVALID(2, "interestCalculationPeriodType.invalid"); //
 
     private final Integer value;
     private final String code;

@@ -35,8 +35,7 @@ public enum TransactionType {
     INTEREST_PAYMENT_WAIVER("interestPaymentWaiver"), //
     REPAYMENT_AT_DISBURSEMENT("repaymentAtDisbursement"), //
     CAPITALIZED_INCOME("capitalizedIncome"), //
-    CAPITALIZED_INCOME_AMORTIZATION("capitalizedIncomeAmortization"), //
-    ;
+    CAPITALIZED_INCOME_AMORTIZATION("capitalizedIncomeAmortization"); //
 
     public final String value;
 

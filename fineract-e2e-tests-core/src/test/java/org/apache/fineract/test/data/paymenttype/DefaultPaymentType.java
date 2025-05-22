@@ -21,8 +21,14 @@ package org.apache.fineract.test.data.paymenttype;
 public enum DefaultPaymentType implements PaymentType {
 
     MONEY_TRANSFER("Money Transfer"), // This is how Fineract defines the payment type
-    REPAYMENT_ADJUSTMENT_CHARGEBACK("Repayment Adjustment Chargeback"), REPAYMENT_ADJUSTMENT_REFUND(
-            "Repayment Adjustment Refund"), AUTOPAY, DOWN_PAYMENT, REAL_TIME, SCHEDULED, CHECK_PAYMENT, OCA_PAYMENT;
+    REPAYMENT_ADJUSTMENT_CHARGEBACK("Repayment Adjustment Chargeback"), //
+    REPAYMENT_ADJUSTMENT_REFUND("Repayment Adjustment Refund"), //
+    AUTOPAY, //
+    DOWN_PAYMENT, //
+    REAL_TIME, //
+    SCHEDULED, //
+    CHECK_PAYMENT, //
+    OCA_PAYMENT; //
 
     private final String customName;
 

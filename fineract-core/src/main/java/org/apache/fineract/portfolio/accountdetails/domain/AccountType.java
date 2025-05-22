@@ -33,7 +33,7 @@ public enum AccountType {
     GROUP(2, "accountType.group"), //
     JLG(3, "accountType.jlg"), // JLG account given in group context
     GLIM(4, "accountType.glim"), //
-    GSIM(5, "accountType.gsim");
+    GSIM(5, "accountType.gsim"); //
 
     private final Integer value;
     private final String code;

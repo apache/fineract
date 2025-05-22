@@ -20,7 +20,9 @@ package org.apache.fineract.test.data;
 
 public enum AssetExternalizationTransferStatusReason {
 
-    BALANCE_ZERO("BALANCE_ZERO"), BALANCE_NEGATIVE("BALANCE_NEGATIVE"), SAMEDAY_TRANSFERS("SAMEDAY_TRANSFERS");
+    BALANCE_ZERO("BALANCE_ZERO"), //
+    BALANCE_NEGATIVE("BALANCE_NEGATIVE"), //
+    SAMEDAY_TRANSFERS("SAMEDAY_TRANSFERS"); //
 
     public final String value;
 

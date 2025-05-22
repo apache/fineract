@@ -20,8 +20,9 @@ package org.apache.fineract.organisation.holiday.domain;
 
 public enum RescheduleType {
 
-    INVALID(0, "rescheduletype.invalid"), RESCHEDULETOSPECIFICDATE(2, "rescheduletype.rescheduletospecificdate"), //
-    RESCHEDULETONEXTREPAYMENTDATE(1, "rescheduletype.rescheduletonextrepaymentdate");
+    INVALID(0, "rescheduletype.invalid"), //
+    RESCHEDULETOSPECIFICDATE(2, "rescheduletype.rescheduletospecificdate"), //
+    RESCHEDULETONEXTREPAYMENTDATE(1, "rescheduletype.rescheduletonextrepaymentdate"); //
 
     private final Integer value;
     private final String code;

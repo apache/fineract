@@ -24,7 +24,10 @@ public class PostInterestAsOnDateException extends AbstractPlatformDomainRuleExc
 
     public enum PostInterestAsOnExceptionType {
 
-        FUTURE_DATE, VALID_DATE, ACTIVATION_DATE, LAST_TRANSACTION_DATE;
+        FUTURE_DATE, //
+        VALID_DATE, //
+        ACTIVATION_DATE, //
+        LAST_TRANSACTION_DATE; //
 
         public String errorMessage() {
             if (name().toString().equalsIgnoreCase("FUTURE_DATE")) {

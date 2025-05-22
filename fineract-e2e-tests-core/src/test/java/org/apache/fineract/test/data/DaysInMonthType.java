@@ -20,7 +20,8 @@ package org.apache.fineract.test.data;
 
 public enum DaysInMonthType {
 
-    ACTUAL(1), DAYS30(30);
+    ACTUAL(1), //
+    DAYS30(30); //
 
     public final Integer value;
 

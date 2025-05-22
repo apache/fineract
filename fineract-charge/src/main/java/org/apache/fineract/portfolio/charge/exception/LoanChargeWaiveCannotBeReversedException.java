@@ -25,7 +25,12 @@ public class LoanChargeWaiveCannotBeReversedException extends AbstractPlatformDo
     /*** enum of reasons of why Loan Charge waive cannot undo **/
     public enum LoanChargeWaiveCannotUndoReason {
 
-        ALREADY_PAID, ALREADY_WAIVED, LOAN_INACTIVE, WAIVE_NOT_ALLOWED_FOR_CHARGE, NOT_WAIVED, ALREADY_REVERSED;
+        ALREADY_PAID, //
+        ALREADY_WAIVED, //
+        LOAN_INACTIVE, //
+        WAIVE_NOT_ALLOWED_FOR_CHARGE, //
+        NOT_WAIVED, //
+        ALREADY_REVERSED; //
 
         public String errorMessage() {
 

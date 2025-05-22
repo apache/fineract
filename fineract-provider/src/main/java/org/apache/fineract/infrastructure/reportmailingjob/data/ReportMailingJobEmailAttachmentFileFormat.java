@@ -25,9 +25,10 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public enum ReportMailingJobEmailAttachmentFileFormat {
 
-    INVALID(0, "ReportMailingJobEmailAttachmentFileFormat.INVALID", "Invalid"), XLS(1, "ReportMailingJobEmailAttachmentFileFormat.XLS",
-            "XLS"), PDF(2, "ReportMailingJobEmailAttachmentFileFormat.PDF",
-                    "PDF"), CSV(3, "ReportMailingJobEmailAttachmentFileFormat.CSV", "CSV");
+    INVALID(0, "ReportMailingJobEmailAttachmentFileFormat.INVALID", "Invalid"), //
+    XLS(1, "ReportMailingJobEmailAttachmentFileFormat.XLS", "XLS"), //
+    PDF(2, "ReportMailingJobEmailAttachmentFileFormat.PDF", "PDF"), //
+    CSV(3, "ReportMailingJobEmailAttachmentFileFormat.CSV", "CSV"); //
 
     private final String code;
     private final String value;

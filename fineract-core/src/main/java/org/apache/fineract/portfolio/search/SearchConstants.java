@@ -39,9 +39,15 @@ public final class SearchConstants {
 
     public enum SearchResponseParameters {
 
-        ENTITY_ID("entityId"), ENTITY_ACCOUNT_NO("entityAccountNo"), ENTITY_EXTERNAL_ID("entityExternalId"), ENTITY_NAME(
-                "entityName"), ENTITY_TYPE("entityType"), PARENT_ID(
-                        "parentId"), PARENT_NAME("parentName"), ENTITY_MOBILE_NO("entityMobileNo"), ENTITY_STATUS("entityStatus");
+        ENTITY_ID("entityId"), //
+        ENTITY_ACCOUNT_NO("entityAccountNo"), //
+        ENTITY_EXTERNAL_ID("entityExternalId"), //
+        ENTITY_NAME("entityName"), //
+        ENTITY_TYPE("entityType"), //
+        PARENT_ID("parentId"), //
+        PARENT_NAME("parentName"), //
+        ENTITY_MOBILE_NO("entityMobileNo"), //
+        ENTITY_STATUS("entityStatus"); //
 
         private final String value;
 
@@ -73,7 +79,9 @@ public final class SearchConstants {
 
     public enum SearchSupportedParameters {
 
-        QUERY("query"), RESOURCE("resource"), EXACTMATCH("exactMatch");
+        QUERY("query"), //
+        RESOURCE("resource"), //
+        EXACTMATCH("exactMatch"); //
 
         private final String value;
 
@@ -105,7 +113,12 @@ public final class SearchConstants {
 
     public enum SearchSupportedResources {
 
-        CLIENTS("clients"), GROUPS("groups"), LOANS("loans"), SAVINGS("savings"), SHARES("shares"), CLIENTIDENTIFIERS("clientIdentifiers");
+        CLIENTS("clients"), //
+        GROUPS("groups"), //
+        LOANS("loans"), //
+        SAVINGS("savings"), //
+        SHARES("shares"), //
+        CLIENTIDENTIFIERS("clientIdentifiers"); //
 
         private final String value;
 
@@ -137,7 +150,9 @@ public final class SearchConstants {
 
     public enum SearchLoanDate {
 
-        APPROVAL_DATE("approvalDate"), CREATED_DATE("createdDate"), DISBURSAL_DATE("disbursalDate");
+        APPROVAL_DATE("approvalDate"), //
+        CREATED_DATE("createdDate"), //
+        DISBURSAL_DATE("disbursalDate"); //
 
         private final String value;
 

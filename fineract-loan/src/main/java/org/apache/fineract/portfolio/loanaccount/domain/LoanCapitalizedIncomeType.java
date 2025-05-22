@@ -26,7 +26,8 @@ import org.apache.fineract.infrastructure.core.api.ApiFacingEnum;
 @RequiredArgsConstructor
 public enum LoanCapitalizedIncomeType implements ApiFacingEnum<LoanCapitalizedIncomeType> {
 
-    FEE("capitalizedIncome.incomeType.fee", "Fee"), INTEREST("capitalizedIncome.incomeType.interest", "Interest");
+    FEE("capitalizedIncome.incomeType.fee", "Fee"), //
+    INTEREST("capitalizedIncome.incomeType.interest", "Interest"); //
 
     private final String code;
     private final String humanReadableName;

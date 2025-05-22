@@ -20,7 +20,8 @@ package org.apache.fineract.investor.data.attribute;
 
 public enum SettlementModelExternalAssetOwnerLoanProductAttribute implements ExternalAssetOwnerLoanProductAttribute {
 
-    DEFAULT_SETTLEMENT("DEFAULT_SETTLEMENT"), DELAYED_SETTLEMENT("DELAYED_SETTLEMENT"),;
+    DEFAULT_SETTLEMENT("DEFAULT_SETTLEMENT"), //
+    DELAYED_SETTLEMENT("DELAYED_SETTLEMENT"); //
 
     private final String attributeKey;
     private final String attributeValue;

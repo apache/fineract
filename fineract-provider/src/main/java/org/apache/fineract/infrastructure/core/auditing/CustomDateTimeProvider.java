@@ -26,7 +26,8 @@ import org.springframework.data.auditing.DateTimeProvider;
 
 public enum CustomDateTimeProvider implements DateTimeProvider {
 
-    INSTANCE, UTC;
+    INSTANCE, //
+    UTC; //
 
     /*
      * (non-Javadoc)
