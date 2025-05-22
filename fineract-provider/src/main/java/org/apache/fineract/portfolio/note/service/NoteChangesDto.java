@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.note.data;
+package org.apache.fineract.portfolio.note.service;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -27,7 +27,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class NoteRequest implements Serializable {
+public class NoteChangesDto implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;

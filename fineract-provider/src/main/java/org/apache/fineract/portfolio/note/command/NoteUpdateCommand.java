@@ -16,28 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.note.handler;
+package org.apache.fineract.portfolio.note.command;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.apache.fineract.command.core.Command;
-import org.apache.fineract.command.core.CommandHandler;
 import org.apache.fineract.portfolio.note.data.NoteUpdateRequest;
-import org.apache.fineract.portfolio.note.data.UpdateNoteResponse;
-import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-@Slf4j
-@Component
-@RequiredArgsConstructor
-public class UpdateNoteCommandHandler implements CommandHandler<NoteUpdateRequest, UpdateNoteResponse> {
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class NoteUpdateCommand extends Command<NoteUpdateRequest> {
 
-    private final NoteWritePlatformService writePlatformService;
-
-    @Transactional
-    @Override
-    public UpdateNoteResponse handle(Command<NoteUpdateRequest> command) {
-        return this.writePlatformService.updateNote(command.getPayload());
-    }
 }

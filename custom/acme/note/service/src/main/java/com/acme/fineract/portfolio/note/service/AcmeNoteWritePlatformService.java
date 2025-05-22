@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.portfolio.client.domain.Client;
-import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
+import org.apache.fineract.portfolio.note.service.NoteWritePlatformServiceAcme;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -30,7 +30,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @ConditionalOnProperty("acme.note.enabled")
-public class AcmeNoteWritePlatformService implements NoteWritePlatformService, InitializingBean {
+public class AcmeNoteWritePlatformService implements NoteWritePlatformServiceAcme, InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {

@@ -16,31 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.command.core;
+package org.apache.fineract.portfolio.note.data;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.OffsetDateTime;
-import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.experimental.FieldNameConstants;
+import lombok.NoArgsConstructor;
+import org.apache.fineract.portfolio.note.model.NoteTypeBaseDto;
 
+@Builder
 @Data
-@FieldNameConstants
-public class Command<T> implements Serializable {
+@NoArgsConstructor
+@AllArgsConstructor
+public class NoteDeleteRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private UUID id;
-
-    private OffsetDateTime createdAt;
-
-    private String tenantId;
-
-    private String username;
-
-    private T payload;
-
-    private String idempotencyKey;
+    @Hidden
+    private Long noteId;
+    @Hidden
+    private NoteTypeBaseDto noteTypeBaseDto;
 }

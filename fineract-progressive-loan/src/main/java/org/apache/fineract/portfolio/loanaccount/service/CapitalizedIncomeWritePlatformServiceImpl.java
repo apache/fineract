@@ -37,7 +37,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeBal
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.repository.LoanCapitalizedIncomeBalanceRepository;
-import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
+import org.apache.fineract.portfolio.note.service.NoteWritePlatformBaseService;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,7 +51,7 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
     private final LoanTransactionRepository loanTransactionRepository;
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
     private final LoanJournalEntryPoster journalEntryPoster;
-    private final NoteWritePlatformService noteWritePlatformService;
+    private final NoteWritePlatformBaseService noteWritePlatformService;
     private final ExternalIdFactory externalIdFactory;
     private final LoanCapitalizedIncomeBalanceRepository capitalizedIncomeBalanceRepository;
 

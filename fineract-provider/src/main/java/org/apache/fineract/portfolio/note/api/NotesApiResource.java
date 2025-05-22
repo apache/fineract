@@ -23,35 +23,51 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandPipeline;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.note.command.NoteCreateCommand;
+import org.apache.fineract.portfolio.note.command.NoteDeleteCommand;
+import org.apache.fineract.portfolio.note.command.NoteUpdateCommand;
+import org.apache.fineract.portfolio.note.data.CreateNoteResponse;
+import org.apache.fineract.portfolio.note.data.DeleteNoteResponse;
+import org.apache.fineract.portfolio.note.data.NoteCreateRequest;
 import org.apache.fineract.portfolio.note.data.NoteData;
-import org.apache.fineract.portfolio.note.data.NoteRequest;
+import org.apache.fineract.portfolio.note.data.NoteDeleteRequest;
+import org.apache.fineract.portfolio.note.data.NoteUpdateRequest;
+import org.apache.fineract.portfolio.note.data.UpdateNoteResponse;
 import org.apache.fineract.portfolio.note.domain.NoteType;
 import org.apache.fineract.portfolio.note.exception.NoteResourceNotSupportedException;
+import org.apache.fineract.portfolio.note.model.NoteTypeBaseDto;
 import org.apache.fineract.portfolio.note.service.NoteReadPlatformService;
+import org.apache.fineract.portfolio.note.service.NoteStrategyProcessor;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/{resourceType}/{resourceId}/notes")
@@ -72,8 +88,10 @@ public class NotesApiResource {
     private final PlatformSecurityContext context;
     private final NoteReadPlatformService readPlatformService;
     private final DefaultToApiJsonSerializer<NoteData> toApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final CommandPipeline pipeline;
+
+    private final List<NoteStrategyProcessor> noteStrategyProcessors;
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -129,24 +147,28 @@ public class NotesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Add a Resource Note", description = "Adds a new note to a supported resource.\n\n" + "Example Requests:\n" + "\n"
             + "clients/1/notes\n" + "\n" + "\n" + "groups/1/notes")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = NoteRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = NotesApiResourceSwagger.PostResourceTypeResourceIdNotesResponse.class))) })
-    public CommandProcessingResult addNewNote(@PathParam("resourceType") @Parameter(description = "resourceType") final String resourceType,
+    public CreateNoteResponse addNewNote(@HeaderParam("Idempotency-Key") @DefaultValue("") String idempotencyKey,
+            @PathParam("resourceType") @Parameter(description = "resourceType") final String resourceType,
             @PathParam("resourceId") @Parameter(description = "resourceId") final Long resourceId,
-            @Parameter(hidden = true) final NoteRequest noteRequest) {
+            @Parameter(hidden = true) @Valid final NoteCreateRequest noteRequest) {
 
         final NoteType noteType = NoteType.fromApiUrl(resourceType);
 
         if (noteType == null) {
-            throw new NoteResourceNotSupportedException(resourceType);
+            throw new NoteResourceNotSupportedException(NoteType.class.toString());
         }
 
-        final CommandWrapper resourceDetails = getResourceDetails(noteType, resourceId);
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createNote(resourceDetails, resourceType, resourceId)
-                .withJson(toApiJsonSerializer.serialize(noteRequest)).build();
+        NoteTypeBaseDto noteTypeBaseDto = noteStrategyProcessors.stream().filter(s -> s.support(noteType))
+                .map(s -> (NoteTypeBaseDto) s.build(resourceId)).findFirst().orElseThrow();
 
-        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        NoteCreateCommand command = new NoteCreateCommand();
+        initCommand(idempotencyKey, command);
+
+        noteRequest.setNoteTypeBaseDto(noteTypeBaseDto);
+        command.setPayload(noteRequest);
+
+        Supplier<CreateNoteResponse> result = pipeline.send(command);
+        return result.get();
     }
 
     @PUT
@@ -154,13 +176,12 @@ public class NotesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Resource Note", description = "Updates a Resource Note")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = NoteRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = NotesApiResourceSwagger.PutResourceTypeResourceIdNotesNoteIdResponse.class))) })
-    public CommandProcessingResult updateNote(@PathParam("resourceType") @Parameter(description = "resourceType") final String resourceType,
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = NoteUpdateRequest.class)))
+    public UpdateNoteResponse updateNote(@HeaderParam("Idempotency-Key") @DefaultValue("") String idempotencyKey,
+            @PathParam("resourceType") @Parameter(description = "resourceType") final String resourceType,
             @PathParam("resourceId") @Parameter(description = "resourceId") final Long resourceId,
             @PathParam("noteId") @Parameter(description = "noteId") final Long noteId,
-            @Parameter(hidden = true) final NoteRequest noteRequest) {
+            @Parameter(hidden = true) final NoteUpdateRequest noteRequest) {
 
         final NoteType noteType = NoteType.fromApiUrl(resourceType);
 
@@ -168,12 +189,18 @@ public class NotesApiResource {
             throw new NoteResourceNotSupportedException(resourceType);
         }
 
-        final CommandWrapper resourceDetails = getResourceDetails(noteType, resourceId);
+        NoteTypeBaseDto noteTypeBaseDto = noteStrategyProcessors.stream().filter(s -> s.support(noteType))
+                .map(s -> (NoteTypeBaseDto) s.build(resourceId)).findFirst().orElseThrow();
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateNote(resourceDetails, resourceType, resourceId, noteId)
-                .withJson(toApiJsonSerializer.serialize(noteRequest)).build();
+        NoteUpdateCommand command = new NoteUpdateCommand();
+        initCommand(idempotencyKey, command);
 
-        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        noteRequest.setNoteTypeBaseDto(noteTypeBaseDto);
+        noteRequest.setNoteId(noteId);
+        command.setPayload(noteRequest);
+
+        Supplier<UpdateNoteResponse> result = pipeline.send(command);
+        return result.get();
     }
 
     @DELETE
@@ -181,9 +208,8 @@ public class NotesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Resource Note", description = "Deletes a Resource Note")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = NotesApiResourceSwagger.DeleteResourceTypeResourceIdNotesNoteIdResponse.class))) })
-    public CommandProcessingResult deleteNote(@PathParam("resourceType") @Parameter(description = "resourceType") final String resourceType,
+    public DeleteNoteResponse deleteNote(@HeaderParam("Idempotency-Key") @DefaultValue("") String idempotencyKey,
+            @PathParam("resourceType") @Parameter(description = "resourceType") final String resourceType,
             @PathParam("resourceId") @Parameter(description = "resourceId") final Long resourceId,
             @PathParam("noteId") @Parameter(description = "noteId") final Long noteId) {
 
@@ -193,12 +219,27 @@ public class NotesApiResource {
             throw new NoteResourceNotSupportedException(resourceType);
         }
 
-        final CommandWrapper resourceDetails = getResourceDetails(noteType, resourceId);
+        NoteTypeBaseDto noteTypeBaseDto = noteStrategyProcessors.stream().filter(s -> s.support(noteType))
+                .map(s -> (NoteTypeBaseDto) s.build(resourceId)).findFirst().orElseThrow();
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteNote(resourceDetails, resourceType, resourceId, noteId)
-                .build();
+        NoteDeleteCommand command = new NoteDeleteCommand();
+        initCommand(idempotencyKey, command);
 
-        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        NoteDeleteRequest noteDeleteRequest = new NoteDeleteRequest();
+        noteDeleteRequest.setNoteId(noteId);
+        noteDeleteRequest.setNoteTypeBaseDto(noteTypeBaseDto);
+        command.setPayload(noteDeleteRequest);
+
+        Supplier<DeleteNoteResponse> result = pipeline.send(command);
+        return result.get();
+    }
+
+    private void initCommand(String idempotencyKey, Command command) {
+        String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
+        command.setId(UUID.randomUUID());
+        command.setCreatedAt(OffsetDateTime.now(ZoneId.of("UTC")));
+        command.setTenantId(tenantIdentifier);
+        command.setIdempotencyKey(idempotencyKey);
     }
 
     private CommandWrapper getResourceDetails(final NoteType type, final Long resourceId) {

@@ -16,31 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.command.core;
+package org.apache.fineract.portfolio.note.model;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.OffsetDateTime;
-import java.util.UUID;
 import lombok.Data;
-import lombok.experimental.FieldNameConstants;
+import lombok.NoArgsConstructor;
+import org.apache.fineract.portfolio.note.domain.NoteType;
 
 @Data
-@FieldNameConstants
-public class Command<T> implements Serializable {
+@NoArgsConstructor
+public abstract class NoteTypeBaseDto {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+    private Long resourceId; // ID of resource: Client, Loan, etc
+    private NoteType noteType;
 
-    private UUID id;
-
-    private OffsetDateTime createdAt;
-
-    private String tenantId;
-
-    private String username;
-
-    private T payload;
-
-    private String idempotencyKey;
+    public NoteTypeBaseDto(Long resourceId, NoteType noteType) {
+        this.resourceId = resourceId;
+        this.noteType = noteType;
+    }
 }

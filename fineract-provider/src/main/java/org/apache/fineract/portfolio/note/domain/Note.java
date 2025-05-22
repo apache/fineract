@@ -119,7 +119,7 @@ public class Note extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         this.noteTypeId = NoteType.CLIENT.getValue();
     }
 
-    private Note(final Group group, final String note) {
+    public Note(final Group group, final String note) {
         this.group = group;
         this.note = note;
         this.client = null;
@@ -182,5 +182,9 @@ public class Note extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     public String getNote() {
         return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
     }
 }

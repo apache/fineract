@@ -18,28 +18,26 @@
  */
 package org.apache.fineract.portfolio.note.handler;
 
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.portfolio.note.data.CreateNoteResponse;
+import org.apache.fineract.portfolio.note.data.NoteCreateRequest;
 import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-public class CreateNoteCommandHandler implements NewCommandSourceHandler {
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class CreateNoteCommandHandler implements CommandHandler<NoteCreateRequest, CreateNoteResponse> {
 
     private final NoteWritePlatformService writePlatformService;
 
-    @Autowired
-    public CreateNoteCommandHandler(final NoteWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
-
     @Transactional
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.createNote(command);
+    public CreateNoteResponse handle(Command<NoteCreateRequest> command) {
+        return this.writePlatformService.createNote(command.getPayload());
     }
-
 }

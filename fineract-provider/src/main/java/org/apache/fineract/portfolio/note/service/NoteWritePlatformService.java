@@ -16,28 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.note.handler;
+package org.apache.fineract.portfolio.note.service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.command.core.Command;
-import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.portfolio.note.data.CreateNoteResponse;
+import org.apache.fineract.portfolio.note.data.DeleteNoteResponse;
+import org.apache.fineract.portfolio.note.data.NoteCreateRequest;
+import org.apache.fineract.portfolio.note.data.NoteDeleteRequest;
 import org.apache.fineract.portfolio.note.data.NoteUpdateRequest;
 import org.apache.fineract.portfolio.note.data.UpdateNoteResponse;
-import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-@Slf4j
-@Component
-@RequiredArgsConstructor
-public class UpdateNoteCommandHandler implements CommandHandler<NoteUpdateRequest, UpdateNoteResponse> {
+public interface NoteWritePlatformService extends NoteWritePlatformBaseService {
 
-    private final NoteWritePlatformService writePlatformService;
+    CreateNoteResponse createNote(NoteCreateRequest noteCreateRequest);
 
-    @Transactional
-    @Override
-    public UpdateNoteResponse handle(Command<NoteUpdateRequest> command) {
-        return this.writePlatformService.updateNote(command.getPayload());
-    }
+    UpdateNoteResponse updateNote(NoteUpdateRequest noteUpdateRequest);
+
+    DeleteNoteResponse deleteNote(NoteDeleteRequest noteDeleteRequest);
+
 }

@@ -16,31 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.command.core;
+package org.apache.fineract.portfolio.note.service;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.OffsetDateTime;
-import java.util.UUID;
-import lombok.Data;
-import lombok.experimental.FieldNameConstants;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.client.domain.Client;
 
-@Data
-@FieldNameConstants
-public class Command<T> implements Serializable {
+@Deprecated
+public interface NoteWritePlatformServiceAcme {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+    CommandProcessingResult createNote(JsonCommand command);
 
-    private UUID id;
+    void createLoanNote(Long loanId, String note);
 
-    private OffsetDateTime createdAt;
+    CommandProcessingResult updateNote(JsonCommand command);
 
-    private String tenantId;
+    CommandProcessingResult deleteNote(JsonCommand command);
 
-    private String username;
-
-    private T payload;
-
-    private String idempotencyKey;
+    void createAndPersistClientNote(Client client, JsonCommand command);
 }

@@ -18,19 +18,20 @@
  */
 package org.apache.fineract.portfolio.note.service;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.portfolio.client.domain.Client;
+import org.apache.fineract.portfolio.note.domain.NoteType;
+import org.apache.fineract.portfolio.note.model.ClientNoteDto;
+import org.springframework.stereotype.Component;
 
-public interface NoteWritePlatformService {
+@Component
+public class ClientNoteStrategyProcessor implements NoteStrategyProcessor<ClientNoteDto, NoteType, Long> {
 
-    CommandProcessingResult createNote(JsonCommand command);
+    @Override
+    public ClientNoteDto build(Long resourceId) {
+        return new ClientNoteDto(resourceId, NoteType.CLIENT);
+    }
 
-    void createLoanNote(Long loanId, String note);
-
-    CommandProcessingResult updateNote(JsonCommand command);
-
-    CommandProcessingResult deleteNote(JsonCommand command);
-
-    void createAndPersistClientNote(Client client, JsonCommand command);
+    @Override
+    public boolean support(NoteType noteType) {
+        return NoteType.CLIENT.equals(noteType);
+    }
 }
