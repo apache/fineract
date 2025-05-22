@@ -138,7 +138,7 @@ Feature: COBFeature
       | RANGE_3                | 10 August 2023 | 10 August 2023 |
       | RANGE_1                | 04 August 2023 | 09 August 2023 |
 
-  @Skip @TestRailId:C2795
+  @TestRailId:C2795
   Scenario: Verify that COB catch up runs properly on loan which is behind date because of locked with error
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -192,9 +192,7 @@ Feature: COBFeature
     When Created user makes externalID controlled "AUTOPAY" repayment on "04 July 2023" with 500 EUR transaction amount
     Then Admin checks that last closed business date of loan is "03 July 2023"
 
-#  On a hard locked loan, in case of the lock has an error message, payment by a non-bypass user should trigger inlineCob and it should be executed
-#  this functionality is not implemented yet
-  @Skip @TestRailId:C2798
+  @TestRailId:C2798
   Scenario: Verify that Inline COB is executed for stuck loans - when payment happened on a locked loan COB got executed before the repayment
     When Admin sets the business date to "01 July 2023"
     When Admin creates a client with random data
