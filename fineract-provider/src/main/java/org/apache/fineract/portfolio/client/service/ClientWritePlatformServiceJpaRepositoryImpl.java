@@ -18,6 +18,10 @@
  */
 package org.apache.fineract.portfolio.client.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonElement;
 import jakarta.persistence.PersistenceException;
 import java.time.LocalDate;
@@ -314,8 +318,10 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             if (isEntity) {
                 extractAndCreateClientNonPerson(newClient, command);
             }
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> map = mapper.readValue(command.getJsonCommand(), new TypeReference<Map<String, Object>>() {});
 
-            if (isAddressEnabled) {
+            if (map.get("address") != null) {
                 this.addressWritePlatformService.addNewClientAddress(newClient, command);
             }
 
@@ -354,6 +360,10 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
+        } catch (JsonMappingException e) {
+            throw new RuntimeException(e);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 

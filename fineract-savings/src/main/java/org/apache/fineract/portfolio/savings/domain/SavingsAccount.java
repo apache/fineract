@@ -1851,13 +1851,13 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
                     .inMinMaxRange(0, 3);
 
             if (this.lockinPeriodFrequencyType != null) {
-                baseDataValidator.reset().parameter(lockinPeriodFrequencyParamName).value(this.lockinPeriodFrequency).notNull()
+                baseDataValidator.reset().parameter(lockinPeriodFrequencyParamName).value(this.lockinPeriodFrequency).ignoreIfNull()
                         .integerZeroOrGreater();
             }
         } else {
             baseDataValidator.reset().parameter(lockinPeriodFrequencyParamName).value(this.lockinPeriodFrequencyType)
                     .integerZeroOrGreater();
-            baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(this.lockinPeriodFrequencyType).notNull()
+            baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(this.lockinPeriodFrequencyType).ignoreIfNull()
                     .inMinMaxRange(0, 3);
         }
     }
