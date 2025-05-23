@@ -408,20 +408,12 @@ public class LoanStepDef extends AbstractStepDef {
         eventCheckHelper.loanBalanceChangedEventCheck(loanId);
     }
 
-    @Then("Credit Balance Refund transaction on future date {string} with {double} EUR transaction amount will result an error")
-    public void futureDateCBRError(String transactionDate, double transactionAmount) throws IOException {
+    public void checkCBRerror(PostLoansLoanIdTransactionsRequest paymentTransactionRequest, int errorCodeExpected,
+            String errorMessageExpected) throws IOException {
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.body().getLoanId();
 
-        int errorCodeExpected = 403;
-        String errorMessageExpected = String.format("Loan: %s, Credit Balance Refund transaction cannot be created for the future.",
-                loanId);
-
         String transactionTypeValue = "creditBalanceRefund";
-
-        PostLoansLoanIdTransactionsRequest paymentTransactionRequest = LoanRequestFactory.defaultPaymentTransactionRequest()
-                .transactionDate(transactionDate).transactionAmount(transactionAmount);
-
         Response<PostLoansLoanIdTransactionsResponse> paymentTransactionResponse = loanTransactionsApi
                 .executeLoanTransaction(loanId, paymentTransactionRequest, transactionTypeValue).execute();
         testContext().set(TestContextKey.LOAN_PAYMENT_TRANSACTION_RESPONSE, paymentTransactionResponse);
@@ -437,6 +429,31 @@ public class LoanStepDef extends AbstractStepDef {
 
         log.debug("ERROR CODE: {}", errorCodeActual);
         log.debug("ERROR MESSAGE: {}", errorMessageActual);
+    }
+
+    @Then("Credit Balance Refund transaction on future date {string} with {double} EUR transaction amount will result an error")
+    public void futureDateCBRError(String transactionDate, double transactionAmount) throws IOException {
+        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.body().getLoanId();
+
+        int errorCodeExpected = 403;
+        String errorMessageExpected = String.format("Loan: %s, Credit Balance Refund transaction cannot be created for the future.",
+                loanId);
+
+        PostLoansLoanIdTransactionsRequest paymentTransactionRequest = LoanRequestFactory.defaultPaymentTransactionRequest()
+                .transactionDate(transactionDate).transactionAmount(transactionAmount);
+
+        checkCBRerror(paymentTransactionRequest, errorCodeExpected, errorMessageExpected);
+    }
+
+    @Then("Credit Balance Refund transaction on active loan {string} with {double} EUR transaction amount will result an error")
+    public void notOverpaidLoanCBRError(String transactionDate, double transactionAmount) throws IOException {
+        int errorCodeExpected = 400;
+        String errorMessageExpected = "Loan Credit Balance Refund is not allowed. Loan Account is not Overpaid.";
+
+        PostLoansLoanIdTransactionsRequest paymentTransactionRequest = LoanRequestFactory.defaultPaymentTransactionRequest()
+                .transactionDate(transactionDate).transactionAmount(transactionAmount);
+        checkCBRerror(paymentTransactionRequest, errorCodeExpected, errorMessageExpected);
     }
 
     @When("Admin creates a fully customized loan with the following data:")
