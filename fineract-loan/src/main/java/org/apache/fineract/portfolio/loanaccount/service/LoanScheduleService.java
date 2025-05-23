@@ -26,6 +26,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
@@ -40,6 +41,7 @@ public class LoanScheduleService {
     private final LoanMapper loanMapper;
     private final LoanTransactionProcessingService loanTransactionProcessingService;
     private final LoanScheduleComponent loanSchedule;
+    private final LoanTransactionRepository loanTransactionRepository;
 
     /**
      * Ability to regenerate the repayment schedule based on the loans current details/state.
@@ -69,7 +71,7 @@ public class LoanScheduleService {
 
     public void recalculateScheduleFromLastTransaction(final Loan loan, final ScheduleGeneratorDTO generatorDTO,
             final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
-        existingTransactionIds.addAll(loan.findExistingTransactionIds());
+        existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
         existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
         if (!loan.isProgressiveSchedule()) {
             if (loan.isInterestBearingAndInterestRecalculationEnabled() && !loan.isChargedOff()) {

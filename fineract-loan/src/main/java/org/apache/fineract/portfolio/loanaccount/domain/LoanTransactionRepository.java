@@ -98,4 +98,11 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
             """)
     Optional<LocalDate> findLastTransactionDateForReprocessing(@Param("loan") Loan loan);
 
+    @Query("""
+            SELECT lt.id FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+            AND lt.id IS NOT NULL
+            """)
+    List<Long> findTransactionIdsByLoan(@Param("loan") Loan loan);
+
 }

@@ -54,6 +54,7 @@ import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatfo
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.guarantor.GuarantorConstants;
 import org.apache.fineract.portfolio.loanaccount.guarantor.domain.Guarantor;
 import org.apache.fineract.portfolio.loanaccount.guarantor.domain.GuarantorFundingDetails;
@@ -87,6 +88,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
     private final ConfigurationDomainService configurationDomainService;
     private final ExternalIdFactory externalIdFactory;
     private final LoanRepository loanRepository;
+    private final LoanTransactionRepository loanTransactionRepository;
 
     @PostConstruct
     public void addListeners() {
@@ -583,7 +585,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         @Override
         public void onBusinessEvent(LoanUndoDisbursalBusinessEvent event) {
             Loan loan = event.get();
-            List<Long> reversedTransactions = new ArrayList<>(loan.findExistingTransactionIds());
+            List<Long> reversedTransactions = new ArrayList<>(loanTransactionRepository.findTransactionIdsByLoan(loan));
             reverseTransaction(reversedTransactions);
         }
     }

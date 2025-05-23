@@ -238,7 +238,7 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
             final LoanTransaction transactionForAdjustment, final List<Long> existingTransactionIds,
             final List<Long> existingReversedTransactionIds, final ScheduleGeneratorDTO scheduleGeneratorDTO,
             final ExternalId reversalExternalId) {
-        existingTransactionIds.addAll(loan.findExistingTransactionIds());
+        existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
         existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
 
         loanTransactionValidator.validateActivityNotBeforeClientOrGroupTransferDate(loan, LoanEvent.LOAN_REPAYMENT_OR_WAIVER,

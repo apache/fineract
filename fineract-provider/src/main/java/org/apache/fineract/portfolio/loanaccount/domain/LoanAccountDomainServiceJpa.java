@@ -444,7 +444,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
     private void handlePayDisbursementTransaction(final Loan loan, final Long chargeId, final LoanTransaction chargesPayment,
             final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
-        existingTransactionIds.addAll(loan.findExistingTransactionIds());
+        existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
         existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
         LoanCharge charge = null;
         for (final LoanCharge loanCharge : loan.getCharges()) {
@@ -767,7 +767,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         final List<Long> existingTransactionIds = new ArrayList<>();
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
-        existingTransactionIds.addAll(loan.findExistingTransactionIds());
+        existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
         existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
         final ScheduleGeneratorDTO scheduleGeneratorDTO = null;
         final LoanRepaymentScheduleInstallment foreCloseDetail = loanBalanceService.fetchLoanForeclosureDetail(loan, foreClosureDate);
@@ -988,7 +988,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         final List<Long> existingTransactionIds = new ArrayList<>();
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
-        existingTransactionIds.addAll(loan.findExistingTransactionIds());
+        existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
         existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
 
         final LoanTransaction interestRefundTransaction = LoanTransaction.interestRefund(loan, loan.getOffice(), refundAmount,
@@ -1076,7 +1076,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private void makeRepayment(final Loan loan, final LoanTransaction repaymentTransaction, final List<Long> existingTransactionIds,
             final List<Long> existingReversedTransactionIds, final ScheduleGeneratorDTO scheduleGeneratorDTO) {
         loanChargeValidator.validateRepaymentTypeTransactionNotBeforeAChargeRefund(loan, repaymentTransaction, "created");
-        existingTransactionIds.addAll(loan.findExistingTransactionIds());
+        existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
         existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
 
         loanDownPaymentHandlerService.handleRepaymentOrRecoveryOrWaiverTransaction(loan, repaymentTransaction, null, scheduleGeneratorDTO);

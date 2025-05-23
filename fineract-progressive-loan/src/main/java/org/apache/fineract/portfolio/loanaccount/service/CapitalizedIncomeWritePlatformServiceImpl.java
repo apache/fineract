@@ -60,7 +60,7 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
     public CommandProcessingResult addCapitalizedIncome(final Long loanId, final JsonCommand command) {
         loanTransactionValidator.validateCapitalizedIncome(command, loanId);
         final Loan loan = loanAssembler.assembleFrom(loanId);
-        final List<Long> existingTransactionIds = new ArrayList<>(loan.findExistingTransactionIds());
+        final List<Long> existingTransactionIds = new ArrayList<>(loanTransactionRepository.findTransactionIdsByLoan(loan));
         final List<Long> existingReversedTransactionIds = new ArrayList<>(loan.findExistingReversedTransactionIds());
         final Map<String, Object> changes = new LinkedHashMap<>();
         // Create payment details

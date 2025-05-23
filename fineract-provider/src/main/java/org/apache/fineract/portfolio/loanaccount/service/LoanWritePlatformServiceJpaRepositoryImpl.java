@@ -395,10 +395,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             LoanTransaction disbursementTransaction = null;
             if (isAccountTransfer) {
                 disburseLoanToSavings(loan, command, amountToDisburse, paymentDetail);
-                existingTransactionIds.addAll(loan.findExistingTransactionIds());
+                existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
                 existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
             } else {
-                existingTransactionIds.addAll(loan.findExistingTransactionIds());
+                existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
                 existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
                 disbursementTransaction = LoanTransaction.disbursement(loan, amountToDisburse, paymentDetail, actualDisbursementDate,
                         txnExternalId, loan.getTotalOverpaidAsMoney());
@@ -769,11 +769,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 final ExternalId txnExternalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
                 if (isAccountTransfer) {
                     disburseLoanToSavings(loan, command, disburseAmount, paymentDetail);
-                    existingTransactionIds.addAll(loan.findExistingTransactionIds());
+                    existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
                     existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
 
                 } else {
-                    existingTransactionIds.addAll(loan.findExistingTransactionIds());
+                    existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
                     existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
                     LoanTransaction disbursementTransaction = LoanTransaction.disbursement(loan, disburseAmount, paymentDetail,
                             actualDisbursementDate, txnExternalId, loan.getTotalOverpaidAsMoney());
@@ -1042,7 +1042,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         businessEventNotifierService.notifyPreBusinessEvent(new LoanTransactionInterestPaymentWaiverPreBusinessEvent(loan));
 
         // save already existing transaction ids
-        final List<Long> existingTransactionIds = new ArrayList<>(loan.findExistingTransactionIds());
+        final List<Long> existingTransactionIds = new ArrayList<>(loanTransactionRepository.findTransactionIdsByLoan(loan));
         final List<Long> existingReversedTransactionIds = new ArrayList<>(loan.findExistingReversedTransactionIds());
 
         final String noteText = command.stringValueOfParameterNamed("note");
@@ -1314,7 +1314,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
         checkClientOrGroupActive(loan);
 
-        final List<Long> existingTransactionIds = loan.findExistingTransactionIds();
+        final List<Long> existingTransactionIds = loanTransactionRepository.findTransactionIdsByLoan(loan);
         final List<Long> existingReversedTransactionIds = loan.findExistingReversedTransactionIds();
 
         businessEventNotifierService.notifyPreBusinessEvent(new LoanChargebackTransactionBusinessEvent(loanTransaction));
@@ -1753,7 +1753,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         businessEventNotifierService.notifyPreBusinessEvent(new LoanInitiateTransferBusinessEvent(loan));
 
-        final List<Long> existingTransactionIds = new ArrayList<>(loan.findExistingTransactionIds());
+        final List<Long> existingTransactionIds = new ArrayList<>(loanTransactionRepository.findTransactionIdsByLoan(loan));
         final List<Long> existingReversedTransactionIds = new ArrayList<>(loan.findExistingReversedTransactionIds());
         ExternalId externalId = externalIdFactory.create();
         final LoanTransaction newTransferTransaction = LoanTransaction.initiateTransfer(loan.getOffice(), loan, transferDate, externalId);
@@ -1773,7 +1773,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public LoanTransaction acceptLoanTransfer(final Loan loan, final LocalDate transferDate, final Office acceptedInOffice,
             final Staff loanOfficer) {
         businessEventNotifierService.notifyPreBusinessEvent(new LoanAcceptTransferBusinessEvent(loan));
-        final List<Long> existingTransactionIds = new ArrayList<>(loan.findExistingTransactionIds());
+        final List<Long> existingTransactionIds = new ArrayList<>(loanTransactionRepository.findTransactionIdsByLoan(loan));
         final List<Long> existingReversedTransactionIds = new ArrayList<>(loan.findExistingReversedTransactionIds());
         ExternalId externalId = externalIdFactory.create();
         final LoanTransaction newTransferAcceptanceTransaction = LoanTransaction.approveTransfer(acceptedInOffice, loan, transferDate,
@@ -1802,7 +1802,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public LoanTransaction withdrawLoanTransfer(final Loan loan, final LocalDate transferDate) {
         businessEventNotifierService.notifyPreBusinessEvent(new LoanWithdrawTransferBusinessEvent(loan));
 
-        final List<Long> existingTransactionIds = new ArrayList<>(loan.findExistingTransactionIds());
+        final List<Long> existingTransactionIds = new ArrayList<>(loanTransactionRepository.findTransactionIdsByLoan(loan));
         final List<Long> existingReversedTransactionIds = new ArrayList<>(loan.findExistingReversedTransactionIds());
 
         ExternalId externalId = externalIdFactory.create();
@@ -2329,7 +2329,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     private CommandProcessingResult processLoanDisbursementDetail(Loan loan, Long loanId, JsonCommand command,
             LoanDisbursementDetails loanDisbursementDetails) {
-        final List<Long> existingTransactionIds = loan.findExistingTransactionIds();
+        final List<Long> existingTransactionIds = loanTransactionRepository.findTransactionIdsByLoan(loan);
         final List<Long> existingReversedTransactionIds = loan.findExistingReversedTransactionIds();
         final Map<String, Object> changes = new LinkedHashMap<>();
         LocalDate recalculateFrom = null;
@@ -2804,7 +2804,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             loan.markAsChargedOff(transactionDate, currentUser, null);
         }
 
-        final List<Long> existingTransactionIds = loan.findExistingTransactionIds();
+        final List<Long> existingTransactionIds = loanTransactionRepository.findTransactionIdsByLoan(loan);
         final List<Long> existingReversedTransactionIds = loan.findExistingReversedTransactionIds();
 
         final LoanTransaction chargeOffTransaction = LoanTransaction.chargeOff(loan, transactionDate, txnExternalId);
@@ -2863,7 +2863,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanTransactionValidator.validateUndoChargeOff(command.json());
         final Long loanId = command.getLoanId();
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
-        final List<Long> existingTransactionIds = loan.findExistingTransactionIds();
+        final List<Long> existingTransactionIds = loanTransactionRepository.findTransactionIdsByLoan(loan);
         final List<Long> existingReversedTransactionIds = loan.findExistingReversedTransactionIds();
         checkClientOrGroupActive(loan);
         if (!loan.isOpen()) {
@@ -2947,7 +2947,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         // Create note
         createNote(loan, command, changes);
         // Initial transaction ids for journal entry generation
-        final List<Long> existingTransactionIds = loan.findExistingTransactionIds();
+        final List<Long> existingTransactionIds = loanTransactionRepository.findTransactionIdsByLoan(loan);
         final List<Long> existingReversedTransactionIds = loan.findExistingReversedTransactionIds();
         // Create refund transaction(s)
         Pair<LoanTransaction, LoanTransaction> refundTransactions = loanAccountDomainService.makeRefund(loan, scheduleGeneratorDTO,
@@ -3058,7 +3058,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
         final LoanStatus currentStatus = loan.getStatus();
         final LoanStatus statusEnum = this.loanLifecycleStateMachine.dryTransition(LoanEvent.LOAN_DISBURSAL_UNDO, loan);
-        existingTransactionIds.addAll(loan.findExistingTransactionIds());
+        existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
         existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
         if (!statusEnum.hasStateOf(currentStatus)) {
             this.loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSAL_UNDO, loan);
@@ -3170,7 +3170,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         loanLifecycleStateMachine.transition(LoanEvent.WRITE_OFF_OUTSTANDING, loan);
         changes.put(PARAM_STATUS, LoanEnumerations.status(loan.getLoanStatus()));
 
-        existingTransactionIds.addAll(loan.findExistingTransactionIds());
+        existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
         existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
 
         final String txnExternalId = command.stringValueOfParameterNamedAllowingNull(EXTERNAL_ID);
@@ -3234,7 +3234,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private Optional<LoanTransaction> close(final Loan loan, final JsonCommand command, final Map<String, Object> changes,
             final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
             final ScheduleGeneratorDTO scheduleGeneratorDTO) {
-        existingTransactionIds.addAll(loan.findExistingTransactionIds());
+        existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
         existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
 
         final LocalDate closureDate = command.localDateValueOfParameterNamed(TRANSACTION_DATE);
@@ -3349,7 +3349,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final LoanTransaction lastDisbursalTransaction = loanTransactions.get(loanTransactions.size() - 1);
         final LocalDate lastTransactionDate = lastDisbursalTransaction.getTransactionDate();
 
-        existingTransactionIds.addAll(loan.findExistingTransactionIds());
+        existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
         existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
 
         loanTransactions = loan.retrieveListOfTransactionsExcludeAccruals();
@@ -3384,7 +3384,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     private void waiveInterest(final Loan loan, final LoanTransaction waiveInterestTransaction, final List<Long> existingTransactionIds,
             final List<Long> existingReversedTransactionIds, final ScheduleGeneratorDTO scheduleGeneratorDTO) {
-        existingTransactionIds.addAll(loan.findExistingTransactionIds());
+        existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
         existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
 
         loanDownPaymentHandlerService.handleRepaymentOrRecoveryOrWaiverTransaction(loan, waiveInterestTransaction, null,
@@ -3392,7 +3392,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     private void undoWrittenOff(final Loan loan, final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
-        existingTransactionIds.addAll(loan.findExistingTransactionIds());
+        existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
         existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
         final LoanTransaction writeOffTransaction = loan.findWriteOffTransaction();
         loanChargeValidator.validateRepaymentTypeTransactionNotBeforeAChargeRefund(writeOffTransaction.getLoan(), writeOffTransaction,

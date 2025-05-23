@@ -60,6 +60,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRescheduleRequestToT
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.DefaultScheduledDateGenerator;
@@ -120,6 +121,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
     private final LoanTermVariationsMapper loanTermVariationsMapper;
     private final LoanAccountingBridgeMapper loanAccountingBridgeMapper;
     private final LoanScheduleComponent loanSchedule;
+    private final LoanTransactionRepository loanTransactionRepository;
 
     /**
      * create a new instance of the LoanRescheduleRequest object from the JsonCommand object and persist
@@ -355,7 +357,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             changes.put("approvedByUserId", appUser.getId());
 
             Loan loan = loanRescheduleRequest.getLoan();
-            final List<Long> existingTransactionIds = new ArrayList<>(loan.findExistingTransactionIds());
+            final List<Long> existingTransactionIds = new ArrayList<>(loanTransactionRepository.findTransactionIdsByLoan(loan));
             final List<Long> existingReversedTransactionIds = new ArrayList<>(loan.findExistingReversedTransactionIds());
 
             ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan,

@@ -192,7 +192,7 @@ class LoanChargeWritePlatformServiceImplTest {
         when(loanAccountService.saveAndFlushLoanWithDataIntegrityViolationChecks(any())).thenReturn(loan);
         List<Long> existingTransactionIds = new ArrayList<>();
         List<Long> existingReversedTransactionIds = new ArrayList<>();
-        when(loan.findExistingTransactionIds()).thenReturn(existingTransactionIds);
+        when(loanTransactionRepository.findTransactionIdsByLoan(loan)).thenReturn(existingTransactionIds);
         when(loan.findExistingReversedTransactionIds()).thenReturn(existingReversedTransactionIds);
 
         when(loan.getLoanCharges()).thenReturn(new HashSet<>());

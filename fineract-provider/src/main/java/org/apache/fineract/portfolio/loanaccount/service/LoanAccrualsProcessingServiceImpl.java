@@ -245,7 +245,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
         if (isProgressiveAccrual(loan)) {
             return;
         }
-        final List<Long> existingTransactionIds = new ArrayList<>(loan.findExistingTransactionIds());
+        final List<Long> existingTransactionIds = new ArrayList<>(loanTransactionRepository.findTransactionIdsByLoan(loan));
         final List<Long> existingReversedTransactionIds = new ArrayList<>(loan.findExistingReversedTransactionIds());
         processIncomePostingAndAccruals(loan);
         this.loanRepositoryWrapper.saveAndFlush(loan);
