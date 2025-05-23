@@ -29,6 +29,7 @@ import org.apache.fineract.command.core.CommandProperties;
 import org.apache.fineract.command.core.CommandRouter;
 import org.apache.fineract.command.implementation.DisruptorCommandExecutor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -42,11 +43,13 @@ class CommandConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnProperty(value = "fineract.command.executor", havingValue = "disruptor")
     WaitStrategy waitStrategy() {
         return new YieldingWaitStrategy();
     }
 
     @Bean
+    @ConditionalOnProperty(value = "fineract.command.executor", havingValue = "disruptor")
     Disruptor<?> disruptor(CommandProperties properties, WaitStrategy waitStrategy, List<CommandMiddleware> middlewares,
             CommandRouter router) {
         // TODO: make this more configurable
