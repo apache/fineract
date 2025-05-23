@@ -105,4 +105,12 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
             """)
     List<Long> findTransactionIdsByLoan(@Param("loan") Loan loan);
 
+    @Query("""
+            SELECT lt.id FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+            AND lt.id IS NOT NULL
+            AND lt.reversed = true
+            """)
+    List<Long> findReversedTransactionIdsByLoan(@Param("loan") Loan loan);
+
 }

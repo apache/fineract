@@ -235,7 +235,7 @@ class LoanAdjustmentServiceImplTest {
 
         // Mock methods called inside adjustExistingTransaction
         when(loanTransactionRepository.findTransactionIdsByLoan(loan)).thenReturn(Collections.emptyList());
-        when(loan.findExistingReversedTransactionIds()).thenReturn(Collections.emptyList());
+        when(loanTransactionRepository.findReversedTransactionIdsByLoan(loan)).thenReturn(Collections.emptyList());
         doNothing().when(loanTransactionValidator).validateActivityNotBeforeClientOrGroupTransferDate(any(), any(), any());
         when(loan.isClosedWrittenOff()).thenReturn(false);
         when(newTransactionDetail.isRepaymentLikeType()).thenReturn(true);
@@ -280,7 +280,7 @@ class LoanAdjustmentServiceImplTest {
 
         // Mock methods called inside adjustExistingTransaction
         when(loanTransactionRepository.findTransactionIdsByLoan(loan)).thenReturn(Collections.emptyList());
-        when(loan.findExistingReversedTransactionIds()).thenReturn(Collections.emptyList());
+        when(loanTransactionRepository.findReversedTransactionIdsByLoan(loan)).thenReturn(Collections.emptyList());
         doNothing().when(loanTransactionValidator).validateActivityNotBeforeClientOrGroupTransferDate(any(), any(), any());
         when(loan.isClosedWrittenOff()).thenReturn(false);
         when(newTransactionDetail.isRepaymentLikeType()).thenReturn(true);

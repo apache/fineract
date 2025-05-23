@@ -41,7 +41,7 @@ public class LoanRefundService {
     public void makeRefund(final Loan loan, final LoanTransaction loanTransaction, final List<Long> existingTransactionIds,
             final List<Long> existingReversedTransactionIds) {
         existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
-        existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
+        existingReversedTransactionIds.addAll(loanTransactionRepository.findReversedTransactionIdsByLoan(loan));
 
         loanRefundValidator.validateTransferRefund(loan, loanTransaction);
 
@@ -62,7 +62,7 @@ public class LoanRefundService {
     public void makeRefundForActiveLoan(final Loan loan, final LoanTransaction loanTransaction, final List<Long> existingTransactionIds,
             final List<Long> existingReversedTransactionIds) {
         existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
-        existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
+        existingReversedTransactionIds.addAll(loanTransactionRepository.findReversedTransactionIdsByLoan(loan));
 
         handleRefundTransaction(loan, loanTransaction);
     }
@@ -72,7 +72,7 @@ public class LoanRefundService {
         loanRefundValidator.validateCreditBalanceRefund(loan, newCreditBalanceRefundTransaction);
 
         existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
-        existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
+        existingReversedTransactionIds.addAll(loanTransactionRepository.findReversedTransactionIdsByLoan(loan));
 
         loan.getLoanTransactions().add(newCreditBalanceRefundTransaction);
 

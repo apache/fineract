@@ -358,7 +358,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
             Loan loan = loanRescheduleRequest.getLoan();
             final List<Long> existingTransactionIds = new ArrayList<>(loanTransactionRepository.findTransactionIdsByLoan(loan));
-            final List<Long> existingReversedTransactionIds = new ArrayList<>(loan.findExistingReversedTransactionIds());
+            final List<Long> existingReversedTransactionIds = new ArrayList<>(
+                    loanTransactionRepository.findReversedTransactionIdsByLoan(loan));
 
             ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan,
                     loanRescheduleRequest.getRescheduleFromDate());

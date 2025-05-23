@@ -246,7 +246,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
             return;
         }
         final List<Long> existingTransactionIds = new ArrayList<>(loanTransactionRepository.findTransactionIdsByLoan(loan));
-        final List<Long> existingReversedTransactionIds = new ArrayList<>(loan.findExistingReversedTransactionIds());
+        final List<Long> existingReversedTransactionIds = new ArrayList<>(loanTransactionRepository.findReversedTransactionIdsByLoan(loan));
         processIncomePostingAndAccruals(loan);
         this.loanRepositoryWrapper.saveAndFlush(loan);
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);

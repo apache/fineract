@@ -760,14 +760,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return maturityDate;
     }
 
-    public List<Long> findExistingReversedTransactionIds() {
-        return getLoanTransactions().stream() //
-                .filter(LoanTransaction::isReversed) //
-                .filter(loanTransaction -> loanTransaction.getId() != null) //
-                .map(LoanTransaction::getId) //
-                .collect(Collectors.toList());
-    }
-
     public List<LoanDisbursementDetails> getDisbursedLoanDisbursementDetails() {
         return getDisbursementDetails().stream() //
                 .filter(it -> it.actualDisbursementDate() != null) //

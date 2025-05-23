@@ -104,7 +104,7 @@ public class LoanChargeService {
             final List<Long> existingReversedTransactionIds, final LoanTransaction paymentTransaction, final Integer installmentNumber) {
         loanChargeValidator.validateChargePaymentNotInFuture(paymentTransaction);
         existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
-        existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
+        existingReversedTransactionIds.addAll(loanTransactionRepository.findReversedTransactionIdsByLoan(loan));
         LoanCharge charge = null;
         for (final LoanCharge loanCharge : loan.getCharges()) {
             if (loanCharge.isActive() && chargeId.equals(loanCharge.getId())) {

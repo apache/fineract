@@ -193,7 +193,7 @@ class LoanChargeWritePlatformServiceImplTest {
         List<Long> existingTransactionIds = new ArrayList<>();
         List<Long> existingReversedTransactionIds = new ArrayList<>();
         when(loanTransactionRepository.findTransactionIdsByLoan(loan)).thenReturn(existingTransactionIds);
-        when(loan.findExistingReversedTransactionIds()).thenReturn(existingReversedTransactionIds);
+        when(loanTransactionRepository.findReversedTransactionIdsByLoan(loan)).thenReturn(existingReversedTransactionIds);
 
         when(loan.getLoanCharges()).thenReturn(new HashSet<>());
         when(loan.getDisbursementDate()).thenReturn(LocalDate.now(ZoneId.systemDefault()));

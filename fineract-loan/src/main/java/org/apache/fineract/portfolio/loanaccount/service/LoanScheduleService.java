@@ -72,7 +72,7 @@ public class LoanScheduleService {
     public void recalculateScheduleFromLastTransaction(final Loan loan, final ScheduleGeneratorDTO generatorDTO,
             final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
         existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
-        existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
+        existingReversedTransactionIds.addAll(loanTransactionRepository.findReversedTransactionIdsByLoan(loan));
         if (!loan.isProgressiveSchedule()) {
             if (loan.isInterestBearingAndInterestRecalculationEnabled() && !loan.isChargedOff()) {
                 regenerateRepaymentScheduleWithInterestRecalculation(loan, generatorDTO);
