@@ -418,4 +418,203 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
             );
         });
     }
+
+    @Test
+    public void testLoanCapitalizedIncomeReversal() {
+        final AtomicReference<Long> loanIdRef = new AtomicReference<>();
+        final AtomicReference<Long> capitalizedIncomeTransactionIdRef = new AtomicReference<>();
+
+        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+
+        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
+                .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                        .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
+                        .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
+                        .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
+
+        runAt("1 January 2024", () -> {
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
+                    500.0, 7.0, 3, null);
+            loanIdRef.set(loanId);
+
+            disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
+            Long capitalizedIncomeTransactionId = loanTransactionHelper.addCapitalizedIncome(loanId, "1 January 2024", 50.0)
+                    .getResourceId();
+            capitalizedIncomeTransactionIdRef.set(capitalizedIncomeTransactionId);
+        });
+        runAt("2 January 2024", () -> {
+            Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
+
+            verifyTransactions(loanId, //
+                    transaction(100.0, "Disbursement", "01 January 2024"), //
+                    transaction(50.0, "Capitalized Income", "01 January 2024"), //
+                    transaction(0.55, "Capitalized Income Amortization", "01 January 2024") //
+            );
+        });
+        runAt("3 January 2024", () -> {
+            Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
+
+            verifyTransactions(loanId, //
+                    transaction(100.0, "Disbursement", "01 January 2024"), //
+                    transaction(50.0, "Capitalized Income", "01 January 2024"), //
+                    transaction(0.55, "Capitalized Income Amortization", "01 January 2024"), //
+                    transaction(0.03, "Accrual", "02 January 2024"), //
+                    transaction(0.55, "Capitalized Income Amortization", "02 January 2024") //
+            );
+
+            verifyJournalEntries(loanId, //
+                    journalEntry(100, loansReceivableAccount, "DEBIT"), //
+                    journalEntry(100, fundSource, "CREDIT"), //
+                    journalEntry(50, loansReceivableAccount, "DEBIT"), //
+                    journalEntry(50, deferredIncomeLiabilityAccount, "CREDIT"), //
+                    journalEntry(0.55, deferredIncomeLiabilityAccount, "DEBIT"), //
+                    journalEntry(0.55, feeIncomeAccount, "CREDIT"), //
+                    journalEntry(0.03, interestReceivableAccount, "DEBIT"), //
+                    journalEntry(0.03, interestIncomeAccount, "CREDIT"), //
+                    journalEntry(0.55, deferredIncomeLiabilityAccount, "DEBIT"), //
+                    journalEntry(0.55, feeIncomeAccount, "CREDIT") //
+            );
+
+            loanTransactionHelper.reverseLoanTransaction(loanId, capitalizedIncomeTransactionIdRef.get(), "3 January 2024");
+
+            verifyTransactions(loanId, //
+                    transaction(100.0, "Disbursement", "01 January 2024"), //
+                    transaction(50.0, "Capitalized Income", "01 January 2024"), //
+                    transaction(0.55, "Capitalized Income Amortization", "01 January 2024"), //
+                    transaction(0.03, "Accrual", "02 January 2024"), //
+                    transaction(0.55, "Capitalized Income Amortization", "02 January 2024"), //
+                    transaction(1.10, "Capitalized Income Amortization Adjustment", "03 January 2024") //
+            );
+
+            verifyJournalEntries(loanId, //
+                    journalEntry(100, loansReceivableAccount, "DEBIT"), //
+                    journalEntry(100, fundSource, "CREDIT"), //
+                    journalEntry(50, loansReceivableAccount, "DEBIT"), //
+                    journalEntry(50, deferredIncomeLiabilityAccount, "CREDIT"), //
+                    journalEntry(0.55, deferredIncomeLiabilityAccount, "DEBIT"), //
+                    journalEntry(0.55, feeIncomeAccount, "CREDIT"), //
+                    journalEntry(0.03, interestReceivableAccount, "DEBIT"), //
+                    journalEntry(0.03, interestIncomeAccount, "CREDIT"), //
+                    journalEntry(0.55, deferredIncomeLiabilityAccount, "DEBIT"), //
+                    journalEntry(0.55, feeIncomeAccount, "CREDIT"), //
+                    journalEntry(50, deferredIncomeLiabilityAccount, "DEBIT"), //
+                    journalEntry(50, loansReceivableAccount, "CREDIT"), //
+                    journalEntry(1.10, feeIncomeAccount, "DEBIT"), //
+                    journalEntry(1.10, deferredIncomeLiabilityAccount, "CREDIT") //
+            );
+        });
+    }
+
+    @Test
+    public void testLoanCapitalizedIncomeAdjustmentReversal() {
+        final AtomicReference<Long> loanIdRef = new AtomicReference<>();
+        final AtomicReference<Long> capitalizedIncomeIdRef = new AtomicReference<>();
+
+        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+
+        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
+                .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                        .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
+                        .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
+                        .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
+
+        runAt("1 April 2024", () -> {
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
+                    500.0, 7.0, 3, null);
+            loanIdRef.set(loanId);
+
+            disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
+            PostLoansLoanIdTransactionsResponse capitalizedIncomeResponse = loanTransactionHelper.addCapitalizedIncome(loanId,
+                    "1 January 2024", 50.0);
+            capitalizedIncomeIdRef.set(capitalizedIncomeResponse.getResourceId());
+
+            final PostLoansLoanIdTransactionsResponse capitalizedIncomeAdjustmentResponse = loanTransactionHelper
+                    .capitalizedIncomeAdjustment(loanId, capitalizedIncomeIdRef.get(), "1 April 2024", 50.0);
+            final Long capitalizedIncomeAdjustmentTransactionId = capitalizedIncomeAdjustmentResponse.getResourceId();
+
+            verifyTransactions(loanId, //
+                    transaction(100.0, "Disbursement", "01 January 2024"), //
+                    transaction(50.0, "Capitalized Income", "01 January 2024"), //
+                    transaction(50.0, "Capitalized Income Adjustment", "01 April 2024") //
+            );
+
+            verifyJournalEntries(loanId, //
+                    journalEntry(100, loansReceivableAccount, "DEBIT"), //
+                    journalEntry(100, fundSource, "CREDIT"), //
+                    journalEntry(50, loansReceivableAccount, "DEBIT"), //
+                    journalEntry(50, deferredIncomeLiabilityAccount, "CREDIT"), //
+                    journalEntry(50.0, deferredIncomeLiabilityAccount, "DEBIT"), //
+                    journalEntry(49.71, loansReceivableAccount, "CREDIT"), //
+                    journalEntry(0.29, interestReceivableAccount, "CREDIT") //
+            );
+
+            loanTransactionHelper.reverseLoanTransaction(loanId, capitalizedIncomeAdjustmentTransactionId, "1 April 2024");
+
+            verifyJournalEntries(loanId, //
+                    journalEntry(100, loansReceivableAccount, "DEBIT"), //
+                    journalEntry(100, fundSource, "CREDIT"), //
+                    journalEntry(50, loansReceivableAccount, "DEBIT"), //
+                    journalEntry(50, deferredIncomeLiabilityAccount, "CREDIT"), //
+                    journalEntry(50.0, deferredIncomeLiabilityAccount, "DEBIT"), //
+                    journalEntry(49.71, loansReceivableAccount, "CREDIT"), //
+                    journalEntry(0.29, interestReceivableAccount, "CREDIT"), //
+                    journalEntry(50.0, deferredIncomeLiabilityAccount, "CREDIT"), //
+                    journalEntry(49.71, loansReceivableAccount, "DEBIT"), //
+                    journalEntry(0.29, interestReceivableAccount, "DEBIT") //
+            );
+        });
+    }
+
+    @Test
+    public void testLoanCapitalizedIncomeReversalFailsIfAdjustmentExistsForIt() {
+        final AtomicReference<Long> loanIdRef = new AtomicReference<>();
+        final AtomicReference<Long> capitalizedIncomeTransactionIdRef = new AtomicReference<>();
+
+        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+
+        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
+                .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                        .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
+                        .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
+                        .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
+
+        runAt("1 January 2024", () -> {
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
+                    500.0, 7.0, 3, null);
+            loanIdRef.set(loanId);
+
+            disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
+            Long capitalizedIncomeTransactionId = loanTransactionHelper.addCapitalizedIncome(loanId, "1 January 2024", 50.0)
+                    .getResourceId();
+            capitalizedIncomeTransactionIdRef.set(capitalizedIncomeTransactionId);
+        });
+        runAt("2 January 2024", () -> {
+            Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
+
+            verifyTransactions(loanId, //
+                    transaction(100.0, "Disbursement", "01 January 2024"), //
+                    transaction(50.0, "Capitalized Income", "01 January 2024"), //
+                    transaction(0.55, "Capitalized Income Amortization", "01 January 2024") //
+            );
+        });
+        runAt("3 January 2024", () -> {
+            Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
+
+            loanTransactionHelper.capitalizedIncomeAdjustment(loanId, capitalizedIncomeTransactionIdRef.get(), "3 January 2024", 40.0);
+
+            Assertions.assertThrows(RuntimeException.class, () -> {
+                loanTransactionHelper.reverseLoanTransaction(loanId, capitalizedIncomeTransactionIdRef.get(), "3 January 2024");
+            });
+        });
+    }
 }

@@ -150,6 +150,10 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
             if (transactionType.isCapitalizedIncomeAdjustment()) {
                 createJournalEntriesForCapitalizedIncomeAdjustment(loanDTO, loanTransactionDTO, office);
             }
+            // Capitalized Income Amortization Adjustment
+            if (transactionType.isCapitalizedIncomeAmortizationAdjustment()) {
+                createJournalEntriesForCapitalizedIncomeAmortizationAdjustment(loanDTO, loanTransactionDTO, office);
+            }
         }
     }
 
@@ -422,6 +426,33 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
                 GLAccount glAccount = glAccountBalanceHolder.getGlAccountMap().get(debitEntry.getKey());
                 this.helper.createDebitJournalEntryForLoan(office, currencyCode, loanId, transactionId, transactionDate,
                         debitEntry.getValue(), glAccount);
+            }
+        }
+    }
+
+    private void createJournalEntriesForCapitalizedIncomeAmortizationAdjustment(final LoanDTO loanDTO,
+            final LoanTransactionDTO loanTransactionDTO, final Office office) {
+        GLAccountBalanceHolder glAccountBalanceHolder = new GLAccountBalanceHolder();
+        if (MathUtil.isGreaterThanZero(loanTransactionDTO.getAmount())) {
+            populateCreditDebitMaps(loanDTO.getLoanProductId(), loanTransactionDTO.getAmount(), loanTransactionDTO.getPaymentTypeId(),
+                    AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(),
+                    AccrualAccountsForLoan.INCOME_FROM_CAPITALIZATION.getValue(), glAccountBalanceHolder);
+        }
+
+        // create credit entries
+        for (Map.Entry<Long, BigDecimal> creditEntry : glAccountBalanceHolder.getCreditBalances().entrySet()) {
+            if (MathUtil.isGreaterThanZero(creditEntry.getValue())) {
+                GLAccount glAccount = glAccountBalanceHolder.getGlAccountMap().get(creditEntry.getKey());
+                this.helper.createCreditJournalEntryForLoan(office, loanDTO.getCurrencyCode(), loanDTO.getLoanId(),
+                        loanTransactionDTO.getTransactionId(), loanTransactionDTO.getTransactionDate(), creditEntry.getValue(), glAccount);
+            }
+        }
+        // create debit entries
+        for (Map.Entry<Long, BigDecimal> debitEntry : glAccountBalanceHolder.getDebitBalances().entrySet()) {
+            if (MathUtil.isGreaterThanZero(debitEntry.getValue())) {
+                GLAccount glAccount = glAccountBalanceHolder.getGlAccountMap().get(debitEntry.getKey());
+                this.helper.createDebitJournalEntryForLoan(office, loanDTO.getCurrencyCode(), loanDTO.getLoanId(),
+                        loanTransactionDTO.getTransactionId(), loanTransactionDTO.getTransactionDate(), debitEntry.getValue(), glAccount);
             }
         }
     }
