@@ -91,13 +91,13 @@ dependencies {
     implementation project(':fineract-provider')
 }
 
-tasks.withType(Tar) {
+tasks.withType(Tar).configureEach {
     compression Compression.GZIP
     archiveExtension = 'tar.gz'
-    
+
     // Enable caching for all tar tasks
     outputs.cacheIf { true }
-    
+
     // Ensure reproducible output
     preserveFileTimestamps = false
     reproducibleFileOrder = true
