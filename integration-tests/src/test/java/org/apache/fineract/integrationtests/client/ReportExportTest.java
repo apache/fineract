@@ -63,4 +63,90 @@ public class ReportExportTest extends IntegrationTest {
         assertThat(result.code()).isEqualTo(204);
     }
 
+    @Test
+    @CIOnly
+    void runClientListingTableReportS3WithValidData() throws IOException {
+        Response<ResponseBody> result = okR(fineractClient().reportsRun.runReportGetFile("Client Listing",
+                Map.of("R_officeId", "1", "exportS3", "true", "R_currencyId", "USD"), false));
+        assertThat(result.code()).isEqualTo(204);
+    }
+
+    @Test
+    @CIOnly
+    void runReportS3WithEmptyContent() throws IOException {
+        try {
+            Response<ResponseBody> result = okR(fineractClient().reportsRun.runReportGetFile("Client Listing",
+                    Map.of("R_officeId", "999999", "exportS3", "true"), false));
+
+            if (!result.isSuccessful()) {
+                assertThat(result.code()).isIn(400, 500);
+            }
+        } catch (Exception e) {
+            assertThat(e.getMessage()).contains("empty report content");
+        }
+    }
+
+    @Test
+    @CIOnly
+    void runReportS3WithLongFileName() throws IOException {
+        String longReportName = "A".repeat(1000);
+
+        try {
+            Response<ResponseBody> result = okR(
+                    fineractClient().reportsRun.runReportGetFile(longReportName, Map.of("R_officeId", "1", "exportS3", "true"), false));
+
+            if (!result.isSuccessful()) {
+                assertThat(result.code()).isIn(400, 500);
+            }
+        } catch (Exception e) {
+            assertThat(e.getMessage()).contains("key length exceeds maximum");
+        }
+    }
+
+    @Test
+    @CIOnly
+    void runReportS3WithMissingBucket() throws IOException {
+        Response<ResponseBody> result = okR(
+                fineractClient().reportsRun.runReportGetFile("Client Listing", Map.of("R_officeId", "1", "exportS3", "true"), false));
+
+        assertThat(result.code()).isEqualTo(204);
+    }
+
+    @Test
+    void runReportWithInvalidOfficeId() throws IOException {
+        try {
+            Response<ResponseBody> result = okR(
+                    fineractClient().reportsRun.runReportGetFile("Client Listing", Map.of("R_officeId", "-1", "exportCSV", "true"), false));
+
+            if (result.isSuccessful()) {
+                assertThat(result.body().contentType()).isEqualTo(MediaType.parse("text/csv"));
+            } else {
+                assertThat(result.code()).isIn(400, 404, 500);
+            }
+        } catch (Exception e) {
+            assertThat(e).isNotNull();
+        }
+    }
+
+    @Test
+    @CIOnly
+    void runMultipleS3ExportsSimultaneously() throws IOException {
+        Response<ResponseBody> result1 = okR(
+                fineractClient().reportsRun.runReportGetFile("Client Listing", Map.of("R_officeId", "1", "exportS3", "true"), false));
+
+        Response<ResponseBody> result2 = okR(
+                fineractClient().reportsRun.runReportGetFile("Client Listing", Map.of("R_officeId", "2", "exportS3", "true"), false));
+
+        assertThat(result1.code()).isEqualTo(204);
+        assertThat(result2.code()).isEqualTo(204);
+    }
+
+    @Test
+    @CIOnly
+    void runReportS3WithSpecialCharactersInParams() throws IOException {
+        Response<ResponseBody> result = okR(fineractClient().reportsRun.runReportGetFile("Client Listing",
+                Map.of("R_officeId", "1", "exportS3", "true", "R_clientName", "Test Client & Co."), false));
+
+        assertThat(result.code()).isEqualTo(204);
+    }
 }

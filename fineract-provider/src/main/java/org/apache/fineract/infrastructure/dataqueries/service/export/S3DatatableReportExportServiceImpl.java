@@ -25,8 +25,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.dataqueries.service.DatatableExportTargetParameter;
 import org.apache.fineract.infrastructure.dataqueries.service.ReadReportingService;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -51,9 +53,22 @@ public class S3DatatableReportExportServiceImpl implements DatatableReportExport
                     isSelfServiceUserReport);
             try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
                 output.write(byteArrayOutputStream);
+                byte[] fileBytes = byteArrayOutputStream.toByteArray();
+                if (fileBytes.length == 0) {
+                    throw new GeneralPlatformDomainRuleException("error.report.upload.empty.content",
+                            "Can not upload empty report content to S3");
+                }
+                String bucketName = properties.getReport().getExport().getS3().getBucketName();
+                if (StringUtils.isBlank(bucketName)) {
+                    throw new GeneralPlatformDomainRuleException("error.report.upload.missing.bucket", "S3 bucket name is not configured");
+                }
                 String folder = configurationDomainService.retrieveReportExportS3FolderName();
                 String filePath = DatatableExportUtil.generateS3DatatableExportFileName(AWS_S3_MAXIMUM_KEY_LENGTH, folder, "csv",
                         reportName, reportParams);
+                if (filePath.length() > AWS_S3_MAXIMUM_KEY_LENGTH) {
+                    throw new GeneralPlatformDomainRuleException("error.aws.s3.key.length.exceeded",
+                            "S3 object key length exceeds maximum allowed limit");
+                }
                 s3Client.putObject(
                         builder -> builder.bucket(properties.getReport().getExport().getS3().getBucketName()).key(filePath).build(),
                         RequestBody.fromBytes(byteArrayOutputStream.toByteArray()));
