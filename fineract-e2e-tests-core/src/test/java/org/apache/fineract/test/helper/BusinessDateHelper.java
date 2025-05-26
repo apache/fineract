@@ -58,4 +58,8 @@ public class BusinessDateHelper {
     public BusinessDateRequest defaultBusinessDateRequest() {
         return new BusinessDateRequest().type(BUSINESS_DATE_REQUEST_TYPE).dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE);
     }
+
+    public String getBusinessDate() throws IOException {
+        return businessDateManagementApi.getBusinessDate(DATE_FORMAT).toString();
+    }
 }
