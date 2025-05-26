@@ -26,22 +26,28 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.transaction
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 
 @RequiredArgsConstructor
 public class LoanAccrualTransactionBusinessEventServiceImpl implements LoanAccrualTransactionBusinessEventService {
 
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final LoanTransactionRepository loanTransactionRepository;
 
     @Override
-    public void raiseBusinessEventForAccrualTransactions(Loan loan, List<Long> existingTransactionIds) {
-        for (final LoanTransaction transaction : loan.getLoanTransactions()) {
-            if (transaction.isNotReversed() && (transaction.isAccrual() || transaction.isAccrualAdjustment())
-                    && !existingTransactionIds.contains(transaction.getId())) {
-                LoanTransactionBusinessEvent businessEvent = transaction.isAccrual()
-                        ? new LoanAccrualTransactionCreatedBusinessEvent(transaction)
-                        : new LoanAccrualAdjustmentTransactionBusinessEvent(transaction);
-                businessEventNotifierService.notifyPostBusinessEvent(businessEvent);
-            }
+    public void raiseBusinessEventForAccrualTransactions(final Loan loan, final List<Long> existingTransactionIds) {
+        final List<LoanTransactionType> transactionTypes = List.of(LoanTransactionType.ACCRUAL, LoanTransactionType.ACCRUAL_ADJUSTMENT);
+        final List<LoanTransaction> transactions = existingTransactionIds.isEmpty()
+                ? loanTransactionRepository.findNewTransactionsByLoanIdAndType(loan.getId(), transactionTypes)
+                : loanTransactionRepository.findNewTransactionsByLoanIdAndTypeAndNotInIds(loan.getId(), transactionTypes,
+                        existingTransactionIds);
+
+        for (final LoanTransaction transaction : transactions) {
+            final LoanTransactionBusinessEvent businessEvent = transaction.isAccrual()
+                    ? new LoanAccrualTransactionCreatedBusinessEvent(transaction)
+                    : new LoanAccrualAdjustmentTransactionBusinessEvent(transaction);
+            businessEventNotifierService.notifyPostBusinessEvent(businessEvent);
         }
     }
 }

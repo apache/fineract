@@ -38,6 +38,26 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
     Optional<LoanTransaction> findByIdAndLoanId(Long transactionId, Long loanId);
 
     @Query("""
+            SELECT lt FROM LoanTransaction lt
+            WHERE lt.loan.id = :loanId
+            AND lt.typeOf IN :transactionTypes
+            AND lt.id NOT IN :existingTransactionIds
+            AND lt.reversed = false
+            """)
+    List<LoanTransaction> findNewTransactionsByLoanIdAndTypeAndNotInIds(@Param("loanId") Long loanId,
+            @Param("transactionTypes") List<LoanTransactionType> transactionTypes,
+            @Param("existingTransactionIds") List<Long> existingTransactionIds);
+
+    @Query("""
+            SELECT lt FROM LoanTransaction lt
+            WHERE lt.loan.id = :loanId
+            AND lt.typeOf IN :transactionTypes
+            AND lt.reversed = false
+            """)
+    List<LoanTransaction> findNewTransactionsByLoanIdAndType(@Param("loanId") Long loanId,
+            @Param("transactionTypes") List<LoanTransactionType> transactionTypes);
+
+    @Query("""
             SELECT new org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData(
                 lt.loan.id,
                 min(lt.dateOf),

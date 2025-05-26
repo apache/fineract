@@ -196,9 +196,8 @@ public class LoanAccountConfiguration {
     @Bean
     @ConditionalOnMissingBean(LoanAccrualTransactionBusinessEventService.class)
     public LoanAccrualTransactionBusinessEventService loanAccrualTransactionBusinessEventService(
-
-            BusinessEventNotifierService businessEventNotifierService) {
-        return new LoanAccrualTransactionBusinessEventServiceImpl(businessEventNotifierService);
+            final BusinessEventNotifierService businessEventNotifierService, final LoanTransactionRepository loanTransactionRepository) {
+        return new LoanAccrualTransactionBusinessEventServiceImpl(businessEventNotifierService, loanTransactionRepository);
     }
 
     @Bean
