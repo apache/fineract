@@ -68,7 +68,7 @@ public class LoanRepaymentImportHandler implements ImportHandler {
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
 
         List<LoanTransactionData> loanRepayments = readExcelFile(workbook, locale, dateFormat);
-        return importEntity(workbook, loanRepayments, dateFormat);
+        return importEntity(workbook, loanRepayments, dateFormat, locale);
     }
 
     private List<LoanTransactionData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
@@ -110,13 +110,14 @@ public class LoanRepaymentImportHandler implements ImportHandler {
                 receiptNumber, bankNumber, loanAccountId, EMPTY_STR, row.getRowNum(), locale, dateFormat);
     }
 
-    private Count importEntity(final Workbook workbook, final List<LoanTransactionData> loanRepayments, final String dateFormat) {
+    private Count importEntity(final Workbook workbook, final List<LoanTransactionData> loanRepayments, final String dateFormat,
+            final String locale) {
         Sheet loanRepaymentSheet = workbook.getSheet(TemplatePopulateImportConstants.LOAN_REPAYMENT_SHEET_NAME);
         int successCount = 0;
         int errorCount = 0;
         String errorMessage;
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
+        gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat, locale));
 
         for (LoanTransactionData loanRepayment : loanRepayments) {
             try {
