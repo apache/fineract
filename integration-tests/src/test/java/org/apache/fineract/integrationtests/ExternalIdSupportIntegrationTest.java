@@ -875,8 +875,8 @@ public class ExternalIdSupportIntegrationTest extends BaseLoanIntegrationTest {
 
             GetLoansApprovalTemplateResponse loanApprovalResult = this.loanTransactionHelper.getLoanApprovalTemplate(loanExternalIdStr);
             assertEquals(actualDate, loanApprovalResult.getApprovalDate());
-            assertEquals(1000.0, loanApprovalResult.getApprovalAmount());
-            assertEquals(1000.0, loanApprovalResult.getNetDisbursalAmount());
+            assertEquals(1000.0, Utils.getDoubleValue(loanApprovalResult.getApprovalAmount()));
+            assertEquals(1000.0, Utils.getDoubleValue(loanApprovalResult.getNetDisbursalAmount()));
             assertNotNull(loanApprovalResult.getCurrency());
             assertNotNull(loanApprovalResult.getCurrency().getCode());
             assertEquals("USD", loanApprovalResult.getCurrency().getCode());

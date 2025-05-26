@@ -119,7 +119,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     private void addDisbursement(final ProgressiveLoanInterestScheduleModel scheduleModel, final EmiChangeOperation operation) {
         scheduleModel
                 .changeOutstandingBalanceAndUpdateInterestPeriods(operation.getSubmittedOnDate(), operation.getAmount(),
-                        scheduleModel.zero(), scheduleModel.zero())
+                        scheduleModel.zero())
                 .ifPresent((repaymentPeriod) -> calculateEMIValueAndRateFactors(
                         getEffectiveRepaymentDueDate(scheduleModel, repaymentPeriod, operation.getSubmittedOnDate()), scheduleModel,
                         operation));
@@ -140,24 +140,6 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         return changedRepaymentPeriod.getDueDate();
     }
 
-    /**
-     * Add capitalized income to Interest Period
-     */
-    @Override
-    public void addCapitalizedIncome(final ProgressiveLoanInterestScheduleModel scheduleModel, final LocalDate transactionDueDate,
-            final Money transactionAmount) {
-        addCapitalizedIncome(scheduleModel, EmiChangeOperation.capitalizedIncome(transactionDueDate, transactionAmount));
-    }
-
-    private void addCapitalizedIncome(final ProgressiveLoanInterestScheduleModel scheduleModel, final EmiChangeOperation operation) {
-        scheduleModel.changeOutstandingBalanceAndUpdateInterestPeriods(operation.getSubmittedOnDate(), scheduleModel.zero(),
-                scheduleModel.zero(), operation.getAmount()).ifPresent((repaymentPeriod) -> {
-                    calculateEMIValueAndRateFactors(
-                            getEffectiveRepaymentDueDate(scheduleModel, repaymentPeriod, operation.getSubmittedOnDate()), scheduleModel,
-                            operation);
-                });
-    }
-
     @Override
     public void changeInterestRate(final ProgressiveLoanInterestScheduleModel scheduleModel, final LocalDate newInterestSubmittedOnDate,
             final BigDecimal newInterestRate) {
@@ -169,7 +151,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         scheduleModel.addInterestRate(interestRateChangeEffectiveDate, operation.getInterestRate());
         scheduleModel
                 .changeOutstandingBalanceAndUpdateInterestPeriods(interestRateChangeEffectiveDate, scheduleModel.zero(),
-                        scheduleModel.zero(), scheduleModel.zero())
+                        scheduleModel.zero())
                 .ifPresent(repaymentPeriod -> calculateEMIValueAndRateFactors(
                         getEffectiveRepaymentDueDate(scheduleModel, repaymentPeriod, interestRateChangeEffectiveDate), scheduleModel,
                         operation));
@@ -178,8 +160,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     @Override
     public void addBalanceCorrection(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate balanceCorrectionDate,
             Money balanceCorrectionAmount) {
-        scheduleModel.changeOutstandingBalanceAndUpdateInterestPeriods(balanceCorrectionDate, scheduleModel.zero(), balanceCorrectionAmount,
-                scheduleModel.zero()).ifPresent(repaymentPeriod -> {
+        scheduleModel.changeOutstandingBalanceAndUpdateInterestPeriods(balanceCorrectionDate, scheduleModel.zero(), balanceCorrectionAmount)
+                .ifPresent(repaymentPeriod -> {
                     calculateRateFactorForRepaymentPeriod(repaymentPeriod, scheduleModel);
                     calculateOutstandingBalance(scheduleModel);
                     calculateLastUnpaidRepaymentPeriodEMI(scheduleModel);
@@ -255,7 +237,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
     private void addCredit(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate transactionDate, Money creditedPrincipalAmount,
             Money creditedInterestAmount) {
-        scheduleModel.changeOutstandingBalanceAndUpdateInterestPeriods(transactionDate, scheduleModel.zero(), creditedPrincipalAmount, scheduleModel.zero())
+        scheduleModel.changeOutstandingBalanceAndUpdateInterestPeriods(transactionDate, scheduleModel.zero(), creditedPrincipalAmount)
                 .ifPresent(repaymentPeriod -> {
                     addCreditedAmountsToInterestPeriod(scheduleModel, transactionDate, creditedPrincipalAmount, creditedInterestAmount);
                     calculateRateFactorForRepaymentPeriod(repaymentPeriod, scheduleModel);
@@ -460,11 +442,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                 .flatMap(rp -> rp.getInterestPeriods().stream().map(InterestPeriod::getDisbursementAmount))
                 .reduce(scheduleModel.zero(), (m1, m2) -> m1.plus(m2, mc)) // 100
                 .plus(scheduleModel.getTotalCreditedPrincipal(), mc); //
-        Money totalCapitalizedIncome = scheduleModel.repaymentPeriods().stream()
-                .flatMap(rp -> rp.getInterestPeriods().stream().map(InterestPeriod::getCapitalizedIncomePrincipal))
-                .reduce(scheduleModel.zero(), (m1, m2) -> m1.plus(m2, mc)); // 100
 
-        Money diff = totalDisbursedAmount.plus(totalCapitalizedIncome, mc).plus(totalDueInterest, mc).minus(totalEMI, mc);
+        Money diff = totalDisbursedAmount.plus(totalDueInterest, mc).minus(totalEMI, mc);
         Optional<RepaymentPeriod> findLastUnpaidRepaymentPeriod = scheduleModel.repaymentPeriods().stream().filter(rp -> !rp.isFullyPaid())
                 .reduce((first, second) -> second);
         findLastUnpaidRepaymentPeriod.ifPresent(repaymentPeriod -> {
@@ -830,9 +809,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             return;
         }
         final ProgressiveLoanInterestScheduleModel scheduleModelCopy = scheduleModel.copyWithoutPaidAmounts();
-
         addDisbursement(scheduleModelCopy, operation.withZeroAmount());
-        addCapitalizedIncome(scheduleModelCopy, operation.withZeroAmount());
 
         final LocalDate firstDueDate = repaymentPeriods.get(0).getDueDate();
         scheduleModel.copyPeriodsFrom(firstDueDate, scheduleModelCopy.repaymentPeriods(), (newRepaymentPeriod, actualRepaymentPeriod) -> {

@@ -2793,7 +2793,7 @@ public class LoanTransactionHelper {
         GetLoansLoanIdSummary getLoansLoanIdSummary = getLoansLoanIdResponse.getSummary();
         if (getLoansLoanIdSummary != null) {
             log.info("Loan with Principal Adjustments {} expected {}", getLoansLoanIdSummary.getPrincipalAdjustments(), amountExpected);
-            assertEquals(amountExpected, getLoansLoanIdSummary.getPrincipalAdjustments());
+            assertEquals(amountExpected, Utils.getDoubleValue(getLoansLoanIdSummary.getPrincipalAdjustments()));
         }
     }
 

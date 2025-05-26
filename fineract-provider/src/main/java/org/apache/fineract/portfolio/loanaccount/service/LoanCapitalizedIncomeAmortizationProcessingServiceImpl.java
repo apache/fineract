@@ -21,12 +21,10 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAdjustTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
@@ -53,10 +51,9 @@ public class LoanCapitalizedIncomeAmortizationProcessingServiceImpl implements L
     @Transactional
     public void processCapitalizedIncomeAmortizationOnLoanClosure(@NotNull final Loan loan) {
         final LocalDate transactionDate = getFinalCapitalizedIncomeAmortizationTransactionDate(loan);
-        final Optional<LoanTransaction> amortizationTransaction = createCapitalizedIncomeAmortizationTransaction(loan, transactionDate,
-                false);
-        amortizationTransaction.ifPresent(loanTransaction -> businessEventNotifierService
-                .notifyPostBusinessEvent(new LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent(loanTransaction)));
+        final LoanTransaction amortizationTransaction = createCapitalizedIncomeAmortizationTransaction(loan, transactionDate, false);
+        businessEventNotifierService
+                .notifyPostBusinessEvent(new LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent(amortizationTransaction));
     }
 
     @Override
@@ -70,16 +67,13 @@ public class LoanCapitalizedIncomeAmortizationProcessingServiceImpl implements L
             transactionDate = DateUtils.getBusinessLocalDate();
         }
 
-        final Optional<LoanTransaction> amortizationTransaction = createCapitalizedIncomeAmortizationTransaction(loan, transactionDate,
-                true);
-        if (amortizationTransaction.isPresent()) {
-            journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
-            businessEventNotifierService.notifyPostBusinessEvent(
-                    new LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent(amortizationTransaction.get()));
-        }
+        final LoanTransaction amortizationTransaction = createCapitalizedIncomeAmortizationTransaction(loan, transactionDate, true);
+        journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+        businessEventNotifierService
+                .notifyPostBusinessEvent(new LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent(amortizationTransaction));
     }
 
-    private Optional<LoanTransaction> createCapitalizedIncomeAmortizationTransaction(final Loan loan, final LocalDate transactionDate,
+    private LoanTransaction createCapitalizedIncomeAmortizationTransaction(final Loan loan, final LocalDate transactionDate,
             final boolean isChargeOff) {
         ExternalId externalId = ExternalId.empty();
         BigDecimal totalUnrecognizedAmount = BigDecimal.ZERO;
@@ -98,17 +92,13 @@ public class LoanCapitalizedIncomeAmortizationProcessingServiceImpl implements L
             balance.setUnrecognizedAmount(BigDecimal.ZERO);
         }
 
-        if (MathUtil.isLessThanOrEqualZero(totalUnrecognizedAmount)) {
-            return Optional.empty();
-        }
-
         final LoanTransaction amortizationTransaction = LoanTransaction.capitalizedIncomeAmortization(loan, loan.getOffice(),
                 transactionDate, totalUnrecognizedAmount, externalId);
 
         loan.addLoanTransaction(amortizationTransaction);
         loanTransactionRepository.saveAndFlush(amortizationTransaction);
 
-        return Optional.of(amortizationTransaction);
+        return amortizationTransaction;
     }
 
     @Override

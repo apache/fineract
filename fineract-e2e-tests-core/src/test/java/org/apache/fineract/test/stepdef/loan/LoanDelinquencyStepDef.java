@@ -59,6 +59,7 @@ import org.apache.fineract.test.data.LoanStatus;
 import org.apache.fineract.test.helper.ErrorHelper;
 import org.apache.fineract.test.helper.ErrorMessageHelper;
 import org.apache.fineract.test.helper.ErrorResponse;
+import org.apache.fineract.test.helper.Utils;
 import org.apache.fineract.test.messaging.EventAssertion;
 import org.apache.fineract.test.messaging.event.EventCheckHelper;
 import org.apache.fineract.test.messaging.event.loan.delinquency.LoanDelinquencyRangeChangeEvent;
@@ -538,7 +539,9 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
         String actualDelinquencyRangeValue = loanDetails.body().getDelinquencyRange() == null ? "NO_DELINQUENCY"
                 : loanDetails.body().getDelinquencyRange().getClassification();
         GetLoansLoanIdDelinquencySummary delinquent = loanDetails.body().getDelinquent();
-        List<String> actualValuesList = List.of(actualDelinquencyRangeValue, delinquent.getDelinquentAmount().toString(),
+        String delinquentAmount = delinquent.getDelinquentAmount() == null ? null
+                : new Utils.DoubleFormatter(delinquent.getDelinquentAmount().doubleValue()).format();
+        List<String> actualValuesList = List.of(actualDelinquencyRangeValue, delinquentAmount,
                 delinquent.getDelinquentDate() == null ? "null" : FORMATTER.format(delinquent.getDelinquentDate()),
                 delinquent.getDelinquentDays().toString(), delinquent.getPastDueDays().toString());
 

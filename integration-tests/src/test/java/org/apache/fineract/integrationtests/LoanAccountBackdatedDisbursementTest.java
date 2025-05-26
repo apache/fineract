@@ -115,31 +115,35 @@ public class LoanAccountBackdatedDisbursementTest extends BaseLoanIntegrationTes
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // verify amounts
-            assertEquals(1000.0, loanDetails.getRepaymentSchedule().getTotalPrincipalExpected());
+            assertEquals(1000.0, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getTotalPrincipalExpected()));
 
             // verify schedule is according to expected disbursement date
             assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
-            assertEquals(250.0, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod());
+            assertEquals(250.0,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod()));
 
             // second installment
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
             assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
-            assertEquals(250.0, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod());
+            assertEquals(250.0,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod()));
 
             // third installment
             assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
             assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
             assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
-            assertEquals(250.0, loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod());
+            assertEquals(250.0,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod()));
 
             // fourth installment
             assertEquals(4, loanDetails.getRepaymentSchedule().getPeriods().get(4).getPeriod());
             assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(4).getFromDate());
             assertEquals(LocalDate.of(2023, 6, 7), loanDetails.getRepaymentSchedule().getPeriods().get(4).getDueDate());
-            assertEquals(250.0, loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod());
+            assertEquals(250.0,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod()));
             // first disbursement on a future date (7 March 2023)
 
             businessDate = LocalDate.of(2023, 3, 7);
@@ -155,31 +159,35 @@ public class LoanAccountBackdatedDisbursementTest extends BaseLoanIntegrationTes
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // verify amounts
-            assertEquals(500.0, loanDetails.getRepaymentSchedule().getTotalPrincipalExpected());
+            assertEquals(500.0, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getTotalPrincipalExpected()));
 
             // first installment down payment repayment
             assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod()));
 
             // second installment
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
             assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod()));
 
             // third installment
             assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
             assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
             assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod()));
 
             // fourth installment
             assertEquals(4, loanDetails.getRepaymentSchedule().getPeriods().get(4).getPeriod());
             assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(4).getFromDate());
             assertEquals(LocalDate.of(2023, 6, 7), loanDetails.getRepaymentSchedule().getPeriods().get(4).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod()));
 
             // make repayment on 7 March to pay down payment installment
             final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
@@ -192,35 +200,39 @@ public class LoanAccountBackdatedDisbursementTest extends BaseLoanIntegrationTes
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // verify amounts
-            assertEquals(500.0, loanDetails.getRepaymentSchedule().getTotalPrincipalExpected());
-            assertEquals(375.0, loanDetails.getRepaymentSchedule().getTotalOutstanding());
+            assertEquals(500.0, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getTotalPrincipalExpected()));
+            assertEquals(375.0, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getTotalOutstanding()));
 
             // first installment down payment repayment
             // check down payment installment gets paid
             assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalPaidForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod()));
+            assertEquals(125.00, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalPaidForPeriod()));
             assertEquals(true, loanDetails.getRepaymentSchedule().getPeriods().get(1).getComplete());
 
             // second installment
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
             assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod()));
 
             // third installment
             assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
             assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
             assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod()));
 
             // fourth installment
             assertEquals(4, loanDetails.getRepaymentSchedule().getPeriods().get(4).getPeriod());
             assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(4).getFromDate());
             assertEquals(LocalDate.of(2023, 6, 7), loanDetails.getRepaymentSchedule().getPeriods().get(4).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod()));
 
             // set business date
 
@@ -240,44 +252,49 @@ public class LoanAccountBackdatedDisbursementTest extends BaseLoanIntegrationTes
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // verify amounts
-            assertEquals(1000.0, loanDetails.getRepaymentSchedule().getTotalPrincipalExpected());
-            assertEquals(875.0, loanDetails.getRepaymentSchedule().getTotalOutstanding());
+            assertEquals(1000.0, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getTotalPrincipalExpected()));
+            assertEquals(875.0, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getTotalOutstanding()));
 
             // first installment down payment repayment for 5 March disbursal
             // check down payment installment gets paid
             assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 5), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
             assertEquals(LocalDate.of(2023, 3, 5), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalPaidForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod()));
+            assertEquals(125.00, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalPaidForPeriod()));
             assertEquals(true, loanDetails.getRepaymentSchedule().getPeriods().get(1).getComplete());
 
             // second installment down payment repayment for 7 March disbursal
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod()));
             assertEquals(false, loanDetails.getRepaymentSchedule().getPeriods().get(3).getComplete());
 
             // third installment [5 March 2023 - 5 April 2023]
             assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(4).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 5), loanDetails.getRepaymentSchedule().getPeriods().get(4).getFromDate());
             assertEquals(LocalDate.of(2023, 4, 5), loanDetails.getRepaymentSchedule().getPeriods().get(4).getDueDate());
-            assertEquals(250.00, loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod());
+            assertEquals(250.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod()));
             assertEquals(false, loanDetails.getRepaymentSchedule().getPeriods().get(4).getComplete());
 
             // fourth installment [5 April 2023 - 5 May 2023]
             assertEquals(4, loanDetails.getRepaymentSchedule().getPeriods().get(5).getPeriod());
             assertEquals(LocalDate.of(2023, 4, 5), loanDetails.getRepaymentSchedule().getPeriods().get(5).getFromDate());
             assertEquals(LocalDate.of(2023, 5, 5), loanDetails.getRepaymentSchedule().getPeriods().get(5).getDueDate());
-            assertEquals(250.00, loanDetails.getRepaymentSchedule().getPeriods().get(5).getTotalInstallmentAmountForPeriod());
+            assertEquals(250.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(5).getTotalInstallmentAmountForPeriod()));
             assertEquals(false, loanDetails.getRepaymentSchedule().getPeriods().get(5).getComplete());
 
             // fifth installment [5 May 2023 - 5 June 2023]
             assertEquals(5, loanDetails.getRepaymentSchedule().getPeriods().get(6).getPeriod());
             assertEquals(LocalDate.of(2023, 5, 5), loanDetails.getRepaymentSchedule().getPeriods().get(6).getFromDate());
             assertEquals(LocalDate.of(2023, 6, 5), loanDetails.getRepaymentSchedule().getPeriods().get(6).getDueDate());
-            assertEquals(250.00, loanDetails.getRepaymentSchedule().getPeriods().get(6).getTotalInstallmentAmountForPeriod());
+            assertEquals(250.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(6).getTotalInstallmentAmountForPeriod()));
             assertEquals(false, loanDetails.getRepaymentSchedule().getPeriods().get(6).getComplete());
 
         } finally {
@@ -339,31 +356,35 @@ public class LoanAccountBackdatedDisbursementTest extends BaseLoanIntegrationTes
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // verify amounts
-            assertEquals(1000.0, loanDetails.getRepaymentSchedule().getTotalPrincipalExpected());
+            assertEquals(1000.0, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getTotalPrincipalExpected()));
 
             // verify schedule is according to expected disbursement date
             assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
-            assertEquals(250.0, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod());
+            assertEquals(250.0,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod()));
 
             // second installment
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 3), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
             assertEquals(LocalDate.of(2023, 4, 3), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
-            assertEquals(250.0, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod());
+            assertEquals(250.0,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod()));
 
             // third installment
             assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
             assertEquals(LocalDate.of(2023, 4, 3), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
             assertEquals(LocalDate.of(2023, 5, 3), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
-            assertEquals(250.0, loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod());
+            assertEquals(250.0,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod()));
 
             // fourth installment
             assertEquals(4, loanDetails.getRepaymentSchedule().getPeriods().get(4).getPeriod());
             assertEquals(LocalDate.of(2023, 5, 3), loanDetails.getRepaymentSchedule().getPeriods().get(4).getFromDate());
             assertEquals(LocalDate.of(2023, 6, 3), loanDetails.getRepaymentSchedule().getPeriods().get(4).getDueDate());
-            assertEquals(250.0, loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod());
+            assertEquals(250.0,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod()));
 
             // first disbursement on a future date (7 March 2023)
 
@@ -380,31 +401,35 @@ public class LoanAccountBackdatedDisbursementTest extends BaseLoanIntegrationTes
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // verify amounts
-            assertEquals(500.0, loanDetails.getRepaymentSchedule().getTotalPrincipalExpected());
+            assertEquals(500.0, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getTotalPrincipalExpected()));
 
             // first installment down payment repayment for 7 March disbursal
             assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod()));
 
             // second installment [3 March 2023 - 3 April 2023]
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 3), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
             assertEquals(LocalDate.of(2023, 4, 3), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod()));
 
             // third installment [3 April 2023 - 3 May 2023]
             assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
             assertEquals(LocalDate.of(2023, 4, 3), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
             assertEquals(LocalDate.of(2023, 5, 3), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod()));
 
             // fourth installment [3 May 2023 - 3 June 2023]
             assertEquals(4, loanDetails.getRepaymentSchedule().getPeriods().get(4).getPeriod());
             assertEquals(LocalDate.of(2023, 5, 3), loanDetails.getRepaymentSchedule().getPeriods().get(4).getFromDate());
             assertEquals(LocalDate.of(2023, 6, 3), loanDetails.getRepaymentSchedule().getPeriods().get(4).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod()));
 
             // make repayment on 7 March to pay downpayment insatllment
             final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
@@ -421,27 +446,31 @@ public class LoanAccountBackdatedDisbursementTest extends BaseLoanIntegrationTes
             assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalPaidForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod()));
+            assertEquals(125.00, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalPaidForPeriod()));
             assertEquals(true, loanDetails.getRepaymentSchedule().getPeriods().get(1).getComplete());
 
             // second installment [3 March 2023 - 3 April 2023]
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 3), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
             assertEquals(LocalDate.of(2023, 4, 3), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod()));
 
             // third installment [3 April 2023 - 3 May 2023]
             assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
             assertEquals(LocalDate.of(2023, 4, 3), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
             assertEquals(LocalDate.of(2023, 5, 3), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod()));
 
             // fourth installment [3 May 2023 - 3 June 2023]
             assertEquals(4, loanDetails.getRepaymentSchedule().getPeriods().get(4).getPeriod());
             assertEquals(LocalDate.of(2023, 5, 3), loanDetails.getRepaymentSchedule().getPeriods().get(4).getFromDate());
             assertEquals(LocalDate.of(2023, 6, 3), loanDetails.getRepaymentSchedule().getPeriods().get(4).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod()));
 
             businessDate = LocalDate.of(2023, 3, 8);
 
@@ -462,36 +491,41 @@ public class LoanAccountBackdatedDisbursementTest extends BaseLoanIntegrationTes
             assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 5), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
             assertEquals(LocalDate.of(2023, 3, 5), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalPaidForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod()));
+            assertEquals(125.00, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalPaidForPeriod()));
             assertEquals(true, loanDetails.getRepaymentSchedule().getPeriods().get(1).getComplete());
 
             // second installment down payment repayment for 7 March disbursal
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod()));
             assertEquals(false, loanDetails.getRepaymentSchedule().getPeriods().get(3).getComplete());
 
             // third installment [3 March 2023 - 3 April 2023]
             assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(4).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 3), loanDetails.getRepaymentSchedule().getPeriods().get(4).getFromDate());
             assertEquals(LocalDate.of(2023, 4, 3), loanDetails.getRepaymentSchedule().getPeriods().get(4).getDueDate());
-            assertEquals(250.00, loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod());
+            assertEquals(250.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod()));
             assertEquals(false, loanDetails.getRepaymentSchedule().getPeriods().get(4).getComplete());
 
             // fourth installment [3 April 2023 - 3 May 2023]
             assertEquals(4, loanDetails.getRepaymentSchedule().getPeriods().get(5).getPeriod());
             assertEquals(LocalDate.of(2023, 4, 3), loanDetails.getRepaymentSchedule().getPeriods().get(5).getFromDate());
             assertEquals(LocalDate.of(2023, 5, 3), loanDetails.getRepaymentSchedule().getPeriods().get(5).getDueDate());
-            assertEquals(250.00, loanDetails.getRepaymentSchedule().getPeriods().get(5).getTotalInstallmentAmountForPeriod());
+            assertEquals(250.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(5).getTotalInstallmentAmountForPeriod()));
             assertEquals(false, loanDetails.getRepaymentSchedule().getPeriods().get(5).getComplete());
 
             // fifth installment [3 May 2023 - 3 June 2023]
             assertEquals(5, loanDetails.getRepaymentSchedule().getPeriods().get(6).getPeriod());
             assertEquals(LocalDate.of(2023, 5, 3), loanDetails.getRepaymentSchedule().getPeriods().get(6).getFromDate());
             assertEquals(LocalDate.of(2023, 6, 3), loanDetails.getRepaymentSchedule().getPeriods().get(6).getDueDate());
-            assertEquals(250.00, loanDetails.getRepaymentSchedule().getPeriods().get(6).getTotalInstallmentAmountForPeriod());
+            assertEquals(250.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(6).getTotalInstallmentAmountForPeriod()));
             assertEquals(false, loanDetails.getRepaymentSchedule().getPeriods().get(6).getComplete());
 
         } finally {
@@ -553,31 +587,35 @@ public class LoanAccountBackdatedDisbursementTest extends BaseLoanIntegrationTes
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // verify amounts
-            assertEquals(1000.0, loanDetails.getRepaymentSchedule().getTotalPrincipalExpected());
+            assertEquals(1000.0, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getTotalPrincipalExpected()));
 
             // verify schedule is according to expected disbursement date
             assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
-            assertEquals(250.0, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod());
+            assertEquals(250.0,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod()));
 
             // second installment
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
             assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
-            assertEquals(250.0, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod());
+            assertEquals(250.0,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod()));
 
             // third installment
             assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
             assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
             assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
-            assertEquals(250.0, loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod());
+            assertEquals(250.0,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod()));
 
             // fourth installment
             assertEquals(4, loanDetails.getRepaymentSchedule().getPeriods().get(4).getPeriod());
             assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(4).getFromDate());
             assertEquals(LocalDate.of(2023, 6, 7), loanDetails.getRepaymentSchedule().getPeriods().get(4).getDueDate());
-            assertEquals(250.0, loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod());
+            assertEquals(250.0,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod()));
 
             // first disbursement on a future date (7 March 2023)
 
@@ -594,31 +632,35 @@ public class LoanAccountBackdatedDisbursementTest extends BaseLoanIntegrationTes
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // verify amounts
-            assertEquals(500.0, loanDetails.getRepaymentSchedule().getTotalPrincipalExpected());
+            assertEquals(500.0, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getTotalPrincipalExpected()));
 
             // first installment down payment repayment
             assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod()));
 
             // second installment
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
             assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod()));
 
             // third installment
             assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
             assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
             assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod()));
 
             // fourth installment
             assertEquals(4, loanDetails.getRepaymentSchedule().getPeriods().get(4).getPeriod());
             assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(4).getFromDate());
             assertEquals(LocalDate.of(2023, 6, 7), loanDetails.getRepaymentSchedule().getPeriods().get(4).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod()));
 
             // make repayment on 7 March to pay downpayment insatllment
             final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
@@ -632,35 +674,39 @@ public class LoanAccountBackdatedDisbursementTest extends BaseLoanIntegrationTes
 
             // check down payment installment gets paid
 
-            assertEquals(500.0, loanDetails.getRepaymentSchedule().getTotalPrincipalExpected());
-            assertEquals(375.0, loanDetails.getRepaymentSchedule().getTotalOutstanding());
+            assertEquals(500.0, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getTotalPrincipalExpected()));
+            assertEquals(375.0, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getTotalOutstanding()));
 
             // first installment down payment repayment
             // check down payment installment gets paid
             assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalPaidForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod()));
+            assertEquals(125.00, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalPaidForPeriod()));
             assertEquals(true, loanDetails.getRepaymentSchedule().getPeriods().get(1).getComplete());
 
             // second installment
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
             assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod()));
 
             // third installment
             assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
             assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
             assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod()));
 
             // fourth installment
             assertEquals(4, loanDetails.getRepaymentSchedule().getPeriods().get(4).getPeriod());
             assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(4).getFromDate());
             assertEquals(LocalDate.of(2023, 6, 7), loanDetails.getRepaymentSchedule().getPeriods().get(4).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod()));
 
             // set business date to next repayment due business date
             businessDate = LocalDate.of(2023, 4, 7);
@@ -677,36 +723,40 @@ public class LoanAccountBackdatedDisbursementTest extends BaseLoanIntegrationTes
             assertNotNull(loanDetails);
             assertNotNull(loanDetails.getRepaymentSchedule());
 
-            assertEquals(250.0, loanDetails.getRepaymentSchedule().getTotalOutstanding());
+            assertEquals(250.0, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getTotalOutstanding()));
 
             // first installment down payment repayment
             // check down payment installment gets paid
             assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalPaidForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod()));
+            assertEquals(125.00, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalPaidForPeriod()));
             assertEquals(true, loanDetails.getRepaymentSchedule().getPeriods().get(1).getComplete());
 
             // second installment
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
             assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalPaidForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod()));
+            assertEquals(125.00, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalPaidForPeriod()));
             assertEquals(true, loanDetails.getRepaymentSchedule().getPeriods().get(2).getComplete());
 
             // third installment
             assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
             assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
             assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod()));
 
             // fourth installment
             assertEquals(4, loanDetails.getRepaymentSchedule().getPeriods().get(4).getPeriod());
             assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(4).getFromDate());
             assertEquals(LocalDate.of(2023, 6, 7), loanDetails.getRepaymentSchedule().getPeriods().get(4).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod()));
 
             // make backdate disbursement for 5 march with business date 7 April
 
@@ -720,44 +770,49 @@ public class LoanAccountBackdatedDisbursementTest extends BaseLoanIntegrationTes
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // verify transactions get reprocessed and installments paid accordingly
-            assertEquals(750.0, loanDetails.getRepaymentSchedule().getTotalOutstanding());
+            assertEquals(750.0, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getTotalOutstanding()));
 
             // first installment down payment repayment for 5 March disbursal
             // check down payment installment gets paid
             assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 5), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
             assertEquals(LocalDate.of(2023, 3, 5), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalPaidForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod()));
+            assertEquals(125.00, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalPaidForPeriod()));
             assertEquals(true, loanDetails.getRepaymentSchedule().getPeriods().get(1).getComplete());
 
             // second installment down payment repayment for 7 March disbursal
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod());
-            assertEquals(125.00, loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalPaidForPeriod());
+            assertEquals(125.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod()));
+            assertEquals(125.00, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalPaidForPeriod()));
             assertEquals(true, loanDetails.getRepaymentSchedule().getPeriods().get(3).getComplete());
 
             // third installment [5 March 2023 - 5 April 2023]
             assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(4).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 5), loanDetails.getRepaymentSchedule().getPeriods().get(4).getFromDate());
             assertEquals(LocalDate.of(2023, 4, 5), loanDetails.getRepaymentSchedule().getPeriods().get(4).getDueDate());
-            assertEquals(250.00, loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod());
+            assertEquals(250.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod()));
             assertEquals(false, loanDetails.getRepaymentSchedule().getPeriods().get(4).getComplete());
 
             // fourth installment [5 April 2023 - 5 May 2023]
             assertEquals(4, loanDetails.getRepaymentSchedule().getPeriods().get(5).getPeriod());
             assertEquals(LocalDate.of(2023, 4, 5), loanDetails.getRepaymentSchedule().getPeriods().get(5).getFromDate());
             assertEquals(LocalDate.of(2023, 5, 5), loanDetails.getRepaymentSchedule().getPeriods().get(5).getDueDate());
-            assertEquals(250.00, loanDetails.getRepaymentSchedule().getPeriods().get(5).getTotalInstallmentAmountForPeriod());
+            assertEquals(250.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(5).getTotalInstallmentAmountForPeriod()));
             assertEquals(false, loanDetails.getRepaymentSchedule().getPeriods().get(5).getComplete());
 
             // fifth installment [5 May 2023 - 5 June 2023]
             assertEquals(5, loanDetails.getRepaymentSchedule().getPeriods().get(6).getPeriod());
             assertEquals(LocalDate.of(2023, 5, 5), loanDetails.getRepaymentSchedule().getPeriods().get(6).getFromDate());
             assertEquals(LocalDate.of(2023, 6, 5), loanDetails.getRepaymentSchedule().getPeriods().get(6).getDueDate());
-            assertEquals(250.00, loanDetails.getRepaymentSchedule().getPeriods().get(6).getTotalInstallmentAmountForPeriod());
+            assertEquals(250.00,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(6).getTotalInstallmentAmountForPeriod()));
             assertEquals(false, loanDetails.getRepaymentSchedule().getPeriods().get(6).getComplete());
 
         } finally {
@@ -817,30 +872,34 @@ public class LoanAccountBackdatedDisbursementTest extends BaseLoanIntegrationTes
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // verify amounts
-            assertEquals(1000.0, loanDetails.getRepaymentSchedule().getTotalPrincipalExpected());
+            assertEquals(1000.0, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getTotalPrincipalExpected()));
             // verify schedule is according to expected disbursement date
             assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
-            assertEquals(250.0, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod());
+            assertEquals(250.0,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod()));
 
             // second installment
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
             assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
-            assertEquals(250.0, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod());
+            assertEquals(250.0,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod()));
 
             // third installment
             assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
             assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
             assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
-            assertEquals(250.0, loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod());
+            assertEquals(250.0,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod()));
 
             // fourth installment
             assertEquals(4, loanDetails.getRepaymentSchedule().getPeriods().get(4).getPeriod());
             assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(4).getFromDate());
             assertEquals(LocalDate.of(2023, 6, 7), loanDetails.getRepaymentSchedule().getPeriods().get(4).getDueDate());
-            assertEquals(250.0, loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod());
+            assertEquals(250.0,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod()));
             // first disbursement on a future date (7 March 2023)
             businessDate = LocalDate.of(2023, 3, 7);
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
@@ -920,26 +979,29 @@ public class LoanAccountBackdatedDisbursementTest extends BaseLoanIntegrationTes
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // verify amounts
-            assertEquals(1000.0, loanDetails.getRepaymentSchedule().getTotalPrincipalExpected());
+            assertEquals(1000.0, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getTotalPrincipalExpected()));
 
             // verify schedule is according to expected disbursement date
             // first installment
             assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
             assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
-            assertEquals(333.33, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod());
+            assertEquals(333.33,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod()));
 
             // second installment
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPeriod());
             assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
             assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
-            assertEquals(333.33, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod());
+            assertEquals(333.33,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod()));
 
             // third installment
             assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
             assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
             assertEquals(LocalDate.of(2023, 6, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
-            assertEquals(333.34, loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod());
+            assertEquals(333.34,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod()));
             // first disbursement on a future date (7 March 2023)
 
             businessDate = LocalDate.of(2023, 3, 7);
@@ -955,7 +1017,7 @@ public class LoanAccountBackdatedDisbursementTest extends BaseLoanIntegrationTes
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // verify amounts
-            assertEquals(500.0, loanDetails.getRepaymentSchedule().getTotalPrincipalExpected());
+            assertEquals(500.0, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getTotalPrincipalExpected()));
 
             // disbursement period
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(0).getDueDate());
@@ -964,19 +1026,22 @@ public class LoanAccountBackdatedDisbursementTest extends BaseLoanIntegrationTes
             assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
             assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
-            assertEquals(166.67, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod());
+            assertEquals(166.67,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod()));
 
             // second installment
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPeriod());
             assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
             assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
-            assertEquals(166.67, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod());
+            assertEquals(166.67,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod()));
 
             // third installment
             assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
             assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
             assertEquals(LocalDate.of(2023, 6, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
-            assertEquals(166.66, loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod());
+            assertEquals(166.66,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod()));
 
             // make repayment on 7 March to pay installment
             final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
@@ -989,29 +1054,32 @@ public class LoanAccountBackdatedDisbursementTest extends BaseLoanIntegrationTes
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // verify amounts
-            assertEquals(500.0, loanDetails.getRepaymentSchedule().getTotalPrincipalExpected());
-            assertEquals(333.33, loanDetails.getRepaymentSchedule().getTotalOutstanding());
+            assertEquals(500.0, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getTotalPrincipalExpected()));
+            assertEquals(333.33, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getTotalOutstanding()));
 
             // first installment
             // check installment gets paid
             assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
             assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
-            assertEquals(166.67, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod());
-            assertEquals(166.67, loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalPaidForPeriod());
+            assertEquals(166.67,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod()));
+            assertEquals(166.67, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalPaidForPeriod()));
             assertEquals(true, loanDetails.getRepaymentSchedule().getPeriods().get(1).getComplete());
 
             // second installment
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPeriod());
             assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
             assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
-            assertEquals(166.67, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod());
+            assertEquals(166.67,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod()));
 
             // third installment
             assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
             assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
             assertEquals(LocalDate.of(2023, 6, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
-            assertEquals(166.66, loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod());
+            assertEquals(166.66,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod()));
             // set business date
 
             businessDate = LocalDate.of(2023, 3, 8);
@@ -1030,8 +1098,8 @@ public class LoanAccountBackdatedDisbursementTest extends BaseLoanIntegrationTes
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // verify amounts
-            assertEquals(1000.0, loanDetails.getRepaymentSchedule().getTotalPrincipalExpected());
-            assertEquals(833.33, loanDetails.getRepaymentSchedule().getTotalOutstanding());
+            assertEquals(1000.0, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getTotalPrincipalExpected()));
+            assertEquals(833.33, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getTotalOutstanding()));
 
             // verify disbursement period order
             assertEquals(LocalDate.of(2023, 3, 5), loanDetails.getRepaymentSchedule().getPeriods().get(0).getDueDate());
@@ -1042,22 +1110,25 @@ public class LoanAccountBackdatedDisbursementTest extends BaseLoanIntegrationTes
             assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPeriod());
             assertEquals(LocalDate.of(2023, 3, 5), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
             assertEquals(LocalDate.of(2023, 4, 5), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
-            assertEquals(333.33, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod());
-            assertEquals(166.67, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalPaidForPeriod());
+            assertEquals(333.33,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod()));
+            assertEquals(166.67, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalPaidForPeriod()));
             assertEquals(false, loanDetails.getRepaymentSchedule().getPeriods().get(2).getComplete());
 
             // second installment
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
             assertEquals(LocalDate.of(2023, 4, 5), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
             assertEquals(LocalDate.of(2023, 5, 5), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
-            assertEquals(333.33, loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod());
+            assertEquals(333.33,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod()));
             assertEquals(false, loanDetails.getRepaymentSchedule().getPeriods().get(3).getComplete());
 
             // third installment
             assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(4).getPeriod());
             assertEquals(LocalDate.of(2023, 5, 5), loanDetails.getRepaymentSchedule().getPeriods().get(4).getFromDate());
             assertEquals(LocalDate.of(2023, 6, 5), loanDetails.getRepaymentSchedule().getPeriods().get(4).getDueDate());
-            assertEquals(333.34, loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod());
+            assertEquals(333.34,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod()));
             assertEquals(false, loanDetails.getRepaymentSchedule().getPeriods().get(4).getComplete());
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,

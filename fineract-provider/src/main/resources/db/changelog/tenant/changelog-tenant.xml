@@ -196,5 +196,4 @@
     <include file="parts/0175_add_fk_acc_product_mapping.xml" relativeToChangelogFile="true" />
     <include file="parts/0176_add_capitalized_income_amortization_transaction.xml" relativeToChangelogFile="true" />
     <include file="parts/0177_acc_journal_entry_index.xml" relativeToChangelogFile="true" />
-    <include file="parts/0178_add_principal_from_capitalized_income_to_loan_summary.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

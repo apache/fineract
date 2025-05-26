@@ -64,7 +64,6 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanDownPaymentHandlerService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanJournalEntryPoster;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
-import org.apache.fineract.portfolio.loanaccount.service.ReprocessLoanTransactionsService;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
@@ -94,7 +93,6 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
     private final LoanChargeValidator loanChargeValidator;
     private final LoanJournalEntryPoster journalEntryPoster;
     private final LoanBalanceService loanBalanceService;
-    private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
 
     @Override
     public CommandProcessingResult adjustLoanTransaction(Loan loan, LoanTransaction transactionToAdjust, LoanAdjustmentParameter parameter,
@@ -247,9 +245,8 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
                 transactionForAdjustment.getTransactionDate());
 
         if (!transactionForAdjustment.isAccrualRelated() && transactionForAdjustment.isNotRepaymentLikeType()
-                && transactionForAdjustment.isNotWaiver() && transactionForAdjustment.isNotCreditBalanceRefund()
-                && !transactionForAdjustment.isCapitalizedIncome()) {
-            final String errorMessage = "Only (non-reversed) transactions of type repayment, waiver, capitalized income, accrual or credit balance refund can be adjusted.";
+                && transactionForAdjustment.isNotWaiver() && transactionForAdjustment.isNotCreditBalanceRefund()) {
+            final String errorMessage = "Only (non-reversed) transactions of type repayment, waiver, accrual or credit balance refund can be adjusted.";
             throw new InvalidLoanTransactionTypeException("transaction",
                     "adjustment.is.only.allowed.to.repayment.or.waiver.or.creditbalancerefund.transactions", errorMessage);
         }
@@ -287,10 +284,6 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
         if (newTransactionDetail.isRepaymentLikeType() || newTransactionDetail.isWaiver()) {
             loanDownPaymentHandlerService.handleRepaymentOrRecoveryOrWaiverTransaction(loan, newTransactionDetail, transactionForAdjustment,
                     scheduleGeneratorDTO);
-        }
-
-        if (transactionForAdjustment.getTypeOf().equals(LoanTransactionType.CAPITALIZED_INCOME)) {
-            reprocessLoanTransactionsService.reprocessTransactions(loan);
         }
     }
 

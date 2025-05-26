@@ -310,12 +310,6 @@ public final class DateUtils {
         return isBeforeBusinessDate(localDate);
     }
 
-    public static boolean isDateInRangeFromInclusiveToExclusive(final LocalDate fromInclusive, final LocalDate upToNotInclusive,
-            final LocalDate target) {
-        return (DateUtils.isEqual(target, fromInclusive) || DateUtils.isAfter(target, fromInclusive))
-                && DateUtils.isBefore(target, upToNotInclusive);
-    }
-
     public static int compare(LocalDate first, LocalDate second) {
         return compare(first, second, true);
     }

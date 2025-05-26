@@ -1254,7 +1254,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
             Assertions.assertNotNull(loanDetails);
             Assertions.assertNotNull(loanDetails.getStatus());
             Assertions.assertEquals(700, loanDetails.getStatus().getId());
-            Assertions.assertEquals(160.16D, loanDetails.getTotalOverpaid());
+            Assertions.assertEquals(160.16D, Utils.getDoubleValue(loanDetails.getTotalOverpaid()));
         });
     }
 
@@ -1630,7 +1630,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
             );
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
             verifyLoanStatus(loanDetails, LoanStatus.OVERPAID);
-            Assertions.assertEquals(0.36, loanDetails.getTotalOverpaid());
+            Assertions.assertEquals(0.36, Utils.getDoubleValue(loanDetails.getTotalOverpaid()));
         });
     }
 }

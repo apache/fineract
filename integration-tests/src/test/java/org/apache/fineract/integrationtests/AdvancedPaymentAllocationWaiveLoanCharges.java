@@ -31,6 +31,7 @@ import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
@@ -72,7 +73,7 @@ public class AdvancedPaymentAllocationWaiveLoanCharges extends BaseLoanIntegrati
             Assertions.assertNotNull(waiveTransaction.getLoanChargePaidByList());
             Assertions.assertEquals(1, waiveTransaction.getLoanChargePaidByList().size());
             Assertions.assertEquals(loanChargeId, waiveTransaction.getLoanChargePaidByList().get(0).getChargeId());
-            Assertions.assertEquals(50.0, waiveTransaction.getLoanChargePaidByList().get(0).getAmount());
+            Assertions.assertEquals(50.0, Utils.getDoubleValue(waiveTransaction.getLoanChargePaidByList().get(0).getAmount()));
         });
     }
 
@@ -105,7 +106,7 @@ public class AdvancedPaymentAllocationWaiveLoanCharges extends BaseLoanIntegrati
             Assertions.assertNotNull(waiveTransaction.getLoanChargePaidByList());
             Assertions.assertEquals(1, waiveTransaction.getLoanChargePaidByList().size());
             Assertions.assertEquals(loanChargeId, waiveTransaction.getLoanChargePaidByList().get(0).getChargeId());
-            Assertions.assertEquals(50.0, waiveTransaction.getLoanChargePaidByList().get(0).getAmount());
+            Assertions.assertEquals(50.0, Utils.getDoubleValue(waiveTransaction.getLoanChargePaidByList().get(0).getAmount()));
         });
     }
 
@@ -143,7 +144,7 @@ public class AdvancedPaymentAllocationWaiveLoanCharges extends BaseLoanIntegrati
             Assertions.assertNotNull(waiveTransaction.getLoanChargePaidByList());
             Assertions.assertEquals(1, waiveTransaction.getLoanChargePaidByList().size());
             Assertions.assertEquals(loanChargeId, waiveTransaction.getLoanChargePaidByList().get(0).getChargeId());
-            Assertions.assertEquals(50.0, waiveTransaction.getLoanChargePaidByList().get(0).getAmount());
+            Assertions.assertEquals(50.0, Utils.getDoubleValue(waiveTransaction.getLoanChargePaidByList().get(0).getAmount()));
 
             addRepaymentForLoan(loanId, 200.0, "03 January 2023");
 

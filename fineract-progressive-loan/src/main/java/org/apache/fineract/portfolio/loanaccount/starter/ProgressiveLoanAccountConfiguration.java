@@ -30,7 +30,6 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanJournalEntryPoster;
 import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanTransactionValidator;
 import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanTransactionValidatorImpl;
-import org.apache.fineract.portfolio.loanaccount.service.ReprocessLoanTransactionsService;
 import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -46,11 +45,10 @@ public class ProgressiveLoanAccountConfiguration {
             LoanAssembler loanAssembler, LoanTransactionRepository loanTransactionRepository,
             PaymentDetailWritePlatformService paymentDetailWritePlatformService, LoanJournalEntryPoster journalEntryPoster,
             NoteWritePlatformService noteWritePlatformService, ExternalIdFactory externalIdFactory,
-            LoanCapitalizedIncomeBalanceRepository capitalizedIncomeBalanceRepository,
-            ReprocessLoanTransactionsService reprocessLoanTransactionsService) {
+            LoanCapitalizedIncomeBalanceRepository capitalizedIncomeBalanceRepository) {
         return new CapitalizedIncomeWritePlatformServiceImpl(loanTransactionValidator, loanAssembler, loanTransactionRepository,
                 paymentDetailWritePlatformService, journalEntryPoster, noteWritePlatformService, externalIdFactory,
-                capitalizedIncomeBalanceRepository, reprocessLoanTransactionsService);
+                capitalizedIncomeBalanceRepository);
     }
 
     @Bean

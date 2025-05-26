@@ -1269,7 +1269,7 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         loanTransactionHelper.printDelinquencyData(getLoansLoanIdResponse);
         delinquent = getLoansLoanIdResponse.getDelinquent();
-        assertEquals(amount, delinquent.getDelinquentAmount());
+        assertEquals(amount, Utils.getDoubleValue(delinquent.getDelinquentAmount()));
         assertEquals(LocalDate.parse(date, dateTimeFormatter), delinquent.getDelinquentDate());
         assertEquals(delinquentDays, delinquent.getDelinquentDays());
     }
@@ -1344,7 +1344,7 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
             getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
             loanTransactionHelper.printDelinquencyData(getLoansLoanIdResponse);
             GetLoansLoanIdDelinquencySummary delinquent = getLoansLoanIdResponse.getDelinquent();
-            assertEquals(2049.99, delinquent.getDelinquentAmount());
+            assertEquals(2049.99, Utils.getDoubleValue(delinquent.getDelinquentAmount()));
             assertEquals(LocalDate.of(2012, 2, 1), delinquent.getDelinquentDate());
             assertEquals(31, delinquent.getDelinquentDays());
             assertEquals(2, delinquent.getInstallmentLevelDelinquency().size());
@@ -1395,7 +1395,7 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
         assertNotNull(getLoansLoanIdResponse);
         assertNotNull(getLoansLoanIdResponse.getDelinquent());
         assertEquals(0, getLoansLoanIdResponse.getDelinquent().getDelinquentDays());
-        assertEquals(0, getLoansLoanIdResponse.getDelinquent().getDelinquentAmount());
+        assertEquals(0.0, Utils.getDoubleValue(getLoansLoanIdResponse.getDelinquent().getDelinquentAmount()));
 
         // Loan Disbursement
         disburseLoanAccount(loanTransactionHelper, loanId, operationDate);
@@ -1404,7 +1404,7 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
         assertNotNull(getLoansLoanIdResponse);
         assertNotNull(getLoansLoanIdResponse.getDelinquent());
         assertNotEquals(0, getLoansLoanIdResponse.getDelinquent().getDelinquentDays());
-        assertNotEquals(0, getLoansLoanIdResponse.getDelinquent().getDelinquentAmount());
+        assertNotEquals(0, Utils.getDoubleValue(getLoansLoanIdResponse.getDelinquent().getDelinquentAmount()));
     }
 
     @Test
@@ -1459,7 +1459,7 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
             assertNotNull(getLoansLoanIdResponse);
             assertNotNull(delinquent);
             assertEquals(0, delinquent.getDelinquentDays());
-            assertEquals(0, delinquent.getDelinquentAmount());
+            assertEquals(0.0, Utils.getDoubleValue(delinquent.getDelinquentAmount()));
 
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,

@@ -66,12 +66,6 @@ public interface EMICalculator {
     void addDisbursement(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate disbursementDueDate, Money disbursedAmount);
 
     /**
-     * Applies the capitalized income transaction on the interest model. This method recalculates the EMI amounts from
-     * the action date.
-     */
-    void addCapitalizedIncome(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate transactionDueDate, Money transactionAmount);
-
-    /**
      * Applies the interest rate change on the interest model. This method recalculates the EMI amounts from the action
      * date.
      */

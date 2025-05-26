@@ -1748,19 +1748,19 @@ public class LoanTransactionInterestPaymentWaiverTest extends BaseLoanIntegratio
 
     private static void validateLoanTransaction(GetLoansLoanIdResponse loanDetails, int index, double transactionAmount,
             double principalPortion, double overPaidPortion, double loanBalance) {
-        assertEquals(transactionAmount, loanDetails.getTransactions().get(index).getAmount());
-        assertEquals(principalPortion, loanDetails.getTransactions().get(index).getPrincipalPortion());
-        assertEquals(overPaidPortion, loanDetails.getTransactions().get(index).getOverpaymentPortion());
-        assertEquals(loanBalance, loanDetails.getTransactions().get(index).getOutstandingLoanBalance());
+        assertEquals(transactionAmount, Utils.getDoubleValue(loanDetails.getTransactions().get(index).getAmount()));
+        assertEquals(principalPortion, Utils.getDoubleValue(loanDetails.getTransactions().get(index).getPrincipalPortion()));
+        assertEquals(overPaidPortion, Utils.getDoubleValue(loanDetails.getTransactions().get(index).getOverpaymentPortion()));
+        assertEquals(loanBalance, Utils.getDoubleValue(loanDetails.getTransactions().get(index).getOutstandingLoanBalance()));
     }
 
     private void validateLoanCharge(GetLoansLoanIdResponse loanDetails, int index, LocalDate dueDate, double charged, double paid,
             double outstanding) {
         GetLoansLoanIdLoanChargeData chargeData = loanDetails.getCharges().get(index);
         assertEquals(dueDate, chargeData.getDueDate());
-        assertEquals(charged, chargeData.getAmount());
-        assertEquals(paid, chargeData.getAmountPaid());
-        assertEquals(outstanding, chargeData.getAmountOutstanding());
+        assertEquals(charged, Utils.getDoubleValue(chargeData.getAmount()));
+        assertEquals(paid, Utils.getDoubleValue(chargeData.getAmountPaid()));
+        assertEquals(outstanding, Utils.getDoubleValue(chargeData.getAmountOutstanding()));
     }
 
 }

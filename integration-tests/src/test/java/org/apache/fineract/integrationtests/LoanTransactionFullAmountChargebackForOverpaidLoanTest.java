@@ -121,19 +121,19 @@ public class LoanTransactionFullAmountChargebackForOverpaidLoanTest {
         // verify loan is overpaid
         assertNotNull(loanDetails);
         assertTrue(loanDetails.getStatus().getOverpaid());
-        assertEquals(loanDetails.getTotalOverpaid(), 200.0);
+        assertEquals(200.0, Utils.getDoubleValue(loanDetails.getTotalOverpaid()));
 
         // verify loan outstanding
         assertNotNull(loanDetails.getSummary());
-        assertEquals(loanDetails.getSummary().getTotalOutstanding(), 0.0);
+        assertEquals(0.0, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
 
         // verify last transaction amount distribution
         GetLoansLoanIdTransactionsTransactionIdResponse loanTransaction = loanTransactionHelper.getLoanTransaction(loanId,
                 repaymentTransaction_3.getResourceId().intValue());
 
         assertNotNull(loanTransaction);
-        assertEquals(loanTransaction.getAmount(), 300.0);
-        assertEquals(loanTransaction.getPrincipalPortion(), 100.0);
+        assertEquals(300.0, loanTransaction.getAmount());
+        assertEquals(100.0, loanTransaction.getPrincipalPortion());
 
         // chargeback for full amount on last repayment for which the amount is 300 and principal is 100 due to
         // overpayment adjustment
@@ -150,15 +150,15 @@ public class LoanTransactionFullAmountChargebackForOverpaidLoanTest {
 
         // verify loan outstanding
         assertNotNull(loanDetailsAfterChargeback.getSummary());
-        assertEquals(loanDetailsAfterChargeback.getSummary().getTotalOutstanding(), 100.0);
+        assertEquals(100.0, Utils.getDoubleValue(loanDetailsAfterChargeback.getSummary().getTotalOutstanding()));
 
         // verify chargeback transaction amount distribution
         GetLoansLoanIdTransactionsTransactionIdResponse chargebackTransaction = loanTransactionHelper.getLoanTransaction(loanId,
                 chargebackTransactionResponse.getResourceId().intValue());
 
         assertNotNull(chargebackTransaction);
-        assertEquals(chargebackTransaction.getAmount(), 300.0);
-        assertEquals(chargebackTransaction.getPrincipalPortion(), 100.0);
+        assertEquals(300.0, chargebackTransaction.getAmount());
+        assertEquals(100.0, chargebackTransaction.getPrincipalPortion());
 
     }
 

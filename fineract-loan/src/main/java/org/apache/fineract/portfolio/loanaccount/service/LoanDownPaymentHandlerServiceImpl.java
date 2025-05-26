@@ -173,10 +173,7 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
         if (loan.getLoanProduct().isMultiDisburseLoan()) {
             final BigDecimal totalDisbursed = loan.getDisbursedAmount();
             final BigDecimal totalPrincipalAdjusted = loan.getSummary().getTotalPrincipalAdjustments();
-            final BigDecimal totalPrincipalFromCapitalizedIncome = loan.getLoanTransactions(LoanTransaction::isCapitalizedIncome).stream()
-                    .filter(LoanTransaction::isNotReversed).map(LoanTransaction::getPrincipalPortion)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-            final BigDecimal totalPrincipalCredited = totalDisbursed.add(totalPrincipalAdjusted).add(totalPrincipalFromCapitalizedIncome);
+            final BigDecimal totalPrincipalCredited = totalDisbursed.add(totalPrincipalAdjusted);
             if (totalPrincipalCredited.compareTo(loan.getSummary().getTotalPrincipalRepaid()) < 0
                     && loan.repaymentScheduleDetail().getPrincipal().minus(totalDisbursed).isGreaterThanZero()) {
                 final String errorMessage = "The transaction amount cannot exceed threshold.";

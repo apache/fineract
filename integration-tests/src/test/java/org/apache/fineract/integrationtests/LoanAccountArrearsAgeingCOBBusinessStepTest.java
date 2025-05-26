@@ -129,16 +129,16 @@ public class LoanAccountArrearsAgeingCOBBusinessStepTest extends BaseLoanIntegra
             GetLoansLoanIdSummary loan1Summary = loan1Details.getSummary();
             assertNotNull(loan1Summary);
             assertNotNull(loan1Summary.getOverdueSinceDate());
-            assertEquals(loan1Summary.getPrincipalOverdue(), 1000.00);
-            assertEquals(loan1Summary.getTotalOverdue(), 1000.00);
+            assertEquals(1000.00, Utils.getDoubleValue(loan1Summary.getPrincipalOverdue()));
+            assertEquals(1000.00, Utils.getDoubleValue(loan1Summary.getTotalOverdue()));
 
             // Retrieve Loan 2 with loanId
             GetLoansLoanIdResponse loan2Details = loanTransactionHelper.getLoanDetails((long) loanId_2);
             GetLoansLoanIdSummary loan2Summary = loan2Details.getSummary();
             assertNotNull(loan2Summary);
             assertNotNull(loan2Summary.getOverdueSinceDate());
-            assertEquals(loan2Summary.getPrincipalOverdue(), 1000.00);
-            assertEquals(loan2Summary.getTotalOverdue(), 1000.00);
+            assertEquals(1000.00, Utils.getDoubleValue(loan2Summary.getPrincipalOverdue()));
+            assertEquals(1000.00, Utils.getDoubleValue(loan2Summary.getTotalOverdue()));
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(false));

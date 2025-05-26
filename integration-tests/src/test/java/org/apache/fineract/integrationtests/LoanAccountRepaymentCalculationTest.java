@@ -416,7 +416,7 @@ public class LoanAccountRepaymentCalculationTest extends BaseLoanIntegrationTest
         assertEquals(expectedPeriodNumber, period.getPeriod());
         assertEquals(expectedPeriodFromDate, period.getFromDate());
         assertEquals(expectedPeriodDueDate, period.getDueDate());
-        assertEquals(expectedAmount, period.getTotalInstallmentAmountForPeriod());
+        assertEquals(expectedAmount, Utils.getDoubleValue(period.getTotalInstallmentAmountForPeriod()));
         assertEquals(isComplete, period.getComplete());
     }
 

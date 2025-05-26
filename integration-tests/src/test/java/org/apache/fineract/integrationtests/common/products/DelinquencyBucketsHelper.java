@@ -183,7 +183,7 @@ public class DelinquencyBucketsHelper {
             log.info("Loan Delinquency Data in Days {} and Amount {}", getCollectionData.getPastDueDays(),
                     getCollectionData.getDelinquentAmount());
             assertEquals(pastDueDays, getCollectionData.getPastDueDays(), "Past due days");
-            assertEquals(amountExpected, getCollectionData.getDelinquentAmount(), "Amount expected");
+            assertEquals(amountExpected, Utils.getDoubleValue(getCollectionData.getDelinquentAmount()), "Amount expected");
         } else {
             log.info("Loan Delinquency Data is null");
         }

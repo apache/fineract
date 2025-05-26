@@ -113,7 +113,7 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
         assertNotNull(loanDetails);
         assertTrue(loanDetails.getStatus().getActive());
         assertNotNull(loanDetails.getSummary());
-        assertEquals(loanDetails.getSummary().getTotalOutstanding(), 500.0);
+        assertEquals(500.0, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
 
         // chargeback on Repayment
         PostLoansLoanIdTransactionsResponse chargebackTransactionResponse = loanTransactionHelper.chargebackLoanTransaction(
@@ -128,7 +128,7 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
         assertNotNull(loanDetails);
         assertTrue(loanDetails.getStatus().getActive());
         assertNotNull(loanDetails.getSummary());
-        assertEquals(loanDetails.getSummary().getTotalOutstanding(), 1000.0);
+        assertEquals(1000.0, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
 
         // Goodwill Credit
         final PostLoansLoanIdTransactionsResponse goodwillCredit_1 = loanTransactionHelper.makeGoodwillCredit((long) loanId,
@@ -142,7 +142,7 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
         assertNotNull(loanDetails);
         assertTrue(loanDetails.getStatus().getActive());
         assertNotNull(loanDetails.getSummary());
-        assertEquals(loanDetails.getSummary().getTotalOutstanding(), 800.0);
+        assertEquals(800.0, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
 
         // chargeback on Goodwill Credit Transaction
         chargebackTransactionResponse = loanTransactionHelper.chargebackLoanTransaction(loanExternalIdStr, goodwillCredit_1.getResourceId(),
@@ -166,7 +166,7 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
         assertNotNull(loanDetails);
         assertTrue(loanDetails.getStatus().getActive());
         assertNotNull(loanDetails.getSummary());
-        assertEquals(loanDetails.getSummary().getTotalOutstanding(), 700.0);
+        assertEquals(700.0, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
 
         // chargeback on Payout Refund Transaction
         chargebackTransactionResponse = loanTransactionHelper.chargebackLoanTransaction(loanExternalIdStr, payoutRefund_1.getResourceId(),
@@ -181,7 +181,7 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
         assertNotNull(loanDetails);
         assertTrue(loanDetails.getStatus().getActive());
         assertNotNull(loanDetails.getSummary());
-        assertEquals(loanDetails.getSummary().getTotalOutstanding(), 1000.0);
+        assertEquals(1000.0, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
 
         // Merchant Issued Refund
 
@@ -196,7 +196,7 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
         assertNotNull(loanDetails);
         assertTrue(loanDetails.getStatus().getActive());
         assertNotNull(loanDetails.getSummary());
-        assertEquals(loanDetails.getSummary().getTotalOutstanding(), 900.0);
+        assertEquals(900.0, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
 
         // chargeback on Merchant Issued Refund Transaction
         chargebackTransactionResponse = loanTransactionHelper.chargebackLoanTransaction(loanExternalIdStr,
@@ -212,7 +212,7 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
         assertNotNull(loanDetails);
         assertTrue(loanDetails.getStatus().getActive());
         assertNotNull(loanDetails.getSummary());
-        assertEquals(loanDetails.getSummary().getTotalOutstanding(), 1000.0);
+        assertEquals(1000.0, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
 
     }
 

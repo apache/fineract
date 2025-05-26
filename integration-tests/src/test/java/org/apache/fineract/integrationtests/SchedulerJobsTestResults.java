@@ -968,7 +968,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
             GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanID);
             // First accrual transaction
             assertTrue(getLoansLoanIdResponse.getTransactions().get(1).getType().getAccrual());
-            assertEquals(10.0f, getLoansLoanIdResponse.getTransactions().get(1).getFeeChargesPortion());
+            assertEquals(10.00, Utils.getDoubleValue(getLoansLoanIdResponse.getTransactions().get(1).getFeeChargesPortion()));
             assertEquals(LocalDate.of(2020, 6, 2), getLoansLoanIdResponse.getTransactions().get(1).getDate());
             Long transactionId = getLoansLoanIdResponse.getTransactions().get(1).getId();
 

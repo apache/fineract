@@ -97,8 +97,7 @@ public class LoanBalanceService {
             loan.setTotalRecovered(recoveredAmount.getAmountDefaultedToNullIfZero());
 
             final Money principal = loan.getLoanRepaymentScheduleDetail().getPrincipal();
-            List<LoanTransaction> capitalizedIncomeTransactions = loan.getLoanTransactions(LoanTransaction::isCapitalizedIncome);
-            loan.getSummary().updateSummary(loan.getCurrency(), principal, loan.getRepaymentScheduleInstallments(), loan.getLoanCharges(), capitalizedIncomeTransactions);
+            loan.getSummary().updateSummary(loan.getCurrency(), principal, loan.getRepaymentScheduleInstallments(), loan.getLoanCharges());
             loan.updateLoanOutstandingBalances();
         }
     }

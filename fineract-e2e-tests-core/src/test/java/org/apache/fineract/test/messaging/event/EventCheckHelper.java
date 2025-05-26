@@ -420,8 +420,8 @@ public class EventCheckHelper {
                 .getGlobalConfiguration("outstanding-interest-calculation-strategy-for-external-asset-transfer");
         if ("PAYABLE_OUTSTANDING_INTEREST".equals(outstandingInterestStrategy.getStringValue())) {
             Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "all", null, null).execute();
-            totalOutstandingBalanceAmountExpected = loanDetails.body().getSummary().getTotalOutstanding();
-            outstandingInterestPortionExpected = loanDetails.body().getSummary().getInterestOutstanding();
+            totalOutstandingBalanceAmountExpected = zeroConversion(loanDetails.body().getSummary().getTotalOutstanding());
+            outstandingInterestPortionExpected = zeroConversion(loanDetails.body().getSummary().getInterestOutstanding());
         }
 
         String ownerExternalIdExpected = filtered.getStatus().getValue().equals("BUYBACK") ? null : filtered.getOwner().getExternalId();

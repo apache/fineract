@@ -35,6 +35,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
@@ -1777,10 +1778,10 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
         GetLoansLoanIdResponse loanResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId.intValue());
         GetLoansLoanIdSummary summary = loanResponse.getSummary();
         Assertions.assertNotNull(summary);
-        Assertions.assertEquals(creditedPrincipal, summary.getPrincipalAdjustments());
-        Assertions.assertEquals(creditedFee, summary.getFeeAdjustments());
-        Assertions.assertEquals(creditedPenalty, summary.getPenaltyAdjustments());
-        Assertions.assertEquals(totalOutstanding, summary.getTotalOutstanding());
+        Assertions.assertEquals(creditedPrincipal, Utils.getDoubleValue(summary.getPrincipalAdjustments()));
+        Assertions.assertEquals(creditedFee, Utils.getDoubleValue(summary.getFeeAdjustments()));
+        Assertions.assertEquals(creditedPenalty, Utils.getDoubleValue(summary.getPenaltyAdjustments()));
+        Assertions.assertEquals(totalOutstanding, Utils.getDoubleValue(summary.getTotalOutstanding()));
     }
 
     private Long applyAndApproveLoan(Long clientId, Long loanProductId, int numberOfRepayments) {

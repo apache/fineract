@@ -1121,9 +1121,11 @@ public class LoanStepDef extends AbstractStepDef {
         ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
 
         GetLoansLoanIdDelinquencySummary delinquent = loanDetailsResponse.body().getDelinquent();
-        String lastPaymentAmountActual = new Utils.DoubleFormatter(delinquent.getLastPaymentAmount().doubleValue()).format();
+        String lastPaymentAmountActual = delinquent.getLastPaymentAmount() == null ? null
+                : new Utils.DoubleFormatter(delinquent.getLastPaymentAmount().doubleValue()).format();
         String lastPaymentDateActual = FORMATTER.format(delinquent.getLastPaymentDate());
-        String lastRepaymentAmountActual = new Utils.DoubleFormatter(delinquent.getLastRepaymentAmount().doubleValue()).format();
+        String lastRepaymentAmountActual = delinquent.getLastRepaymentAmount() == null ? null
+                : new Utils.DoubleFormatter(delinquent.getLastRepaymentAmount().doubleValue()).format();
         String lastRepaymentDateActual = FORMATTER.format(delinquent.getLastRepaymentDate());
 
         assertThat(lastPaymentAmountActual)
@@ -1163,7 +1165,8 @@ public class LoanStepDef extends AbstractStepDef {
                 String amountEventActual = loanChargePaidByListEvent.get(i).getAmount().setScale(1, RoundingMode.HALF_DOWN).toString();
                 String nameEventActual = loanChargePaidByListEvent.get(i).getName();
 
-                String amountActual = String.valueOf(loanChargePaidByList.get(i).getAmount());
+                String amountActual = loanChargePaidByList.get(i).getAmount() == null ? null
+                        : new Utils.DoubleFormatter(loanChargePaidByList.get(i).getAmount().doubleValue()).format();
                 String nameActual = loanChargePaidByList.get(i).getName();
 
                 String amountExpected = data.get(i + 1).get(0);
@@ -2682,9 +2685,11 @@ public class LoanStepDef extends AbstractStepDef {
         ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
 
         GetLoansLoanIdDelinquencySummary delinquent = loanDetailsResponse.body().getDelinquent();
-        String lastPaymentAmountActual = new Utils.DoubleFormatter(delinquent.getLastPaymentAmount().doubleValue()).format();
+        String lastPaymentAmountActual = delinquent.getLastPaymentAmount() == null ? null
+                : new Utils.DoubleFormatter(delinquent.getLastPaymentAmount().doubleValue()).format();
         String lastPaymentDateActual = FORMATTER.format(delinquent.getLastPaymentDate());
-        String lastRepaymentAmountActual = new Utils.DoubleFormatter(delinquent.getLastRepaymentAmount().doubleValue()).format();
+        String lastRepaymentAmountActual = delinquent.getLastRepaymentAmount() == null ? null
+                : new Utils.DoubleFormatter(delinquent.getLastRepaymentAmount().doubleValue()).format();
         String lastRepaymentDateActual = FORMATTER.format(delinquent.getLastRepaymentDate());
 
         assertThat(lastPaymentAmountActual)
@@ -3857,8 +3862,8 @@ public class LoanStepDef extends AbstractStepDef {
                     actualValues.add(emiVariation.getTermType().getValue() == null ? null : emiVariation.getTermType().getValue());
                 case "Applicable From" -> actualValues.add(emiVariation.getTermVariationApplicableFrom() == null ? null
                         : FORMATTER.format(emiVariation.getTermVariationApplicableFrom()));
-                case "Decimal Value" ->
-                    actualValues.add(emiVariation.getDecimalValue() == null ? null : new Utils.DoubleFormatter(emiVariation.getDecimalValue().doubleValue()).format());
+                case "Decimal Value" -> actualValues.add(emiVariation.getDecimalValue() == null ? null
+                        : new Utils.DoubleFormatter(emiVariation.getDecimalValue().doubleValue()).format());
                 case "Date Value" ->
                     actualValues.add(emiVariation.getDateValue() == null ? null : FORMATTER.format(emiVariation.getDateValue()));
                 case "Is Specific To Installment" -> actualValues.add(String.valueOf(emiVariation.getIsSpecificToInstallment()));

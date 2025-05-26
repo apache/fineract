@@ -212,24 +212,30 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest extends BaseLoan
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
 
             assertEquals(5, loanDetails.getRepaymentSchedule().getPeriods().size());
-            assertEquals(feePortion, loanDetails.getRepaymentSchedule().getPeriods().get(2).getFeeChargesDue());
-            assertEquals(feePortion, loanDetails.getRepaymentSchedule().getPeriods().get(2).getFeeChargesOutstanding());
-            assertEquals(penaltyPortion, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPenaltyChargesDue());
-            assertEquals(penaltyPortion, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPenaltyChargesOutstanding());
-            assertEquals(400.0d, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalDueForPeriod());
-            assertEquals(400.0d, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalOutstandingForPeriod());
+            assertEquals(feePortion, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getFeeChargesDue()));
+            assertEquals(feePortion,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getFeeChargesOutstanding()));
+            assertEquals(penaltyPortion,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getPenaltyChargesDue()));
+            assertEquals(penaltyPortion,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getPenaltyChargesOutstanding()));
+            assertEquals(400.0d, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalDueForPeriod()));
+            assertEquals(400.0d,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalOutstandingForPeriod()));
             assertEquals(LocalDate.of(2023, 1, 16), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
 
             scheduleJobHelper.executeAndAwaitJob(jobName);
 
             loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
             assertEquals(5, loanDetails.getRepaymentSchedule().getPeriods().size());
-            assertEquals(feePortion, loanDetails.getRepaymentSchedule().getPeriods().get(2).getFeeChargesDue());
-            assertEquals(0.0d, loanDetails.getRepaymentSchedule().getPeriods().get(2).getFeeChargesOutstanding());
-            assertEquals(penaltyPortion, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPenaltyChargesDue());
-            assertEquals(0.0d, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPenaltyChargesOutstanding());
-            assertEquals(400.0d, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalDueForPeriod());
-            assertEquals(250.0d, loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalOutstandingForPeriod());
+            assertEquals(feePortion, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getFeeChargesDue()));
+            assertEquals(0.0d, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getFeeChargesOutstanding()));
+            assertEquals(penaltyPortion,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getPenaltyChargesDue()));
+            assertEquals(0.0d, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getPenaltyChargesOutstanding()));
+            assertEquals(400.0d, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalDueForPeriod()));
+            assertEquals(250.0d,
+                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalOutstandingForPeriod()));
             assertEquals(LocalDate.of(2023, 1, 16), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,

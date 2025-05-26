@@ -100,7 +100,7 @@ public class LoanLastRepaymentDetailsTest {
         assertTrue(loanDetails.getStatus().getActive());
         assertNotNull(loanDetails.getDelinquent());
         assertNotNull(loanDetails.getDelinquent().getLastRepaymentAmount());
-        assertEquals(loanDetails.getDelinquent().getLastRepaymentAmount(), 500);
+        assertEquals(500.00, Utils.getDoubleValue(loanDetails.getDelinquent().getLastRepaymentAmount()));
         assertNotNull(loanDetails.getDelinquent().getLastRepaymentDate());
         assertEquals(loanDetails.getDelinquent().getLastRepaymentDate(), lastRepaymentDate_1);
 
@@ -117,7 +117,7 @@ public class LoanLastRepaymentDetailsTest {
         assertTrue(loanDetails.getStatus().getClosedObligationsMet());
         assertNotNull(loanDetails.getDelinquent());
         assertNotNull(loanDetails.getDelinquent().getLastRepaymentAmount());
-        assertEquals(loanDetails.getDelinquent().getLastRepaymentAmount(), 500);
+        assertEquals(500.00, Utils.getDoubleValue(loanDetails.getDelinquent().getLastRepaymentAmount()));
         assertNotNull(loanDetails.getDelinquent().getLastRepaymentDate());
         assertEquals(loanDetails.getDelinquent().getLastRepaymentDate(), lastRepaymentDate_2);
 
@@ -155,7 +155,7 @@ public class LoanLastRepaymentDetailsTest {
         assertTrue(loanDetails.getStatus().getActive());
         assertNotNull(loanDetails.getDelinquent());
         assertNotNull(loanDetails.getDelinquent().getLastRepaymentAmount());
-        assertEquals(loanDetails.getDelinquent().getLastRepaymentAmount(), 500);
+        assertEquals(500.00, Utils.getDoubleValue(loanDetails.getDelinquent().getLastRepaymentAmount()));
         assertNotNull(loanDetails.getDelinquent().getLastRepaymentDate());
         assertEquals(loanDetails.getDelinquent().getLastRepaymentDate(), lastRepaymentDate_1);
 
@@ -171,7 +171,7 @@ public class LoanLastRepaymentDetailsTest {
         assertTrue(loanDetails.getStatus().getOverpaid());
         assertNotNull(loanDetails.getDelinquent());
         assertNotNull(loanDetails.getDelinquent().getLastRepaymentAmount());
-        assertEquals(loanDetails.getDelinquent().getLastRepaymentAmount(), 600);
+        assertEquals(600.00, Utils.getDoubleValue(loanDetails.getDelinquent().getLastRepaymentAmount()));
         assertNotNull(loanDetails.getDelinquent().getLastRepaymentDate());
         assertEquals(loanDetails.getDelinquent().getLastRepaymentDate(), lastRepaymentDate_2);
 

@@ -144,7 +144,7 @@ public class LoanTransactionReverseReplayTest extends BaseLoanIntegrationTest {
             GetLoansLoanIdResponse loansLoanIdResponse = loanTransactionHelper.getLoanDetails(loanExternalIdStr);
             int lastTransactionIndex = loansLoanIdResponse.getTransactions().size() - 1;
             assertTrue(loansLoanIdResponse.getTransactions().get(lastTransactionIndex).getType().getAccrual());
-            assertEquals(10.0, loansLoanIdResponse.getTransactions().get(lastTransactionIndex).getAmount());
+            assertEquals(10.0, Utils.getDoubleValue(loansLoanIdResponse.getTransactions().get(lastTransactionIndex).getAmount()));
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(false));
@@ -193,7 +193,7 @@ public class LoanTransactionReverseReplayTest extends BaseLoanIntegrationTest {
             GetLoansLoanIdResponse loansLoanIdResponse = loanTransactionHelper.getLoanDetails(loanExternalIdStr);
             int lastTransactionIndex = loansLoanIdResponse.getTransactions().size() - 1;
             assertTrue(loansLoanIdResponse.getTransactions().get(lastTransactionIndex).getType().getAccrual());
-            assertEquals(10.0, loansLoanIdResponse.getTransactions().get(lastTransactionIndex).getAmount());
+            assertEquals(10.0, Utils.getDoubleValue(loansLoanIdResponse.getTransactions().get(lastTransactionIndex).getAmount()));
             int lastPeriodIndex = loansLoanIdResponse.getRepaymentSchedule().getPeriods().size() - 1;
             assertEquals(LocalDate.of(2022, 10, 10),
                     loansLoanIdResponse.getRepaymentSchedule().getPeriods().get(lastPeriodIndex).getDueDate());
@@ -286,7 +286,7 @@ public class LoanTransactionReverseReplayTest extends BaseLoanIntegrationTest {
 
             GetLoansLoanIdResponse loansLoanIdResponse = loanTransactionHelper.getLoanDetails(loanExternalIdStr);
             int lastTransactionIndex = loansLoanIdResponse.getTransactions().size() - 1;
-            assertEquals(500.0, loansLoanIdResponse.getTransactions().get(lastTransactionIndex).getAmount());
+            assertEquals(500.0, Utils.getDoubleValue(loansLoanIdResponse.getTransactions().get(lastTransactionIndex).getAmount()));
 
             ArrayList<HashMap> journalEntriesForCBR = journalEntryHelper
                     .getJournalEntriesByTransactionId("L" + cbrTransactionResponse.getResourceId().toString());
@@ -327,7 +327,7 @@ public class LoanTransactionReverseReplayTest extends BaseLoanIntegrationTest {
             inlineLoanCOBHelper.executeInlineCOB(List.of(loanId.longValue()));
             loansLoanIdResponse = loanTransactionHelper.getLoanDetails(loanExternalIdStr);
             lastTransactionIndex = loansLoanIdResponse.getTransactions().size() - 1;
-            assertEquals(500.0, loansLoanIdResponse.getTransactions().get(lastTransactionIndex).getAmount());
+            assertEquals(500.0, Utils.getDoubleValue(loansLoanIdResponse.getTransactions().get(lastTransactionIndex).getAmount()));
 
             // replayed CBR transaction
             GetLoansLoanIdTransactions newCBRTransaction = loansLoanIdResponse.getTransactions().stream()

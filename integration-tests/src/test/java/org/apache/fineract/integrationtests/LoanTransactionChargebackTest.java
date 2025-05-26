@@ -255,7 +255,7 @@ public class LoanTransactionChargebackTest extends BaseLoanIntegrationTest {
                 if (period.getPeriod() != null && period.getPeriod() == 3) {
                     log.info("Period number {} for due date {} and totalDueForPeriod {}", period.getPeriod(), period.getDueDate(),
                             period.getTotalDueForPeriod());
-                    assertEquals(Double.valueOf("666.67"), period.getTotalDueForPeriod());
+                    assertEquals(Double.valueOf("666.67"), Utils.getDoubleValue(period.getTotalDueForPeriod()));
                 }
             }
 
@@ -356,7 +356,7 @@ public class LoanTransactionChargebackTest extends BaseLoanIntegrationTest {
                 if (period.getPeriod() != null && period.getPeriod() == 2) {
                     log.info("Period number {} for due date {} and totalDueForPeriod {}", period.getPeriod(), period.getDueDate(),
                             period.getTotalDueForPeriod());
-                    assertEquals(Double.valueOf("500.00"), period.getPrincipalDue());
+                    assertEquals(Double.valueOf("500.00"), Utils.getDoubleValue(period.getPrincipalDue()));
                 }
             }
 
@@ -385,7 +385,7 @@ public class LoanTransactionChargebackTest extends BaseLoanIntegrationTest {
                 if (period.getPeriod() != null && period.getPeriod() == 2) {
                     log.info("Period number {} for due date {} and totalDueForPeriod {}", period.getPeriod(), period.getDueDate(),
                             period.getTotalDueForPeriod());
-                    assertEquals(Double.valueOf("800.00"), period.getPrincipalDue());
+                    assertEquals(Double.valueOf("800.00"), Utils.getDoubleValue(period.getPrincipalDue()));
                 }
             }
 
