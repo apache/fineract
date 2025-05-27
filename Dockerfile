@@ -1,11 +1,16 @@
 FROM openjdk:21-jdk-slim
 
-WORKDIR /fineract
+# Install required tools
+RUN apt-get update && apt-get install -y git unzip curl
 
-RUN apt-get update && apt-get install -y git maven
+# Set working directory
+WORKDIR /app
 
-RUN git clone https://github.com/apache/fineract.git . \
-  && ./gradlew build -x test
+# Copy your forked repo files into the container
+COPY . .
+
+# Build the project (skip tests)
+RUN ./gradlew build -x test
 
 EXPOSE 8443
 
