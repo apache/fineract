@@ -20,6 +20,9 @@ COPY . .
 # Make gradlew executable
 RUN chmod +x gradlew || true
 
+# ✅ Force rebuild to break cache
+ENV FORCE_REBUILD=1
+
 # 🔧 Build the app
 RUN ./gradlew bootJar -x test
 
