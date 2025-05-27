@@ -398,6 +398,29 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
         eventCheckHelper.loanBalanceChangedEventCheck(loanId);
     }
 
+    @When("Customer undo {string}th capitalized income adjustment on {string}")
+    public void undoNthCapitalizedIncomeAdjustment(String nthItemStr, String transactionDate) throws IOException {
+        eventStore.reset();
+        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.body().getLoanId();
+        List<GetLoansLoanIdTransactions> transactions = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute().body()
+                .getTransactions();
+
+        int nthItem = Integer.parseInt(nthItemStr) - 1;
+        GetLoansLoanIdTransactions targetTransaction = transactions.stream()
+                .filter(t -> Boolean.TRUE.equals(t.getType().getCapitalizedIncomeAdjustment())).toList().get(nthItem);
+
+        PostLoansLoanIdTransactionsTransactionIdRequest capitalizedIncomeUndoRequest = LoanRequestFactory.defaultCapitalizedIncomeAdjustmentUndoRequest()
+                .transactionDate(transactionDate);
+
+        Response<PostLoansLoanIdTransactionsResponse> capitalizedIncomeUndoResponse = loanTransactionsApi
+                .adjustLoanTransaction(loanId, targetTransaction.getId(), capitalizedIncomeUndoRequest, "").execute();
+        ErrorHelper.checkSuccessfulApiCall(capitalizedIncomeUndoResponse);
+        testContext().set(TestContextKey.LOAN_CAPITALIZED_INCOME_ADJUSTMENT_UNDO_RESPONSE, capitalizedIncomeUndoResponse);
+        eventCheckHelper.checkTransactionWithLoanTransactionAdjustmentBizEvent(targetTransaction);
+        eventCheckHelper.loanBalanceChangedEventCheck(loanId);
+    }
+
     @When("Customer undo {string}th transaction made on {string}")
     public void undoNthTransaction(String nthItemStr, String transactionDate) throws IOException {
         eventStore.reset();

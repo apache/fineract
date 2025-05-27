@@ -175,6 +175,7 @@ public abstract class TestContextKey {
     public static final String CHARGE_FOR_LOAN_DISBURSEMENT_CHARGE_CREATE_RESPONSE = "ChargeForLoanDisbursementChargeCreateResponse";
     public static final String LOAN_RESPONSE = "loanResponse";
     public static final String LOAN_REPAYMENT_UNDO_RESPONSE = "loanRepaymentUndoResponse";
+    public static final String LOAN_CAPITALIZED_INCOME_ADJUSTMENT_UNDO_RESPONSE = "loanCapitalizedIncomeAdjustmentUndoResponse";
     public static final String LOAN_TRANSACTION_UNDO_RESPONSE = "loanTransactionUndoResponse";
     public static final String LOAN_CHARGEBACK_RESPONSE = "loanChargebackResponse";
     public static final String LOAN_CHARGE_ADJUSTMENT_RESPONSE = "loanChargeAdjustmentResponse";
