@@ -121,7 +121,12 @@ import org.apache.fineract.test.data.loanproduct.LoanProductResolver;
 import org.apache.fineract.test.data.paymenttype.DefaultPaymentType;
 import org.apache.fineract.test.data.paymenttype.PaymentTypeResolver;
 import org.apache.fineract.test.factory.LoanRequestFactory;
-import org.apache.fineract.test.helper.*;
+import org.apache.fineract.test.helper.BusinessDateHelper;
+import org.apache.fineract.test.helper.CodeHelper;
+import org.apache.fineract.test.helper.ErrorHelper;
+import org.apache.fineract.test.helper.ErrorMessageHelper;
+import org.apache.fineract.test.helper.ErrorResponse;
+import org.apache.fineract.test.helper.Utils;
 import org.apache.fineract.test.initializer.global.LoanProductGlobalInitializerStep;
 import org.apache.fineract.test.messaging.EventAssertion;
 import org.apache.fineract.test.messaging.config.EventProperties;
@@ -4170,9 +4175,6 @@ public class LoanStepDef extends AbstractStepDef {
         final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         final long loanId = loanResponse.body().getLoanId();
 
-        final DefaultPaymentType paymentType = DefaultPaymentType.valueOf(transactionPaymentType);
-        final Long paymentTypeValue = paymentTypeResolver.resolve(paymentType);
-
         // Get current business date to ensure we're not creating backdated transactions
         String currentBusinessDate = businessDateHelper.getBusinessDate();
         log.info("Current business date: {}, Transaction date: {}", currentBusinessDate, transactionDate);
@@ -4196,7 +4198,7 @@ public class LoanStepDef extends AbstractStepDef {
 
     @And("Admin adds invalid capitalized income adjustment with {string} payment type to the loan on {string} with {string} EUR transaction amount")
     public void adminAddsArbitraryCapitalizedIncomeAdjustmentToTheLoan(final String transactionPaymentType, final String transactionDate,
-                                                              final String amount) throws IOException {
+            final String amount) throws IOException {
         final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         final long loanId = loanResponse.body().getLoanId();
 
@@ -4216,6 +4218,6 @@ public class LoanStepDef extends AbstractStepDef {
                 transactionDate, amount, capitalizedIncomeTransaction.getId());
 
         testContext().set(TestContextKey.LOAN_CAPITALIZED_INCOME_ADJUSTMENT_RESPONSE, adjustmentResponse);
-        ErrorHelper.checkFailedApiCall(adjustmentResponse,400);
+        ErrorHelper.checkFailedApiCall(adjustmentResponse, 400);
     }
 }
