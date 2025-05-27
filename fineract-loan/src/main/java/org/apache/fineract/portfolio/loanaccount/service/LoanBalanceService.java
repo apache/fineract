@@ -95,23 +95,27 @@ public class LoanBalanceService {
                 }
                 loan.setTotalOverpaid(null);
             } else {
-                final Money overpaidBy = calculateTotalOverpayment(loan);
-                loan.setTotalOverpaid(null);
-                if (!overpaidBy.isLessThanZero()) {
-                    loan.setTotalOverpaid(overpaidBy.getAmountDefaultedToNullIfZero());
-                }
-
-                final Money recoveredAmount = loan.calculateTotalRecoveredPayments();
-                loan.setTotalRecovered(recoveredAmount.getAmountDefaultedToNullIfZero());
-
-                final Money principal = loan.getLoanRepaymentScheduleDetail().getPrincipal();
-                final Money capitalizedIncome = capitalizedIncomeBalanceService.calculateCapitalizedIncome(loan);
-                final Money capitalizedIncomeAdjustment = capitalizedIncomeBalanceService.calculateCapitalizedIncomeAdjustment(loan);
-                loan.getSummary().updateSummary(loan.getCurrency(), principal, loan.getRepaymentScheduleInstallments(),
-                        loan.getLoanCharges(), capitalizedIncome, capitalizedIncomeAdjustment);
-                loan.updateLoanOutstandingBalances();
+                refreshSummaryAndBalancesForDisbursedLoan(loan);
             }
         });
+    }
+
+    public void refreshSummaryAndBalancesForDisbursedLoan(final Loan loan) {
+        final Money overpaidBy = calculateTotalOverpayment(loan);
+        loan.setTotalOverpaid(null);
+        if (!overpaidBy.isLessThanZero()) {
+            loan.setTotalOverpaid(overpaidBy.getAmountDefaultedToNullIfZero());
+        }
+
+        final Money recoveredAmount = loan.calculateTotalRecoveredPayments();
+        loan.setTotalRecovered(recoveredAmount.getAmountDefaultedToNullIfZero());
+
+        final Money principal = loan.getLoanRepaymentScheduleDetail().getPrincipal();
+        final Money capitalizedIncome = capitalizedIncomeBalanceService.calculateCapitalizedIncome(loan);
+        final Money capitalizedIncomeAdjustment = capitalizedIncomeBalanceService.calculateCapitalizedIncomeAdjustment(loan);
+        loan.getSummary().updateSummary(loan.getCurrency(), principal, loan.getRepaymentScheduleInstallments(), loan.getLoanCharges(),
+                capitalizedIncome, capitalizedIncomeAdjustment);
+        loan.updateLoanOutstandingBalances();
     }
 
     public void updateLoanToLastDisbursalState(final Loan loan, final LoanDisbursementDetails disbursementDetail) {

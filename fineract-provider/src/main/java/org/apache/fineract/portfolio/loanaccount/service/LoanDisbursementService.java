@@ -187,13 +187,18 @@ public class LoanDisbursementService {
         final Integer installmentNumber = null;
         for (final LoanCharge charge : loan.getActiveCharges()) {
             LocalDate actualDisbursementDate = loan.getActualDisbursementDate(charge);
+
+            boolean isDisbursementCharge = charge.getCharge().getChargeTimeType().equals(ChargeTimeType.DISBURSEMENT.getValue())
+                    && disbursedOn.equals(actualDisbursementDate) && !charge.isWaived() && !charge.isFullyPaid();
+
+            boolean isTrancheDisbursementCharge = charge.getCharge().getChargeTimeType()
+                    .equals(ChargeTimeType.TRANCHE_DISBURSEMENT.getValue()) && disbursedOn.equals(actualDisbursementDate)
+                    && !charge.isWaived() && !charge.isFullyPaid();
+
             /*
              * create a Charge applied transaction if Up front Accrual, None or Cash based accounting is enabled
              */
-            if ((charge.getCharge().getChargeTimeType().equals(ChargeTimeType.DISBURSEMENT.getValue())
-                    && disbursedOn.equals(actualDisbursementDate) && !charge.isWaived() && !charge.isFullyPaid())
-                    || (charge.getCharge().getChargeTimeType().equals(ChargeTimeType.TRANCHE_DISBURSEMENT.getValue())
-                            && disbursedOn.equals(actualDisbursementDate) && !charge.isWaived() && !charge.isFullyPaid())) {
+            if (isDisbursementCharge || isTrancheDisbursementCharge) {
                 if (totalFeeChargesDueAtDisbursement.isGreaterThanZero() && !charge.getChargePaymentMode().isPaymentModeAccountTransfer()) {
                     charge.markAsFullyPaid();
                     // Add "Loan Charge Paid By" details to this transaction
@@ -201,9 +206,16 @@ public class LoanDisbursementService {
                             installmentNumber);
                     chargesPayment.getLoanChargesPaid().add(loanChargePaidBy);
                     disbursentMoney = disbursentMoney.plus(charge.amount());
+
+                    // For tranche disbursement charges, we need to ensure they don't affect the loan schedule
+                    if (isTrancheDisbursementCharge) {
+                        charge.setOutstandingAmount(BigDecimal.ZERO);
+                        charge.setPaid(true);
+                    }
                 }
             } else if (disbursedOn.equals(loan.getActualDisbursementDate())
                     && loan.isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct()) {
+                // Handle other charges with the standard approach
                 loanChargeService.handleChargeAppliedTransaction(loan, charge, disbursedOn);
             }
         }

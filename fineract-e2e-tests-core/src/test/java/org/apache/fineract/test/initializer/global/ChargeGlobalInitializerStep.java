@@ -55,6 +55,8 @@ public class ChargeGlobalInitializerStep implements FineractGlobalInitializerSte
     public static final String CHARGE_LOAN_INSTALLMENT_PERCENT_FEE = "Installment percentage fee";
     public static final String CHARGE_CLIENT_FIXED_FEE = "Fixed fee for Client";
     public static final String CHARGE_DISBURSEMENT_CHARGE = "Disbursement Charge";
+    public static final String CHARGE_LOAN_TRANCHE_DISBURSEMENT_CHARGE_AMOUNT = "Tranche Disbursement Charge Amount";
+    public static final String CHARGE_LOAN_TRANCHE_DISBURSEMENT_CHARGE_PERCENT = "Tranche Disbursement Charge Percent";
     public static final Double CHARGE_AMOUNT_FLAT = 25D;
     public static final Double CHARGE_AMOUNT_PERCENTAGE = 5D;
     public static final Double CHARGE_AMOUNT_DISBURSEMENT_PERCENTAGE = 1.5D;
@@ -155,6 +157,24 @@ public class ChargeGlobalInitializerStep implements FineractGlobalInitializerSte
                 CHARGE_TIME_TYPE_DISBURSEMENT, CHARGE_CALCULATION_TYPE_FLAT, CHARGE_AMOUNT_FLAT, true, false);
         Response<PostChargesResponse> responseDisbursementCharge = chargesApi.createCharge(requestDisbursementCharge).execute();
         TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_LOAN_DISBURSEMENT_CHARGE_CREATE_RESPONSE, responseDisbursementCharge);
+
+        // Loan - Tranche Disbursement Charge (Flat)
+        ChargeRequest requestTrancheDisbursementCharge = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN,
+                CHARGE_LOAN_TRANCHE_DISBURSEMENT_CHARGE_AMOUNT, CHARGE_TIME_TYPE_TRANCHE_DISBURSEMENT, CHARGE_CALCULATION_TYPE_FLAT, 10.0,
+                true, false);
+        Response<PostChargesResponse> responseTrancheDisbursementCharge = chargesApi.createCharge(requestTrancheDisbursementCharge)
+                .execute();
+        TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_LOAN_TRANCHE_DISBURSEMENT_CHARGE_FLAT_CREATE_RESPONSE,
+                responseTrancheDisbursementCharge);
+
+        // Loan - Tranche Disbursement Charge (%)
+        ChargeRequest requestTrancheDisbursementChargePercent = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN,
+                CHARGE_LOAN_TRANCHE_DISBURSEMENT_CHARGE_PERCENT, CHARGE_TIME_TYPE_TRANCHE_DISBURSEMENT,
+                CHARGE_CALCULATION_TYPE_PERCENTAGE_DISBURSEMENT_AMOUNT, 2.0, true, false);
+        Response<PostChargesResponse> responseTrancheDisbursementChargePercent = chargesApi
+                .createCharge(requestTrancheDisbursementChargePercent).execute();
+        TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_LOAN_TRANCHE_DISBURSEMENT_CHARGE_PERCENT_CREATE_RESPONSE,
+                responseTrancheDisbursementChargePercent);
     }
 
     public static ChargeRequest defaultChargesRequest(Enum<ChargeProductAppliesTo> appliesTo, String name, Integer chargeTimeType,

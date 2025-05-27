@@ -967,8 +967,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     }
 
     private boolean hasDisbursementTransaction() {
-        return this.loanTransactions.stream()
-                .anyMatch(loanTransaction -> loanTransaction.isDisbursement() && loanTransaction.isNotReversed());
+        return this.loanTransactions.stream().anyMatch(LoanTransaction::isDisbursement);
 
     }
 

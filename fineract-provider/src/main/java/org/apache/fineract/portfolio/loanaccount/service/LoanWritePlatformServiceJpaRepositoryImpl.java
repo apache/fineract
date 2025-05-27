@@ -3061,7 +3061,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
         existingReversedTransactionIds.addAll(loanTransactionRepository.findReversedTransactionIdsByLoan(loan));
         if (!statusEnum.hasStateOf(currentStatus)) {
-            this.loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSAL_UNDO, loan);
+            this.loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSAL_UNDO, loan); // tis will update the loan
+                                                                                            // status
             actualChanges.put(PARAM_STATUS, LoanEnumerations.status(loan.getLoanStatus()));
 
             final LocalDate actualDisbursementDate = loan.getDisbursementDate();
@@ -3082,7 +3083,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 }
             }
             final boolean isEmiAmountChanged = !loan.getLoanTermVariations().isEmpty();
-
             updateLoanToPreDisbursalState(loan);
             if (isScheduleRegenerateRequired || isDisbursedAmountChanged || isEmiAmountChanged
                     || loan.isInterestBearingAndInterestRecalculationEnabled()) {
@@ -3114,9 +3114,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     public void updateLoanToPreDisbursalState(final Loan loan) {
         loan.setActualDisbursementDate(null);
-
+        loan.setDisbursedBy(null);
         loan.setAccruedTill(null);
         reverseExistingTransactions(loan);
+        BigDecimal principalForScheduleRegeneration = loan.getApprovedPrincipal();
 
         for (final LoanCharge charge : loan.getActiveCharges()) {
             if (charge.isOverdueInstallmentCharge()) {
@@ -3125,19 +3126,24 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 charge.resetToOriginal(loan.loanCurrency());
             }
         }
+
+        loan.getLoanRepaymentScheduleDetail().setPrincipal(principalForScheduleRegeneration);
+
         final List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
         for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
             currentInstallment.resetDerivedComponents();
         }
+
         for (LoanTermVariations variations : loan.getLoanTermVariations()) {
             if (variations.getOnLoanStatus().equals(LoanStatus.ACTIVE.getValue())) {
                 variations.markAsInactive();
             }
         }
+
         final LoanRepaymentScheduleProcessingWrapper wrapper = new LoanRepaymentScheduleProcessingWrapper();
         wrapper.reprocess(loan.getCurrency(), loan.getDisbursementDate(), loan.getRepaymentScheduleInstallments(), loan.getActiveCharges());
 
-        loanBalanceService.updateLoanSummaryDerivedFields(loan);
+        loanBalanceService.refreshSummaryAndBalancesForDisbursedLoan(loan);
     }
 
     private void reverseExistingTransactions(final Loan loan) {
@@ -3410,6 +3416,31 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
      * Reverse only disbursement, accruals, and repayments at disbursal transactions
      */
     public void reverseExistingTransactionsTillLastDisbursal(final Loan loan, final LoanTransaction lastDisbursalTransaction) {
+        LoanCharge chargeToDeactivate = null;
+
+        for (final LoanCharge charge : loan.getCharges()) {
+            if (charge.isTrancheDisbursementCharge()) {
+                if (charge.getTrancheDisbursementCharge() != null
+                        && charge.getTrancheDisbursementCharge().getloanDisbursementDetails() != null) {
+
+                    LocalDate expectedDate = charge.getTrancheDisbursementCharge().getloanDisbursementDetails().expectedDisbursementDate();
+                    LocalDate actualDate = charge.getTrancheDisbursementCharge().getloanDisbursementDetails().actualDisbursementDate();
+
+                    if ((actualDate != null && actualDate.equals(lastDisbursalTransaction.getTransactionDate()))
+                            || (expectedDate != null && expectedDate.equals(lastDisbursalTransaction.getTransactionDate()))) {
+                        chargeToDeactivate = charge;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (chargeToDeactivate != null) {
+            chargeToDeactivate.resetPaidAmount(loan.getCurrency());
+            chargeToDeactivate.setActive(false);
+        }
+
+        // Now reverse all relevant transactions
         for (final LoanTransaction transaction : loan.getLoanTransactions()) {
             if (!DateUtils.isBefore(transaction.getTransactionDate(), lastDisbursalTransaction.getTransactionDate())
                     && transaction.getId().compareTo(lastDisbursalTransaction.getId()) >= 0
@@ -3418,6 +3449,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 transaction.reverse();
             }
         }
+
+        loanBalanceService.updateLoanSummaryDerivedFields(loan);
+
         if (loan.isAutoRepaymentForDownPaymentEnabled()) {
             // identify down-payment amount for the transaction
             BigDecimal disbursedAmountPercentageForDownPayment = loan.getLoanRepaymentScheduleDetail()
@@ -3439,10 +3473,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
     }
 
-    /**
-     * Behaviour added to comply with capability of previous mifos product to support easier transition to fineract
-     * platform.
-     */
     public void closeAsMarkedForReschedule(final Loan loan, final JsonCommand command, final Map<String, Object> changes) {
         final LocalDate rescheduledOn = command.localDateValueOfParameterNamed(TRANSACTION_DATE);
 

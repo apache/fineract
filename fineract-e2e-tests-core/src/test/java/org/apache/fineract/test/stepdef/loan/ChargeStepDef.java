@@ -48,4 +48,18 @@ public class ChargeStepDef extends AbstractStepDef {
                 .execute();
         ErrorHelper.checkSuccessfulApiCall(responseDisbursementCharge);
     }
+
+    @When("Admin updates charge {string} with {string} calculation type and {double} EUR amount")
+    public void updateChargeWithFlatAmount(String chargeType, String chargeCalculationType, double flatAmount) throws IOException {
+        ChargeRequest disbursementChargeUpdateRequest = new ChargeRequest();
+        ChargeCalculationType chargeProductTypeValue = ChargeCalculationType.valueOf(chargeCalculationType);
+        disbursementChargeUpdateRequest.chargeCalculationType(chargeProductTypeValue.value).amount(flatAmount).locale("en");
+
+        ChargeProductType chargeProductType = ChargeProductType.valueOf(chargeType);
+        Long chargeId = chargeProductType.getValue();
+
+        Response<PutChargesChargeIdResponse> responseDisbursementCharge = chargesApi.updateCharge(chargeId, disbursementChargeUpdateRequest)
+                .execute();
+        ErrorHelper.checkSuccessfulApiCall(responseDisbursementCharge);
+    }
 }

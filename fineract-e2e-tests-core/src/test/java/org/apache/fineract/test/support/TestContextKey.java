@@ -168,6 +168,7 @@ public abstract class TestContextKey {
     public static final String CHARGE_FOR_LOAN_NSF_FEE_CREATE_RESPONSE = "ChargeForLoanNsfFeeCreateResponse";
     public static final String CHARGE_FOR_LOAN_DISBURSEMENET_FEE_CREATE_RESPONSE = "ChargeForLoanDisbursementCreateResponse";
     public static final String CHARGE_FOR_LOAN_TRANCHE_DISBURSEMENT_PERCENT_CREATE_RESPONSE = "ChargeForLoanTrancheDisbursementPercentCreateResponse";
+    public static final String CHARGE_FOR_LOAN_TRANCHE_DISBURSEMENT_CHARGE_PERCENT_CREATE_RESPONSE = "ChargeForLoanTrancheDisbursementChargePercentCreateResponse";
     public static final String CHARGE_FOR_LOAN_INSTALLMENT_FEE_CREATE_RESPONSE = "ChargeForLoanInstallmentCreateResponse";
     public static final String CHARGE_FOR_CLIENT_FIXED_FEE_CREATE_RESPONSE = "ChargeForClientFixedFeeCreateResponse";
     public static final String CHARGE_FOR_LOAN_DISBURSEMENT_CHARGE_CREATE_RESPONSE = "ChargeForLoanDisbursementChargeCreateResponse";
@@ -200,6 +201,7 @@ public abstract class TestContextKey {
     public static final String TRANSACTION_IDEMPOTENCY_KEY = "transactionIdempotencyKey";
     public static final String LOAN_CHARGE_OFF_RESPONSE = "loanChargeOffResponse";
     public static final String LOAN_CHARGE_OFF_UNDO_RESPONSE = "loanChargeOffUndoResponse";
+    public static final String CHARGE_FOR_LOAN_TRANCHE_DISBURSEMENT_CHARGE_FLAT_CREATE_RESPONSE = "ChargeForLoanTrancheDisbursementChargeCreateResponse";
     public static final String CREATED_SIMPLE_USER_RESPONSE = "createdSimpleUserResponse";
     public static final String ASSET_EXTERNALIZATION_RESPONSE = "assetExternalizationResponse";
     public static final String ASSET_EXTERNALIZATION_TRANSFER_EXTERNAL_ID_USER_GENERATED = "assetExternalizationTransferExternalIdUserGenerated";
