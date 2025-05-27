@@ -7062,6 +7062,44 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
         }
     }
 
+    @Test
+    public void testLoanCharges_DISBURSEMENT_WITH_AMOUNT_AND_INTEREST() {
+
+        Calendar fourMonthsfromNowCalendar = Calendar.getInstance(Utils.getTimeZoneOfTenant());
+        fourMonthsfromNowCalendar.add(Calendar.MONTH, -4);
+        if (fourMonthsfromNowCalendar.get(Calendar.DAY_OF_MONTH) > 27) {
+            fourMonthsfromNowCalendar.add(Calendar.DAY_OF_MONTH, 4);
+        }
+
+        String fourMonthsfromNow = Utils.convertDateToURLFormat(fourMonthsfromNowCalendar);
+        final Integer clientID = ClientHelper.createClient(REQUEST_SPEC, RESPONSE_SPEC);
+        ClientHelper.verifyClientCreatedOnServer(REQUEST_SPEC, RESPONSE_SPEC, clientID);
+        final Integer loanProductID = createLoanProduct(false, NONE);
+
+        List<HashMap> charges = new ArrayList<>();
+        Integer disbursementFee = ChargesHelper.createCharges(REQUEST_SPEC, RESPONSE_SPEC,
+                ChargesHelper.getLoanDisbursementJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT_AND_INTEREST, "2"));
+        addCharges(charges, disbursementFee, "2", null);
+
+        List<HashMap> collaterals = new ArrayList<>();
+        final Integer loanID = applyForLoanApplicationWithPaymentStrategyAndPastMonth(clientID, loanProductID, charges, null, "1000",
+                LoanApplicationTestBuilder.DEFAULT_STRATEGY, fourMonthsfromNow, collaterals);
+        Assertions.assertNotNull(loanID);
+
+        LOAN_TRANSACTION_HELPER.approveLoan(fourMonthsfromNow, loanID);
+
+        String loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(REQUEST_SPEC, RESPONSE_SPEC, loanID);
+        LOAN_TRANSACTION_HELPER.disburseLoanWithNetDisbursalAmount(fourMonthsfromNow, loanID,
+                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
+
+        // check for disbursement fee: Principal 1,000 with 24% Annual Rate for 6 Months we have Total Interest of:
+        // 120.00
+        ArrayList<HashMap> loanSchedule = LOAN_TRANSACTION_HELPER.getLoanRepaymentSchedule(REQUEST_SPEC, RESPONSE_SPEC, loanID);
+        HashMap disbursementDetail = loanSchedule.get(0);
+        // Disbursement Fee: 2% of 1,120.00 = 22.40
+        validateNumberForEqual("22.40", String.valueOf(disbursementDetail.get("feeChargesDue")));
+    }
+
     private void checkLoanTransactionOrder(Long loanId, String... transactionUUIDs) {
         LOG.info("-------------------------------CHECK LOAN TRANSACTION ORDER-------------------------------------------");
         GetLoansLoanIdResponse loanDetailsResult = LOAN_TRANSACTION_HELPER.getLoanDetails(loanId);
