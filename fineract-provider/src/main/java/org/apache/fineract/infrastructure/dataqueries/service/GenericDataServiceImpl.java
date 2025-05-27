@@ -48,11 +48,11 @@ import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeader
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnValueData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableNotFoundException;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -134,14 +134,14 @@ public class GenericDataServiceImpl implements GenericDataService {
         return columnHeaders;
     }
 
-    @NotNull
+    @NonNull
     @Override
     public List<ResultsetRowData> fillResultsetRowData(final String sql, List<ResultsetColumnHeaderData> columnHeaders) {
         final SqlRowSet rs = jdbcTemplate.queryForRowSet(sql); // NOSONAR
         return fillResultsetRowData(rs, columnHeaders);
     }
 
-    @NotNull
+    @NonNull
     private static List<ResultsetRowData> fillResultsetRowData(SqlRowSet rs, List<ResultsetColumnHeaderData> columnHeaders) {
         final SqlRowSetMetaData rsmd = rs.getMetaData();
         final List<ResultsetRowData> resultsetDataRows = new ArrayList<>();

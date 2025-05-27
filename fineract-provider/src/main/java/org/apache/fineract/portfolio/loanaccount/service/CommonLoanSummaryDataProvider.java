@@ -97,7 +97,9 @@ public abstract class CommonLoanSummaryDataProvider implements LoanSummaryDataPr
         }
 
         return LoanSummaryData.builder().currency(defaultSummaryData.getCurrency())
-                .principalDisbursed(defaultSummaryData.getPrincipalDisbursed())
+                .principalDisbursed(defaultSummaryData.getPrincipalDisbursed()).totalPrincipal(defaultSummaryData.getTotalPrincipal())
+                .totalCapitalizedIncome(defaultSummaryData.getTotalCapitalizedIncome())
+                .totalCapitalizedIncomeAdjustment(defaultSummaryData.getTotalCapitalizedIncomeAdjustment())
                 .principalAdjustments(defaultSummaryData.getPrincipalAdjustments()).principalPaid(defaultSummaryData.getPrincipalPaid())
                 .principalWrittenOff(defaultSummaryData.getPrincipalWrittenOff())
                 .principalOutstanding(defaultSummaryData.getPrincipalOutstanding())

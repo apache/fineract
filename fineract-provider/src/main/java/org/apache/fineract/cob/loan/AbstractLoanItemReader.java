@@ -27,11 +27,11 @@ import org.apache.fineract.cob.exceptions.LoanReadException;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.AfterStep;
 import org.springframework.batch.item.ItemReader;
+import org.springframework.lang.NonNull;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -56,7 +56,7 @@ public abstract class AbstractLoanItemReader implements ItemReader<Loan> {
     }
 
     @AfterStep
-    public ExitStatus afterStep(@NotNull StepExecution stepExecution) {
+    public ExitStatus afterStep(@NonNull StepExecution stepExecution) {
         return ExitStatus.COMPLETED;
     }
 

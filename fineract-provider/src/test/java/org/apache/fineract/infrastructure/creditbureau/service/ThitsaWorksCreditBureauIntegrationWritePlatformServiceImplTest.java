@@ -64,7 +64,6 @@ import org.apache.fineract.infrastructure.creditbureau.domain.TokenRepositoryWra
 import org.apache.fineract.infrastructure.creditbureau.serialization.CreditBureauTokenCommandFromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -72,6 +71,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.springframework.lang.NonNull;
 
 @SuppressFBWarnings(value = "RV_EXCEPTION_NOT_THROWN", justification = "False positive")
 public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImplTest {
@@ -402,7 +402,7 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImplTest {
         assertNotNull(token);
     }
 
-    @NotNull
+    @NonNull
     private String createValidToken() throws JsonProcessingException {
         ObjectNode jsonResponse = mapper.createObjectNode();
         jsonResponse.put("access_token", "AccessToken");

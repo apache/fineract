@@ -36,9 +36,9 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -92,7 +92,7 @@ public class COBBusinessStepServiceImpl implements COBBusinessStepService {
         return item;
     }
 
-    @NotNull
+    @NonNull
     @Override
     public <T extends COBBusinessStep<S>, S extends AbstractPersistableCustom<Long>> Set<BusinessStepNameAndOrder> getCOBBusinessSteps(
             Class<T> businessStepClass, String cobJobName) {

@@ -16,33 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.portfolio.loanaccount.service;
 
-import java.util.List;
+import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.cob.domain.LockOwner;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.springframework.batch.item.Chunk;
-import org.springframework.batch.item.data.RepositoryItemWriter;
-import org.springframework.lang.NonNull;
+import org.apache.fineract.portfolio.loanaccount.repository.LoanCapitalizedIncomeBalanceRepository;
 
 @Slf4j
 @RequiredArgsConstructor
-public abstract class AbstractLoanItemWriter extends RepositoryItemWriter<Loan> {
+public class CapitalizedIncomeBalanceServiceImpl implements CapitalizedIncomeBalanceService {
 
-    private final LoanLockingService loanLockingService;
+    private final LoanCapitalizedIncomeBalanceRepository capitalizedIncomeBalanceRepository;
 
     @Override
-    public void write(@NonNull Chunk<? extends Loan> items) throws Exception {
-        if (!items.isEmpty()) {
-            super.write(items);
-            List<Long> loanIds = items.getItems().stream().map(AbstractPersistableCustom::getId).toList();
-            loanLockingService.deleteByLoanIdInAndLockOwner(loanIds, getLockOwner());
-        }
+    public Money calculateCapitalizedIncome(Loan loan) {
+        BigDecimal balance = capitalizedIncomeBalanceRepository.calculateCapitalizedIncome(loan.getId());
+        return Money.of(loan.getCurrency(), balance);
     }
 
-    protected abstract LockOwner getLockOwner();
-
+    @Override
+    public Money calculateCapitalizedIncomeAdjustment(Loan loan) {
+        BigDecimal balance = capitalizedIncomeBalanceRepository.calculateCapitalizedIncomeAdjustment(loan.getId());
+        return Money.of(loan.getCurrency(), balance);
+    }
 }

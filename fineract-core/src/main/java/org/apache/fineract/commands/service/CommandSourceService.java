@@ -39,7 +39,7 @@ import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRu
 import org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessUnderProcessingException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.lang.NonNull;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
@@ -63,19 +63,19 @@ public class CommandSourceService {
     private final ErrorHandler errorHandler;
     private final FromJsonHelper fromApiJsonHelper;
 
-    @NotNull
+    @NonNull
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.REPEATABLE_READ)
     public CommandSource saveInitialNewTransaction(CommandWrapper wrapper, JsonCommand jsonCommand, AppUser maker, String idempotencyKey) {
         return saveInitial(wrapper, jsonCommand, maker, idempotencyKey);
     }
 
-    @NotNull
+    @NonNull
     @Transactional(propagation = Propagation.REQUIRED)
     public CommandSource saveInitialSameTransaction(CommandWrapper wrapper, JsonCommand jsonCommand, AppUser maker, String idempotencyKey) {
         return saveInitial(wrapper, jsonCommand, maker, idempotencyKey);
     }
 
-    @NotNull
+    @NonNull
     private CommandSource saveInitial(CommandWrapper wrapper, JsonCommand jsonCommand, AppUser maker, String idempotencyKey) {
         try {
             CommandSource initialCommandSource = getInitialCommandSource(wrapper, jsonCommand, maker, idempotencyKey);
@@ -90,17 +90,17 @@ public class CommandSourceService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.REPEATABLE_READ)
-    public CommandSource saveResultNewTransaction(@NotNull CommandSource commandSource) {
+    public CommandSource saveResultNewTransaction(@NonNull CommandSource commandSource) {
         return saveResult(commandSource);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public CommandSource saveResultSameTransaction(@NotNull CommandSource commandSource) {
+    public CommandSource saveResultSameTransaction(@NonNull CommandSource commandSource) {
         return saveResult(commandSource);
     }
 
-    @NotNull
-    private CommandSource saveResult(@NotNull CommandSource commandSource) {
+    @NonNull
+    private CommandSource saveResult(@NonNull CommandSource commandSource) {
         return commandSourceRepository.saveAndFlush(commandSource);
     }
 
@@ -151,7 +151,7 @@ public class CommandSourceService {
         return result;
     }
 
-    private void sanitizeJson(@NotNull CommandSource commandSource, Set<String> sanitizeKeys) {
+    private void sanitizeJson(@NonNull CommandSource commandSource, Set<String> sanitizeKeys) {
         if (sanitizeKeys == null || sanitizeKeys.isEmpty()) {
             return;
         }

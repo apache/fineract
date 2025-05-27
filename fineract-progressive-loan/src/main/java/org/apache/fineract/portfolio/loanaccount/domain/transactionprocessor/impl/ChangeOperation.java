@@ -27,7 +27,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.lang.NonNull;
 
 @Getter
 public class ChangeOperation implements Comparable<ChangeOperation> {
@@ -116,7 +116,7 @@ public class ChangeOperation implements Comparable<ChangeOperation> {
 
     @Override
     @SuppressFBWarnings(value = "EQ_COMPARETO_USE_OBJECT_EQUALS", justification = "TODO: fix this! See: https://stackoverflow.com/questions/2609037/findbugs-how-to-solve-eq-compareto-use-object-equals")
-    public int compareTo(@NotNull ChangeOperation o) {
+    public int compareTo(@NonNull ChangeOperation o) {
         int datePortion = DateUtils.compareWithNullsLast(this.getEffectiveDate(), o.getEffectiveDate());
         if (datePortion == 0) {
             final boolean isAccrual = isAccrualActivity();

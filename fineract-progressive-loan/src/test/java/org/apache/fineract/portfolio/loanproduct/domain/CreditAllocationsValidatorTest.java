@@ -28,10 +28,10 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.springframework.lang.NonNull;
 
 public class CreditAllocationsValidatorTest {
 
@@ -104,13 +104,13 @@ public class CreditAllocationsValidatorTest {
                         ADVANCED_PAYMENT_ALLOCATION_STRATEGY));
     }
 
-    @NotNull
+    @NonNull
     private static List<Pair<Integer, AllocationType>> createCreditAllocationTypeList() {
         AtomicInteger i = new AtomicInteger(1);
         return EnumSet.allOf(AllocationType.class).stream().map(p -> Pair.of(i.getAndIncrement(), p)).toList();
     }
 
-    @NotNull
+    @NonNull
     private static LoanProductCreditAllocationRule createLoanProductCreditAllocationRule1() {
         LoanProductCreditAllocationRule lpcr1 = new LoanProductCreditAllocationRule();
         lpcr1.setTransactionType(CHARGEBACK);

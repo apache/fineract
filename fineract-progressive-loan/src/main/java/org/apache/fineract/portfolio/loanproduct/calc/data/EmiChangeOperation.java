@@ -31,7 +31,9 @@ public class EmiChangeOperation {
 
     public enum Action { //
         DISBURSEMENT, //
-        INTEREST_RATE_CHANGE //
+        INTEREST_RATE_CHANGE, //
+        CAPITALIZED_INCOME, //
+        ;
     }
 
     private final Action action;
@@ -48,8 +50,12 @@ public class EmiChangeOperation {
         return new EmiChangeOperation(EmiChangeOperation.Action.INTEREST_RATE_CHANGE, newInterestSubmittedOnDate, null, newInterestRate);
     }
 
+    public static EmiChangeOperation capitalizedIncome(final LocalDate transactionDueDate, final Money transactionAmount) {
+        return new EmiChangeOperation(Action.CAPITALIZED_INCOME, transactionDueDate, transactionAmount, null);
+    }
+
     public EmiChangeOperation withZeroAmount() {
-        if (action == Action.DISBURSEMENT) {
+        if (action == Action.DISBURSEMENT || action == Action.CAPITALIZED_INCOME) {
             return new EmiChangeOperation(action, submittedOnDate, amount.zero(), null);
         }
         return null;

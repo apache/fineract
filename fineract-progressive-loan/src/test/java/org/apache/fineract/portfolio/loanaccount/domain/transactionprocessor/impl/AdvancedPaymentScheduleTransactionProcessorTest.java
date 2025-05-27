@@ -82,7 +82,6 @@ import org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationTransact
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTransactionType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -94,6 +93,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.lang.NonNull;
 
 @ExtendWith(MockitoExtension.class)
 class AdvancedPaymentScheduleTransactionProcessorTest {
@@ -524,7 +524,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         return installment;
     }
 
-    @NotNull
+    @NonNull
     private LoanCreditAllocationRule createMockCreditAllocationRule(AllocationType... allocationTypes) {
         LoanCreditAllocationRule mockCreditAllocationRule = mock(LoanCreditAllocationRule.class);
         lenient().when(mockCreditAllocationRule.getTransactionType()).thenReturn(CreditAllocationTransactionType.CHARGEBACK);

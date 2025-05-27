@@ -16,21 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.note.service;
+package org.apache.fineract.infrastructure.core.persistence;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.portfolio.client.domain.Client;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.FlushModeType;
+import jakarta.persistence.PersistenceContext;
+import org.springframework.stereotype.Component;
 
-public interface NoteWritePlatformService {
+@Component
+public class FlushModeHandler {
 
-    CommandProcessingResult createNote(JsonCommand command);
+    @PersistenceContext
+    private EntityManager entityManager;
 
-    void createLoanTransactionNote(Long loanTransactionId, String note);
-
-    CommandProcessingResult updateNote(JsonCommand command);
-
-    CommandProcessingResult deleteNote(JsonCommand command);
-
-    void createAndPersistClientNote(Client client, JsonCommand command);
+    public void withFlushMode(FlushModeType flushMode, Runnable runnable) {
+        FlushModeType original = entityManager.getFlushMode();
+        try {
+            entityManager.setFlushMode(flushMode);
+            runnable.run();
+        } finally {
+            entityManager.setFlushMode(original);
+        }
+    }
 }

@@ -60,7 +60,6 @@ import org.apache.fineract.infrastructure.jobs.exception.JobNotFoundException;
 import org.apache.fineract.infrastructure.jobs.service.InlineExecutorService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.springbatch.SpringBatchJobConstants;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
@@ -72,6 +71,7 @@ import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.context.annotation.Conditional;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
@@ -221,7 +221,7 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
         transactionTemplate.execute(new TransactionCallbackWithoutResult() {
 
             @Override
-            protected void doInTransactionWithoutResult(@NotNull TransactionStatus status) {
+            protected void doInTransactionWithoutResult(@NonNull TransactionStatus status) {
                 List<LoanAccountLock> loanAccountLocks = getLoanAccountLocks(loanIds, businessDate);
                 loanAccountLocks.forEach(loanAccountLock -> {
                     try {

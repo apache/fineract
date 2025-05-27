@@ -226,6 +226,17 @@ public final class RepaymentPeriod {
     }
 
     /**
+     * Sum of capitalized income principals
+     *
+     * @return
+     */
+    public Money getCapitalizedIncomePrincipal() {
+        return MathUtil.negativeToZero(interestPeriods.stream() //
+                .map(InterestPeriod::getCapitalizedIncomePrincipal) //
+                .reduce(getZero(mc), (value, previous) -> value.plus(previous, mc)), mc); //
+    }
+
+    /**
      * Gives back due principal + credited principal or paid principal
      *
      * @return
@@ -278,6 +289,7 @@ public final class RepaymentPeriod {
                 InterestPeriod lastInterestPeriod = getInterestPeriods().get(getInterestPeriods().size() - 1);
                 Money calculatedOutStandingLoanBalance = lastInterestPeriod.getOutstandingLoanBalance() //
                         .plus(lastInterestPeriod.getBalanceCorrectionAmount(), mc) //
+                        .plus(lastInterestPeriod.getCapitalizedIncomePrincipal(), mc) //
                         .plus(lastInterestPeriod.getDisbursementAmount(), mc) //
                         .minus(getDuePrincipal(), mc)//
                         .plus(getPaidPrincipal(), mc);//
@@ -305,7 +317,10 @@ public final class RepaymentPeriod {
         Money totalDisbursedAmount = getInterestPeriods().stream() //
                 .map(InterestPeriod::getDisbursementAmount) //
                 .reduce(getZero(mc), (m1, m2) -> m1.plus(m2, mc)); //
-        return initialBalance.add(totalDisbursedAmount, mc);
+        Money totalCapitalizedIncomeAmount = getInterestPeriods().stream() //
+                .map(InterestPeriod::getCapitalizedIncomePrincipal) //
+                .reduce(getZero(mc), (m1, m2) -> m1.plus(m2, mc)); //
+        return initialBalance.add(totalDisbursedAmount, mc).add(totalCapitalizedIncomeAmount, mc);
     }
 
     private Money getZero(MathContext mc) {

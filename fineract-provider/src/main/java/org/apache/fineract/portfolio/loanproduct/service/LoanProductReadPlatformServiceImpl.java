@@ -67,10 +67,10 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedInterestRef
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundException;
 import org.apache.fineract.portfolio.rate.data.RateData;
 import org.apache.fineract.portfolio.rate.service.RateReadService;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.lang.NonNull;
 
 @RequiredArgsConstructor
 public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatformService {
@@ -310,7 +310,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         }
 
         @Override
-        public LoanProductData mapRow(@NotNull final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public LoanProductData mapRow(@NonNull final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
             final Long id = JdbcSupport.getLong(rs, "id");
             final String name = rs.getString("name");
@@ -832,7 +832,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         }
 
         @Override
-        public LoanProductData mapRow(@NotNull final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public LoanProductData mapRow(@NonNull final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
             final Long id = JdbcSupport.getLong(rs, "id");
             final String name = rs.getString("name");
