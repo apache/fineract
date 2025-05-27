@@ -20,14 +20,14 @@ COPY . .
 # Make gradlew executable
 RUN chmod +x gradlew || true
 
-# ✅ Force rebuild to break cache
+# ✅ Force rebuild to bypass Docker cache
 ENV FORCE_REBUILD=1
 
-# 🔧 Build the app
+# 🔧 Build the app (this creates the JAR in fineract-provider module)
 RUN ./gradlew bootJar -x test
 
 # Expose port
 EXPOSE 8443
 
-# ✅ Run the app
-CMD ["java", "-jar", "build/libs/fineract-provider.jar"]
+# ✅ Run the app (corrected JAR path)
+CMD ["java", "-jar", "fineract-provider/build/libs/fineract-provider.jar"]
