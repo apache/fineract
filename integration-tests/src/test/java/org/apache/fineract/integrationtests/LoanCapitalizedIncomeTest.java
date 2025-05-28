@@ -21,6 +21,7 @@ package org.apache.fineract.integrationtests;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
@@ -30,6 +31,7 @@ import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
+import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.BusinessStepHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -683,4 +685,76 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
         });
     }
 
+
+    @Test
+    public void testOverpaymentAmountWhenCapitalizedIncomeTransactionsAreReversed() {
+        final AtomicReference<Long> loanIdRef = new AtomicReference<>();
+        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        runAt("01 March 2023", () -> {
+            final PostLoanProductsResponse loanProductsResponse = loanProductHelper
+                    .createLoanProduct(create4IProgressiveWithCapitalizedIncome());
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applyLP2ProgressiveLoanRequest(client.getClientId(),
+                    loanProductsResponse.getResourceId(), "01 March 2023", 10000.00, 12.00, 4, null));
+            Long loanId = postLoansResponse.getLoanId();
+            loanIdRef.set(loanId);
+
+            loanTransactionHelper.approveLoan(loanId, approveLoanRequest(10000.00, "01 March 2023"));
+            disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 March 2023");
+
+            loanTransactionHelper.addCapitalizedIncome(loanId, "01 March 2023", 500.00);
+            PostLoansLoanIdTransactionsResponse transactionsResponse = loanTransactionHelper.addCapitalizedIncome(loanId, "01 March 2023",
+                    500.00);
+
+            loanTransactionHelper.makeLoanRepayment(loanId, "Repayment", "1 March 2023", 2000.00);
+            loanTransactionHelper.reverseLoanTransaction(loanId, transactionsResponse.getResourceId(), "1 March 2023");
+        });
+
+        BigDecimal zero = BigDecimal.ZERO;
+        BigDecimal thousand = BigDecimal.valueOf(1000.0);
+        BigDecimal fiveHundred = BigDecimal.valueOf(500.0);
+        BigDecimal thousandFiveHundred = BigDecimal.valueOf(1500.0);
+
+        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanIdRef.get());
+        Assertions.assertEquals(thousand, loanDetails.getPrincipal().setScale(1, RoundingMode.HALF_UP));
+        Assertions.assertEquals(thousand, loanDetails.getSummary().getPrincipalDisbursed().setScale(1, RoundingMode.HALF_UP));
+        Assertions.assertEquals(fiveHundred, loanDetails.getSummary().getTotalCapitalizedIncome().setScale(1, RoundingMode.HALF_UP));
+        Assertions.assertEquals(thousandFiveHundred, loanDetails.getSummary().getTotalPrincipal().setScale(1, RoundingMode.HALF_UP));
+        Assertions.assertEquals(zero, loanDetails.getSummary().getPrincipalOutstanding().setScale(0, RoundingMode.HALF_UP));
+
+        Assertions.assertEquals(fiveHundred, loanDetails.getTotalOverpaid().setScale(1, RoundingMode.HALF_UP));
+    }
+
+    @Test
+    public void testOverpaymentAmountCorrectlyCalculatedWhenBackdatedRepaymentIsMade() {
+        final AtomicReference<Long> loanIdRef = new AtomicReference<>();
+        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        runAt("01 March 2023", () -> {
+            final PostLoanProductsResponse loanProductsResponse = loanProductHelper
+                    .createLoanProduct(create4IProgressiveWithCapitalizedIncome());
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applyLP2ProgressiveLoanRequest(client.getClientId(),
+                    loanProductsResponse.getResourceId(), "01 March 2023", 10000.00, 12.00, 4, null));
+            Long loanId = postLoansResponse.getLoanId();
+            loanIdRef.set(loanId);
+
+            loanTransactionHelper.approveLoan(loanId, approveLoanRequest(10000.00, "01 March 2023"));
+            disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 March 2023");
+        });
+
+        runAt("15 March 2023", () -> {
+            loanTransactionHelper.addCapitalizedIncome(loanIdRef.get(), "15 March 2023", 500.00);
+            loanTransactionHelper.makeLoanRepayment(loanIdRef.get(), "Repayment", "1 March 2023", 1500.00);
+        });
+
+        BigDecimal zero = BigDecimal.ZERO;
+        BigDecimal thousand = BigDecimal.valueOf(1000.0);
+        BigDecimal fiveHundred = BigDecimal.valueOf(500.0);
+        BigDecimal thousandFiveHundred = BigDecimal.valueOf(1500.0);
+
+        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanIdRef.get());
+        Assertions.assertEquals(thousand, loanDetails.getPrincipal().setScale(1, RoundingMode.HALF_UP));
+        Assertions.assertEquals(thousand, loanDetails.getSummary().getPrincipalDisbursed().setScale(1, RoundingMode.HALF_UP));
+        Assertions.assertEquals(fiveHundred, loanDetails.getSummary().getTotalCapitalizedIncome().setScale(1, RoundingMode.HALF_UP));
+        Assertions.assertEquals(thousandFiveHundred, loanDetails.getSummary().getTotalPrincipal().setScale(1, RoundingMode.HALF_UP));
+        Assertions.assertEquals(zero, loanDetails.getSummary().getPrincipalOutstanding().setScale(0, RoundingMode.HALF_UP));
+    }
 }
