@@ -206,16 +206,9 @@ public class LoanDisbursementService {
                             installmentNumber);
                     chargesPayment.getLoanChargesPaid().add(loanChargePaidBy);
                     disbursentMoney = disbursentMoney.plus(charge.amount());
-
-                    // For tranche disbursement charges, we need to ensure they don't affect the loan schedule
-                    if (isTrancheDisbursementCharge) {
-                        charge.setOutstandingAmount(BigDecimal.ZERO);
-                        charge.setPaid(true);
-                    }
                 }
             } else if (disbursedOn.equals(loan.getActualDisbursementDate())
                     && loan.isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct()) {
-                // Handle other charges with the standard approach
                 loanChargeService.handleChargeAppliedTransaction(loan, charge, disbursedOn);
             }
         }

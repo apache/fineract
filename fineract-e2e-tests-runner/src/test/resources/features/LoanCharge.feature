@@ -5390,21 +5390,22 @@ Feature: LoanCharge
       | INCOME | 404000 | Interest Income         |     | 1.1 |
     # Undo disbursement
     When Admin successfully undo disbursal
-    Then Loan status has changed to "Active"
+    Then Loan status has changed to "Approved"
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 01 January 2024  |           | 100.0           |               |          | 5.0  |           | 5.0   |      |            |      | 5.0         |
       | 1  | 31   | 01 February 2024 |           | 83.57           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
       | 2  | 29   | 01 March 2024    |           | 67.05           | 16.52         | 0.49     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 3  | 31   | 01 April 2024    |           | 50.43           | 16.62         | 0.39     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 4  | 30   | 01 May 2024      |           | 33.71           | 16.72         | 0.29     | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 5  | 31   | 01 June 2024     |           | 16.9            | 16.81         | 0.2      | 0.0  | 0.0       | 17.01 | 0.0  | 0.0        | 0.0  | 17.01       |
-      | 6  | 30   | 01 July 2024     |           | 0.0             | 16.9          | 0.1      | 0.0  | 0.0       | 17.0  | 0.0  | 0.0        | 0.0  | 17.0        |
+      |    |      | 03 March 2024    |           | 100.0           |               |          | 5.0  |           | 5.0   |      |            |      | 5.0         |
+      | 3  | 31   | 01 April 2024    |           | 125.62          | 41.43         | 0.94     | 0.0  | 0.0       | 42.37 | 0.0  | 0.0        | 0.0  | 42.37       |
+      | 4  | 30   | 01 May 2024      |           | 83.98           | 41.64         | 0.73     | 0.0  | 0.0       | 42.37 | 0.0  | 0.0        | 0.0  | 42.37       |
+      | 5  | 31   | 01 June 2024     |           | 42.1            | 41.88         | 0.49     | 0.0  | 0.0       | 42.37 | 0.0  | 0.0        | 0.0  | 42.37       |
+      | 6  | 30   | 01 July 2024     |           | 0.0             | 42.1          | 0.25     | 0.0  | 0.0       | 42.35 | 0.0  | 0.0        | 0.0  | 42.35       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
-      | 100.0         | 2.05     | 5.0  | 0.0       | 107.05 | 0.0  | 0.0        | 0.0  | 107.05      |
+      | 200.0         | 3.48     | 10.0 | 0.0       | 213.48 | 0.0  | 0.0        | 0.0  | 213.48      |
+    Then Loan Transactions tab has none transaction
 
-  @Skip
   @TestRailId:C3656
   Scenario: Disbursement charge - flat and accrual based accounting - undo last disbursement
     When Admin sets the business date to "01 January 2024"
@@ -5537,10 +5538,9 @@ Feature: LoanCharge
       | INCOME | 404000       | Interest Income         |       | 1.1    |
     # Undo last disbursement
     When Admin successfully undo last disbursal
-    Then Loan status has changed to "Active"
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
-      |    |      | 01 January 2024  |                  | 100.0           |               |          | 5.0  |           | 5.0   | 5.0   |            |      |             |
+      |    |      | 01 January 2024  |                  | 100.0           |               |          | 10.0 |           | 10.0  | 10.0  |            |      |             |
       | 1  | 31   | 01 February 2024 | 01 February 2024 | 83.57           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 17.01 | 0.0        | 0.0  | 0.0         |
       | 2  | 29   | 01 March 2024    | 01 March 2024    | 67.05           | 16.52         | 0.49     | 0.0  | 0.0       | 17.01 | 17.01 | 0.0        | 0.0  | 0.0         |
       | 3  | 31   | 01 April 2024    |                  | 50.43           | 16.62         | 0.39     | 0.0  | 0.0       | 17.01 | 0.0   | 0.0        | 0.0  | 17.01       |
@@ -5549,7 +5549,7 @@ Feature: LoanCharge
       | 6  | 30   | 01 July 2024     |                  | 0.0             | 16.9          | 0.1      | 0.0  | 0.0       | 17.0  | 0.0   | 0.0        | 0.0  | 17.0        |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
-      | 100.0         | 2.05     | 5.0  | 0.0       | 107.05 | 39.02 | 0.0        | 0.0  | 68.03       |
+      | 100.0         | 2.05     | 10.0  | 0.0      | 112.05 | 44.02 | 0.0        | 0.0  | 68.03       |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type                    | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement                        | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
