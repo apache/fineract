@@ -139,7 +139,7 @@ public class FixedDepositTransactionWorkbookPopulator extends AbstractWorkbookPo
         DataValidationConstraint paymentTypeConstraint = validationHelper.createFormulaListConstraint("PaymentTypes");
         DataValidationConstraint transactionDateConstraint = validationHelper.createDateConstraint(
                 DataValidationConstraint.OperatorType.BETWEEN,
-                "=DATEVALUE(VLOOKUP($C1,$R$2:$T$" + (savingsAccounts.size() + 1) + ",4,FALSE))", "=TODAY()", dateFormat);
+                "=DATEVALUE(VLOOKUP($C1,$R$2:$U$" + (savingsAccounts.size() + 1) + ",4,FALSE))", "=TODAY()", dateFormat);
 
         DataValidation officeValidation = validationHelper.createValidation(officeNameConstraint, officeNameRange);
         DataValidation clientValidation = validationHelper.createValidation(clientNameConstraint, clientNameRange);

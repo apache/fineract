@@ -139,7 +139,7 @@ public class SavingsTransactionsWorkbookPopulator extends AbstractWorkbookPopula
         DataValidationConstraint paymentTypeConstraint = validationHelper.createFormulaListConstraint("PaymentTypes");
         DataValidationConstraint transactionDateConstraint = validationHelper.createDateConstraint(
                 DataValidationConstraint.OperatorType.BETWEEN,
-                "=DATEVALUE(VLOOKUP($C1,$R$2:$T$" + (savingsAccounts.size() + 1) + ",4,FALSE))", "=TODAY()", dateFormat);
+                "=DATEVALUE(VLOOKUP($C1,$R$2:$U$" + (savingsAccounts.size() + 1) + ",4,FALSE))", "=TODAY()", dateFormat);
 
         DataValidation officeValidation = validationHelper.createValidation(officeNameConstraint, officeNameRange);
         DataValidation clientValidation = validationHelper.createValidation(clientNameConstraint, clientNameRange);
@@ -234,13 +234,12 @@ public class SavingsTransactionsWorkbookPopulator extends AbstractWorkbookPopula
             if (savingsAccount.getMinRequiredOpeningBalance() != null) {
                 writeBigDecimal(TransactionConstants.LOOKUP_OPENING_BALANCE_COL, row, savingsAccount.getMinRequiredOpeningBalance());
             }
-            if (savingsAccount.getActivatedOnDate() != null) {
-                writeDate(TransactionConstants.LOOKUP_SAVINGS_ACTIVATION_DATE_COL, row,
-                        "" + savingsAccount.getTimeline().getActivatedOnDate().getDayOfMonth() + "/"
-                                + savingsAccount.getTimeline().getActivatedOnDate().getMonthValue() + "/"
-                                + savingsAccount.getTimeline().getActivatedOnDate().getYear(),
-                        dateCellStyle, dateFormat);
-            }
+            writeDate(TransactionConstants.LOOKUP_SAVINGS_ACTIVATION_DATE_COL, row,
+                    "" + savingsAccount.getTimeline().getActivatedOnDate().getDayOfMonth() + "/"
+                            + savingsAccount.getTimeline().getActivatedOnDate().getMonthValue() + "/"
+                            + savingsAccount.getTimeline().getActivatedOnDate().getYear(),
+                    dateCellStyle, dateFormat);
+
         }
     }
 
