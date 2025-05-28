@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.domain;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -41,7 +42,9 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class LoanSummaryBalancesRepository {
 
-    private final EntityManager entityManager;
+    @PersistenceContext
+    private EntityManager entityManager;
+
     private final CriteriaQueryFactory criteriaQueryFactory;
 
     public Collection<LoanTransactionBalanceWithLoanId> retrieveLoanSummaryBalancesByTransactionType(final Long loanId,

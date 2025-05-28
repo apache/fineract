@@ -66,6 +66,7 @@ class BatchApiServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        batchApiService.setEntityManager(entityManager);
         request = new BatchRequest();
         request.setRequestId(1L);
         request.setMethod("POST");

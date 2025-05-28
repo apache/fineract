@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
 public class CustomExternalEventConfigurationRepositoryImpl implements CustomExternalEventConfigurationRepository {
 
     @PersistenceContext
-    private final EntityManager entityManager;
+    private EntityManager entityManager;
 
     @Override
     public ExternalEventConfiguration findExternalEventConfigurationByTypeWithNotFoundDetection(String externalEventType) {

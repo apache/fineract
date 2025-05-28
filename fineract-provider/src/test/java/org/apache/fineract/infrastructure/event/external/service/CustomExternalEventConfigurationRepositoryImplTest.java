@@ -28,9 +28,9 @@ import jakarta.persistence.EntityManager;
 import org.apache.fineract.infrastructure.event.external.exception.ExternalEventConfigurationNotFoundException;
 import org.apache.fineract.infrastructure.event.external.repository.CustomExternalEventConfigurationRepositoryImpl;
 import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventConfiguration;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -41,12 +41,8 @@ public class CustomExternalEventConfigurationRepositoryImplTest {
 
     @Mock
     private EntityManager entityManager;
+    @InjectMocks
     private CustomExternalEventConfigurationRepositoryImpl underTest;
-
-    @BeforeEach
-    public void setUp() {
-        underTest = new CustomExternalEventConfigurationRepositoryImpl(entityManager);
-    }
 
     @Test
     public void givenConfigurationExistsThenReturnConfiguration() {

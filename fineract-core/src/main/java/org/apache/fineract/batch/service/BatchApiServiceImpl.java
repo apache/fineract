@@ -90,8 +90,7 @@ public class BatchApiServiceImpl implements BatchApiService {
 
     private final List<BatchRequestPreprocessor> batchPreprocessors;
 
-    @PersistenceContext
-    private final EntityManager entityManager;
+    private EntityManager entityManager;
 
     /**
      * Run each request root step in a separated transaction
@@ -379,5 +378,10 @@ public class BatchApiServiceImpl implements BatchApiService {
     private BatchResponse buildErrorResponse(Long requestId, Integer statusCode, String body, Set<Header> headers) {
         return new BatchResponse().setRequestId(requestId).setStatusCode(statusCode == null ? SC_INTERNAL_SERVER_ERROR : statusCode)
                 .setBody(body == null ? "Request with id " + requestId + " was erroneous!" : body).setHeaders(headers);
+    }
+
+    @PersistenceContext
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 }
