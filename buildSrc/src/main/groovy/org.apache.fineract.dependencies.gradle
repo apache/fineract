@@ -267,7 +267,7 @@ dependencyManagement {
 
         dependency 'com.lmax:disruptor:3.4.4'
 
-        dependency 'com.ibm.icu:icu4j:76.1'
+        dependency 'com.ibm.icu:icu4j:77.1'
         dependency 'org.yakworks:spring-icu4j:0.4.2'
     }
 }
