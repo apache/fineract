@@ -265,7 +265,7 @@ dependencyManagement {
         dependency 'org.springframework.restdocs:spring-restdocs-webtestclient:3.0.3'
         dependency 'org.springframework.restdocs:spring-restdocs-restassured:3.0.3'
 
-        dependency 'com.lmax:disruptor:3.4.4'
+        dependency 'com.lmax:disruptor:4.0.0'
 
         dependency 'com.ibm.icu:icu4j:76.1'
         dependency 'org.yakworks:spring-icu4j:0.4.2'
