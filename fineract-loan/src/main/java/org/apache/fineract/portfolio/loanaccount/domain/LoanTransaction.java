@@ -28,6 +28,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.Version;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -57,6 +58,9 @@ import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 @Entity
 @Table(name = "m_loan_transaction", uniqueConstraints = { @UniqueConstraint(columnNames = { "external_id" }, name = "external_id_UNIQUE") })
 public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long> {
+
+    @Version
+    private Long version;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id", nullable = false)
