@@ -20,12 +20,21 @@ package org.apache.fineract.commands.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.github.resilience4j.retry.Retry;
+import io.github.resilience4j.retry.RetryConfig;
 import jakarta.servlet.http.HttpServletRequest;
+import java.time.Duration;
 import java.util.Map;
+import org.apache.fineract.batch.exception.ErrorInfo;
+import org.apache.fineract.commands.configuration.RetryConfigurationAssembler;
 import org.apache.fineract.commands.domain.CommandProcessingResultType;
 import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -39,6 +48,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -70,6 +80,9 @@ public class SynchronousCommandProcessingServiceTest {
     @Mock
     private CommandSourceService commandSourceService;
 
+    @Mock
+    private RetryConfigurationAssembler retryConfigurationAssembler;
+
     @Spy
     private FineractRequestContextHolder fineractRequestContextHolder;
 
@@ -83,6 +96,71 @@ public class SynchronousCommandProcessingServiceTest {
     public void setup() {
         MockitoAnnotations.openMocks(this);
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+        when(retryConfigurationAssembler.getRetryConfigurationForExecuteCommand())
+                .thenReturn(Retry.of("IDENTIFIER", RetryConfig.custom().maxAttempts(3).failAfterMaxAttempts(true)
+                        .waitDuration(Duration.ofMillis(1)).retryOnException(e -> e instanceof RetryException).build()));
+        ErrorInfo errorInfo = mock(ErrorInfo.class);
+        when(errorInfo.getMessage()).thenReturn("Failed");
+        when(errorInfo.getStatusCode()).thenReturn(500);
+        when(commandSourceService.generateErrorInfo(any())).thenReturn(errorInfo);
+    }
+
+    @AfterEach
+    public void teardown() {
+        reset(context);
+        reset(applicationContext);
+        reset(toApiJsonSerializer);
+        reset(toApiResultJsonSerializer);
+        reset(configurationDomainService);
+        reset(commandHandlerProvider);
+        reset(idempotencyKeyResolver);
+        reset(commandSourceService);
+        reset(retryConfigurationAssembler);
+    }
+
+    @Test
+    public void testExecuteCommandSuccessAfter2Fails() {
+        CommandWrapper commandWrapper = Mockito.mock(CommandWrapper.class);
+        when(commandWrapper.isDatatableResource()).thenReturn(false);
+        when(commandWrapper.isNoteResource()).thenReturn(false);
+        when(commandWrapper.isSurveyResource()).thenReturn(false);
+        when(commandWrapper.isLoanDisburseDetailResource()).thenReturn(false);
+
+        long commandId = 1L;
+        JsonCommand jsonCommand = Mockito.mock(JsonCommand.class);
+        when(jsonCommand.commandId()).thenReturn(commandId);
+
+        NewCommandSourceHandler commandHandler = Mockito.mock(NewCommandSourceHandler.class);
+        CommandProcessingResult commandProcessingResult = Mockito.mock(CommandProcessingResult.class);
+        when(commandProcessingResult.isRollbackTransaction()).thenReturn(false);
+        when(commandHandler.processCommand(jsonCommand)).thenReturn(commandProcessingResult);
+
+        when(commandHandlerProvider.getHandler(Mockito.any(), Mockito.any())).thenReturn(commandHandler);
+
+        when(configurationDomainService.isMakerCheckerEnabledForTask(Mockito.any())).thenReturn(false);
+        String idk = "idk";
+        when(idempotencyKeyResolver.resolve(commandWrapper)).thenReturn(idk);
+        CommandSource commandSource = Mockito.mock(CommandSource.class);
+        when(commandSource.getId()).thenReturn(commandId);
+        when(commandSourceService.findCommandSource(commandWrapper, idk)).thenReturn(null);
+        when(commandSourceService.getCommandSource(commandId)).thenReturn(commandSource);
+
+        AppUser appUser = Mockito.mock(AppUser.class);
+        when(commandSourceService.saveInitialNewTransaction(commandWrapper, jsonCommand, appUser, idk)).thenReturn(commandSource);
+        when(commandSourceService.saveResultSameTransaction(commandSource)).thenReturn(commandSource);
+        when(commandSource.getStatus()).thenReturn(CommandProcessingResultType.PROCESSED.getValue());
+        when(context.authenticatedUser(Mockito.any(CommandWrapper.class))).thenReturn(appUser);
+
+        when(commandSourceService.processCommand(commandHandler, jsonCommand, commandSource, appUser, false))
+                .thenThrow(new RetryException()).thenThrow(new RetryException()).thenReturn(commandProcessingResult);
+
+        CommandProcessingResult actualCommandProcessingResult = underTest.executeCommand(commandWrapper, jsonCommand, false);
+
+        assertEquals(CommandProcessingResultType.PROCESSED.getValue(), commandSource.getStatus());
+        assertEquals(commandProcessingResult, actualCommandProcessingResult);
+        // verify 2x throw before success
+        verify(commandSourceService, times(2)).generateErrorInfo(any());
+        verify(commandSourceService).saveResultSameTransaction(commandSource);
     }
 
     @Test
@@ -186,4 +264,7 @@ public class SynchronousCommandProcessingServiceTest {
             underTest.publishHookEvent(entityName, actionName, command, Object.class);
         });
     }
+
+    private static final class RetryException extends RuntimeException {}
+
 }

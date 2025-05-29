@@ -6,23 +6,28 @@ For a deeper understanding of resilience4j, refer to the https://resilience4j.re
 |===
 |Name |Env Variable |Default Value |Description
 
-|resilience4j.retry.instances.executeCommand.max-attempts
+|fineract.retry.instances.executeCommand.max-attempts
 |FINERACT_COMMAND_PROCESSING_RETRY_MAX_ATTEMPTS
 |3
 |The number of attempts that resilience4j will attempt to execute a command after a failed execution. Refer to  org. apache. fineract. commands. service. SynchronousCommandProcessingService#executeCommand for more details
 
-|resilience4j.retry.instances.executeCommand.wait-duration
+|fineract.retry.instances.executeCommand.wait-duration
 |FINERACT_COMMAND_PROCESSING_RETRY_WAIT_DURATION
 |1s
 |The fixed time value that the retry instance will wait before the next attempt can be made to execute a command
 
-|resilience4j.retry.instances.executeCommand.enable-exponential-backoff
+|fineract.retry.instances.executeCommand.enable-exponential-backoff
 |FINERACT_COMMAND_PROCESSING_RETRY_ENABLE_EXPONENTIAL_BACKOFF
 |true
 |If set to true, the wait-duration will increase exponentially between each retry to execute a command
 
-|resilience4j.retry.instances.executeCommand.retryExceptions
+|fineract.retry.instances.executeCommand.exponential-backoff-multiplier
 |FINERACT_COMMAND_PROCESSING_RETRY_EXPONENTIAL_BACKOFF_MULTIPLIER
+|3
+|The multiplier for exponential backoff, this is useful only when enable-exponential-backoff is set to true
+
+|fineract.retry.instances.executeCommand.retryExceptions
+|FINERACT_COMMAND_PROCESSING_RETRY_EXCEPTIONS
 |org.springframework.dao.ConcurrencyFailureException,org.eclipse.persistence.exceptions.OptimisticLockException,jakarta.persistence.OptimisticLockException,org.springframework.orm.jpa.JpaOptimisticLockingFailureException,org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessUnderProcessingException
 |This property specifies the list of exceptions that the execute command retry instance will retry on
 

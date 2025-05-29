@@ -23,10 +23,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 
 import io.cucumber.java8.En;
+import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryRegistry;
 import io.github.resilience4j.retry.event.RetryEvent;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.fineract.commands.configuration.RetryConfigurationAssembler;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.exception.RollbackTransactionNotApprovedException;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -50,6 +52,9 @@ public class CommandServiceStepDefinitions implements En {
     @Autowired
     private RetryRegistry retryRegistry;
 
+    @Autowired
+    private RetryConfigurationAssembler retryConfigurationAssembler;
+
     private PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService;
 
     private DummyCommand command;
@@ -67,8 +72,9 @@ public class CommandServiceStepDefinitions implements En {
             Mockito.when(contextHolder.getAttribute(any(), any())).thenThrow(new CannotAcquireLockException("BLOW IT UP!!!"))
                     .thenThrow(new ObjectOptimisticLockingFailureException("Dummy", new RuntimeException("BLOW IT UP!!!")))
                     .thenThrow(new RollbackTransactionNotApprovedException(1L, null));
-
-            this.retryRegistry.retry("executeCommand").getEventPublisher().onRetry(event -> {
+            Retry retry1 = retryConfigurationAssembler.getRetryConfigurationForExecuteCommand();
+            assertNotNull(retry1);
+            retry1.getEventPublisher().onRetry(event -> {
                 log.warn("... retry event: {}", event);
 
                 counter.incrementAndGet();
@@ -92,7 +98,7 @@ public class CommandServiceStepDefinitions implements En {
             assertEquals(2, retryEvent.getNumberOfRetryAttempts());
         });
 
-        Then("/^The command processing service execute function should be called 3 times$/", () -> {
+        Then("/^The command processing service execute function should be called 2 times$/", () -> {
             assertEquals(2, counter.get());
         });
     }

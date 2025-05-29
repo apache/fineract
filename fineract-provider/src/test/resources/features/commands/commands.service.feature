@@ -19,9 +19,10 @@
 
 Feature: Commands Service
 
+  @soma
   Scenario: Verify that command source write service are working with fallback function
     Given A command source write service
     When The user executes the command via a command write service with exceptions
     Then The command processing service should fallback as expected
-    Then The command processing service execute function should be called 3 times
+    Then The command processing service execute function should be called 2 times
 

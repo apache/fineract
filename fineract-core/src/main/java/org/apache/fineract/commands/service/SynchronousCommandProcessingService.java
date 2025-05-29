@@ -24,15 +24,16 @@ import static org.apache.http.HttpStatus.SC_OK;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import io.github.resilience4j.retry.annotation.Retry;
 import java.lang.reflect.Type;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.batch.exception.ErrorInfo;
+import org.apache.fineract.commands.configuration.RetryConfigurationAssembler;
 import org.apache.fineract.commands.domain.CommandProcessingResultType;
 import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -76,81 +77,96 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     private final CommandHandlerProvider commandHandlerProvider;
     private final IdempotencyKeyResolver idempotencyKeyResolver;
     private final CommandSourceService commandSourceService;
+    private final RetryConfigurationAssembler retryConfigurationAssembler;
 
     private final FineractRequestContextHolder fineractRequestContextHolder;
     private final Gson gson = GoogleGsonSerializerHelper.createSimpleGson();
 
+    private CommandProcessingResult retryWrapper(Supplier<CommandProcessingResult> supplier) {
+        if (!BatchRequestContextHolder.isEnclosingTransaction()) {
+            try {
+                return retryConfigurationAssembler.getRetryConfigurationForExecuteCommand().executeSupplier(supplier);
+            } catch (RuntimeException e) {
+                fallbackExecuteCommand(e);
+            }
+        }
+        return supplier.get();
+    }
+
     @Override
-    @Retry(name = "executeCommand", fallbackMethod = "fallbackExecuteCommand")
     public CommandProcessingResult executeCommand(final CommandWrapper wrapper, final JsonCommand command,
             final boolean isApprovedByChecker) {
-        // Do not store the idempotency key because of the exception handling
-        setIdempotencyKeyStoreFlag(false);
+        return retryWrapper(() -> {
+            // Do not store the idempotency key because of the exception handling
+            setIdempotencyKeyStoreFlag(false);
 
-        Long commandId = (Long) fineractRequestContextHolder.getAttribute(COMMAND_SOURCE_ID, null);
-        boolean isRetry = commandId != null;
-        boolean isEnclosingTransaction = BatchRequestContextHolder.isEnclosingTransaction();
+            Long commandId = (Long) fineractRequestContextHolder.getAttribute(COMMAND_SOURCE_ID, null);
+            boolean isRetry = commandId != null;
+            boolean isEnclosingTransaction = BatchRequestContextHolder.isEnclosingTransaction();
 
-        CommandSource commandSource = null;
-        String idempotencyKey;
-        if (isRetry) {
-            commandSource = commandSourceService.getCommandSource(commandId);
-            idempotencyKey = commandSource.getIdempotencyKey();
-        } else if ((commandId = command.commandId()) != null) { // action on the command itself
-            commandSource = commandSourceService.getCommandSource(commandId);
-            idempotencyKey = commandSource.getIdempotencyKey();
-        } else {
-            idempotencyKey = idempotencyKeyResolver.resolve(wrapper);
-        }
-        exceptionWhenTheRequestAlreadyProcessed(wrapper, idempotencyKey, isRetry);
-
-        AppUser user = context.authenticatedUser(wrapper);
-        if (commandSource == null) {
-            if (isEnclosingTransaction) {
-                commandSource = commandSourceService.getInitialCommandSource(wrapper, command, user, idempotencyKey);
+            CommandSource commandSource = null;
+            String idempotencyKey;
+            if (isRetry) {
+                commandSource = commandSourceService.getCommandSource(commandId);
+                idempotencyKey = commandSource.getIdempotencyKey();
+            } else if ((commandId = command.commandId()) != null) { // action on the command itself
+                commandSource = commandSourceService.getCommandSource(commandId);
+                idempotencyKey = commandSource.getIdempotencyKey();
             } else {
-                commandSource = commandSourceService.saveInitialNewTransaction(wrapper, command, user, idempotencyKey);
-                commandId = commandSource.getId();
+                idempotencyKey = idempotencyKeyResolver.resolve(wrapper);
             }
-        }
-        if (commandId != null) {
+            exceptionWhenTheRequestAlreadyProcessed(wrapper, idempotencyKey, isRetry);
+
+            AppUser user = context.authenticatedUser(wrapper);
+            if (commandSource == null) {
+                if (isEnclosingTransaction) {
+                    commandSource = commandSourceService.getInitialCommandSource(wrapper, command, user, idempotencyKey);
+                } else {
+                    commandSource = commandSourceService.saveInitialNewTransaction(wrapper, command, user, idempotencyKey);
+                    commandId = commandSource.getId();
+                }
+            }
+            if (commandId != null) {
+                storeCommandIdInContext(commandSource); // Store command id as a request attribute
+            }
+
+            setIdempotencyKeyStoreFlag(true);
+
+            final CommandProcessingResult result;
+            try {
+                result = commandSourceService.processCommand(findCommandHandler(wrapper), command, commandSource, user,
+                        isApprovedByChecker);
+            } catch (Throwable t) { // NOSONAR
+                RuntimeException mappable = ErrorHandler.getMappable(t);
+                ErrorInfo errorInfo = commandSourceService.generateErrorInfo(mappable);
+                Integer statusCode = errorInfo.getStatusCode();
+                commandSource.setResultStatusCode(statusCode);
+                commandSource.setResult(errorInfo.getMessage());
+                if (statusCode != SC_OK) {
+                    commandSource.setStatus(ERROR);
+                }
+                if (!isEnclosingTransaction) { // TODO: temporary solution
+                    commandSource = commandSourceService.saveResultNewTransaction(commandSource);
+                }
+                // must not throw any exception; must persist in new transaction as the current transaction was already
+                // marked as rollback
+                publishHookErrorEvent(wrapper, command, errorInfo);
+                throw mappable;
+            }
+
+            commandSource.setResultStatusCode(SC_OK);
+            commandSource.updateForAudit(result);
+            commandSource.setResult(toApiResultJsonSerializer.serializeResult(result));
+            commandSource.setStatus(PROCESSED);
+            commandSource = commandSourceService.saveResultSameTransaction(commandSource);
             storeCommandIdInContext(commandSource); // Store command id as a request attribute
-        }
 
-        setIdempotencyKeyStoreFlag(true);
-
-        final CommandProcessingResult result;
-        try {
-            result = commandSourceService.processCommand(findCommandHandler(wrapper), command, commandSource, user, isApprovedByChecker);
-        } catch (Throwable t) { // NOSONAR
-            RuntimeException mappable = ErrorHandler.getMappable(t);
-            ErrorInfo errorInfo = commandSourceService.generateErrorInfo(mappable);
-            Integer statusCode = errorInfo.getStatusCode();
-            commandSource.setResultStatusCode(statusCode);
-            commandSource.setResult(errorInfo.getMessage());
-            if (statusCode != SC_OK) {
-                commandSource.setStatus(ERROR);
-            }
-            if (!isEnclosingTransaction) { // TODO: temporary solution
-                commandSource = commandSourceService.saveResultNewTransaction(commandSource);
-            }
-            // must not throw any exception; must persist in new transaction as the current transaction was already
-            // marked as rollback
-            publishHookErrorEvent(wrapper, command, errorInfo);
-            throw mappable;
-        }
-
-        commandSource.setResultStatusCode(SC_OK);
-        commandSource.updateForAudit(result);
-        commandSource.setResult(toApiResultJsonSerializer.serializeResult(result));
-        commandSource.setStatus(PROCESSED);
-        commandSource = commandSourceService.saveResultSameTransaction(commandSource);
-        storeCommandIdInContext(commandSource); // Store command id as a request attribute
-
-        result.setRollbackTransaction(null);
-        publishHookEvent(wrapper.entityName(), wrapper.actionName(), command, result); // TODO must be performed in a
-                                                                                       // new transaction
-        return result;
+            result.setRollbackTransaction(null);
+            publishHookEvent(wrapper.entityName(), wrapper.actionName(), command, result); // TODO must be performed in
+                                                                                           // a
+            // new transaction
+            return result;
+        });
     }
 
     private void storeCommandIdInContext(CommandSource savedCommandSource) {
@@ -188,8 +204,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         fineractRequestContextHolder.setAttribute(IDEMPOTENCY_KEY_STORE_FLAG, flag);
     }
 
-    @SuppressWarnings("unused")
-    public CommandProcessingResult fallbackExecuteCommand(Exception e) {
+    public void fallbackExecuteCommand(Exception e) {
         throw ErrorHandler.getMappable(e);
     }
 

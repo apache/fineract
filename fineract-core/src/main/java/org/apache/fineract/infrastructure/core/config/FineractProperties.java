@@ -84,6 +84,8 @@ public class FineractProperties {
 
     private FineractCache cache;
 
+    private RetryProperties retry;
+
     @Getter
     @Setter
     public static class FineractTenantProperties {
@@ -611,5 +613,31 @@ public class FineractProperties {
 
         private Duration ttl;
         private Integer maximumEntries;
+    }
+
+    @Setter
+    @Getter
+    public static class RetryProperties {
+
+        private InstancesProperties instances;
+
+        @Setter
+        @Getter
+        public static class InstancesProperties {
+
+            private ExecuteCommandProperties executeCommand;
+
+            @Getter
+            @Setter
+            public static class ExecuteCommandProperties {
+
+                private Class<? extends Throwable>[] retryExceptions;
+                private Integer maxAttempts;
+                private Boolean enableExponentialBackoff;
+                private Double exponentialBackoffMultiplier;
+                private Duration waitDuration;
+
+            }
+        }
     }
 }
