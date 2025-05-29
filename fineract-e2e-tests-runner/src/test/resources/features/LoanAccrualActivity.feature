@@ -1813,6 +1813,177 @@ Feature: LoanAccrualActivity
       | 06 January 2024  | Accrual          | 0.24   | 0.0       | 0.24     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 07 January 2024  | Accrual          | 0.26   | 0.0       | 0.26     | 0.0  | 0.0       | 0.0          | false    | false    |
 
+  @TestRailId:3709
+  Scenario: Verify accrual and accrual activity after backdated payoff with overdue installments on progressive loan
+    When Admin sets the business date to "01 January 2024"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                   | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALCULATION_DAILY_ACCRUAL_ACTIVITY_POSTING | 01 January 2024   | 1000           | 49.99                  | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 4                 | WEEKS                 | 1              | WEEKS                  | 4                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "1000" amount and expected disbursement date on "01 January 2024"
+    When Admin successfully disburse the loan on "01 January 2024" with "1000" EUR transaction amount
+    When Admin sets the business date to "02 January 2024"
+    When Admin runs inline COB job for Loan
+    When Admin sets the business date to "19 January 2024"
+    When Admin runs inline COB job for Loan
+    Then Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type  | Amount  | Principal  | Interest  | Fees  | Penalties  | Loan Balance  | Reverted  | Replayed  |
+      | 01 January 2024   | Disbursement      | 1000.0  | 0.0        | 0.0       | 0.0   | 0.0        | 1000.0        | false     | false     |
+      | 02 January 2024   | Accrual           | 1.39    | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 03 January 2024   | Accrual           | 1.39    | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 04 January 2024   | Accrual           | 1.39    | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 05 January 2024   | Accrual           | 1.38    | 0.0        | 1.38      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 06 January 2024   | Accrual           | 1.39    | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 07 January 2024   | Accrual           | 1.39    | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 08 January 2024   | Accrual           | 1.39    | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 08 January 2024   | Accrual Activity  | 9.72    | 0.0        | 9.72      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 09 January 2024   | Accrual           | 1.39    | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 10 January 2024   | Accrual           | 1.39    | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 11 January 2024   | Accrual           | 1.39    | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 12 January 2024   | Accrual           | 1.38    | 0.0        | 1.38      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 13 January 2024   | Accrual           | 1.39    | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 14 January 2024   | Accrual           | 1.39    | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 15 January 2024   | Accrual           | 1.39    | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 15 January 2024   | Accrual Activity  | 9.72    | 0.0        | 9.72      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 16 January 2024   | Accrual           | 1.39    | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 17 January 2024   | Accrual           | 1.39    | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 18 January 2024   | Accrual           | 1.39    | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+    When Loan Pay-off is made on "11 January 2024"
+    Then Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type    | Amount   | Principal  | Interest  | Fees  | Penalties  | Loan Balance  | Reverted  | Replayed  |
+      | 01 January 2024   | Disbursement        | 1000.0   | 0.0        | 0.0       | 0.0   | 0.0        | 1000.0        | false     | false     |
+      | 02 January 2024   | Accrual             | 1.39     | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 03 January 2024   | Accrual             | 1.39     | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 04 January 2024   | Accrual             | 1.39     | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 05 January 2024   | Accrual             | 1.38     | 0.0        | 1.38      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 06 January 2024   | Accrual             | 1.39     | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 07 January 2024   | Accrual             | 1.39     | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 08 January 2024   | Accrual             | 1.39     | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 08 January 2024   | Accrual Activity    | 9.72     | 0.0        | 9.72      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 09 January 2024   | Accrual             | 1.39     | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 10 January 2024   | Accrual             | 1.39     | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 11 January 2024   | Accrual             | 1.39     | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 11 January 2024   | Accrual Activity    | 4.17     | 0.0        | 4.17      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 11 January 2024   | Repayment           | 1013.89  | 1000.0     | 13.89     | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 12 January 2024   | Accrual             | 1.38     | 0.0        | 1.38      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 13 January 2024   | Accrual             | 1.39     | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 14 January 2024   | Accrual             | 1.39     | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 15 January 2024   | Accrual             | 1.39     | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 16 January 2024   | Accrual             | 1.39     | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 17 January 2024   | Accrual             | 1.39     | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 18 January 2024   | Accrual             | 1.39     | 0.0        | 1.39      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 19 January 2024   | Accrual Adjustment  | 9.72     | 0.0        | 9.72      | 0.0   | 0.0        | 0.0           | false     | false     |
+
+  @TestRailId:3710
+  Scenario: Verify accrual and accrual activity after backdated payoff with overdue installments on cumulative loan
+    When Admin sets the business date to "01 January 2024"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                          | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE_ACCRUAL_ACTIVITY | 01 January 2024   | 1000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 20                | DAYS                  | 5              | DAYS                   | 4                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+    And Admin successfully approves the loan on "01 January 2024" with "1000" amount and expected disbursement date on "01 January 2024"
+    When Admin successfully disburse the loan on "01 January 2024" with "1000" EUR transaction amount
+    When Admin sets the business date to "02 January 2024"
+    When Admin runs inline COB job for Loan
+    When Admin sets the business date to "16 January 2024"
+    When Admin runs inline COB job for Loan
+    Then Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type  | Amount  | Principal  | Interest  | Fees  | Penalties  | Loan Balance  | Reverted  | Replayed  |
+      | 01 January 2024   | Disbursement      | 1000.0  | 0.0        | 0.0       | 0.0   | 0.0        | 1000.0        | false     | false     |
+      | 02 January 2024   | Accrual           | 0.33    | 0.0        | 0.33      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 03 January 2024   | Accrual           | 0.33    | 0.0        | 0.33      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 04 January 2024   | Accrual           | 0.32    | 0.0        | 0.32      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 05 January 2024   | Accrual           | 0.33    | 0.0        | 0.33      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 06 January 2024   | Accrual           | 0.33    | 0.0        | 0.33      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 06 January 2024   | Accrual Activity  | 1.64    | 0.0        | 1.64      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 07 January 2024   | Accrual           | 0.28    | 0.0        | 0.28      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 08 January 2024   | Accrual           | 0.31    | 0.0        | 0.31      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 09 January 2024   | Accrual           | 0.35    | 0.0        | 0.35      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 10 January 2024   | Accrual           | 0.37    | 0.0        | 0.37      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 11 January 2024   | Accrual           | 0.33    | 0.0        | 0.33      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 11 January 2024   | Accrual Activity  | 1.64    | 0.0        | 1.64      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 12 January 2024   | Accrual           | 0.23    | 0.0        | 0.23      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 13 January 2024   | Accrual           | 0.3     | 0.0        | 0.3       | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 14 January 2024   | Accrual           | 0.36    | 0.0        | 0.36      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 15 January 2024   | Accrual           | 0.42    | 0.0        | 0.42      | 0.0   | 0.0        | 0.0           | false     | false     |
+    When Loan Pay-off is made on "11 January 2024"
+    Then Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type  | Amount   | Principal  | Interest  | Fees  | Penalties  | Loan Balance  | Reverted  | Replayed  |
+      | 01 January 2024   | Disbursement      | 1000.0   | 0.0        | 0.0       | 0.0   | 0.0        | 1000.0        | false     | false     |
+      | 02 January 2024   | Accrual           | 0.33     | 0.0        | 0.33      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 03 January 2024   | Accrual           | 0.33     | 0.0        | 0.33      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 04 January 2024   | Accrual           | 0.32     | 0.0        | 0.32      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 05 January 2024   | Accrual           | 0.33     | 0.0        | 0.33      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 06 January 2024   | Accrual           | 0.33     | 0.0        | 0.33      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 06 January 2024   | Accrual Activity  | 1.64     | 0.0        | 1.64      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 07 January 2024   | Accrual           | 0.28     | 0.0        | 0.28      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 08 January 2024   | Accrual           | 0.31     | 0.0        | 0.31      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 09 January 2024   | Accrual           | 0.35     | 0.0        | 0.35      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 10 January 2024   | Accrual           | 0.37     | 0.0        | 0.37      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 11 January 2024   | Accrual           | 0.33     | 0.0        | 0.33      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 11 January 2024   | Accrual Activity  | 1.64     | 0.0        | 1.64      | 0.0   | 0.0        | 0.0           | false     | false     |
+      | 11 January 2024   | Repayment         | 1003.28  | 1000.0     | 3.28      | 0.0   | 0.0        | 0.0           | false     | false     |
+
+  @TestRailId:3711
+  Scenario: Verify accrual and accrual activity after backdated payoff on cumulative loan
+    When Admin sets the business date to "01 January 2024"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                          | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy                        |
+      | LP1_INTEREST_DECLINING_BALANCE_DAILY_RECALCULATION_COMPOUNDING_NONE_ACCRUAL_ACTIVITY | 01 January 2024   | 1000           | 12                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 20                | DAYS                  | 5              | DAYS                   | 4                  | 0                       | 0                      | 0                    | PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER |
+    And Admin successfully approves the loan on "01 January 2024" with "1000" amount and expected disbursement date on "01 January 2024"
+    When Admin successfully disburse the loan on "01 January 2024" with "1000" EUR transaction amount
+    When Admin sets the business date to "02 January 2024"
+    When Admin runs inline COB job for Loan
+    When Admin sets the business date to "06 January 2024"
+    When Admin runs inline COB job for Loan
+    And Customer makes "AUTOPAY" repayment on "06 January 2024" with 251.0 EUR transaction amount
+    When Admin sets the business date to "11 January 2024"
+    When Admin runs inline COB job for Loan
+    And Customer makes "AUTOPAY" repayment on "11 January 2024" with 251.0 EUR transaction amount
+    When Admin sets the business date to "16 January 2024"
+    When Admin runs inline COB job for Loan
+    Then Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024   | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 02 January 2024   | Accrual           | 0.33   | 0.0       | 0.33     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 January 2024   | Accrual           | 0.33   | 0.0       | 0.33     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 January 2024   | Accrual           | 0.32   | 0.0       | 0.32     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 January 2024   | Accrual           | 0.33   | 0.0       | 0.33     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 January 2024   | Repayment         | 251.0  | 249.36    | 1.64     | 0.0  | 0.0       | 750.64       | false    | false    |
+      | 06 January 2024   | Accrual           | 0.33   | 0.0       | 0.33     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 January 2024   | Accrual Activity  | 1.64   | 0.0       | 1.64     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 07 January 2024   | Accrual           | 0.25   | 0.0       | 0.25     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 January 2024   | Accrual           | 0.24   | 0.0       | 0.24     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 January 2024   | Accrual           | 0.25   | 0.0       | 0.25     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 January 2024   | Accrual           | 0.24   | 0.0       | 0.24     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 11 January 2024   | Repayment         | 251.0  | 249.77    | 1.23     | 0.0  | 0.0       | 500.87       | false    | false    |
+      | 11 January 2024   | Accrual           | 0.25   | 0.0       | 0.25     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 11 January 2024   | Accrual Activity  | 1.23   | 0.0       | 1.23     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 12 January 2024   | Accrual           | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 13 January 2024   | Accrual           | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 January 2024   | Accrual           | 0.16   | 0.0       | 0.16     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 January 2024   | Accrual           | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
+    When Loan Pay-off is made on "11 January 2024"
+    Then Loan Transactions tab has the following data:
+      | Transaction date  | Transaction Type  | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024   | Disbursement      | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 02 January 2024   | Accrual           | 0.33   | 0.0       | 0.33     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 03 January 2024   | Accrual           | 0.33   | 0.0       | 0.33     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 January 2024   | Accrual           | 0.32   | 0.0       | 0.32     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 January 2024   | Accrual           | 0.33   | 0.0       | 0.33     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 January 2024   | Repayment         | 251.0  | 249.36    | 1.64     | 0.0  | 0.0       | 750.64       | false    | false    |
+      | 06 January 2024   | Accrual           | 0.33   | 0.0       | 0.33     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 06 January 2024   | Accrual Activity  | 1.64   | 0.0       | 1.64     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 07 January 2024   | Accrual           | 0.25   | 0.0       | 0.25     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 January 2024   | Accrual           | 0.24   | 0.0       | 0.24     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 09 January 2024   | Accrual           | 0.25   | 0.0       | 0.25     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 January 2024   | Accrual           | 0.24   | 0.0       | 0.24     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 11 January 2024   | Repayment         | 251.0  | 249.77    | 1.23     | 0.0  | 0.0       | 500.87       | false    | false    |
+      | 11 January 2024   | Accrual           | 0.25   | 0.0       | 0.25     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 11 January 2024   | Accrual Activity  | 1.23   | 0.0       | 1.23     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 11 January 2024   | Repayment         | 500.87 | 500.87    | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+
   @TestRailId:C3190
   Scenario: Verify accrual activity reverse/replay - UC04: Early repayment with interest recalculation enabled
     When Admin sets the business date to "01 January 2024"

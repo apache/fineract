@@ -2404,28 +2404,33 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Transactional
     @Override
     public Loan recalculateInterest(Loan loan) {
-        LocalDate recalculateFrom = loan.fetchInterestRecalculateFromDate();
         businessEventNotifierService.notifyPreBusinessEvent(new LoanInterestRecalculationBusinessEvent(loan));
         final List<Long> existingTransactionIds = new ArrayList<>();
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
 
-        ScheduleGeneratorDTO generatorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
+        if (loan.isCumulativeSchedule()) {
+            LocalDate recalculateFrom = loan.fetchInterestRecalculateFromDate();
+            ScheduleGeneratorDTO generatorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
+            loanScheduleService.recalculateScheduleFromLastTransaction(loan, generatorDTO, existingTransactionIds,
+                    existingReversedTransactionIds);
+            loanAccrualsProcessingService.reprocessExistingAccruals(loan);
+            if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
+                loanAccrualsProcessingService.processIncomePostingAndAccruals(loan);
+            }
 
-        loanScheduleService.recalculateScheduleFromLastTransaction(loan, generatorDTO, existingTransactionIds,
-                existingReversedTransactionIds);
+            loan = saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+            loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan,
+                    loan.isInterestBearingAndInterestRecalculationEnabled(), false);
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanInterestRecalculationBusinessEvent(loan));
 
-        loanAccrualsProcessingService.reprocessExistingAccruals(loan);
-        if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
-            loanAccrualsProcessingService.processIncomePostingAndAccruals(loan);
+            journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+            loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
+        } else {
+            loanScheduleService.recalculateScheduleFromLastTransaction(loan, null, existingTransactionIds, existingReversedTransactionIds,
+                    true);
+            loan = saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanInterestRecalculationBusinessEvent(loan));
         }
-
-        loan = saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
-        loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan, loan.isInterestBearingAndInterestRecalculationEnabled(),
-                false);
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanInterestRecalculationBusinessEvent(loan));
-
-        journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
-        loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
         return loan;
     }
 
