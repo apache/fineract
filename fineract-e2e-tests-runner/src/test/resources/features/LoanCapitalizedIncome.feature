@@ -73,7 +73,7 @@ Feature: Capitalized Income
     Then Loan status will be "ACTIVE"
     When Admin sets the business date to "2 January 2024"
     And Admin successfully disburse the loan on "2 January 2024" with "200" EUR transaction amount
-    When Admin sets the business date to "2 January 2024"
+    When Admin sets the business date to "3 January 2024"
     And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "3 January 2024" with "200" EUR transaction amount
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |

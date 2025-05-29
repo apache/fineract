@@ -36,6 +36,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
@@ -108,6 +109,12 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
                         "Transaction date cannot be before disbursement date");
             }
 
+            // Validate transaction date is not in the future
+            if (transactionDate != null && transactionDate.isAfter(DateUtils.getBusinessLocalDate())) {
+                baseDataValidator.reset().parameter("transactionDate").failWithCode("cannot.be.in.the.future",
+                        "Transaction date cannot be in the future");
+            }
+
             final BigDecimal transactionAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("transactionAmount", element);
             baseDataValidator.reset().parameter("transactionAmount").value(transactionAmount).notNull().positiveAmount();
 
@@ -142,7 +149,7 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, getCapitalizedIncomeAdjustmentParameters());
 
-        Validator.validateOrThrow("loan.capitalized.incomeAdjustment", baseDataValidator -> {
+        Validator.validateOrThrow("loan.capitalizedIncomeAdjustment", baseDataValidator -> {
             final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
             validateLoanClientIsActive(loan);
             validateLoanGroupIsActive(loan);
@@ -169,6 +176,12 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
             if (transactionDate != null && loan.getDisbursementDate() != null && transactionDate.isBefore(loan.getDisbursementDate())) {
                 baseDataValidator.reset().parameter("transactionDate").failWithCode("before.disbursement.date",
                         "Transaction date cannot be before disbursement date");
+            }
+
+            // Validate transaction date is not in the future
+            if (transactionDate != null && transactionDate.isAfter(DateUtils.getBusinessLocalDate())) {
+                baseDataValidator.reset().parameter("transactionDate").failWithCode("cannot.be.in.the.future",
+                        "Transaction date cannot be in the future");
             }
 
             final BigDecimal transactionAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("transactionAmount", element);

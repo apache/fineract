@@ -66,12 +66,14 @@ public class CapitalizedIncomeAmortizationBusinessStep implements LoanCOBBusines
 
         BigDecimal totalAmortizationAmount = BigDecimal.ZERO;
         for (LoanCapitalizedIncomeBalance balance : balances) {
-            long daysUntilMaturity = businessDate.until(loan.getMaturityDate(), ChronoUnit.DAYS);
-            Money dailyAmortization = CapitalizedIncomeAmortizationUtil.calculateDailyAmortization(
-                    loan.getLoanProductRelatedDetail().getCapitalizedIncomeStrategy(), daysUntilMaturity, balance.getUnrecognizedAmount(),
-                    loan.getCurrency().toData());
-            totalAmortizationAmount = totalAmortizationAmount.add(dailyAmortization.getAmount(), mc);
-            balance.setUnrecognizedAmount(balance.getUnrecognizedAmount().subtract(dailyAmortization.getAmount(), mc));
+            if (DateUtils.isAfterInclusive(businessDate, balance.getDate())) {
+                long daysUntilMaturity = businessDate.until(loan.getMaturityDate(), ChronoUnit.DAYS);
+                Money dailyAmortization = CapitalizedIncomeAmortizationUtil.calculateDailyAmortization(
+                        loan.getLoanProductRelatedDetail().getCapitalizedIncomeStrategy(), daysUntilMaturity,
+                        balance.getUnrecognizedAmount(), loan.getCurrency().toData());
+                totalAmortizationAmount = totalAmortizationAmount.add(dailyAmortization.getAmount(), mc);
+                balance.setUnrecognizedAmount(balance.getUnrecognizedAmount().subtract(dailyAmortization.getAmount(), mc));
+            }
         }
 
         capitalizedIncomeBalanceRepository.saveAll(balances);
