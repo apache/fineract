@@ -29,10 +29,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
+import org.apache.fineract.client.models.CreateChargeResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdLoanChargePaidByData;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsResponse;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
@@ -106,7 +106,7 @@ public class LoanWaiveChargeTest extends BaseLoanIntegrationTest {
 
             // create charge
             double chargeAmount = 100.0;
-            PostChargesResponse chargeResult = createCharge(chargeAmount);
+            CreateChargeResponse chargeResult = createCharge(chargeAmount);
             Long chargeId = chargeResult.getResourceId();
 
             // add charge after maturity
@@ -200,7 +200,7 @@ public class LoanWaiveChargeTest extends BaseLoanIntegrationTest {
 
             // create charge
             double chargeAmount = 10.0;
-            PostChargesResponse chargeResult = createCharge(chargeAmount);
+            CreateChargeResponse chargeResult = createCharge(chargeAmount);
             Long chargeId = chargeResult.getResourceId();
 
             PostLoansLoanIdChargesResponse loanChargeResult = addLoanCharge(loanId, chargeId, "09 January 2023", chargeAmount);
@@ -221,7 +221,7 @@ public class LoanWaiveChargeTest extends BaseLoanIntegrationTest {
 
             // create charge
             double chargeAmount = 9.0;
-            PostChargesResponse chargeResult = createCharge(chargeAmount);
+            CreateChargeResponse chargeResult = createCharge(chargeAmount);
             Long chargeId = chargeResult.getResourceId();
 
             PostLoansLoanIdChargesResponse loanChargeResult = addLoanCharge(loanId, chargeId, "10 January 2023", chargeAmount);
@@ -248,7 +248,7 @@ public class LoanWaiveChargeTest extends BaseLoanIntegrationTest {
 
             // create charge
             double chargeAmount = 8.0;
-            PostChargesResponse chargeResult = createCharge(chargeAmount);
+            CreateChargeResponse chargeResult = createCharge(chargeAmount);
             Long chargeId = chargeResult.getResourceId();
 
             PostLoansLoanIdChargesResponse loanChargeResult = addLoanCharge(loanId, chargeId, "11 January 2023", chargeAmount);
@@ -299,7 +299,7 @@ public class LoanWaiveChargeTest extends BaseLoanIntegrationTest {
         runAt("23 January 2023", () -> {
             // create charge
             double chargeAmount = 5.0;
-            PostChargesResponse chargeResult = createCharge(chargeAmount, "EUR");
+            CreateChargeResponse chargeResult = createCharge(chargeAmount, "EUR");
             Long chargeId = chargeResult.getResourceId();
 
             PostLoansLoanIdChargesResponse loanChargeResult = addLoanCharge(appliedLoanId.get(), chargeId, "23 January 2023", chargeAmount);

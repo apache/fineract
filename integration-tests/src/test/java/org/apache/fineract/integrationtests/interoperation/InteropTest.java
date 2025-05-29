@@ -148,8 +148,8 @@ public class InteropTest {
     }
 
     private void createCharge() {
-        chargeId = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper.getSavingsJSON(interopHelper.getFee().toString(),
-                interopHelper.getCurrency(), ChargeTimeType.WITHDRAWAL_FEE));
+        chargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
+                ChargesHelper.getSavingsJSON(interopHelper.getFee(), interopHelper.getCurrency(), ChargeTimeType.WITHDRAWAL_FEE));
         Assertions.assertNotNull(chargeId);
     }
 

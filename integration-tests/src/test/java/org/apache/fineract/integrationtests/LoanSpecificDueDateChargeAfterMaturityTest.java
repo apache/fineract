@@ -36,9 +36,9 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import org.apache.fineract.client.models.BusinessDateRequest;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.CreateChargeRequest;
+import org.apache.fineract.client.models.CreateChargeResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
@@ -146,15 +146,15 @@ public class LoanSpecificDueDateChargeAfterMaturityTest extends BaseLoanIntegrat
         final float NEXT_FEE_PORTION = 55.0f;
         final float NEXT_PENALTY_PORTION = 105.0f;
 
-        Integer flat = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(FEE_PORTION), false));
+        Integer flat = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
+                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.valueOf(FEE_PORTION), false));
         Integer flatSpecifiedDueDate = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
-                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(PENALTY_PORTION), true));
+                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.valueOf(PENALTY_PORTION), true));
 
         Integer flatNext = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
-                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(NEXT_FEE_PORTION), false));
+                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.valueOf(NEXT_FEE_PORTION), false));
         Integer flatSpecifiedDueDateNext = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
-                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(NEXT_PENALTY_PORTION), true));
+                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.valueOf(NEXT_PENALTY_PORTION), true));
 
         HashMap<String, Object> loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
@@ -183,7 +183,7 @@ public class LoanSpecificDueDateChargeAfterMaturityTest extends BaseLoanIntegrat
         final String penaltyCharge1AddedDate = DATE_FORMATTER.format(targetDate);
         Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanID,
                 LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flatSpecifiedDueDate), penaltyCharge1AddedDate,
-                        String.valueOf(PENALTY_PORTION)));
+                        BigDecimal.valueOf(PENALTY_PORTION)));
 
         this.loanTransactionHelper.noAccrualTransactionForRepayment(loanID);
 
@@ -207,7 +207,7 @@ public class LoanSpecificDueDateChargeAfterMaturityTest extends BaseLoanIntegrat
         targetDate = LocalDate.of(2011, 4, 6);
         final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
         Integer fee1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper
-                .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flat), feeCharge1AddedDate, String.valueOf(FEE_PORTION)));
+                .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flat), feeCharge1AddedDate, BigDecimal.valueOf(FEE_PORTION)));
 
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
         assertEquals(3, loanSchedule.size());
@@ -224,7 +224,7 @@ public class LoanSpecificDueDateChargeAfterMaturityTest extends BaseLoanIntegrat
         final String penaltyCharge2AddedDate = DATE_FORMATTER.format(targetDate);
         Integer penalty2LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanID,
                 LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flatSpecifiedDueDateNext),
-                        penaltyCharge2AddedDate, String.valueOf(NEXT_PENALTY_PORTION)));
+                        penaltyCharge2AddedDate, BigDecimal.valueOf(NEXT_PENALTY_PORTION)));
 
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
         assertEquals(3, loanSchedule.size());
@@ -239,8 +239,9 @@ public class LoanSpecificDueDateChargeAfterMaturityTest extends BaseLoanIntegrat
 
         targetDate = LocalDate.of(2011, 4, 8);
         final String feeCharge2AddedDate = DATE_FORMATTER.format(targetDate);
-        Integer fee2LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper
-                .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flatNext), feeCharge2AddedDate, String.valueOf(NEXT_FEE_PORTION)));
+        Integer fee2LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanID,
+                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flatNext), feeCharge2AddedDate,
+                        BigDecimal.valueOf(NEXT_FEE_PORTION)));
 
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
         assertEquals(3, loanSchedule.size());
@@ -279,15 +280,15 @@ public class LoanSpecificDueDateChargeAfterMaturityTest extends BaseLoanIntegrat
         final float NEXT_FEE_PORTION = 55.0f;
         final float NEXT_PENALTY_PORTION = 105.0f;
 
-        Integer flat = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(FEE_PORTION), false));
+        Integer flat = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
+                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.valueOf(FEE_PORTION), false));
         Integer flatSpecifiedDueDate = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
-                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(PENALTY_PORTION), true));
+                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.valueOf(PENALTY_PORTION), true));
 
         Integer flatNext = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
-                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(NEXT_FEE_PORTION), false));
+                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.valueOf(NEXT_FEE_PORTION), false));
         Integer flatSpecifiedDueDateNext = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
-                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(NEXT_PENALTY_PORTION), true));
+                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.valueOf(NEXT_PENALTY_PORTION), true));
 
         HashMap<String, Object> loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
@@ -324,7 +325,7 @@ public class LoanSpecificDueDateChargeAfterMaturityTest extends BaseLoanIntegrat
         final String penaltyCharge1AddedDate = DATE_FORMATTER.format(targetDate);
         Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanID,
                 LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flatSpecifiedDueDate), penaltyCharge1AddedDate,
-                        String.valueOf(PENALTY_PORTION)));
+                        BigDecimal.valueOf(PENALTY_PORTION)));
 
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
@@ -370,7 +371,7 @@ public class LoanSpecificDueDateChargeAfterMaturityTest extends BaseLoanIntegrat
         String penaltyCharge2AddedDate = DATE_FORMATTER.format(targetDate);
         Integer penalty2LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanID,
                 LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flatSpecifiedDueDate), penaltyCharge2AddedDate,
-                        String.valueOf(PENALTY_PORTION)));
+                        BigDecimal.valueOf(PENALTY_PORTION)));
 
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
         assertEquals(3, loanSchedule.size());
@@ -439,7 +440,7 @@ public class LoanSpecificDueDateChargeAfterMaturityTest extends BaseLoanIntegrat
             BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
                     .date("01 September 2023").dateFormat(DATETIME_PATTERN).locale("en"));
 
-            PostChargesResponse penaltyCharge = CHARGES_HELPER.createCharges(new ChargeRequest().penalty(true).amount(10.0)
+            CreateChargeResponse penaltyCharge = CHARGES_HELPER.createCharges(new CreateChargeRequest().penalty(true).amount(BigDecimal.TEN)
                     .chargeCalculationType(ChargeCalculationType.FLAT.getValue())
                     .chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE.getValue()).chargePaymentMode(ChargePaymentMode.REGULAR.getValue())
                     .currencyCode("USD").name(Utils.randomStringGenerator("PENALTY_" + Calendar.getInstance().getTimeInMillis(), 5))

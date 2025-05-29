@@ -18,14 +18,17 @@
  */
 package org.apache.fineract.portfolio.charge.service;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.charge.data.CreateChargeRequest;
+import org.apache.fineract.portfolio.charge.data.CreateChargeResponse;
+import org.apache.fineract.portfolio.charge.data.DeleteChargeResponse;
+import org.apache.fineract.portfolio.charge.data.UpdateChargeRequest;
+import org.apache.fineract.portfolio.charge.data.UpdateChargeResponse;
 
 public interface ChargeWritePlatformService {
 
-    CommandProcessingResult createCharge(JsonCommand command);
+    CreateChargeResponse createCharge(CreateChargeRequest createChargeRequest);
 
-    CommandProcessingResult updateCharge(Long chargeId, JsonCommand command);
+    UpdateChargeResponse updateCharge(UpdateChargeRequest updateChargeRequest);
 
-    CommandProcessingResult deleteCharge(Long chargeId);
+    DeleteChargeResponse deleteCharge(Long chargeId);
 }

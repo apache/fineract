@@ -27,6 +27,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -109,13 +110,13 @@ public class LoanAccrualTransactionReversalTest extends BaseLoanIntegrationTest 
 
         // Add Charge
         Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
+                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, true));
 
         LocalDate targetDate = LocalDate.of(2022, 9, 4);
         final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
-        Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
+        Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, BigDecimal.TEN));
 
         // Run accrual till charge date
         this.periodicAccrualAccountingHelper.runPeriodicAccrualAccounting(penaltyCharge1AddedDate);

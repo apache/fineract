@@ -22,10 +22,9 @@ import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformServi
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainServiceJpa;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepository;
-import org.apache.fineract.portfolio.charge.serialization.ChargeDefinitionCommandFromApiJsonDeserializer;
+import org.apache.fineract.portfolio.charge.mapper.ChargeMapper;
 import org.apache.fineract.portfolio.charge.service.ChargeDropdownReadPlatformService;
 import org.apache.fineract.portfolio.charge.service.ChargeDropdownReadPlatformServiceImpl;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
@@ -66,12 +65,11 @@ public class ChargeConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(ChargeWritePlatformService.class)
-    public ChargeWritePlatformService chargeWritePlatformService(PlatformSecurityContext context,
-            ChargeDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer, ChargeRepository chargeRepository,
+    public ChargeWritePlatformService chargeWritePlatformService(ChargeRepository chargeRepository,
             LoanProductRepository loanProductRepository, JdbcTemplate jdbcTemplate, FineractEntityAccessUtil fineractEntityAccessUtil,
             GLAccountRepositoryWrapper glAccountRepository, TaxGroupRepositoryWrapper taxGroupRepository,
-            PaymentTypeRepositoryWrapper paymentTyperepositoryWrapper) {
-        return new ChargeWritePlatformServiceJpaRepositoryImpl(context, fromApiJsonDeserializer, chargeRepository, loanProductRepository,
-                jdbcTemplate, fineractEntityAccessUtil, glAccountRepository, taxGroupRepository, paymentTyperepositoryWrapper);
+            PaymentTypeRepositoryWrapper paymentTyperepositoryWrapper, ChargeMapper chargeMapper) {
+        return new ChargeWritePlatformServiceJpaRepositoryImpl(chargeRepository, loanProductRepository, jdbcTemplate,
+                fineractEntityAccessUtil, glAccountRepository, taxGroupRepository, paymentTyperepositoryWrapper, chargeMapper);
     }
 }

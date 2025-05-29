@@ -1709,9 +1709,10 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
 
             // Add Charge Penalty
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "100", true));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, new BigDecimal("100"), true));
             Integer penalty1LoanChargeId = loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "22 February 2023", "100"));
+                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "22 February 2023",
+                            new BigDecimal("100")));
             assertNotNull(penalty1LoanChargeId);
 
             loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
@@ -1857,9 +1858,10 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
 
             // Add Charge Penalty
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "100", true));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, new BigDecimal("100"), true));
             Integer penalty1LoanChargeId = loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "22 February 2023", "100"));
+                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "22 February 2023",
+                            new BigDecimal("100")));
             assertNotNull(penalty1LoanChargeId);
 
             loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
@@ -1924,11 +1926,11 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
 
             // Add Charge Penalty
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "25", true));
-            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "20 January 2023", "25"));
-            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "10 February 2023", "25"));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, new BigDecimal("25"), true));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(), LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "20 January 2023", new BigDecimal("25")));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(), LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "10 February 2023", new BigDecimal("25")));
 
             loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
             validateLoanSummaryBalances(loanDetails, 550.0, 0.0, 500.0, 0.0, null);
@@ -2004,11 +2006,11 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
 
             // Add Charge Penalty
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "25", true));
-            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "20 January 2023", "25"));
-            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "10 February 2023", "25"));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, new BigDecimal("25"), true));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(), LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "20 January 2023", new BigDecimal("25")));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(), LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "10 February 2023", new BigDecimal("25")));
 
             loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
             validateLoanSummaryBalances(loanDetails, 550.0, 0.0, 500.0, 0.0, null);
@@ -2441,9 +2443,9 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
 
             // Add Charge Penalty
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "20", true));
-            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 October 2023", "20"));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, new BigDecimal("20"), true));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(), LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 October 2023", new BigDecimal("20")));
 
             loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
             validateLoanSummaryBalances(loanDetails, 1020.0, 0.0, 1000.0, 0.0, null);
@@ -2482,10 +2484,10 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     0.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getActive());
 
-            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 September 2023", "20"));
-            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "16 October 2023", "20"));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(), LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 September 2023", new BigDecimal("20")));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(), LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "16 October 2023", new BigDecimal("20")));
 
             loanTransactionHelper.makeGoodwillCredit(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
                     .dateFormat(DATETIME_PATTERN).transactionDate("16 September 2023").locale("en").transactionAmount(50.0));
@@ -2548,9 +2550,9 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
 
             // Add Charge Penalty
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "20", true));
-            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 October 2023", "20"));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, new BigDecimal("20"), true));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(), LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 October 2023", new BigDecimal("20")));
 
             loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
             validateLoanSummaryBalances(loanDetails, 1020.0, 0.0, 1000.0, 0.0, null);
@@ -2589,10 +2591,10 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     0.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getActive());
 
-            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 September 2023", "20"));
-            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "16 October 2023", "20"));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(), LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 September 2023", new BigDecimal("20")));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(), LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "16 October 2023", new BigDecimal("20")));
 
             loanTransactionHelper.makeGoodwillCredit(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
                     .dateFormat(DATETIME_PATTERN).transactionDate("16 September 2023").locale("en").transactionAmount(50.0));
@@ -2653,9 +2655,9 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
 
             // Add Charge Penalty
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "20", true));
-            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 October 2023", "20"));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, new BigDecimal("20"), true));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(), LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 October 2023", new BigDecimal("20")));
 
             loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
             validateLoanSummaryBalances(loanDetails, 1020.0, 0.0, 1000.0, 0.0, null);
@@ -2694,10 +2696,10 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     0.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getActive());
 
-            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 September 2023", "20"));
-            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "16 October 2023", "20"));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(), LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 September 2023", new BigDecimal("20")));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(), LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "16 October 2023", new BigDecimal("20")));
 
             loanTransactionHelper.makeMerchantIssuedRefund(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
                     .dateFormat(DATETIME_PATTERN).transactionDate("16 September 2023").locale("en").transactionAmount(30.0));
@@ -2758,9 +2760,9 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
 
             // Add Charge Penalty
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "20", true));
-            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 October 2023", "20"));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, new BigDecimal("20"), true));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(), LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 October 2023", new BigDecimal("20")));
 
             loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
             validateLoanSummaryBalances(loanDetails, 1020.0, 0.0, 1000.0, 0.0, null);
@@ -2798,10 +2800,10 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             validateRepaymentPeriod(loanDetails, 5, LocalDate.of(2023, 10, 17), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 20.0, 0.0, 20.0, 0.0, 0.0,
                     0.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getActive());
-            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 September 2023", "20"));
-            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "16 October 2023", "20"));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(), LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 September 2023", new BigDecimal("20")));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(), LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "16 October 2023", new BigDecimal("20")));
             loanTransactionHelper.makeMerchantIssuedRefund(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
                     .dateFormat(DATETIME_PATTERN).transactionDate("16 September 2023").locale("en").transactionAmount(30.0));
             loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
@@ -2858,9 +2860,9 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
 
             // Add Charge Fee
             Integer fee = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "50", false));
-            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(fee), "01 January 2023", "50"));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, new BigDecimal("50"), false));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(), LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(fee), "01 January 2023", new BigDecimal("50")));
 
             loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
             validateLoanSummaryBalances(loanDetails, 1050.0, 0.0, 1000.0, 0.0, null);
@@ -2945,9 +2947,9 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
 
             // Add Charge Fee
             Integer fee = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "50", false));
-            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(fee), "01 January 2023", "50"));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, new BigDecimal("50"), false));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(), LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(fee), "01 January 2023", new BigDecimal("50")));
 
             loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
             validateLoanSummaryBalances(loanDetails, 1050.0, 0.0, 1000.0, 0.0, null);

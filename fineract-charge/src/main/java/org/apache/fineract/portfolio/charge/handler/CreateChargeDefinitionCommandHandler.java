@@ -18,30 +18,26 @@
  */
 package org.apache.fineract.portfolio.charge.handler;
 
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.portfolio.charge.data.CreateChargeRequest;
+import org.apache.fineract.portfolio.charge.data.CreateChargeResponse;
 import org.apache.fineract.portfolio.charge.service.ChargeWritePlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-@CommandType(entity = "CHARGE", action = "CREATE")
-public class CreateChargeDefinitionCommandHandler implements NewCommandSourceHandler {
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class CreateChargeDefinitionCommandHandler implements CommandHandler<CreateChargeRequest, CreateChargeResponse> {
 
     private final ChargeWritePlatformService clientWritePlatformService;
 
-    @Autowired
-    public CreateChargeDefinitionCommandHandler(final ChargeWritePlatformService clientWritePlatformService) {
-        this.clientWritePlatformService = clientWritePlatformService;
-    }
-
     @Transactional
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-
-        return this.clientWritePlatformService.createCharge(command);
+    public CreateChargeResponse handle(Command<CreateChargeRequest> command) {
+        return this.clientWritePlatformService.createCharge(command.getPayload());
     }
 }

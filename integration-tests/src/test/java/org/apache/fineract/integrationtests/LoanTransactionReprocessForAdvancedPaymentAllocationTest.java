@@ -27,6 +27,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -104,12 +105,12 @@ public class LoanTransactionReprocessForAdvancedPaymentAllocationTest extends Ba
             // add loan charge
             // apply fee
             Integer feeCharge = ChargesHelper.createCharges(REQUEST_SPEC, RESPONSE_SPEC,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "50", false));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, new BigDecimal("50"), false));
 
             LocalDate targetDate = LocalDate.of(2023, 2, 22);
             final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
-            Integer feeLoanChargeId = LOAN_TRANSACTION_HELPER.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "50"));
+            Integer feeLoanChargeId = LOAN_TRANSACTION_HELPER.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, new BigDecimal("50")));
 
             // Set Loan transaction externalId for transaction getting reversed and replayed
             String loanTransactionExternalIdStr = UUID.randomUUID().toString();
@@ -128,12 +129,12 @@ public class LoanTransactionReprocessForAdvancedPaymentAllocationTest extends Ba
             targetDate = LocalDate.of(2023, 2, 22);
 
             Integer penalty = ChargesHelper.createCharges(REQUEST_SPEC, RESPONSE_SPEC,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, true));
 
             final String penaltyCharge1AddedDate = DATE_FORMATTER.format(targetDate);
 
-            Integer penalty1LoanChargeId = LOAN_TRANSACTION_HELPER.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
+            Integer penalty1LoanChargeId = LOAN_TRANSACTION_HELPER.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, BigDecimal.TEN));
 
             // verify no reverse replay
             GetLoansLoanIdTransactionsTransactionIdResponse getLoansTransactionResponse = LOAN_TRANSACTION_HELPER
@@ -145,12 +146,12 @@ public class LoanTransactionReprocessForAdvancedPaymentAllocationTest extends Ba
             targetDate = LocalDate.of(2023, 2, 18);
 
             Integer penalty_1 = ChargesHelper.createCharges(REQUEST_SPEC, RESPONSE_SPEC,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, true));
 
             final String penaltyCharge1AddedDate_1 = DATE_FORMATTER.format(targetDate);
 
             Integer penalty1LoanChargeId_1 = LOAN_TRANSACTION_HELPER.addChargesForLoan(loanId, LoanTransactionHelper
-                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty_1), penaltyCharge1AddedDate_1, "10"));
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty_1), penaltyCharge1AddedDate_1, BigDecimal.TEN));
 
             // verify reverse replay
             getLoansTransactionResponse = LOAN_TRANSACTION_HELPER.getLoanTransactionDetails((long) loanId, loanTransactionExternalIdStr);

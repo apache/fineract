@@ -21,11 +21,13 @@ package org.apache.fineract.integrationtests.common.charges;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
-import org.apache.fineract.client.models.ChargeRequest;
-import org.apache.fineract.client.models.GetChargesResponse;
-import org.apache.fineract.client.models.PostChargesResponse;
+import java.util.UUID;
+import org.apache.fineract.client.models.ChargeData;
+import org.apache.fineract.client.models.CreateChargeRequest;
+import org.apache.fineract.client.models.CreateChargeResponse;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.common.CommonConstants;
@@ -84,7 +86,7 @@ public final class ChargesHelper {
 
     private static final boolean ACTIVE = true;
     private static final boolean PENALTY = true;
-    private static final String AMOUNT = "100";
+    private static final BigDecimal AMOUNT = new BigDecimal("100");
     private static final String CURRENCY_CODE = "USD";
     public static final String FEE_ON_MONTH_DAY = "04 March";
     private static final String MONTH_DAY_FORMAT = "dd MMM";
@@ -132,8 +134,8 @@ public final class ChargesHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static String getSavingsJSON(String amount, String currencyCode, ChargeTimeType timeType) {
-        final HashMap<String, Object> map = populateDefaultsForSavings(amount.toString(), currencyCode);
+    public static String getSavingsJSON(BigDecimal amount, String currencyCode, ChargeTimeType timeType) {
+        final HashMap<String, Object> map = populateDefaultsForSavings(amount, currencyCode);
         map.put("chargeTimeType", timeType.getValue());
         String chargesCreateJson = new Gson().toJson(map);
         LOG.info("{}", chargesCreateJson);
@@ -200,7 +202,7 @@ public final class ChargesHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static HashMap<String, Object> populateDefaultsForSavings(String amount, String currencyCode) {
+    public static HashMap<String, Object> populateDefaultsForSavings(BigDecimal amount, String currencyCode) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("active", ChargesHelper.ACTIVE);
         map.put("amount", amount);
@@ -225,7 +227,7 @@ public final class ChargesHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static String getLoanDisbursementJSON(final Integer chargeCalculationType, final String amount) {
+    public static String getLoanDisbursementJSON(final Integer chargeCalculationType, final BigDecimal amount) {
         return getLoanDisbursementJSON(chargeCalculationType, amount, ChargesHelper.CHARGE_PAYMENT_MODE_REGULAR);
     }
 
@@ -233,7 +235,7 @@ public final class ChargesHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static String getLoanDisbursementAccountTransferJSON(final Integer chargeCalculationType, final String amount) {
+    public static String getLoanDisbursementAccountTransferJSON(final Integer chargeCalculationType, final BigDecimal amount) {
         return getLoanDisbursementJSON(chargeCalculationType, amount, ChargesHelper.CHARGE_PAYMENT_MODE_ACCOUNT_TRANSFER);
     }
 
@@ -241,7 +243,7 @@ public final class ChargesHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static String getLoanDisbursementJSON(final Integer chargeCalculationType, final String amount, final Integer paymentmode) {
+    public static String getLoanDisbursementJSON(final Integer chargeCalculationType, final BigDecimal amount, final Integer paymentmode) {
         final HashMap<String, Object> map = populateDefaultsForLoan();
         map.put("chargeTimeType", CHARGE_DISBURSEMENT_FEE);
         map.put("chargePaymentMode", paymentmode);
@@ -293,7 +295,7 @@ public final class ChargesHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static String getLoanSpecifiedDueDateJSON(final Integer chargeCalculationType, final String amount, boolean penalty) {
+    public static String getLoanSpecifiedDueDateJSON(final Integer chargeCalculationType, final BigDecimal amount, boolean penalty) {
         return getLoanSpecifiedDueDateJSON(chargeCalculationType, amount, penalty, ChargesHelper.CHARGE_PAYMENT_MODE_REGULAR);
     }
 
@@ -301,7 +303,7 @@ public final class ChargesHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static String getLoanSpecifiedDueDateJSON(final Integer chargeCalculationType, final String amount, boolean penalty,
+    public static String getLoanSpecifiedDueDateJSON(final Integer chargeCalculationType, final BigDecimal amount, boolean penalty,
             String currencyCode) {
         return getLoanSpecifiedDueDateJSON(chargeCalculationType, amount, penalty, ChargesHelper.CHARGE_PAYMENT_MODE_REGULAR, currencyCode);
     }
@@ -310,7 +312,7 @@ public final class ChargesHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static String getLoanSpecifiedDueDateJSON(final Integer chargeCalculationType, final String amount, final boolean penalty,
+    public static String getLoanSpecifiedDueDateJSON(final Integer chargeCalculationType, final BigDecimal amount, final boolean penalty,
             final Integer paymentMode) {
         return getLoanSpecifiedDueDateJSON(chargeCalculationType, amount, penalty, paymentMode, ChargesHelper.CURRENCY_CODE);
     }
@@ -319,7 +321,7 @@ public final class ChargesHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static String getLoanSpecifiedDueDateJSON(final Integer chargeCalculationType, final String amount, final boolean penalty,
+    public static String getLoanSpecifiedDueDateJSON(final Integer chargeCalculationType, final BigDecimal amount, final boolean penalty,
             final Integer paymentMode, final String currencyCode) {
         final HashMap<String, Object> map = populateDefaultsForLoan();
         map.put("chargeTimeType", CHARGE_SPECIFIED_DUE_DATE);
@@ -355,7 +357,7 @@ public final class ChargesHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static String getLoanSpecifiedDueDateWithAccountTransferJSON(final Integer chargeCalculationType, final String amount,
+    public static String getLoanSpecifiedDueDateWithAccountTransferJSON(final Integer chargeCalculationType, final BigDecimal amount,
             boolean penalty) {
         return getLoanSpecifiedDueDateJSON(chargeCalculationType, amount, penalty, ChargesHelper.CHARGE_PAYMENT_MODE_ACCOUNT_TRANSFER);
     }
@@ -373,7 +375,7 @@ public final class ChargesHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static String getLoanInstallmentJSON(final Integer chargeCalculationType, final String amount, boolean penalty) {
+    public static String getLoanInstallmentJSON(final Integer chargeCalculationType, final BigDecimal amount, boolean penalty) {
         return getLoanInstallmentJSON(chargeCalculationType, amount, penalty, ChargesHelper.CHARGE_PAYMENT_MODE_REGULAR);
     }
 
@@ -381,7 +383,7 @@ public final class ChargesHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static String getLoanOverdueInstallmentJSON(final String amount) {
+    public static String getLoanOverdueInstallmentJSON(final BigDecimal amount) {
         final HashMap<String, Object> map = populateDefaultsForLoan();
         map.put("chargeId", CHARGE_OVERDUE_INSTALLMENT_FEE);
         map.put("amount", amount);
@@ -395,7 +397,7 @@ public final class ChargesHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static String getLoanInstallmentJSON(final Integer chargeCalculationType, final String amount, final boolean penalty,
+    public static String getLoanInstallmentJSON(final Integer chargeCalculationType, final BigDecimal amount, final boolean penalty,
             final Integer paymentMode) {
         final HashMap<String, Object> map = populateDefaultsForLoan();
         map.put("chargeTimeType", CHARGE_INSTALLMENT_FEE);
@@ -413,7 +415,7 @@ public final class ChargesHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static String getLoanInstallmentWithAccountTransferJSON(final Integer chargeCalculationType, final String amount,
+    public static String getLoanInstallmentWithAccountTransferJSON(final Integer chargeCalculationType, final BigDecimal amount,
             boolean penalty) {
         return getLoanInstallmentJSON(chargeCalculationType, amount, penalty, ChargesHelper.CHARGE_PAYMENT_MODE_ACCOUNT_TRANSFER);
     }
@@ -610,10 +612,10 @@ public final class ChargesHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static PostChargesResponse createLoanCharge(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+    public static CreateChargeResponse createLoanCharge(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String payload) {
         final String response = Utils.performServerPost(requestSpec, responseSpec, CREATE_CHARGES_URL, payload, null);
-        return GSON.fromJson(response, PostChargesResponse.class);
+        return GSON.fromJson(response, CreateChargeResponse.class);
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -808,11 +810,11 @@ public final class ChargesHelper {
 
     }
 
-    public PostChargesResponse createCharges(ChargeRequest request) {
-        return Calls.ok(FineractClientHelper.getFineractClient().charges.createCharge(request));
+    public CreateChargeResponse createCharges(CreateChargeRequest request) {
+        return Calls.ok(FineractClientHelper.getFineractClient().charges.createCharge(UUID.randomUUID().toString(), request));
     }
 
-    public GetChargesResponse retrieveCharge(final Long chargeId) {
+    public ChargeData retrieveCharge(final Long chargeId) {
         return Calls.ok(FineractClientHelper.getFineractClient().charges.retrieveCharge(chargeId));
     }
 }

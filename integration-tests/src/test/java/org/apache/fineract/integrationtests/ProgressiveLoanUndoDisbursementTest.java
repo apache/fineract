@@ -22,8 +22,8 @@ import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.fineract.client.models.ChargeRequest;
-import org.apache.fineract.client.models.PostChargesResponse;
+import org.apache.fineract.client.models.CreateChargeRequest;
+import org.apache.fineract.client.models.CreateChargeResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
@@ -43,8 +43,8 @@ public class ProgressiveLoanUndoDisbursementTest extends BaseLoanIntegrationTest
 
         final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
 
-        final PostChargesResponse disbCharge = chargesHelper.createCharges(new ChargeRequest().active(true).chargeAppliesTo(1)
-                .chargeCalculationType(1).chargePaymentMode(0).chargeTimeType(1).currencyCode("EUR").amount(10.0d)
+        final CreateChargeResponse disbCharge = chargesHelper.createCharges(new CreateChargeRequest().active(true).chargeAppliesTo(1)
+                .chargeCalculationType(1).chargePaymentMode(0).chargeTimeType(1).currencyCode("EUR").amount(BigDecimal.valueOf(10.0d))
                 .name(Utils.randomStringGenerator("FEE_" + Calendar.getInstance().getTimeInMillis(), 5)).locale("en"));
 
         runAt("01 January 2025", () -> {

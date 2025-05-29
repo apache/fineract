@@ -27,6 +27,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -150,12 +151,12 @@ public class LoanPostChargeOffScenariosTest extends BaseLoanIntegrationTest {
 
             // apply charges
             Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, false));
 
             LocalDate targetDate = LocalDate.of(2022, 9, 5);
             final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
-            Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
+            Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, BigDecimal.TEN));
 
             // set loan as chargeoff
             String randomText = Utils.randomStringGenerator("en", 5) + Utils.randomNumberGenerator(6)
@@ -324,12 +325,12 @@ public class LoanPostChargeOffScenariosTest extends BaseLoanIntegrationTest {
 
         // apply charges
         Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, false));
 
         LocalDate targetDate = LocalDate.of(2022, 9, 5);
         final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
-        Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
-                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
+        Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, BigDecimal.TEN));
 
         // make Repayment
         final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
@@ -448,12 +449,12 @@ public class LoanPostChargeOffScenariosTest extends BaseLoanIntegrationTest {
 
         // apply charges
         Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, false));
 
         LocalDate targetDate = LocalDate.of(2022, 9, 5);
         final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
-        Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
-                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
+        Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, BigDecimal.TEN));
 
         // Set Loan transaction externalId for transaction getting reversed and replayed
         String loanTransactionExternalIdStr = UUID.randomUUID().toString();
@@ -594,12 +595,12 @@ public class LoanPostChargeOffScenariosTest extends BaseLoanIntegrationTest {
 
         // apply charges
         Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, false));
 
         LocalDate targetDate = LocalDate.of(2022, 9, 5);
         final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
-        Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
-                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
+        Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, BigDecimal.TEN));
 
         // Set Loan transaction externalId for transaction getting reversed and replayed
         String loanTransactionExternalIdStr = UUID.randomUUID().toString();
@@ -739,12 +740,12 @@ public class LoanPostChargeOffScenariosTest extends BaseLoanIntegrationTest {
 
         // apply charges
         Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, false));
 
         LocalDate targetDate = LocalDate.of(2022, 9, 5);
         final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
-        Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
-                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
+        Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, BigDecimal.TEN));
 
         // set loan as chargeoff
         String randomText = Utils.randomStringGenerator("en", 5) + Utils.randomNumberGenerator(6) + Utils.randomStringGenerator("is", 5);
@@ -883,12 +884,12 @@ public class LoanPostChargeOffScenariosTest extends BaseLoanIntegrationTest {
 
         // apply charges
         Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, false));
 
         LocalDate targetDate = LocalDate.of(2022, 9, 5);
         final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
-        Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
-                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
+        Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, BigDecimal.TEN));
 
         // make Repayment before charge-off on charge off date
         final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
@@ -990,12 +991,12 @@ public class LoanPostChargeOffScenariosTest extends BaseLoanIntegrationTest {
 
         // apply charges
         Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, false));
 
         LocalDate targetDate = LocalDate.of(2022, 9, 5);
         final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
-        Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
-                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
+        Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, BigDecimal.TEN));
 
         // make Repayment before charge-off on charge off date
         final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,

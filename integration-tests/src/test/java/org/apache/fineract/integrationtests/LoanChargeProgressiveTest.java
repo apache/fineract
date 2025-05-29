@@ -21,8 +21,8 @@ package org.apache.fineract.integrationtests;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.CreateChargeResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
@@ -57,7 +57,7 @@ public class LoanChargeProgressiveTest extends BaseLoanIntegrationTest {
     @Test
     public void loanChargeAfterMaturityTest() {
         runAt("02 October 2024", () -> {
-            final PostChargesResponse chargeResponse = createCharge(20.0d, "EUR");
+            final CreateChargeResponse chargeResponse = createCharge(20.0d, "EUR");
             addLoanCharge(loanId, chargeResponse.getResourceId(), "02 October 2024", 20.0d);
 
             final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
@@ -76,7 +76,7 @@ public class LoanChargeProgressiveTest extends BaseLoanIntegrationTest {
             executeInlineCOB(loanId);
             globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_IMMEDIATE_CHARGE_ACCRUAL_POST_MATURITY,
                     true);
-            final PostChargesResponse chargeResponse = createCharge(20.0d, "EUR");
+            final CreateChargeResponse chargeResponse = createCharge(20.0d, "EUR");
             addLoanCharge(loanId, chargeResponse.getResourceId(), "03 October 2024", 20.0d);
             final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
             Assertions.assertTrue(loanDetails.getTransactions().stream()

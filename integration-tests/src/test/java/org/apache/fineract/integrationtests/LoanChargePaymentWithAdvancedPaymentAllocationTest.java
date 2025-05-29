@@ -193,19 +193,19 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest extends BaseLoan
 
             Integer fee = ChargesHelper.createCharges(requestSpec, responseSpec,
                     ChargesHelper.getLoanSpecifiedDueDateWithAccountTransferJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT,
-                            String.valueOf(feePortion), false));
+                            BigDecimal.valueOf(feePortion), false));
 
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
                     ChargesHelper.getLoanSpecifiedDueDateWithAccountTransferJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT,
-                            String.valueOf(penaltyPortion), true));
+                            BigDecimal.valueOf(penaltyPortion), true));
 
             LocalDate targetDate = LocalDate.of(2023, 1, 3);
             final String penaltyChargeAddedDate = DATE_FORMATTER.format(targetDate);
             loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
-                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(fee), penaltyChargeAddedDate, String.valueOf(feePortion)));
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(fee), penaltyChargeAddedDate, BigDecimal.valueOf(feePortion)));
 
             loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
-                    String.valueOf(penalty), penaltyChargeAddedDate, String.valueOf(penaltyPortion)));
+                    String.valueOf(penalty), penaltyChargeAddedDate, BigDecimal.valueOf(penaltyPortion)));
 
             loanTransactionHelper.noAccrualTransactionForRepayment(loanId);
 

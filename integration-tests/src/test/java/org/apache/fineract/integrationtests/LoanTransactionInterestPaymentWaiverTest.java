@@ -41,11 +41,11 @@ import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.BusinessDateRequest;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.CreateChargeRequest;
+import org.apache.fineract.client.models.CreateChargeResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdLoanChargeData;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
@@ -880,9 +880,9 @@ public class LoanTransactionInterestPaymentWaiverTest extends BaseLoanIntegratio
 
             // Add Charge Penalty
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "20", true));
-            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 October 2023", "20"));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, new BigDecimal("20"), true));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(), LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 October 2023", new BigDecimal("20")));
 
             loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
             validateLoanSummaryBalances(loanDetails, 1020.0, 0.0, 1000.0, 0.0, null);
@@ -921,10 +921,10 @@ public class LoanTransactionInterestPaymentWaiverTest extends BaseLoanIntegratio
                     0.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getActive());
 
-            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 September 2023", "20"));
-            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "16 October 2023", "20"));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(), LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 September 2023", new BigDecimal("20")));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(), LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "16 October 2023", new BigDecimal("20")));
 
             loanTransactionHelper.makeInterestPaymentWaiver(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
                     .dateFormat(DATETIME_PATTERN).transactionDate("16 September 2023").locale("en").transactionAmount(50.0));
@@ -987,9 +987,9 @@ public class LoanTransactionInterestPaymentWaiverTest extends BaseLoanIntegratio
 
             // Add Charge Penalty
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "20", true));
-            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 October 2023", "20"));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, new BigDecimal("20"), true));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(), LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 October 2023", new BigDecimal("20")));
 
             loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
             validateLoanSummaryBalances(loanDetails, 1020.0, 0.0, 1000.0, 0.0, null);
@@ -1028,10 +1028,10 @@ public class LoanTransactionInterestPaymentWaiverTest extends BaseLoanIntegratio
                     0.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getActive());
 
-            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 September 2023", "20"));
-            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(),
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "16 October 2023", "20"));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(), LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "17 September 2023", new BigDecimal("20")));
+            loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId().intValue(), LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "16 October 2023", new BigDecimal("20")));
 
             loanTransactionHelper.makeInterestPaymentWaiver(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
                     .dateFormat(DATETIME_PATTERN).transactionDate("16 September 2023").locale("en").transactionAmount(50.0));
@@ -1619,11 +1619,11 @@ public class LoanTransactionInterestPaymentWaiverTest extends BaseLoanIntegratio
     }
 
     private void chargeFee(Long loanId, Double amount, String dueDate) {
-        PostChargesResponse feeCharge = chargesHelper.createCharges(new ChargeRequest().penalty(false).amount(9.0)
-                .chargeCalculationType(ChargeCalculationType.FLAT.getValue()).chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE.getValue())
-                .chargePaymentMode(ChargePaymentMode.REGULAR.getValue()).currencyCode("USD")
-                .name(Utils.randomStringGenerator("FEE_" + Calendar.getInstance().getTimeInMillis(), 5)).chargeAppliesTo(1).locale("en")
-                .active(true));
+        CreateChargeResponse feeCharge = chargesHelper.createCharges(new CreateChargeRequest().penalty(false)
+                .amount(BigDecimal.valueOf(9.0)).chargeCalculationType(ChargeCalculationType.FLAT.getValue())
+                .chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE.getValue()).chargePaymentMode(ChargePaymentMode.REGULAR.getValue())
+                .currencyCode("USD").name(Utils.randomStringGenerator("FEE_" + Calendar.getInstance().getTimeInMillis(), 5))
+                .chargeAppliesTo(1).locale("en").active(true));
         PostLoansLoanIdChargesResponse feeLoanChargeResult = loanTransactionHelper.addChargesForLoan(loanId,
                 new PostLoansLoanIdChargesRequest().chargeId(feeCharge.getResourceId()).dateFormat(DATETIME_PATTERN).locale("en")
                         .amount(amount).dueDate(dueDate));
@@ -1632,11 +1632,11 @@ public class LoanTransactionInterestPaymentWaiverTest extends BaseLoanIntegratio
     }
 
     private void chargePenalty(Long loanId, Double amount, String dueDate) {
-        PostChargesResponse penaltyCharge = chargesHelper.createCharges(new ChargeRequest().penalty(true).amount(10.0)
-                .chargeCalculationType(ChargeCalculationType.FLAT.getValue()).chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE.getValue())
-                .chargePaymentMode(ChargePaymentMode.REGULAR.getValue()).currencyCode("USD")
-                .name(Utils.randomStringGenerator("PENALTY_" + Calendar.getInstance().getTimeInMillis(), 5)).chargeAppliesTo(1).locale("en")
-                .active(true));
+        CreateChargeResponse penaltyCharge = chargesHelper.createCharges(new CreateChargeRequest().penalty(true)
+                .amount(BigDecimal.valueOf(10.0)).chargeCalculationType(ChargeCalculationType.FLAT.getValue())
+                .chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE.getValue()).chargePaymentMode(ChargePaymentMode.REGULAR.getValue())
+                .currencyCode("USD").name(Utils.randomStringGenerator("PENALTY_" + Calendar.getInstance().getTimeInMillis(), 5))
+                .chargeAppliesTo(1).locale("en").active(true));
         PostLoansLoanIdChargesResponse penaltyLoanChargeResult = loanTransactionHelper.addChargesForLoan(loanId,
                 new PostLoansLoanIdChargesRequest().chargeId(penaltyCharge.getResourceId()).dateFormat(DATETIME_PATTERN).locale("en")
                         .amount(amount).dueDate(dueDate));

@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.portfolio.charge.domain;
 
+import lombok.Getter;
+
+@Getter
 public enum ChargeCalculationType {
 
     INVALID(0, "chargeCalculationType.invalid"), //
@@ -35,37 +38,29 @@ public enum ChargeCalculationType {
         this.code = code;
     }
 
-    public Integer getValue() {
-        return this.value;
-    }
-
-    public String getCode() {
-        return this.code;
-    }
-
-    public static Object[] validValuesForLoan() {
+    public static Integer[] validValuesForLoan() {
         return new Integer[] { ChargeCalculationType.FLAT.getValue(), ChargeCalculationType.PERCENT_OF_AMOUNT.getValue(),
                 ChargeCalculationType.PERCENT_OF_AMOUNT_AND_INTEREST.getValue(), ChargeCalculationType.PERCENT_OF_INTEREST.getValue(),
                 ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue() };
     }
 
-    public static Object[] validValuesForSavings() {
+    public static Integer[] validValuesForSavings() {
         return new Integer[] { ChargeCalculationType.FLAT.getValue(), ChargeCalculationType.PERCENT_OF_AMOUNT.getValue() };
     }
 
-    public static Object[] validValuesForShares() {
+    public static Integer[] validValuesForShares() {
         return new Integer[] { ChargeCalculationType.FLAT.getValue(), ChargeCalculationType.PERCENT_OF_AMOUNT.getValue() };
     }
 
-    public static Object[] validValuesForClients() {
+    public static Integer[] validValuesForClients() {
         return new Integer[] { ChargeCalculationType.FLAT.getValue() };
     }
 
-    public static Object[] validValuesForShareAccountActivation() {
+    public static Integer[] validValuesForShareAccountActivation() {
         return new Integer[] { ChargeCalculationType.FLAT.getValue() };
     }
 
-    public static Object[] validValuesForTrancheDisbursement() {
+    public static Integer[] validValuesForTrancheDisbursement() {
         return new Integer[] { ChargeCalculationType.FLAT.getValue(), ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue() };
     }
 

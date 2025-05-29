@@ -27,6 +27,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -90,12 +91,12 @@ public class LoanWriteOffWithAdvancedPaymentAllocationTest {
 
         // apply charges
         Integer feeCharge = ChargesHelper.createCharges(REQUEST_SPEC, RESPONSE_SPEC,
-                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "200", false));
+                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, new BigDecimal("200"), false));
 
         LocalDate targetDate = LocalDate.of(2022, 9, 5);
         final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
-        Integer feeLoanChargeId = LOAN_TRANSACTION_HELPER.addChargesForLoan(loanId,
-                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "200"));
+        Integer feeLoanChargeId = LOAN_TRANSACTION_HELPER.addChargesForLoan(loanId, LoanTransactionHelper
+                .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, new BigDecimal("200")));
 
         // make Repayment
         final PostLoansLoanIdTransactionsResponse repaymentTransaction = LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanExternalIdStr,

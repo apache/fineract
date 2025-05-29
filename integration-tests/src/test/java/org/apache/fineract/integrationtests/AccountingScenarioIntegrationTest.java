@@ -912,10 +912,10 @@ public class AccountingScenarioIntegrationTest {
 
         final float FEE_PORTION = 50.0f;
         final float PENALTY_PORTION = 100.0f;
-        Integer flat = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(FEE_PORTION), false));
+        Integer flat = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
+                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.valueOf(FEE_PORTION), false));
         Integer flatSpecifiedDueDate = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
-                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(PENALTY_PORTION), true));
+                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.valueOf(PENALTY_PORTION), true));
 
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
@@ -939,10 +939,10 @@ public class AccountingScenarioIntegrationTest {
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
-                String.valueOf(flatSpecifiedDueDate), dateFormat.format(zonedDate), String.valueOf(PENALTY_PORTION)));
+                String.valueOf(flatSpecifiedDueDate), dateFormat.format(zonedDate), BigDecimal.valueOf(PENALTY_PORTION)));
         zonedDate = zonedDate.plusDays(1);
-        this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper
-                .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flat), dateFormat.format(zonedDate), String.valueOf(FEE_PORTION)));
+        this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
+                String.valueOf(flat), dateFormat.format(zonedDate), BigDecimal.valueOf(FEE_PORTION)));
 
         // CHECK ACCOUNT ENTRIES
         LOG.info("Entries ......");
@@ -1009,15 +1009,15 @@ public class AccountingScenarioIntegrationTest {
         final float NEXT_FEE_PORTION = 55.0f;
         final float NEXT_PENALTY_PORTION = 105.0f;
 
-        Integer flat = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(FEE_PORTION), false));
+        Integer flat = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
+                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.valueOf(FEE_PORTION), false));
         Integer flatSpecifiedDueDate = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
-                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(PENALTY_PORTION), true));
+                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.valueOf(PENALTY_PORTION), true));
 
         Integer flatNext = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
-                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(NEXT_FEE_PORTION), false));
+                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.valueOf(NEXT_FEE_PORTION), false));
         Integer flatSpecifiedDueDateNext = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
-                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(NEXT_PENALTY_PORTION), true));
+                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.valueOf(NEXT_PENALTY_PORTION), true));
 
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
@@ -1045,19 +1045,20 @@ public class AccountingScenarioIntegrationTest {
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
-                String.valueOf(flatSpecifiedDueDate), dateFormat.format(todayDate.getTime()), String.valueOf(PENALTY_PORTION)));
+                String.valueOf(flatSpecifiedDueDate), dateFormat.format(todayDate.getTime()), BigDecimal.valueOf(PENALTY_PORTION)));
         todayDate.add(Calendar.DATE, 1);
         String runOndate = dateFormat.format(todayDate.getTime());
 
         this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper
-                .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flat), runOndate, String.valueOf(FEE_PORTION)));
+                .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flat), runOndate, BigDecimal.valueOf(FEE_PORTION)));
 
         todayDate.add(Calendar.DATE, 1);
-        this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
-                String.valueOf(flatSpecifiedDueDateNext), dateFormat.format(todayDate.getTime()), String.valueOf(NEXT_PENALTY_PORTION)));
+        this.loanTransactionHelper.addChargesForLoan(loanID,
+                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flatSpecifiedDueDateNext),
+                        dateFormat.format(todayDate.getTime()), BigDecimal.valueOf(NEXT_PENALTY_PORTION)));
 
         this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
-                String.valueOf(flatNext), dateFormat.format(todayDate.getTime()), String.valueOf(NEXT_FEE_PORTION)));
+                String.valueOf(flatNext), dateFormat.format(todayDate.getTime()), BigDecimal.valueOf(NEXT_FEE_PORTION)));
 
         // CHECK ACCOUNT ENTRIES
         LOG.info("Entries ......");

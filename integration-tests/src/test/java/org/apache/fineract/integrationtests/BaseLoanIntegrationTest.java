@@ -60,6 +60,7 @@ import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.AllowAttributeOverrides;
 import org.apache.fineract.client.models.BusinessDateRequest;
+import org.apache.fineract.client.models.CreateChargeResponse;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
@@ -70,7 +71,6 @@ import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateRespo
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
 import org.apache.fineract.client.models.LoanPointInTimeData;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
@@ -117,6 +117,8 @@ import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;
+
+;
 
 @Slf4j
 @ExtendWith(LoanTestLifecycleExtension.class)
@@ -794,17 +796,17 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
 
     protected Long addCharge(Long loanId, boolean isPenalty, double amount, String dueDate) {
         Integer chargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(amount), isPenalty));
+                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, new BigDecimal(amount), isPenalty));
         assertNotNull(chargeId);
         Integer loanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId.intValue(),
-                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(chargeId), dueDate, String.valueOf(amount)));
+                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(chargeId), dueDate, new BigDecimal(amount)));
         assertNotNull(loanChargeId);
         return loanChargeId.longValue();
     }
 
     protected Long createDisbursementPercentageCharge(double percentageAmount) {
         Integer chargeId = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
-                .getLoanDisbursementJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT, String.valueOf(percentageAmount)));
+                .getLoanDisbursementJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT, new BigDecimal(percentageAmount)));
         assertNotNull(chargeId);
         return chargeId.longValue();
     }
@@ -1109,19 +1111,20 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
         return response.getResourceId();
     }
 
-    protected PostChargesResponse createCharge(Double amount) {
-        String payload = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, amount.toString(), false);
+    protected CreateChargeResponse createCharge(Double amount) {
+        String payload = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, new BigDecimal(amount),
+                false);
         return ChargesHelper.createLoanCharge(requestSpec, responseSpec, payload);
     }
 
-    protected PostChargesResponse createCharge(Double amount, String currencyCode) {
-        String payload = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, amount.toString(), false,
-                currencyCode);
+    protected CreateChargeResponse createCharge(Double amount, String currencyCode) {
+        String payload = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, new BigDecimal(amount),
+                false, currencyCode);
         return ChargesHelper.createLoanCharge(requestSpec, responseSpec, payload);
     }
 
     protected PostLoansLoanIdChargesResponse addLoanCharge(Long loanId, Long chargeId, String date, Double amount) {
-        String payload = LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(chargeId.toString(), date, amount.toString());
+        String payload = LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(chargeId.toString(), date, new BigDecimal(amount));
         return loanTransactionHelper.addChargeForLoan(loanId.intValue(), payload, responseSpec);
     }
 

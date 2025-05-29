@@ -27,6 +27,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -111,13 +112,13 @@ public class LoanMultipleDisbursementRepaymentScheduleTest extends BaseLoanInteg
 
             // Add Charge fee
             Integer fee = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "5.15", false));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, new BigDecimal("5.15"), false));
 
             LocalDate targetDate = LocalDate.of(2023, 7, 11);
             final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
 
-            Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(fee), feeCharge1AddedDate, "5.15"));
+            Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(fee), feeCharge1AddedDate, new BigDecimal("5.15")));
 
             assertNotNull(feeLoanChargeId);
 

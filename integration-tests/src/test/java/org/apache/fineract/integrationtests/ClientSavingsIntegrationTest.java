@@ -2598,7 +2598,7 @@ public class ClientSavingsIntegrationTest {
         String chargeCurrency = "USD";
 
         final Integer savingsChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
-                ChargesHelper.getSavingsJSON(chargeAmount, chargeCurrency, ChargeTimeType.SPECIFIED_DUE_DATE));
+                ChargesHelper.getSavingsJSON(new BigDecimal(chargeAmount), chargeCurrency, ChargeTimeType.SPECIFIED_DUE_DATE));
 
         Assertions.assertNotNull(savingsChargeId);
 

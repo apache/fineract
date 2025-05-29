@@ -60,6 +60,10 @@ public final class MathUtil {
         return value != null && value > 0L;
     }
 
+    public static boolean isGreaterThanZero(Integer value) {
+        return value != null && value > 0L;
+    }
+
     public static boolean isLessThanZero(Long value) {
         return value != null && value < 0L;
     }
@@ -218,6 +222,10 @@ public final class MathUtil {
     }
 
     public static boolean isLessThanOrEqualTo(BigDecimal first, BigDecimal second) {
+        return nullToZero(first).compareTo(second) <= 0;
+    }
+
+    public static boolean isLessThanOrEqualTo(Integer first, Integer second) {
         return nullToZero(first).compareTo(second) <= 0;
     }
 
@@ -508,5 +516,9 @@ public final class MathUtil {
 
     public static boolean isEqualTo(Integer first, Integer second) {
         return nullToZero(first).equals(nullToZero(second));
+    }
+
+    public static boolean isMinAndMax(Integer value, Integer min, Integer max) {
+        return isGreaterThanOrEqualTo(value.longValue(), min.longValue()) && isLessThanOrEqualTo(value, max);
     }
 }

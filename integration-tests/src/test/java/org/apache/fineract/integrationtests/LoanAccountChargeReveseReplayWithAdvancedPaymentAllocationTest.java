@@ -27,6 +27,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -149,21 +150,21 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest exte
 
             // apply charges
             Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, false));
 
             LocalDate targetDate = LocalDate.of(2022, 9, 9);
             final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
-            Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
+            Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, BigDecimal.TEN));
 
             // apply penalty
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "20", true));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, new BigDecimal("20"), true));
 
             final String penaltyCharge1AddedDate = DATE_FORMATTER.format(targetDate);
 
-            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "20"));
+            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, new BigDecimal("20")));
 
             GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
             assertNotNull(loanDetails.getRepaymentSchedule());
@@ -193,21 +194,21 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest exte
 
             // apply charges
             Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, false));
 
             LocalDate targetDate = LocalDate.of(2022, 9, 9);
             final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
-            Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
+            Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, BigDecimal.TEN));
 
             // apply penalty
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "20", true));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, new BigDecimal("20"), true));
 
             final String penaltyCharge1AddedDate = DATE_FORMATTER.format(targetDate);
 
-            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "20"));
+            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, new BigDecimal("20")));
 
             GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
             assertNotNull(loanDetails.getRepaymentSchedule());
@@ -239,21 +240,21 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest exte
             // apply charges on 4th of Sept backdated to 2nd of Sept 2022
             updateBusinessDate("4 September 2022");
             Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, false));
 
             LocalDate targetDate = LocalDate.of(2022, 9, 2);
             final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
-            Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
+            Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, BigDecimal.TEN));
 
             // apply penalty
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "20", true));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, new BigDecimal("20"), true));
 
             final String penaltyCharge1AddedDate = DATE_FORMATTER.format(targetDate);
 
-            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "20"));
+            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, new BigDecimal("20")));
 
             GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
             assertNotNull(loanDetails.getRepaymentSchedule());
@@ -285,21 +286,21 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest exte
             // apply charges on 4th of Sept backdated to 2nd of Sept 2022
             updateBusinessDate("4 September 2022");
             Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, false));
 
             LocalDate targetDate = LocalDate.of(2022, 9, 2);
             final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
-            Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
+            Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, BigDecimal.TEN));
 
             // apply penalty
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "20", true));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, new BigDecimal("20"), true));
 
             final String penaltyCharge1AddedDate = DATE_FORMATTER.format(targetDate);
 
-            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "20"));
+            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, new BigDecimal("20")));
 
             // make a full repayment of 10th of September
             updateBusinessDate("10 September 2022");
@@ -319,9 +320,9 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest exte
             // adding an extra charge after maturity
             updateBusinessDate("11 October 2022");
             Integer snoozeFee = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "30.0", false));
-            loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(snoozeFee), "11 October 2022", "30.0"));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, new BigDecimal("30.0"), false));
+            loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(snoozeFee), "11 October 2022", new BigDecimal("30.0")));
 
             loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
             assertNotNull(loanDetails.getRepaymentSchedule());

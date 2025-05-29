@@ -18,9 +18,11 @@
  */
 package org.apache.fineract.test.initializer.global;
 
+import java.math.BigDecimal;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.client.models.ChargeRequest;
-import org.apache.fineract.client.models.PostChargesResponse;
+import org.apache.fineract.client.models.CreateChargeRequest;
+import org.apache.fineract.client.models.CreateChargeResponse;
 import org.apache.fineract.client.services.ChargesApi;
 import org.apache.fineract.test.data.ChargeCalculationType;
 import org.apache.fineract.test.data.ChargePaymentMode;
@@ -77,109 +79,118 @@ public class ChargeGlobalInitializerStep implements FineractGlobalInitializerSte
     @Override
     public void initialize() throws Exception {
         // Loan - % late (overdue) fee
-        ChargeRequest requestLoanPercentLate = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN, CHARGE_LOAN_PERCENTAGE_LATE_FEE,
+        CreateChargeRequest requestLoanPercentLate = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN, CHARGE_LOAN_PERCENTAGE_LATE_FEE,
                 CHARGE_TIME_TYPE_OVERDUE_FEES, CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT, CHARGE_AMOUNT_OVERDUE_PERCENTAGE, true, true);
-        Response<PostChargesResponse> responseLoanPercentLate = chargesApi.createCharge(requestLoanPercentLate).execute();
+        Response<CreateChargeResponse> responseLoanPercentLate = chargesApi
+                .createCharge(UUID.randomUUID().toString(), requestLoanPercentLate).execute();
         TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_LOAN_PERCENT_LATE_CREATE_RESPONSE, responseLoanPercentLate);
 
         // Loan - % processing fee
-        ChargeRequest requestLoanPercentProcessing = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN, CHARGE_LOAN_PERCENTAGE_PROCESSING_FEE,
-                CHARGE_TIME_TYPE_SPECIFIED_DUE_DATE, CHARGE_CALCULATION_TYPE_PERCENTAGE_LOAN_AMOUNT_PLUS_INTEREST, CHARGE_AMOUNT_PERCENTAGE,
-                true, false);
-        Response<PostChargesResponse> responseLoanPercentProcessing = chargesApi.createCharge(requestLoanPercentProcessing).execute();
+        CreateChargeRequest requestLoanPercentProcessing = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN,
+                CHARGE_LOAN_PERCENTAGE_PROCESSING_FEE, CHARGE_TIME_TYPE_SPECIFIED_DUE_DATE,
+                CHARGE_CALCULATION_TYPE_PERCENTAGE_LOAN_AMOUNT_PLUS_INTEREST, CHARGE_AMOUNT_PERCENTAGE, true, false);
+        Response<CreateChargeResponse> responseLoanPercentProcessing = chargesApi
+                .createCharge(UUID.randomUUID().toString(), requestLoanPercentProcessing).execute();
         TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_LOAN_PERCENT_PROCESSING_CREATE_RESPONSE, responseLoanPercentProcessing);
 
         // Loan - fixed late (overdue) fee
-        ChargeRequest requestLoanFixedLate = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN, CHARGE_LOAN_FIXED_LATE_FEE,
+        CreateChargeRequest requestLoanFixedLate = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN, CHARGE_LOAN_FIXED_LATE_FEE,
                 CHARGE_TIME_TYPE_OVERDUE_FEES, CHARGE_CALCULATION_TYPE_FLAT, CHARGE_AMOUNT_FLAT, true, true);
-        Response<PostChargesResponse> responseLoanFixedLate = chargesApi.createCharge(requestLoanFixedLate).execute();
+        Response<CreateChargeResponse> responseLoanFixedLate = chargesApi.createCharge(UUID.randomUUID().toString(), requestLoanFixedLate)
+                .execute();
         TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_LOAN_FIXED_LATE_CREATE_RESPONSE, responseLoanFixedLate);
 
         // Loan - fixed returned payment fee
-        ChargeRequest requestLoanFixedReturnedPayment = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN,
+        CreateChargeRequest requestLoanFixedReturnedPayment = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN,
                 CHARGE_LOAN_FIXED_RETURNED_PAYMENT_FEE, CHARGE_TIME_TYPE_SPECIFIED_DUE_DATE, CHARGE_CALCULATION_TYPE_FLAT,
                 CHARGE_AMOUNT_FLAT, true, false);
-        Response<PostChargesResponse> responseLoanFixedReturnedPayment = chargesApi.createCharge(requestLoanFixedReturnedPayment).execute();
+        Response<CreateChargeResponse> responseLoanFixedReturnedPayment = chargesApi
+                .createCharge(UUID.randomUUID().toString(), requestLoanFixedReturnedPayment).execute();
         TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_LOAN_FIXED_RETURNED_PAYMENT_CREATE_RESPONSE, responseLoanFixedReturnedPayment);
 
         // Loan - snooze fee
-        ChargeRequest requestLoanSnooze = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN, CHARGE_LOAN_SNOOZE_FEE,
+        CreateChargeRequest requestLoanSnooze = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN, CHARGE_LOAN_SNOOZE_FEE,
                 CHARGE_TIME_TYPE_SPECIFIED_DUE_DATE, CHARGE_CALCULATION_TYPE_FLAT, CHARGE_AMOUNT_FLAT, true, false);
-        Response<PostChargesResponse> responseLoanSnooze = chargesApi.createCharge(requestLoanSnooze).execute();
+        Response<CreateChargeResponse> responseLoanSnooze = chargesApi.createCharge(UUID.randomUUID().toString(), requestLoanSnooze)
+                .execute();
         TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_LOAN_SNOOZE_FEE_CREATE_RESPONSE, responseLoanSnooze);
 
         // Loan - NSF fee
-        ChargeRequest requestLoanNsf = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN, CHARGE_LOAN_NSF_FEE,
+        CreateChargeRequest requestLoanNsf = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN, CHARGE_LOAN_NSF_FEE,
                 CHARGE_TIME_TYPE_SPECIFIED_DUE_DATE, CHARGE_CALCULATION_TYPE_FLAT, CHARGE_AMOUNT_FLAT, true, true);
-        Response<PostChargesResponse> responseLoanNsf = chargesApi.createCharge(requestLoanNsf).execute();
+        Response<CreateChargeResponse> responseLoanNsf = chargesApi.createCharge(UUID.randomUUID().toString(), requestLoanNsf).execute();
         TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_LOAN_NSF_FEE_CREATE_RESPONSE, responseLoanNsf);
 
         // Loan - Disbursement % fee
-        ChargeRequest requestLoanDisbursePercent = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN, CHARGE_LOAN_DISBURSEMENT_PERCENT_FEE,
+        CreateChargeRequest requestLoanDisbursePercent = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN, CHARGE_LOAN_DISBURSEMENT_PERCENT_FEE,
                 CHARGE_TIME_TYPE_DISBURSEMENT, CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT, CHARGE_AMOUNT_DISBURSEMENT_PERCENTAGE, true,
                 false);
-        Response<PostChargesResponse> responseLoanDisbursePercent = chargesApi.createCharge(requestLoanDisbursePercent).execute();
+        Response<CreateChargeResponse> responseLoanDisbursePercent = chargesApi
+                .createCharge(UUID.randomUUID().toString(), requestLoanDisbursePercent).execute();
         TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_LOAN_DISBURSEMENET_FEE_CREATE_RESPONSE, responseLoanDisbursePercent);
 
         // Loan - Tranche Disbursement % fee
-        ChargeRequest requestLoanTrancheDisbursePercent = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN,
+        CreateChargeRequest requestLoanTrancheDisbursePercent = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN,
                 CHARGE_LOAN_TRANCHE_DISBURSEMENT_PERCENT_FEE, CHARGE_TIME_TYPE_TRANCHE_DISBURSEMENT,
                 CHARGE_CALCULATION_TYPE_PERCENTAGE_DISBURSEMENT_AMOUNT, CHARGE_AMOUNT_DISBURSEMENT_PERCENTAGE, true, false);
-        Response<PostChargesResponse> responseLoanTrancheDisbursePercent = chargesApi.createCharge(requestLoanTrancheDisbursePercent)
-                .execute();
+        Response<CreateChargeResponse> responseLoanTrancheDisbursePercent = chargesApi
+                .createCharge(UUID.randomUUID().toString(), requestLoanTrancheDisbursePercent).execute();
         TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_LOAN_TRANCHE_DISBURSEMENT_PERCENT_CREATE_RESPONSE,
                 responseLoanTrancheDisbursePercent);
 
         // Loan - Installment % fee
-        ChargeRequest requestLoanInstallmentPercent = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN, CHARGE_LOAN_INSTALLMENT_PERCENT_FEE,
-                CHARGE_TIME_TYPE_INSTALLMENT, CHARGE_CALCULATION_TYPE_PERCENTAGE_LOAN_AMOUNT_PLUS_INTEREST,
-                CHARGE_AMOUNT_INSTALLMENT_PERCENTAGE, true, false);
-        Response<PostChargesResponse> responseLoanInstallmentPercent = chargesApi.createCharge(requestLoanInstallmentPercent).execute();
+        CreateChargeRequest requestLoanInstallmentPercent = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN,
+                CHARGE_LOAN_INSTALLMENT_PERCENT_FEE, CHARGE_TIME_TYPE_INSTALLMENT,
+                CHARGE_CALCULATION_TYPE_PERCENTAGE_LOAN_AMOUNT_PLUS_INTEREST, CHARGE_AMOUNT_INSTALLMENT_PERCENTAGE, true, false);
+        Response<CreateChargeResponse> responseLoanInstallmentPercent = chargesApi
+                .createCharge(UUID.randomUUID().toString(), requestLoanInstallmentPercent).execute();
         TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_LOAN_INSTALLMENT_FEE_CREATE_RESPONSE, responseLoanInstallmentPercent);
 
         // Loan - % late (overdue) fee amount+interest
-        ChargeRequest requestLoanPercentAmountPlusInterestLate = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN,
+        CreateChargeRequest requestLoanPercentAmountPlusInterestLate = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN,
                 CHARGE_LOAN_PERCENTAGE_LATE_FEE_AMOUNT_PLUS_INTEREST, CHARGE_TIME_TYPE_OVERDUE_FEES,
                 CHARGE_CALCULATION_TYPE_PERCENTAGE_LOAN_AMOUNT_PLUS_INTEREST, CHARGE_AMOUNT_OVERDUE_PERCENTAGE, true, true);
-        Response<PostChargesResponse> responseLoanPercentAmountPlusInterestLate = chargesApi
-                .createCharge(requestLoanPercentAmountPlusInterestLate).execute();
+        Response<CreateChargeResponse> responseLoanPercentAmountPlusInterestLate = chargesApi
+                .createCharge(UUID.randomUUID().toString(), requestLoanPercentAmountPlusInterestLate).execute();
         TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_LOAN_PERCENT_LATE_AMOUNT_PLUS_INTEREST_CREATE_RESPONSE,
                 responseLoanPercentAmountPlusInterestLate);
 
         // Client - fixed fee
-        ChargeRequest requestClientFixed = defaultChargesRequest(CHARGE_APPLIES_TO_CLIENT, CHARGE_CLIENT_FIXED_FEE,
+        CreateChargeRequest requestClientFixed = defaultChargesRequest(CHARGE_APPLIES_TO_CLIENT, CHARGE_CLIENT_FIXED_FEE,
                 CHARGE_TIME_TYPE_SPECIFIED_DUE_DATE, CHARGE_CALCULATION_TYPE_FLAT, CHARGE_AMOUNT_FLAT, true, false);
-        Response<PostChargesResponse> responseClientFixed = chargesApi.createCharge(requestClientFixed).execute();
+        Response<CreateChargeResponse> responseClientFixed = chargesApi.createCharge(UUID.randomUUID().toString(), requestClientFixed)
+                .execute();
         TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_CLIENT_FIXED_FEE_CREATE_RESPONSE, responseClientFixed);
 
         // Loan - Disbursement fixed fee
-        ChargeRequest requestDisbursementCharge = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN, CHARGE_DISBURSEMENT_CHARGE,
+        CreateChargeRequest requestDisbursementCharge = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN, CHARGE_DISBURSEMENT_CHARGE,
                 CHARGE_TIME_TYPE_DISBURSEMENT, CHARGE_CALCULATION_TYPE_FLAT, CHARGE_AMOUNT_FLAT, true, false);
-        Response<PostChargesResponse> responseDisbursementCharge = chargesApi.createCharge(requestDisbursementCharge).execute();
+        Response<CreateChargeResponse> responseDisbursementCharge = chargesApi
+                .createCharge(UUID.randomUUID().toString(), requestDisbursementCharge).execute();
         TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_LOAN_DISBURSEMENT_CHARGE_CREATE_RESPONSE, responseDisbursementCharge);
 
         // Loan - Tranche Disbursement Charge (Flat)
-        ChargeRequest requestTrancheDisbursementCharge = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN,
+        CreateChargeRequest requestTrancheDisbursementCharge = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN,
                 CHARGE_LOAN_TRANCHE_DISBURSEMENT_CHARGE_AMOUNT, CHARGE_TIME_TYPE_TRANCHE_DISBURSEMENT, CHARGE_CALCULATION_TYPE_FLAT, 10.0,
                 true, false);
-        Response<PostChargesResponse> responseTrancheDisbursementCharge = chargesApi.createCharge(requestTrancheDisbursementCharge)
-                .execute();
+        Response<CreateChargeResponse> responseTrancheDisbursementCharge = chargesApi
+                .createCharge(UUID.randomUUID().toString(), requestTrancheDisbursementCharge).execute();
         TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_LOAN_TRANCHE_DISBURSEMENT_CHARGE_FLAT_CREATE_RESPONSE,
                 responseTrancheDisbursementCharge);
 
         // Loan - Tranche Disbursement Charge (%)
-        ChargeRequest requestTrancheDisbursementChargePercent = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN,
+        CreateChargeRequest requestTrancheDisbursementChargePercent = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN,
                 CHARGE_LOAN_TRANCHE_DISBURSEMENT_CHARGE_PERCENT, CHARGE_TIME_TYPE_TRANCHE_DISBURSEMENT,
                 CHARGE_CALCULATION_TYPE_PERCENTAGE_DISBURSEMENT_AMOUNT, 2.0, true, false);
-        Response<PostChargesResponse> responseTrancheDisbursementChargePercent = chargesApi
-                .createCharge(requestTrancheDisbursementChargePercent).execute();
+        Response<CreateChargeResponse> responseTrancheDisbursementChargePercent = chargesApi
+                .createCharge(UUID.randomUUID().toString(), requestTrancheDisbursementChargePercent).execute();
         TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_LOAN_TRANCHE_DISBURSEMENT_CHARGE_PERCENT_CREATE_RESPONSE,
                 responseTrancheDisbursementChargePercent);
     }
 
-    public static ChargeRequest defaultChargesRequest(Enum<ChargeProductAppliesTo> appliesTo, String name, Integer chargeTimeType,
+    public static CreateChargeRequest defaultChargesRequest(Enum<ChargeProductAppliesTo> appliesTo, String name, Integer chargeTimeType,
             Integer chargeCalculationType, Double amount, Boolean isActive, Boolean isPenalty) throws Exception {
-        ChargeRequest request = new ChargeRequest();
+        CreateChargeRequest request = new CreateChargeRequest();
         Integer chargeAppliesTo;
 
         if (appliesTo.equals(ChargeProductAppliesTo.CLIENT)) {
@@ -197,7 +208,7 @@ public class ChargeGlobalInitializerStep implements FineractGlobalInitializerSte
                 .currencyCode(CURRENCY_CODE)//
                 .chargeTimeType(chargeTimeType)//
                 .chargeCalculationType(chargeCalculationType)//
-                .amount(amount)//
+                .amount(new BigDecimal(amount))//
                 .active(isActive)//
                 .penalty(isPenalty)//
                 .monthDayFormat(MONTH_DAY_FORMAT)//

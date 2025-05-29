@@ -28,6 +28,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -121,24 +122,24 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
 
             // Add Charge Penalty
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, true));
 
             LocalDate targetDate = LocalDate.of(2023, 3, 10);
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
-            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
+            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, BigDecimal.TEN));
 
             assertNotNull(penalty1LoanChargeId);
 
             // Add Charge Fee
             Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, false));
 
             targetDate = LocalDate.of(2023, 3, 14);
             final String feeChargeAddedDate = dateFormatter.format(targetDate);
-            Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeChargeAddedDate, "10"));
+            Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeChargeAddedDate, BigDecimal.TEN));
 
             assertNotNull(feeLoanChargeId);
 
@@ -161,12 +162,12 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
 
             // Add Charge
             Integer feeCharge_1 = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, false));
 
             targetDate = LocalDate.of(2023, 3, 21);
             final String feeChargeAddedDate_1 = dateFormatter.format(targetDate);
-            Integer feeLoanChargeId_1 = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge_1), feeChargeAddedDate_1, "10"));
+            Integer feeLoanChargeId_1 = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge_1), feeChargeAddedDate_1, BigDecimal.TEN));
 
             assertNotNull(feeLoanChargeId_1);
 
@@ -219,24 +220,24 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
 
             // Add Charge Penalty
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, true));
 
             LocalDate targetDate = LocalDate.of(2023, 3, 10);
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
-            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
+            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, BigDecimal.TEN));
 
             assertNotNull(penalty1LoanChargeId);
 
             // Add Charge Fee
             Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, false));
 
             targetDate = LocalDate.of(2023, 3, 14);
             final String feeChargeAddedDate = dateFormatter.format(targetDate);
-            Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeChargeAddedDate, "10"));
+            Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeChargeAddedDate, BigDecimal.TEN));
 
             assertNotNull(feeLoanChargeId);
 
@@ -260,12 +261,12 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
 
             // Add Charge
             Integer feeCharge_1 = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, false));
 
             targetDate = LocalDate.of(2023, 3, 21);
             final String feeChargeAddedDate_1 = dateFormatter.format(targetDate);
-            Integer feeLoanChargeId_1 = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge_1), feeChargeAddedDate_1, "10"));
+            Integer feeLoanChargeId_1 = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge_1), feeChargeAddedDate_1, BigDecimal.TEN));
 
             assertNotNull(feeLoanChargeId_1);
 
@@ -317,24 +318,24 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
 
             // Add Charge Penalty
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, true));
 
             LocalDate targetDate = LocalDate.of(2023, 3, 10);
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
-            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
+            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, BigDecimal.TEN));
 
             assertNotNull(penalty1LoanChargeId);
 
             // Add Charge Fee
             Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, false));
 
             targetDate = LocalDate.of(2023, 3, 14);
             final String feeChargeAddedDate = dateFormatter.format(targetDate);
-            Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeChargeAddedDate, "10"));
+            Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeChargeAddedDate, BigDecimal.TEN));
 
             assertNotNull(feeLoanChargeId);
 
@@ -360,12 +361,12 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
 
             // Add Charge
             Integer feeCharge_1 = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, false));
 
             targetDate = LocalDate.of(2023, 3, 21);
             final String feeChargeAddedDate_1 = dateFormatter.format(targetDate);
-            Integer feeLoanChargeId_1 = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge_1), feeChargeAddedDate_1, "10"));
+            Integer feeLoanChargeId_1 = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge_1), feeChargeAddedDate_1, BigDecimal.TEN));
 
             assertNotNull(feeLoanChargeId_1);
 
@@ -418,24 +419,24 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
 
             // Add Charge Penalty
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, true));
 
             LocalDate targetDate = LocalDate.of(2023, 3, 10);
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
-            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
+            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, BigDecimal.TEN));
 
             assertNotNull(penalty1LoanChargeId);
 
             // Add Charge Fee
             Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, false));
 
             targetDate = LocalDate.of(2023, 3, 14);
             final String feeChargeAddedDate = dateFormatter.format(targetDate);
-            Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeChargeAddedDate, "10"));
+            Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeChargeAddedDate, BigDecimal.TEN));
 
             assertNotNull(feeLoanChargeId);
 
@@ -459,12 +460,12 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
 
             // Add Charge
             Integer feeCharge_1 = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, false));
 
             targetDate = LocalDate.of(2023, 3, 21);
             final String feeChargeAddedDate_1 = dateFormatter.format(targetDate);
-            Integer feeLoanChargeId_1 = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge_1), feeChargeAddedDate_1, "10"));
+            Integer feeLoanChargeId_1 = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge_1), feeChargeAddedDate_1, BigDecimal.TEN));
 
             assertNotNull(feeLoanChargeId_1);
 
@@ -516,26 +517,26 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
 
             // Add Charge Penalty
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, true));
 
             // Due for future date in one of the schedule
             LocalDate targetDate = LocalDate.of(2023, 3, 10);
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
-            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
+            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, BigDecimal.TEN));
 
             assertNotNull(penalty1LoanChargeId);
 
             // Add Charge Penalty
             Integer penalty_1 = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, true));
 
             // Due for future date in different of the schedule
             targetDate = LocalDate.of(2023, 3, 17);
             final String penaltyChargeAddedDate = dateFormatter.format(targetDate);
-            Integer penaltyLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty_1), penaltyChargeAddedDate, "10"));
+            Integer penaltyLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty_1), penaltyChargeAddedDate, BigDecimal.TEN));
 
             assertNotNull(penaltyLoanChargeId);
 
@@ -591,13 +592,13 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
 
             // Add Charge Penalty
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, true));
 
             LocalDate targetDate = LocalDate.of(2023, 3, 9);
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
-            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
+            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, BigDecimal.TEN));
 
             assertNotNull(penalty1LoanChargeId);
 
@@ -671,10 +672,10 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
 
             // Add Fee
             Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, false));
 
-            Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeChargeDueDate, "10"));
+            Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeChargeDueDate, BigDecimal.TEN));
 
             assertNotNull(feeLoanChargeId);
 
@@ -719,13 +720,13 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
 
             // Add Charge Penalty
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, true));
 
             LocalDate targetDate = LocalDate.of(2023, 07, 19);
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
-            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
+            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, BigDecimal.TEN));
 
             assertNotNull(penalty1LoanChargeId);
 

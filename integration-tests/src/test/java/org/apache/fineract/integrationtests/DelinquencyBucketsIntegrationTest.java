@@ -488,7 +488,7 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
 
             // Create and apply Charge for Specific Due Date
             final Integer chargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(1, "30", false));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(1, new BigDecimal("30"), false));
             assertNotNull(chargeId);
             final Integer loanChargeId = loanTransactionHelper.addChargesForLoan(loanId, getChargeApplyJSON(chargeId, operationDate),
                     responseSpec);

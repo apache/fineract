@@ -24,6 +24,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -82,7 +83,7 @@ public class ClientLoanChargeExternalIntegrationTest {
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         final Integer charge = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
-                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT_AND_INTEREST, "1", false));
+                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT_AND_INTEREST, BigDecimal.ONE, false));
 
         final float amount = 1.0f;
         final String externalId = "extId" + loanID.toString();
@@ -112,7 +113,7 @@ public class ClientLoanChargeExternalIntegrationTest {
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         final Integer charge = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
-                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT_AND_INTEREST, "1", false));
+                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT_AND_INTEREST, BigDecimal.ONE, false));
 
         final String externalId = "extId" + loanID.toString();
         final float amount = 1.0f;

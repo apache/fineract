@@ -1953,14 +1953,14 @@ public class LoanTransactionHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static String getSpecifiedDueDateChargesForLoanAsJSON(final String chargeId) {
-        return getSpecifiedDueDateChargesForLoanAsJSON(chargeId, "12 January 2013", "100", null);
+        return getSpecifiedDueDateChargesForLoanAsJSON(chargeId, "12 January 2013", new BigDecimal("100"), null);
     }
 
     // TODO: Rewrite to use fineract-client instead!
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static String getSpecifiedDueDateChargesForLoanAsJSON(final String chargeId, final String dueDate, final String amount) {
+    public static String getSpecifiedDueDateChargesForLoanAsJSON(final String chargeId, final String dueDate, final BigDecimal amount) {
         return getSpecifiedDueDateChargesForLoanAsJSON(chargeId, dueDate, amount, null);
     }
 
@@ -1968,9 +1968,9 @@ public class LoanTransactionHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static String getSpecifiedDueDateChargesForLoanAsJSON(final String chargeId, final String dueDate, final String amount,
+    public static String getSpecifiedDueDateChargesForLoanAsJSON(final String chargeId, final String dueDate, final BigDecimal amount,
             final String externalId) {
-        final HashMap<String, String> map = new HashMap<>();
+        final HashMap<String, Object> map = new HashMap<>();
         map.put("locale", "en_GB");
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("amount", amount);
@@ -1988,8 +1988,8 @@ public class LoanTransactionHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static String getSpecifiedInstallmentChargesForLoanAsJSON(final String chargeId, final String amount) {
-        final HashMap<String, String> map = new HashMap<>();
+    public static String getSpecifiedInstallmentChargesForLoanAsJSON(final String chargeId, final BigDecimal amount) {
+        final HashMap<String, Object> map = new HashMap<>();
         map.put("locale", "en_GB");
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("amount", amount);
@@ -2004,15 +2004,15 @@ public class LoanTransactionHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static String getDisbursementChargesForLoanAsJSON(final String chargeId) {
-        return getDisbursementChargesForLoanAsJSON(chargeId, "100");
+        return getDisbursementChargesForLoanAsJSON(chargeId, new BigDecimal("100"));
     }
 
     // TODO: Rewrite to use fineract-client instead!
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static String getDisbursementChargesForLoanAsJSON(final String chargeId, String amount) {
-        final HashMap<String, String> map = new HashMap<>();
+    public static String getDisbursementChargesForLoanAsJSON(final String chargeId, BigDecimal amount) {
+        final HashMap<String, Object> map = new HashMap<>();
         map.put("locale", "en_GB");
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("amount", amount);
@@ -2026,7 +2026,7 @@ public class LoanTransactionHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static String getInstallmentChargesForLoanAsJSON(final String chargeId, final String amount) {
+    public static String getInstallmentChargesForLoanAsJSON(final String chargeId, final BigDecimal amount) {
         return getInstallmentChargesForLoanAsJSON(chargeId, amount, Locale.UK);
     }
 
@@ -2049,8 +2049,8 @@ public class LoanTransactionHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static String getUpdateChargesForLoanAsJSON(String amount) {
-        final HashMap<String, String> map = new HashMap<>();
+    public static String getUpdateChargesForLoanAsJSON(BigDecimal amount) {
+        final HashMap<String, Object> map = new HashMap<>();
         map.put("locale", "en_GB");
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("amount", amount);

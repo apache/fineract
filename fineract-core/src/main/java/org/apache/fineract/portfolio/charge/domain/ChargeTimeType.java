@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.charge.domain;
 
+import java.util.Arrays;
+
 public enum ChargeTimeType {
 
     INVALID(0, "chargeTimeType.invalid"), //
@@ -54,91 +56,40 @@ public enum ChargeTimeType {
         return this.code;
     }
 
-    public static Object[] validLoanValues() {
+    public static Integer[] validLoanValues() {
         return new Integer[] { ChargeTimeType.DISBURSEMENT.getValue(), ChargeTimeType.SPECIFIED_DUE_DATE.getValue(),
                 ChargeTimeType.INSTALMENT_FEE.getValue(), ChargeTimeType.OVERDUE_INSTALLMENT.getValue(),
                 ChargeTimeType.TRANCHE_DISBURSEMENT.getValue() };
     }
 
-    public static Object[] validLoanChargeValues() {
+    public static Integer[] validLoanChargeValues() {
         return new Integer[] { ChargeTimeType.DISBURSEMENT.getValue(), ChargeTimeType.SPECIFIED_DUE_DATE.getValue(),
                 ChargeTimeType.INSTALMENT_FEE.getValue() };
     }
 
-    public static Object[] validSavingsValues() {
+    public static Integer[] validSavingsValues() {
         return new Integer[] { ChargeTimeType.SPECIFIED_DUE_DATE.getValue(), ChargeTimeType.SAVINGS_ACTIVATION.getValue(),
                 ChargeTimeType.SAVINGS_CLOSURE.getValue(), ChargeTimeType.WITHDRAWAL_FEE.getValue(), ChargeTimeType.ANNUAL_FEE.getValue(),
                 ChargeTimeType.MONTHLY_FEE.getValue(), ChargeTimeType.OVERDRAFT_FEE.getValue(), ChargeTimeType.WEEKLY_FEE.getValue(),
                 ChargeTimeType.SAVINGS_NOACTIVITY_FEE.getValue() };
     }
 
-    public static Object[] validClientValues() {
+    public static Integer[] validClientValues() {
         return new Integer[] { ChargeTimeType.SPECIFIED_DUE_DATE.getValue() };
     }
 
-    public static Object[] validShareValues() {
+    public static Integer[] validShareValues() {
         return new Integer[] { ChargeTimeType.SHAREACCOUNT_ACTIVATION.getValue(), ChargeTimeType.SHARE_PURCHASE.getValue(),
                 ChargeTimeType.SHARE_REDEEM.getValue() };
     }
 
     public static ChargeTimeType fromInt(final Integer chargeTime) {
-        ChargeTimeType chargeTimeType = ChargeTimeType.INVALID;
-        if (chargeTime != null) {
-            switch (chargeTime) {
-                case 1:
-                    chargeTimeType = DISBURSEMENT;
-                break;
-                case 2:
-                    chargeTimeType = SPECIFIED_DUE_DATE;
-                break;
-                case 3:
-                    chargeTimeType = SAVINGS_ACTIVATION;
-                break;
-                case 4:
-                    chargeTimeType = SAVINGS_CLOSURE;
-                break;
-                case 5:
-                    chargeTimeType = WITHDRAWAL_FEE;
-                break;
-                case 6:
-                    chargeTimeType = ANNUAL_FEE;
-                break;
-                case 7:
-                    chargeTimeType = MONTHLY_FEE;
-                break;
-                case 8:
-                    chargeTimeType = INSTALMENT_FEE;
-                break;
-                case 9:
-                    chargeTimeType = OVERDUE_INSTALLMENT;
-                break;
-                case 10:
-                    chargeTimeType = OVERDRAFT_FEE;
-                break;
-                case 11:
-                    chargeTimeType = WEEKLY_FEE;
-                break;
-                case 12:
-                    chargeTimeType = TRANCHE_DISBURSEMENT;
-                break;
-                case 13:
-                    chargeTimeType = SHAREACCOUNT_ACTIVATION;
-                break;
-                case 14:
-                    chargeTimeType = SHARE_PURCHASE;
-                break;
-                case 15:
-                    chargeTimeType = SHARE_REDEEM;
-                break;
-                case 16:
-                    chargeTimeType = SAVINGS_NOACTIVITY_FEE;
-                break;
-                default:
-                    chargeTimeType = INVALID;
-                break;
-            }
+        if (chargeTime == null) {
+            return ChargeTimeType.INVALID;
         }
-        return chargeTimeType;
+
+        return Arrays.stream(ChargeTimeType.values()).filter(type -> type.getValue().equals(chargeTime)).findFirst()
+                .orElse(ChargeTimeType.INVALID);
     }
 
     public boolean isTimeOfDisbursement() {

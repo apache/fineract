@@ -39,7 +39,7 @@ public enum ChargePaymentMode {
         return this.code;
     }
 
-    public static Object[] validValues() {
+    public static Integer[] validValues() {
         return new Integer[] { ChargePaymentMode.REGULAR.getValue(), ChargePaymentMode.ACCOUNT_TRANSFER.getValue() };
     }
 

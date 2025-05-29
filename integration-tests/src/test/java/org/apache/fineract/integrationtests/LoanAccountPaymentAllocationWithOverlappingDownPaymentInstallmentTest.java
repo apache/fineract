@@ -118,25 +118,25 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             // add charge PENALTY with due date as overlapping installment due date
 
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, true));
 
             LocalDate targetDate = LocalDate.of(2023, 4, 3);
             final String penaltyCharge1AddedDate = DATE_FORMATTER.format(targetDate);
 
-            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
+            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, BigDecimal.TEN));
 
             assertNotNull(penalty1LoanChargeId);
 
             // add charge FEE with due date as overlapping installment due date
             Integer fee = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, false));
 
             targetDate = LocalDate.of(2023, 4, 3);
             final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
 
-            Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(fee), feeCharge1AddedDate, "5.15"));
+            Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(fee), feeCharge1AddedDate, new BigDecimal("5.15")));
 
             assertNotNull(feeLoanChargeId);
 
@@ -291,25 +291,25 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             // add charge PENALTY with due date as overlapping installment due date
 
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, true));
 
             LocalDate targetDate = LocalDate.of(2023, 4, 3);
             final String penaltyCharge1AddedDate = DATE_FORMATTER.format(targetDate);
 
-            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
+            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, BigDecimal.TEN));
 
             assertNotNull(penalty1LoanChargeId);
 
             // add charge FEE with due date as overlapping installment due date
             Integer fee = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, false));
 
             targetDate = LocalDate.of(2023, 4, 3);
             final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
 
-            Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(fee), feeCharge1AddedDate, "5.15"));
+            Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(fee), feeCharge1AddedDate, new BigDecimal("5.15")));
 
             assertNotNull(feeLoanChargeId);
 

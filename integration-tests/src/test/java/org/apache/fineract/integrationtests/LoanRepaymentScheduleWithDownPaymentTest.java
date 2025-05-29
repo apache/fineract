@@ -29,12 +29,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import org.apache.fineract.client.models.CreateChargeResponse;
 import org.apache.fineract.client.models.DelinquencyBucketData;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdSummary;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
@@ -505,14 +505,14 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         final Integer loanId = createApproveAndDisburseLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "1", "0");
 
         final Double feeAmount = 10.00;
-        String payloadJSON = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, feeAmount.toString(),
-                false);
-        final PostChargesResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
+        String payloadJSON = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT,
+                BigDecimal.valueOf(feeAmount), false);
+        final CreateChargeResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
         assertNotNull(postChargesResponse);
         final Long loanChargeId = postChargesResponse.getResourceId();
 
         payloadJSON = LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(loanChargeId.toString(), "03 September 2022",
-                feeAmount.toString());
+                BigDecimal.valueOf(feeAmount));
         PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = loanTransactionHelper.addChargeForLoan(loanId, payloadJSON,
                 responseSpec);
         assertNotNull(postLoansLoanIdChargesResponse);
@@ -569,14 +569,14 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         final Integer loanId = createApproveAndDisburseTwiceLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "3", "0");
 
         final Double feeAmount = 10.00;
-        String payloadJSON = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, feeAmount.toString(),
-                false);
-        final PostChargesResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
+        String payloadJSON = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT,
+                BigDecimal.valueOf(feeAmount), false);
+        final CreateChargeResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
         assertNotNull(postChargesResponse);
         final Long loanChargeId = postChargesResponse.getResourceId();
 
         payloadJSON = LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(loanChargeId.toString(), "04 September 2022",
-                feeAmount.toString());
+                BigDecimal.valueOf(feeAmount));
         PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = loanTransactionHelper.addChargeForLoan(loanId, payloadJSON,
                 responseSpec);
         assertNotNull(postLoansLoanIdChargesResponse);
@@ -672,14 +672,14 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         final Integer loanId = createApproveAndDisburseLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "1", "1");
 
         final Double feeAmount = 10.00;
-        String payloadJSON = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, feeAmount.toString(),
-                false);
-        final PostChargesResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
+        String payloadJSON = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT,
+                BigDecimal.valueOf(feeAmount), false);
+        final CreateChargeResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
         assertNotNull(postChargesResponse);
         final Long loanChargeId = postChargesResponse.getResourceId();
 
         payloadJSON = LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(loanChargeId.toString(), "03 September 2022",
-                feeAmount.toString());
+                BigDecimal.valueOf(feeAmount));
         PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = loanTransactionHelper.addChargeForLoan(loanId, payloadJSON,
                 responseSpec);
         assertNotNull(postLoansLoanIdChargesResponse);
@@ -738,14 +738,14 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         final Integer loanId = createApproveAndDisburseTwiceLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "3", "1");
 
         final Double feeAmount = 10.00;
-        String payloadJSON = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, feeAmount.toString(),
-                false);
-        final PostChargesResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
+        String payloadJSON = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT,
+                BigDecimal.valueOf(feeAmount), false);
+        final CreateChargeResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
         assertNotNull(postChargesResponse);
         final Long loanChargeId = postChargesResponse.getResourceId();
 
         payloadJSON = LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(loanChargeId.toString(), "04 September 2022",
-                feeAmount.toString());
+                BigDecimal.valueOf(feeAmount));
         PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = loanTransactionHelper.addChargeForLoan(loanId, payloadJSON,
                 responseSpec);
         assertNotNull(postLoansLoanIdChargesResponse);

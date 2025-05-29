@@ -26,6 +26,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -104,12 +105,11 @@ public class LoanChargeTypeInstallmentFeeErrorHandlingWithAdvancedPaymentAllocat
             // add loan charge
             // apply Installment fee
             Integer installmentFeeCharge = ChargesHelper.createCharges(REQUEST_SPEC, RESPONSE_SPEC,
-                    ChargesHelper.getLoanInstallmentJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "50", false));
+                    ChargesHelper.getLoanInstallmentJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, new BigDecimal("50"), false));
 
             List<HashMap<String, Object>> loanChargeErrorData = (List<HashMap<String, Object>>) validationErrorHelper
-                    .addChargesForLoanWithError(loanId,
-                            LoanTransactionHelper.getInstallmentChargesForLoanAsJSON(String.valueOf(installmentFeeCharge), "50"),
-                            CommonConstants.RESPONSE_ERROR);
+                    .addChargesForLoanWithError(loanId, LoanTransactionHelper.getInstallmentChargesForLoanAsJSON(
+                            String.valueOf(installmentFeeCharge), new BigDecimal("50")), CommonConstants.RESPONSE_ERROR);
             assertNotNull(loanChargeErrorData);
 
             assertEquals(

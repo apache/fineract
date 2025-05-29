@@ -27,6 +27,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -112,7 +113,7 @@ public class LoanTransactionReverseReplayTest extends BaseLoanIntegrationTest {
 
             // Add Charge
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, true));
 
             final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
                     new PostLoansLoanIdTransactionsRequest().dateFormat(DATE_PATTERN).transactionDate("03 October 2022").locale("en")
@@ -138,8 +139,8 @@ public class LoanTransactionReverseReplayTest extends BaseLoanIntegrationTest {
 
             LocalDate targetDate = LocalDate.of(2022, 10, 6);
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
-            loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
+            loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, BigDecimal.TEN));
             inlineLoanCOBHelper.executeInlineCOB(List.of(loanId.longValue()));
             GetLoansLoanIdResponse loansLoanIdResponse = loanTransactionHelper.getLoanDetails(loanExternalIdStr);
             int lastTransactionIndex = loansLoanIdResponse.getTransactions().size() - 1;
@@ -177,7 +178,7 @@ public class LoanTransactionReverseReplayTest extends BaseLoanIntegrationTest {
 
             // Add Charge
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, true));
 
             // make repayment
             String loanTransactionExternalIdStr = UUID.randomUUID().toString();
@@ -186,8 +187,8 @@ public class LoanTransactionReverseReplayTest extends BaseLoanIntegrationTest {
 
             LocalDate targetDate = LocalDate.of(2022, 10, 10);
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
-            loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
+            loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, BigDecimal.TEN));
             inlineLoanCOBHelper.executeInlineCOB(List.of(loanId.longValue()));
 
             GetLoansLoanIdResponse loansLoanIdResponse = loanTransactionHelper.getLoanDetails(loanExternalIdStr);

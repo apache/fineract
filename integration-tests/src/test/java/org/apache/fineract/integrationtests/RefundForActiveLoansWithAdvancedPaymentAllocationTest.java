@@ -115,24 +115,24 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends BaseL
             final double penaltyPortion = 100.00;
 
             Integer fee = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
-                    .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(feePortion), false));
+                    .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, new BigDecimal(feePortion), false));
 
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
-                    .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(penaltyPortion), true));
+                    .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, new BigDecimal(penaltyPortion), true));
 
             final String firstInstallmentChargeAddedDate = DATE_FORMATTER.format(LocalDate.of(2023, 1, 3));
             loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
-                    String.valueOf(fee), firstInstallmentChargeAddedDate, String.valueOf(feePortion)));
+                    String.valueOf(fee), firstInstallmentChargeAddedDate, new BigDecimal(feePortion)));
 
             loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
-                    String.valueOf(penalty), firstInstallmentChargeAddedDate, String.valueOf(penaltyPortion)));
+                    String.valueOf(penalty), firstInstallmentChargeAddedDate, new BigDecimal(penaltyPortion)));
 
             final String secondInstallmentChargeAddedDate = DATE_FORMATTER.format(LocalDate.of(2023, 2, 3));
             loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
-                    String.valueOf(fee), secondInstallmentChargeAddedDate, String.valueOf(feePortion)));
+                    String.valueOf(fee), secondInstallmentChargeAddedDate, BigDecimal.valueOf(feePortion)));
 
             loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
-                    String.valueOf(penalty), secondInstallmentChargeAddedDate, String.valueOf(penaltyPortion)));
+                    String.valueOf(penalty), secondInstallmentChargeAddedDate, BigDecimal.valueOf(penaltyPortion)));
 
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
 
@@ -316,24 +316,24 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends BaseL
             final double penaltyPortion = 100.00;
 
             Integer fee = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
-                    .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(feePortion), false));
+                    .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.valueOf(feePortion), false));
 
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
-                    .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(penaltyPortion), true));
+                    .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.valueOf(penaltyPortion), true));
 
             final String firstInstallmentChargeAddedDate = DATE_FORMATTER.format(LocalDate.of(2023, 1, 3));
             loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
-                    String.valueOf(fee), firstInstallmentChargeAddedDate, String.valueOf(feePortion)));
+                    String.valueOf(fee), firstInstallmentChargeAddedDate, BigDecimal.valueOf(feePortion)));
 
             loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
-                    String.valueOf(penalty), firstInstallmentChargeAddedDate, String.valueOf(penaltyPortion)));
+                    String.valueOf(penalty), firstInstallmentChargeAddedDate, BigDecimal.valueOf(penaltyPortion)));
 
             final String secondInstallmentChargeAddedDate = DATE_FORMATTER.format(LocalDate.of(2023, 2, 3));
             loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
-                    String.valueOf(fee), secondInstallmentChargeAddedDate, String.valueOf(feePortion)));
+                    String.valueOf(fee), secondInstallmentChargeAddedDate, BigDecimal.valueOf(feePortion)));
 
             loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
-                    String.valueOf(penalty), secondInstallmentChargeAddedDate, String.valueOf(penaltyPortion)));
+                    String.valueOf(penalty), secondInstallmentChargeAddedDate, BigDecimal.valueOf(penaltyPortion)));
 
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
 

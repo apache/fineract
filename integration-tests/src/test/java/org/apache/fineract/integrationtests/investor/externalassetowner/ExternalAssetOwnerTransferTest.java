@@ -154,9 +154,9 @@ public class ExternalAssetOwnerTransferTest extends BaseLoanIntegrationTest {
     protected void addPenaltyForLoan(Integer loanID, String amount) {
         // Add Charge Penalty
         Integer penalty = ChargesHelper.createCharges(REQUEST_SPEC, RESPONSE_SPEC,
-                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, amount, true));
-        Integer penalty1LoanChargeId = LOAN_TRANSACTION_HELPER.addChargesForLoan(loanID,
-                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "02 March 2020", amount));
+                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, new BigDecimal(amount), true));
+        Integer penalty1LoanChargeId = LOAN_TRANSACTION_HELPER.addChargesForLoan(loanID, LoanTransactionHelper
+                .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "02 March 2020", new BigDecimal(amount)));
         assertNotNull(penalty1LoanChargeId);
     }
 

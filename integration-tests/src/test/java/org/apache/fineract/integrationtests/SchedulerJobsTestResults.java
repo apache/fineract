@@ -296,8 +296,8 @@ public class SchedulerJobsTestResults extends IntegrationTest {
                 ChargesHelper.getLoanSpecifiedDueDateWithAccountTransferJSON());
         Assertions.assertNotNull(specifiedDueDateChargeId);
 
-        this.loanTransactionHelper.addChargesForLoan(loanID,
-                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(specifiedDueDateChargeId.toString(), "12 March 2013", "100"));
+        this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper
+                .getSpecifiedDueDateChargesForLoanAsJSON(specifiedDueDateChargeId.toString(), "12 March 2013", new BigDecimal("100")));
         ArrayList<HashMap> chargesPendingState = this.loanTransactionHelper.getLoanCharges(loanID);
         Assertions.assertEquals(1, chargesPendingState.size());
 
@@ -865,7 +865,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
             Assertions.assertNotNull(overdueFeeChargeId);
 
             Integer fee = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, new BigDecimal("10"), false));
             Assertions.assertNotNull(fee);
 
             final Integer loanProductID = createLoanProduct(overdueFeeChargeId.toString());
@@ -889,8 +889,8 @@ public class SchedulerJobsTestResults extends IntegrationTest {
                 LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
                 loanIDs.add(loanID);
 
-                this.loanTransactionHelper.addChargesForLoan(loanID,
-                        LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(fee), "02 March 2020", "10", null));
+                this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper
+                        .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(fee), "02 March 2020", BigDecimal.TEN, null));
             }
 
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.COB_DATE, LocalDate.of(2020, 9, 2));
@@ -932,7 +932,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
             Assertions.assertNotNull(clientID);
 
             Integer fee = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, false));
             Assertions.assertNotNull(fee);
 
             final Integer loanProductID = createLoanProductWithPeriodicAccrual(null);
@@ -953,8 +953,8 @@ public class SchedulerJobsTestResults extends IntegrationTest {
                     JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
             LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-            this.loanTransactionHelper.addChargesForLoan(loanID,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(fee), "02 June 2020", "10", null));
+            this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(fee), "02 June 2020", BigDecimal.TEN, null));
 
             String jobName = "Loan COB";
             this.schedulerJobHelper.executeAndAwaitJob(jobName);
@@ -1358,7 +1358,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
             final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
 
             Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, true));
 
             final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
                     .withRepaymentAfterEvery("1").withNumberOfRepayments("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
@@ -1382,7 +1382,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
             String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
             this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
-                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10", null));
+                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, BigDecimal.TEN, null));
 
             this.schedulerJobHelper.updateSchedulerStatus(true);
             this.schedulerJobHelper.updateSchedulerJob(16L, new PutJobsJobIDRequest().active(true).cronExpression("0/5 * * * * ?"));

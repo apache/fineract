@@ -141,6 +141,8 @@ public class SecurityConfig {
                             .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/echo")).permitAll() //
                             .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/authentication")).permitAll() //
                             .requestMatchers(antMatcher(HttpMethod.PUT, "/api/*/instance-mode")).permitAll() //
+                            .requestMatchers(antMatcher(HttpMethod.GET, "/api/*/charges"), antMatcher(HttpMethod.GET, "/api/*/charges/*"))
+                            .hasAnyAuthority("READ_CHARGE", "ALL_FUNCTIONS", "ALL_FUNCTIONS_READ") //
                             .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated() //
                             .requestMatchers(antMatcher("/api/*/twofactor")).fullyAuthenticated() //
                             .requestMatchers(antMatcher("/api/**"))

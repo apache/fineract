@@ -27,9 +27,9 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import org.apache.fineract.client.models.ChargeRequest;
-import org.apache.fineract.client.models.GetChargesResponse;
-import org.apache.fineract.client.models.PostChargesResponse;
+import org.apache.fineract.client.models.ChargeData;
+import org.apache.fineract.client.models.CreateChargeRequest;
+import org.apache.fineract.client.models.CreateChargeResponse;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
@@ -336,17 +336,17 @@ public class ChargesTest {
         final BigDecimal minCapVal = BigDecimal.valueOf(23);
         final BigDecimal maxCapVal = BigDecimal.valueOf(45);
 
-        final PostChargesResponse feeCharge = chargesHelper.createCharges(
-                new ChargeRequest().penalty(false).amount(9.0).chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue())
-                        .chargeTimeType(ChargeTimeType.DISBURSEMENT.getValue()).chargePaymentMode(ChargePaymentMode.REGULAR.getValue())
-                        .currencyCode("USD").name(Utils.randomStringGenerator("FEE_" + Calendar.getInstance().getTimeInMillis(), 5))
-                        .chargeAppliesTo(1).locale("en").active(true).minCap(minCapVal).maxCap(maxCapVal));
+        final CreateChargeResponse feeCharge = chargesHelper.createCharges(new CreateChargeRequest().penalty(false)
+                .amount(BigDecimal.valueOf(9.0)).chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue())
+                .chargeTimeType(ChargeTimeType.DISBURSEMENT.getValue()).chargePaymentMode(ChargePaymentMode.REGULAR.getValue())
+                .currencyCode("USD").name(Utils.randomStringGenerator("FEE_" + Calendar.getInstance().getTimeInMillis(), 5))
+                .chargeAppliesTo(1).locale("en").active(true).minCap(minCapVal).maxCap(maxCapVal));
 
         Assertions.assertNotNull(feeCharge);
         final Long chargeId = feeCharge.getResourceId();
         Assertions.assertNotNull(chargeId);
 
-        final GetChargesResponse chargeResponseData = chargesHelper.retrieveCharge(chargeId);
+        final ChargeData chargeResponseData = chargesHelper.retrieveCharge(chargeId);
         Assertions.assertNotNull(chargeResponseData);
         Assertions.assertEquals(minCapVal.stripTrailingZeros(), chargeResponseData.getMinCap().stripTrailingZeros());
         Assertions.assertEquals(maxCapVal.stripTrailingZeros(), chargeResponseData.getMaxCap().stripTrailingZeros());

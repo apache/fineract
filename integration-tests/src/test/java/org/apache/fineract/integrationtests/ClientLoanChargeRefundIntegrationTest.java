@@ -27,6 +27,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -538,8 +539,8 @@ public class ClientLoanChargeRefundIntegrationTest {
         final String loanAmount = "12,000.00";
         disburseLoanOfAccountingRule(accountingType, loanAmount, loanDate, penalty);
 
-        final Integer charge = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
-                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT_AND_INTEREST, "1", penalty));
+        final Integer charge = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper.getLoanSpecifiedDueDateJSON(
+                ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT_AND_INTEREST, BigDecimal.ONE, penalty));
 
         final String externalId = null;
         final float amount = 1.0f;

@@ -26,7 +26,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
-import org.apache.fineract.client.models.PostChargesResponse;
+import org.apache.fineract.client.models.CreateChargeResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
@@ -113,7 +113,7 @@ public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
 
             // create charge
             double chargeAmount = 10.0;
-            PostChargesResponse chargeResult = createCharge(chargeAmount);
+            CreateChargeResponse chargeResult = createCharge(chargeAmount);
             Long chargeId = chargeResult.getResourceId();
 
             // add charge after maturity

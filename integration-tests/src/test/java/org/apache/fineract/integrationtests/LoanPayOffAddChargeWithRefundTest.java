@@ -27,6 +27,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -110,12 +111,12 @@ public class LoanPayOffAddChargeWithRefundTest {
 
         // apply charges on date before maturity date
         Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, false));
 
         LocalDate targetDate = LocalDate.of(2022, 9, 4);
         final String feeChargeAddedDate = dateFormatter.format(targetDate);
-        Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeChargeAddedDate, "10"));
+        Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeChargeAddedDate, BigDecimal.TEN));
 
         assertNotNull(feeLoanChargeId);
         loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
@@ -123,12 +124,12 @@ public class LoanPayOffAddChargeWithRefundTest {
 
         // apply charges on date after maturity date
         Integer feeCharge_1 = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, false));
 
         LocalDate targetDate_1 = LocalDate.of(2022, 10, 4);
         final String feeCharge1AddedDate = dateFormatter.format(targetDate_1);
-        Integer feeLoanChargeId_1 = this.loanTransactionHelper.addChargesForLoan(loanId,
-                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge_1), feeCharge1AddedDate, "10"));
+        Integer feeLoanChargeId_1 = this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
+                .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge_1), feeCharge1AddedDate, BigDecimal.TEN));
 
         assertNotNull(feeLoanChargeId_1);
         loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);

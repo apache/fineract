@@ -93,10 +93,10 @@ public class ExternalIdSupportIntegrationTest extends BaseLoanIntegrationTest {
         final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
 
         Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
+                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, true));
 
         Integer penalty2 = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true, 1));
+                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, true, 1));
 
         final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
                 .withRepaymentAfterEvery("1").withNumberOfRepayments("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
@@ -124,8 +124,8 @@ public class ExternalIdSupportIntegrationTest extends BaseLoanIntegrationTest {
 
         String penalty1LoanChargeExternalId = UUID.randomUUID().toString();
         Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10",
-                        penalty1LoanChargeExternalId));
+                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate,
+                        BigDecimal.TEN, penalty1LoanChargeExternalId));
 
         // Get loan charges
         List<GetLoansLoanIdChargesChargeIdResponse> loanChargesResult = loanTransactionHelper.getLoanCharges((long) loanId);
@@ -505,15 +505,17 @@ public class ExternalIdSupportIntegrationTest extends BaseLoanIntegrationTest {
         formattedDate = dateFormatter.format(aMonthBeforePlus3Days);
 
         String penalty3LoanChargeExternalId = UUID.randomUUID().toString();
-        Integer penalty3LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanWithInterestId, LoanTransactionHelper
-                .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), formattedDate, "10", penalty3LoanChargeExternalId));
+        Integer penalty3LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanWithInterestId,
+                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), formattedDate, BigDecimal.TEN,
+                        penalty3LoanChargeExternalId));
 
-        Integer penalty4LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanWithInterestId,
-                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty2), formattedDate, "1000"));
+        Integer penalty4LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanWithInterestId, LoanTransactionHelper
+                .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty2), formattedDate, new BigDecimal("1000")));
 
         String penalty5LoanChargeExternalId = UUID.randomUUID().toString();
-        Integer penalty5LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanWithInterestId, LoanTransactionHelper
-                .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty2), formattedDate, "1000", penalty5LoanChargeExternalId));
+        Integer penalty5LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanWithInterestId,
+                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty2), formattedDate,
+                        new BigDecimal("1000"), penalty5LoanChargeExternalId));
 
         // Check whether an external id was generated
         final PostLoansLoanIdTransactionsResponse waiveInterestResult = loanTransactionHelper.makeWaiveInterest(loanExternalIdStr,
@@ -705,15 +707,15 @@ public class ExternalIdSupportIntegrationTest extends BaseLoanIntegrationTest {
         final HashMap disbursedLoan2Result = this.loanTransactionHelper.disburseLoan("03 September 2022", loan2Id, "1000", null);
 
         Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
+                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, BigDecimal.TEN, true));
 
         LocalDate targetDate = LocalDate.of(2022, 9, 7);
         final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
         String penalty1LoanChargeExternalId = UUID.randomUUID().toString();
         Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loan2Id,
-                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10",
-                        penalty1LoanChargeExternalId));
+                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate,
+                        BigDecimal.TEN, penalty1LoanChargeExternalId));
 
         // NEGATIVE SCENARIOS
 
