@@ -35,9 +35,10 @@ public final class LoanDisbursementValidator {
 
     public void compareDisbursedToApprovedOrProposedPrincipal(final Loan loan, final BigDecimal disbursedAmount,
             final BigDecimal totalDisbursed) {
+        final BigDecimal capitalizedIncome = loan.getSummary().getTotalCapitalizedIncome();
         if (loan.loanProduct().isDisallowExpectedDisbursements() && loan.loanProduct().isAllowApprovedDisbursedAmountsOverApplied()) {
             final BigDecimal maxDisbursedAmount = loanApplicationValidator.getOverAppliedMax(loan);
-            if (totalDisbursed.compareTo(maxDisbursedAmount) > 0) {
+            if (totalDisbursed.add(capitalizedIncome).compareTo(maxDisbursedAmount) > 0) {
                 final String errorMessage = String.format(
                         "Loan disbursal amount can't be greater than maximum applied loan amount calculation. "
                                 + "Total disbursed amount: %s  Maximum disbursal amount: %s",
@@ -47,7 +48,8 @@ public final class LoanDisbursementValidator {
                         maxDisbursedAmount);
             }
         } else {
-            if (totalDisbursed.compareTo(loan.getApprovedPrincipal()) > 0) {
+            if ((totalDisbursed.compareTo(loan.getApprovedPrincipal()) > 0)
+                    || (totalDisbursed.add(capitalizedIncome).compareTo(loan.getApprovedPrincipal()) > 0)) {
                 final String errorMsg = "Loan can't be disbursed,disburse amount is exceeding approved principal ";
                 throw new LoanDisbursalException(errorMsg, "disburse.amount.must.be.less.than.approved.principal", totalDisbursed,
                         loan.getApprovedPrincipal());

@@ -27,6 +27,7 @@ import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
+import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.BusinessStepHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.junit.jupiter.api.Assertions;
@@ -99,6 +100,38 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
                     journalEntry(0.55, deferredIncomeLiabilityAccount, "DEBIT"), //
                     journalEntry(0.55, feeIncomeAccount, "CREDIT") //
             );
+        });
+    }
+
+    @Test
+    public void testLoanDisbursementWithCapitalizedIncome() {
+        final AtomicReference<Long> loanIdRef = new AtomicReference<>();
+        final AtomicReference<Long> capitalizedIncomeIdRef = new AtomicReference<>();
+
+        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+
+        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
+                .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                        .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
+                        .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
+                        .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE).overAppliedNumber(3));
+
+        runAt("1 April 2024", () -> {
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
+                    500.0, 7.0, 3, null);
+            loanIdRef.set(loanId);
+
+            disburseLoan(loanId, BigDecimal.valueOf(300), "1 January 2024");
+            PostLoansLoanIdTransactionsResponse capitalizedIncomeResponse = loanTransactionHelper.addCapitalizedIncome(loanId,
+                    "1 January 2024", 50.0);
+
+            CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class,
+                    () -> disburseLoan(loanId, BigDecimal.valueOf(200), "1 February 2024"));
+
+            Assertions.assertTrue(callFailedRuntimeException.getMessage()
+                    .contains("Loan disbursal amount can't be greater than maximum applied loan amount calculation"));
         });
     }
 

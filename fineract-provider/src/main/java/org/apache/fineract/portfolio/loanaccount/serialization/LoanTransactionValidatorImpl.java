@@ -106,6 +106,7 @@ public final class LoanTransactionValidatorImpl implements LoanTransactionValida
     private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final LoanDownPaymentTransactionValidator loanDownPaymentTransactionValidator;
+    private final LoanDisbursementValidator loanDisbursementValidator;
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) {
@@ -157,6 +158,9 @@ public final class LoanTransactionValidatorImpl implements LoanTransactionValida
             validateLoanClientIsActive(loan);
             validateLoanGroupIsActive(loan);
 
+            final BigDecimal disbursedAmount = loan.getDisbursedAmount();
+            loanDisbursementValidator.compareDisbursedToApprovedOrProposedPrincipal(loan, principal, disbursedAmount);
+
             if (loan.isChargedOff()) {
                 throw new GeneralPlatformDomainRuleException("error.msg.loan.disbursal.not.allowed.on.charged.off",
                         "Loan: " + loan.getId() + " disbursement is not allowed on charged-off loan.");
@@ -173,7 +177,6 @@ public final class LoanTransactionValidatorImpl implements LoanTransactionValida
                 baseDataValidator.getDataValidationErrors().add(error);
             }
 
-            final BigDecimal disbursedAmount = loan.getDisbursedAmount();
             final Set<LoanCollateralManagement> loanCollateralManagements = loan.getLoanCollateralManagements();
 
             if ((loanCollateralManagements != null && !loanCollateralManagements.isEmpty()) && loan.getLoanType().isIndividualAccount()) {
