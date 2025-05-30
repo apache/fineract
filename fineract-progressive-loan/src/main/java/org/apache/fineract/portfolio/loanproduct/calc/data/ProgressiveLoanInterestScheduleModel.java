@@ -161,13 +161,13 @@ public class ProgressiveLoanInterestScheduleModel {
         if (repaymentPeriods.isEmpty()) {
             return 0;
         }
-        final RepaymentPeriod firstPeriod = repaymentPeriods.get(0);
+        final RepaymentPeriod firstPeriod = repaymentPeriods.getFirst();
         final RepaymentPeriod lastPeriod = repaymentPeriods.size() > 1 ? getLastRepaymentPeriod() : firstPeriod;
         return DateUtils.getExactDifferenceInDays(firstPeriod.getFromDate(), lastPeriod.getDueDate());
     }
 
     public LocalDate getStartDate() {
-        return !repaymentPeriods.isEmpty() ? repaymentPeriods.get(0).getFromDate() : null;
+        return !repaymentPeriods.isEmpty() ? repaymentPeriods.getFirst().getFromDate() : null;
     }
 
     public LocalDate getMaturityDate() {
@@ -264,7 +264,9 @@ public class ProgressiveLoanInterestScheduleModel {
     }
 
     private void insertInterestPausePeriods(final RepaymentPeriod repaymentPeriod, final LocalDate pauseStart, final LocalDate pauseEnd) {
-        final LocalDate effectivePauseStart = pauseStart.minusDays(1);
+        final boolean isPauseStartOnFirstDayOfPeriod = pauseStart.isEqual(repaymentPeriod.getFromDate().plusDays(1));
+        final LocalDate effectivePauseStart = isPauseStartOnFirstDayOfPeriod ? pauseStart : pauseStart.minusDays(1);
+
         final LocalDate finalPauseStart = effectivePauseStart.isBefore(repaymentPeriod.getFromDate()) ? repaymentPeriod.getFromDate()
                 : effectivePauseStart;
         final LocalDate finalPauseEnd = pauseEnd.isAfter(repaymentPeriod.getDueDate()) ? repaymentPeriod.getDueDate() : pauseEnd;
@@ -302,7 +304,7 @@ public class ProgressiveLoanInterestScheduleModel {
         } else {
             return repaymentPeriod.getInterestPeriods().stream()
                     .filter(ip -> date.isAfter(ip.getFromDate()) && !date.isAfter(ip.getDueDate())).reduce((first, second) -> second)
-                    .orElse(repaymentPeriod.getInterestPeriods().get(0));
+                    .orElse(repaymentPeriod.getInterestPeriods().getFirst());
         }
     }
 
@@ -357,10 +359,6 @@ public class ProgressiveLoanInterestScheduleModel {
         return MathUtil.negativeToZero(getTotalDuePrincipal().minus(getTotalPaidPrincipal()));
     }
 
-    public Money getTotalOutstandingInterest() {
-        return MathUtil.negativeToZero(getTotalDueInterest().minus(getTotalPaidInterest()));
-    }
-
     public Optional<RepaymentPeriod> findRepaymentPeriod(@NotNull LocalDate transactionDate) {
         return repaymentPeriods.stream() //
                 .filter(period -> isInPeriod(transactionDate, period.getFromDate(), period.getDueDate(), period.isFirstRepaymentPeriod()))//
@@ -381,7 +379,7 @@ public class ProgressiveLoanInterestScheduleModel {
 
     @NotNull
     public RepaymentPeriod getLastRepaymentPeriod() {
-        return repaymentPeriods.get(repaymentPeriods.size() - 1);
+        return repaymentPeriods.getLast();
     }
 
     public boolean isLastRepaymentPeriod(@NotNull RepaymentPeriod repaymentPeriod) {
