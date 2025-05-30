@@ -24,20 +24,20 @@ dependencyManagement {
     imports {
         mavenBom 'com.squareup.okhttp3:okhttp-bom:4.12.0'
         mavenBom 'org.slf4j:slf4j-bom:2.0.17'
-        mavenBom 'io.micrometer:micrometer-bom:1.13.6'
-        mavenBom 'org.springframework:spring-framework-bom:6.2.5'
-        mavenBom 'org.springframework.boot:spring-boot-dependencies:3.4.4'
-        mavenBom 'io.awspring.cloud:spring-cloud-aws-dependencies:3.2.1'
-        mavenBom 'io.opentelemetry:opentelemetry-bom:1.44.1'
-        mavenBom 'org.jetbrains.kotlin:kotlin-bom:2.0.21'
-        mavenBom 'org.junit:junit-bom:5.11.3'
-        mavenBom 'com.fasterxml.jackson:jackson-bom:2.18.3'
-        mavenBom 'io.cucumber:cucumber-bom:7.20.1'
-        mavenBom 'io.netty:netty-bom:4.1.119.Final'
-        mavenBom 'org.mockito:mockito-bom:5.14.2'
-        mavenBom 'software.amazon.awssdk:bom:2.29.9'
-        mavenBom 'io.github.resilience4j:resilience4j-bom:2.2.0'
-        mavenBom 'org.testcontainers:testcontainers-bom:1.20.4'
+        mavenBom 'io.micrometer:micrometer-bom:1.15.0'
+        mavenBom 'org.springframework:spring-framework-bom:6.2.7'
+        mavenBom 'org.springframework.boot:spring-boot-dependencies:3.5.0'
+        mavenBom 'io.awspring.cloud:spring-cloud-aws-dependencies:3.3.1'
+        mavenBom 'io.opentelemetry:opentelemetry-bom:1.50.0'
+        mavenBom 'org.jetbrains.kotlin:kotlin-bom:2.1.21'
+        mavenBom 'org.junit:junit-bom:5.13.0'
+        mavenBom 'com.fasterxml.jackson:jackson-bom:2.19.0'
+        mavenBom 'io.cucumber:cucumber-bom:7.23.0'
+        mavenBom 'io.netty:netty-bom:4.2.1.Final'
+        mavenBom 'org.mockito:mockito-bom:5.18.0'
+        mavenBom 'software.amazon.awssdk:bom:2.31.53'
+        mavenBom 'io.github.resilience4j:resilience4j-bom:2.3.0'
+        mavenBom 'org.testcontainers:testcontainers-bom:1.21.1'
     }
 
     dependencies {
@@ -45,8 +45,8 @@ dependencyManagement {
         // We do not use :+ to get the latest available version available on Maven Central, as that could suddenly break things.
         // We use the Renovate Bot to automatically propose Pull Requests (PRs) when upgrades for all of these versions are available.
 
-        dependency 'ch.qos.logback:logback-core:1.5.17'
-        dependency 'ch.qos.logback:logback-classic:1.5.17'
+        dependency 'ch.qos.logback:logback-core:1.5.18'
+        dependency 'ch.qos.logback:logback-classic:1.5.18'
         dependency 'ch.qos.logback.contrib:logback-json-classic:0.1.5'
         dependency 'ch.qos.logback.contrib:logback-jackson:0.1.5'
         dependency 'org.codehaus.janino:janino:3.1.12'
@@ -54,30 +54,30 @@ dependencyManagement {
 
         dependency 'org.eclipse.persistence:org.eclipse.persistence.jpa:4.0.2'
         dependency 'com.google.guava:guava:33.1.0-jre'
-        dependency 'com.google.code.gson:gson:2.11.0'
-        dependency 'com.google.googlejavaformat:google-java-format:1.24.0'
-        dependency 'org.apache.commons:commons-collections4:4.4'
-        dependency 'org.apache.commons:commons-compress:1.26.0'
-        dependency ('software.amazon.msk:aws-msk-iam-auth:2.2.0') {
+        dependency 'com.google.code.gson:gson:2.13.1'
+        dependency 'com.google.googlejavaformat:google-java-format:1.27.0'
+        dependency 'org.apache.commons:commons-collections4:4.5.0'
+        dependency 'org.apache.commons:commons-compress:1.27.1'
+        dependency ('software.amazon.msk:aws-msk-iam-auth:2.3.2') {
             exclude 'commons-logging:commons-logging:'
         }
         dependency ('org.apache.commons:commons-email:1.6.0') {
             exclude 'com.sun.mail:javax.mail'
             exclude 'javax.activation:activation'
         }
-        dependency 'commons-io:commons-io:2.17.0'
-        dependency 'com.github.librepdf:openpdf:2.0.3'
+        dependency 'commons-io:commons-io:2.19.0'
+        dependency 'com.github.librepdf:openpdf:2.0.5'
         dependency ('org.mnode.ical4j:ical4j:3.2.19') {
             exclude 'com.sun.mail:javax.mail'
             exclude 'org.codehaus.groovy:groovy'
         }
-        dependency 'org.apache.commons:commons-csv:1.12.0'
+        dependency 'org.apache.commons:commons-csv:1.14.0'
         dependency 'org.quartz-scheduler:quartz:2.5.0'
         dependency 'org.ehcache:ehcache:3.10.8'
         dependency 'com.github.spullara.mustache.java:compiler:0.9.14'
         dependency 'com.jayway.jsonpath:json-path:2.9.0'
-        dependency 'org.apache.tika:tika-core:2.9.3'
-        dependency ('org.apache.tika:tika-parser-microsoft-module:2.9.3') {
+        dependency 'org.apache.tika:tika-core:2.9.4'
+        dependency ('org.apache.tika:tika-parser-microsoft-module:2.9.4') {
             exclude 'org.bouncycastle:bcprov-jdk15on'
             exclude 'org.bouncycastle:bcmail-jdk15on'
             exclude 'org.bouncycastle:bcprov-jdk18on'
@@ -94,7 +94,7 @@ dependencyManagement {
             exclude 'org.apache.commons:commons-compress'
             exclude 'xml-apis:xml-apis'
         }
-        dependency ('org.apache.tika:tika-parser-miscoffice-module:2.9.3') {
+        dependency ('org.apache.tika:tika-parser-miscoffice-module:2.9.4') {
             exclude 'org.bouncycastle:bcprov-jdk15on'
             exclude 'org.bouncycastle:bcmail-jdk15on'
             exclude 'org.bouncycastle:bcprov-jdk18on'
@@ -120,59 +120,59 @@ dependencyManagement {
         dependency 'org.glassfish.jersey.media:jersey-media-multipart:3.1.10'
         dependency 'org.glassfish.jaxb:jaxb-runtime:2.3.6' // Swagger needs exactly this version
         dependency 'org.apache.bval:org.apache.bval.bundle:3.0.2'
-        dependency 'joda-time:joda-time:2.13.1'
+        dependency 'joda-time:joda-time:2.14.0'
 
         dependency 'io.github.classgraph:classgraph:4.8.179'
-        dependency 'org.awaitility:awaitility:4.2.2'
+        dependency 'org.awaitility:awaitility:4.3.0'
         // TODO: upgrade to 4.8.3
-        dependency 'com.github.spotbugs:spotbugs-annotations:4.8.6'
+        dependency 'com.github.spotbugs:spotbugs-annotations:4.9.3'
         dependency 'javax.cache:cache-api:1.1.1'
         dependency 'org.mock-server:mockserver-junit-jupiter:5.15.0'
         dependency 'org.webjars:webjars-locator-core:0.59'
         dependency 'com.icegreen:greenmail-junit5:2.0.1'
 
         // fineract client dependencies
-        dependency "com.squareup.retrofit2:retrofit:2.11.0"
-        dependency "com.squareup.retrofit2:retrofit-mock:2.11.0"
-        dependency "com.squareup.retrofit2:adapter-java8:2.11.0"
-        dependency "com.squareup.retrofit2:adapter-rxjava2:2.11.0"
-        dependency "com.squareup.retrofit2:adapter-rxjava3:2.11.0"
-        dependency "com.squareup.retrofit2:adapter-guava:2.11.0"
-        dependency "com.squareup.retrofit2:converter-wire:2.11.0"
-        dependency "com.squareup.retrofit2:converter-jackson:2.11.0"
-        dependency "com.squareup.retrofit2:converter-simplexml:2.11.0"
-        dependency "com.squareup.retrofit2:converter-jaxb:2.11.0"
-        dependency "com.squareup.retrofit2:converter-java8:2.11.0"
-        dependency "com.squareup.retrofit2:converter-scalars:2.11.0"
-        dependency "com.squareup.retrofit2:converter-gson:2.11.0"
-        dependency "com.squareup.retrofit2:converter-protobuf:2.11.0"
+        dependency "com.squareup.retrofit2:retrofit:2.12.0"
+        dependency "com.squareup.retrofit2:retrofit-mock:2.12.0"
+        dependency "com.squareup.retrofit2:adapter-java8:2.12.0"
+        dependency "com.squareup.retrofit2:adapter-rxjava2:2.12.0"
+        dependency "com.squareup.retrofit2:adapter-rxjava3:2.12.0"
+        dependency "com.squareup.retrofit2:adapter-guava:2.12.0"
+        dependency "com.squareup.retrofit2:converter-wire:2.12.0"
+        dependency "com.squareup.retrofit2:converter-jackson:2.12.0"
+        dependency "com.squareup.retrofit2:converter-simplexml:2.12.0"
+        dependency "com.squareup.retrofit2:converter-jaxb:2.12.0"
+        dependency "com.squareup.retrofit2:converter-java8:2.12.0"
+        dependency "com.squareup.retrofit2:converter-scalars:2.12.0"
+        dependency "com.squareup.retrofit2:converter-gson:2.12.0"
+        dependency "com.squareup.retrofit2:converter-protobuf:2.12.0"
         dependency 'io.reactivex.rxjava2:rxjava:2.2.21'
         dependency "org.apache.oltu.oauth2:org.apache.oltu.oauth2.common:1.0.1"
         dependency "org.apache.oltu.oauth2:org.apache.oltu.oauth2.client:1.0.1"
         dependency "org.apache.oltu.oauth2:org.apache.oltu.oauth2.httpclient4:1.0.1"
         dependency "io.gsonfire:gson-fire:1.9.0"
         dependency "com.google.code.findbugs:jsr305:3.0.2"
-        dependency "commons-codec:commons-codec:1.17.1"
-        dependency "org.projectlombok:lombok:1.18.36"
+        dependency "commons-codec:commons-codec:1.18.0"
+        dependency "org.projectlombok:lombok:1.18.38"
 
         dependency 'org.bouncycastle:bcpkix-jdk18on:1.80'
         dependency 'org.bouncycastle:bcprov-jdk18on:1.80'
         dependency 'org.bouncycastle:bcutil-jdk18on:1.80'
         dependency 'org.bouncycastle:bcpg-jdk18on:1.80'
 
-        dependency 'org.eclipse.jgit:org.eclipse.jgit:7.2.0.202503040940-r'
-        dependency 'org.eclipse.jgit:org.eclipse.jgit.gpg.bc:7.2.0.202503040940-r'
-        dependency 'org.eclipse.jgit:org.eclipse.jgit.ssh.apache:7.2.0.202503040940-r'
+        dependency 'org.eclipse.jgit:org.eclipse.jgit:7.2.1.202505142326-r'
+        dependency 'org.eclipse.jgit:org.eclipse.jgit.gpg.bc:7.2.1.202505142326-r'
+        dependency 'org.eclipse.jgit:org.eclipse.jgit.ssh.apache:7.2.1.202505142326-r'
 
         dependency ('com.tmatesoft.svnkit:svnkit:1.10.12')
         dependency 'com.vdurmont:semver4j:3.1.0'
         dependency 'org.beryx:text-io:3.4.1'
 
-        dependency ('org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0') {
+        dependency ('org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8') {
             exclude 'io.swagger.core.v3:swagger-core'
         }
 
-        dependency 'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.23.1'
+        dependency 'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.25.1'
 
         dependency ('org.apache.activemq:activemq-client:6.1.6') {
             exclude 'javax.annotation:javax.annotation-api'
@@ -196,10 +196,10 @@ dependencyManagement {
             exclude 'jakarta.activation:jakarta.activation-api'
         }
 
-        dependency ('org.liquibase:liquibase-core:4.31.1') {
+        dependency ('org.liquibase:liquibase-core:4.32.0') {
             exclude 'javax.xml.bind:jaxb-api'
         }
-        dependency 'org.liquibase.ext:liquibase-postgresql:4.31.1'
+        dependency 'org.liquibase.ext:liquibase-postgresql:4.32.0'
 
         dependency ('org.dom4j:dom4j:2.1.4') {
             exclude 'relaxngDatatype:relaxngDatatype' // already in com.sun.xml.bind:jaxb-osgi:2.3.0.1
@@ -208,8 +208,8 @@ dependencyManagement {
             exclude 'pull-parser:pull-parser'
         }
 
-        dependency 'org.owasp.esapi:esapi:2.6.0.0'
-        dependency 'org.awaitility:awaitility:4.2.2'
+        dependency 'org.owasp.esapi:esapi:2.6.1.0'
+        dependency 'org.awaitility:awaitility:4.3.0'
 
         dependencySet(group: 'org.apache.poi', version: '5.4.1') {
             entry 'poi'
@@ -217,20 +217,20 @@ dependencyManagement {
             entry 'poi-ooxml-schemas'
         }
 
-        dependencySet(group: 'io.rest-assured', version: '5.5.1') {
+        dependencySet(group: 'io.rest-assured', version: '5.5.5') {
             entry 'rest-assured'
             entry 'json-path'
             entry 'xml-path'
         }
-        dependency 'org.apache.groovy:groovy-xml:4.0.26'
-        dependency 'org.apache.groovy:groovy-json:4.0.26'
+        dependency 'org.apache.groovy:groovy-xml:4.0.27'
+        dependency 'org.apache.groovy:groovy-json:4.0.27'
 
         dependency 'org.mapstruct:mapstruct:1.6.3'
         dependency 'org.mapstruct:mapstruct-processor:1.6.3'
 
         dependency "org.apache.avro:avro:1.12.0"
 
-        dependency ('org.mariadb.jdbc:mariadb-java-client:3.5.2') {
+        dependency ('org.mariadb.jdbc:mariadb-java-client:3.5.3') {
             exclude 'org.slf4j:jcl-over-slf4j'
             exclude 'org.slf4j:slf4j-api'
         }
@@ -238,9 +238,9 @@ dependencyManagement {
         //v42.7.5: performance issue: https://github.com/pgjdbc/pgjdbc/issues/3511#issuecomment-2637277977
         dependency 'org.postgresql:postgresql:42.7.4'
 
-        dependency 'com.mysql:mysql-connector-j:9.2.0'
+        dependency 'com.mysql:mysql-connector-j:9.3.0'
 
-        dependency 'org.assertj:assertj-core:3.26.3'
+        dependency 'org.assertj:assertj-core:3.27.3'
 
         dependency 'org.apache.commons:commons-math3:3.6.1'
 
@@ -250,10 +250,10 @@ dependencyManagement {
         dependency 'org.apache.sshd:sshd-common:2.15.0'
         dependency 'org.apache.sshd:sshd-core:2.15.0'
 
-        dependency 'io.cucumber:cucumber-java:7.20.1'
-        dependency 'io.cucumber:cucumber-java8:7.20.1'
-        dependency 'io.cucumber:cucumber-junit-platform-engine:7.20.1'
-        dependency 'io.cucumber:cucumber-spring:7.20.1'
+        dependency 'io.cucumber:cucumber-java:7.23.0'
+        dependency 'io.cucumber:cucumber-java8:7.23.0'
+        dependency 'io.cucumber:cucumber-junit-platform-engine:7.23.0'
+        dependency 'io.cucumber:cucumber-spring:7.23.0'
 
         dependency 'org.reflections:reflections:0.10.2'
 
@@ -268,6 +268,6 @@ dependencyManagement {
         dependency 'com.lmax:disruptor:3.4.4'
 
         dependency 'com.ibm.icu:icu4j:76.1'
-        dependency 'org.yakworks:spring-icu4j:0.4.2'
+        dependency 'org.yakworks:spring-icu4j:0.5.2'
     }
 }
