@@ -4151,6 +4151,18 @@ public class LoanStepDef extends AbstractStepDef {
                 .isEqualTo(ErrorMessageHelper.addCapitalizedIncomeExceedApprovedAmountFailure());
     }
 
+    @Then("Capitalized income with payment type {string} on {string} is forbidden with amount {string} due to future date")
+    public void capitalizedIncomeForbiddenFutureDate(final String transactionPaymentType, final String transactionDate, final String amount)
+            throws IOException {
+        final Response<PostLoansLoanIdTransactionsResponse> capitalizedIncomeResponse = addCapitalizedIncomeToTheLoanOnWithEURTransactionAmount(
+                transactionPaymentType, transactionDate, amount);
+
+        ErrorResponse errorDetails = ErrorResponse.from(capitalizedIncomeResponse);
+        assertThat(errorDetails.getHttpStatusCode()).as(ErrorMessageHelper.addCapitalizedIncomeFutureDateFailure()).isEqualTo(400);
+        assertThat(errorDetails.getSingleError().getDeveloperMessage())
+                .isEqualTo(ErrorMessageHelper.addCapitalizedIncomeFutureDateFailure());
+    }
+
     @Then("LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on {string}")
     public void checkLoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent(final String date) throws IOException {
         Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
@@ -4258,5 +4270,27 @@ public class LoanStepDef extends AbstractStepDef {
         final Long loanContractTerminationTransactionId = loanContractTerminationTransaction.getId();
 
         eventAssertion.assertEventRaised(LoanTransactionContractTerminationPostBusinessEvent.class, loanContractTerminationTransactionId);
+    }
+
+    @Then("Capitalized income adjustment with payment type {string} on {string} is forbidden with amount {string} due to future date")
+    public void capitalizedIncomeAdjustmentForbiddenFutureDate(final String transactionPaymentType, final String transactionDate,
+            final String amount) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.body().getLoanId();
+        final Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        final List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.body().getTransactions();
+        final GetLoansLoanIdTransactions capitalizedIncomeTransaction = transactions.stream()
+                .filter(t -> "Capitalized Income".equals(t.getType().getValue())).findFirst()
+                .orElseThrow(() -> new IllegalStateException("No Capitalized Income transaction found for loan " + loanId));
+
+        final Response<PostLoansLoanIdTransactionsResponse> capitalizedIncomeAdjustmentResponse = adjustCapitalizedIncome(
+                transactionPaymentType, transactionDate, amount, capitalizedIncomeTransaction.getId());
+
+        ErrorResponse errorDetails = ErrorResponse.from(capitalizedIncomeAdjustmentResponse);
+        assertThat(errorDetails.getHttpStatusCode()).as(ErrorMessageHelper.addCapitalizedIncomeFutureDateFailure()).isEqualTo(400);
+        assertThat(errorDetails.getSingleError().getDeveloperMessage())
+                .isEqualTo(ErrorMessageHelper.addCapitalizedIncomeFutureDateFailure());
     }
 }
