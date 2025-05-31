@@ -410,11 +410,11 @@ public class LoanProductUpdateUtil {
         }
 
         if (command.isChangeInIntegerParameterNamedWithNullCheck(LoanProductConstants.installmentAmountInMultiplesOfParamName,
-                loanProduct.getInstallmentAmountInMultiplesOf())) {
+                loanProduct.getLoanProductRelatedDetail().getInstallmentAmountInMultiplesOf())) {
             final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.installmentAmountInMultiplesOfParamName);
             actualChanges.put(LoanProductConstants.installmentAmountInMultiplesOfParamName, newValue);
             actualChanges.put("locale", localeAsInput);
-            loanProduct.setInstallmentAmountInMultiplesOf(newValue);
+            loanProduct.getLoanProductRelatedDetail().setInstallmentAmountInMultiplesOf(newValue);
         }
 
         if (command.isChangeInBooleanParameterNamed(LoanProductConstants.CAN_USE_FOR_TOPUP, loanProduct.isCanUseForTopup())) {

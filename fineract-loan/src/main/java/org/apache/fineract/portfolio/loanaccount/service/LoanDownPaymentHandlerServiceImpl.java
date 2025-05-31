@@ -197,8 +197,9 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
         }
         Money downPaymentMoney = Money.of(loan.getCurrency(),
                 MathUtil.percentageOf(disbursementTransaction.getAmount(), disbursedAmountPercentageForDownPayment, 19));
-        if (loan.getLoanProduct().getInstallmentAmountInMultiplesOf() != null) {
-            downPaymentMoney = Money.roundToMultiplesOf(downPaymentMoney, loan.getLoanProduct().getInstallmentAmountInMultiplesOf());
+        if (loan.getLoanProductRelatedDetail().getInstallmentAmountInMultiplesOf() != null) {
+            downPaymentMoney = Money.roundToMultiplesOf(downPaymentMoney,
+                    loan.getLoanProductRelatedDetail().getInstallmentAmountInMultiplesOf());
         }
         final Money adjustedDownPaymentMoney = switch (loan.getLoanProductRelatedDetail().getLoanScheduleType()) {
             // For Cumulative loan: To check whether the loan was overpaid when the disbursement happened and to get the

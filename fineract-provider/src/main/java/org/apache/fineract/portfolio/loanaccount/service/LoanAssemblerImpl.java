@@ -221,8 +221,9 @@ public class LoanAssemblerImpl implements LoanAssembler {
         // Here we add Rates to LoanApplication
         final List<Rate> rates = this.rateAssembler.fromParsedJson(element);
 
-        final LoanProductRelatedDetail loanProductRelatedDetail = this.loanScheduleAssembler.assembleLoanProductRelatedDetail(element,
-                loanProduct);
+        final LoanApplicationTerms loanApplicationTerms = this.loanScheduleAssembler.assembleLoanTerms(element);
+        final LoanProductRelatedDetail loanProductRelatedDetail = this.loanScheduleAssembler
+                .assembleLoanProductRelatedDetail(loanApplicationTerms, element);
 
         final BigDecimal interestRateDifferential = this.fromApiJsonHelper
                 .extractBigDecimalWithLocaleNamed(LoanApiConstants.interestRateDifferentialParameterName, element);
@@ -247,7 +248,6 @@ public class LoanAssemblerImpl implements LoanAssembler {
             isEnableInstallmentLevelDelinquency = loanProduct.isEnableInstallmentLevelDelinquency();
         }
 
-        final LoanApplicationTerms loanApplicationTerms = this.loanScheduleAssembler.assembleLoanTerms(element);
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
         Long officeId = client != null ? client.getOffice().getId() : group.getOffice().getId();
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(officeId,

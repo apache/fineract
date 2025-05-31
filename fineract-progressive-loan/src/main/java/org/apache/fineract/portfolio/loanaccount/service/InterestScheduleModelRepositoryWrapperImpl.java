@@ -83,7 +83,7 @@ public class InterestScheduleModelRepositoryWrapperImpl implements InterestSched
         return progressiveLoanModel.map(ProgressiveLoanModel::getJsonModel) //
                 .map(jsonModel -> progressiveLoanInterestScheduleModelParserService.fromJson(jsonModel,
                         progressiveLoanModel.get().getLoan().getLoanProductRelatedDetail(), MoneyHelper.getMathContext(),
-                        progressiveLoanModel.get().getLoan().getLoanProduct().getInstallmentAmountInMultiplesOf()));
+                        progressiveLoanModel.get().getLoan().getLoanProductRelatedDetail().getInstallmentAmountInMultiplesOf()));
     }
 
     @Override
