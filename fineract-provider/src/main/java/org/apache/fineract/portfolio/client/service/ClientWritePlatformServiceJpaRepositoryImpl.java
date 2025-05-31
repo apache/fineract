@@ -315,7 +315,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 extractAndCreateClientNonPerson(newClient, command);
             }
 
-            if (isAddressEnabled) {
+            if (isAddressEnabled || command.json().contains("\"isActive\"")) {
                 this.addressWritePlatformService.addNewClientAddress(newClient, command);
             }
 
