@@ -1,9 +1,11 @@
-FROM openjdk:17-jdk-slim
+FROM openjdk:21-jdk-slim
 
 # Install required packages
 RUN apt-get update && apt-get install -y \
     curl \
     wget \
+    postgresql-client \
+    redis-tools \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
