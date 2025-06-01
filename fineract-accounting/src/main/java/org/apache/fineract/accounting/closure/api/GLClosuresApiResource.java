@@ -126,7 +126,7 @@ public class GLClosuresApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update an Accounting closure", description = "Once an accounting closure is created, only the comments associated with it may be edited")
-    @RequestBody(content = @Content(schema = @Schema(implementation = GLClosuresApiResourceSwagger.PutGlClosuresRequest.class, required = true)))
+    @RequestBody(content = @Content(schema = @Schema(implementation = GLClosuresApiResourceSwagger.PutGlClosuresRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GLClosuresApiResourceSwagger.PutGlClosuresResponse.class))) })
     public CommandProcessingResult updateGLClosure(@PathParam("glClosureId") @Parameter(description = "glClosureId") final Long glClosureId,

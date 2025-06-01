@@ -42,7 +42,7 @@ public class AcmeNoteServiceStepDefinitions implements En {
                 });
 
         When("/^The user retrieves the service of interface class (.*)$/", (String interfaceClassName) -> {
-            contextRunner.run((ctx) -> {
+            contextRunner.run(ctx -> {
                 this.interfaceClass = Class.forName(interfaceClassName.trim());
 
                 assertThat(this.interfaceClass.isInterface()).isTrue();
