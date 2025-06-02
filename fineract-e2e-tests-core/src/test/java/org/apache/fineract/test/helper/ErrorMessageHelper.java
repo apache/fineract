@@ -150,6 +150,10 @@ public final class ErrorMessageHelper {
         return "Failed data validation due to: exceeds.approved.amount.";
     }
 
+    public static String addCapitalizedIncomeFutureDateFailure() {
+        return "Failed data validation due to: cannot.be.in.the.future.";
+    }
+
     public static String wrongAmountInRepaymentSchedule(int line, BigDecimal actual, BigDecimal expected) {
         String lineToStr = String.valueOf(line);
         String actualToStr = actual.toString();
