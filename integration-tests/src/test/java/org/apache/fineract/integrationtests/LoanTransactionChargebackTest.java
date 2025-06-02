@@ -281,7 +281,7 @@ public class LoanTransactionChargebackTest extends BaseLoanIntegrationTest {
         List<GetLoansLoanIdTransactions> loanTransactions = getLoansLoanIdResponse.getTransactions();
         assertNotNull(loanTransactions);
         log.info("Loan Id {} with {} transactions", loanId, loanTransactions.size());
-        assertEquals(2, loanTransactions.size());
+        assertEquals(1, loanTransactions.size());
         GetLoansLoanIdTransactions loanTransaction = loanTransactions.iterator().next();
         log.info("Try to apply the Charge back over transaction Id {} with type {}", loanTransaction.getId(),
                 loanTransaction.getType().getCode());

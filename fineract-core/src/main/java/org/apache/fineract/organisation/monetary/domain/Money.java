@@ -224,6 +224,9 @@ public class Money implements Comparable<Money> {
     public Money plus(final Iterable<? extends Money> moniesToAdd) {
         BigDecimal total = this.amount;
         for (final Money moneyProvider : moniesToAdd) {
+            if (moneyProvider == null) {
+                continue;
+            }
             final Money money = checkCurrencyEqual(moneyProvider);
             total = total.add(money.amount);
         }
@@ -235,6 +238,10 @@ public class Money implements Comparable<Money> {
     }
 
     public Money plus(final Money moneyToAdd, final MathContext mc) {
+        if (moneyToAdd == null) {
+            return this;
+        }
+
         final Money toAdd = checkCurrencyEqual(moneyToAdd);
         return this.plus(toAdd.getAmount(), mc);
     }
@@ -264,6 +271,9 @@ public class Money implements Comparable<Money> {
     }
 
     public Money minus(final Money moneyToSubtract, final MathContext mc) {
+        if (moneyToSubtract == null) {
+            return this;
+        }
         final Money toSubtract = checkCurrencyEqual(moneyToSubtract);
         return this.minus(toSubtract.getAmount(), mc);
     }
@@ -273,6 +283,9 @@ public class Money implements Comparable<Money> {
     }
 
     public Money add(final Money moneyToAdd, final MathContext mc) {
+        if (moneyToAdd == null) {
+            return this;
+        }
         final Money toAdd = checkCurrencyEqual(moneyToAdd);
         return this.add(toAdd.getAmount(), mc);
     }
