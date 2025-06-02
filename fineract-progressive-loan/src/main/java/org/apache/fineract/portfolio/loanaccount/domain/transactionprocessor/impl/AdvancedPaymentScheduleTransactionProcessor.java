@@ -1245,6 +1245,22 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         Money amortizableAmount = disbursementTransaction.getAmount(currency).minus(downPaymentAmount);
         emiCalculator.addDisbursement(model, transactionDate, amortizableAmount);
 
+        boolean needsNPlusOneInstallment = installments.stream()
+                .filter(i -> i.getDueDate().isAfter(transactionDate) || i.getDueDate().isEqual(transactionDate))
+                .filter(i -> !i.isDownPayment() && !i.isAdditional()).findAny().isEmpty();
+
+        if (needsNPlusOneInstallment) {
+            // CREATE N+1 installment like the non-EMI version does
+            LoanRepaymentScheduleInstallment newInstallment = new LoanRepaymentScheduleInstallment(disbursementTransaction.getLoan(),
+                    installments.size() + 1, disbursementTransaction.getTransactionDate(), disbursementTransaction.getTransactionDate(),
+                    Money.zero(currency).getAmount(), Money.zero(currency).getAmount(), Money.zero(currency).getAmount(),
+                    Money.zero(currency).getAmount(), true, null);
+            newInstallment.updatePrincipal(amortizableAmount.getAmount());
+            newInstallment.markAsAdditional();
+            disbursementTransaction.getLoan().addLoanRepaymentScheduleInstallment(newInstallment);
+            installments.add(newInstallment);
+        }
+
         disbursementTransaction.resetDerivedComponents();
         recalculateRepaymentPeriodsWithEMICalculation(amortizableAmount, model, installments, transactionDate, currency);
         allocateOverpayment(disbursementTransaction, transactionCtx);
@@ -1258,6 +1274,23 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         List<LoanRepaymentScheduleInstallment> candidateRepaymentInstallments = installments.stream().filter(
                 i -> i.getDueDate().isAfter(disbursementTransaction.getTransactionDate()) && !i.isDownPayment() && !i.isAdditional())
                 .toList();
+        if (candidateRepaymentInstallments.isEmpty()) {
+            LoanRepaymentScheduleInstallment newInstallment;
+            if (installments.stream().filter(LoanRepaymentScheduleInstallment::isAdditional).findAny().isEmpty()) {
+                newInstallment = new LoanRepaymentScheduleInstallment(disbursementTransaction.getLoan(), installments.size() + 1,
+                        disbursementTransaction.getTransactionDate(), disbursementTransaction.getTransactionDate(),
+                        Money.zero(currency).getAmount(), Money.zero(currency).getAmount(), Money.zero(currency).getAmount(),
+                        Money.zero(currency).getAmount(), false, null);
+                newInstallment.markAsAdditional();
+                disbursementTransaction.getLoan().addLoanRepaymentScheduleInstallment(newInstallment);
+                installments.add(newInstallment);
+            } else {
+                newInstallment = installments.stream().filter(LoanRepaymentScheduleInstallment::isAdditional).findFirst().orElseThrow();
+                newInstallment.updateDueDate(disbursementTransaction.getTransactionDate());
+            }
+            candidateRepaymentInstallments = Collections.singletonList(newInstallment);
+        }
+
         LoanProductRelatedDetail loanProductRelatedDetail = disbursementTransaction.getLoan().getLoanRepaymentScheduleDetail();
         Integer installmentAmountInMultiplesOf = disbursementTransaction.getLoan().getLoanProduct().getInstallmentAmountInMultiplesOf();
         Money downPaymentAmount = Money.zero(currency);
@@ -1323,7 +1356,18 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
     private void recalculateRepaymentPeriodsWithEMICalculation(Money amortizableAmount, ProgressiveLoanInterestScheduleModel model,
             List<LoanRepaymentScheduleInstallment> installments, LocalDate transactionDate, MonetaryCurrency currency) {
+        boolean isPostMaturityDisbursement = installments.stream().filter(i -> !i.isDownPayment() && !i.isAdditional())
+                .allMatch(i -> i.getDueDate().isBefore(transactionDate));
+
         if (amortizableAmount.isGreaterThanZero()) {
+            if (isPostMaturityDisbursement) {
+                LoanRepaymentScheduleInstallment additionalInstallment = installments.stream()
+                        .filter(LoanRepaymentScheduleInstallment::isAdditional).findFirst().orElse(null);
+                if (additionalInstallment != null && additionalInstallment.getPrincipal(currency).isZero()) {
+                    additionalInstallment.updatePrincipal(amortizableAmount.getAmount());
+                }
+            }
+
             model.repaymentPeriods().forEach(rm -> {
                 LoanRepaymentScheduleInstallment installment = installments.stream().filter(
                         ri -> ri.getDueDate().equals(rm.getDueDate()) && !ri.isDownPayment() && !ri.getDueDate().isBefore(transactionDate))
@@ -1342,6 +1386,15 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             Integer installmentAmountInMultiplesOf) {
         if (amortizableAmount.isGreaterThanZero()) {
             int noCandidateRepaymentInstallments = candidateRepaymentInstallments.size();
+
+            // Handle the case where no future installments exist (e.g., second disbursement after loan closure)
+            if (noCandidateRepaymentInstallments == 0) {
+                log.debug("No candidate repayment installments found for disbursement on {}. Creating new installments.",
+                        loanTransaction.getTransactionDate());
+                return;
+            }
+
+            // Original logic for when candidate installments exist
             Money increasePrincipalBy = amortizableAmount.dividedBy(noCandidateRepaymentInstallments, MoneyHelper.getMathContext());
             MoneyHolder moneyHolder = new MoneyHolder(amortizableAmount);
 

@@ -25,6 +25,7 @@ import static org.apache.fineract.portfolio.loanproduct.domain.AllocationType.PE
 import static org.apache.fineract.portfolio.loanproduct.domain.AllocationType.PRINCIPAL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.refEq;
@@ -513,6 +514,71 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         assertNotNull(paidPortion);
         assertNotNull(payDate);
         assertEquals(transactionAmountMoney.toString(), paidPortion.toString());
+    }
+
+    @Test
+    public void testDisbursementAfterMaturityDateWithEMICalculator() {
+        LocalDate disbursementDate = LocalDate.of(2023, 1, 1);
+        LocalDate maturityDate = LocalDate.of(2023, 6, 1);
+        LocalDate postMaturityDisbursementDate = LocalDate.of(2023, 7, 15); // After maturity date
+
+        MonetaryCurrency currency = MONETARY_CURRENCY;
+        BigDecimal postMaturityDisbursementAmount = BigDecimal.valueOf(500.0);
+        Money disbursementMoney = Money.of(currency, postMaturityDisbursementAmount);
+
+        LoanProductRelatedDetail loanProductRelatedDetail = mock(LoanProductRelatedDetail.class);
+        org.apache.fineract.portfolio.loanproduct.domain.LoanProduct loanProduct = mock(
+                org.apache.fineract.portfolio.loanproduct.domain.LoanProduct.class);
+        when(loanProduct.getInstallmentAmountInMultiplesOf()).thenReturn(null);
+        when(loanProductRelatedDetail.isEnableDownPayment()).thenReturn(false);
+
+        Loan loan = mock(Loan.class);
+        when(loan.getLoanRepaymentScheduleDetail()).thenReturn(loanProductRelatedDetail);
+        when(loan.getLoanProduct()).thenReturn(loanProduct);
+        when(loan.isInterestBearing()).thenReturn(true);
+
+        LoanRepaymentScheduleInstallment installment1 = spy(
+                new LoanRepaymentScheduleInstallment(loan, 1, disbursementDate, disbursementDate.plusMonths(1), BigDecimal.valueOf(200.0),
+                        BigDecimal.valueOf(10.0), BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0), false, null, BigDecimal.ZERO));
+
+        LoanRepaymentScheduleInstallment installment2 = spy(new LoanRepaymentScheduleInstallment(loan, 2, disbursementDate.plusMonths(1),
+                disbursementDate.plusMonths(2), BigDecimal.valueOf(200.0), BigDecimal.valueOf(10.0), BigDecimal.valueOf(0.0),
+                BigDecimal.valueOf(0.0), false, null, BigDecimal.ZERO));
+
+        LoanRepaymentScheduleInstallment installment3 = spy(
+                new LoanRepaymentScheduleInstallment(loan, 3, disbursementDate.plusMonths(2), maturityDate, BigDecimal.valueOf(600.0),
+                        BigDecimal.valueOf(10.0), BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0), false, null, BigDecimal.ZERO));
+
+        List<LoanRepaymentScheduleInstallment> installments = new ArrayList<>(Arrays.asList(installment1, installment2, installment3));
+
+        List<LoanRepaymentScheduleInstallment> spyInstallments = spy(installments);
+
+        LoanTransaction disbursementTransaction = mock(LoanTransaction.class);
+        when(disbursementTransaction.getTypeOf()).thenReturn(LoanTransactionType.DISBURSEMENT);
+        when(disbursementTransaction.getTransactionDate()).thenReturn(postMaturityDisbursementDate);
+        when(disbursementTransaction.getAmount(currency)).thenReturn(disbursementMoney);
+        when(disbursementTransaction.getLoan()).thenReturn(loan);
+
+        ArgumentCaptor<LoanRepaymentScheduleInstallment> installmentCaptor = ArgumentCaptor
+                .forClass(LoanRepaymentScheduleInstallment.class);
+        Mockito.doNothing().when(loan).addLoanRepaymentScheduleInstallment(installmentCaptor.capture());
+
+        ProgressiveLoanInterestScheduleModel model = mock(ProgressiveLoanInterestScheduleModel.class);
+
+        TransactionCtx ctx = new ProgressiveTransactionCtx(currency, spyInstallments, Set.of(), new MoneyHolder(Money.zero(currency)),
+                mock(ChangedTransactionDetail.class), model, Money.zero(currency));
+
+        underTest.processLatestTransaction(disbursementTransaction, ctx);
+
+        Mockito.verify(emiCalculator).addDisbursement(eq(model), eq(postMaturityDisbursementDate), eq(disbursementMoney));
+        Mockito.verify(loan).addLoanRepaymentScheduleInstallment(any(LoanRepaymentScheduleInstallment.class));
+
+        LoanRepaymentScheduleInstallment newInstallment = installmentCaptor.getValue();
+        assertNotNull(newInstallment);
+        assertTrue(newInstallment.isAdditional());
+        assertEquals(postMaturityDisbursementDate, newInstallment.getDueDate());
+
+        assertEquals(0, newInstallment.getPrincipal(currency).getAmount().compareTo(postMaturityDisbursementAmount));
     }
 
     private LoanRepaymentScheduleInstallment createMockInstallment(LocalDate localDate, boolean isAdditional) {
