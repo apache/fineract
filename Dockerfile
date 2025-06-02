@@ -1,18 +1,25 @@
 FROM openjdk:21-jdk-slim
 
-# Install required packages
+# Install required packages including Gradle
 RUN apt-get update && apt-get install -y \
     curl \
     wget \
+    unzip \
     postgresql-client \
     redis-tools \
     && rm -rf /var/lib/apt/lists/*
 
+# Install Gradle
+RUN wget https://services.gradle.org/distributions/gradle-8.10.2-bin.zip -P /tmp \
+    && unzip -d /opt/gradle /tmp/gradle-8.10.2-bin.zip \
+    && rm /tmp/gradle-8.10.2-bin.zip
+
+ENV GRADLE_HOME=/opt/gradle/gradle-8.10.2
+ENV PATH=${GRADLE_HOME}/bin:${PATH}
+
 WORKDIR /app
 
-# Copy gradle wrapper and build files
-COPY gradlew .
-COPY gradle/ gradle/
+# Copy build files
 COPY build.gradle .
 COPY settings.gradle .
 COPY gradle.properties .
@@ -41,11 +48,8 @@ COPY fineract-savings/ fineract-savings/
 COPY fineract-tax/ fineract-tax/
 COPY fineract-war/ fineract-war/
 
-# Make gradlew executable
-RUN chmod +x gradlew
-
 # Build the application
-RUN ./gradlew clean bootJar -x test --no-daemon
+RUN gradle clean bootJar -x test --no-daemon
 
 # Expose port
 EXPOSE 8080
