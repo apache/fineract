@@ -34,7 +34,7 @@ configurations {
     driver
 }
 dependencies {
-    driver 'com.mysql:mysql-connector-j'
+    driver 'org.postgresql:postgresql'
 }
 
 cargo {

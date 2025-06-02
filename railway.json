@@ -1,13 +1,13 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
-    "builder": "dockerfile",
-    "dockerfilePath": "Dockerfile"
+    "builder": "nixpacks"
   },
   "deploy": {
     "healthcheckPath": "/fineract-provider/actuator/health",
     "healthcheckTimeout": 300,
     "restartPolicyType": "always",
-    "sleepApplication": false
+    "sleepApplication": false,
+    "startCommand": "./railway-start.sh"
   }
 }

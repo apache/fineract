@@ -75,8 +75,6 @@ jib {
             }
         }
         // NOTE: other custom dependencies
-        implementation 'org.mariadb.jdbc:mariadb-java-client'
-        implementation 'com.mysql:mysql-connector-j'
         implementation 'org.postgresql:postgresql'
         annotationProcessor('org.springframework.boot:spring-boot-autoconfigure-processor')
         annotationProcessor('org.springframework.boot:spring-boot-configuration-processor')

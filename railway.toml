@@ -1,7 +1,7 @@
 [build]
 builder = "nixpacks"
-buildCommand = "./gradlew :fineract-provider:build -x test -x cucumber -x spotlessCheck -x rat --no-daemon"
-startCommand = "java $JAVA_OPTS -Dspring.profiles.active=basicauth,railway -Dspring.config.additional-location=classpath:/,file:config/railway/ -jar fineract-provider/build/libs/fineract-provider-*-SNAPSHOT.jar"
+buildCommand = "./gradlew :fineract-provider:build -x test -x cucumber -x spotlessCheck -x rat --no-daemon && cp fineract-provider/build/libs/fineract-provider-*-SNAPSHOT.jar /app/fineract-provider.jar"
+startCommand = "./railway-start.sh"
 
 [deploy]
 healthcheckPath = "/fineract-provider/actuator/health"
