@@ -177,6 +177,8 @@ configurations {
 }
 dependencies {
     driver 'org.postgresql:postgresql'
+    implementation 'org.codehaus.groovy:groovy-sql:3.0.19'
+    implementation 'org.apache.ant:ant:1.10.14'
 }
 
 URLClassLoader loader = GroovyObject.class.classLoader
