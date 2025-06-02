@@ -64,6 +64,10 @@ public final class ErrorMessageHelper {
         return String.format("The date on which a loan with identifier : %s is disbursed cannot be in the future.", loanIdStr);
     }
 
+    public static String addDisbursementExceedApprovedAmountFailure() {
+        return "Loan can't be disbursed,disburse amount is exceeding approved principal ";
+    }
+
     public static String disbursePastDateFailure(Integer loanId, String actualDisbursementDate) {
         return String.format("The date on which a loan is disbursed cannot be before its approval date: %s", actualDisbursementDate);
     }
