@@ -45,7 +45,7 @@ COPY fineract-war/ fineract-war/
 RUN chmod +x gradlew
 
 # Build the application
-RUN java -cp gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain clean bootJar -x test --no-daemon
+RUN ./gradlew clean bootJar -x test --no-daemon
 
 # Expose port
 EXPOSE 8080
