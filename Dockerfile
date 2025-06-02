@@ -28,6 +28,7 @@ COPY lombok.config .
 # Copy source code
 COPY buildSrc/ buildSrc/
 COPY config/ config/
+COPY custom/ custom/
 COPY fineract-accounting/ fineract-accounting/
 COPY fineract-avro-schemas/ fineract-avro-schemas/
 COPY fineract-branch/ fineract-branch/
