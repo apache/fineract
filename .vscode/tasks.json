@@ -94,10 +94,42 @@
                 "clear": true
             }
         },
-        {
-            "label": "Railway: Test Conditional Notifications (Failure)",
+        {            "label": "Railway: Test Conditional Notifications (Failure)",
             "type": "shell",
             "command": "bash -c 'export DEPLOY_TYPE=production DEPLOY_STATUS=failure && bash .\\scripts\\conditional-notifications.sh --debug'",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "clear": true
+            }
+        },
+        {
+            "label": "Railway: Test Monitoring Integration",
+            "type": "shell",
+            "command": "bash .\\scripts\\monitoring-integration.sh --verbose",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "clear": true
+            }
+        },
+        {
+            "label": "Railway: Test Monitoring with Priority",
+            "type": "shell",
+            "command": "bash -c 'export DEPLOY_TYPE=production NOTIFICATION_PRIORITY=high && bash .\\scripts\\monitoring-integration.sh --verbose'",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "clear": true
+            }
+        },
+        {
+            "label": "Railway: Test Monitoring for Feature Deployment",
+            "type": "shell",
+            "command": "bash -c 'export DEPLOY_TYPE=feature NOTIFICATION_PRIORITY=low SEND_SLACK=false SEND_TEAMS=false && bash .\\scripts\\monitoring-integration.sh --verbose'",
             "problemMatcher": [],
             "presentation": {
                 "reveal": "always",
