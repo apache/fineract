@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.collateralmanagement.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.apache.fineract.portfolio.collateralmanagement.data.CollateralProductRequest;
 
 final class CollateralManagementApiResourceSwagger {
 
@@ -32,16 +31,6 @@ final class CollateralManagementApiResourceSwagger {
 
         @Schema(example = "14")
         public Long resourceId;
-    }
-
-    @Schema(description = "PutCollateralProductResponse")
-    public static final class PutCollateralProductResponse {
-
-        private PutCollateralProductResponse() {}
-
-        @Schema(example = "12")
-        public Long resourceId;
-        public CollateralProductRequest changes;
     }
 
     @Schema(description = "DeleteCollateralProductResponse")

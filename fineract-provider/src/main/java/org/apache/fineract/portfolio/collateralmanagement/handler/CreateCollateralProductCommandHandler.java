@@ -19,28 +19,28 @@
 package org.apache.fineract.portfolio.collateralmanagement.handler;
 
 import jakarta.transaction.Transactional;
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.portfolio.collateralmanagement.data.CollateralManagementProductCreateRequest;
+import org.apache.fineract.portfolio.collateralmanagement.data.CollateralManagementProductResponse;
 import org.apache.fineract.portfolio.collateralmanagement.service.CollateralManagementWritePlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 @Service
-@CommandType(entity = "COLLATERAL_PRODUCT", action = "CREATE")
-public class CreateCollateralProductCommandHandler implements NewCommandSourceHandler {
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class CreateCollateralProductCommandHandler
+        implements CommandHandler<CollateralManagementProductCreateRequest, CollateralManagementProductResponse> {
 
     private final CollateralManagementWritePlatformService collateralManagementWritePlatformService;
 
-    @Autowired
-    public CreateCollateralProductCommandHandler(final CollateralManagementWritePlatformService collateralManagementWritePlatformService) {
-        this.collateralManagementWritePlatformService = collateralManagementWritePlatformService;
-    }
-
     @Transactional
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand jsonCommand) {
-        return this.collateralManagementWritePlatformService.createCollateral(jsonCommand);
+    public CollateralManagementProductResponse handle(Command<CollateralManagementProductCreateRequest> command) {
+        return this.collateralManagementWritePlatformService.createCollateral(command.getPayload());
     }
 }

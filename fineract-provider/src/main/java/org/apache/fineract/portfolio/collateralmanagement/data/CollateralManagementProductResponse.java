@@ -20,11 +20,20 @@ package org.apache.fineract.portfolio.collateralmanagement.data;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public record CollateralManagementProductRequest(String quality, BigDecimal basePrice, BigDecimal pctToBase, String unitType, String name,
-        String currency, String locale) implements Serializable {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class CollateralManagementProductResponse implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
+
+    private Long resourceId;
+    private Long entityId;
 }

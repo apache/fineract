@@ -20,34 +20,40 @@ package org.apache.fineract.portfolio.collateralmanagement.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.List;
+import java.util.UUID;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.service.CommandWrapperBuilder;
-import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandPipeline;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
+import org.apache.fineract.portfolio.collateralmanagement.command.CollateralManagementProductCommand;
+import org.apache.fineract.portfolio.collateralmanagement.command.CollateralManagementProductDeleteCommand;
+import org.apache.fineract.portfolio.collateralmanagement.command.CollateralManagementProductUpdateCommand;
 import org.apache.fineract.portfolio.collateralmanagement.data.CollateralManagementData;
-import org.apache.fineract.portfolio.collateralmanagement.data.CollateralManagementProductRequest;
-import org.apache.fineract.portfolio.collateralmanagement.data.CollateralProductRequest;
+import org.apache.fineract.portfolio.collateralmanagement.data.CollateralManagementProductCreateRequest;
+import org.apache.fineract.portfolio.collateralmanagement.data.CollateralManagementProductDeleteRequest;
+import org.apache.fineract.portfolio.collateralmanagement.data.CollateralManagementProductResponse;
+import org.apache.fineract.portfolio.collateralmanagement.data.CollateralManagementProductUpdateRequest;
+import org.apache.fineract.portfolio.collateralmanagement.data.CollateralManagementProductUpdateResponse;
 import org.apache.fineract.portfolio.collateralmanagement.service.CollateralManagementReadPlatformService;
 import org.springframework.stereotype.Component;
 
@@ -57,25 +63,24 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CollateralManagementApiResource {
 
-    private final DefaultToApiJsonSerializer<CollateralManagementData> apiJsonSerializerService;
-    private final DefaultToApiJsonSerializer<CurrencyData> apiJsonSerializerServiceForCurrency;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final PlatformSecurityContext context;
     private final CollateralManagementReadPlatformService collateralManagementReadPlatformService;
     private final CurrencyReadPlatformService currencyReadPlatformService;
+    private final CommandPipeline pipeline;
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create a new collateral", description = "Collateral Creation")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CollateralManagementProductRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CollateralManagementApiResourceSwagger.PostCollateralManagementProductResponse.class))) })
-    public CommandProcessingResult createCollateral(
-            @Parameter(hidden = true) final CollateralManagementProductRequest collateralManagementProductRequest) {
-        final CommandWrapper commandWrapper = new CommandWrapperBuilder().createCollateral()
-                .withJson(apiJsonSerializerService.serialize(collateralManagementProductRequest)).build();
-        return this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
+    public CollateralManagementProductResponse createCollateral(@HeaderParam("Idempotency-Key") @DefaultValue("") String idempotencyKey,
+            @Parameter(hidden = true) @Valid final CollateralManagementProductCreateRequest collateralManagementProductRequest) {
+
+        CollateralManagementProductCommand command = new CollateralManagementProductCommand();
+        initCommand(idempotencyKey, command);
+        command.setPayload(collateralManagementProductRequest);
+
+        Supplier<CollateralManagementProductResponse> result = pipeline.send(command);
+        return result.get();
     }
 
     @GET
@@ -116,16 +121,19 @@ public class CollateralManagementApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update Collateral", description = "Update Collateral")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CollateralProductRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CollateralManagementApiResourceSwagger.PutCollateralProductResponse.class))) })
-    public CommandProcessingResult updateCollateral(
+    public CollateralManagementProductUpdateResponse updateCollateral(
+            @HeaderParam("Idempotency-Key") @DefaultValue("") String idempotencyKey,
             @PathParam("collateralId") @Parameter(description = "collateralId") final Long collateralId,
-            @Parameter(hidden = true) final CollateralProductRequest collateralProductRequest) {
-        final CommandWrapper commandWrapper = new CommandWrapperBuilder().updateCollateralProduct(collateralId)
-                .withJson(apiJsonSerializerService.serialize(collateralProductRequest)).build();
+            @Parameter(hidden = true) @Valid final CollateralManagementProductUpdateRequest request) {
 
-        return this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
+        CollateralManagementProductUpdateCommand command = new CollateralManagementProductUpdateCommand();
+        initCommand(idempotencyKey, command);
+
+        request.setCollateralId(collateralId);
+        command.setPayload(request);
+
+        Supplier<CollateralManagementProductUpdateResponse> result = pipeline.send(command);
+        return result.get();
     }
 
     @DELETE
@@ -133,14 +141,25 @@ public class CollateralManagementApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Consumes({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Collateral", description = "Delete Collateral")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CollateralManagementApiResourceSwagger.DeleteCollateralProductResponse.class))) })
-    public CommandProcessingResult deleteCollateral(
+    public CollateralManagementProductResponse deleteCollateral(@HeaderParam("Idempotency-Key") @DefaultValue("") String idempotencyKey,
             @PathParam("collateralId") @Parameter(description = "collateralId") final Long collateralId) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteCollateralProduct(collateralId).build();
+        CollateralManagementProductDeleteCommand command = new CollateralManagementProductDeleteCommand();
+        initCommand(idempotencyKey, command);
 
-        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        CollateralManagementProductDeleteRequest request = new CollateralManagementProductDeleteRequest();
+        request.setResourceId(collateralId);
+        command.setPayload(request);
+
+        Supplier<CollateralManagementProductResponse> result = pipeline.send(command);
+        return result.get();
     }
 
+    private void initCommand(String idempotencyKey, Command command) {
+        String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
+        command.setId(UUID.randomUUID());
+        command.setCreatedAt(OffsetDateTime.now(ZoneId.of("UTC")));
+        command.setTenantId(tenantIdentifier);
+        command.setIdempotencyKey(idempotencyKey);
+    }
 }

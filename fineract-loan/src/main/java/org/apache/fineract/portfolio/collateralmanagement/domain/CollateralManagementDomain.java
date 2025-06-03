@@ -67,7 +67,7 @@ public class CollateralManagementDomain extends AbstractPersistableCustom<Long> 
 
     }
 
-    private CollateralManagementDomain(final String quality, final BigDecimal basePrice, final String unitType, final BigDecimal pctToBase,
+    public CollateralManagementDomain(final String quality, final BigDecimal basePrice, final String unitType, final BigDecimal pctToBase,
             final ApplicationCurrency currency, final String name) {
         this.basePrice = basePrice;
         this.currency = currency;
@@ -77,6 +77,7 @@ public class CollateralManagementDomain extends AbstractPersistableCustom<Long> 
         this.name = name;
     }
 
+    @Deprecated
     public static CollateralManagementDomain createNew(JsonCommand jsonCommand, final ApplicationCurrency applicationCurrency) {
         String quality = jsonCommand.stringValueOfParameterNamed("quality");
         BigDecimal basePrice = jsonCommand.bigDecimalValueOfParameterNamed("basePrice");
@@ -86,6 +87,7 @@ public class CollateralManagementDomain extends AbstractPersistableCustom<Long> 
         return new CollateralManagementDomain(quality, basePrice, unitType, pctToBase, applicationCurrency, name);
     }
 
+    @Deprecated
     public Map<String, Object> update(final JsonCommand command, final ApplicationCurrency applicationCurrency) {
         final Map<String, Object> changes = new LinkedHashMap<>(5);
         final String nameParamName = CollateralManagementJsonInputParams.NAME.getValue();
@@ -151,6 +153,30 @@ public class CollateralManagementDomain extends AbstractPersistableCustom<Long> 
 
     public String getName() {
         return this.name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setQuality(String quality) {
+        this.quality = quality;
+    }
+
+    public void setBasePrice(BigDecimal basePrice) {
+        this.basePrice = basePrice;
+    }
+
+    public void setUnitType(String unitType) {
+        this.unitType = unitType;
+    }
+
+    public void setPctToBase(BigDecimal pctToBase) {
+        this.pctToBase = pctToBase;
+    }
+
+    public void setCurrency(ApplicationCurrency currency) {
+        this.currency = currency;
     }
 
     public Set<ClientCollateralManagement> getClientCollateralManagements() {
