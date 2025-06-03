@@ -26,7 +26,7 @@ dependencies {
 
             'org.liquibase:liquibase-core',
 
-            'com.mysql:mysql-connector-j',
+            // PostgreSQL-only configuration - MySQL connector removed
             'org.postgresql:postgresql',
 
             'com.fasterxml.jackson.core:jackson-databind',
@@ -65,7 +65,7 @@ dependencies {
             'org.openjdk.jmh:jmh-core',
             'org.testcontainers:junit-jupiter',
             'org.testcontainers:postgresql',
-            'org.testcontainers:mysql',
+            // PostgreSQL-only configuration - MySQL testcontainer removed
             'org.springframework.restdocs:spring-restdocs-mockmvc',
             'org.springframework.restdocs:spring-restdocs-webtestclient',
             'org.springframework.restdocs:spring-restdocs-restassured',

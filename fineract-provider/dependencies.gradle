@@ -106,7 +106,7 @@ dependencies {
             'com.github.spotbugs:spotbugs-annotations',
             'io.swagger.core.v3:swagger-annotations-jakarta',
 
-            'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.18.1',
+            // PostgreSQL-only configuration - MySQL connectors removed
             'com.squareup.retrofit2:converter-gson',
             'com.sun.activation:jakarta.activation',
             'com.sun.mail:jakarta.mail',
