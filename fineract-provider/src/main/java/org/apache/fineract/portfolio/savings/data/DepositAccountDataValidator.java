@@ -306,13 +306,13 @@ public class DepositAccountDataValidator {
             isLockinPeriodFrequencyValidated = true;
             final Integer lockinPeriodFrequency = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(lockinPeriodFrequencyParamName,
                     element);
-            baseDataValidator.reset().parameter(lockinPeriodFrequencyParamName).value(lockinPeriodFrequency).integerZeroOrGreater();
+            baseDataValidator.reset().parameter(lockinPeriodFrequencyParamName).value(lockinPeriodFrequency).ignoreIfNull();
 
             if (lockinPeriodFrequency != null) {
                 isLockinPeriodFrequencyTypeValidated = true;
                 final Integer lockinPeriodFrequencyType = this.fromApiJsonHelper
                         .extractIntegerSansLocaleNamed(lockinPeriodFrequencyTypeParamName, element);
-                baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(lockinPeriodFrequencyType).notNull()
+                baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(lockinPeriodFrequencyType).ignoreIfNull()
                         .inMinMaxRange(0, 3);
             }
         }
@@ -325,7 +325,7 @@ public class DepositAccountDataValidator {
             if (lockinPeriodFrequencyType != null && !isLockinPeriodFrequencyValidated) {
                 final Integer lockinPeriodFrequency = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(lockinPeriodFrequencyParamName,
                         element);
-                baseDataValidator.reset().parameter(lockinPeriodFrequencyParamName).value(lockinPeriodFrequency).notNull()
+                baseDataValidator.reset().parameter(lockinPeriodFrequencyParamName).value(lockinPeriodFrequency).ignoreIfNull()
                         .integerZeroOrGreater();
             }
         }
