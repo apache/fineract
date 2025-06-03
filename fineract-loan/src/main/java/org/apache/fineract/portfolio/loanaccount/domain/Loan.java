@@ -1655,6 +1655,12 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return false;
     }
 
+    public void liftContractTerminationSubStatus() {
+        if (this.loanSubStatus.isContractTermination()) {
+            this.loanSubStatus = null;
+        }
+    }
+
     public List<LoanTermVariations> getActiveLoanTermVariations() {
         if (this.loanTermVariations == null) {
             return new ArrayList<>();

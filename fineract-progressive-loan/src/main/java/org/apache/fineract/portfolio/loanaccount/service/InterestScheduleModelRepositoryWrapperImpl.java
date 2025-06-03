@@ -103,6 +103,7 @@ public class InterestScheduleModelRepositoryWrapperImpl implements InterestSched
                 ProgressiveTransactionCtx ctx = new ProgressiveTransactionCtx(loan.getCurrency(), loan.getRepaymentScheduleInstallments(),
                         Set.of(), new MoneyHolder(loan.getTotalOverpaidAsMoney()), new ChangedTransactionDetail(), savedModel.get());
                 ctx.setChargedOff(loan.isChargedOff());
+                ctx.setContractTerminated(loan.isContractTermination());
                 advancedPaymentScheduleTransactionProcessor.recalculateInterestForDate(businessDate, ctx);
             }
         } else {

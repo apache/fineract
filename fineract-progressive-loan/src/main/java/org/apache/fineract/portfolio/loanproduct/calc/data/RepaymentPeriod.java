@@ -351,4 +351,9 @@ public final class RepaymentPeriod {
     public Money getOutstandingPrincipal() {
         return MathUtil.negativeToZero(getDuePrincipal().minus(getPaidPrincipal()), mc);
     }
+
+    public void resetDerivedComponents() {
+        this.paidInterest = paidInterest.zero();
+        this.paidPrincipal = paidPrincipal.zero();
+    }
 }
