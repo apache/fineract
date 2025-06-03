@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
+import org.apache.fineract.client.models.GetLoanRescheduleRequestResponse;
 import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
 import org.apache.fineract.client.models.PostCreateRescheduleLoansResponse;
 import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
@@ -87,6 +88,10 @@ public class LoanRescheduleRequestHelper {
         final String URL = LOAN_RESCHEDULE_REQUEST_URL + "/" + requestId + "?" + Utils.TENANT_IDENTIFIER;
 
         return Utils.performServerGet(requestSpec, responseSpec, URL, param);
+    }
+
+    public GetLoanRescheduleRequestResponse readLoanRescheduleRequest(final Long requestId, final String param) {
+        return Calls.ok(FineractClientHelper.getFineractClient().rescheduleLoans.readLoanRescheduleRequest(requestId, param));
     }
 
     // TODO: Rewrite to use fineract-client instead!
