@@ -1,0 +1,75 @@
+{
+	"name": "Apache Fineract Dev Environment",
+	"image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+	
+	"features": {
+		"ghcr.io/devcontainers/features/java:1": {
+			"version": "21",
+			"jdkDistro": "temurin",
+			"gradleVersion": "8.1.3",
+			"installGradle": true
+		},
+		"ghcr.io/devcontainers/features/node:1": {
+			"version": "lts"
+		},
+		"ghcr.io/devcontainers/features/postgresql:1": {
+			"version": "latest"
+		},
+		"ghcr.io/devcontainers/features/github-cli:1": {}
+	},
+
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"github.copilot",
+				"vscjava.vscode-java-pack",
+				"vscjava.vscode-gradle",
+				"ckolkman.vscode-postgres",
+				"github.vscode-pull-request-github",
+				"humao.rest-client",
+				"eamodio.gitlens",
+				"usernamehw.errorlens",
+				"redhat.java",
+				"ms-vscode.vscode-json"
+			],
+			"settings": {
+				"java.configuration.runtimes": [
+					{
+						"name": "JavaSE-21",
+						"path": "/usr/lib/jvm/msopenjdk-current",
+						"default": true
+					}
+				],
+				"java.configuration.updateBuildConfiguration": "automatic",
+				"java.compile.nullAnalysis.mode": "automatic",
+				"java.format.settings.url": "https://raw.githubusercontent.com/apache/fineract/develop/config/fineractdev-formatter.xml",
+				"java.checkstyle.configuration": "/workspaces/fineract/config/checkstyle/checkstyle.xml",
+				"gradle.nestedProjects": true,
+				"files.exclude": {
+					"**/.git": true,
+					"**/.gradle": true,
+					"**/build": true
+				}
+			}
+		}
+	},
+
+	"forwardPorts": [8443, 8080, 5432, 6379],
+
+	"postCreateCommand": "bash -c 'curl -fsSL https://railway.app/install.sh | sh && echo \"Railway CLI installed\"'",
+
+	"mounts": [
+		"source=${localWorkspaceFolder}/.railway,target=/workspaces/fineract/.railway,type=bind,consistency=cached"
+	],
+
+	"remoteEnv": {
+		"SPRING_PROFILES_ACTIVE": "dev,postgresql",
+		"PGHOST": "localhost",
+		"PGPORT": "5432",
+		"PGDATABASE": "fineract_tenants",
+		"PGUSER": "postgres",
+		"PGPASSWORD": "postgres",
+		"REDIS_HOST": "localhost",
+		"REDIS_PORT": "6379"
+	}
+}

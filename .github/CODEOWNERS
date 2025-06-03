@@ -1,0 +1,20 @@
+# Railway Configuration Files
+railway.json                  @MYKLCS/devops
+railway.toml                  @MYKLCS/devops
+railway-*.sh                  @MYKLCS/devops
+config/railway/               @MYKLCS/devops
+.github/workflows/railway-*.yml @MYKLCS/devops
+
+# Database Configuration
+**/application-postgresql.properties @MYKLCS/database
+**/application-railway.properties   @MYKLCS/database
+
+# Infrastructure Monitoring
+fineract-provider/src/main/java/org/apache/fineract/infrastructure/monitoring/ @MYKLCS/monitoring
+
+# CI/CD Workflows
+.github/workflows/            @MYKLCS/ci-cd
+
+# VS Code Configuration
+.vscode/                      @MYKLCS/developers
+.devcontainer/                @MYKLCS/developers

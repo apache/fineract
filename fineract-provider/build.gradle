@@ -169,18 +169,16 @@ if (!(project.hasProperty('env') && project.getProperty('env') == 'dev')) {
 // https://docs.groovy-lang.org/latest/html/api/groovy/sql/Sql.html
 import groovy.sql.Sql
 
-project.ext.mysqlUser='root'
-project.ext.mysqlPassword='mysql'
-project.ext.pgUser='root'
+project.ext.pgUser='postgres'
 project.ext.pgPassword='postgres'
 
 configurations {
     driver
 }
 dependencies {
-    driver 'org.mariadb.jdbc:mariadb-java-client'
     driver 'org.postgresql:postgresql'
-    driver 'com.mysql:mysql-connector-j'
+    implementation 'org.codehaus.groovy:groovy-sql:3.0.19'
+    implementation 'org.apache.ant:ant:1.10.14'
 }
 
 URLClassLoader loader = GroovyObject.class.classLoader
@@ -189,18 +187,18 @@ configurations.driver.each {File file ->
 }
 
 tasks.register('createDB') {
-    description = "Creates the MariaDB Database. Needs database name to be passed (like: -PdbName=someDBname)"
+    description = "Creates the PostgreSQL Database. Needs database name to be passed (like: -PdbName=someDBname)"
     doLast {
-        def sql = Sql.newInstance('jdbc:mariadb://localhost:3306/', mysqlUser, mysqlPassword, 'org.mariadb.jdbc.Driver')
-        sql.execute('CREATE DATABASE ' + "`$dbName` CHARACTER SET utf8mb4")
+        def sql = Sql.newInstance('jdbc:postgresql://localhost:5432/', pgUser, pgPassword, 'org.postgresql.Driver')
+        sql.execute('create database ' + "$dbName")
     }
 }
 
 tasks.register('dropDB') {
-    description = "Drops the specified MariaDB database. The database name has to be passed (like: -PdbName=someDBname)"
+    description = "Drops the specified PostgreSQL database. The database name has to be passed (like: -PdbName=someDBname)"
     doLast {
-        def sql = Sql.newInstance('jdbc:mariadb://localhost:3306/', mysqlUser, mysqlPassword, 'org.mariadb.jdbc.Driver')
-        sql.execute('DROP DATABASE ' + "`$dbName`")
+        def sql = Sql.newInstance('jdbc:postgresql://localhost:5432/', pgUser, pgPassword, 'org.postgresql.Driver')
+        sql.execute('DROP DATABASE ' + "$dbName")
     }
 }
 
@@ -220,29 +218,7 @@ tasks.register('dropPGDB') {
     }
 }
 
-tasks.register('createMySQLDB') {
-    description = "Creates the MySQL Database. Needs database name to be passed (like: -PdbName=someDBname)"
-    doLast {
-        def sql = Sql.newInstance('jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.cj.jdbc.Driver')
-        sql.execute('CREATE DATABASE ' + "`$dbName` CHARACTER SET utf8mb4")
-    }
-}
-
-tasks.register('dropMySQLDB') {
-    description = "Drops the specified MySQL database. The database name has to be passed (like: -PdbName=someDBname)"
-    doLast {
-        def sql = Sql.newInstance('jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.cj.jdbc.Driver')
-        sql.execute('DROP DATABASE ' + "`$dbName`")
-    }
-}
-
-tasks.register('setBlankPassword') {
-    doLast {
-        def sql = Sql.newInstance('jdbc:mariadb://localhost:3306/', mysqlUser, mysqlPassword, 'org.mariadb.jdbc.Driver')
-        sql.execute('USE `fineract_tenants`')
-        sql.execute('UPDATE fineract_tenants.tenants SET schema_server = \'localhost\', schema_server_port = \'3306\', schema_username = \'mifos\', schema_password = \'mysql\' WHERE id=1;')
-    }
-}
+// MySQL/MariaDB tasks removed - using PostgreSQL only
 
 bootRun {
     jvmArgs = [
@@ -250,8 +226,8 @@ bootRun {
     ]
 
     dependencies {
-        implementation 'org.mariadb.jdbc:mariadb-java-client'
         implementation 'org.postgresql:postgresql'
+        implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     }
 }
 
@@ -305,8 +281,8 @@ jib {
     allowInsecureRegistries = true
 
     dependencies {
-        implementation 'org.mariadb.jdbc:mariadb-java-client'
         implementation 'org.postgresql:postgresql'
+        implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     }
 
     pluginExtensions {
@@ -335,8 +311,8 @@ tasks.register('migrateDatabase') {
                 main {
                     changeLogFile changeLogFilePath
                     url dbUrl
-                    username project.ext.mysqlUser
-                    password project.ext.mysqlPassword
+                    username project.ext.pgUser
+                    password project.ext.pgPassword
                 }
             }
         }

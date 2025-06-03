@@ -172,7 +172,10 @@ dependencyManagement {
             exclude 'io.swagger.core.v3:swagger-core'
         }
 
-        dependency 'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.23.1'
+        // PostgreSQL and Redis dependencies only
+        dependency 'org.postgresql:postgresql:42.7.4'
+        dependency 'redis.clients:jedis:5.1.5'
+        dependency 'org.springframework.boot:spring-boot-starter-data-redis:3.4.1'
 
         dependency ('org.apache.activemq:activemq-client:6.1.6') {
             exclude 'javax.annotation:javax.annotation-api'
@@ -230,15 +233,7 @@ dependencyManagement {
 
         dependency "org.apache.avro:avro:1.12.0"
 
-        dependency ('org.mariadb.jdbc:mariadb-java-client:3.5.2') {
-            exclude 'org.slf4j:jcl-over-slf4j'
-            exclude 'org.slf4j:slf4j-api'
-        }
-
-        //v42.7.5: performance issue: https://github.com/pgjdbc/pgjdbc/issues/3511#issuecomment-2637277977
-        dependency 'org.postgresql:postgresql:42.7.4'
-
-        dependency 'com.mysql:mysql-connector-j:9.2.0'
+        // PostgreSQL driver only - MariaDB and MySQL removed
 
         dependency 'org.assertj:assertj-core:3.26.3'
 

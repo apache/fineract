@@ -13,7 +13,7 @@ build
 *.swp
 *.DS_Store
 .idea
-.vscode
+#.vscode
 catalina.base_IS_UNDEFINED/
 keystore.jks
 bin/
@@ -25,6 +25,17 @@ licenses
 **/.asciidoctor/images/*
 **/.asciidoctor/diagram/*
 **/images/diag-*.svg
+
+# Railway specific files
+.railway/
+.env
+.env.local
+railway-variables.env
+**/sentry.properties
+railway-token.txt
+railway-secrets.json
+railway.local.toml
+railway.private.json
 
 fineract-provider/src/main/generated/
 

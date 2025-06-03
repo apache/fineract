@@ -1,0 +1,197 @@
+name: CI - Lint and Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  JAVA_VERSION: '21'
+
+jobs:
+  checkstyle:
+    runs-on: ubuntu-latest
+    name: Checkstyle (Java Code Style)
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'temurin'
+
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Run Checkstyle
+      run: |
+        echo "🔍 Running Checkstyle checks..."
+        ./gradlew checkstyleMain checkstyleTest
+        echo "✅ Checkstyle completed"
+
+    - name: Upload Checkstyle reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: checkstyle-reports
+        path: '**/build/reports/checkstyle/'
+
+  sonarscanner:
+    runs-on: ubuntu-latest
+    name: SonarScanner (Static Analysis)
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'temurin'
+
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build project
+      run: ./gradlew build -x test
+
+    - name: Run SonarScanner
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+      run: |
+        echo "🔍 Running SonarScanner static analysis..."
+        if [ -n "$SONAR_TOKEN" ] && [ -n "$SONAR_PROJECT_KEY" ]; then
+          ./gradlew sonar \
+            -Dsonar.projectKey=$SONAR_PROJECT_KEY \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.token=$SONAR_TOKEN
+        else
+          echo "⚠️  SonarScanner skipped - SONAR_TOKEN or SONAR_PROJECT_KEY not configured"
+          echo "To enable SonarScanner, add these secrets to your repository:"
+          echo "- SONAR_TOKEN: Your SonarCloud token"
+          echo "- SONAR_PROJECT_KEY: Your SonarCloud project key"
+        fi
+        echo "✅ SonarScanner completed"
+
+  super-linter:
+    runs-on: ubuntu-latest
+    name: Super Linter (Multi-language)
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Run GitHub Super Linter
+      uses: github/super-linter/slim@v4
+      env:
+        DEFAULT_BRANCH: main
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        VALIDATE_ALL_CODEBASE: false
+        VALIDATE_JAVA: true
+        VALIDATE_YAML: true
+        VALIDATE_MARKDOWN: true
+        VALIDATE_JSON: true
+        VALIDATE_XML: true
+        VALIDATE_DOCKERFILE: false
+        VALIDATE_BASH: true
+        VALIDATE_SHELL_SHFMT: true
+        LINTER_RULES_PATH: '.'
+        JAVA_FILE_NAME: 'checkstyle.xml'
+        MARKDOWN_FILE_NAME: '.markdownlint.yml'
+        YAML_FILE_NAME: '.yamllint.yml'
+
+  auto-fix:
+    runs-on: ubuntu-latest
+    name: Auto-fix Issues
+    needs: [checkstyle, sonarscanner, super-linter]
+    if: failure() && github.event_name != 'pull_request'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'temurin'
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Auto-fix common issues
+      run: |
+        echo "🔧 Attempting to auto-fix common issues..."
+        
+        # Fix line endings
+        find . -name "*.java" -exec sed -i 's/\r$//' {} \;
+        find . -name "*.xml" -exec sed -i 's/\r$//' {} \;
+        find . -name "*.yml" -exec sed -i 's/\r$//' {} \;
+        find . -name "*.yaml" -exec sed -i 's/\r$//' {} \;
+        find . -name "*.md" -exec sed -i 's/\r$//' {} \;
+        
+        # Fix trailing whitespace
+        find . -name "*.java" -exec sed -i 's/[[:space:]]*$//' {} \;
+        find . -name "*.xml" -exec sed -i 's/[[:space:]]*$//' {} \;
+        find . -name "*.yml" -exec sed -i 's/[[:space:]]*$//' {} \;
+        find . -name "*.yaml" -exec sed -i 's/[[:space:]]*$//' {} \;
+        find . -name "*.md" -exec sed -i 's/[[:space:]]*$//' {} \;
+        
+        # Run spotless apply if available
+        ./gradlew spotlessApply || echo "Spotless not configured"
+        
+        echo "✅ Auto-fix completed"
+
+    - name: Commit fixes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add -A
+        if ! git diff --cached --quiet; then
+          git commit -m "fix: lint and quality cleanup
+
+          - Fixed line endings and trailing whitespace
+          - Applied automatic code formatting
+          - Resolved common linting issues
+          
+          Auto-generated by: CI-Lint workflow"
+          git push
+        else
+          echo "No changes to commit"
+        fi

@@ -1,0 +1,141 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Fineract",
+            "type": "shell",
+            "command": ".\\gradlew :fineract-provider:build -x test -x cucumber -x spotlessCheck -x rat --no-daemon",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$gradle"]
+        },
+        {
+            "label": "Run Tests",
+            "type": "shell",
+            "command": ".\\gradlew test jacocoTestReport",
+            "group": "test",
+            "problemMatcher": ["$gradle"]
+        },
+        {
+            "label": "Run Lint Checks",
+            "type": "shell",
+            "command": ".\\gradlew spotlessCheck checkstyleMain checkstyleTest",
+            "group": "test",
+            "problemMatcher": ["$gradle"]
+        },
+        {
+            "label": "Railway: Setup Complete Environment",
+            "type": "shell",
+            "command": "bash .\\railway-setup-complete.sh",
+            "problemMatcher": []
+        },
+        {
+            "label": "Railway: Deploy Application",
+            "type": "shell",
+            "command": "bash .\\railway-deploy.sh",
+            "problemMatcher": []
+        },
+        {
+            "label": "Railway: Check Health",
+            "type": "shell",
+            "command": "bash .\\railway-health-check.sh",
+            "problemMatcher": []
+        },
+        {
+            "label": "Railway: Setup PostgreSQL",
+            "type": "shell",
+            "command": "bash .\\railway-postgres-setup.sh",
+            "problemMatcher": []
+        },
+        {
+            "label": "Railway: Setup Redis/Dragonfly",
+            "type": "shell",
+            "command": "bash .\\railway-redis-setup.sh",
+            "problemMatcher": []
+        },
+        {
+            "label": "Railway: View Logs",
+            "type": "shell",
+            "command": "railway logs",
+            "problemMatcher": []
+        },
+        {
+            "label": "Railway: Test Notifications",
+            "type": "shell",
+            "command": "bash .\\scripts\\test-notifications.sh",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "clear": true
+            }
+        },
+        {
+            "label": "Railway: Test Notifications (Send Mode)",
+            "type": "shell",
+            "command": "bash .\\scripts\\test-notifications.sh --send",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "clear": true
+            }
+        },
+        {
+            "label": "Railway: Test Conditional Notifications",
+            "type": "shell",
+            "command": "bash -c 'export DEPLOY_TYPE=production DEPLOY_STATUS=success && bash .\\scripts\\conditional-notifications.sh --debug'",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "clear": true
+            }
+        },
+        {            "label": "Railway: Test Conditional Notifications (Failure)",
+            "type": "shell",
+            "command": "bash -c 'export DEPLOY_TYPE=production DEPLOY_STATUS=failure && bash .\\scripts\\conditional-notifications.sh --debug'",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "clear": true
+            }
+        },
+        {
+            "label": "Railway: Test Monitoring Integration",
+            "type": "shell",
+            "command": "bash .\\scripts\\monitoring-integration.sh --verbose",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "clear": true
+            }
+        },
+        {
+            "label": "Railway: Test Monitoring with Priority",
+            "type": "shell",
+            "command": "bash -c 'export DEPLOY_TYPE=production NOTIFICATION_PRIORITY=high && bash .\\scripts\\monitoring-integration.sh --verbose'",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "clear": true
+            }
+        },
+        {
+            "label": "Railway: Test Monitoring for Feature Deployment",
+            "type": "shell",
+            "command": "bash -c 'export DEPLOY_TYPE=feature NOTIFICATION_PRIORITY=low SEND_SLACK=false SEND_TEAMS=false && bash .\\scripts\\monitoring-integration.sh --verbose'",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "clear": true
+            }
+        }
+    ]
+}

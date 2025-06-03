@@ -1,0 +1,14 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "nixpacks",
+    "buildCommand": "./gradlew :fineract-provider:build -x test -x cucumber -x spotlessCheck -x rat --no-daemon"
+  },
+  "deploy": {
+    "startCommand": "java $JAVA_OPTS -Dspring.profiles.active=railway,postgresql -Dspring.config.additional-location=classpath:/,file:config/railway/ -jar fineract-provider/build/libs/fineract-provider-*-SNAPSHOT.jar",
+    "healthcheckPath": "/fineract-provider/actuator/health",
+    "healthcheckTimeout": 300,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  }
+}

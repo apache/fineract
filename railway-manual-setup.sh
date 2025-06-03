@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Manual Railway Setup for Apache Fineract
+set -e
+
+echo "🚀 Manual Railway Setup for Apache Fineract"
+echo ""
+echo "Since you have the Railway VS Code extension, here are your options:"
+echo ""
+echo "Option 1: Use VS Code Railway Extension"
+echo "1. Open the Railway panel in VS Code (Railway icon in sidebar)"
+echo "2. Sign in to your Railway account"
+echo "3. Create new project or link existing project"
+echo "4. Add PostgreSQL plugin from the Railway dashboard"
+echo ""
+echo "Option 2: Use CLI (manual steps)"
+echo "Run these commands one by one:"
+echo ""
+echo "# Create/link project manually"
+echo "railway init"
+echo ""
+echo "# Add PostgreSQL"
+echo "railway add postgresql"
+echo ""
+echo "# Check services"
+echo "railway service"
+echo ""
+echo "# Deploy"
+echo "railway up"
+echo ""
+echo "Choose your preferred method and follow the steps above."

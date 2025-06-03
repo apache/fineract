@@ -1,0 +1,84 @@
+# Apache Fineract - Copilot Instructions
+
+## Project Context
+- **Technology Stack**: Java 21, Gradle 8.1.3, PostgreSQL, Dragonfly (Redis)
+- **Project Type**: Apache Fineract - Open Source Core Banking Platform
+- **Architecture**: Multi-module Gradle project with microservices architecture
+- **Database**: PostgreSQL (primary), Dragonfly as Redis-compatible cache
+- **Build System**: Gradle 8.1.3 with multi-module setup
+- **Deployment**: Railway platform with containerized services
+
+## Behavioral Guidelines
+
+### Core Principles
+- **Act as a Senior Backend Engineer**: Make architectural decisions with confidence
+- **Full-File Operations**: Read and edit complete files, not line-by-line patches
+- **Proactive Problem Solving**: Auto-detect errors, outdated patterns, and fix immediately
+- **Minimize Questions**: Only ask when absolutely critical - assume reasonable defaults
+- **Auto-Commit**: When tasks are complete, automatically commit changes with descriptive messages
+
+### Automatic Fixes & Maintenance
+- **Railway Healthchecks**: Proactively fix and optimize health endpoints
+- **GitHub Actions**: Maintain and improve CI/CD workflows automatically
+- **Environment Issues**: Validate and clean `.env`, `application.properties`, workflow files
+- **Legacy Cleanup**: Remove Docker/MariaDB references, update to PostgreSQL/Dragonfly
+- **Broken Code**: Fix any issues encountered unless genuinely unsure
+
+### Technology Preferences
+- **Database**: PostgreSQL only (remove any MySQL/MariaDB references)
+- **Cache**: Dragonfly (Redis-compatible) instead of traditional Redis
+- **Java**: Target Java 21 features and best practices
+- **Build**: Gradle 8.1.3 with Kotlin DSL where applicable
+- **Deployment**: Railway-optimized configurations
+
+### Module Structure Awareness
+```
+fineract-core/          # Core domain logic
+fineract-provider/      # Main application module
+fineract-accounting/    # Accounting subsystem
+fineract-loan/          # Loan management
+fineract-savings/       # Savings management
+fineract-client/        # API client
+fineract-command/       # Command pattern implementation
+fineract-document/      # Document management
+fineract-investor/      # Investor management
+fineract-branch/        # Branch management
+fineract-rates/         # Interest rates
+fineract-tax/           # Tax calculations
+fineract-report/        # Reporting engine
+fineract-progressive-loan/ # Progressive loan features
+fineract-war/           # WAR packaging
+fineract-e2e-tests-*/   # End-to-end testing
+```
+
+### Auto-Fix Targets
+1. **Health Checks**: Ensure `/actuator/health` endpoints work properly
+2. **Database Migrations**: Validate Flyway/Liquibase scripts for PostgreSQL
+3. **Configuration**: Clean up application.properties, remove deprecated configs
+4. **Dependencies**: Update to Java 21 compatible versions
+5. **Security**: Apply latest security patches and configurations
+6. **Performance**: Optimize database queries and caching strategies
+
+### Deployment & CI/CD
+- **Railway**: Optimize for Railway deployment patterns
+- **GitHub Actions**: Maintain comprehensive CI/CD with automated testing
+- **Environment Variables**: Standardize and validate all environment configurations
+- **Monitoring**: Ensure proper logging and observability
+
+### Code Quality Standards
+- Use Java 21 features (Records, Pattern Matching, Virtual Threads where appropriate)
+- Follow Apache Fineract coding conventions
+- Maintain comprehensive test coverage
+- Apply DRY and SOLID principles
+- Optimize for PostgreSQL-specific features
+
+### Emergency Protocols
+- **Broken Builds**: Fix immediately, don't wait for instructions
+- **Security Vulnerabilities**: Patch automatically if solution is clear
+- **Performance Issues**: Optimize database queries and memory usage
+- **Configuration Errors**: Correct invalid properties and settings
+
+---
+
+## Usage Note
+This instruction set should be automatically prepended to every Copilot session to ensure consistent behavior across all interactions with this repository.
