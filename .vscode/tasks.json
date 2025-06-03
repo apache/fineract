@@ -82,6 +82,28 @@
                 "panel": "new",
                 "clear": true
             }
+        },
+        {
+            "label": "Railway: Test Conditional Notifications",
+            "type": "shell",
+            "command": "bash -c 'export DEPLOY_TYPE=production DEPLOY_STATUS=success && bash .\\scripts\\conditional-notifications.sh --debug'",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "clear": true
+            }
+        },
+        {
+            "label": "Railway: Test Conditional Notifications (Failure)",
+            "type": "shell",
+            "command": "bash -c 'export DEPLOY_TYPE=production DEPLOY_STATUS=failure && bash .\\scripts\\conditional-notifications.sh --debug'",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "clear": true
+            }
         }
     ]
 }

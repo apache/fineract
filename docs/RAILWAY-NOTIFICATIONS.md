@@ -19,14 +19,34 @@ The system currently supports the following notification channels:
 1. **GitHub Step Summary**: Automatically displayed in the GitHub Actions workflow UI
 2. **Console Output**: Basic information in the workflow logs
 3. **Slack** (optional): Rich formatted messages with interactive buttons
-4. **Email** (optional): HTML-formatted emails with deployment details
-5. **Custom Webhooks** (optional): JSON payloads for integration with other systems
+4. **MS Teams** (optional): Interactive cards with deployment details
+5. **Email** (optional): HTML-formatted emails with deployment details
+6. **Custom Webhooks** (optional): JSON payloads for integration with other systems
 
 ## Configuration
 
 ### GitHub Step Summary
 
 This is enabled by default and requires no additional configuration. The workflow creates a formatted Markdown summary that appears in the GitHub Actions UI.
+
+### Conditional Notifications
+
+The system supports conditional notifications based on deployment type and status:
+
+| Deployment Type | Status   | GitHub | Slack | MS Teams | Email | Webhook |
+|----------------|----------|:------:|:-----:|:--------:|:-----:|:-------:|
+| Production     | Success  |   ✅   |   ✅   |    ✅    |   ✅   |    ✅    |
+| Production     | Failure  |   ✅   |   ✅   |    ✅    |   ✅   |    ✅    |
+| Staging        | Success  |   ✅   |   ✅   |    ✅    |   ❌   |    ✅    |
+| Staging        | Failure  |   ✅   |   ✅   |    ✅    |   ✅   |    ✅    |
+| Feature        | Success  |   ✅   |   ✅   |    ❌    |   ❌   |    ❌    |
+| Feature        | Failure  |   ✅   |   ✅   |    ✅    |   ❌   |    ❌    |
+| Hotfix         | Success  |   ✅   |   ✅   |    ✅    |   ❌   |    ✅    |
+| Hotfix         | Failure  |   ✅   |   ✅   |    ✅    |   ✅   |    ✅    |
+| Preview        | Success  |   ✅   |   ❌   |    ❌    |   ❌   |    ❌    |
+| Preview        | Failure  |   ✅   |   ✅   |    ✅    |   ❌   |    ❌    |
+
+You can modify these rules by editing the `scripts/conditional-notifications.sh` script.
 
 ### Slack Integration
 
@@ -35,6 +55,20 @@ To enable Slack notifications:
 1. Create a Slack app and webhook in your workspace
 2. Add the webhook URL as a GitHub repository secret: `SLACK_WEBHOOK_URL`
 3. Uncomment the Slack notification step in the workflow file
+
+### MS Teams Integration
+
+To enable MS Teams notifications:
+
+1. Create a Teams webhook connector:
+   - Open the Teams channel where you want to receive notifications
+   - Click the "..." menu > Connectors
+   - Select "Incoming Webhook" > Configure
+   - Provide a name and optional image for the webhook
+   - Copy the generated webhook URL
+
+2. Add the webhook URL as a GitHub repository secret: `MS_TEAMS_WEBHOOK_URL`
+3. Uncomment the MS Teams notification step in the workflow file
 
 ### Email Notifications
 
@@ -110,6 +144,14 @@ The Slack message includes:
 - Deployment URL
 - Interactive buttons for quick access to the application, health check, and Railway dashboard
 
+### MS Teams Card
+
+The MS Teams card includes:
+- Title with deployment status
+- Deployment details displayed as facts (environment, branch, URL, etc.)
+- Action buttons for quick access to the application, health check, and Railway dashboard
+- Color coding (blue for success, red for failure)
+
 ### Email Notification
 
 The email includes:
@@ -163,3 +205,11 @@ If notifications are not working as expected:
 3. Check the workflow logs for any error messages
 4. Run the test script to validate the notification formats
 5. For external services, verify that the endpoints are accessible from GitHub Actions
+6. Check if your deployment type is configured for the expected notification channels
+7. For debugging conditional notifications, run the script with `--debug` flag:
+
+```bash
+bash ./scripts/conditional-notifications.sh --debug
+```
+
+This will output detailed information about the notification decision process.

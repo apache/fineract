@@ -5,9 +5,10 @@
 1. **GitHub Actions Workflow Setup**
    - Created comprehensive CI/CD workflow with test, build, and deploy stages
    - Added deployment verification steps with health checks
-   - Enhanced notification system with detailed deployment information
-   - Added PostgreSQL backup workflow
+   - Enhanced notification system with detailed deployment information   - Added PostgreSQL backup workflow
    - Integrated multi-channel notifications (GitHub, Slack, MS Teams)
+   - Added conditional notifications based on deployment type
+   - Added notification testing tools
 
 2. **Railway Configuration**
    - Removed all Docker/MariaDB/MySQL configurations
@@ -69,6 +70,13 @@ To verify the deployment is working correctly:
    ./scripts/test-notifications.sh
    ```
 
+5. Test conditional notifications by deployment type:
+   ```bash
+   # Set environment variables for testing
+   export DEPLOY_TYPE=production DEPLOY_STATUS=success
+   ./scripts/conditional-notifications.sh --debug
+   ```
+
 ## 📊 Next Steps
 
 1. Consider setting up a monitoring dashboard using Railway's integration with Datadog or New Relic
@@ -76,6 +84,7 @@ To verify the deployment is working correctly:
 3. Set up a disaster recovery plan with automated database restoration
 4. Create a performance testing suite for Railway deployments
 5. Document operational procedures for the team
+6. Add more specialized notification templates for different deployment contexts
 
 ## 🔐 Security Considerations
 

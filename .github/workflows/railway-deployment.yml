@@ -158,14 +158,14 @@ jobs:
       - name: Login to Railway
         run: railway login --browserless
         env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-
-      - name: Deploy to Railway
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}      - name: Deploy to Railway
         run: |
           echo "Deploying to Railway..."
           railway up --detach
         env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}      - name: Verify Deployment
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          
+      - name: Verify Deployment
         run: |
           echo "Verifying deployment..."
           ATTEMPTS=0
@@ -184,8 +184,7 @@ jobs:
             echo "✅ Deployment verified successfully"
           fi
         env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-  notify:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}  notify:
     name: 📢 Deployment Notification
     runs-on: ubuntu-latest
     needs: [validate, deploy]
@@ -216,11 +215,24 @@ jobs:
           DEPLOY_ENV=$(railway environment show --json | jq -r '.name')
           PROJECT_NAME=$(railway project show --json | jq -r '.name')
           
+          # Determine deployment type based on branch name
+          DEPLOY_TYPE="preview"
+          if [[ "$BRANCH_NAME" == "main" ]]; then
+            DEPLOY_TYPE="production"
+          elif [[ "$BRANCH_NAME" == "develop" ]]; then
+            DEPLOY_TYPE="staging"
+          elif [[ "$BRANCH_NAME" =~ ^feature/ ]]; then
+            DEPLOY_TYPE="feature"
+          elif [[ "$BRANCH_NAME" =~ ^fix/ ]]; then
+            DEPLOY_TYPE="hotfix"
+          fi
+          
           echo "deploy-url=$DEPLOY_URL" >> $GITHUB_OUTPUT
           echo "branch-name=$BRANCH_NAME" >> $GITHUB_OUTPUT
           echo "deploy-id=$DEPLOY_ID" >> $GITHUB_OUTPUT
           echo "deploy-env=$DEPLOY_ENV" >> $GITHUB_OUTPUT
           echo "project-name=$PROJECT_NAME" >> $GITHUB_OUTPUT
+          echo "deploy-type=$DEPLOY_TYPE" >> $GITHUB_OUTPUT
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
