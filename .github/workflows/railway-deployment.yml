@@ -251,9 +251,7 @@ jobs:
           
           EOF
           
-          cat deployment-summary.md
-
-      - name: Deployment Failure
+          cat deployment-summary.md      - name: Deployment Failure
         if: needs.deploy.result != 'success'
         run: |
           cat << EOF > deployment-failure.md
@@ -275,7 +273,7 @@ jobs:
           EOF
           
           cat deployment-failure.md
-
+      
       - name: Create GitHub Job Summary
         if: needs.deploy.result == 'success'
         run: cat deployment-summary.md >> $GITHUB_STEP_SUMMARY
@@ -296,3 +294,191 @@ jobs:
             echo "❌ Deployment failed"
             echo "Check the logs for more information"
           fi
+          
+      # Uncomment and configure these steps to enable additional notification channels
+      
+      # - name: Send Slack Notification
+      #   if: always()
+      #   uses: slackapi/slack-github-action@v1.24.0
+      #   with:
+      #     payload: |
+      #       {
+      #         "blocks": [
+      #           {
+      #             "type": "header",
+      #             "text": {
+      #               "type": "plain_text",
+      #               "text": "${{ needs.deploy.result == 'success' && '🚀 Railway Deployment: Success' || '❌ Railway Deployment: Failure' }}",
+      #               "emoji": true
+      #             }
+      #           },
+      #           {
+      #             "type": "section",
+      #             "fields": [
+      #               {
+      #                 "type": "mrkdwn",
+      #                 "text": "*Environment:*\n${{ steps.deployment-details.outputs.deploy-env || 'N/A' }}"
+      #               },
+      #               {
+      #                 "type": "mrkdwn",
+      #                 "text": "*Branch:*\n${{ steps.deployment-details.outputs.branch-name || needs.validate.outputs.branch-name }}"
+      #               }
+      #             ]
+      #           },
+      #           {
+      #             "type": "section",
+      #             "text": {
+      #               "type": "mrkdwn", 
+      #               "text": "*Deployment URL:* ${{ steps.deployment-details.outputs.deploy-url || 'N/A' }}"
+      #             }
+      #           },
+      #           {
+      #             "type": "actions",
+      #             "elements": [
+      #               {
+      #                 "type": "button",
+      #                 "text": {
+      #                   "type": "plain_text",
+      #                   "text": "View Application",
+      #                   "emoji": true
+      #                 },
+      #                 "url": "${{ steps.deployment-details.outputs.deploy-url || '#' }}"
+      #               },
+      #               {
+      #                 "type": "button",
+      #                 "text": {
+      #                   "type": "plain_text",
+      #                   "text": "Health Check",
+      #                   "emoji": true
+      #                 },
+      #                 "url": "${{ steps.deployment-details.outputs.deploy-url || '#' }}/fineract-provider/actuator/health"
+      #               }
+      #             ]
+      #           }
+      #         ]
+      #       }
+      #   env:
+      #     SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      
+      # - name: Send MS Teams Notification
+      #   if: always()
+      #   uses: aliencube/microsoft-teams-actions@v0.8.0
+      #   with:
+      #     webhook_uri: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
+      #     title: "${{ needs.deploy.result == 'success' && '🚀 Railway Deployment: Success' || '❌ Railway Deployment: Failure' }}"
+      #     summary: "Railway Deployment Status"
+      #     theme_color: "${{ needs.deploy.result == 'success' && '0076D7' || 'FF0000' }}"
+      #     sections: |
+      #       [{
+      #         "activityTitle": "${{ needs.deploy.result == 'success' && '🚀 Railway Deployment: Success' || '❌ Railway Deployment: Failure' }}",
+      #         "facts": [
+      #           {
+      #             "name": "Status",
+      #             "value": "${{ needs.deploy.result == 'success' && '✅ Success' || '❌ Failed' }}"
+      #           },
+      #           {
+      #             "name": "Environment",
+      #             "value": "${{ steps.deployment-details.outputs.deploy-env || 'N/A' }}"
+      #           },
+      #           {
+      #             "name": "Branch",
+      #             "value": "${{ steps.deployment-details.outputs.branch-name || needs.validate.outputs.branch-name }}"
+      #           },
+      #           {
+      #             "name": "Project",
+      #             "value": "${{ steps.deployment-details.outputs.project-name || 'N/A' }}"
+      #           },
+      #           {
+      #             "name": "Deployment URL",
+      #             "value": "${{ steps.deployment-details.outputs.deploy-url || 'N/A' }}"
+      #           },
+      #           {
+      #             "name": "Deployment Time",
+      #             "value": "$(date)"
+      #           }
+      #         ],
+      #         "markdown": true
+      #       }]
+      #     actions: |
+      #       [{
+      #         "@type": "OpenUri",
+      #         "name": "View Application",
+      #         "targets": [
+      #           {
+      #             "os": "default",
+      #             "uri": "${{ steps.deployment-details.outputs.deploy-url || '#' }}"
+      #           }
+      #         ]
+      #       },
+      #       {
+      #         "@type": "OpenUri",
+      #         "name": "Health Check",
+      #         "targets": [
+      #           {
+      #             "os": "default",
+      #             "uri": "${{ steps.deployment-details.outputs.deploy-url || '#' }}/fineract-provider/actuator/health"
+      #           }
+      #         ]
+      #       },
+      #       {
+      #         "@type": "OpenUri",
+      #         "name": "Railway Dashboard",
+      #         "targets": [
+      #           {
+      #             "os": "default",
+      #             "uri": "https://railway.app/project/${{ steps.deployment-details.outputs.deploy-id || '#' }}"
+      #           }
+      #         ]
+      #       }]
+      
+      # - name: Send Email Notification
+      #   if: always()
+      #   uses: dawidd6/action-send-mail@v3
+      #   with:
+      #     server_address: ${{ secrets.EMAIL_SERVER }}
+      #     server_port: ${{ secrets.EMAIL_PORT }}
+      #     username: ${{ secrets.EMAIL_USERNAME }}
+      #     password: ${{ secrets.EMAIL_PASSWORD }}
+      #     subject: ${{ needs.deploy.result == 'success' && '✅ Railway Deployment Success' || '❌ Railway Deployment Failure' }}
+      #     to: ${{ secrets.EMAIL_RECIPIENTS }}
+      #     from: Railway Deployment <no-reply@railway-deployment.app>
+      #     html_body: |
+      #       <html>
+      #       <body style="font-family: Arial, sans-serif; margin: 0; padding: 20px; color: #333;">
+      #         <div style="max-width: 600px; margin: 0 auto; background-color: #f9f9f9; border-radius: 5px; padding: 20px; border: 1px solid #ddd;">
+      #           <h1 style="color: #0066cc;">${{ needs.deploy.result == 'success' && '🚀 Railway Deployment: Success' || '❌ Railway Deployment: Failure' }}</h1>
+      #           <table style="width: 100%; border-collapse: collapse;">
+      #             <tr>
+      #               <td style="padding: 10px; border-bottom: 1px solid #ddd;"><strong>Status:</strong></td>
+      #               <td style="padding: 10px; border-bottom: 1px solid #ddd;">${{ needs.deploy.result == 'success' && '✅ Success' || '❌ Failed' }}</td>
+      #             </tr>
+      #             <tr>
+      #               <td style="padding: 10px; border-bottom: 1px solid #ddd;"><strong>Environment:</strong></td>
+      #               <td style="padding: 10px; border-bottom: 1px solid #ddd;">${{ steps.deployment-details.outputs.deploy-env || 'N/A' }}</td>
+      #             </tr>
+      #             <tr>
+      #               <td style="padding: 10px; border-bottom: 1px solid #ddd;"><strong>Branch:</strong></td>
+      #               <td style="padding: 10px; border-bottom: 1px solid #ddd;">${{ steps.deployment-details.outputs.branch-name || needs.validate.outputs.branch-name }}</td>
+      #             </tr>
+      #             ${{ needs.deploy.result == 'success' && format('<tr><td style="padding: 10px; border-bottom: 1px solid #ddd;"><strong>Deployment URL:</strong></td><td style="padding: 10px; border-bottom: 1px solid #ddd;"><a href="{0}">{0}</a></td></tr>', steps.deployment-details.outputs.deploy-url) || '' }}
+      #           </table>
+      #           ${{ needs.deploy.result == 'success' && format('<div style="margin-top: 20px;"><a href="{0}" style="background-color: #0066cc; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px; margin-right: 10px;">View Application</a><a href="https://railway.app/project/{1}" style="background-color: #5c5c5c; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">Railway Dashboard</a></div>', steps.deployment-details.outputs.deploy-url, steps.deployment-details.outputs.deploy-id) || '' }}
+      #         </div>
+      #       </body>
+      #       </html>
+      
+      # - name: Send Webhook Notification
+      #   if: always()
+      #   run: |
+      #     curl -X POST ${{ secrets.CUSTOM_WEBHOOK_URL }} \
+      #       -H "Content-Type: application/json" \
+      #       -d '{
+      #         "deployment": {
+      #           "status": "${{ needs.deploy.result == 'success' && 'success' || 'failure' }}",
+      #           "environment": "${{ steps.deployment-details.outputs.deploy-env || 'N/A' }}",
+      #           "branch": "${{ steps.deployment-details.outputs.branch-name || needs.validate.outputs.branch-name }}",
+      #           "url": "${{ steps.deployment-details.outputs.deploy-url || 'N/A' }}",
+      #           "timestamp": "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'"
+      #         }
+      #       }'

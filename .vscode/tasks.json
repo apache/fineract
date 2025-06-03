@@ -60,6 +60,28 @@
             "type": "shell",
             "command": "railway logs",
             "problemMatcher": []
+        },
+        {
+            "label": "Railway: Test Notifications",
+            "type": "shell",
+            "command": "bash .\\scripts\\test-notifications.sh",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "clear": true
+            }
+        },
+        {
+            "label": "Railway: Test Notifications (Send Mode)",
+            "type": "shell",
+            "command": "bash .\\scripts\\test-notifications.sh --send",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "clear": true
+            }
         }
     ]
 }
