@@ -47,6 +47,7 @@ import org.apache.fineract.test.data.ChargeProductType;
 import org.apache.fineract.test.data.DaysInMonthType;
 import org.apache.fineract.test.data.DaysInYearType;
 import org.apache.fineract.test.data.InterestCalculationPeriodTime;
+import org.apache.fineract.test.data.OverAppliedCalculationType;
 import org.apache.fineract.test.data.RecalculationRestFrequencyType;
 import org.apache.fineract.test.data.TransactionProcessingStrategyCode;
 import org.apache.fineract.test.data.loanproduct.DefaultLoanProduct;
@@ -2698,6 +2699,42 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         TestContext.INSTANCE.set(
                 TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_INTEREST_RECALCULATION_CONTRACT_TERMINATION,
                 responseLoanProductsRequestAdvCustomContractTerminationProgressiveLoanScheduleIntRecalc);
+
+        // LP2 with progressive loan schedule + horizontal + interest EMI + 360/30
+        // + interest recalculation, preClosureInterestCalculationStrategy= till preclose,
+        // Frequency for recalculate Outstanding Principal: Daily, Frequency Interval for recalculation: 1
+        // multidisbursal that doesn't expect tranches with allowed approved/disbursed amount over applied amount
+        // capitalized income enabled
+        final String name108 = DefaultLoanProduct.LP2_ADV_PYMNT_INTEREST_DAILY_RECALC_EMI_360_30_MULTIDISB_APPROVED_OVER_APPLIED_CAPITALIZED_INCOME
+                .getName();
+        final PostLoanProductsRequest loanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbursalApprovedOverAppliedCapitalizedIncome = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2EmiCapitalizedIncome()//
+                .name(name108)//
+                .daysInYearType(DaysInYearType.DAYS360.value)//
+                .daysInMonthType(DaysInMonthType.DAYS30.value)//
+                .isInterestRecalculationEnabled(true)//
+                .preClosureInterestCalculationStrategy(1)//
+                .rescheduleStrategyMethod(4)//
+                .interestRecalculationCompoundingMethod(0)//
+                .recalculationRestFrequencyType(2)//
+                .recalculationRestFrequencyInterval(1)//
+                .allowApprovedDisbursedAmountsOverApplied(true).overAppliedCalculationType(OverAppliedCalculationType.PERCENTAGE.value)
+                .overAppliedNumber(50).paymentAllocation(List.of(//
+                        createPaymentAllocation("DEFAULT", "NEXT_INSTALLMENT"), //
+                        createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                        createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION"), //
+                        createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT")))//
+                .multiDisburseLoan(true)//
+                .disallowExpectedDisbursements(true)//
+                .maxTrancheCount(10)//
+                .outstandingLoanBalance(10000.0);//
+        final Response<PostLoanProductsResponse> responseLoanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbursalApprovedOverAppliedCapitalizedIncome = loanProductsApi
+                .createLoanProduct(
+                        loanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbursalApprovedOverAppliedCapitalizedIncome)
+                .execute();
+        TestContext.INSTANCE.set(
+                TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INTEREST_DAILY_RECALC_EMI_360_30_MULTIDISB_APPROVED_OVER_APPLIED_CAPITALIZED_INCOME,
+                responseLoanProductsRequestLP2ProgressiveAdvPymnt36030InterestRecalcMultidisbursalApprovedOverAppliedCapitalizedIncome);
     }
 
     public static AdvancedPaymentData createPaymentAllocation(String transactionType, String futureInstallmentAllocationRule,

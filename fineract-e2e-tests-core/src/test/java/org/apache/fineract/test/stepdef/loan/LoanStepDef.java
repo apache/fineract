@@ -1677,6 +1677,24 @@ public class LoanStepDef extends AbstractStepDef {
                 .isEqualTo(ErrorMessageHelper.addDisbursementExceedApprovedAmountFailure());
     }
 
+    @Then("Admin fails to disburse the loan on {string} with {string} EUR trn amount with total disb amount {string} and max disb amount {string} due to exceed max applied amount")
+    public void disbursementForbiddenExceedMaxAppliedAmount(String actualDisbursementDate, String transactionAmount,
+            String totalDisbursalAmount, String maxDisbursalAmount) throws IOException {
+        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.body().getLoanId();
+        PostLoansLoanIdRequest disburseRequest = LoanRequestFactory.defaultLoanDisburseRequest()
+                .actualDisbursementDate(actualDisbursementDate).transactionAmount(new BigDecimal(transactionAmount));
+
+        Response<PostLoansLoanIdResponse> loanDisburseResponse = loansApi.stateTransitions(loanId, disburseRequest, "disburse").execute();
+        testContext().set(TestContextKey.LOAN_DISBURSE_RESPONSE, loanDisburseResponse);
+        ErrorResponse errorDetails = ErrorResponse.from(loanDisburseResponse);
+        assertThat(errorDetails.getHttpStatusCode())
+                .as(ErrorMessageHelper.addDisbursementExceedMaxAppliedAmountFailure(totalDisbursalAmount, maxDisbursalAmount))
+                .isEqualTo(403);
+        assertThat(errorDetails.getSingleError().getDeveloperMessage())
+                .isEqualTo(ErrorMessageHelper.addDisbursementExceedMaxAppliedAmountFailure(totalDisbursalAmount, maxDisbursalAmount));
+    }
+
     @And("Admin does charge-off the loan on {string}")
     public void chargeOffLoan(String transactionDate) throws IOException {
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);

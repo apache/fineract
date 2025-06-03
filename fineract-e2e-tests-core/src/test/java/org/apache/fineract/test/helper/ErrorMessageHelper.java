@@ -68,6 +68,11 @@ public final class ErrorMessageHelper {
         return "Loan can't be disbursed,disburse amount is exceeding approved principal ";
     }
 
+    public static String addDisbursementExceedMaxAppliedAmountFailure(String totalDisbAmount, String maxDisbursalAmount) {
+        return String.format("Loan disbursal amount can't be greater than maximum applied loan amount calculation. "
+                + "Total disbursed amount: %s  Maximum disbursal amount: %s", totalDisbAmount, maxDisbursalAmount);
+    }
+
     public static String disbursePastDateFailure(Integer loanId, String actualDisbursementDate) {
         return String.format("The date on which a loan is disbursed cannot be before its approval date: %s", actualDisbursementDate);
     }

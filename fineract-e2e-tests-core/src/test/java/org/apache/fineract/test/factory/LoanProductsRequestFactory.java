@@ -42,6 +42,7 @@ import org.apache.fineract.test.data.InterestCalculationPeriodTime;
 import org.apache.fineract.test.data.InterestRateFrequencyType;
 import org.apache.fineract.test.data.InterestRecalculationCompoundingMethod;
 import org.apache.fineract.test.data.InterestType;
+import org.apache.fineract.test.data.OverAppliedCalculationType;
 import org.apache.fineract.test.data.PreClosureInterestCalculationRule;
 import org.apache.fineract.test.data.RecalculationCompoundingFrequencyType;
 import org.apache.fineract.test.data.RecalculationRestFrequencyType;
@@ -111,7 +112,7 @@ public class LoanProductsRequestFactory {
     public static final Integer LOAN_ACCOUNTING_RULE = AccountingRule.ACCRUAL_PERIODIC.value;
     public static final Integer LOAN_ACCOUNTING_RULE_NONE = AccountingRule.NONE.value;
     public static final Integer CASH_ACCOUNTING_RULE = AccountingRule.CASH_BASED.value;
-    public static final String OVER_APPLIED_CALCULATION_TYPE = "percentage";
+    public static final String OVER_APPLIED_CALCULATION_TYPE = OverAppliedCalculationType.PERCENTAGE.value;
     public static final Integer OVER_APPLIED_NUMBER = 50;
     public static final Integer DELINQUENCY_BUCKET_ID = DelinquencyBucket.BASIC_DELINQUENCY_BUCKET.value;
     public static final Integer PRE_CLOSURE_INTEREST_CALCULATION_RULE_TILL_PRE_CLOSE_DATE = PreClosureInterestCalculationRule.TILL_PRE_CLOSE_DATE.value;
