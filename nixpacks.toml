@@ -1,0 +1,8 @@
+[phases.build]
+aptPkgs = ["openjdk-21-jdk"]
+
+[variables]
+JAVA_VERSION = "21"
+
+[start]
+cmd = "java $JAVA_OPTS -Dspring.profiles.active=railway,postgresql -jar fineract-provider/build/libs/fineract-provider-*-SNAPSHOT.jar"
