@@ -158,6 +158,14 @@ public final class ErrorMessageHelper {
         return "Failed data validation due to: cannot.be.in.the.future.";
     }
 
+    public static String addCapitalizedIncomeUndoFailureTransactionTypeNonReversal() {
+        return "Only (non-reversed) transactions of type repayment, waiver, accrual, credit balance refund, capitalized income or capitalized income adjustment can be adjusted.";
+    }
+
+    public static String addCapitalizedIncomeUndoFailureAdjustmentExists() {
+        return "Capitalized income transaction cannot be reversed when non-reversed adjustment exists for it.";
+    }
+
     public static String wrongAmountInRepaymentSchedule(int line, BigDecimal actual, BigDecimal expected) {
         String lineToStr = String.valueOf(line);
         String actualToStr = actual.toString();

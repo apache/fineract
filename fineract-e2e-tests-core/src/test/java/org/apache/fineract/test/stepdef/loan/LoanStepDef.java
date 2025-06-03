@@ -137,6 +137,7 @@ import org.apache.fineract.test.messaging.event.loan.transaction.BulkBusinessEve
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanAccrualAdjustmentTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanAccrualTransactionCreatedBusinessEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanAdjustTransactionBusinessEvent;
+import org.apache.fineract.test.messaging.event.loan.transaction.LoanCapitalizedIncomeAmortizationAdjustmentTransactionCreatedBusinessEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanChargeAdjustmentPostBusinessEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanChargeOffEvent;
@@ -4194,6 +4195,26 @@ public class LoanStepDef extends AbstractStepDef {
         Long finalAmortizationTransactionId = finalAmortizationTransaction.getId();
 
         eventAssertion.assertEventRaised(LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent.class,
+                finalAmortizationTransactionId);
+    }
+
+    @Then("LoanCapitalizedIncomeAmortizationAdjustmentTransactionCreatedBusinessEvent is raised on {string}")
+    public void checkLoanCapitalizedIncomeAmortizationAdjustmentTransactionCreatedBusinessEvent(final String date) throws IOException {
+        Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanCreateResponse.body().getLoanId();
+
+        Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+
+        List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.body().getTransactions();
+        GetLoansLoanIdTransactions finalAmortizationTransaction = transactions.stream()
+                .filter(t -> date.equals(FORMATTER.format(t.getDate()))
+                        && "Capitalized Income Amortization Adjustment".equals(t.getType().getValue()))
+                .findFirst().orElseThrow(() -> new IllegalStateException(
+                        String.format("No Capitalized Income Amortization Adjustment transaction found on %s", date)));
+        Long finalAmortizationTransactionId = finalAmortizationTransaction.getId();
+
+        eventAssertion.assertEventRaised(LoanCapitalizedIncomeAmortizationAdjustmentTransactionCreatedBusinessEvent.class,
                 finalAmortizationTransactionId);
     }
 

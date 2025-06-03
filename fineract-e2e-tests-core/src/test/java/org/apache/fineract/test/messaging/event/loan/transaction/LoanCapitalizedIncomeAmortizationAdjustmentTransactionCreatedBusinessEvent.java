@@ -16,22 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.business.domain.journalentry;
+package org.apache.fineract.test.messaging.event.loan.transaction;
 
-import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
-import org.apache.fineract.infrastructure.event.business.domain.AbstractBusinessEvent;
-
-public abstract class JournalEntryBusinessEvent extends AbstractBusinessEvent<JournalEntry> {
-
-    private static final String CATEGORY = "Accounting";
-
-    protected JournalEntryBusinessEvent(JournalEntry value) {
-        super(value);
-    }
+public class LoanCapitalizedIncomeAmortizationAdjustmentTransactionCreatedBusinessEvent extends AbstractLoanTransactionEvent {
 
     @Override
-    public String getCategory() {
-        return CATEGORY;
+    public String getEventName() {
+        return "LoanCapitalizedIncomeAmortizationAdjustmentTransactionCreatedBusinessEvent";
     }
-
 }

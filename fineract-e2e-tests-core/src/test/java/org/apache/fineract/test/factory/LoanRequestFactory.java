@@ -215,6 +215,11 @@ public class LoanRequestFactory {
                 .transactionAmount(DEFAULT_UNDO_TRANSACTION_AMOUNT).dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE);
     }
 
+    public static PostLoansLoanIdTransactionsTransactionIdRequest defaultCapitalizedIncomeAdjustmentUndoRequest() {
+        return new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate(DEFAULT_TRANSACTION_DATE)
+                .transactionAmount(DEFAULT_UNDO_TRANSACTION_AMOUNT).dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE);
+    }
+
     public static PostLoansLoanIdTransactionsTransactionIdRequest defaultRepaymentAdjustRequest(double amount) {
         return new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate(DEFAULT_TRANSACTION_DATE).transactionAmount(amount)
                 .dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE);

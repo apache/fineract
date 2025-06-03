@@ -138,10 +138,9 @@ public class AccountingRule extends AbstractPersistableCustom<Long> {
                 if (this.accountToCredit == null) {
                     this.allowMultipleCreditEntries = newValue;
                 }
-            } else if (paramName.equals(AccountingRuleJsonInputParams.ALLOW_MULTIPLE_DEBIT_ENTRIES.getValue())) {
-                if (this.accountToDebit == null) {
-                    this.allowMultipleDebitEntries = newValue;
-                }
+            } else if (paramName.equals(AccountingRuleJsonInputParams.ALLOW_MULTIPLE_DEBIT_ENTRIES.getValue())
+                    && this.accountToDebit == null) {
+                this.allowMultipleDebitEntries = newValue;
             }
         }
     }

@@ -199,4 +199,5 @@
     <include file="parts/0178_add_principal_from_capitalized_income_to_loan_summary.xml" relativeToChangelogFile="true" />
     <include file="parts/0179_add_capitalized_income_adjustment_transaction.xml" relativeToChangelogFile="true" />
     <include file="parts/0180_add_version_field_to_loan_transaction.xml" relativeToChangelogFile="true" />
+    <include file="parts/0181_add_capitalized_income_amortization_adjustment_transaction.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

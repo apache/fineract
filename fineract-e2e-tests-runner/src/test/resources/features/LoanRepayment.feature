@@ -2662,7 +2662,6 @@ Feature: LoanRepayment
       | Principal due | Interest | Fees | Penalties | Due  | Paid | In advance | Late | Outstanding |
       | 1000          | 0        | 20   | 40        | 1060 | 1060 | 0          | 1040 | 0           |
 
-
   @TestRailId:C2705 @PaymentStrategyDueInAdvancePenaltyInterestPrincipalFee
   Scenario: Verify the due-penalty-interest-principal-fee-in-advance-penalty-interest-principal-fee-strategy payment strategy: UC12 - partial payment, in advance penalty, interest, principal, fee due penalty, interest, principal, fee
     When Admin sets the business date to "01 January 2023"

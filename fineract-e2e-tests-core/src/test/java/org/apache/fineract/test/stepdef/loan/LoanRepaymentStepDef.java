@@ -398,6 +398,29 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
         eventCheckHelper.loanBalanceChangedEventCheck(loanId);
     }
 
+    @When("Customer undo {string}th capitalized income adjustment on {string}")
+    public void undoNthCapitalizedIncomeAdjustment(String nthItemStr, String transactionDate) throws IOException {
+        eventStore.reset();
+        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.body().getLoanId();
+        List<GetLoansLoanIdTransactions> transactions = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute().body()
+                .getTransactions();
+
+        int nthItem = Integer.parseInt(nthItemStr) - 1;
+        GetLoansLoanIdTransactions targetTransaction = transactions.stream()
+                .filter(t -> Boolean.TRUE.equals(t.getType().getCapitalizedIncomeAdjustment())).toList().get(nthItem);
+
+        PostLoansLoanIdTransactionsTransactionIdRequest capitalizedIncomeUndoRequest = LoanRequestFactory
+                .defaultCapitalizedIncomeAdjustmentUndoRequest().transactionDate(transactionDate);
+
+        Response<PostLoansLoanIdTransactionsResponse> capitalizedIncomeUndoResponse = loanTransactionsApi
+                .adjustLoanTransaction(loanId, targetTransaction.getId(), capitalizedIncomeUndoRequest, "").execute();
+        ErrorHelper.checkSuccessfulApiCall(capitalizedIncomeUndoResponse);
+        testContext().set(TestContextKey.LOAN_CAPITALIZED_INCOME_ADJUSTMENT_UNDO_RESPONSE, capitalizedIncomeUndoResponse);
+        eventCheckHelper.checkTransactionWithLoanTransactionAdjustmentBizEvent(targetTransaction);
+        eventCheckHelper.loanBalanceChangedEventCheck(loanId);
+    }
+
     @When("Customer undo {string}th transaction made on {string}")
     public void undoNthTransaction(String nthItemStr, String transactionDate) throws IOException {
         eventStore.reset();
@@ -426,18 +449,13 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
     @When("Customer undo {string}th {string} transaction made on {string}")
     public void undoNthTransactionType(String nthItemStr, String transactionType, String transactionDate) throws IOException {
         eventStore.reset();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.body().getLoanId();
         List<GetLoansLoanIdTransactions> transactions = loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute().body()
                 .getTransactions();
 
-        int nthItem = Integer.parseInt(nthItemStr) - 1;
-        GetLoansLoanIdTransactions targetTransaction = transactions//
-                .stream()//
-                .filter(t -> transactionDate.equals(formatter.format(t.getDate())) && transactionType.equals(t.getType().getValue()))//
-                .toList()//
-                .get(nthItem);//
+        GetLoansLoanIdTransactions targetTransaction = eventCheckHelper.getNthTransactionType(nthItemStr, transactionType, transactionDate,
+                transactions);
 
         PostLoansLoanIdTransactionsTransactionIdRequest transactionUndoRequest = LoanRequestFactory.defaultTransactionUndoRequest()
                 .transactionDate(transactionDate);
@@ -464,14 +482,18 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
         Response<PostLoansLoanIdTransactionsResponse> transactionUndoResponse = loanTransactionsApi
                 .adjustLoanTransaction(loanId, targetTransaction.getId(), transactionUndoRequest, "").execute();
 
+        Integer httpStatusCodeExpected = 403;
+        String developerMessageExpected = String.format("Interest refund transaction: %s cannot be reversed or adjusted directly",
+                targetTransaction.getId());
+        checkMakeTransactionForbidden(transactionUndoResponse, httpStatusCodeExpected, developerMessageExpected);
+    }
+
+    public void checkMakeTransactionForbidden(Response<PostLoansLoanIdTransactionsResponse> transactionUndoResponse,
+            Integer httpStatusCodeExpected, String developerMessageExpected) throws IOException {
         String string = transactionUndoResponse.errorBody().string();
         ErrorResponse errorResponse = GSON.fromJson(string, ErrorResponse.class);
         Integer httpStatusCodeActual = errorResponse.getHttpStatusCode();
         String developerMessageActual = errorResponse.getErrors().get(0).getDeveloperMessage();
-
-        Integer httpStatusCodeExpected = 403;
-        String developerMessageExpected = String.format("Interest refund transaction: %s cannot be reversed or adjusted directly",
-                targetTransaction.getId());
 
         assertThat(httpStatusCodeActual)
                 .as(ErrorMessageHelper.wrongErrorCodeInFailedChargeAdjustment(httpStatusCodeActual, httpStatusCodeExpected))
@@ -482,6 +504,41 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
 
         log.debug("Error code: {}", httpStatusCodeActual);
         log.debug("Error message: {}", developerMessageActual);
+    }
+
+    @Then("Customer is forbidden to undo {string}th {string} transaction made on {string} due to transaction type is non-reversal")
+    public void makeTransactionUndoForbiddenNonReversal(String nthItemStr, String transactionType, String transactionDate)
+            throws IOException {
+        eventStore.reset();
+        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.body().getLoanId();
+        GetLoansLoanIdTransactions targetTransaction = eventCheckHelper.findNthTransaction(nthItemStr, transactionType, transactionDate,
+                loanId);
+
+        PostLoansLoanIdTransactionsTransactionIdRequest transactionUndoRequest = LoanRequestFactory.defaultTransactionUndoRequest()
+                .transactionDate(transactionDate);
+
+        Response<PostLoansLoanIdTransactionsResponse> transactionUndoResponse = loanTransactionsApi
+                .adjustLoanTransaction(loanId, targetTransaction.getId(), transactionUndoRequest, "").execute();
+        checkMakeTransactionForbidden(transactionUndoResponse, 403,
+                ErrorMessageHelper.addCapitalizedIncomeUndoFailureTransactionTypeNonReversal());
+    }
+
+    @Then("Customer is forbidden to undo {string}th {string} transaction made on {string} due to adjustment exists")
+    public void makeTransactionUndoForbiddenAdjustmentExiists(String nthItemStr, String transactionType, String transactionDate)
+            throws IOException {
+        eventStore.reset();
+        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.body().getLoanId();
+        GetLoansLoanIdTransactions targetTransaction = eventCheckHelper.findNthTransaction(nthItemStr, transactionType, transactionDate,
+                loanId);
+
+        PostLoansLoanIdTransactionsTransactionIdRequest transactionUndoRequest = LoanRequestFactory.defaultTransactionUndoRequest()
+                .transactionDate(transactionDate);
+
+        Response<PostLoansLoanIdTransactionsResponse> transactionUndoResponse = loanTransactionsApi
+                .adjustLoanTransaction(loanId, targetTransaction.getId(), transactionUndoRequest, "").execute();
+        checkMakeTransactionForbidden(transactionUndoResponse, 403, ErrorMessageHelper.addCapitalizedIncomeUndoFailureAdjustmentExists());
     }
 
     @When("Customer undo {string}th {string} transaction made on {string} with linked {string} transaction")

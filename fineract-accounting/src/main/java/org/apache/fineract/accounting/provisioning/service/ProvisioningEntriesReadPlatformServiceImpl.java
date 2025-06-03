@@ -262,7 +262,7 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
         LoanProductProvisioningEntryRowMapper mapper = new LoanProductProvisioningEntryRowMapper();
         final String sql = "select " + mapper.getSchema() + " where entry.criteria_id = ?";
         Collection<LoanProductProvisioningEntryData> entries = this.jdbcTemplate.query(sql, mapper, criteriaId); // NOSONAR
-        if (entries != null && entries.size() > 0) {
+        if (entries != null && !entries.isEmpty()) {
             Long entryId = ((LoanProductProvisioningEntryData) entries.toArray()[0]).getHistoryId();
             ProvisioningEntryDataMapper mapper1 = new ProvisioningEntryDataMapper();
             final String sql1 = "select " + mapper1.getSchema() + " where entry.id = ?";

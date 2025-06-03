@@ -70,6 +70,7 @@ public enum LoanTransactionType {
     CAPITALIZED_INCOME(35, "loanTransactionType.capitalizedIncome"), //
     CAPITALIZED_INCOME_AMORTIZATION(36, "loanTransactionType.capitalizedIncomeAmortization"), //
     CAPITALIZED_INCOME_ADJUSTMENT(37, "loanTransactionType.capitalizedIncomeAdjustment"), //
+    CAPITALIZED_INCOME_AMORTIZATION_ADJUSTMENT(39, "loanTransactionType.capitalizedIncomeAmortizationAdjustment"), //
     // Kind of Final Transactions
     CONTRACT_TERMINATION(38, "loanTransactionType.contractTermination"), //
     ;
@@ -126,6 +127,7 @@ public enum LoanTransactionType {
             case 36 -> LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION;
             case 37 -> LoanTransactionType.CAPITALIZED_INCOME_ADJUSTMENT;
             case 38 -> LoanTransactionType.CONTRACT_TERMINATION;
+            case 39 -> LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION_ADJUSTMENT;
             default -> LoanTransactionType.INVALID;
         };
     }

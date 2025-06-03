@@ -2542,7 +2542,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
 
         // Merchant issued with Interest refund + interest recalculation, 360/30
         // accrual activity enabled
-        // (LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_REFUND_INTEREST_RECALCULATION)
+        // (LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_REFUND_INTEREST_RECALC_ACCRUAL_ACTIVITY)
         String name103 = DefaultLoanProduct.LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_REFUND_INTEREST_RECALC_ACCRUAL_ACTIVITY
                 .getName();
         PostLoanProductsRequest loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRefundRecalculationAccrualActivity = loanProductsRequestFactory
@@ -2573,7 +2573,7 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
 
         // Merchant issued with Interest refund + interest recalculation, 360/30
         // accrual activity enabled
-        // (LP2_ADV_PYMNT_INTEREST_DAILY_EMI_ACTUAL_ACTUAL_INTEREST_REFUND_INTEREST_RECALCULATION)
+        // (LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_REFUND_INTEREST_RECALC_DOWNPAYMENT_ACCRUAL_ACTIVITY)
         String name104 = DefaultLoanProduct.LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_REFUND_INTEREST_RECALC_DOWNPAYMENT_ACCRUAL_ACTIVITY
                 .getName();
         PostLoanProductsRequest loanProductsRequestLP2AdvancedpaymentInterestEmi36030InterestRefundRecalculation = loanProductsRequestFactory

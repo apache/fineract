@@ -536,6 +536,7 @@ public class LoanTransactionsApiResource {
             case capitalizedIncomeAmortization -> LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION;
             case capitalizedIncomeAdjustment -> LoanTransactionType.CAPITALIZED_INCOME_ADJUSTMENT;
             case contractTermination -> LoanTransactionType.CONTRACT_TERMINATION;
+            case capitalizedIncomeAmortizationAdjustment -> LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION_ADJUSTMENT;
             default ->
                 throw new InvalidLoanTransactionTypeException("transaction", transactionTypeParam.name(), "Unknown transaction type");
         };

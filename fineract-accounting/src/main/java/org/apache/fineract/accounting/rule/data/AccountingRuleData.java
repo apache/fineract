@@ -52,9 +52,9 @@ public class AccountingRuleData {
 
     // template
     @SuppressWarnings("unused")
-    private List<OfficeData> allowedOffices = new ArrayList<OfficeData>();
+    private List<OfficeData> allowedOffices = new ArrayList<>();
     @SuppressWarnings("unused")
-    private List<GLAccountData> allowedAccounts = new ArrayList<GLAccountData>();
+    private List<GLAccountData> allowedAccounts = new ArrayList<>();
     @SuppressWarnings("unused")
     private Collection<CodeValueData> allowedCreditTagOptions;
     @SuppressWarnings("unused")
