@@ -1,0 +1,204 @@
+name: Railway Deployment Workflow
+
+on:
+  push:
+    branches: [main, develop, 'feature/*', 'fix/*']
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+env:
+  JAVA_VERSION: '21'
+  JAVA_DISTRIBUTION: 'temurin'
+  GRADLE_VERSION: '8.1.3'
+
+jobs:
+  validate:
+    name: 🔍 Validate Environment
+    runs-on: ubuntu-latest
+    outputs:
+      should-deploy: ${{ steps.check-deploy.outputs.deploy }}
+      branch-name: ${{ steps.extract-branch.outputs.branch }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          cache: 'gradle'
+
+      - name: Extract branch name
+        id: extract-branch
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "branch=${{ github.head_ref }}" >> $GITHUB_OUTPUT
+          else
+            echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check if should deploy
+        id: check-deploy
+        run: |
+          if [[ "${{ github.event_name }}" == "push" && ("${{ github.ref }}" == "refs/heads/main" || "${{ github.ref }}" == "refs/heads/develop" || "${{ github.ref }}" =~ ^refs/heads/feature/ || "${{ github.ref }}" =~ ^refs/heads/fix/) ]]; then
+            echo "deploy=true" >> $GITHUB_OUTPUT
+          else
+            echo "deploy=false" >> $GITHUB_OUTPUT
+          fi
+
+  lint:
+    name: 🧹 Code Linting
+    runs-on: ubuntu-latest
+    needs: validate
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          cache: 'gradle'
+
+      - name: Run Checkstyle
+        run: ./gradlew checkstyleMain checkstyleTest
+
+      - name: Run SpotBugs
+        run: ./gradlew spotbugsMain spotbugsTest
+
+      - name: Run Spotless check
+        run: ./gradlew spotlessCheck
+
+  test:
+    name: 🧪 Unit Tests & Code Coverage
+    runs-on: ubuntu-latest
+    needs: lint
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          cache: 'gradle'
+
+      - name: Run tests with JaCoCo
+        run: ./gradlew test jacocoTestReport
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          fail_ci_if_error: false
+
+      - name: Verify minimum code coverage
+        run: |
+          COVERAGE=$(grep -o 'Total.*[0-9]\{1,3\}\.[0-9]\{1,2\}%' build/reports/jacoco/test/html/index.html | grep -o '[0-9]\{1,3\}\.[0-9]\{1,2\}')
+          if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+            echo "❌ Code coverage is below 80%: $COVERAGE%"
+            exit 1
+          else
+            echo "✅ Code coverage is acceptable: $COVERAGE%"
+          fi
+
+  build:
+    name: 🏗️ Build Application
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          cache: 'gradle'
+
+      - name: Build with Gradle
+        run: ./gradlew :fineract-provider:build -x test -x cucumber -x spotlessCheck -x rat --no-daemon
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: fineract-artifacts
+          path: |
+            fineract-provider/build/libs/*.jar
+            config/railway/**
+
+  deploy:
+    name: 🚀 Deploy to Railway
+    runs-on: ubuntu-latest
+    needs: [validate, build]
+    if: needs.validate.outputs.should-deploy == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: fineract-artifacts
+
+      - name: Install Railway CLI
+        run: curl -fsSL https://railway.app/install.sh | sh
+
+      - name: Login to Railway
+        run: railway login --browserless
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      - name: Deploy to Railway
+        run: |
+          echo "Deploying to Railway..."
+          railway up --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      - name: Verify Deployment
+        run: |
+          echo "Verifying deployment..."
+          ATTEMPTS=0
+          MAX_ATTEMPTS=20
+          
+          until $(curl --output /dev/null --silent --head --fail $(railway service url --url)/fineract-provider/actuator/health) || [ $ATTEMPTS -eq $MAX_ATTEMPTS ]; do
+            ATTEMPTS=$((ATTEMPTS+1))
+            echo "Waiting for deployment to be ready... ($ATTEMPTS/$MAX_ATTEMPTS)"
+            sleep 15
+          done
+          
+          if [ $ATTEMPTS -eq $MAX_ATTEMPTS ]; then
+            echo "❌ Deployment verification timed out"
+            exit 1
+          else
+            echo "✅ Deployment verified successfully"
+          fi
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  notify:
+    name: 📢 Deployment Notification
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    if: always()
+    
+    steps:
+      - name: Deployment Status
+        run: |
+          if [[ "${{ needs.deploy.result }}" == "success" ]]; then
+            echo "✅ Deployment was successful"
+          else
+            echo "❌ Deployment failed"
+          fi

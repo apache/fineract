@@ -1,0 +1,14 @@
+{
+    "recommendations": [
+        "github.copilot",
+        "vscjava.vscode-java-pack",
+        "vscjava.vscode-gradle",
+        "ckolkman.vscode-postgres",
+        "github.vscode-pull-request-github",
+        "humao.rest-client",
+        "eamodio.gitlens",
+        "usernamehw.errorlens",
+        "redhat.java",
+        "ms-vscode.vscode-json"
+    ]
+}
