@@ -37,7 +37,6 @@ import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.externalevents.ExternalEventHelper;
 import org.apache.fineract.integrationtests.common.externalevents.ExternalEventsExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -303,12 +302,6 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
             List<ExternalEventDTO> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
             Assertions.assertEquals(0, allExternalEvents.size());
         });
-    }
-
-    private void deleteAllExternalEvents() {
-        ExternalEventHelper.deleteAllExternalEvents(requestSpec, createResponseSpecification(Matchers.is(204)));
-        List<ExternalEventDTO> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
-        Assertions.assertEquals(0, allExternalEvents.size());
     }
 
     private void enableCOBBusinessStep(String... steps) {

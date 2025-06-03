@@ -25,24 +25,12 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdStatus;
 import org.apache.fineract.client.models.GlobalConfigurationPropertyData;
@@ -66,8 +54,10 @@ import org.apache.fineract.integrationtests.common.LoanRescheduleRequestHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.externalevents.ExternalEventHelper;
 import org.apache.fineract.integrationtests.common.externalevents.ExternalEventsExtension;
+import org.apache.fineract.integrationtests.common.externalevents.LoanAdjustTransactionBusinessEvent;
+import org.apache.fineract.integrationtests.common.externalevents.LoanBusinessEvent;
+import org.apache.fineract.integrationtests.common.externalevents.LoanTransactionBusinessEvent;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -1012,12 +1002,6 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
         externalEventHelper.disableBusinessEvent("LoanBalanceChangedBusinessEvent");
     }
 
-    private void deleteAllExternalEvents() {
-        ExternalEventHelper.deleteAllExternalEvents(requestSpec, createResponseSpecification(Matchers.is(204)));
-        List<ExternalEventDTO> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
-        Assertions.assertEquals(0, allExternalEvents.size());
-    }
-
     private static Long createLoanProductPeriodicWithInterest() {
         String name = Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6);
         String shortName = Utils.uniqueRandomStringGenerator("", 4);
@@ -1070,21 +1054,6 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
         return loanId;
     }
 
-    private void logBusinessEvents(List<ExternalEventDTO> allExternalEvents) {
-        allExternalEvents.forEach(externalEventDTO -> {
-            Object amount = externalEventDTO.getPayLoad().get("amount");
-            Object outstandingLoanBalance = externalEventDTO.getPayLoad().get("outstandingLoanBalance");
-            Object principalPortion = externalEventDTO.getPayLoad().get("principalPortion");
-            Object interestPortion = externalEventDTO.getPayLoad().get("interestPortion");
-            Object feePortion = externalEventDTO.getPayLoad().get("feeChargesPortion");
-            Object penaltyPortion = externalEventDTO.getPayLoad().get("penaltyChargesPortion");
-            log.info("Event Received\n type:'{}'\n businessDate:'{}'", externalEventDTO.getType(), externalEventDTO.getBusinessDate());
-            log.info(
-                    "Values\n amount: {}\n outstandingLoanBalance: {}\n principalPortion: {}\n interestPortion: {}\n feePortion: {}\n penaltyPortion: {}",
-                    amount, outstandingLoanBalance, principalPortion, interestPortion, feePortion, penaltyPortion);
-        });
-    }
-
     private void enableLoanInterestRefundPstBusinessEvent(boolean enabled) {
         externalEventHelper.configureBusinessEvent("LoanTransactionInterestRefundPostBusinessEvent", enabled);
     }
@@ -1095,221 +1064,5 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
 
     private void configureLoanAccrualTransactionCreatedBusinessEvent(boolean enabled) {
         externalEventHelper.configureBusinessEvent("LoanAccrualTransactionCreatedBusinessEvent", enabled);
-    }
-
-    public void verifyBusinessEvents(BusinessEvent... businessEvents) {
-        List<ExternalEventDTO> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
-        logBusinessEvents(allExternalEvents);
-        Assertions.assertNotNull(businessEvents);
-        Assertions.assertNotNull(allExternalEvents);
-        Assertions.assertTrue(businessEvents.length <= allExternalEvents.size(),
-                "Expected business event count is less than actual. Expected: " + businessEvents.length + " Actual: "
-                        + allExternalEvents.size());
-        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATETIME_PATTERN, Locale.ENGLISH);
-        for (BusinessEvent businessEvent : businessEvents) {
-            long count = allExternalEvents.stream().filter(externalEvent -> businessEvent.verify(externalEvent, formatter)).count();
-            Assertions.assertEquals(1, count, "Expected business event not found " + businessEvent);
-        }
-    }
-
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class BusinessEvent {
-
-        String type;
-        String businessDate;
-
-        boolean verify(@NotNull ExternalEventDTO externalEvent, DateTimeFormatter formatter) {
-            var businessDate = LocalDate.parse(getBusinessDate(), formatter);
-
-            return Objects.equals(externalEvent.getType(), getType()) && Objects.equals(externalEvent.getBusinessDate(), businessDate);
-        }
-    }
-
-    @EqualsAndHashCode(callSuper = true)
-    @Data
-    @AllArgsConstructor
-    public static class LoanTransactionBusinessEvent extends BusinessEvent {
-
-        private Double amount;
-        private Double outstandingLoanBalance;
-        private Double principalPortion;
-        private Double interestPortion;
-        private Double feeChargesPortion;
-        private Double penaltyChargesPortion;
-
-        public LoanTransactionBusinessEvent(String type, String businessDate, Double amount, Double outstandingLoanBalance,
-                Double principalPortion, Double interestPortion, Double feeChargesPortion, Double penaltyChargesPortion) {
-            super(type, businessDate);
-            this.amount = amount;
-            this.outstandingLoanBalance = outstandingLoanBalance;
-            this.principalPortion = principalPortion;
-            this.interestPortion = interestPortion;
-            this.feeChargesPortion = feeChargesPortion;
-            this.penaltyChargesPortion = penaltyChargesPortion;
-        }
-
-        @Override
-        boolean verify(ExternalEventDTO externalEvent, DateTimeFormatter formatter) {
-            Object amount = externalEvent.getPayLoad().get("amount");
-            Object outstandingLoanBalance = externalEvent.getPayLoad().get("outstandingLoanBalance");
-            Object principalPortion = externalEvent.getPayLoad().get("principalPortion");
-            Object interestPortion = externalEvent.getPayLoad().get("interestPortion");
-            Object feePortion = externalEvent.getPayLoad().get("feeChargesPortion");
-            Object penaltyPortion = externalEvent.getPayLoad().get("penaltyChargesPortion");
-
-            return super.verify(externalEvent, formatter) && Objects.equals(amount, getAmount())
-                    && Objects.equals(outstandingLoanBalance, getOutstandingLoanBalance())
-                    && Objects.equals(principalPortion, getPrincipalPortion()) && Objects.equals(interestPortion, getInterestPortion())
-                    && Objects.equals(feePortion, getFeeChargesPortion()) && Objects.equals(penaltyPortion, getPenaltyChargesPortion());
-        }
-    }
-
-    @EqualsAndHashCode(callSuper = true)
-    @Data
-    @AllArgsConstructor
-    public static class LoanBusinessEvent extends BusinessEvent {
-
-        private Integer statusId;
-        private Double principalDisbursed;
-        private Double principalOutstanding;
-        private List<String> loanTermVariationType;
-
-        public LoanBusinessEvent(String type, String businessDate, Integer statusId, Double principalDisbursed,
-                Double principalOutstanding) {
-            super(type, businessDate);
-            this.statusId = statusId;
-            this.principalDisbursed = principalDisbursed;
-            this.principalOutstanding = principalOutstanding;
-        }
-
-        public LoanBusinessEvent(String type, String businessDate, Integer statusId, Double principalDisbursed, Double principalOutstanding,
-                List<String> loanTermVariationType) {
-            super(type, businessDate);
-            this.statusId = statusId;
-            this.principalDisbursed = principalDisbursed;
-            this.principalOutstanding = principalOutstanding;
-            this.loanTermVariationType = loanTermVariationType;
-        }
-
-        @Override
-        public boolean verify(ExternalEventDTO externalEvent, DateTimeFormatter formatter) {
-            Object summaryRes = externalEvent.getPayLoad().get("summary");
-            Object statusRes = externalEvent.getPayLoad().get("status");
-            Map<String, Object> summary = summaryRes instanceof Map ? (Map<String, Object>) summaryRes : Map.of();
-            Map<String, Object> status = statusRes instanceof Map ? (Map<String, Object>) statusRes : Map.of();
-            var principalDisbursed = summary.get("principalDisbursed");
-
-            var principalOutstanding = summary.get("principalOutstanding");
-            Double statusId = (Double) status.get("id");
-            return super.verify(externalEvent, formatter) && Objects.equals(statusId, getStatusId().doubleValue())
-                    && Objects.equals(principalDisbursed, getPrincipalDisbursed())
-                    && Objects.equals(principalOutstanding, getPrincipalOutstanding()) && loanTermVariationsMatch(
-                            (List<Map<String, Object>>) externalEvent.getPayLoad().get("loanTermVariations"), loanTermVariationType);
-        }
-
-        private boolean loanTermVariationsMatch(final List<Map<String, Object>> loanTermVariations, final List<String> expectedTypes) {
-            if (CollectionUtils.isEmpty(expectedTypes)) {
-                return true;
-            }
-            final long numberOfMatches = expectedTypes.stream().filter(expectedType -> loanTermVariations.stream().anyMatch(
-                    variation -> StringUtils.equals((String) ((Map<String, Object>) variation.get("termType")).get("value"), expectedType)))
-                    .count();
-
-            return numberOfMatches == expectedTypes.size();
-        }
-    }
-
-    public static class LoanAdjustTransactionBusinessEvent extends BusinessEvent {
-
-        private String transactionTypeCode;
-        private String transactionDate;
-        private Double oldAmount;
-        private Double newAmount;
-        private Double oldPrincipalPortion;
-        private Double newPrincipalPortion;
-        private Double oldInterestPortion;
-        private Double newInterestPortion;
-        private Double oldFeePortion;
-        private Double newFeePortion;
-        private Double oldPenaltyPortion;
-        private Double newPenaltyPortion;
-
-        public LoanAdjustTransactionBusinessEvent(String type, String businessDate, String transactionTypeCode, String transactionDate) {
-            super(type, businessDate);
-            this.transactionTypeCode = transactionTypeCode;
-            this.transactionDate = transactionDate;
-        }
-
-        public LoanAdjustTransactionBusinessEvent(String type, String businessDate, String transactionTypeCode, String transactionDate,
-                Double oldAmount, Double newAmount) {
-            super(type, businessDate);
-            this.transactionTypeCode = transactionTypeCode;
-            this.transactionDate = transactionDate;
-            this.oldAmount = oldAmount;
-            this.newAmount = newAmount;
-        }
-
-        public LoanAdjustTransactionBusinessEvent(String type, String businessDate, String transactionTypeCode, String transactionDate,
-                Double oldAmount, Double newAmount, Double oldPrincipalPortion, Double newPrincipalPortion, Double oldInterestPortion,
-                Double newInterestPortion, Double oldFeePortion, Double newFeePortion, Double oldPenaltyPortion, Double newPenaltyPortion) {
-            super(type, businessDate);
-            this.transactionTypeCode = transactionTypeCode;
-            this.transactionDate = transactionDate;
-            this.oldAmount = oldAmount;
-            this.newAmount = newAmount;
-            this.oldPrincipalPortion = oldPrincipalPortion;
-            this.newPrincipalPortion = newPrincipalPortion;
-            this.oldInterestPortion = oldInterestPortion;
-            this.newInterestPortion = newInterestPortion;
-            this.oldFeePortion = oldFeePortion;
-            this.newFeePortion = newFeePortion;
-            this.oldPenaltyPortion = oldPenaltyPortion;
-            this.newPenaltyPortion = newPenaltyPortion;
-        }
-
-        @Override
-        boolean verify(ExternalEventDTO externalEvent, DateTimeFormatter formatter) {
-            final Object transactionToAdjust = externalEvent.getPayLoad().get("transactionToAdjust");
-            final Map<?, Object> transActionToAdjustMap = transactionToAdjust instanceof Map ? (Map<String, Object>) transactionToAdjust
-                    : Collections.emptyMap();
-
-            Object actualOldAmount = transActionToAdjustMap.get("amount");
-            Object actualOldPrincipalPortion = transActionToAdjustMap.get("principalPortion");
-            Object actualOldInterestPortion = transActionToAdjustMap.get("interestPortion");
-            Object actualOldFeePortion = transActionToAdjustMap.get("feeChargesPortion");
-            Object actualOldPenaltyPortion = transActionToAdjustMap.get("penaltyChargesPortion");
-
-            final Object newTransactionDetail = externalEvent.getPayLoad().get("newTransactionDetail");
-            final Map<?, Object> newTransactionDetailMap = newTransactionDetail instanceof Map ? (Map<String, Object>) newTransactionDetail
-                    : Collections.emptyMap();
-
-            Object actualNewAmount = newTransactionDetailMap.get("amount");
-            Object actualNewPrincipalPortion = newTransactionDetailMap.get("principalPortion");
-            Object actualNewInterestPortion = newTransactionDetailMap.get("interestPortion");
-            Object actualNewFeePortion = newTransactionDetailMap.get("feeChargesPortion");
-            Object actualNewPenaltyPortion = newTransactionDetailMap.get("penaltyChargesPortion");
-
-            final Object actualTransactionDate = transActionToAdjustMap.get("date");
-            final Object transactionType = transActionToAdjustMap.get("type");
-            final Map<?, Object> transactionTypeMap = transactionType instanceof Map ? (Map<String, Object>) transactionType
-                    : Collections.emptyMap();
-            final Object actualTransactionTypeCode = transactionTypeMap.get("code");
-
-            return super.verify(externalEvent, formatter)//
-                    && Objects.equals(actualTransactionTypeCode, transactionTypeCode)
-                    && Objects.equals(actualTransactionDate, transactionDate)//
-                    && (oldAmount == null || Objects.equals(actualOldAmount, oldAmount))//
-                    && (newAmount == null || Objects.equals(actualNewAmount, newAmount))//
-                    && (oldPrincipalPortion == null || Objects.equals(actualOldPrincipalPortion, oldPrincipalPortion))//
-                    && (newPrincipalPortion == null || Objects.equals(actualNewPrincipalPortion, newPrincipalPortion))//
-                    && (oldInterestPortion == null || Objects.equals(actualOldInterestPortion, oldInterestPortion))//
-                    && (newInterestPortion == null || Objects.equals(actualNewInterestPortion, newInterestPortion))//
-                    && (oldFeePortion == null || Objects.equals(actualOldFeePortion, oldFeePortion))//
-                    && (newFeePortion == null || Objects.equals(actualNewFeePortion, newFeePortion))//
-                    && (oldPenaltyPortion == null || Objects.equals(actualOldPenaltyPortion, oldPenaltyPortion))//
-                    && (newPenaltyPortion == null || Objects.equals(actualNewPenaltyPortion, newPenaltyPortion));
-        }
     }
 }

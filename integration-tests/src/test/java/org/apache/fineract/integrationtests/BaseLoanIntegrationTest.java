@@ -87,6 +87,7 @@ import org.apache.fineract.client.models.RetrieveLoansPointInTimeRequest;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
+import org.apache.fineract.infrastructure.event.external.service.validation.ExternalEventDTO;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.BatchHelper;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
@@ -99,6 +100,9 @@ import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.integrationtests.common.accounting.JournalEntryHelper;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.error.ErrorResponse;
+import org.apache.fineract.integrationtests.common.externalevents.BusinessEvent;
+import org.apache.fineract.integrationtests.common.externalevents.ExternalEventHelper;
+import org.apache.fineract.integrationtests.common.externalevents.ExternalEventsExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanAccountLockHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
@@ -119,7 +123,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @Slf4j
-@ExtendWith(LoanTestLifecycleExtension.class)
+@ExtendWith({ LoanTestLifecycleExtension.class, ExternalEventsExtension.class })
 public abstract class BaseLoanIntegrationTest extends IntegrationTest {
 
     protected static final String DATETIME_PATTERN = "dd MMMM yyyy";
@@ -171,6 +175,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     protected GlobalConfigurationHelper globalConfigurationHelper = new GlobalConfigurationHelper();
     protected final CodeHelper codeHelper = new CodeHelper();
     protected final ChargesHelper chargesHelper = new ChargesHelper();
+    protected final ExternalEventHelper externalEventHelper = new ExternalEventHelper();
 
     protected static void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, LocalDate dueDate, double principalDue,
             double principalPaid, double principalOutstanding, double paidInAdvance, double paidLate) {
@@ -1267,6 +1272,42 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     protected void rejectLoan(Long loanId, String rejectedOnDate) {
         loanTransactionHelper.rejectLoan(loanId,
                 new PostLoansLoanIdRequest().rejectedOnDate(rejectedOnDate).locale("en").dateFormat(DATETIME_PATTERN));
+    }
+
+    protected void verifyBusinessEvents(BusinessEvent... businessEvents) {
+        List<ExternalEventDTO> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+        logBusinessEvents(allExternalEvents);
+        Assertions.assertNotNull(businessEvents);
+        Assertions.assertNotNull(allExternalEvents);
+        Assertions.assertTrue(businessEvents.length <= allExternalEvents.size(),
+                "Expected business event count is less than actual. Expected: " + businessEvents.length + " Actual: "
+                        + allExternalEvents.size());
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATETIME_PATTERN, Locale.ENGLISH);
+        for (BusinessEvent businessEvent : businessEvents) {
+            long count = allExternalEvents.stream().filter(externalEvent -> businessEvent.verify(externalEvent, formatter)).count();
+            Assertions.assertEquals(1, count, "Expected business event not found " + businessEvent);
+        }
+    }
+
+    protected void logBusinessEvents(List<ExternalEventDTO> allExternalEvents) {
+        allExternalEvents.forEach(externalEventDTO -> {
+            Object amount = externalEventDTO.getPayLoad().get("amount");
+            Object outstandingLoanBalance = externalEventDTO.getPayLoad().get("outstandingLoanBalance");
+            Object principalPortion = externalEventDTO.getPayLoad().get("principalPortion");
+            Object interestPortion = externalEventDTO.getPayLoad().get("interestPortion");
+            Object feePortion = externalEventDTO.getPayLoad().get("feeChargesPortion");
+            Object penaltyPortion = externalEventDTO.getPayLoad().get("penaltyChargesPortion");
+            log.info("Event Received\n type:'{}'\n businessDate:'{}'", externalEventDTO.getType(), externalEventDTO.getBusinessDate());
+            log.info(
+                    "Values\n amount: {}\n outstandingLoanBalance: {}\n principalPortion: {}\n interestPortion: {}\n feePortion: {}\n penaltyPortion: {}",
+                    amount, outstandingLoanBalance, principalPortion, interestPortion, feePortion, penaltyPortion);
+        });
+    }
+
+    protected void deleteAllExternalEvents() {
+        ExternalEventHelper.deleteAllExternalEvents(requestSpec, createResponseSpecification(Matchers.is(204)));
+        List<ExternalEventDTO> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+        Assertions.assertEquals(0, allExternalEvents.size());
     }
 
     @RequiredArgsConstructor

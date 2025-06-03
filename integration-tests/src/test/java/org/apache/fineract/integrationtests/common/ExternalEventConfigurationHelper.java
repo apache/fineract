@@ -606,6 +606,11 @@ public class ExternalEventConfigurationHelper {
         loanCapitalizedIncomeAmortizationAdjustmentTransactionCreatedBusinessEvent.put("enabled", false);
         defaults.add(loanCapitalizedIncomeAmortizationAdjustmentTransactionCreatedBusinessEvent);
 
+        Map<String, Object> loanCapitalizedIncomeTransactionCreatedBusinessEvent = new HashMap<>();
+        loanCapitalizedIncomeTransactionCreatedBusinessEvent.put("type", "LoanCapitalizedIncomeTransactionCreatedBusinessEvent");
+        loanCapitalizedIncomeTransactionCreatedBusinessEvent.put("enabled", false);
+        defaults.add(loanCapitalizedIncomeTransactionCreatedBusinessEvent);
+
         return defaults;
     }
 

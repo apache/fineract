@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.starter;
 
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.repository.LoanCapitalizedIncomeBalanceRepository;
@@ -50,10 +51,11 @@ public class ProgressiveLoanAccountConfiguration {
             PaymentDetailWritePlatformService paymentDetailWritePlatformService, LoanJournalEntryPoster journalEntryPoster,
             NoteWritePlatformService noteWritePlatformService, ExternalIdFactory externalIdFactory,
             LoanCapitalizedIncomeBalanceRepository capitalizedIncomeBalanceRepository,
-            ReprocessLoanTransactionsService reprocessLoanTransactionsService, LoanBalanceService loanBalanceService) {
+            ReprocessLoanTransactionsService reprocessLoanTransactionsService, LoanBalanceService loanBalanceService,
+            BusinessEventNotifierService businessEventNotifierService) {
         return new CapitalizedIncomeWritePlatformServiceImpl(loanTransactionValidator, loanAssembler, loanTransactionRepository,
                 paymentDetailWritePlatformService, journalEntryPoster, noteWritePlatformService, externalIdFactory,
-                capitalizedIncomeBalanceRepository, reprocessLoanTransactionsService, loanBalanceService);
+                capitalizedIncomeBalanceRepository, reprocessLoanTransactionsService, loanBalanceService, businessEventNotifierService);
     }
 
     @Bean
