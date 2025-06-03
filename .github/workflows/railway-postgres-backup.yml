@@ -1,0 +1,98 @@
+name: Railway PostgreSQL Backup
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to backup (production, staging)'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+        - production
+        - staging
+
+env:
+  BACKUP_RETENTION_DAYS: 7
+
+jobs:
+  backup:
+    name: 💾 Backup PostgreSQL Database
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: curl -fsSL https://railway.app/install.sh | sh
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Login to Railway
+        run: railway login --browserless
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      - name: Switch to correct environment
+        run: |
+          ENV_NAME="${{ github.event.inputs.environment || 'production' }}"
+          echo "Switching to $ENV_NAME environment"
+          railway environment
+          railway environment $ENV_NAME
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      - name: Get PostgreSQL credentials
+        id: postgres-creds
+        run: |
+          echo "RAILWAY_POSTGRES_HOST=$(railway variables get RAILWAY_POSTGRES_HOST)" >> $GITHUB_ENV
+          echo "RAILWAY_POSTGRES_PORT=$(railway variables get RAILWAY_POSTGRES_PORT)" >> $GITHUB_ENV
+          echo "RAILWAY_POSTGRES_USERNAME=$(railway variables get RAILWAY_POSTGRES_USERNAME)" >> $GITHUB_ENV
+          echo "RAILWAY_POSTGRES_PASSWORD=$(railway variables get RAILWAY_POSTGRES_PASSWORD)" >> $GITHUB_ENV
+          echo "RAILWAY_POSTGRES_DATABASE=$(railway variables get RAILWAY_POSTGRES_DATABASE)" >> $GITHUB_ENV
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      - name: Set up backup directory
+        run: mkdir -p ./backups
+
+      - name: Run backup script
+        run: |
+          chmod +x ./scripts/railway-postgres-backup.sh
+          ./scripts/railway-postgres-backup.sh "$RAILWAY_POSTGRES_DATABASE" "$RAILWAY_POSTGRES_USERNAME" "$RAILWAY_POSTGRES_HOST" "$RAILWAY_POSTGRES_PORT" "./backups" "$BACKUP_RETENTION_DAYS"
+        env:
+          RAILWAY_POSTGRES_HOST: ${{ env.RAILWAY_POSTGRES_HOST }}
+          RAILWAY_POSTGRES_PORT: ${{ env.RAILWAY_POSTGRES_PORT }}
+          RAILWAY_POSTGRES_USERNAME: ${{ env.RAILWAY_POSTGRES_USERNAME }}
+          RAILWAY_POSTGRES_PASSWORD: ${{ env.RAILWAY_POSTGRES_PASSWORD }}
+          RAILWAY_POSTGRES_DATABASE: ${{ env.RAILWAY_POSTGRES_DATABASE }}
+          
+      - name: Upload backup as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: postgresql-backup-${{ github.event.inputs.environment || 'production' }}
+          path: ./backups/*.gz
+          retention-days: ${{ env.BACKUP_RETENTION_DAYS }}
+
+      - name: Backup Summary
+        run: |
+          BACKUP_SIZE=$(du -h ./backups/*.gz | cut -f1)
+          BACKUP_DATE=$(date)
+          ENV_NAME="${{ github.event.inputs.environment || 'production' }}"
+          
+          echo "## 💾 PostgreSQL Backup Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Detail | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| ------ | ----- |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Environment** | $ENV_NAME |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Database** | $RAILWAY_POSTGRES_DATABASE |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Backup Size** | $BACKUP_SIZE |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Timestamp** | $BACKUP_DATE |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Retention** | $BACKUP_RETENTION_DAYS days |" >> $GITHUB_STEP_SUMMARY

@@ -5,6 +5,7 @@ Apache Fineract: A Platform for Microfinance
 [![Docker Hub](https://img.shields.io/docker/pulls/apache/fineract.svg?logo=Docker)](https://hub.docker.com/r/apache/fineract)
 [![Docker Build](https://github.com/apache/fineract/actions/workflows/publish-dockerhub.yml/badge.svg)](https://github.com/apache/fineract/actions/workflows/publish-dockerhub.yml)
 [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=apache_fineract&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=apache_fineract)
+[![Railway Deployment](https://img.shields.io/badge/deployment-railway-purple)](https://railway.app)
 
 </b>
 
@@ -21,15 +22,16 @@ If you are interested in contributing to this project, but perhaps don't quite k
 REQUIREMENTS
 ============
 * `Java >= 21` (Azul Zulu JVM is tested by our CI on GitHub Actions)
-* MariaDB `11.5.2`
+* PostgreSQL (default for Railway deployment)
+* Dragonfly (Redis-compatible, for Railway deployment)
 
 You can run the required version of the database server in a container, instead of having to install it, like this:
 
-    docker run --name mariadb-11.5 -p 3306:3306 -e MARIADB_ROOT_PASSWORD=mysql -d mariadb:11.5.2
+    docker run --name postgres-16 -p 5432:5432 -e POSTGRES_PASSWORD=postgres -d postgres:16
 
 and stop and destroy it like this:
 
-    docker rm -f mariadb-11.5
+    docker rm -f postgres-16
 
 <br>Beware that this database container database keeps its state inside the container and not on the host filesystem.  It is lost when you destroy (rm) this container.  This is typically fine for development.  See [Caveats: Where to Store Data on the database container documentation](https://hub.docker.com/_/mariadb) re. how to make it persistent instead of ephemeral.<br>
 
@@ -288,52 +290,49 @@ id -u ${GROUP}
 
 Please make sure that you are not checking in your changed values. The defaults should normally work for most people.
 
-INSTRUCTIONS: How to build documentation
-===================================================
+INSTRUCTIONS: How to deploy using Railway
+============
 
-Run the following command:
+This repository is configured for easy deployment on [Railway](https://railway.app), a modern platform as a service. Railway offers a streamlined way to deploy Fineract with PostgreSQL and Dragonfly (Redis-compatible) services.
 
-```bash
-./gradlew doc
-```
+### Option 1: One-Click Deployment (Recommended)
 
-Some dependencies are required (e.g. Ghostscript, Graphviz), see `.github/workflows/build-documentation.yml` for hints.
+1. Fork this repository on GitHub
+2. Log in to Railway
+3. Create a new project and select "Deploy from GitHub repo"
+4. Choose your forked repository
+5. Railway will automatically provision PostgreSQL and Dragonfly services
+6. Your application will be deployed and accessible at a Railway-provided URL
 
-Additionally, IDEs such as IntelliJ are useful for editing the AsciiDoc source files while providing a live rendered preview.
+### Option 2: Manual Deployment
 
-HTML rendered from the AsciiDoc source files is also available online at <https://fineract.apache.org/docs/current/>.
+1. Clone this repository
+2. Navigate to the project directory
+3. Run the setup script:
+   ```powershell
+   bash .\railway-setup-complete.sh
+   ```
+4. Deploy the application:
+   ```powershell
+   bash .\railway-deploy.sh
+   ```
 
-Connection pool configuration
-=============================
+### VS Code Integration
 
-Please check `application.properties` to see which connection pool settings can be tweaked. The associated environment variables are prefixed with `FINERACT_HIKARI_*`. You can find more information about specific connection pool settings (Hikari) at https://github.com/brettwooldridge/HikariCP#configuration-knobs-baby
+We provide VS Code tasks for easy interaction with Railway:
+1. Open the project in VS Code
+2. Press `Ctrl+Shift+P` and select "Tasks: Run Task"
+3. Choose from Railway tasks:
+   - "Railway: Setup Complete Environment"
+   - "Railway: Deploy Application"
+   - "Railway: Check Health"
+   - "Railway: Setup PostgreSQL"
+   - "Railway: Setup Redis/Dragonfly"
+   - "Railway: View Logs"
 
-NOTE: we'll keep backwards compatibility until one of the next releases to ensure that things are working as expected. Environment variables prefixed `fineract_tenants_*` can still be used to configure the database connection, but we strongly encourage using `FINERACT_HIKARI_*` with more options.
+For more detailed instructions, see [RAILWAY-DEPLOYMENT.md](RAILWAY-DEPLOYMENT.md)
 
-<br>SSL CONFIGURATION
-=================
-
-Read also [the HTTPS related doc](fineract-doc/src/docs/en/chapters/deployment/https.adoc).
-
-By default SSL is enabled, but all SSL related properties are now tunable. SSL can be turned off by setting the environment variable `FINERACT_SERVER_SSL_ENABLED` to false. If you do that then please make sure to also change the server port to `8080` via the variable `FINERACT_SERVER_PORT`, just for the sake of keeping the conventions.
-You can choose now easily a different SSL keystore by setting `FINERACT_SERVER_SSL_KEY_STORE` with a path to a different (not embedded) keystore. The password can be set via `FINERACT_SERVER_SSL_KEY_STORE_PASSWORD`. See the `application.properties` file and the latest Spring Boot documentation (https://docs.spring.io/spring-boot/docs/current/reference/html/application-properties.html) for more details.
-
-
-<br>TOMCAT CONFIGURATION
-====================
-
-Please refer to the `application.properties` and the official Spring Boot documentation (https://docs.spring.io/spring-boot/docs/current/reference/html/application-properties.html) on how to do performance tuning for Tomcat. Note: you can set now the acceptable form POST size (default is 2MB) via environment variable `FINERACT_SERVER_TOMCAT_MAX_HTTP_FORM_POST_SIZE`.
-
-
-<br>INSTRUCTIONS: How to run on Kubernetes
-=================================
-
-<br>General Clusters
-----------------
-
-You can also run Fineract using containers on a Kubernetes cluster.
-Make sure you set up and connect to your Kubernetes cluster.
-You can follow [this](https://cwiki.apache.org/confluence/display/FINERACT/Install+and+configure+kubectl+and+Google+Cloud+SDK+on+ubuntu+16.04) guide to set up a Kubernetes cluster on GKE. Make sure to replace `apache-fineract-cn` with `apache-fineract`
+https://cwiki.apache.org/confluence/display/FINERACT/Install+and+configure+kubectl+and+Google+Cloud+SDK+on+ubuntu+16.04) guide to set up a Kubernetes cluster on GKE. Make sure to replace `apache-fineract-cn` with `apache-fineract`
 
 Now e.g. from your Google Cloud shell, run the following commands:
 
@@ -482,6 +481,47 @@ If you are developer and object to using the LGPL licensed Connector/J JDBC driv
 simply do not run the integration tests that use the Liquibase library and/or use another JDBC driver.
 As discussed in [LEGAL-462](https://issues.apache.org/jira/browse/LEGAL-462), this project therefore
 complies with the [Apache Software Foundation third-party license policy](https://www.apache.org/legal/resolved.html).
+
+
+RAILWAY DEPLOYMENT
+============
+
+This repository includes configuration for deploying Apache Fineract to [Railway](https://railway.app), a modern cloud platform.
+
+### Prerequisites
+- GitHub account
+- Railway account (https://railway.app)
+- Git installed locally
+
+### Deployment Options
+
+#### Option 1: GitHub-Connected Deployment (Recommended)
+1. Fork this repository on GitHub
+2. Log in to Railway
+3. Create a new project and select "Deploy from GitHub repo"
+4. Choose your forked repository
+5. Railway will automatically set up PostgreSQL and Dragonfly (Redis-compatible) services
+6. Wait for the deployment to complete
+
+#### Option 2: Manual Deployment
+1. Clone this repository
+2. Navigate to the project directory
+3. Run the setup script: `bash railway-setup-complete.sh`
+4. Deploy the application: `bash railway-deploy.sh`
+
+### Environment Variables
+Railway automatically provides environment variables for PostgreSQL and Dragonfly services. Additional variables you may want to configure:
+- `JAVA_OPTS` - JVM options (default: `-Xmx1G -Xms512M -XX:+UseG1GC -XX:+UseStringDeduplication`)
+- `SPRING_PROFILES_ACTIVE` - Spring profiles (default: `railway,postgresql`)
+- `SENTRY_DSN` - Sentry error tracking DSN
+
+### Monitoring and Maintenance
+- Health checks: `bash railway-health-check.sh`
+- View logs: `railway logs`
+- Access database: `railway postgres`
+- Access Redis: `railway redis`
+
+For more detailed instructions, see [RAILWAY-DEPLOYMENT.md](RAILWAY-DEPLOYMENT.md).
 
 
 <br><br>APACHE FINERACT PLATFORM API

@@ -51,9 +51,10 @@ dependencies {
             )
     implementation(
             'org.springframework.boot:spring-boot-starter-web',
-            'org.springframework.boot:spring-boot-starter-security',
-            'org.springframework.boot:spring-boot-starter-cache',
+            'org.springframework.boot:spring-boot-starter-security',            'org.springframework.boot:spring-boot-starter-cache',
             'org.springframework.boot:spring-boot-starter-data-redis',
+            'io.sentry:sentry-spring-boot-starter:7.7.0',
+            'io.sentry:sentry-logback:7.7.0',
             'org.springframework.boot:spring-boot-starter-oauth2-resource-server',
             'org.springframework.boot:spring-boot-starter-actuator',
             'org.springframework.boot:spring-boot-starter-batch',

@@ -1,21 +1,22 @@
 [phases.setup]
-nixPkgs = ["curl"]
+nixPkgs = ["curl", "jq"]
 
 [phases.build]
-aptPkgs = ["openjdk-21-jdk", "wget"]
+aptPkgs = ["openjdk-21-jdk", "wget", "ca-certificates", "gnupg", "lsb-release"]
 cmds = [
   "./gradlew :fineract-provider:build -x test -x cucumber -x spotlessCheck -x rat --no-daemon",
-  "wget -O fineract-provider/build/libs/mariadb-java-client.jar https://dlm.mariadb.com/4174416/Connectors/java/connector-java-3.5.2/mariadb-java-client-3.5.2.jar",
-  "wget -O fineract-provider/build/libs/postgresql.jar https://jdbc.postgresql.org/download/postgresql-42.7.1.jar"
+  "wget -O fineract-provider/build/libs/postgresql.jar https://jdbc.postgresql.org/download/postgresql-42.7.1.jar",
+  "mkdir -p logs"
 ]
-
-[phases.install]
-cmds = ["mkdir -p logs"]
 
 [variables]
 JAVA_VERSION = "21"
 SPRING_PROFILES_ACTIVE = "railway,postgresql"
 PORT = "8080"
+JAVA_OPTS = "-Xmx1G -Xms512M -XX:+UseG1GC -XX:+UseStringDeduplication -XX:MaxGCPauseMillis=200 -Djava.security.egd=file:/dev/./urandom"
 
 [start]
-cmd = "java $JAVA_OPTS -Dloader.path=fineract-provider/build/libs/ -Dspring.profiles.active=railway,postgresql -Dspring.config.additional-location=classpath:/,file:config/railway/ -jar fineract-provider/build/libs/fineract-provider-*-SNAPSHOT.jar"
+cmd = "java $JAVA_OPTS -Dloader.path=fineract-provider/build/libs/ -Dspring.profiles.active=$SPRING_PROFILES_ACTIVE -Dspring.config.additional-location=classpath:/,file:config/railway/ -jar fineract-provider/build/libs/fineract-provider-*-SNAPSHOT.jar"
+
+[phases.health]
+cmd = "curl -f http://localhost:$PORT/fineract-provider/actuator/health || exit 1"

@@ -165,9 +165,7 @@ jobs:
           echo "Deploying to Railway..."
           railway up --detach
         env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-
-      - name: Verify Deployment
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}      - name: Verify Deployment
         run: |
           echo "Verifying deployment..."
           ATTEMPTS=0
@@ -187,18 +185,114 @@ jobs:
           fi
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-
   notify:
     name: 📢 Deployment Notification
     runs-on: ubuntu-latest
-    needs: [deploy]
+    needs: [validate, deploy]
     if: always()
     
     steps:
-      - name: Deployment Status
+      - name: Checkout code
+        uses: actions/checkout@v4
+        if: needs.deploy.result == 'success'
+
+      - name: Install Railway CLI
+        if: needs.deploy.result == 'success'
+        run: curl -fsSL https://railway.app/install.sh | sh
+
+      - name: Login to Railway
+        if: needs.deploy.result == 'success'
+        run: railway login --browserless
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      - name: Get Deployment Details
+        if: needs.deploy.result == 'success'
+        id: deployment-details
+        run: |
+          DEPLOY_URL=$(railway service url --url)
+          BRANCH_NAME="${{ needs.validate.outputs.branch-name }}"
+          DEPLOY_ID=$(railway service show --json | jq -r '.id')
+          DEPLOY_ENV=$(railway environment show --json | jq -r '.name')
+          PROJECT_NAME=$(railway project show --json | jq -r '.name')
+          
+          echo "deploy-url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          echo "branch-name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "deploy-id=$DEPLOY_ID" >> $GITHUB_OUTPUT
+          echo "deploy-env=$DEPLOY_ENV" >> $GITHUB_OUTPUT
+          echo "project-name=$PROJECT_NAME" >> $GITHUB_OUTPUT
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      - name: Create Deployment Summary
+        if: needs.deploy.result == 'success'
+        run: |
+          cat << EOF > deployment-summary.md
+          ## 🚀 Deployment Summary
+          
+          | Detail | Value |
+          | ------ | ----- |
+          | **Status** | ✅ Success |
+          | **Environment** | ${{ steps.deployment-details.outputs.deploy-env }} |
+          | **Branch** | ${{ steps.deployment-details.outputs.branch-name }} |
+          | **Project** | ${{ steps.deployment-details.outputs.project-name }} |
+          | **Deployment URL** | ${{ steps.deployment-details.outputs.deploy-url }} |
+          | **Health Check** | ${{ steps.deployment-details.outputs.deploy-url }}/fineract-provider/actuator/health |
+          | **API Docs** | ${{ steps.deployment-details.outputs.deploy-url }}/fineract-provider/swagger-ui/index.html |
+          | **Railway Service ID** | ${{ steps.deployment-details.outputs.deploy-id }} |
+          | **Deployment Time** | $(date) |
+          
+          ### Quick Links
+          
+          - 🩺 [Health Check](${{ steps.deployment-details.outputs.deploy-url }}/fineract-provider/actuator/health)
+          - 📊 [Metrics](${{ steps.deployment-details.outputs.deploy-url }}/fineract-provider/actuator/metrics)
+          - 📝 [API Docs](${{ steps.deployment-details.outputs.deploy-url }}/fineract-provider/swagger-ui/index.html)
+          - 🔄 [Railway Dashboard](https://railway.app/project/${{ steps.deployment-details.outputs.deploy-id }})
+          
+          EOF
+          
+          cat deployment-summary.md
+
+      - name: Deployment Failure
+        if: needs.deploy.result != 'success'
+        run: |
+          cat << EOF > deployment-failure.md
+          ## ❌ Deployment Failure
+          
+          | Detail | Value |
+          | ------ | ----- |
+          | **Status** | ❌ Failed |
+          | **Branch** | ${{ needs.validate.outputs.branch-name }} |
+          | **Failure Time** | $(date) |
+          
+          ### Troubleshooting
+          
+          1. Check the deployment logs for error details
+          2. Verify Railway token is valid
+          3. Check if there are any issues with the Railway platform
+          4. Review the build logs for any compilation errors
+          
+          EOF
+          
+          cat deployment-failure.md
+
+      - name: Create GitHub Job Summary
+        if: needs.deploy.result == 'success'
+        run: cat deployment-summary.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Create GitHub Failure Summary
+        if: needs.deploy.result != 'success'
+        run: cat deployment-failure.md >> $GITHUB_STEP_SUMMARY
+        
+      - name: Send Deployment Notification
+        if: always()
         run: |
           if [[ "${{ needs.deploy.result }}" == "success" ]]; then
             echo "✅ Deployment was successful"
+            echo "🌐 Application URL: ${{ steps.deployment-details.outputs.deploy-url || 'Not available' }}"
+            echo "📊 Health check: ${{ steps.deployment-details.outputs.deploy-url || 'Not available' }}/fineract-provider/actuator/health"
+            echo "📝 API docs: ${{ steps.deployment-details.outputs.deploy-url || 'Not available' }}/fineract-provider/swagger-ui/index.html"
           else
             echo "❌ Deployment failed"
+            echo "Check the logs for more information"
           fi

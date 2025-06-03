@@ -1,0 +1,158 @@
+name: Railway Preview Environment
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main, develop]
+
+env:
+  JAVA_VERSION: '21'
+  JAVA_DISTRIBUTION: 'temurin'
+  GRADLE_VERSION: '8.1.3'
+
+jobs:
+  create-preview:
+    name: 🔮 Create Preview Environment
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          cache: 'gradle'
+
+      - name: Build with Gradle
+        run: ./gradlew :fineract-provider:build -x test -x cucumber -x spotlessCheck -x rat --no-daemon
+
+      - name: Install Railway CLI
+        run: curl -fsSL https://railway.app/install.sh | sh
+
+      - name: Login to Railway
+        run: railway login --browserless
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      - name: Generate unique preview name
+        id: preview-name
+        run: |
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          BRANCH_NAME="${{ github.head_ref }}"
+          SANITIZED_BRANCH=$(echo "$BRANCH_NAME" | tr -cd '[:alnum:]-' | tr '[:upper:]' '[:lower:]')
+          PREVIEW_NAME="preview-pr${PR_NUMBER}-${SANITIZED_BRANCH:0:20}"
+          echo "preview=$PREVIEW_NAME" >> $GITHUB_OUTPUT
+
+      - name: Create new environment
+        run: |
+          railway environment new ${{ steps.preview-name.outputs.preview }} || true
+          railway environment ${{ steps.preview-name.outputs.preview }}
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      - name: Deploy to Railway
+        id: deploy
+        run: |
+          echo "Deploying preview environment..."
+          railway up --detach
+          echo "preview-url=$(railway service url --url)" >> $GITHUB_OUTPUT
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      - name: Wait for deployment
+        run: |
+          echo "Waiting for deployment to be ready..."
+          ATTEMPTS=0
+          MAX_ATTEMPTS=20
+          
+          until $(curl --output /dev/null --silent --head --fail ${{ steps.deploy.outputs.preview-url }}/fineract-provider/actuator/health) || [ $ATTEMPTS -eq $MAX_ATTEMPTS ]; do
+            ATTEMPTS=$((ATTEMPTS+1))
+            echo "Waiting for deployment to be ready... ($ATTEMPTS/$MAX_ATTEMPTS)"
+            sleep 15
+          done
+          
+          if [ $ATTEMPTS -eq $MAX_ATTEMPTS ]; then
+            echo "❌ Preview deployment verification timed out"
+            exit 1
+          else
+            echo "✅ Preview deployment verified successfully"
+          fi
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      - name: Comment on PR
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const previewUrl = '${{ steps.deploy.outputs.preview-url }}';
+            const previewName = '${{ steps.preview-name.outputs.preview }}';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 🔮 Preview Environment Deployed
+              
+              | Detail | Value |
+              | ------ | ----- |
+              | **Environment** | \`${previewName}\` |
+              | **URL** | ${previewUrl} |
+              | **Health Check** | ${previewUrl}/fineract-provider/actuator/health |
+              | **API Docs** | ${previewUrl}/fineract-provider/swagger-ui/index.html |
+              | **Deployed Branch** | \`${{ github.head_ref }}\` |
+              
+              This preview environment will be automatically updated with each new commit to this PR.
+              `
+            })
+
+  cleanup-preview:
+    name: 🧹 Cleanup Preview Environment
+    runs-on: ubuntu-latest
+    if: github.event.action == 'closed'
+    
+    steps:
+      - name: Install Railway CLI
+        run: curl -fsSL https://railway.app/install.sh | sh
+
+      - name: Login to Railway
+        run: railway login --browserless
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      - name: Generate preview name
+        id: preview-name
+        run: |
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          BRANCH_NAME="${{ github.head_ref }}"
+          SANITIZED_BRANCH=$(echo "$BRANCH_NAME" | tr -cd '[:alnum:]-' | tr '[:upper:]' '[:lower:]')
+          PREVIEW_NAME="preview-pr${PR_NUMBER}-${SANITIZED_BRANCH:0:20}"
+          echo "preview=$PREVIEW_NAME" >> $GITHUB_OUTPUT
+
+      - name: Delete preview environment
+        run: |
+          echo "Deleting preview environment ${{ steps.preview-name.outputs.preview }}..."
+          railway environment ${{ steps.preview-name.outputs.preview }}
+          railway environment delete ${{ steps.preview-name.outputs.preview }} --confirm
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      - name: Comment on PR
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const previewName = '${{ steps.preview-name.outputs.preview }}';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 🧹 Preview Environment Removed
+              
+              The preview environment \`${previewName}\` has been successfully removed.
+              `
+            })
