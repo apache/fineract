@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -60,7 +61,14 @@ public class LoanCapitalizedIncomeAmortizationProcessingServiceImpl implements L
 
     @Override
     @Transactional
-    public void processCapitalizedIncomeAmortizationOnLoanClosure(@NotNull final Loan loan) {
+    public void processCapitalizedIncomeAmortizationOnLoanClosure(@NotNull final Loan loan, final boolean addJournal) {
+        List<Long> existingTransactionIds = Collections.emptyList();
+        List<Long> existingReversedTransactionIds = Collections.emptyList();
+        if (addJournal) {
+            existingTransactionIds = loanTransactionRepository.findTransactionIdsByLoan(loan);
+            existingReversedTransactionIds = loanTransactionRepository.findReversedTransactionIdsByLoan(loan);
+        }
+
         final LocalDate transactionDate = getFinalCapitalizedIncomeAmortizationTransactionDate(loan);
         final Optional<LoanTransaction> amortizationTransaction = createCapitalizedIncomeAmortizationTransaction(loan, transactionDate,
                 false, null);
@@ -73,6 +81,10 @@ public class LoanCapitalizedIncomeAmortizationProcessingServiceImpl implements L
                         new LoanCapitalizedIncomeAmortizationAdjustmentTransactionCreatedBusinessEvent(loanTransaction));
             }
         });
+
+        if (addJournal) {
+            journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+        }
     }
 
     @Override
@@ -175,7 +187,8 @@ public class LoanCapitalizedIncomeAmortizationProcessingServiceImpl implements L
 
     @Override
     @Transactional
-    public void processCapitalizedIncomeAmortizationTillDate(@NonNull Loan loan, @NonNull LocalDate tillDate) {
+    public void processCapitalizedIncomeAmortizationTillDate(@NonNull final Loan loan, @NonNull final LocalDate tillDate,
+            final boolean addJournal) {
         final List<Long> existingTransactionIds = loanTransactionRepository.findTransactionIdsByLoan(loan);
         final List<Long> existingReversedTransactionIds = loanTransactionRepository.findReversedTransactionIdsByLoan(loan);
 
@@ -215,7 +228,9 @@ public class LoanCapitalizedIncomeAmortizationProcessingServiceImpl implements L
             transaction = loanTransactionRepository.save(transaction);
             loanTransactionRepository.flush();
 
-            journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+            if (addJournal) {
+                journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+            }
 
             BusinessEvent<?> event = MathUtil.isGreaterThanZero(totalAmortizationAmount)
                     ? new LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent(transaction)

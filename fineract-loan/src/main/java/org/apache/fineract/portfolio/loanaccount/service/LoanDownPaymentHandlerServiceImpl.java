@@ -29,7 +29,6 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
-import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBalanceChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionDownPaymentPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionDownPaymentPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
@@ -73,7 +72,6 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
         if (downPaymentTransaction != null) {
             downPaymentTransaction = loanTransactionRepository.saveAndFlush(downPaymentTransaction);
             businessEventNotifierService.notifyPostBusinessEvent(new LoanTransactionDownPaymentPostBusinessEvent(downPaymentTransaction));
-            businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
         }
         return downPaymentTransaction;
     }

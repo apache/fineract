@@ -280,15 +280,14 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         setLoanDelinquencyTag(loan, transactionDate);
 
+        postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer, isLoanToLoanTransfer);
+        loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
         if (!repaymentTransactionType.isChargeRefund()) {
-            LoanTransactionBusinessEvent transactionRepaymentEvent = getTransactionRepaymentTypeBusinessEvent(repaymentTransactionType,
-                    isRecoveryRepayment, newRepaymentTransaction);
+            final LoanTransactionBusinessEvent transactionRepaymentEvent = getTransactionRepaymentTypeBusinessEvent(
+                    repaymentTransactionType, isRecoveryRepayment, newRepaymentTransaction);
             businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
             businessEventNotifierService.notifyPostBusinessEvent(transactionRepaymentEvent);
         }
-
-        postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer, isLoanToLoanTransfer);
-        loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
 
         // disable all active standing orders linked to this loan if status
         // changes to closed
@@ -434,11 +433,11 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan, loan.isInterestBearingAndInterestRecalculationEnabled(),
                 false);
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanChargePaymentPostBusinessEvent(newPaymentTransaction));
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
         loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanChargePaymentPostBusinessEvent(newPaymentTransaction));
         return newPaymentTransaction;
     }
 
@@ -686,12 +685,12 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan, loan.isInterestBearingAndInterestRecalculationEnabled(),
                 false);
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
-        businessEventNotifierService
-                .notifyPostBusinessEvent(new LoanCreditBalanceRefundPostBusinessEvent(newCreditBalanceRefundTransaction));
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds, false);
         loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
+        businessEventNotifierService
+                .notifyPostBusinessEvent(new LoanCreditBalanceRefundPostBusinessEvent(newCreditBalanceRefundTransaction));
 
         return newCreditBalanceRefundTransaction;
     }
@@ -739,11 +738,11 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan, loan.isInterestBearingAndInterestRecalculationEnabled(),
                 false);
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanRefundPostBusinessEvent(newRefundTransaction));
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds, false);
         loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanRefundPostBusinessEvent(newRefundTransaction));
 
         builderResult.withEntityId(newRefundTransaction.getId()).withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId())
                 .withGroupId(loan.getGroupId());

@@ -37,8 +37,6 @@ Feature: Credit Balance Refund
       | Type      | Account code | Account name              | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable          |       | 500.0  |
       | LIABILITY | 145023       | Suspense/Clearing account | 500.0 |        |
-    Then Loan Transactions tab has a "REPAYMENT" transaction with date "05 January 2023" which has the following Journal entries:
-      | Type      | Account code | Account name              | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable          |       | 500.0  |
       | LIABILITY | l1           | Overpayment account       |       | 100.0  |
       | LIABILITY | 145023       | Suspense/Clearing account | 600.0 |        |
@@ -78,8 +76,6 @@ Feature: Credit Balance Refund
       | Type      | Account code | Account name              | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable          |       | 450.0  |
       | LIABILITY | 145023       | Suspense/Clearing account | 450.0 |        |
-    Then Loan Transactions tab has a "REPAYMENT" transaction with date "05 January 2023" which has the following Journal entries:
-      | Type      | Account code | Account name              | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable          |       | 100.0  |
       | LIABILITY | l1           | Overpayment account       |       | 200.0  |
       | LIABILITY | 145023       | Suspense/Clearing account | 300.0 |        |
@@ -1410,6 +1406,8 @@ Feature: Credit Balance Refund
       | Type      | Account code | Account name              | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable          |       | 100.0  |
       | LIABILITY | 145023       | Suspense/Clearing account | 100.0 |        |
+      | ASSET     | 112601       | Loans Receivable          | 100.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |       | 100.0  |
     Then Loan Transactions tab has a "CHARGE_OFF" transaction with date "03 January 2024" which has the following Journal entries:
       | Type    | Account code | Account name         | Debit | Credit |
       | ASSET   | 112601       | Loans Receivable     |       | 750.0  |

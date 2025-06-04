@@ -39,7 +39,7 @@ public class CapitalizedIncomeAmortizationBusinessStep implements LoanCOBBusines
     public Loan execute(Loan loan) {
         LocalDate businessDate = DateUtils.getBusinessLocalDate();
 
-        loanCapitalizedIncomeAmortizationProcessingService.processCapitalizedIncomeAmortizationTillDate(loan, businessDate);
+        loanCapitalizedIncomeAmortizationProcessingService.processCapitalizedIncomeAmortizationTillDate(loan, businessDate, true);
 
         return loan;
     }

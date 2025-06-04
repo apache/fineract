@@ -524,6 +524,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
         loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -1073,14 +1074,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         loanAccountDomainService.updateAndSaveLoanCollateralTransactionsForIndividualAccounts(loan, newInterestPaymentWaiverTransaction);
 
         // Finished Notification
-
-        LoanTransactionBusinessEvent transactionRepaymentEvent = new LoanTransactionInterestPaymentWaiverPostBusinessEvent(
+        final LoanTransactionBusinessEvent transactionRepaymentEvent = new LoanTransactionInterestPaymentWaiverPostBusinessEvent(
                 newInterestPaymentWaiverTransaction);
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
-        businessEventNotifierService.notifyPostBusinessEvent(transactionRepaymentEvent);
 
         journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
         loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
+        businessEventNotifierService.notifyPostBusinessEvent(transactionRepaymentEvent);
 
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()) //
                 .withLoanId(loan.getId()) //
@@ -1457,11 +1457,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 false);
         loanAccountDomainService.setLoanDelinquencyTag(loan, DateUtils.getBusinessLocalDate());
 
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanWaiveInterestBusinessEvent(waiveInterestTransaction));
-
         journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
         loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanWaiveInterestBusinessEvent(waiveInterestTransaction));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(waiveInterestTransaction.getId()) //
@@ -1551,11 +1550,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan,
                     loan.isInterestBearingAndInterestRecalculationEnabled(), false);
             loanAccountDomainService.setLoanDelinquencyTag(loan, DateUtils.getBusinessLocalDate());
-            businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
-            businessEventNotifierService.notifyPostBusinessEvent(new LoanWrittenOffPostBusinessEvent(loanTransaction));
 
             journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
             loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanWrittenOffPostBusinessEvent(loanTransaction));
 
             builder.withEntityId(loanTransaction.getId()).withEntityExternalId(loanTransaction.getExternalId());
         }
@@ -2215,13 +2214,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan, loan.isInterestBearingAndInterestRecalculationEnabled(),
                 false);
 
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanUndoWrittenOffBusinessEvent(writeOffTransaction));
-
         this.loanAccountDomainService.setLoanDelinquencyTag(loan, DateUtils.getBusinessLocalDate());
 
         journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
         loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanUndoWrittenOffBusinessEvent(writeOffTransaction));
 
         return new CommandProcessingResultBuilder() //
                 .withOfficeId(loan.getOfficeId()) //
@@ -2987,11 +2985,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         // Raise business events
         loanAccrualsProcessingService.processAccrualsOnInterestRecalculation(loan, loan.isInterestBearingAndInterestRecalculationEnabled(),
                 false);
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
 
         // Create journal entries for the new transaction(s)
         journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
         loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
 
         Long entityId = refundTransaction.getId();
         ExternalId entityExternalId = refundTransaction.getExternalId();

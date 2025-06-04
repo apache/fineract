@@ -318,10 +318,10 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         this.loanAccountDomainService.setLoanDelinquencyTag(loan, DateUtils.getBusinessLocalDate());
 
         businessEventNotifierService.notifyPostBusinessEvent(new LoanAddChargeBusinessEvent(loanCharge));
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
         loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
 
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()) //
                 .withEntityId(loanCharge.getId()) //

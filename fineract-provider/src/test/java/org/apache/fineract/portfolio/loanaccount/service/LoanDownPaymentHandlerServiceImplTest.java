@@ -198,7 +198,6 @@ public class LoanDownPaymentHandlerServiceImplTest {
                 .notifyPreBusinessEvent(Mockito.any(LoanTransactionDownPaymentPreBusinessEvent.class));
         verify(businessEventNotifierService, Mockito.times(1))
                 .notifyPostBusinessEvent(Mockito.any(LoanTransactionDownPaymentPostBusinessEvent.class));
-        verify(businessEventNotifierService, Mockito.times(1)).notifyPostBusinessEvent(Mockito.any(LoanBalanceChangedBusinessEvent.class));
     }
 
     @Test

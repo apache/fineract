@@ -255,11 +255,11 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
             entityId = newTransactionDetail.getId();
             entityExternalId = newTransactionDetail.getExternalId();
         }
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanAdjustTransactionBusinessEvent(eventData));
 
         journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
         loanAccrualTransactionBusinessEventService.raiseBusinessEventForAccrualTransactions(loan, existingTransactionIds);
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanAdjustTransactionBusinessEvent(eventData));
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(commandId) //

@@ -108,6 +108,10 @@ public class JournalEntriesStepDef extends AbstractStepDef {
         }).collect(Collectors.toList());
 
         List<List<String>> data = table.asLists();
+        final int expectedCount = data.size() - 1;
+        final int actualCount = journalLinesActualList.stream().mapToInt(List::size).sum();
+        assertThat(actualCount).as("The number of journal entries for the transaction does not match the expected count! Expected: "
+                + expectedCount + ", Actual: " + actualCount).isEqualTo(expectedCount);
         for (int i = 1; i < data.size(); i++) {
             List<List<List<String>>> possibleActualValuesList = new ArrayList<>();
             List<String> expectedValues = data.get(i);

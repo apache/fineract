@@ -59,7 +59,7 @@ public class LoanCapitalizedIncomeAmortizationEventService {
             if (loan.getLoanProductRelatedDetail().isEnableIncomeCapitalization()
                     && (status.isClosedObligationsMet() || status.isClosedWrittenOff() || status.isOverpaid())) {
                 log.debug("Loan closure on capitalized income amortization for loan {}", loan.getId());
-                loanCapitalizedIncomeAmortizationProcessingService.processCapitalizedIncomeAmortizationOnLoanClosure(loan);
+                loanCapitalizedIncomeAmortizationProcessingService.processCapitalizedIncomeAmortizationOnLoanClosure(loan, false);
             }
         }
     }
@@ -73,7 +73,7 @@ public class LoanCapitalizedIncomeAmortizationEventService {
             if (loan.getLoanProductRelatedDetail().isEnableIncomeCapitalization()
                     && (status.isClosedObligationsMet() || status.isClosedWrittenOff() || status.isOverpaid())) {
                 log.debug("Loan balance change on capitalized income amortization for loan {}", loan.getId());
-                loanCapitalizedIncomeAmortizationProcessingService.processCapitalizedIncomeAmortizationOnLoanClosure(loan);
+                loanCapitalizedIncomeAmortizationProcessingService.processCapitalizedIncomeAmortizationOnLoanClosure(loan, true);
             }
         }
     }
@@ -100,7 +100,7 @@ public class LoanCapitalizedIncomeAmortizationEventService {
             if (loan.getLoanProductRelatedDetail().isEnableIncomeCapitalization()) {
                 log.debug("Loan pre charge-off capitalized income amortization for loan {}", loan.getId());
                 loanCapitalizedIncomeAmortizationProcessingService.processCapitalizedIncomeAmortizationTillDate(loan,
-                        DateUtils.getBusinessLocalDate());
+                        DateUtils.getBusinessLocalDate(), false);
             }
         }
     }

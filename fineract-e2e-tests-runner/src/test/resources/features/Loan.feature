@@ -501,8 +501,6 @@ Feature: Loan
       | Type      | Account code | Account name              | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable          |       | 450.0  |
       | LIABILITY | 145023       | Suspense/Clearing account | 450.0 |        |
-    Then Loan Transactions tab has a "REPAYMENT" transaction with date "05 January 2023" which has the following Journal entries:
-      | Type      | Account code | Account name              | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable          |       | 100.0  |
       | LIABILITY | l1           | Overpayment account       |       | 200.0  |
       | LIABILITY | 145023       | Suspense/Clearing account | 300.0 |        |
@@ -544,8 +542,6 @@ Feature: Loan
       | Type      | Account code | Account name              | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable          |       | 450.0  |
       | LIABILITY | 145023       | Suspense/Clearing account | 450.0 |        |
-    Then Loan Transactions tab has a "REPAYMENT" transaction with date "05 January 2023" which has the following Journal entries:
-      | Type      | Account code | Account name              | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable          |       | 300.0  |
       | LIABILITY | 145023       | Suspense/Clearing account | 300.0 |        |
 
@@ -686,8 +682,6 @@ Feature: Loan
       | Type      | Account code | Account name              | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable          |       | 450.0  |
       | LIABILITY | 145023       | Suspense/Clearing account | 450.0 |        |
-    Then Loan Transactions tab has a "REPAYMENT" transaction with date "05 January 2023" which has the following Journal entries:
-      | Type      | Account code | Account name              | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable          |       | 100.0  |
       | LIABILITY | l1           | Overpayment account       |       | 200.0  |
       | LIABILITY | 145023       | Suspense/Clearing account | 300.0 |        |
@@ -729,8 +723,6 @@ Feature: Loan
       | Type      | Account code | Account name              | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable          |       | 700.0  |
       | LIABILITY | 145023       | Suspense/Clearing account | 700.0 |        |
-    Then Loan Transactions tab has a "REPAYMENT" transaction with date "05 January 2023" which has the following Journal entries:
-      | Type      | Account code | Account name              | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable          |       | 300.0  |
       | LIABILITY | 145023       | Suspense/Clearing account | 300.0 |        |
 

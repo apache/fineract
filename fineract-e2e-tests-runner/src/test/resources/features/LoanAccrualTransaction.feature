@@ -1567,3 +1567,27 @@ Feature: LoanAccrualTransaction
       | 20 February 2025 | Merchant Issued Refund | 1881.05 | 1881.05   | 0.0      | 0.0  | 0.0       | 1596.3       | false    | false    |
       | 20 February 2025 | Accrual                | 3.7     | 0.0       | 3.7      | 0.0  | 0.0       | 0.0          | false    | false    |
       | 21 February 2025 | Accrual                | 3.7     | 0.0       | 3.7      | 0.0  | 0.0       | 0.0          | false    | false    |
+
+  @TestRailId:C3733
+  Scenario: Accruals on accounts where charge adjustments and refunds are done on the same day should not cause duplicate journal entries
+    When Admin sets the business date to "12 May 2025"
+    And Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                           | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_360_30_INTEREST_RECALCULATION_ZERO_INTEREST_CHARGE_OFF_ACCRUAL_ACTIVITY | 12 May 2025       | 50             | 12.19                  | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 1                 | MONTHS                | 1              | MONTHS                 | 1                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "12 May 2025" with "50" amount and expected disbursement date on "12 May 2025"
+    And Admin successfully disburse the loan on "12 May 2025" with "48.25" EUR transaction amount
+    When Admin adds "LOAN_NSF_FEE" due date charge with "12 May 2025" due date and 1.30 EUR transaction amount
+    And Admin makes a charge adjustment for the last "LOAN_NSF_FEE" type charge which is due on "12 May 2025" with 1.30 EUR transaction amount and externalId ""
+    When Admin makes "PAYOUT_REFUND" transaction with "AUTOPAY" payment type on "12 May 2025" with 48.25 EUR transaction amount
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | 12 May 2025      | Disbursement       | 48.25  | 0.0       | 0.0      | 0.0  | 0.0       | 48.25        |
+      | 12 May 2025      | Charge Adjustment  | 1.3    | 0.0       | 0.0      | 0.0  | 1.3       | 48.25        |
+      | 12 May 2025      | Payout Refund      | 48.25  | 48.25     | 0.0      | 0.0  | 0.0       | 0.0          |
+      | 12 May 2025      | Accrual            | 1.3    | 0.0       | 0.0      | 0.0  | 1.3       | 0.0          |
+      | 12 May 2025      | Accrual Activity   | 1.3    | 0.0       | 0.0      | 0.0  | 1.3       | 0.0          |
+    Then Loan Transactions tab has a "ACCRUAL" transaction with date "12 May 2025" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable | 1.3   |        |
+      | INCOME | 404007       | Fee Income              |       | 1.3    |

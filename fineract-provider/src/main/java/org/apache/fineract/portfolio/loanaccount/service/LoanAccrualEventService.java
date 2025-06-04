@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import jakarta.annotation.PostConstruct;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.event.business.BusinessEventListener;
@@ -28,7 +27,6 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.LoanCloseBu
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -66,19 +64,9 @@ public class LoanAccrualEventService {
             LoanStatus status = loan.getStatus();
             if (status.isClosedObligationsMet() || status.isOverpaid()) {
                 log.debug("Loan balance change on accrual for loan {}", loan.getId());
-                final boolean hasChargeAdjustment = hasChargeAdjustment(loan);
-                loanAccrualsProcessingService.processAccrualsOnLoanClosure(loan, hasChargeAdjustment);
+                loanAccrualsProcessingService.processAccrualsOnLoanClosure(loan, true);
                 loanAccrualActivityProcessingService.processAccrualActivityForLoanClosure(loan);
             }
-        }
-
-        private boolean hasChargeAdjustment(final Loan loan) {
-            return loan.getLoanTransactions().stream()
-                    .filter(transaction -> transaction.isChargeAdjustment() && transaction.isNotReversed())
-                    .anyMatch(chargeAdjustment -> chargeAdjustment.getLoanTransactionRelations().stream()
-                            .anyMatch(relation -> relation.getRelationType() == LoanTransactionRelationTypeEnum.CHARGE_ADJUSTMENT
-                                    && relation.getFromTransaction() != null
-                                    && Objects.equals(relation.getFromTransaction().getId(), chargeAdjustment.getId())));
         }
     }
 }

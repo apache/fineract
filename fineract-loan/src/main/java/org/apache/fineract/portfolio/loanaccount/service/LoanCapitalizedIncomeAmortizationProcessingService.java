@@ -25,11 +25,11 @@ import org.springframework.lang.NonNull;
 
 public interface LoanCapitalizedIncomeAmortizationProcessingService {
 
-    void processCapitalizedIncomeAmortizationOnLoanClosure(@NonNull Loan loan);
+    void processCapitalizedIncomeAmortizationOnLoanClosure(@NonNull Loan loan, boolean addJournal);
 
     void processCapitalizedIncomeAmortizationOnLoanChargeOff(@NonNull Loan loan, @NonNull LoanTransaction chargeOffTransaction);
 
     void processCapitalizedIncomeAmortizationOnLoanUndoChargeOff(@NonNull LoanTransaction loanTransaction);
 
-    void processCapitalizedIncomeAmortizationTillDate(@NonNull Loan loan, @NonNull LocalDate tillDate);
+    void processCapitalizedIncomeAmortizationTillDate(@NonNull Loan loan, @NonNull LocalDate tillDate, boolean addJournal);
 }

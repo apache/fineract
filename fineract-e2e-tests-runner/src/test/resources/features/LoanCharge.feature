@@ -350,14 +350,12 @@ Feature: LoanCharge
       | ASSET  | 112601       | Loans Receivable        | 1.0   |        |
       | ASSET  | 112603       | Interest/Fee Receivable | 2.0   |        |
       | INCOME | 404007       | Fee Income              |       | 3.0    |
+      | ASSET  | 112603       | Interest/Fee Receivable |       | 4.0    |
+      | INCOME | 404007       | Fee Income              | 4.0   |        |
     Then Loan Transactions tab has a "ACCRUAL" transaction with date "04 November 2022" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
       | ASSET  | 112603       | Interest/Fee Receivable | 9.0   |        |
       | INCOME | 404007       | Fee Income              |       | 9.0    |
-    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
-      | Type   | Account code | Account name            | Debit | Credit |
-      | ASSET  | 112603       | Interest/Fee Receivable |       | 4.0    |
-      | INCOME | 404007       | Fee Income              | 4.0   |        |
 #   --- Backdated repayment with 507 EUR ---
     And Customer makes "AUTOPAY" repayment on "31 October 2022" with 507 EUR transaction amount
     Then Loan has 500 outstanding amount
@@ -408,14 +406,12 @@ Feature: LoanCharge
       | ASSET  | 112601       | Loans Receivable        | 1.0   |        |
       | ASSET  | 112603       | Interest/Fee Receivable | 2.0   |        |
       | INCOME | 404007       | Fee Income              |       | 3.0    |
+      | ASSET  | 112601       | Loans Receivable        |       | 4.0    |
+      | INCOME | 404007       | Fee Income              | 4.0   |        |
     Then Loan Transactions tab has a "ACCRUAL" transaction with date "04 November 2022" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
       | ASSET  | 112603       | Interest/Fee Receivable | 9.0   |        |
       | INCOME | 404007       | Fee Income              |       | 9.0    |
-    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
-      | Type   | Account code | Account name     | Debit | Credit |
-      | ASSET  | 112601       | Loans Receivable |       | 4.0    |
-      | INCOME | 404007       | Fee Income       | 4.0   |        |
 #   --- charge adjustment for nsf fee with 5 ---
     When Admin makes a charge adjustment for the last "LOAN_NSF_FEE" type charge which is due on "23 October 2022" with 5 EUR transaction amount and externalId ""
     Then Loan has 495 outstanding amount
@@ -467,18 +463,14 @@ Feature: LoanCharge
       | ASSET  | 112601       | Loans Receivable        | 1.0   |        |
       | ASSET  | 112603       | Interest/Fee Receivable | 2.0   |        |
       | INCOME | 404007       | Fee Income              |       | 3.0    |
+      | ASSET  | 112601       | Loans Receivable        |       | 4.0    |
+      | INCOME | 404007       | Fee Income              | 4.0   |        |
+      | ASSET  | 112601       | Loans Receivable        |       | 5.0    |
+      | INCOME | 404007       | Fee Income              | 5.0   |        |
     Then Loan Transactions tab has a "ACCRUAL" transaction with date "04 November 2022" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
       | ASSET  | 112603       | Interest/Fee Receivable | 9.0   |        |
       | INCOME | 404007       | Fee Income              |       | 9.0    |
-    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
-      | Type   | Account code | Account name     | Debit | Credit |
-      | ASSET  | 112601       | Loans Receivable |       | 4.0    |
-      | INCOME | 404007       | Fee Income       | 4.0   |        |
-    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
-      | Type   | Account code | Account name     | Debit | Credit |
-      | ASSET  | 112601       | Loans Receivable |       | 5.0    |
-      | INCOME | 404007       | Fee Income       | 5.0   |        |
 #  --- Backdated repayment with 494 EUR ---
     And Customer makes "AUTOPAY" repayment on "1 November 2022" with 494 EUR transaction amount
     Then Loan has 1 outstanding amount
@@ -535,18 +527,14 @@ Feature: LoanCharge
       | ASSET  | 112601       | Loans Receivable        | 1.0   |        |
       | ASSET  | 112603       | Interest/Fee Receivable | 2.0   |        |
       | INCOME | 404007       | Fee Income              |       | 3.0    |
+      | ASSET  | 112601       | Loans Receivable        |       | 4.0    |
+      | INCOME | 404007       | Fee Income              | 4.0   |        |
+      | ASSET  | 112601       | Loans Receivable        |       | 5.0    |
+      | INCOME | 404007       | Fee Income              | 5.0   |        |
     Then Loan Transactions tab has a "ACCRUAL" transaction with date "04 November 2022" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
       | ASSET  | 112603       | Interest/Fee Receivable | 9.0   |        |
       | INCOME | 404007       | Fee Income              |       | 9.0    |
-    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
-      | Type   | Account code | Account name     | Debit | Credit |
-      | ASSET  | 112601       | Loans Receivable |       | 4.0    |
-      | INCOME | 404007       | Fee Income       | 4.0   |        |
-    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
-      | Type   | Account code | Account name     | Debit | Credit |
-      | ASSET  | 112601       | Loans Receivable |       | 5.0    |
-      | INCOME | 404007       | Fee Income       | 5.0   |        |
 #   --- charge adjustment for snooze fee with 1 ---
     When Admin makes a charge adjustment for the last "LOAN_SNOOZE_FEE" type charge which is due on "27 October 2022" with 1 EUR transaction amount and externalId ""
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
@@ -605,22 +593,16 @@ Feature: LoanCharge
       | ASSET  | 112601       | Loans Receivable        | 1.0   |        |
       | ASSET  | 112603       | Interest/Fee Receivable | 2.0   |        |
       | INCOME | 404007       | Fee Income              |       | 3.0    |
+      | ASSET  | 112601       | Loans Receivable        |       | 4.0    |
+      | INCOME | 404007       | Fee Income              | 4.0   |        |
+      | ASSET  | 112601       | Loans Receivable        |       | 5.0    |
+      | INCOME | 404007       | Fee Income              | 5.0   |        |
+      | ASSET  | 112601       | Loans Receivable        |       | 1.0    |
+      | INCOME | 404007       | Fee Income              | 1.0   |        |
     Then Loan Transactions tab has a "ACCRUAL" transaction with date "04 November 2022" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
       | ASSET  | 112603       | Interest/Fee Receivable | 9.0   |        |
       | INCOME | 404007       | Fee Income              |       | 9.0    |
-    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
-      | Type   | Account code | Account name     | Debit | Credit |
-      | ASSET  | 112601       | Loans Receivable |       | 4.0    |
-      | INCOME | 404007       | Fee Income       | 4.0   |        |
-    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
-      | Type   | Account code | Account name     | Debit | Credit |
-      | ASSET  | 112601       | Loans Receivable |       | 5.0    |
-      | INCOME | 404007       | Fee Income       | 5.0   |        |
-    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
-      | Type   | Account code | Account name     | Debit | Credit |
-      | ASSET  | 112601       | Loans Receivable |       | 1.0    |
-      | INCOME | 404007       | Fee Income       | 1.0   |        |
 #   --- revert last charge adjustment (was amount 1) ---
     When Admin reverts the charge adjustment which was raised on "04 November 2022" with 1 EUR transaction amount
     Then Loan status will be "ACTIVE"
@@ -679,24 +661,18 @@ Feature: LoanCharge
       | ASSET  | 112601       | Loans Receivable        | 1.0   |        |
       | ASSET  | 112603       | Interest/Fee Receivable | 2.0   |        |
       | INCOME | 404007       | Fee Income              |       | 3.0    |
+      | ASSET  | 112601       | Loans Receivable        |       | 4.0    |
+      | INCOME | 404007       | Fee Income              | 4.0   |        |
+      | ASSET  | 112601       | Loans Receivable        |       | 5.0    |
+      | INCOME | 404007       | Fee Income              | 5.0   |        |
+      | ASSET  | 112601       | Loans Receivable        |       | 1.0    |
+      | INCOME | 404007       | Fee Income              | 1.0   |        |
+      | ASSET  | 112601       | Loans Receivable        | 1.0   |        |
+      | INCOME | 404007       | Fee Income              |       | 1.0    |
     Then Loan Transactions tab has a "ACCRUAL" transaction with date "04 November 2022" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
       | ASSET  | 112603       | Interest/Fee Receivable | 9.0   |        |
       | INCOME | 404007       | Fee Income              |       | 9.0    |
-    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
-      | Type   | Account code | Account name     | Debit | Credit |
-      | ASSET  | 112601       | Loans Receivable |       | 4.0    |
-      | INCOME | 404007       | Fee Income       | 4.0   |        |
-    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
-      | Type   | Account code | Account name     | Debit | Credit |
-      | ASSET  | 112601       | Loans Receivable |       | 5.0    |
-      | INCOME | 404007       | Fee Income       | 5.0   |        |
-    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
-      | Type   | Account code | Account name     | Debit | Credit |
-      | ASSET  | 112601       | Loans Receivable |       | 1.0    |
-      | INCOME | 404007       | Fee Income       | 1.0   |        |
-      | ASSET  | 112601       | Loans Receivable | 1.0   |        |
-      | INCOME | 404007       | Fee Income       |       | 1.0    |
 #   --- charge adjustment for nsf fee with 1 ---
     When Admin makes a charge adjustment for the last "LOAN_NSF_FEE" type charge which is due on "23 October 2022" with 1 EUR transaction amount and externalId ""
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
@@ -756,28 +732,20 @@ Feature: LoanCharge
       | ASSET  | 112601       | Loans Receivable        | 1.0   |        |
       | ASSET  | 112603       | Interest/Fee Receivable | 2.0   |        |
       | INCOME | 404007       | Fee Income              |       | 3.0    |
+      | ASSET  | 112601       | Loans Receivable        |       | 4.0    |
+      | INCOME | 404007       | Fee Income              | 4.0   |        |
+      | ASSET  | 112601       | Loans Receivable        |       | 5.0    |
+      | INCOME | 404007       | Fee Income              | 5.0   |        |
+      | ASSET  | 112601       | Loans Receivable        |       | 1.0    |
+      | INCOME | 404007       | Fee Income              | 1.0   |        |
+      | ASSET  | 112601       | Loans Receivable        | 1.0   |        |
+      | INCOME | 404007       | Fee Income              |       | 1.0    |
+      | ASSET  | 112601       | Loans Receivable        |       | 1.0    |
+      | INCOME | 404007       | Fee Income              | 1.0   |        |
     Then Loan Transactions tab has a "ACCRUAL" transaction with date "04 November 2022" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
       | ASSET  | 112603       | Interest/Fee Receivable | 9.0   |        |
       | INCOME | 404007       | Fee Income              |       | 9.0    |
-    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
-      | Type   | Account code | Account name     | Debit | Credit |
-      | ASSET  | 112601       | Loans Receivable |       | 4.0    |
-      | INCOME | 404007       | Fee Income       | 4.0   |        |
-    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
-      | Type   | Account code | Account name     | Debit | Credit |
-      | ASSET  | 112601       | Loans Receivable |       | 5.0    |
-      | INCOME | 404007       | Fee Income       | 5.0   |        |
-    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
-      | Type   | Account code | Account name     | Debit | Credit |
-      | ASSET  | 112601       | Loans Receivable |       | 1.0    |
-      | INCOME | 404007       | Fee Income       | 1.0   |        |
-      | ASSET  | 112601       | Loans Receivable | 1.0   |        |
-      | INCOME | 404007       | Fee Income       |       | 1.0    |
-    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
-      | Type   | Account code | Account name     | Debit | Credit |
-      | ASSET  | 112601       | Loans Receivable |       | 1.0    |
-      | INCOME | 404007       | Fee Income       | 1.0   |        |
 #   --- charge adjustment for nsf fee with 2 ---
     When Admin makes a charge adjustment for the last "LOAN_NSF_FEE" type charge which is due on "23 October 2022" with 2 EUR transaction amount and externalId ""
     Then Loan status will be "OVERPAID"
@@ -831,39 +799,29 @@ Feature: LoanCharge
       | ASSET     | 112601       | Loans Receivable          |       | 494.0  |
       | LIABILITY | 145023       | Suspense/Clearing account | 494.0 |        |
     Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
-      | Type   | Account code | Account name            | Debit | Credit |
-      | ASSET  | 112601       | Loans Receivable        |       | 1.0    |
-      | ASSET  | 112603       | Interest/Fee Receivable |       | 2.0    |
-      | INCOME | 404007       | Fee Income              | 3.0   |        |
-      | ASSET  | 112601       | Loans Receivable        | 1.0   |        |
-      | ASSET  | 112603       | Interest/Fee Receivable | 2.0   |        |
-      | INCOME | 404007       | Fee Income              |       | 3.0    |
+      | Type      | Account code | Account name            | Debit | Credit |
+      | ASSET     | 112601       | Loans Receivable        |       | 1.0    |
+      | ASSET     | 112603       | Interest/Fee Receivable |       | 2.0    |
+      | INCOME    | 404007       | Fee Income              | 3.0   |        |
+      | ASSET     | 112601       | Loans Receivable        | 1.0   |        |
+      | ASSET     | 112603       | Interest/Fee Receivable | 2.0   |        |
+      | INCOME    | 404007       | Fee Income              |       | 3.0    |
+      | ASSET     | 112601       | Loans Receivable        |       | 4.0    |
+      | INCOME    | 404007       | Fee Income              | 4.0   |        |
+      | ASSET     | 112601       | Loans Receivable        |       | 5.0    |
+      | INCOME    | 404007       | Fee Income              | 5.0   |        |
+      | ASSET     | 112601       | Loans Receivable        |       | 1.0    |
+      | INCOME    | 404007       | Fee Income              | 1.0   |        |
+      | ASSET     | 112601       | Loans Receivable        | 1.0   |        |
+      | INCOME    | 404007       | Fee Income              |       | 1.0    |
+      | ASSET     | 112601       | Loans Receivable        |       | 1.0    |
+      | INCOME    | 404007       | Fee Income              | 1.0   |        |
+      | LIABILITY | l1           | Overpayment account     |       | 2.0    |
+      | INCOME    | 404007       | Fee Income              | 2.0   |        |
     Then Loan Transactions tab has a "ACCRUAL" transaction with date "04 November 2022" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
       | ASSET  | 112603       | Interest/Fee Receivable | 9.0   |        |
       | INCOME | 404007       | Fee Income              |       | 9.0    |
-    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
-      | Type   | Account code | Account name     | Debit | Credit |
-      | ASSET  | 112601       | Loans Receivable |       | 4.0    |
-      | INCOME | 404007       | Fee Income       | 4.0   |        |
-    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
-      | Type   | Account code | Account name     | Debit | Credit |
-      | ASSET  | 112601       | Loans Receivable |       | 5.0    |
-      | INCOME | 404007       | Fee Income       | 5.0   |        |
-    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
-      | Type   | Account code | Account name     | Debit | Credit |
-      | ASSET  | 112601       | Loans Receivable |       | 1.0    |
-      | INCOME | 404007       | Fee Income       | 1.0   |        |
-      | ASSET  | 112601       | Loans Receivable | 1.0   |        |
-      | INCOME | 404007       | Fee Income       |       | 1.0    |
-    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
-      | Type   | Account code | Account name     | Debit | Credit |
-      | ASSET  | 112601       | Loans Receivable |       | 1.0    |
-      | INCOME | 404007       | Fee Income       | 1.0   |        |
-    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
-      | Type      | Account code | Account name        | Debit | Credit |
-      | LIABILITY | l1           | Overpayment account |       | 2.0    |
-      | INCOME    | 404007       | Fee Income          | 2.0   |        |
 #   --- revert last charge adjustment (was amount 2) ---
     When Admin reverts the charge adjustment which was raised on "04 November 2022" with 2 EUR transaction amount
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
@@ -917,41 +875,31 @@ Feature: LoanCharge
       | ASSET     | 112601       | Loans Receivable          |       | 494.0  |
       | LIABILITY | 145023       | Suspense/Clearing account | 494.0 |        |
     Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
-      | Type   | Account code | Account name            | Debit | Credit |
-      | ASSET  | 112601       | Loans Receivable        |       | 1.0    |
-      | ASSET  | 112603       | Interest/Fee Receivable |       | 2.0    |
-      | INCOME | 404007       | Fee Income              | 3.0   |        |
-      | ASSET  | 112601       | Loans Receivable        | 1.0   |        |
-      | ASSET  | 112603       | Interest/Fee Receivable | 2.0   |        |
-      | INCOME | 404007       | Fee Income              |       | 3.0    |
+      | Type      | Account code | Account name            | Debit | Credit |
+      | ASSET     | 112601       | Loans Receivable        |       | 1.0    |
+      | ASSET     | 112603       | Interest/Fee Receivable |       | 2.0    |
+      | INCOME    | 404007       | Fee Income              | 3.0   |        |
+      | ASSET     | 112601       | Loans Receivable        | 1.0   |        |
+      | ASSET     | 112603       | Interest/Fee Receivable | 2.0   |        |
+      | INCOME    | 404007       | Fee Income              |       | 3.0    |
+      | ASSET     | 112601       | Loans Receivable        |       | 4.0    |
+      | INCOME    | 404007       | Fee Income              | 4.0   |        |
+      | ASSET     | 112601       | Loans Receivable        |       | 5.0    |
+      | INCOME    | 404007       | Fee Income              | 5.0   |        |
+      | ASSET     | 112601       | Loans Receivable        |       | 1.0    |
+      | INCOME    | 404007       | Fee Income              | 1.0   |        |
+      | ASSET     | 112601       | Loans Receivable        | 1.0   |        |
+      | INCOME    | 404007       | Fee Income              |       | 1.0    |
+      | ASSET     | 112601       | Loans Receivable        |       | 1.0    |
+      | INCOME    | 404007       | Fee Income              | 1.0   |        |
+      | LIABILITY | l1           | Overpayment account     |       | 2.0    |
+      | INCOME    | 404007       | Fee Income              | 2.0   |        |
+      | LIABILITY | l1           | Overpayment account     | 2.0   |        |
+      | INCOME    | 404007       | Fee Income              |       | 2.0    |
     Then Loan Transactions tab has a "ACCRUAL" transaction with date "04 November 2022" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
       | ASSET  | 112603       | Interest/Fee Receivable | 9.0   |        |
       | INCOME | 404007       | Fee Income              |       | 9.0    |
-    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
-      | Type   | Account code | Account name     | Debit | Credit |
-      | ASSET  | 112601       | Loans Receivable |       | 4.0    |
-      | INCOME | 404007       | Fee Income       | 4.0   |        |
-    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
-      | Type   | Account code | Account name     | Debit | Credit |
-      | ASSET  | 112601       | Loans Receivable |       | 5.0    |
-      | INCOME | 404007       | Fee Income       | 5.0   |        |
-    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
-      | Type   | Account code | Account name     | Debit | Credit |
-      | ASSET  | 112601       | Loans Receivable |       | 1.0    |
-      | INCOME | 404007       | Fee Income       | 1.0   |        |
-      | ASSET  | 112601       | Loans Receivable | 1.0   |        |
-      | INCOME | 404007       | Fee Income       |       | 1.0    |
-    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
-      | Type   | Account code | Account name     | Debit | Credit |
-      | ASSET  | 112601       | Loans Receivable |       | 1.0    |
-      | INCOME | 404007       | Fee Income       | 1.0   |        |
-    Then Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "04 November 2022" which has the following Journal entries:
-      | Type      | Account code | Account name        | Debit | Credit |
-      | LIABILITY | l1           | Overpayment account |       | 2.0    |
-      | INCOME    | 404007       | Fee Income          | 2.0   |        |
-      | LIABILITY | l1           | Overpayment account | 2.0   |        |
-      | INCOME    | 404007       | Fee Income          |       | 2.0    |
 
   @TestRailId:C2532
   Scenario: Verify that charge can be added to loan on disbursement date (loan status is 'active')
@@ -5386,8 +5334,9 @@ Feature: LoanCharge
       | 03 March 2024    | Repayment (at time of disbursement) | 5.0    | 0.0       | 0.0      | 5.0  | 0.0       | 167.05       | false    | false    |
       | 03 March 2024    | Accrual                             | 1.1    | 0.0       | 1.1      | 0.0  | 0.0       | 0.0          | false    | false    |
     Then Loan Transactions tab has a "ACCRUAL" transaction with date "03 March 2024" which has the following Journal entries:
-      | ASSET  | 112603 | Interest/Fee Receivable | 1.1 |     |
-      | INCOME | 404000 | Interest Income         |     | 1.1 |
+      | Type   | Account code | Account name              | Debit | Credit |
+      | ASSET  | 112603       | Interest/Fee Receivable   | 1.1   |        |
+      | INCOME | 404000       | Interest Income           |       | 1.1    |
     # Undo disbursement
     When Admin successfully undo disbursal
     Then Loan status has changed to "Approved"

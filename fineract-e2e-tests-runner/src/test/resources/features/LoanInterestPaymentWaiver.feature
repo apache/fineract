@@ -392,8 +392,6 @@ Feature: LoanInterestWaiver
       | Type      | Account code | Account name              | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable          |       | 250.0  |
       | LIABILITY | 145023       | Suspense/Clearing account | 250.0 |        |
-    Then Loan Transactions tab has a "REPAYMENT" transaction with date "01 February 2024" which has the following Journal entries:
-      | Type      | Account code | Account name              | Debit | Credit |
       | ASSET     | 112603       | Interest/Fee Receivable   |       | 10.0   |
       | LIABILITY | 145023       | Suspense/Clearing account | 10.0  |        |
 
