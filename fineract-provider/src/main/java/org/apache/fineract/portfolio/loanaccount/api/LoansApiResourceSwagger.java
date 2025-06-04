@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
@@ -1249,6 +1250,16 @@ final class LoansApiResourceSwagger {
             public BigDecimal principal;
         }
 
+        static final class PostLoansDataTable {
+
+            private PostLoansDataTable() {}
+
+            @Schema(example = "m_loan")
+            public String registeredTableName;
+            @Schema(example = "Datatable data")
+            public Map<String, Object> data;
+        }
+
         private PostLoansRequest() {}
 
         @Schema(example = "1")
@@ -1335,6 +1346,8 @@ final class LoansApiResourceSwagger {
         public String capitalizedIncomeStrategy;
         @Schema(example = "FEE")
         public StringEnumOptionData capitalizedIncomeType;
+        @Schema(example = "List of PostLoansDataTable")
+        public List<PostLoansDataTable> datatables;
 
         public List<PostLoansRequestChargeData> charges;
 
