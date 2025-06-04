@@ -1,0 +1,14 @@
+= Core Configuration Properites
+
+For further understanding of the configuration properties that directly alter application behavior.
+
+.Core Configuration Properties
+|===
+|Name |Env Variable |Default Value |Description
+
+|fineract.loan.allow-cash-and-non-cash-accrual
+|FINERACT_LOAN_ALLOW_CASH_AND_NON_CASH_ACCRUAL
+|true
+|When a loan product is created with accounting type of none or cash, the expectation is that there will be no accrual interest posted. This configuration controls whether interest should be posted in a scenario like this. It is only here for backwards compatibility
+
+|===

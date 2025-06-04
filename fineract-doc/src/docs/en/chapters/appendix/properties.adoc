@@ -22,3 +22,5 @@ include::properties-cloud-aws.adoc[leveloffset=+1]
 include::properties-resilience4j.adoc[leveloffset=+1]
 
 // include::properties-cache.adoc[leveloffset=+1]
+
+include::properties-core-configuration.adoc[leveloffset=+1]

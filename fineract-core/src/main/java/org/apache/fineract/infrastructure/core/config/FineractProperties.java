@@ -467,6 +467,7 @@ public class FineractProperties {
 
         private FineractTransactionProcessorProperties transactionProcessor;
         private String statusChangeHistoryStatuses;
+        private boolean allowCashAndNonCashAccrual;
     }
 
     @Getter
