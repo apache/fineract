@@ -29,6 +29,7 @@ import org.apache.fineract.portfolio.loanaccount.data.CumulativeIncomeFromIncome
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData;
 import org.apache.fineract.portfolio.loanaccount.data.TransactionPortionsForForeclosure;
 import org.apache.fineract.portfolio.loanaccount.data.UnpaidChargeData;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -189,6 +190,18 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
             @Param("types") Set<LoanTransactionType> types, @Param("transactionDate") LocalDate transactionDate);
 
     @Query("""
+            SELECT lt
+            FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+                AND lt.reversed = false
+                AND lt.typeOf = :type
+                AND lt.dateOf > :transactionDate
+            ORDER BY lt.dateOf
+            """)
+    List<LoanTransaction> findNonReversedByLoanAndTypeAndAfterDate(@Param("loan") Loan loan, @Param("type") LoanTransactionType type,
+            @Param("transactionDate") LocalDate transactionDate);
+
+    @Query("""
             SELECT CASE WHEN COUNT(lt) > 0 THEN true ELSE false END
             FROM LoanTransaction lt
             WHERE lt.loan = :loan
@@ -218,6 +231,15 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
                 AND lt.typeOf IN :types
             """)
     List<LoanTransaction> findNonReversedByLoanAndTypes(@Param("loan") Loan loan, @Param("types") Set<LoanTransactionType> types);
+
+    @Query("""
+            SELECT lt
+            FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+                AND lt.reversed = false
+                AND lt.typeOf = :type
+            """)
+    List<LoanTransaction> findNonReversedByLoanAndType(@Param("loan") Loan loan, @Param("type") LoanTransactionType type);
 
     @Query("""
             SELECT lt
@@ -303,6 +325,27 @@ public interface LoanTransactionRepository extends JpaRepository<LoanTransaction
             WHERE lt.loan = :loan
                 AND lt.reversed = false
             """)
-    List<LoanTransaction> findNonReversedTransactionsByLoan(@Param("loan") Loan loan);
+    List<LoanTransaction> findNonReversedByLoan(@Param("loan") Loan loan);
+
+    @Query("""
+            SELECT lt FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+                AND lt.reversed = false
+                AND lt.typeOf = :type
+                AND lt.dateOf IN :transactionDates
+            ORDER BY lt.id
+            """)
+    List<LoanTransaction> findNonReversedLoanAndTypeAndDates(@Param("loan") Loan loan, @Param("type") LoanTransactionType type,
+            @Param("transactionDates") Set<LocalDate> transactionDates);
+
+    @Query("""
+            SELECT lt FROM LoanTransaction lt
+            WHERE lt.loan = :loan
+                AND lt.reversed = false
+                AND lt.typeOf = :type
+            ORDER BY lt.dateOf DESC
+            """)
+    List<LoanTransaction> findNonReversedByLoanAndType(@Param("loan") Loan loan, @Param("type") LoanTransactionType type,
+            Pageable pageable);
 
 }

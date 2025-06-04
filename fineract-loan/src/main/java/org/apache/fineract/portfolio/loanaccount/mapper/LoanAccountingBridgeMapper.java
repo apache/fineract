@@ -77,7 +77,7 @@ public class LoanAccountingBridgeMapper {
             final List<Long> existingReversedTransactionIds, final boolean isAccountTransfer, final Loan loan) {
         List<LoanTransaction> transactions;
         if (existingTransactionIds == null || existingTransactionIds.isEmpty()) {
-            transactions = loanTransactionRepository.findNonReversedTransactionsByLoan(loan);
+            transactions = loanTransactionRepository.findNonReversedByLoan(loan);
         } else if (existingReversedTransactionIds == null || existingReversedTransactionIds.isEmpty()) {
             transactions = loanTransactionRepository.findTransactionsForAccountingBridge(loan, existingTransactionIds);
         } else {
