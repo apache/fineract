@@ -348,6 +348,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
     protected List<InteropIdentifier> identifiers = new ArrayList<>();
 
     public transient ConfigurationDomainService configurationDomainService;
+    public transient SavingsAccountTransaction newTransaction;
 
     protected SavingsAccount() {
         //
@@ -876,6 +877,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
     protected void recalculateDailyBalances(final Money openingAccountBalance, final LocalDate interestPostingUpToDate,
             final boolean backdatedTxnsAllowedTill, boolean postReversals) {
         Money runningBalance = openingAccountBalance;
+        BigDecimal previewBalance = BigDecimal.ZERO;
         boolean calculateInterest = hasInterestCalculation() || hasOverdraftInterestCalculation();
 
         List<SavingsAccountTransaction> accountTransactionsSorted = null;
@@ -888,6 +890,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
 
         boolean isTransactionsModified = false;
         for (final SavingsAccountTransaction transaction : accountTransactionsSorted) {
+            boolean typeTransaccionValidation = transaction.getTransactionType() == SavingsAccountTransactionType.ACCRUAL;
             if (transaction.isReversed() || transaction.isReversalTransaction()) {
                 transaction.zeroBalanceFields();
             } else {
@@ -913,6 +916,9 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
                 runningBalance = runningBalance.plus(transactionAmount);
                 transaction.setRunningBalance(runningBalance);
 
+                if (typeTransaccionValidation && (transaction.getDateOf().isAfter(this.newTransaction.getDateOf())|| transaction.getDateOf().isEqual(this.newTransaction.getDateOf()))){
+                    transaction.reverse();
+                }
                 if (MathUtil.isEmpty(overdraftAmount) && runningBalance.isLessThanZero() && !transaction.isAmountOnHold()) {
                     overdraftAmount = runningBalance.negated();
                 }
@@ -933,6 +939,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
                         reversal = SavingsAccountTransaction.reversal(transaction);
                     }
                     if (MathUtil.isGreaterThanZero(overdraftAmount)) {
+                        accountTransaction.reverse();
                         accountTransaction.setOverdraftAmount(overdraftAmount);
                     }
                     accountTransaction.setRunningBalance(runningBalance);
@@ -1048,6 +1055,8 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         if (backdatedTxnsAllowedTill) {
             addTransactionToExisting(transaction);
         } else {
+            //AGREGO EL VALOR DE LA TRANSACCION NUEVA QUE SE HARA PARA ELIMINAR IGUAL EL ACCRUAL
+            addTransactionNew(transaction);
             addTransaction(transaction);
         }
 
@@ -1183,6 +1192,8 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         if (backdatedTxnsAllowedTill) {
             addTransactionToExisting(transaction);
         } else {
+            //AGREGO EL VALOR DE LA TRANSACCION NUEVA QUE SE HARA PARA ELIMINAR IGUAL EL ACCRUAL
+            addTransactionNew(transaction);
             addTransaction(transaction);
         }
 
@@ -2909,6 +2920,9 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
 
     public void addTransaction(final SavingsAccountTransaction transaction) {
         this.transactions.add(transaction);
+    }
+    public void addTransactionNew(final SavingsAccountTransaction transaction) {
+        this.newTransaction = transaction;
     }
 
     public void addTransactionToExisting(final SavingsAccountTransaction transaction) {
