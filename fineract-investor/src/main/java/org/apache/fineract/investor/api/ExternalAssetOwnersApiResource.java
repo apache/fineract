@@ -41,7 +41,6 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.batch.command.CommandHandlerRegistry;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -100,8 +99,8 @@ public class ExternalAssetOwnersApiResource {
             @Parameter(hidden = true) ExternalAssetOwnerRequest assetOwnerReq) {
         platformUserRightsContext.isAuthenticated();
         final String serializedAssetRequest = postApiJsonSerializerService.serialize(assetOwnerReq);
-        final CommandWrapper commandRequest = COMMAND_HANDLER_REGISTRY.execute(StringUtils.toRootLowerCase(commandParam), loanId,
-                serializedAssetRequest, new UnrecognizedQueryParamException("command", commandParam));
+        final CommandWrapper commandRequest = COMMAND_HANDLER_REGISTRY.execute(commandParam, loanId, serializedAssetRequest,
+                new UnrecognizedQueryParamException("command", commandParam));
         return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
@@ -119,8 +118,8 @@ public class ExternalAssetOwnersApiResource {
         platformUserRightsContext.isAuthenticated();
         final Long loanId = loanReadPlatformService.getLoanIdByLoanExternalId(externalLoanId);
         final String serializedAssetRequest = postApiJsonSerializerService.serialize(assetOwnerReq);
-        final CommandWrapper commandRequest = COMMAND_HANDLER_REGISTRY.execute(StringUtils.toRootLowerCase(commandParam), loanId,
-                serializedAssetRequest, new UnrecognizedQueryParamException("command", commandParam));
+        final CommandWrapper commandRequest = COMMAND_HANDLER_REGISTRY.execute(commandParam, loanId, serializedAssetRequest,
+                new UnrecognizedQueryParamException("command", commandParam));
         return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
     }
@@ -137,8 +136,8 @@ public class ExternalAssetOwnersApiResource {
             @Parameter(hidden = true) ExternalAssetOwnerRequest assetOwnerReq) {
         platformUserRightsContext.isAuthenticated();
         final String serializedAssetRequest = postApiJsonSerializerService.serialize(assetOwnerReq);
-        final CommandWrapper commandRequest = COMMAND_HANDLER_REGISTRY.execute(StringUtils.toRootLowerCase(commandParam), id,
-                serializedAssetRequest, new UnrecognizedQueryParamException("command", commandParam));
+        final CommandWrapper commandRequest = COMMAND_HANDLER_REGISTRY.execute(commandParam, id, serializedAssetRequest,
+                new UnrecognizedQueryParamException("command", commandParam));
         return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
@@ -155,8 +154,8 @@ public class ExternalAssetOwnersApiResource {
         platformUserRightsContext.isAuthenticated();
         final Long id = externalAssetOwnersReadService.retrieveLastTransferIdByExternalId(new ExternalId(externalId));
         final String serializedAssetRequest = postApiJsonSerializerService.serialize(assetOwnerReq);
-        final CommandWrapper commandRequest = COMMAND_HANDLER_REGISTRY.execute(StringUtils.toRootLowerCase(commandParam), id,
-                serializedAssetRequest, new UnrecognizedQueryParamException("command", commandParam));
+        final CommandWrapper commandRequest = COMMAND_HANDLER_REGISTRY.execute(commandParam, id, serializedAssetRequest,
+                new UnrecognizedQueryParamException("command", commandParam));
         return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 

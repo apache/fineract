@@ -43,7 +43,6 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.batch.command.CommandHandlerRegistry;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -138,8 +137,8 @@ public class StandingInstructionApiResource {
             @QueryParam("command") @Parameter(description = "command") final String commandParam) {
 
         final String serializedUpdatesRequest = toApiJsonSerializer.serialize(updatesRequest);
-        final CommandWrapper commandRequest = COMMAND_HANDLER_REGISTRY.execute(StringUtils.toRootLowerCase(commandParam),
-                standingInstructionId, serializedUpdatesRequest, new UnrecognizedQueryParamException("command", commandParam));
+        final CommandWrapper commandRequest = COMMAND_HANDLER_REGISTRY.execute(commandParam, standingInstructionId,
+                serializedUpdatesRequest, new UnrecognizedQueryParamException("command", commandParam));
 
         return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
