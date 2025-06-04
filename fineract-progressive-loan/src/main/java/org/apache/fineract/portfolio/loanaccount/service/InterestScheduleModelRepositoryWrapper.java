@@ -31,7 +31,7 @@ public interface InterestScheduleModelRepositoryWrapper {
 
     Optional<ProgressiveLoanInterestScheduleModel> extractModel(Optional<ProgressiveLoanModel> progressiveLoanModel);
 
-    String writeInterestScheduleModel(Loan loan, ProgressiveLoanInterestScheduleModel model);
+    ProgressiveLoanInterestScheduleModel writeInterestScheduleModel(Loan loan, ProgressiveLoanInterestScheduleModel model);
 
     Optional<ProgressiveLoanInterestScheduleModel> readProgressiveLoanInterestScheduleModel(Long loanId,
             LoanProductMinimumRepaymentScheduleRelatedDetail detail, Integer installmentAmountInMultipliesOf);

@@ -50,7 +50,7 @@ public class InterestScheduleModelRepositoryWrapperImpl implements InterestSched
 
     @Transactional
     @Override
-    public String writeInterestScheduleModel(Loan loan, ProgressiveLoanInterestScheduleModel model) {
+    public ProgressiveLoanInterestScheduleModel writeInterestScheduleModel(Loan loan, ProgressiveLoanInterestScheduleModel model) {
         if (model == null) {
             return null;
         }
@@ -66,7 +66,7 @@ public class InterestScheduleModelRepositoryWrapperImpl implements InterestSched
             progressiveLoanModel.setJsonModel(jsonModel);
             loanModelRepository.save(progressiveLoanModel);
         });
-        return jsonModel;
+        return model;
     }
 
     @Override

@@ -61,8 +61,8 @@ public class EmbeddableProgressiveLoanScheduleGenerator {
         }
 
         @Override
-        public String writeInterestScheduleModel(Loan loan, ProgressiveLoanInterestScheduleModel model) {
-            return "";
+        public ProgressiveLoanInterestScheduleModel writeInterestScheduleModel(Loan loan, ProgressiveLoanInterestScheduleModel model) {
+            return null;
         }
 
         @Override
