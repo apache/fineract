@@ -60,6 +60,9 @@ public final class RepaymentPeriod {
     private Money paidPrincipal;
     @Getter
     private Money paidInterest;
+    @Setter
+    @Getter
+    private Money futureUnrecognizedInterest;
 
     @JsonExclude
     private final MathContext mc;
@@ -72,9 +75,12 @@ public final class RepaymentPeriod {
     private Memo<Money> dueInterestCalculation;
     @JsonExclude
     private Memo<Money> outstandingBalanceCalculation;
+    @Getter
+    @Setter
+    private boolean isInterestMoved = false;
 
     private RepaymentPeriod(RepaymentPeriod previous, LocalDate fromDate, LocalDate dueDate, List<InterestPeriod> interestPeriods,
-            Money emi, Money originalEmi, Money paidPrincipal, Money paidInterest, MathContext mc) {
+            Money emi, Money originalEmi, Money paidPrincipal, Money paidInterest, Money futureUnrecognizedInterest, MathContext mc) {
         this.previous = previous;
         this.fromDate = fromDate;
         this.dueDate = dueDate;
@@ -83,17 +89,18 @@ public final class RepaymentPeriod {
         this.originalEmi = originalEmi;
         this.paidPrincipal = paidPrincipal;
         this.paidInterest = paidInterest;
+        this.futureUnrecognizedInterest = futureUnrecognizedInterest;
         this.mc = mc;
     }
 
     public static RepaymentPeriod empty(RepaymentPeriod previous, MathContext mc) {
-        return new RepaymentPeriod(previous, null, null, new ArrayList<>(), null, null, null, null, mc);
+        return new RepaymentPeriod(previous, null, null, new ArrayList<>(), null, null, null, null, null, mc);
     }
 
     public static RepaymentPeriod create(RepaymentPeriod previous, LocalDate fromDate, LocalDate dueDate, Money emi, MathContext mc) {
         final Money zero = emi.zero();
         final RepaymentPeriod newRepaymentPeriod = new RepaymentPeriod(previous, fromDate, dueDate, new ArrayList<>(), emi, emi, zero, zero,
-                mc);
+                zero, mc);
         // There is always at least 1 interest period, by default with same from-due date as repayment period
         newRepaymentPeriod.interestPeriods.add(InterestPeriod.withEmptyAmounts(newRepaymentPeriod, fromDate, dueDate));
         return newRepaymentPeriod;
@@ -102,7 +109,7 @@ public final class RepaymentPeriod {
     public static RepaymentPeriod copy(RepaymentPeriod previous, RepaymentPeriod repaymentPeriod, MathContext mc) {
         final RepaymentPeriod newRepaymentPeriod = new RepaymentPeriod(previous, repaymentPeriod.fromDate, repaymentPeriod.dueDate,
                 new ArrayList<>(), repaymentPeriod.emi, repaymentPeriod.originalEmi, repaymentPeriod.paidPrincipal,
-                repaymentPeriod.paidInterest, mc);
+                repaymentPeriod.paidInterest, repaymentPeriod.futureUnrecognizedInterest, mc);
         // There is always at least 1 interest period, by default with same from-due date as repayment period
         for (InterestPeriod interestPeriod : repaymentPeriod.interestPeriods) {
             newRepaymentPeriod.interestPeriods.add(InterestPeriod.copy(newRepaymentPeriod, interestPeriod, mc));
@@ -113,7 +120,7 @@ public final class RepaymentPeriod {
     public static RepaymentPeriod copyWithoutPaidAmounts(RepaymentPeriod previous, RepaymentPeriod repaymentPeriod, MathContext mc) {
         final Money zero = repaymentPeriod.emi.zero();
         final RepaymentPeriod newRepaymentPeriod = new RepaymentPeriod(previous, repaymentPeriod.fromDate, repaymentPeriod.dueDate,
-                new ArrayList<>(), repaymentPeriod.emi, repaymentPeriod.originalEmi, zero, zero, mc);
+                new ArrayList<>(), repaymentPeriod.emi, repaymentPeriod.originalEmi, zero, zero, zero, mc);
         // There is always at least 1 interest period, by default with same from-due date as repayment period
         for (InterestPeriod interestPeriod : repaymentPeriod.interestPeriods) {
             var interestPeriodCopy = InterestPeriod.copy(newRepaymentPeriod, interestPeriod);
@@ -154,14 +161,19 @@ public final class RepaymentPeriod {
     public Money getCalculatedDueInterest() {
         if (calculatedDueInterestCalculation == null) {
             calculatedDueInterestCalculation = Memo.of(this::calculateCalculatedDueInterest,
-                    () -> new Object[] { this.previous, this.interestPeriods });
+                    () -> new Object[] { this.previous, this.interestPeriods, this.futureUnrecognizedInterest, this.isInterestMoved });
         }
         return calculatedDueInterestCalculation.get();
     }
 
     private Money calculateCalculatedDueInterest() {
-        Money calculatedDueInterest = Money.of(emi.getCurrencyData(),
-                getInterestPeriods().stream().map(InterestPeriod::getCalculatedDueInterest).reduce(BigDecimal.ZERO, BigDecimal::add), mc);
+        Money calculatedDueInterest = getZero(mc);
+        if (!isInterestMoved) {
+            calculatedDueInterest = Money.of(emi.getCurrencyData(),
+                    getInterestPeriods().stream().map(InterestPeriod::getCalculatedDueInterest).reduce(BigDecimal.ZERO, BigDecimal::add),
+                    mc);
+        }
+        calculatedDueInterest = calculatedDueInterest.add(getFutureUnrecognizedInterest(), mc);
         if (getPrevious().isPresent()) {
             calculatedDueInterest = calculatedDueInterest.add(getPrevious().get().getUnrecognizedInterest(), mc);
         }
@@ -176,22 +188,22 @@ public final class RepaymentPeriod {
     public Money getDueInterest() {
         if (dueInterestCalculation == null) {
             // Due interest might be the maximum paid if there is pay-off or early repayment
-            dueInterestCalculation = Memo
-                    .of(() -> MathUtil.max(
-                            getPaidPrincipal().isGreaterThan(getCalculatedDuePrincipal()) ? getPaidInterest()
-                                    : MathUtil.min(getCalculatedDueInterest(), getEmiPlusCreditedAmounts(), false),
-                            getPaidInterest(), false), () -> new Object[] { paidPrincipal, paidInterest, interestPeriods });
+            dueInterestCalculation = Memo.of(
+                    () -> MathUtil.max(getPaidPrincipal().isGreaterThan(getCalculatedDuePrincipal()) ? getPaidInterest()
+                            : MathUtil.min(getCalculatedDueInterest(), getEmiPlusCreditedAmountsPlusFutureUnrecognizedInterest(), false),
+                            getPaidInterest(), false),
+                    () -> new Object[] { paidPrincipal, paidInterest, interestPeriods, futureUnrecognizedInterest });
         }
         return dueInterestCalculation.get();
     }
 
     /**
-     * Gives back an EMI amount which includes credited amounts as well
+     * Gives back an EMI amount which includes credited amounts and future unrecognized interest as well
      *
      * @return
      */
-    public Money getEmiPlusCreditedAmounts() {
-        return getEmi().plus(getTotalCreditedAmount(), mc); //
+    public Money getEmiPlusCreditedAmountsPlusFutureUnrecognizedInterest() {
+        return getEmi().plus(getTotalCreditedAmount(), mc).plus(getFutureUnrecognizedInterest(), mc); //
     }
 
     /**
@@ -200,7 +212,7 @@ public final class RepaymentPeriod {
      * @return
      */
     public Money getCalculatedDuePrincipal() {
-        return MathUtil.negativeToZero(getEmiPlusCreditedAmounts().minus(getCalculatedDueInterest(), mc), mc);
+        return MathUtil.negativeToZero(getEmiPlusCreditedAmountsPlusFutureUnrecognizedInterest().minus(getCalculatedDueInterest(), mc), mc);
     }
 
     /**
@@ -243,8 +255,9 @@ public final class RepaymentPeriod {
      */
     public Money getDuePrincipal() {
         // Due principal might be the maximum paid if there is pay-off or early repayment
-        return MathUtil.max(MathUtil.negativeToZero(getEmiPlusCreditedAmounts().minus(getDueInterest(), mc), mc), getPaidPrincipal(),
-                false);
+        return MathUtil.max(
+                MathUtil.negativeToZero(getEmiPlusCreditedAmountsPlusFutureUnrecognizedInterest().minus(getDueInterest(), mc), mc),
+                getPaidPrincipal(), false);
     }
 
     /**
@@ -266,7 +279,7 @@ public final class RepaymentPeriod {
     }
 
     public boolean isFullyPaid() {
-        return getEmiPlusCreditedAmounts().isEqualTo(getTotalPaidAmount());
+        return getEmiPlusCreditedAmountsPlusFutureUnrecognizedInterest().isEqualTo(getTotalPaidAmount());
     }
 
     /**
