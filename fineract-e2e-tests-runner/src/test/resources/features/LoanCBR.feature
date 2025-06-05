@@ -1674,3 +1674,120 @@ Feature: Credit Balance Refund
     Then Loan status will be "OVERPAID"
     Then Loan has 0 outstanding amount
     Then Loan has 250 overpaid amount
+
+  @TestRailId:C3734
+  Scenario: Verify that 2nd disbursement is allowed after MIR, Payout Refund and Credit Balance Refund closes the loan
+    When Admin sets the business date to "14 March 2024"
+    When Admin creates a client with random data
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_CUSTOM_PAYMENT_ALLOCATION  | 14 March 2024     | 487.58         | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "14 March 2024" with "487.58" amount and expected disbursement date on "14 March 2024"
+  # First disbursement with automatic downpayment
+    When Admin successfully disburse the loan on "14 March 2024" with "487.58" EUR transaction amount
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date          | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 14 March 2024 |               | 487.58          |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 0    | 14 March 2024 | 14 March 2024 | 365.58          | 122.0         | 0.0      | 0.0  | 0.0       | 122.0  | 122.0 | 0.0        | 0.0  | 0.0         |
+      | 2  | 15   | 29 March 2024 |               | 243.58          | 122.0         | 0.0      | 0.0  | 0.0       | 122.0  | 0.0   | 0.0        | 0.0  | 122.0       |
+      | 3  | 15   | 13 April 2024 |               | 121.58          | 122.0         | 0.0      | 0.0  | 0.0       | 122.0  | 0.0   | 0.0        | 0.0  | 122.0       |
+      | 4  | 15   | 28 April 2024 |               | 0.0             | 121.58        | 0.0      | 0.0  | 0.0       | 121.58 | 0.0   | 0.0        | 0.0  | 121.58      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 487.58        | 0.0      | 0.0  | 0.0       | 487.58 | 122.0 | 0.0        | 0.0  | 365.58      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 14 March 2024    | Disbursement     | 487.58 | 0.0       | 0.0      | 0.0  | 0.0       | 487.58       | false    | false    |
+      | 14 March 2024    | Down Payment     | 122.0  | 122.0     | 0.0      | 0.0  | 0.0       | 365.58       | false    | false    |
+    When Admin runs inline COB job for Loan
+  # Merchant Issued Refund
+    When Admin sets the business date to "24 March 2024"
+    When Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "24 March 2024" with 201.39 EUR transaction amount and system-generated Idempotency key
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date          | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      |    |      | 14 March 2024 |               | 487.58          |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
+      | 1  | 0    | 14 March 2024 | 14 March 2024 | 365.58          | 122.0         | 0.0      | 0.0  | 0.0       | 122.0  | 122.0  | 0.0        | 0.0  | 0.0         |
+      | 2  | 15   | 29 March 2024 |               | 243.58          | 122.0         | 0.0      | 0.0  | 0.0       | 122.0  | 0.0    | 0.0        | 0.0  | 122.0       |
+      | 3  | 15   | 13 April 2024 |               | 121.58          | 122.0         | 0.0      | 0.0  | 0.0       | 122.0  | 79.81  | 79.81      | 0.0  | 42.19       |
+      | 4  | 15   | 28 April 2024 | 24 March 2024 | 0.0             | 121.58        | 0.0      | 0.0  | 0.0       | 121.58 | 121.58 | 121.58     | 0.0  | 0.0         |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      | 487.58        | 0.0      | 0.0  | 0.0       | 487.58 | 323.39 | 201.39     | 0.0  | 164.19      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 14 March 2024    | Disbursement           | 487.58 | 0.0       | 0.0      | 0.0  | 0.0       | 487.58       | false    | false    |
+      | 14 March 2024    | Down Payment           | 122.0  | 122.0     | 0.0      | 0.0  | 0.0       | 365.58       | false    | false    |
+      | 24 March 2024    | Merchant Issued Refund | 201.39 | 201.39    | 0.0      | 0.0  | 0.0       | 164.19       | false    | false    |
+    When Admin runs inline COB job for Loan
+  # Move forward to next year for Payout Refund
+    When Admin sets the business date to "24 March 2025"
+    When Customer makes "PAYOUT_REFUND" transaction with "AUTOPAY" payment type on "24 March 2025" with 286.19 EUR transaction amount and system-generated Idempotency key
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date          | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late  | Outstanding |
+      |    |      | 14 March 2024 |               | 487.58          |               |          | 0.0  |           | 0.0    | 0.0    |            |       |             |
+      | 1  | 0    | 14 March 2024 | 14 March 2024 | 365.58          | 122.0         | 0.0      | 0.0  | 0.0       | 122.0  | 122.0  | 0.0        | 0.0   | 0.0         |
+      | 2  | 15   | 29 March 2024 | 24 March 2025 | 243.58          | 122.0         | 0.0      | 0.0  | 0.0       | 122.0  | 122.0  | 0.0        | 122.0 | 0.0         |
+      | 3  | 15   | 13 April 2024 | 24 March 2025 | 121.58          | 122.0         | 0.0      | 0.0  | 0.0       | 122.0  | 122.0  | 79.81      | 42.19 | 0.0         |
+      | 4  | 15   | 28 April 2024 | 24 March 2024 | 0.0             | 121.58        | 0.0      | 0.0  | 0.0       | 121.58 | 121.58 | 121.58     | 0.0   | 0.0         |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late   | Outstanding |
+      | 487.58        | 0.0      | 0.0  | 0.0       | 487.58 | 487.58 | 201.39     | 164.19 | 0.0         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 14 March 2024    | Disbursement           | 487.58 | 0.0       | 0.0      | 0.0  | 0.0       | 487.58       | false    | false    |
+      | 14 March 2024    | Down Payment           | 122.0  | 122.0     | 0.0      | 0.0  | 0.0       | 365.58       | false    | false    |
+      | 24 March 2024    | Merchant Issued Refund | 201.39 | 201.39    | 0.0      | 0.0  | 0.0       | 164.19       | false    | false    |
+      | 24 March 2025    | Payout Refund          | 286.19 | 164.19    | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then Loan status will be "OVERPAID"
+    Then Loan has 0 outstanding amount
+    Then Loan has 122.0 overpaid amount
+    When Admin runs inline COB job for Loan
+  # Credit Balance Refund to close the loan
+    When Admin sets the business date to "25 March 2025"
+    When Admin makes Credit Balance Refund transaction on "25 March 2025" with 122.0 EUR transaction amount
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date          | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late  | Outstanding |
+      |    |      | 14 March 2024 |               | 487.58          |               |          | 0.0  |           | 0.0    | 0.0    |            |       |             |
+      | 1  | 0    | 14 March 2024 | 14 March 2024 | 365.58          | 122.0         | 0.0      | 0.0  | 0.0       | 122.0  | 122.0  | 0.0        | 0.0   | 0.0         |
+      | 2  | 15   | 29 March 2024 | 24 March 2025 | 243.58          | 122.0         | 0.0      | 0.0  | 0.0       | 122.0  | 122.0  | 0.0        | 122.0 | 0.0         |
+      | 3  | 15   | 13 April 2024 | 24 March 2025 | 121.58          | 122.0         | 0.0      | 0.0  | 0.0       | 122.0  | 122.0  | 79.81      | 42.19 | 0.0         |
+      | 4  | 15   | 28 April 2024 | 24 March 2024 | 0.0             | 121.58        | 0.0      | 0.0  | 0.0       | 121.58 | 121.58 | 121.58     | 0.0   | 0.0         |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late   | Outstanding |
+      | 487.58        | 0.0      | 0.0  | 0.0       | 487.58 | 487.58 | 201.39     | 164.19 | 0.0         |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 14 March 2024    | Disbursement           | 487.58 | 0.0       | 0.0      | 0.0  | 0.0       | 487.58       | false    | false    |
+      | 14 March 2024    | Down Payment           | 122.0  | 122.0     | 0.0      | 0.0  | 0.0       | 365.58       | false    | false    |
+      | 24 March 2024    | Merchant Issued Refund | 201.39 | 201.39    | 0.0      | 0.0  | 0.0       | 164.19       | false    | false    |
+      | 24 March 2025    | Payout Refund          | 286.19 | 164.19    | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 25 March 2025    | Credit Balance Refund  | 122.0  | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+    Then Loan has 0 outstanding amount
+    When Admin runs inline COB job for Loan
+  # Second disbursement
+    When Admin sets the business date to "01 April 2025"
+    When Admin successfully disburse the loan on "01 April 2025" with "243.79" EUR transaction amount
+    Then Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date          | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late  | Outstanding |
+      |    |      | 14 March 2024 |               | 487.58          |               |          | 0.0  |           | 0.0    | 0.0    |            |       |             |
+      | 1  | 0    | 14 March 2024 | 14 March 2024 | 365.58          | 122.0         | 0.0      | 0.0  | 0.0       | 122.0  | 122.0  | 0.0        | 0.0   | 0.0         |
+      | 2  | 15   | 29 March 2024 | 24 March 2025 | 243.58          | 122.0         | 0.0      | 0.0  | 0.0       | 122.0  | 122.0  | 0.0        | 122.0 | 0.0         |
+      | 3  | 15   | 13 April 2024 | 24 March 2025 | 121.58          | 122.0         | 0.0      | 0.0  | 0.0       | 122.0  | 122.0  | 79.81      | 42.19 | 0.0         |
+      | 4  | 15   | 28 April 2024 | 24 March 2024 | 0.0             | 121.58        | 0.0      | 0.0  | 0.0       | 121.58 | 121.58 | 121.58     | 0.0   | 0.0         |
+      |    |      | 01 April 2025 |               | 243.79          |               |          | 0.0  |           | 0.0    | 0.0    |            |       |             |
+      | 5  | 0    | 01 April 2025 | 01 April 2025 | 182.79          | 61.0          | 0.0      | 0.0  | 0.0       | 61.0   | 61.0   | 0.0        | 0.0   | 0.0         |
+      | 6  | 0    | 01 April 2025 |               | 0.0             | 182.79        | 0.0      | 0.0  | 0.0       | 182.79 | 0.0    | 0.0        | 0.0   | 182.79      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late   | Outstanding |
+      | 731.37        | 0.0      | 0.0  | 0.0       | 731.37 | 548.58 | 201.39     | 164.19 | 182.79      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 14 March 2024    | Disbursement           | 487.58 | 0.0       | 0.0      | 0.0  | 0.0       | 487.58       | false    | false    |
+      | 14 March 2024    | Down Payment           | 122.0  | 122.0     | 0.0      | 0.0  | 0.0       | 365.58       | false    | false    |
+      | 24 March 2024    | Merchant Issued Refund | 201.39 | 201.39    | 0.0      | 0.0  | 0.0       | 164.19       | false    | false    |
+      | 24 March 2025    | Payout Refund          | 286.19 | 164.19    | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 25 March 2025    | Credit Balance Refund  | 122.0  | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 April 2025    | Disbursement           | 243.79 | 0.0       | 0.0      | 0.0  | 0.0       | 243.79       | false    | false    |
+      | 01 April 2025    | Down Payment           | 61.0   | 61.0      | 0.0      | 0.0  | 0.0       | 182.79       | false    | false    |
+    Then Loan status will be "ACTIVE"
