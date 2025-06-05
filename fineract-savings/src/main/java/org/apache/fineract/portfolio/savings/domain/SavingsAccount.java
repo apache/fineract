@@ -939,7 +939,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
                         reversal = SavingsAccountTransaction.reversal(transaction);
                     }
                     if (MathUtil.isGreaterThanZero(overdraftAmount)) {
-                        accountTransaction.reverse();
                         accountTransaction.setOverdraftAmount(overdraftAmount);
                     }
                     accountTransaction.setRunningBalance(runningBalance);

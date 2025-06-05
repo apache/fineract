@@ -617,7 +617,7 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
         thisTransactionData.put("currencyCode", currencyCode);
         thisTransactionData.put("amount", this.amount);
         thisTransactionData.put("overdraftAmount", this.overdraftAmount);
-        thisTransactionData.put("isNegativeBalance", MathUtil.isLessThanZero(runningBalance));
+        thisTransactionData.put("isNegativeBalance", this.isNegativeBalance != null ? this.isNegativeBalance :  MathUtil.isLessThanZero(runningBalance));
 
 
         if (this.paymentDetail != null) {
