@@ -41,6 +41,7 @@ import org.apache.fineract.infrastructure.event.business.service.BusinessEventNo
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeBalance;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
@@ -65,6 +66,7 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
     private final LoanCapitalizedIncomeBalanceRepository capitalizedIncomeBalanceRepository;
     private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
     private final LoanBalanceService loanBalanceService;
+    private final LoanLifecycleStateMachine loanLifecycleStateMachine;
     private final BusinessEventNotifierService businessEventNotifierService;
 
     @Transactional
@@ -103,8 +105,11 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
         if (noteText != null && !noteText.isEmpty()) {
             noteWritePlatformService.createLoanTransactionNote(capitalizedIncomeTransaction.getId(), noteText);
         }
+
         // Post journal entries
         journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+
+        loanLifecycleStateMachine.determineAndTransition(loan, transactionDate);
 
         businessEventNotifierService
                 .notifyPostBusinessEvent(new LoanCapitalizedIncomeTransactionCreatedBusinessEvent(capitalizedIncomeTransaction));
@@ -161,6 +166,8 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
                 MathUtil.negativeToZero(capitalizedIncomeBalance.getUnrecognizedAmount().subtract(transactionAmount)));
         capitalizedIncomeBalanceRepository.save(capitalizedIncomeBalance);
 
+        loanLifecycleStateMachine.determineAndTransition(loan, transactionDate);
+
         businessEventNotifierService.notifyPostBusinessEvent(
                 new LoanCapitalizedIncomeAdjustmentTransactionCreatedBusinessEvent(savedCapitalizedIncomeAdjustment));
         businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
@@ -203,4 +210,5 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
         capitalizedIncomeBalance.setUnrecognizedAmount(capitalizedIncomeTransaction.getAmount());
         capitalizedIncomeBalanceRepository.saveAndFlush(capitalizedIncomeBalance);
     }
+
 }
