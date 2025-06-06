@@ -47,6 +47,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeBal
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
@@ -95,9 +96,10 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
                 baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("income.capitalization.not.enabled");
             }
 
-            // Validate loan is active
-            if (!loan.getStatus().isActive()) {
-                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("not.active");
+            // Validate loan is active, or closed or overpaid
+            final LoanStatus loanStatus = loan.getStatus();
+            if (!loanStatus.isActive() && !loanStatus.isClosed() && !loanStatus.isOverpaid()) {
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("not.valid.loan.status");
             }
 
             final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed("transactionDate", element);
@@ -164,9 +166,10 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
                 baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("income.capitalization.not.enabled");
             }
 
-            // Validate loan is active
-            if (!loan.getStatus().isActive()) {
-                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("not.active");
+            // Validate loan is active, or closed or overpaid
+            final LoanStatus loanStatus = loan.getStatus();
+            if (!loanStatus.isActive() && !loanStatus.isClosed() && !loanStatus.isOverpaid()) {
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("not.valid.loan.status");
             }
 
             final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed("transactionDate", element);

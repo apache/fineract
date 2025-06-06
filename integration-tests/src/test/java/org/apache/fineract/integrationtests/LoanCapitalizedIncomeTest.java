@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -26,6 +28,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.BusinessStepHelper;
@@ -617,4 +620,67 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
             });
         });
     }
+
+    @Test
+    public void testLoanCapitalizedIncomeOnLoanClosed() {
+        final AtomicReference<Long> loanIdRef = new AtomicReference<>();
+        final AtomicReference<Long> capitalizedIncomeTransactionIdRef = new AtomicReference<>();
+
+        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+
+        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
+                .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                        .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
+                        .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
+                        .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
+
+        runAt("1 January 2024", () -> {
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
+                    500.0, 7.0, 3, null);
+            loanIdRef.set(loanId);
+
+            disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
+            Long capitalizedIncomeTransactionId = loanTransactionHelper.addCapitalizedIncome(loanId, "1 January 2024", 50.0)
+                    .getResourceId();
+            capitalizedIncomeTransactionIdRef.set(capitalizedIncomeTransactionId);
+        });
+        runAt("1 February 2024", () -> {
+            Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
+
+            addRepaymentForLoan(loanId, 50.58, "1 February 2024");
+        });
+        runAt("1 March 2024", () -> {
+            Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
+
+            addRepaymentForLoan(loanId, 50.58, "1 March 2024");
+        });
+        runAt("15 March 2024", () -> {
+            Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
+
+            addRepaymentForLoan(loanId, 50.58, "15 March 2024");
+
+            loanTransactionHelper.makeCreditBalanceRefund(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+                    .transactionDate("15 March 2024").locale("en").transactionAmount(0.15));
+
+            // Validate Loan is Closed
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            assertTrue(loanDetails.getStatus().getClosedObligationsMet());
+        });
+        runAt("16 March 2024", () -> {
+            Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
+
+            Long capitalizedIncomeTransactionId = loanTransactionHelper.addCapitalizedIncome(loanId, "16 March 2024", 50.0).getResourceId();
+
+            verifyTRJournalEntries(capitalizedIncomeTransactionId, journalEntry(50, loansReceivableAccount, "DEBIT"), //
+                    journalEntry(50, deferredIncomeLiabilityAccount, "CREDIT") //
+            );
+        });
+    }
+
 }
