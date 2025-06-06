@@ -83,14 +83,14 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     private final Gson gson = GoogleGsonSerializerHelper.createSimpleGson();
 
     private CommandProcessingResult retryWrapper(Supplier<CommandProcessingResult> supplier) {
-        if (!BatchRequestContextHolder.isEnclosingTransaction()) {
-            try {
+        try {
+            if (!BatchRequestContextHolder.isEnclosingTransaction()) {
                 return retryConfigurationAssembler.getRetryConfigurationForExecuteCommand().executeSupplier(supplier);
-            } catch (RuntimeException e) {
-                fallbackExecuteCommand(e);
             }
+            return supplier.get();
+        } catch (RuntimeException e) {
+            return fallbackExecuteCommand(e);
         }
-        return supplier.get();
     }
 
     @Override
@@ -204,7 +204,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         fineractRequestContextHolder.setAttribute(IDEMPOTENCY_KEY_STORE_FLAG, flag);
     }
 
-    public void fallbackExecuteCommand(Exception e) {
+    public CommandProcessingResult fallbackExecuteCommand(Exception e) {
         throw ErrorHandler.getMappable(e);
     }
 
