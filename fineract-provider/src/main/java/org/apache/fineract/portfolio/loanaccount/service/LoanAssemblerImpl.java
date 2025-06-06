@@ -775,7 +775,7 @@ public class LoanAssemblerImpl implements LoanAssembler {
             changes.put(LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName, loan.getFixedPrincipalPercentagePerInstallment());
         }
 
-        final LoanProductRelatedDetail productRelatedDetail = loan.repaymentScheduleDetail();
+        final LoanProductRelatedDetail productRelatedDetail = loan.getLoanProductRelatedDetail();
         if (loan.loanProduct().getLoanConfigurableAttributes() != null) {
             loanScheduleAssembler.updateProductRelatedDetails(productRelatedDetail, loan);
         }

@@ -162,7 +162,7 @@ public class LoanDownPaymentHandlerServiceImplTest {
 
         when(loanRepaymentRelatedDetail.getInstallmentAmountInMultiplesOf()).thenReturn(10);
         when(loanForProcessing.getLoanRepaymentScheduleDetail()).thenReturn(loanRepaymentRelatedDetail);
-        when(loanForProcessing.repaymentScheduleDetail()).thenReturn(loanRepaymentRelatedDetail);
+        when(loanForProcessing.getLoanProductRelatedDetail()).thenReturn(loanRepaymentRelatedDetail);
         when(loanRepaymentRelatedDetail.isInterestRecalculationEnabled()).thenReturn(true);
         when(loanForProcessing.isInterestBearingAndInterestRecalculationEnabled()).thenReturn(true);
         when(loanRepaymentRelatedDetail.getDisbursedAmountPercentageForDownPayment()).thenReturn(BigDecimal.valueOf(10));

@@ -1226,7 +1226,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         final MathContext mc = MoneyHelper.getMathContext();
         Loan loan = disbursementTransaction.getLoan();
         LoanProductRelatedDetail loanProductRelatedDetail = loan.getLoanRepaymentScheduleDetail();
-        Integer installmentAmountInMultiplesOf = loan.getLoanProductRelatedDetail().getInstallmentAmountInMultiplesOf();
+        Integer installmentAmountInMultiplesOf = loanProductRelatedDetail.getInstallmentAmountInMultiplesOf();
         List<LoanRepaymentScheduleInstallment> installments = transactionCtx.getInstallments();
         LocalDate transactionDate = disbursementTransaction.getTransactionDate();
         MonetaryCurrency currency = transactionCtx.getCurrency();

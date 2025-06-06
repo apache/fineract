@@ -233,12 +233,13 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             case DAILY -> CalendarFrequencyType.DAILY;
             case WEEKLY -> CalendarFrequencyType.WEEKLY;
             case MONTHLY -> CalendarFrequencyType.MONTHLY;
-            case SAME_AS_REPAYMENT_PERIOD -> CalendarFrequencyType.from(loan.repaymentScheduleDetail().getRepaymentPeriodFrequencyType());
+            case SAME_AS_REPAYMENT_PERIOD ->
+                CalendarFrequencyType.from(loan.getLoanProductRelatedDetail().getRepaymentPeriodFrequencyType());
             case INVALID -> CalendarFrequencyType.INVALID;
         };
 
         if (recalculationFrequencyType == SAME_AS_REPAYMENT_PERIOD) {
-            frequency = loan.repaymentScheduleDetail().getRepayEvery();
+            frequency = loan.getLoanProductRelatedDetail().getRepayEvery();
             calendarStartDate = loan.getExpectedDisbursedOnLocalDate();
             if (updatedRepeatsOnDay == null) {
                 updatedRepeatsOnDay = calendarStartDate.get(ChronoField.DAY_OF_WEEK);
@@ -400,12 +401,12 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                         }
                     }
                 } else {
-                    PeriodFrequencyType repaymentFrequencyType = loan.repaymentScheduleDetail().getRepaymentPeriodFrequencyType();
+                    PeriodFrequencyType repaymentFrequencyType = loan.getLoanProductRelatedDetail().getRepaymentPeriodFrequencyType();
                     if (repaymentFrequencyType == PeriodFrequencyType.MONTHS) {
                         final String title = "loan_schedule_" + loan.getId();
                         final Integer typeId = CalendarType.COLLECTION.getValue();
                         final CalendarFrequencyType calendarFrequencyType = CalendarFrequencyType.MONTHLY;
-                        final Integer interval = loan.repaymentScheduleDetail().getRepayEvery();
+                        final Integer interval = loan.getLoanProductRelatedDetail().getRepayEvery();
                         LocalDate startDate = loan.getExpectedFirstRepaymentOnDate();
                         if (startDate == null) {
                             startDate = loan.getExpectedDisbursedOnLocalDate();

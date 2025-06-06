@@ -249,7 +249,7 @@ public class LoanUtilService {
                 // immediately after disbursement date,
                 // need to have minimum number of days gap between disbursement
                 // and first repayment date.
-                final LoanProductRelatedDetail repaymentScheduleDetails = loan.repaymentScheduleDetail();
+                final LoanProductRelatedDetail repaymentScheduleDetails = loan.getLoanProductRelatedDetail();
                 // Not expecting to be null
                 if (repaymentScheduleDetails != null) {
                     final Integer repayEvery = repaymentScheduleDetails.getRepayEvery();
@@ -273,7 +273,7 @@ public class LoanUtilService {
 
     private LocalDate generateCalculatedRepaymentStartDate(final CalendarHistoryDataWrapper calendarHistoryDataWrapper,
             LocalDate actualDisbursementDate, Loan loan) {
-        final LoanProductRelatedDetail repaymentScheduleDetails = loan.repaymentScheduleDetail();
+        final LoanProductRelatedDetail repaymentScheduleDetails = loan.getLoanProductRelatedDetail();
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         LocalDate calculatedRepaymentsStartingFromDate = null;
 

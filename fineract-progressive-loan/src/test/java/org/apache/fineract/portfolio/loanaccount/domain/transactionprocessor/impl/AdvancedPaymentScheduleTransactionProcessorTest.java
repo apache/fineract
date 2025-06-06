@@ -529,12 +529,11 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         LoanProductRelatedDetail loanProductRelatedDetail = mock(LoanProductRelatedDetail.class);
         org.apache.fineract.portfolio.loanproduct.domain.LoanProduct loanProduct = mock(
                 org.apache.fineract.portfolio.loanproduct.domain.LoanProduct.class);
-        when(loanProduct.getInstallmentAmountInMultiplesOf()).thenReturn(null);
+        when(loanProductRelatedDetail.getInstallmentAmountInMultiplesOf()).thenReturn(null);
         when(loanProductRelatedDetail.isEnableDownPayment()).thenReturn(false);
 
         Loan loan = mock(Loan.class);
         when(loan.getLoanRepaymentScheduleDetail()).thenReturn(loanProductRelatedDetail);
-        when(loan.getLoanProduct()).thenReturn(loanProduct);
         when(loan.isInterestBearing()).thenReturn(true);
 
         LoanRepaymentScheduleInstallment installment1 = spy(

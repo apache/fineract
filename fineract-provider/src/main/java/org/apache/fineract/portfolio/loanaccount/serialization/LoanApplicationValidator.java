@@ -215,8 +215,8 @@ public final class LoanApplicationValidator {
         }
 
         validateLoanTermAndRepaidEveryValues(loan.getTermFrequency(), loan.getTermPeriodFrequencyType().getValue(),
-                loan.repaymentScheduleDetail().getNumberOfRepayments(), loan.repaymentScheduleDetail().getRepayEvery(),
-                loan.repaymentScheduleDetail().getRepaymentPeriodFrequencyType().getValue(), loan);
+                loan.getLoanProductRelatedDetail().getNumberOfRepayments(), loan.getLoanProductRelatedDetail().getRepayEvery(),
+                loan.getLoanProductRelatedDetail().getRepaymentPeriodFrequencyType().getValue(), loan);
     }
 
     public void validateForModify(final Loan loan) {
@@ -229,8 +229,8 @@ public final class LoanApplicationValidator {
         }
 
         validateLoanTermAndRepaidEveryValues(loan.getTermFrequency(), loan.getTermPeriodFrequencyType().getValue(),
-                loan.repaymentScheduleDetail().getNumberOfRepayments(), loan.repaymentScheduleDetail().getRepayEvery(),
-                loan.repaymentScheduleDetail().getRepaymentPeriodFrequencyType().getValue(), loan);
+                loan.getLoanProductRelatedDetail().getNumberOfRepayments(), loan.getLoanProductRelatedDetail().getRepayEvery(),
+                loan.getLoanProductRelatedDetail().getRepaymentPeriodFrequencyType().getValue(), loan);
     }
 
     public void validateForCreate(JsonCommand command) {

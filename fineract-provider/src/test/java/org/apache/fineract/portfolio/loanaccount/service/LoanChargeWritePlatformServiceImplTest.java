@@ -177,7 +177,7 @@ class LoanChargeWritePlatformServiceImplTest {
         when(chargeDefinition.getChargeTimeType()).thenReturn(SPECIFIED_DUE_DATE);
         when(chargeDefinition.getCurrencyCode()).thenReturn(CURRENCY_CODE);
         when(loanChargeAssembler.createNewFromJson(loan, chargeDefinition, jsonCommand)).thenReturn(loanCharge);
-        when(loan.repaymentScheduleDetail()).thenReturn(loanRepaymentScheduleDetail);
+        when(loan.getLoanProductRelatedDetail()).thenReturn(loanRepaymentScheduleDetail);
         when(loanRepaymentScheduleDetail.getLoanScheduleType()).thenReturn(LoanScheduleType.CUMULATIVE);
         when(loan.getLoanRepaymentScheduleDetail()).thenReturn(loanRepaymentScheduleDetail);
         when(loan.hasCurrencyCodeOf(CURRENCY_CODE)).thenReturn(true);
