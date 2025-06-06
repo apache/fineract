@@ -1234,6 +1234,8 @@ public class LoansApiResource {
             commandRequest = builder.assignDelinquency(resolvedLoanId).build();
         } else if (CommandParameterUtil.is(commandParam, LoanApiConstants.CONTRACT_TERMINATION_COMMAND)) {
             commandRequest = builder.applyContractTermination(resolvedLoanId).build();
+        } else if (CommandParameterUtil.is(commandParam, LoanApiConstants.UNDO_CONTRACT_TERMINATION_COMMAND)) {
+            commandRequest = builder.undoContractTermination(resolvedLoanId).build();
         }
 
         if (commandRequest == null) {

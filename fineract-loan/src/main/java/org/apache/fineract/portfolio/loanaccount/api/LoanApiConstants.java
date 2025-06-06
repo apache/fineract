@@ -180,6 +180,7 @@ public interface LoanApiConstants {
     String CAPITALIZED_INCOME_TRANSACTION_COMMAND = "capitalizedIncome";
     String CAPITALIZED_INCOME_ADJUSTMENT_TRANSACTION_COMMAND = "capitalizedIncomeAdjustment";
     String CONTRACT_TERMINATION_COMMAND = "contractTermination";
+    String UNDO_CONTRACT_TERMINATION_COMMAND = "undoContractTermination";
 
     // Data Validator names
     String LOAN_FRAUD_DATAVALIDATOR_PREFIX = "loans.fraud";

@@ -305,6 +305,10 @@ public class LoanRequestFactory {
                 .locale(DEFAULT_LOCALE).note("Capitalized Income");
     }
 
+    public static PostLoansLoanIdRequest defaultContractTerminationUndoRequest() {
+        return new PostLoansLoanIdRequest().note("Contract Termination Undo");
+    }
+
     public static PostLoansLoanIdRequest defaultLoanContractTerminationRequest() {
         return new PostLoansLoanIdRequest().dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE).note("Contract Termination");
     }

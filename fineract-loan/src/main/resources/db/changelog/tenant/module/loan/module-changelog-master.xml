@@ -52,4 +52,5 @@
   <include relativeToChangelogFile="true" file="parts/1027_add_capitalized_income_transaction_type.xml"/>
   <include relativeToChangelogFile="true" file="parts/1028_add_missing_indexes.xml"/>
   <include relativeToChangelogFile="true" file="parts/1029_add_installment_amount_in_multiples_of_to_loan.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1030_add_loan_undo_contract_termination_event.xml"/>
 </databaseChangeLog>

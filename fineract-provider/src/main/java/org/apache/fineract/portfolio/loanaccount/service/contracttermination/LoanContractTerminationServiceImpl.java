@@ -32,19 +32,25 @@ import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
+import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAdjustTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBalanceChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionContractTerminationPostBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanUndoContractTerminationBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
+import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSubStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
+import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
+import org.apache.fineract.portfolio.loanaccount.service.LoanScheduleService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
+import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanTransactionValidator;
 import org.apache.fineract.portfolio.loanaccount.service.ReprocessLoanTransactionsService;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
@@ -65,6 +71,9 @@ public class LoanContractTerminationServiceImpl {
     private final ExternalIdFactory externalIdFactory;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanTransactionService loanTransactionService;
+    private final LoanScheduleService loanScheduleService;
+    private final LoanChargeValidator loanChargeValidator;
+    private final ProgressiveLoanTransactionValidator loanTransactionValidator;
 
     public CommandProcessingResult applyContractTermination(final JsonCommand command) {
         final Loan loan = loanAssembler.assembleFrom(command.getLoanId());
@@ -114,6 +123,67 @@ public class LoanContractTerminationServiceImpl {
                 .withGroupId(loan.getGroupId()) //
                 .withLoanId(command.getLoanId()) //
                 .with(changes).build();
+    }
+
+    public CommandProcessingResult undoContractTermination(final JsonCommand command) {
+        final Long loanId = command.getLoanId();
+
+        loanTransactionValidator.validateContractTerminationUndo(command, loanId);
+
+        final Loan loan = loanAssembler.assembleFrom(loanId);
+        final LoanTransaction contractTerminationTransaction = loan.findContractTerminationTransaction();
+
+        businessEventNotifierService.notifyPreBusinessEvent(new LoanUndoContractTerminationBusinessEvent(contractTerminationTransaction));
+        businessEventNotifierService.notifyPreBusinessEvent(
+                new LoanAdjustTransactionBusinessEvent(new LoanAdjustTransactionBusinessEvent.Data(contractTerminationTransaction)));
+
+        // check if reversalExternalId is provided
+        final String reversalExternalId = command.stringValueOfParameterNamedAllowingNull(LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME);
+        final ExternalId reversalTxnExternalId = ExternalIdFactory.produce(reversalExternalId);
+        final Map<String, Object> changes = new LinkedHashMap<>();
+
+        // Add note if provided
+        final String noteText = command.stringValueOfParameterNamed("note");
+        if (StringUtils.isNotBlank(noteText)) {
+            changes.put("note", noteText);
+            final Note note = Note.loanTransactionNote(loan, contractTerminationTransaction, noteText);
+            noteRepository.save(note);
+        }
+
+        loanChargeValidator.validateRepaymentTypeTransactionNotBeforeAChargeRefund(contractTerminationTransaction.getLoan(),
+                contractTerminationTransaction, "reversed");
+        contractTerminationTransaction.reverse(reversalTxnExternalId);
+        contractTerminationTransaction.manuallyAdjustedOrReversed();
+
+        loan.liftContractTerminationSubStatus();
+        changes.put(LoanApiConstants.subStatusAttributeName, loan.getLoanSubStatus());
+        loanTransactionRepository.saveAndFlush(contractTerminationTransaction);
+
+        final ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, null, null);
+        if (loan.isCumulativeSchedule() && loan.isInterestBearingAndInterestRecalculationEnabled()) {
+            loanScheduleService.regenerateRepaymentScheduleWithInterestRecalculation(loan, scheduleGeneratorDTO);
+        } else if (loan.isProgressiveSchedule()) {
+            loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
+        }
+
+        reprocessLoanTransactionsService.reprocessTransactions(loan);
+
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanUndoContractTerminationBusinessEvent(contractTerminationTransaction));
+
+        final LoanAdjustTransactionBusinessEvent.Data eventData = new LoanAdjustTransactionBusinessEvent.Data(
+                contractTerminationTransaction);
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanAdjustTransactionBusinessEvent(eventData));
+
+        return new CommandProcessingResultBuilder() //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
+                .withEntityId(contractTerminationTransaction.getId()) //
+                .withEntityExternalId(contractTerminationTransaction.getExternalId()) //
+                .with(changes) //
+                .build();
     }
 
     public void validateContractTermination(final Loan loan) {

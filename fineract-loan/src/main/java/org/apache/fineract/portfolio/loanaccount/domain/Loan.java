@@ -1789,6 +1789,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return getLoanTransaction(e -> e.isNotReversed() && e.isChargeOff());
     }
 
+    public LoanTransaction findContractTerminationTransaction() {
+        return getLoanTransaction(e -> e.isNotReversed() && e.isContractTermination());
+    }
+
     public void handleMaturityDateActivate() {
         if (this.expectedMaturityDate != null && !this.expectedMaturityDate.equals(this.actualMaturityDate)) {
             this.actualMaturityDate = this.expectedMaturityDate;

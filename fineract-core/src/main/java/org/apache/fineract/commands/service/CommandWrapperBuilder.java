@@ -3849,4 +3849,13 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId;
         return this;
     }
+
+    public CommandWrapperBuilder undoContractTermination(final Long loanId) {
+        this.actionName = "CONTRACT_TERMINATION_UNDO";
+        this.entityName = "LOAN";
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId;
+        return this;
+    }
 }

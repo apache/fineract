@@ -611,6 +611,11 @@ public class ExternalEventConfigurationHelper {
         loanCapitalizedIncomeTransactionCreatedBusinessEvent.put("enabled", false);
         defaults.add(loanCapitalizedIncomeTransactionCreatedBusinessEvent);
 
+        Map<String, Object> loanTransactionUndoContractTerminationBusinessEvent = new HashMap<>();
+        loanTransactionUndoContractTerminationBusinessEvent.put("type", "LoanUndoContractTerminationBusinessEvent");
+        loanTransactionUndoContractTerminationBusinessEvent.put("enabled", false);
+        defaults.add(loanTransactionUndoContractTerminationBusinessEvent);
+
         return defaults;
     }
 

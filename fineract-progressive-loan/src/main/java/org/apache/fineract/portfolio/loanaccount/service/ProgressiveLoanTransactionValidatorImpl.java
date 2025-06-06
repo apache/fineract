@@ -34,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -219,6 +220,47 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
         });
     }
 
+    @Override
+    public void validateContractTerminationUndo(final JsonCommand command, final Long loanId) {
+        final String json = command.json();
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
+
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, getContractTerminationUndoParameters());
+
+        Validator.validateOrThrow("loan.contract.termination.undo", baseDataValidator -> {
+            final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
+            validateLoanClientIsActive(loan);
+            validateLoanGroupIsActive(loan);
+
+            if (!loan.isOpen()) {
+                throw new GeneralPlatformDomainRuleException("error.msg.loan.is.not.active",
+                        "Loan: " + loanId + " Undo Contract Termination is not allowed. Loan Account is not Active", loanId);
+            }
+            if (!loan.isContractTermination()) {
+                throw new GeneralPlatformDomainRuleException("error.msg.loan.is.not.contract.terminated",
+                        "Loan: " + loanId + " is not contract terminated", loanId);
+            }
+            final LoanTransaction contractTerminationTransaction = loan.findContractTerminationTransaction();
+            if (contractTerminationTransaction == null) {
+                throw new GeneralPlatformDomainRuleException("error.msg.loan.contract.termination.transaction.not.found",
+                        "Loan: " + loanId + " contract termination transaction was not found", loanId);
+            }
+            if (!contractTerminationTransaction.equals(loan.getLastUserTransaction())) {
+                throw new GeneralPlatformDomainRuleException("error.msg.loan.contract.termination.is.not.the.last.user.transaction",
+                        "Loan: " + loanId
+                                + " contract termination cannot be undone. User transaction was found after contract termination!",
+                        loanId);
+            }
+
+            validateNote(baseDataValidator, element);
+            validateReversalExternalId(baseDataValidator, element);
+        });
+    }
+
     // Delegates
     @Override
     public void validateDisbursement(JsonCommand command, boolean isAccountTransfer, Long loanId) {
@@ -368,6 +410,11 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
         loanTransactionValidator.validateExternalId(baseDataValidator, element);
     }
 
+    @Override
+    public void validateReversalExternalId(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
+        loanTransactionValidator.validateReversalExternalId(baseDataValidator, element);
+    }
+
     private Set<String> getCapitalizedIncomeParameters() {
         return new HashSet<>(
                 Arrays.asList("transactionDate", "dateFormat", "locale", "transactionAmount", "paymentTypeId", "note", "externalId"));
@@ -376,5 +423,9 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
     private Set<String> getCapitalizedIncomeAdjustmentParameters() {
         return new HashSet<>(
                 Arrays.asList("transactionDate", "dateFormat", "locale", "transactionAmount", "paymentTypeId", "note", "externalId"));
+    }
+
+    private Set<String> getContractTerminationUndoParameters() {
+        return new HashSet<>(Arrays.asList("note", "reversalExternalId"));
     }
 }

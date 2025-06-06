@@ -16,16 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
+package org.apache.fineract.infrastructure.event.business.domain.loan.transaction;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.portfolio.loanaccount.serialization.LoanTransactionValidator;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 
-public interface ProgressiveLoanTransactionValidator extends LoanTransactionValidator {
+public class LoanUndoContractTerminationBusinessEvent extends LoanTransactionBusinessEvent {
 
-    void validateCapitalizedIncome(JsonCommand command, Long loanId);
+    private static final String TYPE = "LoanUndoContractTerminationBusinessEvent";
 
-    void validateCapitalizedIncomeAdjustment(JsonCommand command, Long loanId, Long capitalizedIncomeTransactionId);
+    public LoanUndoContractTerminationBusinessEvent(LoanTransaction value) {
+        super(value);
+    }
 
-    void validateContractTerminationUndo(JsonCommand command, Long loanId);
+    @Override
+    public String getType() {
+        return TYPE;
+    }
 }

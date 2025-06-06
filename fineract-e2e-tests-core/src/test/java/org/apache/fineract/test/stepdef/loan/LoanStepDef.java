@@ -4374,6 +4374,35 @@ public class LoanStepDef extends AbstractStepDef {
                 .isEqualTo(transactionId);
     }
 
+    @And("Admin successfully undoes loan contract termination")
+    public void undoLoanContractTermination() throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        assert loanResponse.body() != null;
+        final Response<PostLoansLoanIdResponse> loanContractTerminationResponse = testContext()
+                .get(TestContextKey.LOAN_CONTRACT_TERMINATION_RESPONSE);
+        assert loanContractTerminationResponse.body() != null;
+        final Long loanId = loanResponse.body().getLoanId();
+
+        final List<GetLoansLoanIdTransactions> transactions = Objects
+                .requireNonNull(loansApi.retrieveLoan(loanId, false, "transactions", "", "").execute().body()).getTransactions();
+
+        assert transactions != null;
+        final GetLoansLoanIdTransactions targetTransaction = transactions.stream().filter(t -> {
+            assert t.getType() != null;
+            return Boolean.TRUE.equals(t.getType().getContractTermination());
+        }).findFirst().orElse(null);
+
+        final PostLoansLoanIdRequest request = LoanRequestFactory.defaultContractTerminationUndoRequest();
+
+        final Response<PostLoansLoanIdResponse> response = loansApi.stateTransitions(loanId, request, "undoContractTermination").execute();
+        testContext().set(TestContextKey.LOAN_UNDO_CONTRACT_TERMINATION_RESPONSE, response);
+        ErrorHelper.checkSuccessfulApiCall(response);
+        assert targetTransaction != null;
+        eventCheckHelper.checkTransactionWithLoanTransactionAdjustmentBizEvent(targetTransaction);
+        eventCheckHelper.loanUndoContractTerminationEventCheck(targetTransaction);
+        eventCheckHelper.loanBalanceChangedEventCheck(loanId);
+    }
+
     @Then("LoanTransactionContractTerminationPostBusinessEvent is raised on {string}")
     public void checkLoanTransactionContractTerminationPostBusinessEvent(final String date) throws IOException {
         final Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);

@@ -1081,4 +1081,12 @@ public final class LoanTransactionValidatorImpl implements LoanTransactionValida
             baseDataValidator.reset().parameter("externalId").value(externalId).notExceedingLengthOf(100);
         }
     }
+
+    @Override
+    public void validateReversalExternalId(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
+        final String reversalExternalId = this.fromApiJsonHelper.extractStringNamed("reversalExternalId", element);
+        if (StringUtils.isNotBlank(reversalExternalId)) {
+            baseDataValidator.reset().parameter("reversalExternalId").value(reversalExternalId).notExceedingLengthOf(100);
+        }
+    }
 }
