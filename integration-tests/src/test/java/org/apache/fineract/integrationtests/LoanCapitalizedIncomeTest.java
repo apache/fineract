@@ -685,7 +685,6 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
         });
     }
 
-
     @Test
     public void testOverpaymentAmountWhenCapitalizedIncomeTransactionsAreReversed() {
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();

@@ -3958,3 +3958,195 @@ Feature: Capitalized Income
       | 16 February 2024 | Capitalized Income                         | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
     Then LoanCapitalizedIncomeAmortizationAdjustmentTransactionCreatedBusinessEvent is raised on "15 February 2024"
     Then Customer is forbidden to undo "1"th "Capitalized Income" transaction made on "01 January 2024" due to transaction type is non-reversal
+
+  @TestRailId:C3737
+  Scenario: Verify overpayment amount when capitalized income transactions are reversed and replayed - basic flow
+    When Admin sets the business date to "1 January 2024"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME | 01 January 2024   | 1200           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "1 January 2024" with "1200" amount and expected disbursement date on "1 January 2024"
+    And Admin successfully disburse the loan on "1 January 2024" with "1000" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    When Admin sets the business date to "5 January 2024"
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "5 January 2024" with "200" EUR transaction amount
+    Then Loan has 1213.88 outstanding amount
+  # Make overpayment
+    When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "5 January 2024" with 1300 EUR transaction amount and system-generated Idempotency key
+    Then Loan status will be "OVERPAID"
+    And Loan has 0 outstanding amount
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement                    | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 05 January 2024  | Capitalized Income              | 200.0  | 200.0     | 0.0      | 0.0  | 0.0       | 1200.0       | false    |
+      | 05 January 2024  | Repayment                       | 1300.0 | 1200.0    | 0.75     | 0.0  | 0.0       | 0.0          | false    |
+      | 05 January 2024  | Accrual                         | 0.75   | 0.0       | 0.75     | 0.0  | 0.0       | 0.0          | false    |
+      | 05 January 2024  | Capitalized Income Amortization | 200.0  | 0.0       | 200.0    | 0.0  | 0.0       | 0.0          | false    |
+  # Undo capitalized income - should trigger reverse-replay
+    When Customer undo "1"th "Capitalized Income" transaction made on "05 January 2024"
+    Then Loan has 0 outstanding amount
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type                           | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024  | Disbursement                               | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 05 January 2024  | Capitalized Income                         | 200.0  | 200.0     | 0.0      | 0.0  | 0.0       | 1200.0       | true     | false    |
+      | 05 January 2024  | Accrual                                    | 0.75   | 0.0       | 0.75     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 January 2024  | Capitalized Income Amortization            | 200.0  | 0.0       | 200.0    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 05 January 2024  | Repayment                                  | 1300.0 | 1000.0    | 0.75     | 0.0  | 0.0       | 0.0          | false    | true     |
+      | 05 January 2024  | Capitalized Income Amortization Adjustment | 200.0  | 0.0       | 200.0    | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then Loan status will be "OVERPAID"
+    Then Loan has 299.25 overpaid amount
+
+  @TestRailId:C3739
+  Scenario: Verify multiple capitalized income transactions reversal with overpayment - selective middle transaction reversal
+    When Admin sets the business date to "1 January 2024"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME | 01 January 2024   | 1600           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "1 January 2024" with "1600" amount and expected disbursement date on "1 January 2024"
+    And Admin successfully disburse the loan on "1 January 2024" with "1000" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    When Admin sets the business date to "5 January 2024"
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "5 January 2024" with "100" EUR transaction amount
+    When Admin sets the business date to "10 January 2024"
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "10 January 2024" with "150" EUR transaction amount
+    When Admin sets the business date to "15 January 2024"
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "15 January 2024" with "200" EUR transaction amount
+    Then Loan has 1466.08 outstanding amount
+  # Overpay the loan
+    When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "15 January 2024" with 1500 EUR transaction amount and system-generated Idempotency key
+    Then Loan status will be "OVERPAID"
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement                    | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 05 January 2024  | Capitalized Income              | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1100.0       | false    |
+      | 10 January 2024  | Capitalized Income              | 150.0  | 150.0     | 0.0      | 0.0  | 0.0       | 1250.0       | false    |
+      | 15 January 2024  | Capitalized Income              | 200.0  | 200.0     | 0.0      | 0.0  | 0.0       | 1450.0       | false    |
+      | 15 January 2024  | Repayment                       | 1500.0 | 1450.0    | 2.96     | 0.0  | 0.0       | 0.0          | false    |
+      | 15 January 2024  | Accrual                         | 2.96   | 0.0       | 2.96     | 0.0  | 0.0       | 0.0          | false    |
+      | 15 January 2024  | Capitalized Income Amortization | 450.0  | 0.0       | 450.0    | 0.0  | 0.0       | 0.0          | false    |
+  # Undo middle capitalized income transaction
+    When Customer undo "1"th "Capitalized Income" transaction made on "10 January 2024"
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type                           | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024  | Disbursement                               | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 05 January 2024  | Capitalized Income                         | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1100.0       | false    | false    |
+      | 10 January 2024  | Capitalized Income                         | 150.0  | 150.0     | 0.0      | 0.0  | 0.0       | 1250.0       | true     | false    |
+      | 15 January 2024  | Capitalized Income                         | 200.0  | 200.0     | 0.0      | 0.0  | 0.0       | 1300.0       | false    | false    |
+      | 15 January 2024  | Accrual                                    | 2.96   | 0.0       | 2.96     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 January 2024  | Capitalized Income Amortization            | 450.0  | 0.0       | 450.0    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 January 2024  | Repayment                                  | 1500.0 | 1300.0    | 2.82     | 0.0  | 0.0       | 0.0          | false    | true     |
+      | 15 January 2024  | Capitalized Income Amortization Adjustment | 150.0  | 0.0       | 150.0    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 January 2024  | Accrual Adjustment                         | 0.14   | 0.0       | 0.14     | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then Loan status will be "OVERPAID"
+    Then Loan has 197.18 overpaid amount
+
+  @TestRailId:C3740
+  Scenario: Verify capitalized income reversal with partial repayment when loan transitions from active to overpaid state
+    When Admin sets the business date to "1 January 2024"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME | 01 January 2024   | 1800           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "1 January 2024" with "1800" amount and expected disbursement date on "1 January 2024"
+    And Admin successfully disburse the loan on "1 January 2024" with "1000" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    When Admin sets the business date to "5 January 2024"
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "5 January 2024" with "500" EUR transaction amount
+    Then Loan has 1517.15 outstanding amount
+  # Partial payment
+    When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "5 January 2024" with 1200 EUR transaction amount and system-generated Idempotency key
+    Then Loan status will be "ACTIVE"
+    And Loan has 305.78 outstanding amount
+  # Undo capitalized income - this should cause overpayment
+    When Customer undo "1"th "Capitalized Income" transaction made on "05 January 2024"
+    Then Loan status will be "OVERPAID"
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024  | Disbursement       | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 05 January 2024  | Capitalized Income | 500.0  | 500.0     | 0.0      | 0.0  | 0.0       | 1500.0       | true     | false    |
+      | 05 January 2024  | Repayment          | 1200.0 | 1000.0    | 0.75     | 0.0  | 0.0       | 0.0          | false    | true    |
+      | 05 January 2024  | Accrual            | 0.75   | 0.0       | 0.75     | 0.0  | 0.0       | 0.0          | false    | false    |
+    And Loan has 0.0 outstanding amount
+    And Loan has 199.25 overpaid amount
+
+  @TestRailId:C3741
+  Scenario: Verify backdated disbursement with capitalized income and overpayment reverse-replay
+    When Admin sets the business date to "1 January 2024"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                     | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_MULTIDISBURSAL_CAPITALIZED_INCOME | 01 January 2024   | 1200           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "1 January 2024" with "1200" amount and expected disbursement date on "1 January 2024"
+    And Admin successfully disburse the loan on "1 January 2024" with "500" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    When Admin sets the business date to "10 January 2024"
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "10 January 2024" with "200" EUR transaction amount
+  # Overpay current balance
+    When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "10 January 2024" with 750 EUR transaction amount and system-generated Idempotency key
+    Then Loan status will be "OVERPAID"
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement                    | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    |
+      | 10 January 2024  | Capitalized Income              | 200.0  | 200.0     | 0.0      | 0.0  | 0.0       | 700.0        | false    |
+      | 10 January 2024  | Repayment                       | 750.0  | 700.0     | 0.85     | 0.0  | 0.0       | 0.0          | false    |
+      | 10 January 2024  | Accrual                         | 0.85   | 0.0       | 0.85     | 0.0  | 0.0       | 0.0          | false    |
+      | 10 January 2024  | Capitalized Income Amortization | 200.0  | 0.0       | 200.0    | 0.0  | 0.0       | 0.0          | false    |
+  # Backdated disbursement should trigger reverse-replay
+    When Admin successfully disburse the loan on "5 January 2024" with "300" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024  | Disbursement                    | 500.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    | false    |
+      | 05 January 2024  | Disbursement                    | 300.0  | 0.0       | 0.0      | 0.0  | 0.0       | 800.0        | false    | true     |
+      | 10 January 2024  | Capitalized Income              | 200.0  | 200.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    | false    |
+      | 10 January 2024  | Accrual                         | 0.85   | 0.0       | 0.85     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 January 2024  | Capitalized Income Amortization | 200.0  | 0.0       | 200.0    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 January 2024  | Repayment                       | 750.0  | 748.87    | 1.13     | 0.0  | 0.0       | 251.13       | false    | true     |
+    And Loan has 255.09 outstanding amount
+
+  @TestRailId:C3742
+  Scenario: Verify capitalized income amortization reversal when multiple payments create complex overpayment scenario
+    When Admin sets the business date to "1 January 2024"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME | 01 January 2024   | 2000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "1 January 2024" with "2000" amount and expected disbursement date on "1 January 2024"
+    And Admin successfully disburse the loan on "1 January 2024" with "1500" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    When Admin sets the business date to "5 January 2024"
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "5 January 2024" with "300" EUR transaction amount
+  # First partial payment
+    When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "5 January 2024" with 900 EUR transaction amount and system-generated Idempotency key
+    Then Loan status will be "ACTIVE"
+    When Admin sets the business date to "8 January 2024"
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "8 January 2024" with "200" EUR transaction amount
+  # Second payment that causes overpayment
+    When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "8 January 2024" with 1200 EUR transaction amount and system-generated Idempotency key
+    Then Loan status will be "OVERPAID"
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 January 2024  | Disbursement                    | 1500.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1500.0       | false    |
+      | 05 January 2024  | Capitalized Income              | 300.0  | 300.0     | 0.0      | 0.0  | 0.0       | 1800.0       | false    |
+      | 05 January 2024  | Repayment                       | 900.0  | 898.87    | 1.13     | 0.0  | 0.0       | 901.13       | false    |
+      | 08 January 2024  | Capitalized Income              | 200.0  | 200.0     | 0.0      | 0.0  | 0.0       | 1101.13      | false    |
+      | 08 January 2024  | Repayment                       | 1200.0 | 1101.13   | 0.51     | 0.0  | 0.0       | 0.0          | false    |
+      | 08 January 2024  | Accrual                         | 1.64   | 0.0       | 1.64     | 0.0  | 0.0       | 0.0          | false    |
+      | 08 January 2024  | Capitalized Income Amortization | 500.0  | 0.0       | 500.0    | 0.0  | 0.0       | 0.0          | false    |
+  # Undo first capitalized income
+    When Customer undo "1"th "Capitalized Income" transaction made on "05 January 2024"
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type                           | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 01 January 2024  | Disbursement                               | 1500.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1500.0       | false    | false    |
+      | 05 January 2024  | Capitalized Income                         | 300.0  | 300.0     | 0.0      | 0.0  | 0.0       | 1800.0       | true     | false    |
+      | 05 January 2024  | Repayment                                  | 900.0  | 898.87    | 1.13     | 0.0  | 0.0       | 601.13       | false    | false    |
+      | 08 January 2024  | Capitalized Income                         | 200.0  | 200.0     | 0.0      | 0.0  | 0.0       | 801.13       | false    | false    |
+      | 08 January 2024  | Accrual                                    | 1.64   | 0.0       | 1.64     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 January 2024  | Capitalized Income Amortization            | 500.0  | 0.0       | 500.0    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 January 2024  | Repayment                                  | 1200.0 | 801.13    | 0.34     | 0.0  | 0.0       | 0.0          | false    | true    |
+      | 08 January 2024  | Capitalized Income Amortization Adjustment | 300.0  | 0.0       | 300.0    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 January 2024  | Accrual Adjustment                         | 0.17   | 0.0       | 0.17     | 0.0  | 0.0       | 0.0          | false    | false    |
+    And Loan has 0.0 outstanding amount
+    And Loan has 398.53 overpaid amount
