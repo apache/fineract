@@ -4653,3 +4653,29 @@ Feature: Capitalized Income
       | 31 January 2024  | Capitalized Income Amortization | 17.03  | 0.0       | 17.03    | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 February 2024 | Accrual                         | 0.31   | 0.0       | 0.31     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 February 2024 | Capitalized Income Amortization | 17.77  | 0.0       | 17.77    | 0.0  | 0.0       | 0.0          | false    | false    |
+
+  @TestRailId:C3735
+  Scenario: Verify Capitalized Income business events
+    When Admin sets the business date to "01 January 2024"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME_ADJ_CUSTOM_ALLOC | 01 January 2024   | 150            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2024" with "150" amount and expected disbursement date on "01 January 2024"
+    And Admin successfully disburse the loan on "01 January 2024" with "90" EUR transaction amount
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "01 January 2024" with "60" EUR transaction amount
+    And Admin sets the business date to "02 January 2024"
+    Then LoanCapitalizedIncomeTransactionCreatedBusinessEvent is raised on "01 January 2024"
+    When Admin runs inline COB job for Loan
+    Then LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "01 January 2024"
+    And Loan status will be "ACTIVE"
+    When Admin adds capitalized income adjustment with "AUTOPAY" payment type to the loan on "02 January 2024" with "10" EUR transaction amount
+    And Admin sets the business date to "03 January 2024"
+    Then LoanCapitalizedIncomeAdjustmentTransactionCreatedBusinessEvent is raised on "02 January 2024"
+    When Admin runs inline COB job for Loan
+    And Admin sets the business date to "04 January 2024"
+    And Admin runs inline COB job for Loan
+    And Customer undo "1"th capitalized income adjustment on "02 January 2024"
+    When Customer undo "1"th "Capitalized Income" transaction made on "01 January 2024"
+    And Admin sets the business date to "05 January 2024"
+    And Admin runs inline COB job for Loan
