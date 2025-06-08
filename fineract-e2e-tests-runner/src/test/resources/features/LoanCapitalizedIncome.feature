@@ -730,7 +730,7 @@ Feature: Capitalized Income
       | 07 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 08 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 10 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 January 2024  | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 12 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 13 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -748,7 +748,7 @@ Feature: Capitalized Income
       | 25 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 26 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 27 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 28 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 January 2024  | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 30 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 31 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -767,7 +767,7 @@ Feature: Capitalized Income
       | 12 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 13 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 15 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 February 2024 | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 17 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 18 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -786,7 +786,7 @@ Feature: Capitalized Income
       | 01 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 02 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 03 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 04 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 March 2024    | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 05 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 06 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 07 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -806,13 +806,13 @@ Feature: Capitalized Income
       | 21 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 22 March 2024    | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 23 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 24 March 2024    | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 25 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 26 March 2024    | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 26 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 27 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 28 March 2024    | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 30 March 2024    | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 30 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 31 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
     And Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "01 January 2024" which has the following Journal entries:
       | Type      | Account code | Account name                | Debit | Credit |
@@ -901,99 +901,99 @@ Feature: Capitalized Income
       | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement                    | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 01 January 2024  | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    | false    |
-      | 01 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 02 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 03 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 04 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 05 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 06 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 07 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 08 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 09 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 10 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 11 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 12 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 13 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 14 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 15 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 16 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 17 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 18 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 19 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 20 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 21 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 22 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 23 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 24 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 25 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 26 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 27 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 28 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 29 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 30 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 31 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 01 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 02 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 03 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 04 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 05 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 06 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 07 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 08 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 09 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 10 January 2024  | Capitalized Income Amortization | 0.54   | 0.0       | 0.0      | 0.54  | 0.0       | 0.0          | false    | false    |
+      | 11 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 12 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 13 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 14 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 15 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 16 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 17 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 18 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 19 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 20 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 21 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 22 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 23 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 24 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 25 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 26 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 27 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 28 January 2024  | Capitalized Income Amortization | 0.54   | 0.0       | 0.0      | 0.54  | 0.0       | 0.0          | false    | false    |
+      | 29 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 30 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 31 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
 
-      | 01 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 02 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 03 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 04 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 05 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 06 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 07 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 08 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 09 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 10 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 11 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 12 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 13 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 14 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 15 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 16 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 17 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 18 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 19 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 20 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 21 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 22 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 23 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 24 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 25 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 26 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 27 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 28 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 29 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 01 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 02 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 03 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 04 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 05 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 06 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 07 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 08 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 09 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 10 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 11 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 12 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 13 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 14 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 15 February 2024 | Capitalized Income Amortization | 0.54   | 0.0       | 0.0      | 0.54  | 0.0       | 0.0          | false    | false    |
+      | 16 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 17 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 18 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 19 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 20 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 21 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 22 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 23 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 24 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 25 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 26 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 27 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 28 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 29 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
 
-      | 01 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 02 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 03 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 04 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 05 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 06 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 07 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 08 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 09 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 10 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 11 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 12 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 13 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 14 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 15 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 16 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 17 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 18 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 19 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 20 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 21 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 22 March 2024    | Capitalized Income Amortization | 0.54   | 0.0       | 0.0     | 0.54  | 0.0       | 0.0          | false    | false    |
-      | 23 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 24 March 2024    | Capitalized Income Amortization | 0.54   | 0.0       | 0.0     | 0.54  | 0.0       | 0.0          | false    | false    |
-      | 25 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 26 March 2024    | Capitalized Income Amortization | 0.54   | 0.0       | 0.0     | 0.54  | 0.0       | 0.0          | false    | false    |
-      | 27 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 28 March 2024    | Capitalized Income Amortization | 0.54   | 0.0       | 0.0     | 0.54  | 0.0       | 0.0          | false    | false    |
-      | 29 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
-      | 30 March 2024    | Capitalized Income Amortization | 0.54   | 0.0       | 0.0     | 0.54  | 0.0       | 0.0          | false    | false    |
-      | 31 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0     | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 01 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 02 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 03 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 04 March 2024    | Capitalized Income Amortization | 0.54   | 0.0       | 0.0      | 0.54  | 0.0       | 0.0          | false    | false    |
+      | 05 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 06 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 07 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 08 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 09 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 10 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 11 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 12 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 13 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 14 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 15 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 16 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 17 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 18 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 19 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 20 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 21 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 22 March 2024    | Capitalized Income Amortization | 0.54   | 0.0       | 0.0      | 0.54  | 0.0       | 0.0          | false    | false    |
+      | 23 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 24 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 25 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 26 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 27 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 28 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 29 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 30 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
+      | 31 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.0      | 0.55  | 0.0       | 0.0          | false    | false    |
     And Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "01 January 2024" which has the following Journal entries:
       | Type      | Account code | Account name                | Debit | Credit |
       | INCOME    | 404000       | Interest Income             |       | 0.55   |
@@ -1021,9 +1021,9 @@ Feature: Capitalized Income
       | ASSET     | 112601       | Loans Receivable             | 100.0  |        |
       | LIABILITY | 145024       | Deferred Capitalized Income  |        | 100.0  |
     Then Admin can successfully set Fraud flag to the loan
-    When Admin sets the business date to "03 February 2024"
-    And Admin does charge-off the loan with reason "DELINQUENT" on "03 February 2024"
-    Then Loan Transactions tab has a "CHARGE_OFF" transaction with date "03 February 2024" which has the following Journal entries:
+    When Admin sets the business date to "26 January 2024"
+    And Admin does charge-off the loan with reason "DELINQUENT" on "26 January 2024"
+    Then Loan Transactions tab has a "CHARGE_OFF" transaction with date "26 January 2024" which has the following Journal entries:
       | Type    | Account code | Account name               | Debit | Credit |
       | ASSET   | 112601       | Loans Receivable           |       | 1000.0 |
       | ASSET   | 112603       | Interest/Fee Receivable    |       | 4.58   |
@@ -1033,14 +1033,15 @@ Feature: Capitalized Income
       | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement                    | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
       | 02 January 2024  | Capitalized Income              | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
-      | 03 February 2024 | Accrual                         | 4.58   | 0.0       | 4.58     | 0.0  | 0.0       | 0.0          | false    |
-      | 03 February 2024 | Charge-off                      | 1004.58| 1000.0    | 4.58     | 0.0  | 0.0       | 0.0          | false    |
-      | 03 February 2024 | Capitalized Income Amortization | 100.0  | 0.0       | 100.0    | 0.0  | 0.0       | 0.0          | false    |
-    Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "03 February 2024" which has the following Journal entries:
+      | 26 January 2024  | Capitalized Income Amortization | 83.33  | 0.0       | 83.33    | 0.0  | 0.0       | 0.0          | false    |
+      | 26 January 2024  | Accrual                         | 3.69   | 0.0       | 3.69     | 0.0  | 0.0       | 0.0          | false    |
+      | 26 January 2024  | Charge-off                      | 1004.58| 1000.0    | 4.58     | 0.0  | 0.0       | 0.0          | false    |
+      | 26 January 2024  | Capitalized Income Amortization | 16.67  | 0.0       | 16.67    | 0.0  | 0.0       | 0.0          | false    |
+    Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "26 January 2024" which has the following Journal entries:
       | Type      | Account code | Account name                 | Debit  | Credit |
-      | EXPENSE   | 744007       | Credit Loss/Bad Debt         |        | 100.0  |
-      | LIABILITY | 145024       | Deferred Capitalized Income  | 100.0  |        |
-    Then LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "03 February 2024"
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt         |        | 16.67  |
+      | LIABILITY | 145024       | Deferred Capitalized Income  | 16.67  |        |
+    Then LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "26 January 2024"
 
   @TestRailId:C3662
   Scenario: As a user I want to add capitalized income to a progressive loan after disbursement and then charge-off a fraud loan - amortization in case of loan charge-off event
@@ -1063,9 +1064,9 @@ Feature: Capitalized Income
       | ASSET     | 112601       | Loans Receivable             | 100.0  |        |
       | LIABILITY | 145024       | Deferred Capitalized Income  |        | 100.0  |
     Then Admin can successfully set Fraud flag to the loan
-    When Admin sets the business date to "03 February 2024"
-    And Admin does charge-off the loan on "03 February 2024"
-    Then Loan Transactions tab has a "CHARGE_OFF" transaction with date "03 February 2024" which has the following Journal entries:
+    When Admin sets the business date to "26 January 2024"
+    And Admin does charge-off the loan on "26 January 2024"
+    Then Loan Transactions tab has a "CHARGE_OFF" transaction with date "26 January 2024" which has the following Journal entries:
       | Type    | Account code | Account name               | Debit | Credit |
       | ASSET   | 112601       | Loans Receivable           |       | 1000.0 |
       | ASSET   | 112603       | Interest/Fee Receivable    |       | 4.58   |
@@ -1075,14 +1076,15 @@ Feature: Capitalized Income
       | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement                    | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
       | 02 January 2024  | Capitalized Income              | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
-      | 03 February 2024 | Accrual                         | 4.58   | 0.0       | 4.58     | 0.0  | 0.0       | 0.0          | false    |
-      | 03 February 2024 | Charge-off                      | 1004.58| 1000.0    | 4.58     | 0.0  | 0.0       | 0.0          | false    |
-      | 03 February 2024 | Capitalized Income Amortization | 100.0  | 0.0       | 100.0    | 0.0  | 0.0       | 0.0          | false    |
-    Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "03 February 2024" which has the following Journal entries:
+      | 26 January 2024  | Capitalized Income Amortization | 83.33  | 0.0       | 83.33    | 0.0  | 0.0       | 0.0          | false    |
+      | 26 January 2024  | Accrual                         | 3.69   | 0.0       | 3.69     | 0.0  | 0.0       | 0.0          | false    |
+      | 26 January 2024  | Charge-off                      | 1004.58| 1000.0    | 4.58     | 0.0  | 0.0       | 0.0          | false    |
+      | 26 January 2024  | Capitalized Income Amortization | 16.67  | 0.0       | 16.67    | 0.0  | 0.0       | 0.0          | false    |
+    Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "26 January 2024" which has the following Journal entries:
       | Type      | Account code | Account name                 | Debit  | Credit |
-      | EXPENSE   | 744037       | Credit Loss/Bad Debt-Fraud   |        | 100.0  |
-      | LIABILITY | 145024       | Deferred Capitalized Income  | 100.0  |        |
-    Then LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "03 February 2024"
+      | EXPENSE   | 744037       | Credit Loss/Bad Debt-Fraud   |        | 16.67  |
+      | LIABILITY | 145024       | Deferred Capitalized Income  | 16.67  |        |
+    Then LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "26 January 2024"
 
   @TestRailId:C3663
   Scenario: As a user I want to add capitalized income to a progressive loan after disbursement and then charge-off the loan - amortization in case of loan charge-off event
@@ -1105,9 +1107,9 @@ Feature: Capitalized Income
       | ASSET     | 112601       | Loans Receivable             | 100.0  |        |
       | LIABILITY | 145024       | Deferred Capitalized Income  |        | 100.0  |
     Then Admin can successfully set Fraud flag to the loan
-    When Admin sets the business date to "03 February 2024"
-    And Admin does charge-off the loan with reason "DELINQUENT" on "03 February 2024"
-    Then Loan Transactions tab has a "CHARGE_OFF" transaction with date "03 February 2024" which has the following Journal entries:
+    When Admin sets the business date to "26 January 2024"
+    And Admin does charge-off the loan with reason "DELINQUENT" on "26 January 2024"
+    Then Loan Transactions tab has a "CHARGE_OFF" transaction with date "26 January 2024" which has the following Journal entries:
       | Type    | Account code | Account name               | Debit | Credit |
       | ASSET   | 112601       | Loans Receivable           |       | 1000.0 |
       | ASSET   | 112603       | Interest/Fee Receivable    |       | 4.58   |
@@ -1117,14 +1119,15 @@ Feature: Capitalized Income
       | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement                    | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
       | 02 January 2024  | Capitalized Income              | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
-      | 03 February 2024 | Accrual                         | 4.58   | 0.0       | 4.58     | 0.0  | 0.0       | 0.0          | false    |
-      | 03 February 2024 | Charge-off                      | 1004.58| 1000.0    | 4.58     | 0.0  | 0.0       | 0.0          | false    |
-      | 03 February 2024 | Capitalized Income Amortization | 100.0  | 0.0       | 100.0    | 0.0  | 0.0       | 0.0          | false    |
-    Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "03 February 2024" which has the following Journal entries:
+      | 26 January 2024  | Capitalized Income Amortization | 83.33  | 0.0       | 83.33    | 0.0  | 0.0       | 0.0          | false    |
+      | 26 January 2024  | Accrual                         | 3.69   | 0.0       | 3.69     | 0.0  | 0.0       | 0.0          | false    |
+      | 26 January 2024  | Charge-off                      | 1004.58| 1000.0    | 4.58     | 0.0  | 0.0       | 0.0          | false    |
+      | 26 January 2024  | Capitalized Income Amortization | 16.67  | 0.0       | 16.67    | 0.0  | 0.0       | 0.0          | false    |
+    Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "26 January 2024" which has the following Journal entries:
       | Type      | Account code | Account name                 | Debit  | Credit |
-      | EXPENSE   | 744007       | Credit Loss/Bad Debt         |        | 100.0  |
-      | LIABILITY | 145024       | Deferred Capitalized Income  | 100.0  |        |
-    Then LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "03 February 2024"
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt         |        | 16.67  |
+      | LIABILITY | 145024       | Deferred Capitalized Income  | 16.67  |        |
+    Then LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "26 January 2024"
 
   @TestRailId:C3664
   Scenario: As a user I want to add capitalized income to a progressive loan after disbursement and then undo the charge-off transaction with "delinquent" reason - amortization in case of loan charge-off event should also be reversed
@@ -1147,9 +1150,9 @@ Feature: Capitalized Income
       | ASSET     | 112601       | Loans Receivable             | 100.0  |        |
       | LIABILITY | 145024       | Deferred Capitalized Income  |        | 100.0  |
     Then Admin can successfully set Fraud flag to the loan
-    When Admin sets the business date to "03 February 2024"
-    And Admin does charge-off the loan with reason "DELINQUENT" on "03 February 2024"
-    Then Loan Transactions tab has a "CHARGE_OFF" transaction with date "03 February 2024" which has the following Journal entries:
+    When Admin sets the business date to "26 January 2024"
+    And Admin does charge-off the loan with reason "DELINQUENT" on "26 January 2024"
+    Then Loan Transactions tab has a "CHARGE_OFF" transaction with date "26 January 2024" which has the following Journal entries:
       | Type    | Account code | Account name               | Debit | Credit |
       | ASSET   | 112601       | Loans Receivable           |       | 1000.0 |
       | ASSET   | 112603       | Interest/Fee Receivable    |       | 4.58   |
@@ -1159,16 +1162,17 @@ Feature: Capitalized Income
       | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement                    | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
       | 02 January 2024  | Capitalized Income              | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
-      | 03 February 2024 | Accrual                         | 4.58   | 0.0       | 4.58     | 0.0  | 0.0       | 0.0          | false    |
-      | 03 February 2024 | Charge-off                      | 1004.58| 1000.0    | 4.58     | 0.0  | 0.0       | 0.0          | false    |
-      | 03 February 2024 | Capitalized Income Amortization | 100.0  | 0.0       | 100.0    | 0.0  | 0.0       | 0.0          | false    |
-    Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "03 February 2024" which has the following Journal entries:
+      | 26 January 2024  | Capitalized Income Amortization | 83.33  | 0.0       | 83.33    | 0.0  | 0.0       | 0.0          | false    |
+      | 26 January 2024  | Accrual                         | 3.69   | 0.0       | 3.69     | 0.0  | 0.0       | 0.0          | false    |
+      | 26 January 2024  | Charge-off                      | 1004.58| 1000.0    | 4.58     | 0.0  | 0.0       | 0.0          | false    |
+      | 26 January 2024  | Capitalized Income Amortization | 16.67  | 0.0       | 16.67    | 0.0  | 0.0       | 0.0          | false    |
+    Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "26 January 2024" which has the following Journal entries:
       | Type      | Account code | Account name                 | Debit  | Credit |
-      | EXPENSE   | 744007       | Credit Loss/Bad Debt         |        | 100.0  |
-      | LIABILITY | 145024       | Deferred Capitalized Income  | 100.0  |        |
-    Then LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "03 February 2024"
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt         |        | 16.67  |
+      | LIABILITY | 145024       | Deferred Capitalized Income  | 16.67  |        |
+    Then LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "26 January 2024"
     Then Admin does a charge-off undo the loan
-    Then Loan Transactions tab has a "CHARGE_OFF" transaction with date "03 February 2024" which has the following Journal entries:
+    Then Loan Transactions tab has a "CHARGE_OFF" transaction with date "26 January 2024" which has the following Journal entries:
       | Type    | Account code | Account name               | Debit | Credit |
       | ASSET   | 112601       | Loans Receivable           |       | 1000.0 |
       | ASSET   | 112603       | Interest/Fee Receivable    |       | 4.58   |
@@ -1182,14 +1186,15 @@ Feature: Capitalized Income
       | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 01 January 2024  | Disbursement                    | 900.0  | 0.0       | 0.0      | 0.0  | 0.0       | 900.0        | false    |
       | 02 January 2024  | Capitalized Income              | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
-      | 03 February 2024 | Accrual                         | 4.58   | 0.0       | 4.58     | 0.0  | 0.0       | 0.0          | false    |
-      | 03 February 2024 | Charge-off                      | 1004.58| 1000.0    | 4.58     | 0.0  | 0.0       | 0.0          | true     |
+      | 26 January 2024  | Capitalized Income Amortization | 83.33  | 0.0       | 83.33    | 0.0  | 0.0       | 0.0          | false    |
+      | 26 January 2024  | Accrual                         | 3.69   | 0.0       | 3.69     | 0.0  | 0.0       | 0.0          | false    |
+      | 26 January 2024  | Charge-off                      | 1004.58| 1000.0    | 4.58     | 0.0  | 0.0       | 0.0          | true     |
     Then Reversed loan capitalized income amortization transaction has the following Journal entries:
       | Type      | Account code | Account name                 | Debit  | Credit |
-      | EXPENSE   | 744007       | Credit Loss/Bad Debt         |        | 100.0  |
-      | LIABILITY | 145024       | Deferred Capitalized Income  | 100.0  |        |
-      | EXPENSE   | 744007       | Credit Loss/Bad Debt         | 100.0  |        |
-      | LIABILITY | 145024       | Deferred Capitalized Income  |        | 100.0  |
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt         |        | 16.67  |
+      | LIABILITY | 145024       | Deferred Capitalized Income  | 16.67  |        |
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt         | 16.67  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income  |        | 16.67  |
 
   @TestRailId:C3673
   Scenario: Verify capitalized income: repayment schedule - UC1: Simple loan - full payment
@@ -1258,7 +1263,7 @@ Feature: Capitalized Income
       | 09 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 10 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 10 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 January 2024  | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 12 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -1294,7 +1299,7 @@ Feature: Capitalized Income
       | 27 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 27 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 28 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 28 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 January 2024  | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 30 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -1338,7 +1343,7 @@ Feature: Capitalized Income
       | 09 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 10 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 10 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 January 2024  | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 12 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -1374,7 +1379,7 @@ Feature: Capitalized Income
       | 27 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 27 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 28 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 28 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 January 2024  | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 30 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -1412,7 +1417,7 @@ Feature: Capitalized Income
       | 14 February 2024 | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 February 2024 | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 15 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 February 2024 | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 February 2024 | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 17 February 2024 | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -1479,7 +1484,7 @@ Feature: Capitalized Income
       | 09 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 10 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 10 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 January 2024  | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 12 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -1515,7 +1520,7 @@ Feature: Capitalized Income
       | 27 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 27 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 28 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 28 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 January 2024  | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 30 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -1553,7 +1558,7 @@ Feature: Capitalized Income
       | 14 February 2024 | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 February 2024 | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 15 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 February 2024 | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 February 2024 | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 17 February 2024 | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -1591,7 +1596,7 @@ Feature: Capitalized Income
       | 03 March 2024    | Accrual                         | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 03 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 04 March 2024    | Accrual                         | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 04 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 March 2024    | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 05 March 2024    | Accrual                         | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 05 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 06 March 2024    | Accrual                         | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -1630,18 +1635,18 @@ Feature: Capitalized Income
       | 23 March 2024    | Accrual                         | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 23 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 24 March 2024    | Accrual                         | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 24 March 2024    | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 25 March 2024    | Accrual                         | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 25 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 26 March 2024    | Accrual                         | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 26 March 2024    | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 26 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 27 March 2024    | Accrual                         | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 27 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 28 March 2024    | Accrual                         | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 28 March 2024    | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 March 2024    | Accrual                         | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 30 March 2024    | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 30 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 31 March 2024    | Accrual                         | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 31 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 April 2024    | Repayment                       | 50.59  | 50.3      | 0.29     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -1714,7 +1719,7 @@ Feature: Capitalized Income
       | 09 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 10 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 10 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 January 2024  | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 12 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -1750,7 +1755,7 @@ Feature: Capitalized Income
       | 27 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 27 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 28 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 28 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 January 2024  | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 30 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -1795,7 +1800,7 @@ Feature: Capitalized Income
       | 09 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 10 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 10 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 January 2024  | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 12 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -1831,7 +1836,7 @@ Feature: Capitalized Income
       | 27 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 27 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 28 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 28 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 January 2024  | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 30 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -1869,7 +1874,7 @@ Feature: Capitalized Income
       | 14 February 2024 | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 February 2024 | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 15 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 February 2024 | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 February 2024 | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 17 February 2024 | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -1900,7 +1905,7 @@ Feature: Capitalized Income
       | 29 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 March 2024    | Repayment                       | 100.88 | 100.29    | 0.59     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 March 2024    | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 01 March 2024    | Capitalized Income Amortization | 17.0   | 0.0       | 17.0     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 March 2024    | Capitalized Income Amortization | 17.03   | 0.0      | 17.03    | 0.0  | 0.0       | 0.0          | false    | false    |
 
   @TestRailId:C3675
   Scenario: Verify capitalized income: repayment schedule - UC3: loan - charge-off
@@ -1969,7 +1974,7 @@ Feature: Capitalized Income
       | 09 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 10 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 10 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 January 2024  | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 12 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -2005,7 +2010,7 @@ Feature: Capitalized Income
       | 27 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 27 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 28 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 28 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 January 2024  | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 30 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -2050,7 +2055,7 @@ Feature: Capitalized Income
       | 09 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 10 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 10 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 January 2024  | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 12 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -2086,7 +2091,7 @@ Feature: Capitalized Income
       | 27 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 27 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 28 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 28 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 January 2024  | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 30 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -2124,7 +2129,7 @@ Feature: Capitalized Income
       | 14 February 2024 | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 February 2024 | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 15 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 February 2024 | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 February 2024 | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 17 February 2024 | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -2153,9 +2158,10 @@ Feature: Capitalized Income
       | 28 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 February 2024 | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 March 2024    | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 March 2024    | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 March 2024    | Charge-off                      | 101.17 | 100.29    | 0.88     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 01 March 2024    | Capitalized Income Amortization | 17.0   | 0.0       | 17.0     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 01 March 2024    | Capitalized Income Amortization | 16.48  | 0.0       | 16.48    | 0.0  | 0.0       | 0.0          | false    | false    |
 
   @TestRailId:C3665
   Scenario: Verify Capitalized Income Adjustment with partial amortization and allocation strategy - Credit Adj < Bal - UC4
@@ -2201,7 +2207,7 @@ Feature: Capitalized Income
       | 01 January 2024  | Disbursement                    | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
       | 01 January 2024  | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    |
       | 01 February 2024 | Accrual                         | 0.87   | 0.0       | 0.87     | 0.0  | 0.0       | 0.0          | false    |
-      | 01 February 2024 | Capitalized Income Amortization | 0.83   | 0.0       | 0.83     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Capitalized Income Amortization | 17.58  | 0.0       | 17.58    | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Repayment                       | 50.58  | 49.71     | 0.87     | 0.0  | 0.0       | 100.29       | false    |
   # Journal entry check for accrual
     Then Loan Transactions tab has a "ACCRUAL" transaction with date "01 February 2024" which has the following Journal entries:
@@ -2211,8 +2217,8 @@ Feature: Capitalized Income
     # Journal entry check for final capitalized income amortization
     Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "01 February 2024" which has the following Journal entries:
       | Type      | Account code | Account name                 | Debit  | Credit |
-      | INCOME    | 404000       | Interest Income              |        | 0.83   |
-      | LIABILITY | 145024       | Deferred Capitalized Income  | 0.83   |        |
+      | INCOME    | 404000       | Interest Income              |        | 17.58  |
+      | LIABILITY | 145024       | Deferred Capitalized Income  | 17.58  |        |
     When Admin sets the business date to "01 March 2024"
     And Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 March 2024" with 50.58 EUR transaction amount and system-generated Idempotency key
     Then Loan Transactions tab has the following data:
@@ -2220,7 +2226,7 @@ Feature: Capitalized Income
       | 01 January 2024  | Disbursement                    | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
       | 01 January 2024  | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    |
       | 01 February 2024 | Accrual                         | 0.87   | 0.0       | 0.87     | 0.0  | 0.0       | 0.0          | false    |
-      | 01 February 2024 | Capitalized Income Amortization | 0.83   | 0.0       | 0.83     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Capitalized Income Amortization | 17.58  | 0.0       | 17.58    | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Repayment                       | 50.58  | 49.71     | 0.87     | 0.0  | 0.0       | 100.29       | false    |
       | 01 March 2024    | Repayment                       | 50.58  | 49.99     | 0.59     | 0.0  | 0.0       | 50.3         | false    |
   # Journal entry check for March repayment
@@ -2240,7 +2246,7 @@ Feature: Capitalized Income
       | 01 January 2024  | Disbursement                    | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
       | 01 January 2024  | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    |
       | 01 February 2024 | Accrual                         | 0.87   | 0.0       | 0.87     | 0.0  | 0.0       | 0.0          | false    |
-      | 01 February 2024 | Capitalized Income Amortization | 0.83   | 0.0       | 0.83     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Capitalized Income Amortization | 17.58  | 0.0       | 17.58    | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Repayment                       | 50.58  | 49.71     | 0.87     | 0.0  | 0.0       | 100.29       | false    |
       | 01 March 2024    | Repayment                       | 50.58  | 49.99     | 0.59     | 0.0  | 0.0       | 50.3         | false    |
       | 01 March 2024    | Capitalized Income Adjustment   | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 40.3         | false    |
@@ -2252,12 +2258,12 @@ Feature: Capitalized Income
       | 01 January 2024  | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    |
       | 01 February 2024 | Repayment                       | 50.58  | 49.71     | 0.87     | 0.0  | 0.0       | 100.29       | false    |
       | 01 February 2024 | Accrual                         | 0.87   | 0.0       | 0.87     | 0.0  | 0.0       | 0.0          | false    |
-      | 01 February 2024 | Capitalized Income Amortization | 0.83   | 0.0       | 0.83     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Capitalized Income Amortization | 17.58  | 0.0       | 17.58    | 0.0  | 0.0       | 0.0          | false    |
       | 01 February 2024 | Repayment                       | 50.58  | 49.71     | 0.87     | 0.0  | 0.0       | 100.29       | false    |
       | 01 March 2024    | Capitalized Income Adjustment   | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 40.3         | false    |
       | 01 April 2024    | Repayment                       | 40.54  | 40.3      | 0.24     | 0.0  | 0.0       | 0.0          | false    |
       | 01 April 2024    | Accrual                         | 0.83   | 0.0       | 0.83     | 0.0  | 0.0       | 0.0          | false    |
-      | 01 April 2024    | Capitalized Income Amortization | 39.17  | 0.0       | 39.17    | 0.0  | 0.0       | 0.0          | false    |
+      | 01 April 2024    | Capitalized Income Amortization | 22.42  | 0.0       | 22.42    | 0.0  | 0.0       | 0.0          | false    |
   # Journal entry check for final repayment
     Then Loan Transactions tab has a "REPAYMENT" transaction with date "01 April 2024" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit | Credit |
@@ -2272,8 +2278,8 @@ Feature: Capitalized Income
   # Journal entry check for final capitalized income amortization
     Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "01 April 2024" which has the following Journal entries:
       | Type      | Account code | Account name                | Debit | Credit |
-      | INCOME    | 404000       | Interest Income             |       | 39.17  |
-      | LIABILITY | 145024       | Deferred Capitalized Income | 39.17 |        |
+      | INCOME    | 404000       | Interest Income             |       | 22.42  |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 22.42 |        |
   # Journal entry check for final capitalized income adjustment
     Then Loan Transactions tab has a "CAPITALIZED_INCOME_ADJUSTMENT" transaction with date "01 March 2024" which has the following Journal entries:
       | Type      | Account code | Account name                 | Debit  | Credit |
@@ -2325,7 +2331,7 @@ Feature: Capitalized Income
       | 01 January 2024  | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    |
       | 01 February 2024 | Repayment                       | 50.58  | 49.71     | 0.87     | 0.0  | 0.0       | 100.29       | false    |
       | 01 February 2024 | Accrual                         | 0.87   | 0.0       | 0.87     | 0.0  | 0.0       | 0.0          | false    |
-      | 01 February 2024 | Capitalized Income Amortization | 0.83   | 0.0       | 0.83     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Capitalized Income Amortization | 17.58  | 0.0       | 17.58    | 0.0  | 0.0       | 0.0          | false    |
   # Journal entry check for February accrual
     Then Loan Transactions tab has a "ACCRUAL" transaction with date "01 February 2024" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
@@ -2334,8 +2340,8 @@ Feature: Capitalized Income
   # Journal entry check for February capitalized income amortization
     Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "01 February 2024" which has the following Journal entries:
       | Type      | Account code | Account name                 | Debit | Credit |
-      | INCOME    | 404000       | Interest Income              |       | 0.83   |
-      | LIABILITY | 145024       | Deferred Capitalized Income  | 0.83  |        |
+      | INCOME    | 404000       | Interest Income              |       | 17.58  |
+      | LIABILITY | 145024       | Deferred Capitalized Income  | 17.58 |        |
     When Admin sets the business date to "01 March 2024"
     When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 March 2024" with 50.58 EUR transaction amount and system-generated Idempotency key
     Then Loan Transactions tab has the following data:
@@ -2344,7 +2350,7 @@ Feature: Capitalized Income
       | 01 January 2024  | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    |
       | 01 February 2024 | Repayment                       | 50.58  | 49.71     | 0.87     | 0.0  | 0.0       | 100.29       | false    |
       | 01 February 2024 | Accrual                         | 0.87   | 0.0       | 0.87     | 0.0  | 0.0       | 0.0          | false    |
-      | 01 February 2024 | Capitalized Income Amortization | 0.83   | 0.0       | 0.83     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Capitalized Income Amortization | 17.58  | 0.0       | 17.58    | 0.0  | 0.0       | 0.0          | false    |
       | 01 March 2024    | Repayment                       | 50.58  | 49.99     | 0.59     | 0.0  | 0.0       | 50.3         | false    |
   # Journal entry check for March repayment
     Then Loan Transactions tab has a "REPAYMENT" transaction with date "01 March 2024" which has the following Journal entries:
@@ -2364,7 +2370,7 @@ Feature: Capitalized Income
       | 01 January 2024  | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    |
       | 01 February 2024 | Repayment                       | 50.58  | 49.71     | 0.87     | 0.0  | 0.0       | 100.29       | false    |
       | 01 February 2024 | Accrual                         | 0.87   | 0.0       | 0.87     | 0.0  | 0.0       | 0.0          | false    |
-      | 01 February 2024 | Capitalized Income Amortization | 0.83   | 0.0       | 0.83     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Capitalized Income Amortization | 17.58  | 0.0       | 17.58    | 0.0  | 0.0       | 0.0          | false    |
       | 01 March 2024    | Repayment                       | 50.58  | 49.99     | 0.59     | 0.0  | 0.0       | 50.3         | false    |
       | 01 March 2024    | Capitalized Income Adjustment   | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 40.3         | false    |
     When Admin sets the business date to "15 March 2024"
@@ -2380,7 +2386,7 @@ Feature: Capitalized Income
       | 01 January 2024  | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    |
       | 01 February 2024 | Repayment                       | 50.58  | 49.71     | 0.87     | 0.0  | 0.0       | 100.29       | false    |
       | 01 February 2024 | Accrual                         | 0.87   | 0.0       | 0.87     | 0.0  | 0.0       | 0.0          | false    |
-      | 01 February 2024 | Capitalized Income Amortization | 0.83   | 0.0       | 0.83     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Capitalized Income Amortization | 17.58  | 0.0       | 17.58    | 0.0  | 0.0       | 0.0          | false    |
       | 01 March 2024    | Repayment                       | 50.58  | 49.99     | 0.59     | 0.0  | 0.0       | 50.3         | false    |
       | 01 March 2024    | Capitalized Income Adjustment   | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 40.3         | false    |
       | 15 March 2024    | Capitalized Income Adjustment   | 5.0    | 5.0       | 0.0      | 0.0  | 0.0       | 35.3         | false    |
@@ -2392,13 +2398,13 @@ Feature: Capitalized Income
       | 01 January 2024  | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    |
       | 01 February 2024 | Repayment                       | 50.58  | 49.71     | 0.87     | 0.0  | 0.0       | 100.29       | false    |
       | 01 February 2024 | Accrual                         | 0.87   | 0.0       | 0.87     | 0.0  | 0.0       | 0.0          | false    |
-      | 01 February 2024 | Capitalized Income Amortization | 0.83   | 0.0       | 0.83     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Capitalized Income Amortization | 17.58  | 0.0       | 17.58    | 0.0  | 0.0       | 0.0          | false    |
       | 01 March 2024    | Repayment                       | 50.58  | 49.99     | 0.59     | 0.0  | 0.0       | 50.3         | false    |
       | 01 March 2024    | Capitalized Income Adjustment   | 10.0   | 10.0      | 0.0      | 0.0  | 0.0       | 40.3         | false    |
       | 15 March 2024    | Capitalized Income Adjustment   | 5.0    | 5.0       | 0.0      | 0.0  | 0.0       | 35.3         | false    |
       | 01 April 2024    | Repayment                       | 35.52  | 35.3      | 0.22     | 0.0  | 0.0       | 0.0          | false    |
       | 01 April 2024    | Accrual                         | 0.81   | 0.0       | 0.81     | 0.0  | 0.0       | 0.0          | false    |
-      | 01 April 2024    | Capitalized Income Amortization | 34.17  | 0.0       | 34.17    | 0.0  | 0.0       | 0.0          | false    |
+      | 01 April 2024    | Capitalized Income Amortization | 17.42  | 0.0       | 17.42    | 0.0  | 0.0       | 0.0          | false    |
   # Journal entry check for final April repayment
     Then Loan Transactions tab has a "REPAYMENT" transaction with date "01 April 2024" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit | Credit |
@@ -2413,8 +2419,8 @@ Feature: Capitalized Income
   # Journal entry check for final April capitalized income amortization
     Then Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "01 April 2024" which has the following Journal entries:
       | Type      | Account code | Account name                 | Debit | Credit |
-      | INCOME    | 404000       | Interest Income              |       | 34.17  |
-      | LIABILITY | 145024       | Deferred Capitalized Income  | 34.17 |        |
+      | INCOME    | 404000       | Interest Income              |       | 17.42  |
+      | LIABILITY | 145024       | Deferred Capitalized Income  | 17.42 |        |
   # Journal entry checks for Capitalized Income Adjustments - INTACT
     Then Loan Transactions tab has a "CAPITALIZED_INCOME_ADJUSTMENT" transaction with date "01 March 2024" which has the following Journal entries:
       | Type      | Account code | Account name                 | Debit  | Credit |
@@ -2464,7 +2470,7 @@ Feature: Capitalized Income
       | 09 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 10 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 10 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 January 2024  | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 12 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -2500,7 +2506,7 @@ Feature: Capitalized Income
       | 27 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 27 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 28 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 28 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 January 2024  | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 30 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -2536,7 +2542,7 @@ Feature: Capitalized Income
       | 14 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 15 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 February 2024 | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 17 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -2570,8 +2576,7 @@ Feature: Capitalized Income
       | Type      | Account code | Account name                | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable            |       | 49.71  |
       | ASSET     | 112603       | Interest/Fee Receivable     |       | 0.29   |
-      | INCOME    | 404000       | Interest Income             | 33.0  |        |
-      | LIABILITY | 145024       | Deferred Capitalized Income | 17.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 50.0  |        |
     When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 February 2024" with 33.72 EUR transaction amount and system-generated Idempotency key
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
@@ -2595,7 +2600,7 @@ Feature: Capitalized Income
       | 09 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 10 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 10 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 January 2024  | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 12 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -2631,7 +2636,7 @@ Feature: Capitalized Income
       | 27 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 27 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 28 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 28 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 January 2024  | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 30 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -2668,7 +2673,7 @@ Feature: Capitalized Income
       | 14 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 15 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 February 2024 | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 17 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -2697,13 +2702,12 @@ Feature: Capitalized Income
       | 28 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 01 March 2024    | Capitalized Income Adjustment   | 50.0   | 49.13     | 0.87    | 0.0  | 0.0        | 67.15        | false    | true     |
+      | 01 March 2024    | Capitalized Income Adjustment   | 50.0   | 49.13     | 0.87     | 0.0  | 0.0        | 67.15        | false    | true     |
     Then Loan Transactions tab has a "CAPITALIZED_INCOME_ADJUSTMENT" transaction with date "01 March 2024" which has the following Journal entries:
       | Type      | Account code | Account name                | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable            |       | 49.13  |
       | ASSET     | 112603       | Interest/Fee Receivable     |       | 0.87   |
-      | INCOME    | 404000       | Interest Income             | 33.0  |        |
-      | LIABILITY | 145024       | Deferred Capitalized Income | 17.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 50.0  |        |
 
   @TestRailId:C3703
   Scenario: Verify Capitalized Income adjustment reverse replay with backdated charge
@@ -2747,7 +2751,7 @@ Feature: Capitalized Income
       | 11 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Capitalized Income Amortization | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 12 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 12 January 2024  | Capitalized Income Amortization | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 12 January 2024  | Capitalized Income Amortization | 0.57   | 0.0       | 0.57     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 13 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 13 January 2024  | Capitalized Income Amortization | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -2793,7 +2797,7 @@ Feature: Capitalized Income
       | 03 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 03 February 2024 | Capitalized Income Amortization | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 04 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 04 February 2024 | Capitalized Income Amortization | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 February 2024 | Capitalized Income Amortization | 0.57   | 0.0       | 0.57     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 05 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 05 February 2024 | Capitalized Income Amortization | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 06 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -2837,7 +2841,7 @@ Feature: Capitalized Income
       | 25 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 25 February 2024 | Capitalized Income Amortization | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 26 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 26 February 2024 | Capitalized Income Amortization | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 26 February 2024 | Capitalized Income Amortization | 0.57   | 0.0       | 0.57     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 27 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 27 February 2024 | Capitalized Income Amortization | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 28 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -2849,8 +2853,7 @@ Feature: Capitalized Income
       | Type      | Account code | Account name                | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable            |       | 50.12  |
       | ASSET     | 112603       | Interest/Fee Receivable     |       | 0.88   |
-      | INCOME    | 404000       | Interest Income             | 33.6  |        |
-      | LIABILITY | 145024       | Deferred Capitalized Income | 17.4  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 51.0  |        |
     When Admin adds "LOAN_SNOOZE_FEE" due date charge with "01 February 2024" due date and 10 EUR transaction amount
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
@@ -2878,7 +2881,7 @@ Feature: Capitalized Income
       | 11 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Capitalized Income Amortization | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 12 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 12 January 2024  | Capitalized Income Amortization | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 12 January 2024  | Capitalized Income Amortization | 0.57   | 0.0       | 0.57     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 13 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 13 January 2024  | Capitalized Income Amortization | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -2924,7 +2927,7 @@ Feature: Capitalized Income
       | 03 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 03 February 2024 | Capitalized Income Amortization | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 04 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 04 February 2024 | Capitalized Income Amortization | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 04 February 2024 | Capitalized Income Amortization | 0.57   | 0.0       | 0.57     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 05 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 05 February 2024 | Capitalized Income Amortization | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 06 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -2968,7 +2971,7 @@ Feature: Capitalized Income
       | 25 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 25 February 2024 | Capitalized Income Amortization | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 26 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 26 February 2024 | Capitalized Income Amortization | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 26 February 2024 | Capitalized Income Amortization | 0.57   | 0.0       | 0.57     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 27 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 27 February 2024 | Capitalized Income Amortization | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 28 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -2980,8 +2983,7 @@ Feature: Capitalized Income
       | Type      | Account code | Account name                | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable            |       | 50.04  |
       | ASSET     | 112603       | Interest/Fee Receivable     |       | 0.96   |
-      | INCOME    | 404000       | Interest Income             | 33.6  |        |
-      | LIABILITY | 145024       | Deferred Capitalized Income | 17.4  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 51.0  |        |
 
   @TestRailId:C3712
   Scenario: Verify Capitalized Income Adjustment validation - Total adjustment amount cannot exceed original transaction amount
@@ -3060,7 +3062,7 @@ Feature: Capitalized Income
       | 01 January 2024  | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    |
       | 01 February 2024 | Repayment                       | 50.58  | 49.71     | 0.87     | 0.0  | 0.0       | 100.29       | false    |
       | 01 February 2024 | Accrual                         | 0.87   | 0.0       | 0.87     | 0.0  | 0.0       | 0.0          | false    |
-      | 01 February 2024 | Capitalized Income Amortization | 0.83   | 0.0       | 0.83     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Capitalized Income Amortization | 17.58  | 0.0       | 17.58    | 0.0  | 0.0       | 0.0          | false    |
     When Admin sets the business date to "01 March 2024"
     When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 March 2024" with 50.89 EUR transaction amount and system-generated Idempotency key
     When Admin sets the business date to "02 March 2024"
@@ -3081,7 +3083,7 @@ Feature: Capitalized Income
       | 01 January 2024  | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    |
       | 01 February 2024 | Repayment                       | 50.58  | 49.71     | 0.87     | 0.0  | 0.0       | 100.29       | false    |
       | 01 February 2024 | Accrual                         | 0.87   | 0.0       | 0.87     | 0.0  | 0.0       | 0.0          | false    |
-      | 01 February 2024 | Capitalized Income Amortization | 0.83   | 0.0       | 0.83     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 February 2024 | Capitalized Income Amortization | 17.58  | 0.0       | 17.58    | 0.0  | 0.0       | 0.0          | false    |
       | 01 March 2024    | Repayment                       | 50.89  | 50.3      | 0.59     | 0.0  | 0.0       | 49.99        | false    |
       | 02 March 2024    | Capitalized Income Adjustment   | 50.0   | 49.99     | 0.01     | 0.0  | 0.0       | 0.0          | false    |
 
@@ -3212,7 +3214,7 @@ Feature: Capitalized Income
       | 09 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 10 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 10 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 January 2024  | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 12 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -3248,7 +3250,7 @@ Feature: Capitalized Income
       | 27 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 27 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 28 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 28 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 January 2024  | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 30 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -3284,7 +3286,7 @@ Feature: Capitalized Income
       | 14 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 15 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 February 2024 | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 17 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -3317,8 +3319,7 @@ Feature: Capitalized Income
     Then Loan Transactions tab has a "CAPITALIZED_INCOME_ADJUSTMENT" transaction with date "01 March 2024" which has the following Journal entries:
       | Type      | Account code | Account name                | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable            |       | 40.0   |
-      | INCOME    | 404000       | Interest Income             | 23.0  |        |
-      | LIABILITY | 145024       | Deferred Capitalized Income | 17.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 40.0  |        |
     When Admin sets the business date to "02 March 2024"
     And Admin runs inline COB job for Loan
     And Customer undo "1"th capitalized income adjustment on "02 March 2024"
@@ -3346,7 +3347,7 @@ Feature: Capitalized Income
       | 09 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 10 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 10 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 January 2024  | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 12 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -3382,7 +3383,7 @@ Feature: Capitalized Income
       | 27 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 27 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 28 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 28 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 January 2024  | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 30 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -3418,7 +3419,7 @@ Feature: Capitalized Income
       | 14 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 14 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 15 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 15 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 February 2024 | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 17 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -3448,17 +3449,16 @@ Feature: Capitalized Income
       | 29 February 2024 | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 February 2024 | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 March 2024    | Capitalized Income Adjustment   | 40.0   | 40.0      | 0.0      | 0.0  | 0.0       | 110.0        | true     | false    |
+      | 01 March 2024    | Capitalized Income Amortization Adjustment   | 22.97   | 0.0      | 22.97    | 0.0  | 0.0       | 0.0          | false     | false    |
       | 01 March 2024    | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 02 March 2024    | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 02 March 2024    | Capitalized Income Amortization | 1.33   | 0.0       | 1.33     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 02 March 2024    | Capitalized Income Amortization | 24.07  | 0.0       | 24.07    | 0.0  | 0.0       | 0.0          | false    | false    |
     Then Loan Transactions tab has a "CAPITALIZED_INCOME_ADJUSTMENT" transaction with date "01 March 2024" which has the following Journal entries:
       | Type      | Account code | Account name                | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable            |       | 40.0   |
-      | INCOME    | 404000       | Interest Income             | 23.0  |        |
-      | LIABILITY | 145024       | Deferred Capitalized Income | 17.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 40.0  |        |
       | ASSET     | 112601       | Loans Receivable            | 40.0  |        |
-      | INCOME    | 404000       | Interest Income             |       | 23.0   |
-      | LIABILITY | 145024       | Deferred Capitalized Income |       | 17.0   |
+      | LIABILITY | 145024       | Deferred Capitalized Income |       | 40.0   |
 
   @TestRailId:C3705
   Scenario: Verify Capitalized Income adjustment reverse - UC2
@@ -3534,7 +3534,7 @@ Feature: Capitalized Income
       | 10 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 10 January 2024  | Capitalized Income Amortization | 0.06   | 0.0       | 0.06     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 11 January 2024  | Capitalized Income Amortization | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 11 January 2024  | Capitalized Income Amortization | 1.03   | 0.0       | 1.03     | 0.0  | 0.0       | 0.0          | false    | false    |
     Then Loan Transactions tab has a "CAPITALIZED_INCOME_ADJUSTMENT" transaction with date "10 January 2024" which has the following Journal entries:
       | Type      | Account code | Account name                | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable            |       | 40.0   |
@@ -3578,17 +3578,17 @@ Feature: Capitalized Income
       | 07 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 07 January 2024  | Capitalized Income Amortization | 0.66   | 0.0       | 0.66     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 08 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 08 January 2024  | Capitalized Income Amortization | 0.66   | 0.0       | 0.66     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 January 2024  | Capitalized Income Amortization | 0.65   | 0.0       | 0.65     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 January 2024  | Capitalized Income Amortization | 0.66   | 0.0       | 0.66     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 10 January 2024  | Capitalized Income Adjustment   | 55.0   | 54.75     | 0.25     | 0.0  | 0.0       | 95.25        | false    | false    |
       | 10 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 January 2024  | Capitalized Income Amortization Adjustment | 0.93   | 0.0       | 0.93     | 0.0  | 0.0       | 0.0          | false    | false    |
     Then Loan Transactions tab has a "CAPITALIZED_INCOME_ADJUSTMENT" transaction with date "10 January 2024" which has the following Journal entries:
       | Type      | Account code | Account name                | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable            |       | 54.75  |
       | ASSET     | 112603       | Interest/Fee Receivable     |       | 0.25   |
-      | INCOME    | 404000       | Interest Income             | 0.94  |        |
-      | LIABILITY | 145024       | Deferred Capitalized Income | 54.06 |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 55.0  |        |
     Then Customer is forbidden to undo "1"th "Capitalized Income" transaction made on "01 January 2024" due to adjustment exists
     And Customer undo "1"th capitalized income adjustment on "11 January 2024"
     When Admin sets the business date to "12 January 2024"
@@ -3611,23 +3611,22 @@ Feature: Capitalized Income
       | 07 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 07 January 2024  | Capitalized Income Amortization | 0.66   | 0.0       | 0.66     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 08 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 08 January 2024  | Capitalized Income Amortization | 0.66   | 0.0       | 0.66     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 08 January 2024  | Capitalized Income Amortization | 0.65   | 0.0       | 0.65     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 January 2024  | Capitalized Income Amortization | 0.66   | 0.0       | 0.66     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 10 January 2024  | Capitalized Income Adjustment   | 55.0   | 54.75     | 0.25     | 0.0  | 0.0       | 95.25        | true    | false    |
       | 10 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 January 2024  | Capitalized Income Amortization Adjustment | 0.93   | 0.0       | 0.93     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 11 January 2024  | Capitalized Income Amortization | 0.68   | 0.0       | 0.68     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 11 January 2024  | Capitalized Income Amortization | 2.25   | 0.0       | 2.25     | 0.0  | 0.0       | 0.0          | false    | false    |
     Then Loan Transactions tab has a "CAPITALIZED_INCOME_ADJUSTMENT" transaction with date "10 January 2024" which has the following Journal entries:
       | Type      | Account code | Account name                | Debit | Credit |
       | ASSET     | 112601       | Loans Receivable            |       | 54.75  |
       | ASSET     | 112603       | Interest/Fee Receivable     |       |  0.25  |
-      | INCOME    | 404000       | Interest Income             |  0.94 |        |
-      | LIABILITY | 145024       | Deferred Capitalized Income | 54.06 |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 55.0  |        |
       | ASSET     | 112601       | Loans Receivable            | 54.75 |        |
       | ASSET     | 112603       | Interest/Fee Receivable     |  0.25 |        |
-      | INCOME    | 404000       | Interest Income             |       |  0.94  |
-      | LIABILITY | 145024       | Deferred Capitalized Income |       | 54.06  |
+      | LIABILITY | 145024       | Deferred Capitalized Income |       | 55.0   |
 
   @TestRailId:C3708
   Scenario: Verify capitalized income reversed after repayment - UC1
@@ -3696,7 +3695,7 @@ Feature: Capitalized Income
       | 09 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 10 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 10 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 January 2024  | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 12 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -3732,7 +3731,7 @@ Feature: Capitalized Income
       | 27 January 2024  | Accrual                         | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 27 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 28 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 28 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 January 2024  | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 30 January 2024  | Accrual                         | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -3744,9 +3743,11 @@ Feature: Capitalized Income
       | Type      | Account code | Account name                | Debit | Credit |
       | INCOME    | 404000       | Interest Income             |       | 0.55   |
       | LIABILITY | 145024       | Deferred Capitalized Income | 0.55  |        |
-    And Admin sets the business date to "15 February 2024"
+    And Admin sets the business date to "14 February 2024"
     And Admin runs inline COB job for Loan
     When Customer undo "1"th "Capitalized Income" transaction made on "01 January 2024"
+    And Admin sets the business date to "15 February 2024"
+    And Admin runs inline COB job for Loan
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type                           | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement                               | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
@@ -3769,7 +3770,7 @@ Feature: Capitalized Income
       | 09 January 2024  | Accrual                                    | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 January 2024  | Capitalized Income Amortization            | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 10 January 2024  | Accrual                                    | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 10 January 2024  | Capitalized Income Amortization            | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 January 2024  | Capitalized Income Amortization            | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Accrual                                    | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Capitalized Income Amortization            | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 12 January 2024  | Accrual                                    | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -3805,7 +3806,7 @@ Feature: Capitalized Income
       | 27 January 2024  | Accrual                                    | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 27 January 2024  | Capitalized Income Amortization            | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 28 January 2024  | Accrual                                    | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 28 January 2024  | Capitalized Income Amortization            | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 January 2024  | Capitalized Income Amortization            | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Accrual                                    | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Capitalized Income Amortization            | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 30 January 2024  | Accrual                                    | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -3839,13 +3840,12 @@ Feature: Capitalized Income
       | 12 February 2024 | Capitalized Income Amortization            | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 13 February 2024 | Accrual                                    | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 13 February 2024 | Capitalized Income Amortization            | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 14 February 2024 | Accrual                                    | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 14 February 2024 | Capitalized Income Amortization            | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 15 February 2024 | Capitalized Income Amortization Adjustment | 24.75  | 0.0       | 24.75    | 0.0  | 0.0       | 0.0          | false    | false    |
-    And Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION_ADJUSTMENT" transaction with date "15 February 2024" which has the following Journal entries:
+      | 14 February 2024 | Accrual Adjustment                         | 0.4    | 0.0       | 0.4      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 February 2024 | Capitalized Income Amortization Adjustment | 24.18  | 0.0       | 24.18    | 0.0  | 0.0       | 0.0          | false    | false    |
+    And Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION_ADJUSTMENT" transaction with date "14 February 2024" which has the following Journal entries:
       | Type      | Account code | Account name                | Debit | Credit |
-      | INCOME    | 404000       | Interest Income             | 24.75 |        |
-      | LIABILITY | 145024       | Deferred Capitalized Income |       | 24.75  |
+      | INCOME    | 404000       | Interest Income             | 24.18 |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income |       | 24.18  |
     And Admin sets the business date to "16 February 2024"
     And Admin runs inline COB job for Loan
     And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "16 February 2024" with "50" EUR transaction amount
@@ -3881,7 +3881,7 @@ Feature: Capitalized Income
       | 09 January 2024  | Accrual                                    | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 09 January 2024  | Capitalized Income Amortization            | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 10 January 2024  | Accrual                                    | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 10 January 2024  | Capitalized Income Amortization            | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 10 January 2024  | Capitalized Income Amortization            | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Accrual                                    | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 11 January 2024  | Capitalized Income Amortization            | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 12 January 2024  | Accrual                                    | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -3917,7 +3917,7 @@ Feature: Capitalized Income
       | 27 January 2024  | Accrual                                    | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 27 January 2024  | Capitalized Income Amortization            | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 28 January 2024  | Accrual                                    | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 28 January 2024  | Capitalized Income Amortization            | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 28 January 2024  | Capitalized Income Amortization            | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Accrual                                    | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 January 2024  | Capitalized Income Amortization            | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 30 January 2024  | Accrual                                    | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
@@ -3951,12 +3951,11 @@ Feature: Capitalized Income
       | 12 February 2024 | Capitalized Income Amortization            | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 13 February 2024 | Accrual                                    | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 13 February 2024 | Capitalized Income Amortization            | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 14 February 2024 | Accrual                                    | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 14 February 2024 | Capitalized Income Amortization            | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 15 February 2024 | Capitalized Income Amortization Adjustment | 24.75  | 0.0       | 24.75    | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 15 February 2024 | Accrual Adjustment                         | 0.41   | 0.0       | 0.41     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 February 2024 | Accrual Adjustment                         | 0.4    | 0.0       | 0.4      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 14 February 2024 | Capitalized Income Amortization Adjustment | 24.18  | 0.0       | 24.18    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 15 February 2024 | Accrual                                    | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 16 February 2024 | Capitalized Income                         | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
-    Then LoanCapitalizedIncomeAmortizationAdjustmentTransactionCreatedBusinessEvent is raised on "15 February 2024"
+    Then LoanCapitalizedIncomeAmortizationAdjustmentTransactionCreatedBusinessEvent is raised on "14 February 2024"
     Then Customer is forbidden to undo "1"th "Capitalized Income" transaction made on "01 January 2024" due to transaction type is non-reversal
 
   @TestRailId:C3737

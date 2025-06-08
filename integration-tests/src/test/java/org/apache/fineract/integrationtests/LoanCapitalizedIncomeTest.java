@@ -232,6 +232,7 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
     public void testLoanCapitalizedIncomeAdjustmentWithAmortizationAccounting() {
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
         final AtomicReference<Long> capitalizedIncomeIdRef = new AtomicReference<>();
+        final AtomicReference<Long> capitalizedIncomeAdjustmentTransactionIdRef = new AtomicReference<>();
 
         final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
 
@@ -290,6 +291,11 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
 
             Long capitalizedIncomeAdjustmentTransactionId = loanTransactionHelper
                     .capitalizedIncomeAdjustment(loanId, capitalizedIncomeIdRef.get(), "3 January 2024", 100.0).getResourceId();
+            capitalizedIncomeAdjustmentTransactionIdRef.set(capitalizedIncomeAdjustmentTransactionId);
+        });
+        runAt("4 January 2024", () -> {
+            Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
 
             verifyTransactions(loanId, //
                     transaction(100.0, "Disbursement", "01 January 2024"), //
@@ -297,7 +303,9 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
                     transaction(1.10, "Capitalized Income Amortization", "01 January 2024"), //
                     transaction(0.04, "Accrual", "02 January 2024"), //
                     transaction(1.10, "Capitalized Income Amortization", "02 January 2024"), //
-                    transaction(100.0, "Capitalized Income Adjustment", "03 January 2024") //
+                    transaction(100.0, "Capitalized Income Adjustment", "03 January 2024"), //
+                    transaction(0.04, "Accrual", "03 January 2024"), //
+                    transaction(2.20, "Capitalized Income Amortization Adjustment", "03 January 2024") //
             );
 
             verifyJournalEntries(loanId, //
@@ -313,8 +321,11 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
                     journalEntry(1.10, feeIncomeAccount, "CREDIT"), //
                     journalEntry(99.92, loansReceivableAccount, "CREDIT"), //
                     journalEntry(0.08, interestReceivableAccount, "CREDIT"), //
+                    journalEntry(100.0, deferredIncomeLiabilityAccount, "DEBIT"), //
+                    journalEntry(0.04, interestReceivableAccount, "DEBIT"), //
+                    journalEntry(0.04, interestIncomeAccount, "CREDIT"), //
                     journalEntry(2.20, feeIncomeAccount, "DEBIT"), //
-                    journalEntry(97.80, deferredIncomeLiabilityAccount, "DEBIT") //
+                    journalEntry(2.20, deferredIncomeLiabilityAccount, "CREDIT") //
             );
 
             // Reverse-replay
@@ -328,19 +339,16 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
             verifyTRJournalEntries(replayedCapitalizedIncomeAdjustmentOpt.get().getId(), //
                     journalEntry(99.98, loansReceivableAccount, "CREDIT"), //
                     journalEntry(0.02, interestReceivableAccount, "CREDIT"), //
-                    journalEntry(2.20, feeIncomeAccount, "DEBIT"), //
-                    journalEntry(97.80, deferredIncomeLiabilityAccount, "DEBIT") //
+                    journalEntry(100.0, deferredIncomeLiabilityAccount, "DEBIT") //
             );
 
-            verifyTRJournalEntries(capitalizedIncomeAdjustmentTransactionId, //
+            verifyTRJournalEntries(capitalizedIncomeAdjustmentTransactionIdRef.get(), //
                     journalEntry(99.92, loansReceivableAccount, "CREDIT"), //
                     journalEntry(0.08, interestReceivableAccount, "CREDIT"), //
-                    journalEntry(2.20, feeIncomeAccount, "DEBIT"), //
-                    journalEntry(97.80, deferredIncomeLiabilityAccount, "DEBIT"), //
+                    journalEntry(100.0, deferredIncomeLiabilityAccount, "DEBIT"), //
                     journalEntry(99.92, loansReceivableAccount, "DEBIT"), //
                     journalEntry(0.08, interestReceivableAccount, "DEBIT"), //
-                    journalEntry(2.20, feeIncomeAccount, "CREDIT"), //
-                    journalEntry(97.80, deferredIncomeLiabilityAccount, "CREDIT") //
+                    journalEntry(100.0, deferredIncomeLiabilityAccount, "CREDIT") //
             );
         });
     }
@@ -486,12 +494,18 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
 
             loanTransactionHelper.reverseLoanTransaction(loanId, capitalizedIncomeTransactionIdRef.get(), "3 January 2024");
 
+        });
+        runAt("4 January 2024", () -> {
+            Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
+
             verifyTransactions(loanId, //
                     transaction(100.0, "Disbursement", "01 January 2024"), //
                     transaction(50.0, "Capitalized Income", "01 January 2024"), //
                     transaction(0.55, "Capitalized Income Amortization", "01 January 2024"), //
                     transaction(0.03, "Accrual", "02 January 2024"), //
                     transaction(0.55, "Capitalized Income Amortization", "02 January 2024"), //
+                    transaction(0.01, "Accrual", "03 January 2024"), //
                     transaction(1.10, "Capitalized Income Amortization Adjustment", "03 January 2024") //
             );
 
@@ -508,6 +522,8 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
                     journalEntry(0.55, feeIncomeAccount, "CREDIT"), //
                     journalEntry(50, deferredIncomeLiabilityAccount, "DEBIT"), //
                     journalEntry(50, loansReceivableAccount, "CREDIT"), //
+                    journalEntry(0.01, interestReceivableAccount, "DEBIT"), //
+                    journalEntry(0.01, interestIncomeAccount, "CREDIT"), //
                     journalEntry(1.10, feeIncomeAccount, "DEBIT"), //
                     journalEntry(1.10, deferredIncomeLiabilityAccount, "CREDIT") //
             );

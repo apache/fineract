@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import java.time.LocalDate;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.springframework.lang.NonNull;
@@ -26,7 +27,9 @@ public interface LoanCapitalizedIncomeAmortizationProcessingService {
 
     void processCapitalizedIncomeAmortizationOnLoanClosure(@NonNull Loan loan);
 
-    void processCapitalizedIncomeAmortizationOnLoanChargeOff(@NonNull Loan loan);
+    void processCapitalizedIncomeAmortizationOnLoanChargeOff(@NonNull Loan loan, @NonNull LoanTransaction chargeOffTransaction);
 
     void processCapitalizedIncomeAmortizationOnLoanUndoChargeOff(@NonNull LoanTransaction loanTransaction);
+
+    void processCapitalizedIncomeAmortizationTillDate(@NonNull Loan loan, @NonNull LocalDate tillDate);
 }

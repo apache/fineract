@@ -21,10 +21,12 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.event.business.BusinessEventListener;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBalanceChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanCloseBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanChargeOffPostBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanChargeOffPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanUndoChargeOffBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -45,6 +47,7 @@ public class LoanCapitalizedIncomeAmortizationEventService {
         businessEventNotifierService.addPostBusinessEventListener(LoanChargeOffPostBusinessEvent.class, new LoanChargeOffEventListener());
         businessEventNotifierService.addPostBusinessEventListener(LoanUndoChargeOffBusinessEvent.class,
                 new LoanUndoChargeOffEventListener());
+        businessEventNotifierService.addPreBusinessEventListener(LoanChargeOffPreBusinessEvent.class, new LoanChargeOffPreEventListener());
     }
 
     private final class LoanCloseListener implements BusinessEventListener<LoanCloseBusinessEvent> {
@@ -83,7 +86,21 @@ public class LoanCapitalizedIncomeAmortizationEventService {
             final Loan loan = loanTransaction.getLoan();
             if (loan.getLoanProductRelatedDetail().isEnableIncomeCapitalization() && loan.isChargedOff() && loanTransaction.isChargeOff()) {
                 log.debug("Loan charge-off on capitalized income amortization for loan {}", loan.getId());
-                loanCapitalizedIncomeAmortizationProcessingService.processCapitalizedIncomeAmortizationOnLoanChargeOff(loan);
+                loanCapitalizedIncomeAmortizationProcessingService.processCapitalizedIncomeAmortizationOnLoanChargeOff(loan,
+                        loanTransaction);
+            }
+        }
+    }
+
+    private final class LoanChargeOffPreEventListener implements BusinessEventListener<LoanChargeOffPreBusinessEvent> {
+
+        @Override
+        public void onBusinessEvent(final LoanChargeOffPreBusinessEvent event) {
+            final Loan loan = event.get();
+            if (loan.getLoanProductRelatedDetail().isEnableIncomeCapitalization()) {
+                log.debug("Loan pre charge-off capitalized income amortization for loan {}", loan.getId());
+                loanCapitalizedIncomeAmortizationProcessingService.processCapitalizedIncomeAmortizationTillDate(loan,
+                        DateUtils.getBusinessLocalDate());
             }
         }
     }

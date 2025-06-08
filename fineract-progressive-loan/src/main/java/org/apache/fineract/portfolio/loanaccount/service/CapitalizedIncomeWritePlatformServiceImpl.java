@@ -142,7 +142,6 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
         // Post journal entries
         journalEntryPoster.postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
 
-        // Accounting uses the original balance, balance update HAS TO HAPPEN AFTER postJournalEntries
         LoanCapitalizedIncomeBalance capitalizedIncomeBalance = capitalizedIncomeBalanceRepository.findByLoanIdAndLoanTransactionId(loanId,
                 capitalizedIncomeTransactionId);
         capitalizedIncomeBalance

@@ -37,7 +37,6 @@ import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAdjustTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBalanceChangedBusinessEvent;
-import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanCapitalizedIncomeAmortizationAdjustmentTransactionCreatedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -156,9 +155,6 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
                 throw new InvalidLoanTransactionTypeException("transaction", "capitalizedIncome.cannot.be.reversed.when.adjusted",
                         "Capitalized income transaction cannot be reversed when non-reversed adjustment exists for it.");
             }
-            BigDecimal recognizedAmount = capitalizedIncomeBalance.getAmount().subtract(capitalizedIncomeBalance.getUnrecognizedAmount());
-            capitalizedIncomeAmortizationAdjustmentTransaction = LoanTransaction.capitalizedIncomeAmortizationAdjustment(loan,
-                    Money.of(loan.getCurrency(), recognizedAmount), DateUtils.getBusinessLocalDate(), externalIdFactory.create());
             loanCapitalizedIncomeBalanceRepository.delete(capitalizedIncomeBalance);
         }
         if (transactionToAdjust.isCapitalizedIncomeAdjustment()) {
@@ -211,15 +207,6 @@ public class LoanAdjustmentServiceImpl implements LoanAdjustmentService {
                 this.paymentDetailWritePlatformService.persistPaymentDetail(paymentDetail);
             }
             this.loanTransactionRepository.saveAndFlush(newTransactionDetail);
-        }
-
-        if (capitalizedIncomeAmortizationAdjustmentTransaction != null && capitalizedIncomeAmortizationAdjustmentTransaction.isNotZero()) {
-            LoanTransaction savedCapitalizedIncomeAmortizationAdjustmentTransaction = loanTransactionRepository
-                    .saveAndFlush(capitalizedIncomeAmortizationAdjustmentTransaction);
-            loan.addLoanTransaction(savedCapitalizedIncomeAmortizationAdjustmentTransaction);
-            businessEventNotifierService
-                    .notifyPostBusinessEvent(new LoanCapitalizedIncomeAmortizationAdjustmentTransactionCreatedBusinessEvent(
-                            capitalizedIncomeAmortizationAdjustmentTransaction));
         }
 
         loan = saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
