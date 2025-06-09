@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
@@ -165,7 +166,11 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
                     "1 January 2024", 50.0);
             capitalizedIncomeIdRef.set(capitalizedIncomeResponse.getResourceId());
 
-            loanTransactionHelper.capitalizedIncomeAdjustment(loanId, capitalizedIncomeIdRef.get(), "1 April 2024", 50.0);
+            PostLoansLoanIdTransactionsResponse capitalizedIncomeAdjustmentResponse = loanTransactionHelper
+                    .capitalizedIncomeAdjustment(loanId, capitalizedIncomeIdRef.get(), "1 April 2024", 50.0);
+            assertNotNull(capitalizedIncomeAdjustmentResponse.getLoanId());
+            assertNotNull(capitalizedIncomeAdjustmentResponse.getClientId());
+            assertNotNull(capitalizedIncomeAdjustmentResponse.getOfficeId());
 
             verifyTransactions(loanId, //
                     transaction(100.0, "Disbursement", "01 January 2024"), //
@@ -401,6 +406,9 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
             PostLoansLoanIdTransactionsResponse capitalizedIncomeResponse = loanTransactionHelper.addCapitalizedIncome(loanId,
                     "1 January 2024", 100.0);
+            assertNotNull(capitalizedIncomeResponse.getLoanId());
+            assertNotNull(capitalizedIncomeResponse.getClientId());
+            assertNotNull(capitalizedIncomeResponse.getOfficeId());
             capitalizedIncomeIdRef.set(capitalizedIncomeResponse.getResourceId());
 
             // random midday COB run

@@ -104,6 +104,9 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
         return new CommandProcessingResultBuilder() //
                 .withEntityId(capitalizedIncomeTransaction.getId()) //
                 .withEntityExternalId(capitalizedIncomeTransaction.getExternalId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withLoanId(loan.getId()) //
                 .build();
     }
 
@@ -151,9 +154,13 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
                 MathUtil.negativeToZero(capitalizedIncomeBalance.getUnrecognizedAmount().subtract(transactionAmount)));
         capitalizedIncomeBalanceRepository.save(capitalizedIncomeBalance);
 
-        return new CommandProcessingResultBuilder().withLoanId(loan.getId()).withLoanExternalId(loan.getExternalId())
-                .withEntityId(savedCapitalizedIncomeAdjustment.getId())
-                .withEntityExternalId(savedCapitalizedIncomeAdjustment.getExternalId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(savedCapitalizedIncomeAdjustment.getId()) //
+                .withEntityExternalId(savedCapitalizedIncomeAdjustment.getExternalId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withLoanId(loan.getId()) //
+                .build();
     }
 
     private void recalculateLoanTransactions(Loan loan, LocalDate transactionDate, LoanTransaction transaction) {
