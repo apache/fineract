@@ -16,14 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.collateralmanagement.data;
+package org.apache.fineract.portfolio.collateralmanagement.command;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.math.BigDecimal;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.portfolio.collateralmanagement.data.ClientCollateralManagementDeleteRequest;
 
-public record ClientCollateralRequest(BigDecimal quantity, Long collateralId, String locale) implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class ClientCollateralManagementDeleteCommand extends Command<ClientCollateralManagementDeleteRequest> {}

@@ -18,15 +18,17 @@
  */
 package org.apache.fineract.portfolio.collateralmanagement.service;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.collateralmanagement.data.ClientCollateralManagementCreateRequest;
+import org.apache.fineract.portfolio.collateralmanagement.data.ClientCollateralManagementDeleteResponse;
+import org.apache.fineract.portfolio.collateralmanagement.data.ClientCollateralManagementResponse;
+import org.apache.fineract.portfolio.collateralmanagement.data.ClientCollateralManagementUpdateRequest;
 
 public interface ClientCollateralManagementWritePlatformService {
 
-    CommandProcessingResult addClientCollateralProduct(JsonCommand command);
+    ClientCollateralManagementResponse addClientCollateralProduct(ClientCollateralManagementCreateRequest request);
 
-    CommandProcessingResult updateClientCollateralProduct(JsonCommand command);
+    ClientCollateralManagementResponse updateClientCollateralProduct(ClientCollateralManagementUpdateRequest request);
 
-    CommandProcessingResult deleteClientCollateralProduct(Long collateralId);
+    ClientCollateralManagementDeleteResponse deleteClientCollateralProduct(Long collateralId);
 
 }

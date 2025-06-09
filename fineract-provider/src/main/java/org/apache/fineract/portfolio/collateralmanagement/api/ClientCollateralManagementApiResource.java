@@ -20,15 +20,13 @@ package org.apache.fineract.portfolio.collateralmanagement.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -38,18 +36,26 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.List;
+import java.util.UUID;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.service.CommandWrapperBuilder;
-import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandPipeline;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.collateralmanagement.command.ClientCollateralManagementCreateCommand;
+import org.apache.fineract.portfolio.collateralmanagement.command.ClientCollateralManagementDeleteCommand;
+import org.apache.fineract.portfolio.collateralmanagement.command.ClientCollateralManagementUpdateCommand;
+import org.apache.fineract.portfolio.collateralmanagement.data.ClientCollateralManagementCreateRequest;
 import org.apache.fineract.portfolio.collateralmanagement.data.ClientCollateralManagementData;
-import org.apache.fineract.portfolio.collateralmanagement.data.ClientCollateralRequest;
+import org.apache.fineract.portfolio.collateralmanagement.data.ClientCollateralManagementDeleteRequest;
+import org.apache.fineract.portfolio.collateralmanagement.data.ClientCollateralManagementDeleteResponse;
+import org.apache.fineract.portfolio.collateralmanagement.data.ClientCollateralManagementResponse;
+import org.apache.fineract.portfolio.collateralmanagement.data.ClientCollateralManagementUpdateRequest;
 import org.apache.fineract.portfolio.collateralmanagement.data.LoanCollateralTemplateData;
-import org.apache.fineract.portfolio.collateralmanagement.data.UpdateClientCollateralRequest;
 import org.apache.fineract.portfolio.collateralmanagement.service.ClientCollateralManagementReadPlatformService;
 import org.springframework.stereotype.Component;
 
@@ -59,11 +65,9 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ClientCollateralManagementApiResource {
 
-    private final DefaultToApiJsonSerializer<ClientCollateralManagementData> apiJsonSerializerDataService;
-    private final DefaultToApiJsonSerializer<LoanCollateralTemplateData> apiJsonSerializerForLoanCollateralTemplateService;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final PlatformSecurityContext context;
     private final ClientCollateralManagementReadPlatformService clientCollateralManagementReadPlatformService;
+    private final CommandPipeline pipeline;
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
@@ -72,9 +76,6 @@ public class ClientCollateralManagementApiResource {
     public List<ClientCollateralManagementData> getClientCollateral(
             @PathParam("clientId") @Parameter(description = "clientId") final Long clientId, @Context final UriInfo uriInfo,
             @QueryParam("prodId") @Parameter(description = "prodId") final Long prodId) {
-
-        this.context.authenticatedUser()
-                .validateHasReadPermission(CollateralManagementJsonInputParams.CLIENT_COLLATERAL_PRODUCT_READ_PERMISSION.getValue());
 
         return this.clientCollateralManagementReadPlatformService.getClientCollaterals(clientId, prodId);
     }
@@ -87,9 +88,6 @@ public class ClientCollateralManagementApiResource {
     public ClientCollateralManagementData getClientCollateralData(
             @PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @PathParam("clientCollateralId") @Parameter(description = "clientCollateralId") final Long collateralId) {
-
-        this.context.authenticatedUser()
-                .validateHasReadPermission(CollateralManagementJsonInputParams.CLIENT_COLLATERAL_PRODUCT_READ_PERMISSION.getValue());
 
         return this.clientCollateralManagementReadPlatformService.getClientCollateralManagementData(collateralId);
     }
@@ -108,15 +106,17 @@ public class ClientCollateralManagementApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Consumes({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Add New Collateral For a Client", description = "Add New Collateral For a Client")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ClientCollateralRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientCollateralManagementApiResourceSwagger.PostClientCollateralResponse.class))) })
-    public CommandProcessingResult addCollateral(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
-            @Parameter(hidden = true) ClientCollateralRequest clientCollateralRequest) {
-        final CommandWrapper commandWrapper = new CommandWrapperBuilder().addClientCollateralProduct(clientId)
-                .withJson(apiJsonSerializerDataService.serialize(clientCollateralRequest)).build();
+    public ClientCollateralManagementResponse addCollateral(@HeaderParam("Idempotency-Key") @DefaultValue("") String idempotencyKey,
+            @PathParam("clientId") final Long clientId,
+            @Valid ClientCollateralManagementCreateRequest clientCollateralManagementCreateRequest) {
 
-        return this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
+        ClientCollateralManagementCreateCommand command = new ClientCollateralManagementCreateCommand();
+        initCommand(idempotencyKey, command);
+        clientCollateralManagementCreateRequest.setClientId(clientId);
+        command.setPayload(clientCollateralManagementCreateRequest);
+
+        Supplier<ClientCollateralManagementResponse> result = pipeline.send(command);
+        return result.get();
     }
 
     @PUT
@@ -124,17 +124,20 @@ public class ClientCollateralManagementApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Consumes({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update New Collateral of a Client", description = "Update New Collateral of a Client")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = UpdateClientCollateralRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientCollateralManagementApiResourceSwagger.PutClientCollateralResponse.class))) })
-    public CommandProcessingResult updateCollateral(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
+    public ClientCollateralManagementResponse updateCollateral(@HeaderParam("Idempotency-Key") @DefaultValue("") String idempotencyKey,
+            @PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @PathParam("collateralId") @Parameter(description = "collateralId") final Long collateralId,
-            @Parameter(hidden = true) UpdateClientCollateralRequest updateClientCollateralRequest) {
+            @Parameter(hidden = true) @Valid ClientCollateralManagementUpdateRequest request) {
 
-        final CommandWrapper commandWrapper = new CommandWrapperBuilder().updateClientCollateralProduct(clientId, collateralId)
-                .withJson(apiJsonSerializerDataService.serialize(updateClientCollateralRequest)).build();
+        ClientCollateralManagementUpdateCommand command = new ClientCollateralManagementUpdateCommand();
+        initCommand(idempotencyKey, command);
 
-        return this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
+        request.setClientId(clientId);
+        request.setCollateralId(collateralId);
+        command.setPayload(request);
+
+        Supplier<ClientCollateralManagementResponse> result = pipeline.send(command);
+        return result.get();
     }
 
     @DELETE
@@ -142,12 +145,27 @@ public class ClientCollateralManagementApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Consumes({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete Client Collateral", description = "Delete Client Collateral")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientCollateralManagementApiResourceSwagger.DeleteClientCollateralResponse.class))) })
-    public CommandProcessingResult deleteCollateral(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
-            @PathParam("collateralId") @Parameter(description = "collateralId") final Long collateralId) {
-        final CommandWrapper commandWrapper = new CommandWrapperBuilder().deleteClientCollateralProduct(collateralId, clientId).build();
-        return this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
+    public ClientCollateralManagementDeleteResponse deleteCollateral(
+            @HeaderParam("Idempotency-Key") @DefaultValue("") String idempotencyKey, @PathParam("clientId") final Long clientId,
+            @PathParam("collateralId") final Long collateralId) {
+
+        ClientCollateralManagementDeleteCommand command = new ClientCollateralManagementDeleteCommand();
+        initCommand(idempotencyKey, command);
+
+        ClientCollateralManagementDeleteRequest request = new ClientCollateralManagementDeleteRequest();
+        request.setClientId(clientId);
+        request.setCollateralId(collateralId);
+        command.setPayload(request);
+
+        Supplier<ClientCollateralManagementDeleteResponse> result = pipeline.send(command);
+        return result.get();
     }
 
+    private void initCommand(String idempotencyKey, Command command) {
+        String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
+        command.setId(UUID.randomUUID());
+        command.setCreatedAt(OffsetDateTime.now(ZoneId.of("UTC")));
+        command.setTenantId(tenantIdentifier);
+        command.setIdempotencyKey(idempotencyKey);
+    }
 }

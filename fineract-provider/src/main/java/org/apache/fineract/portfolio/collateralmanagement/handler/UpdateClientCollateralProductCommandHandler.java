@@ -19,29 +19,26 @@
 package org.apache.fineract.portfolio.collateralmanagement.handler;
 
 import jakarta.transaction.Transactional;
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.portfolio.collateralmanagement.data.ClientCollateralManagementResponse;
+import org.apache.fineract.portfolio.collateralmanagement.data.ClientCollateralManagementUpdateRequest;
 import org.apache.fineract.portfolio.collateralmanagement.service.ClientCollateralManagementWritePlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
-@CommandType(entity = "CLIENT_COLLATERAL_PRODUCT", action = "UPDATE")
-public class UpdateClientCollateralProductCommandHandler implements NewCommandSourceHandler {
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class UpdateClientCollateralProductCommandHandler
+        implements CommandHandler<ClientCollateralManagementUpdateRequest, ClientCollateralManagementResponse> {
 
     private final ClientCollateralManagementWritePlatformService clientCollateralManagementWritePlatformService;
 
-    @Autowired
-    public UpdateClientCollateralProductCommandHandler(
-            final ClientCollateralManagementWritePlatformService clientCollateralManagementWritePlatformService) {
-        this.clientCollateralManagementWritePlatformService = clientCollateralManagementWritePlatformService;
-    }
-
     @Transactional
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand jsonCommand) {
-        return this.clientCollateralManagementWritePlatformService.updateClientCollateralProduct(jsonCommand);
+    public ClientCollateralManagementResponse handle(Command<ClientCollateralManagementUpdateRequest> command) {
+        return this.clientCollateralManagementWritePlatformService.updateClientCollateralProduct(command.getPayload());
     }
 }

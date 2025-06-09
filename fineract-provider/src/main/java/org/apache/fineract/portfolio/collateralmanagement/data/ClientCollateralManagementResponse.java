@@ -16,27 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.collateralmanagement.api;
+package org.apache.fineract.portfolio.collateralmanagement.data;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.math.BigDecimal;
+import java.io.Serializable;
+import java.util.Map;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-final class ClientCollateralManagementApiResourceSwagger {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class ClientCollateralManagementResponse implements Serializable {
 
-    private ClientCollateralManagementApiResourceSwagger() {}
+    private static final long serialVersionUID = 1L;
 
-    @Schema(description = "PostClientCollateralRequest")
-    public static final class PostClientCollateralRequest {
+    @Schema(example = "12")
+    public Long resourceId;
 
-        private PostClientCollateralRequest() {}
+    @Schema(example = "1")
+    public Long clientId;
 
-        @Schema(example = "10")
-        public BigDecimal quantity;
-        @Schema(example = "1")
-        public Long collateralId;
-        @Schema(example = "en")
-        public String locale;
-
-    }
-
+    private Map<String, Object> changes;
 }

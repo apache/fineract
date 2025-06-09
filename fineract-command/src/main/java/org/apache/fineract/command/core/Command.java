@@ -41,4 +41,6 @@ public class Command<T> implements Serializable {
     private String username;
 
     private T payload;
+
+    private String idempotencyKey;
 }

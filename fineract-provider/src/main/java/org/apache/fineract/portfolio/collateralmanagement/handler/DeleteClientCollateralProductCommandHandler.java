@@ -19,17 +19,19 @@
 package org.apache.fineract.portfolio.collateralmanagement.handler;
 
 import jakarta.transaction.Transactional;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
 import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.collateralmanagement.data.ClientCollateralManagementDeleteRequest;
+import org.apache.fineract.portfolio.collateralmanagement.data.ClientCollateralManagementDeleteResponse;
 import org.apache.fineract.portfolio.collateralmanagement.service.ClientCollateralManagementWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 @CommandType(entity = "CLIENT_COLLATERAL_PRODUCT", action = "DELETE")
-public class DeleteClientCollateralProductCommandHandler implements NewCommandSourceHandler {
+public class DeleteClientCollateralProductCommandHandler
+        implements CommandHandler<ClientCollateralManagementDeleteRequest, ClientCollateralManagementDeleteResponse> {
 
     private final ClientCollateralManagementWritePlatformService clientCollateralManagementWritePlatformService;
 
@@ -41,7 +43,7 @@ public class DeleteClientCollateralProductCommandHandler implements NewCommandSo
 
     @Transactional
     @Override
-    public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.clientCollateralManagementWritePlatformService.deleteClientCollateralProduct(command.entityId());
+    public ClientCollateralManagementDeleteResponse handle(Command<ClientCollateralManagementDeleteRequest> command) {
+        return this.clientCollateralManagementWritePlatformService.deleteClientCollateralProduct(command.getPayload().getCollateralId());
     }
 }

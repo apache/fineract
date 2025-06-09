@@ -142,6 +142,13 @@ public class SecurityConfig {
                             .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/authentication")).permitAll() //
                             .requestMatchers(antMatcher(HttpMethod.PUT, "/api/*/instance-mode")).permitAll() //
                             .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated() //
+
+                            // ClientCollateralManagementApiResource
+                            .requestMatchers(antMatcher(HttpMethod.GET, "/api/*/clients/{clientId}/collaterals"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "READ_CLIENT_COLLATERAL_PRODUCT") //
+                            .requestMatchers(antMatcher(HttpMethod.GET, "/api/*/clients/{clientId}/collaterals/*"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "READ_CLIENT_COLLATERAL_PRODUCT")
+
                             .requestMatchers(antMatcher("/api/*/twofactor")).fullyAuthenticated() //
                             .requestMatchers(antMatcher("/api/**"))
                             .access(allOf(authorizationManagers.toArray(new AuthorizationManager[0]))); //

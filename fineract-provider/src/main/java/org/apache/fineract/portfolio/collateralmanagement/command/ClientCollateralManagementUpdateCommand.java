@@ -16,27 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.collateralmanagement.api;
+package org.apache.fineract.portfolio.collateralmanagement.command;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import java.math.BigDecimal;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.portfolio.collateralmanagement.data.ClientCollateralManagementUpdateRequest;
 
-final class ClientCollateralManagementApiResourceSwagger {
-
-    private ClientCollateralManagementApiResourceSwagger() {}
-
-    @Schema(description = "PostClientCollateralRequest")
-    public static final class PostClientCollateralRequest {
-
-        private PostClientCollateralRequest() {}
-
-        @Schema(example = "10")
-        public BigDecimal quantity;
-        @Schema(example = "1")
-        public Long collateralId;
-        @Schema(example = "en")
-        public String locale;
-
-    }
-
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class ClientCollateralManagementUpdateCommand extends Command<ClientCollateralManagementUpdateRequest> {}

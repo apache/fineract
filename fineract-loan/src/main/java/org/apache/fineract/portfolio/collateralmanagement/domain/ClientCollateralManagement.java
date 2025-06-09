@@ -87,6 +87,7 @@ public class ClientCollateralManagement extends AbstractPersistableCustom<Long> 
         return new ClientCollateralManagement(quantity, client, collateral);
     }
 
+    @Deprecated
     public Map<String, Object> update(JsonCommand command) {
         final Map<String, Object> changes = new LinkedHashMap<>(3);
         final String quantity = CollateralManagementJsonInputParams.QUANTITY.getValue();
