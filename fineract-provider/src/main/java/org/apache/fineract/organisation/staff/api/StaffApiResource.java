@@ -20,15 +20,12 @@ package org.apache.fineract.organisation.staff.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -42,23 +39,25 @@ import jakarta.ws.rs.core.UriInfo;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.service.CommandWrapperBuilder;
-import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.command.core.CommandPipeline;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookPopulatorService;
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookService;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.data.UploadRequest;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
+import org.apache.fineract.organisation.staff.command.CreateStaffCommand;
+import org.apache.fineract.organisation.staff.command.UpdateStaffCommand;
+import org.apache.fineract.organisation.staff.data.CreateStaffRequest;
+import org.apache.fineract.organisation.staff.data.CreateStaffResponse;
 import org.apache.fineract.organisation.staff.data.StaffData;
-import org.apache.fineract.organisation.staff.data.StaffRequest;
+import org.apache.fineract.organisation.staff.data.UpdateStaffRequest;
+import org.apache.fineract.organisation.staff.data.UpdateStaffResponse;
 import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -70,16 +69,12 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class StaffApiResource {
 
-    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "STAFF";
-
-    private final PlatformSecurityContext context;
     private final StaffReadPlatformService readPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
-    private final DefaultToApiJsonSerializer<StaffData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final BulkImportWorkbookService bulkImportWorkbookService;
     private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
+    private final CommandPipeline commandPipeline;
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -93,7 +88,6 @@ public class StaffApiResource {
             @DefaultValue("false") @QueryParam("staffInOfficeHierarchy") @Parameter(description = "staffInOfficeHierarchy") final boolean staffInOfficeHierarchy,
             @DefaultValue("false") @QueryParam("loanOfficersOnly") @Parameter(description = "loanOfficersOnly") final boolean loanOfficersOnly,
             @DefaultValue("active") @QueryParam("status") @Parameter(description = "status") final String status) {
-        context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
         return staffInOfficeHierarchy ? readPlatformService.retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(officeId, loanOfficersOnly)
                 : readPlatformService.retrieveAllStaff(officeId, loanOfficersOnly, status);
     }
@@ -103,13 +97,15 @@ public class StaffApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create a staff member", description = "Creates a staff member.\n" + "\n" + "Mandatory Fields: \n"
             + "officeId, firstname, lastname\n" + "\n" + "Optional Fields: \n" + "isLoanOfficer, isActive")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = StaffRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StaffApiResourceSwagger.CreateStaffResponse.class))) })
-    public CommandProcessingResult create(@Parameter(hidden = true) StaffRequest staffRequest) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createStaff()
-                .withJson(toApiJsonSerializer.serialize(staffRequest)).build();
-        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    public CreateStaffResponse create(@HeaderParam("Idempotency-Key") String idempotencyKey, @Valid CreateStaffRequest createStaffRequest) {
+
+        CreateStaffCommand createStaffCommand = new CreateStaffCommand();
+        createStaffCommand.setId(UUID.randomUUID());
+        createStaffCommand.setCreatedAt(DateUtils.getAuditOffsetDateTime());
+        createStaffCommand.setPayload(createStaffRequest);
+
+        Supplier<CreateStaffResponse> result = commandPipeline.send(createStaffCommand);
+        return result.get();
     }
 
     @GET
@@ -120,7 +116,6 @@ public class StaffApiResource {
             + "\n" + "staff/1")
     public StaffData retrieveOne(@PathParam("staffId") @Parameter(description = "staffId") final Long staffId,
             @Context final UriInfo uriInfo) {
-        context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         StaffData staff = readPlatformService.retrieveStaff(staffId);
         if (settings.isTemplate()) {
@@ -135,15 +130,19 @@ public class StaffApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Staff Member", description = "Updates the details of a staff member.")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = StaffApiResourceSwagger.PutStaffRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StaffApiResourceSwagger.UpdateStaffResponse.class))) })
-    public CommandProcessingResult update(@PathParam("staffId") @Parameter(description = "staffId") final Long staffId,
-            @Parameter(hidden = true) StaffRequest staffRequest) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateStaff(staffId)
-                .withJson(toApiJsonSerializer.serialize(staffRequest)).build();
+    public UpdateStaffResponse update(@HeaderParam("Idempotency-Key") String idempotencyKey,
+            @PathParam("staffId") @Parameter(description = "staffId") final Long staffId, @Valid UpdateStaffRequest updateStaffRequest) {
 
-        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        updateStaffRequest.setId(staffId);
+
+        UpdateStaffCommand updateStaffCommand = new UpdateStaffCommand();
+        updateStaffCommand.setId(UUID.randomUUID());
+        updateStaffCommand.setCreatedAt(DateUtils.getAuditOffsetDateTime());
+        updateStaffCommand.setPayload(updateStaffRequest);
+
+        Supplier<UpdateStaffResponse> result = commandPipeline.send(updateStaffCommand);
+
+        return result.get();
     }
 
     @GET
@@ -156,8 +155,6 @@ public class StaffApiResource {
     @POST
     @Path("uploadtemplate")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @RequestBody(description = "Upload staff template", content = {
-            @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = UploadRequest.class)) })
     public Long postTemplate(@FormDataParam("file") InputStream uploadedInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail, @FormDataParam("locale") final String locale,
             @FormDataParam("dateFormat") final String dateFormat) {

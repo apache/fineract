@@ -19,9 +19,8 @@
 package org.apache.fineract.organisation.staff.starter;
 
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.staff.domain.StaffRepository;
-import org.apache.fineract.organisation.staff.serialization.StaffCommandFromApiJsonDeserializer;
+import org.apache.fineract.organisation.staff.mapper.StaffMapper;
 import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
 import org.apache.fineract.organisation.staff.service.StaffReadPlatformServiceImpl;
 import org.apache.fineract.organisation.staff.service.StaffWritePlatformService;
@@ -42,8 +41,7 @@ public class OrganisationStaffConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(StaffWritePlatformService.class)
-    public StaffWritePlatformService staffWritePlatformService(StaffCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            StaffRepository staffRepository, OfficeRepositoryWrapper officeRepositoryWrapper) {
-        return new StaffWritePlatformServiceJpaRepositoryImpl(fromApiJsonDeserializer, staffRepository, officeRepositoryWrapper);
+    public StaffWritePlatformService staffWritePlatformService(StaffRepository staffRepository, StaffMapper staffMapper) {
+        return new StaffWritePlatformServiceJpaRepositoryImpl(staffRepository, staffMapper);
     }
 }

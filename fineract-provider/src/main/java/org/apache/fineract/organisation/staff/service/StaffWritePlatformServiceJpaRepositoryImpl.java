@@ -19,22 +19,20 @@
 package org.apache.fineract.organisation.staff.service;
 
 import jakarta.persistence.PersistenceException;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.apache.fineract.organisation.office.domain.Office;
-import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
+import org.apache.fineract.organisation.staff.data.CreateStaffRequest;
+import org.apache.fineract.organisation.staff.data.CreateStaffResponse;
+import org.apache.fineract.organisation.staff.data.UpdateStaffRequest;
+import org.apache.fineract.organisation.staff.data.UpdateStaffResponse;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepository;
 import org.apache.fineract.organisation.staff.exception.StaffNotFoundException;
-import org.apache.fineract.organisation.staff.serialization.StaffCommandFromApiJsonDeserializer;
+import org.apache.fineract.organisation.staff.mapper.StaffMapper;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,90 +41,88 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePlatformService {
 
-    private final StaffCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final StaffRepository staffRepository;
-    private final OfficeRepositoryWrapper officeRepositoryWrapper;
+    private final StaffMapper staffMapper;
 
     @Transactional
     @Override
-    public CommandProcessingResult createStaff(final JsonCommand command) {
+    public CreateStaffResponse createStaff(CreateStaffRequest createStaffRequest) {
 
         try {
-            this.fromApiJsonDeserializer.validateForCreate(command.json());
+            final Long officeId = createStaffRequest.getOfficeId();
 
-            final Long officeId = command.longValueOfParameterNamed("officeId");
-
-            final Office staffOffice = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
-            final Staff staff = Staff.fromJson(staffOffice, command);
+            final Staff staff = staffMapper.map(createStaffRequest);
 
             this.staffRepository.saveAndFlush(staff);
 
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(command.commandId()) //
-                    .withEntityId(staff.getId()).withOfficeId(officeId) //
-                    .build();
+            return CreateStaffResponse.builder().resourceId(staff.getId()).officeId(officeId).build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
-            handleStaffDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
-            return CommandProcessingResult.empty();
+            handleStaffDataIntegrityIssues(createStaffRequest, dve.getMostSpecificCause(), dve);
+            return new CreateStaffResponse();
         } catch (final PersistenceException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
-            handleStaffDataIntegrityIssues(command, throwable, dve);
-            return CommandProcessingResult.empty();
+            handleStaffDataIntegrityIssues(createStaffRequest, throwable, dve);
+            return new CreateStaffResponse();
         }
     }
 
     @Transactional
     @Override
-    public CommandProcessingResult updateStaff(final Long staffId, final JsonCommand command) {
+    public UpdateStaffResponse updateStaff(final Long staffId, UpdateStaffRequest updateStaffRequest) {
 
         try {
-            this.fromApiJsonDeserializer.validateForUpdate(command.json(), staffId);
-
             final Staff staffForUpdate = this.staffRepository.findById(staffId).orElseThrow(() -> new StaffNotFoundException(staffId));
-            final Map<String, Object> changesOnly = staffForUpdate.update(command);
-
-            if (changesOnly.containsKey("officeId")) {
-                final Long officeId = (Long) changesOnly.get("officeId");
-                final Office newOffice = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
-                staffForUpdate.changeOffice(newOffice);
-            }
-
-            if (!changesOnly.isEmpty()) {
-                this.staffRepository.saveAndFlush(staffForUpdate);
-            }
-
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(staffId)
-                    .withOfficeId(staffForUpdate.officeId()).with(changesOnly).build();
+            staffMapper.updateStaffFromRequest(updateStaffRequest, staffForUpdate);
+            this.staffRepository.saveAndFlush(staffForUpdate);
+            return UpdateStaffResponse.builder().resourceId(staffId).officeId(staffForUpdate.officeId()).changes(updateStaffRequest)
+                    .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
-            handleStaffDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
-            return CommandProcessingResult.empty();
+            handleStaffDataIntegrityIssues(updateStaffRequest, dve.getMostSpecificCause(), dve);
+            return new UpdateStaffResponse();
         } catch (final PersistenceException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
-            handleStaffDataIntegrityIssues(command, throwable, dve);
-            return CommandProcessingResult.empty();
+            handleStaffDataIntegrityIssues(updateStaffRequest, throwable, dve);
+            return new UpdateStaffResponse();
         }
     }
 
     /*
      * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
-    private void handleStaffDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
+    private void handleStaffDataIntegrityIssues(final Object requestPayload, final Throwable realCause, final Exception dve) {
         if (realCause.getMessage().contains("external_id")) {
-            final String externalId = command.stringValueOfParameterNamed("externalId");
+            String externalId = null;
+            if (requestPayload instanceof CreateStaffRequest createStaffRequest) {
+                externalId = createStaffRequest.getExternalId();
+            } else if (requestPayload instanceof UpdateStaffRequest updateStaffRequest) {
+                externalId = updateStaffRequest.getExternalId();
+            }
             throw new PlatformDataIntegrityException("error.msg.staff.duplicate.externalId",
                     "Staff with externalId `" + externalId + "` already exists", "externalId", externalId);
-        } else if (realCause.getMessage().contains("display_name")) {
-            final String lastname = command.stringValueOfParameterNamed("lastname");
-            String displayName = lastname;
-            if (!StringUtils.isBlank(displayName)) {
-                final String firstname = command.stringValueOfParameterNamed("firstname");
+        }
+
+        if (realCause.getMessage().contains("display_name")) {
+            String firstname = null;
+            String lastname = null;
+
+            if (requestPayload instanceof CreateStaffRequest createRequest) {
+                firstname = createRequest.getFirstname();
+                lastname = createRequest.getLastname();
+            } else if (requestPayload instanceof UpdateStaffRequest updateRequest) {
+                firstname = updateRequest.getFirstname();
+                lastname = updateRequest.getLastname();
+            }
+
+            String displayName = lastname != null ? lastname : "";
+            if (StringUtils.isNotBlank(lastname) && StringUtils.isNotBlank(firstname)) {
                 displayName = lastname + ", " + firstname;
             }
+
             throw new PlatformDataIntegrityException("error.msg.staff.duplicate.displayName",
                     "A staff with the given display name '" + displayName + "' already exists", "displayName", displayName);
         }
 
-        log.error("Error occured.", dve);
+        log.error("Unhandled data integrity issue", dve);
         throw ErrorHandler.getMappable(dve, "error.msg.staff.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }

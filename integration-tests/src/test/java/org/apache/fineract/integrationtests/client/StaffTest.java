@@ -21,10 +21,13 @@ package org.apache.fineract.integrationtests.client;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Optional;
-import org.apache.fineract.client.models.StaffRequest;
+import java.util.UUID;
+import org.apache.fineract.client.models.CreateStaffRequest;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+
+;
 
 /**
  * Integration Test for /staff API.
@@ -52,9 +55,11 @@ public class StaffTest extends IntegrationTest {
     }
 
     Long create() {
-        return ok(fineractClient().staff.create3(new StaffRequest().officeId(1L).firstname(Utils.randomStringGenerator("StaffTest", 6))
+
+        CreateStaffRequest createStaffRequest = new CreateStaffRequest().officeId(1L).firstname(Utils.randomStringGenerator("StaffTest", 6))
                 .lastname(Utils.randomStringGenerator("Staffer_", 6)).externalId(Utils.randomStringGenerator("", 12))
-                .joiningDate(LocalDate.now(ZoneId.of("UTC")).toString()).dateFormat("yyyy-MM-dd").locale("en_US"))).getResourceId();
+                .joiningDate(LocalDate.now(ZoneId.of("UTC")).toString()).dateFormat("yyyy-MM-dd").locale("en_US");
+        return ok(fineractClient().staff.create3(UUID.randomUUID().toString(), createStaffRequest)).getResourceId();
     }
 
     Optional<Long> retrieveFirst() {

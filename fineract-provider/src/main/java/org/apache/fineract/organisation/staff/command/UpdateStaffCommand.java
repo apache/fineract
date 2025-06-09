@@ -16,27 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.staff.handler;
+package org.apache.fineract.organisation.staff.command;
 
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.apache.fineract.command.core.Command;
-import org.apache.fineract.command.core.CommandHandler;
 import org.apache.fineract.organisation.staff.data.UpdateStaffRequest;
-import org.apache.fineract.organisation.staff.data.UpdateStaffResponse;
-import org.apache.fineract.organisation.staff.service.StaffWritePlatformService;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-@Component
-@RequiredArgsConstructor
-public class UpdateStaffCommandHandler implements CommandHandler<UpdateStaffRequest, UpdateStaffResponse> {
-
-    private final StaffWritePlatformService writePlatformService;
-
-    @Transactional
-    @Override
-    public UpdateStaffResponse handle(Command<UpdateStaffRequest> command) {
-        UpdateStaffRequest updateStaffRequest = command.getPayload();
-        return writePlatformService.updateStaff(updateStaffRequest.getId(), updateStaffRequest);
-    }
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class UpdateStaffCommand extends Command<UpdateStaffRequest> {}

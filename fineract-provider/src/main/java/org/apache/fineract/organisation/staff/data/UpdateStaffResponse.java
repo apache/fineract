@@ -16,16 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.staff.service;
+package org.apache.fineract.organisation.staff.data;
 
-import org.apache.fineract.organisation.staff.data.CreateStaffRequest;
-import org.apache.fineract.organisation.staff.data.CreateStaffResponse;
-import org.apache.fineract.organisation.staff.data.UpdateStaffRequest;
-import org.apache.fineract.organisation.staff.data.UpdateStaffResponse;
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public interface StaffWritePlatformService {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class UpdateStaffResponse implements Serializable {
 
-    CreateStaffResponse createStaff(CreateStaffRequest createStaffRequest);
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    UpdateStaffResponse updateStaff(Long staffId, UpdateStaffRequest updateStaffRequest);
+    private Long officeId;
+    private Long resourceId;
+    private UpdateStaffRequest changes;
 }
