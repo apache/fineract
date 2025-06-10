@@ -236,12 +236,14 @@ public class SavingsAccrualWritePlatformServiceImpl implements SavingsAccrualWri
                         period.getInterestEarned());
                 if (!accrualTransactionDates.contains(period.getPeriodInterval().endDate())) {
                     SavingsAccountTransaction savingsAccountTransaction = SavingsAccountTransaction.accrual(savingsAccount,
-                            savingsAccount.office(), period.getPeriodInterval().endDate(), period.getInterestEarned(), false, MathUtil.isLessThanZero(savingsAccount.getSummary().getAccountBalance()));
+                            savingsAccount.office(), period.getPeriodInterval().endDate(), period.getInterestEarned(), false, false);
+                    savingsAccountTransaction.setRunningBalance(period.getClosingBalance());
                     savingsAccount.addTransaction(savingsAccountTransaction);
                 }else if (accrualTransactionDatesReverse.contains(period.getPeriodInterval().endDate())){
                     if (foundDate.size() == foundDateReverse.size()) {
                         SavingsAccountTransaction savingsAccountTransaction = SavingsAccountTransaction.accrual(savingsAccount,
-                                savingsAccount.office(), period.getPeriodInterval().endDate(), period.getInterestEarned(), false, MathUtil.isLessThanZero(savingsAccount.getSummary().getAccountBalance()));
+                                savingsAccount.office(), period.getPeriodInterval().endDate(), period.getInterestEarned(), false, false);
+                        savingsAccountTransaction.setRunningBalance(period.getClosingBalance());
                         savingsAccount.addTransaction(savingsAccountTransaction);
                     }
                 }
@@ -256,11 +258,13 @@ public class SavingsAccrualWritePlatformServiceImpl implements SavingsAccrualWri
                 if (!accrualTransactionDates.contains(period.getPeriodInterval().endDate()) && !MathUtil.isZero(period.getInterestEarned().getAmount())) {
                     SavingsAccountTransaction savingsAccountTransaction = SavingsAccountTransaction.accrual(savingsAccount,
                             savingsAccount.office(), period.getPeriodInterval().endDate(), period.getInterestEarned(), false, true);
+                    savingsAccountTransaction.setRunningBalance(period.getClosingBalance());
                     savingsAccount.addTransaction(savingsAccountTransaction);
                 }else if (accrualTransactionDatesReverse.contains(period.getPeriodInterval().endDate())){
                     if (foundDate.size() == foundDateReverse.size()){
                     SavingsAccountTransaction savingsAccountTransaction = SavingsAccountTransaction.accrual(savingsAccount,
                             savingsAccount.office(), period.getPeriodInterval().endDate(), period.getInterestEarned(), false, true);
+                    savingsAccountTransaction.setRunningBalance(period.getClosingBalance());
                     savingsAccount.addTransaction(savingsAccountTransaction);
                     }
                 }

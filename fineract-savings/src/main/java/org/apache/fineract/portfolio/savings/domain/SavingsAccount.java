@@ -889,9 +889,11 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         }
 
         boolean isTransactionsModified = false;
-        for (final SavingsAccountTransaction transaction : accountTransactionsSorted) {
+        for (final
+        SavingsAccountTransaction transaction : accountTransactionsSorted) {
             boolean typeTransaccionValidation = transaction.getTransactionType() == SavingsAccountTransactionType.ACCRUAL;
             if (transaction.isReversed() || transaction.isReversalTransaction()) {
+                transaction.setNegativeBalance(MathUtil.isLessThanZero(transaction.getRunningBalance()));
                 transaction.zeroBalanceFields();
             } else {
                 Money overdraftAmount = Money.zero(this.currency);
@@ -912,13 +914,14 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
                     }
                     transactionAmount = transactionAmount.minus(transaction.getAmount(this.currency));
                 }
+                if (typeTransaccionValidation && this.newTransaction != null  && (transaction.getDateOf().isAfter(this.newTransaction.getDateOf()) || transaction.getDateOf().isEqual(this.newTransaction.getDateOf()))){
+                    transaction.setNegativeBalance(MathUtil.isLessThanZero(transaction.getRunningBalance()));
+                    transaction.reverse();
+                }
 
                 runningBalance = runningBalance.plus(transactionAmount);
                 transaction.setRunningBalance(runningBalance);
 
-                if (typeTransaccionValidation && (transaction.getDateOf().isAfter(this.newTransaction.getDateOf())|| transaction.getDateOf().isEqual(this.newTransaction.getDateOf()))){
-                    transaction.reverse();
-                }
                 if (MathUtil.isEmpty(overdraftAmount) && runningBalance.isLessThanZero() && !transaction.isAmountOnHold()) {
                     overdraftAmount = runningBalance.negated();
                 }
