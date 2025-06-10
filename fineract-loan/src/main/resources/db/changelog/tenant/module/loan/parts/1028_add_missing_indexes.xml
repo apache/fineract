@@ -22,19 +22,109 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
-    <changeSet author="fineract" id="1">
+
+    <changeSet author="fineract" id="1-postgres" context="postgresql" runInTransaction="false">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="m_loan_transaction_transaction_type_enum_index"/>
+            </not>
+        </preConditions>
+        <sql>
+            CREATE INDEX CONCURRENTLY m_loan_transaction_transaction_type_enum_index
+                ON m_loan_transaction (transaction_type_enum);
+        </sql>
+    </changeSet>
+    <changeSet author="fineract" id="2-postgres" context="postgresql" runInTransaction="false">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="m_loan_transaction_transaction_date_index"/>
+            </not>
+        </preConditions>
+        <sql>
+            CREATE INDEX CONCURRENTLY m_loan_transaction_transaction_date_index
+                ON m_loan_transaction (transaction_date);
+        </sql>
+    </changeSet>
+    <changeSet author="fineract" id="3-postgres" context="postgresql" runInTransaction="false">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="m_loan_transaction_created_on_utc_index"/>
+            </not>
+        </preConditions>
+        <sql>
+            CREATE INDEX CONCURRENTLY m_loan_transaction_created_on_utc_index
+                ON m_loan_transaction (created_on_utc);
+        </sql>
+    </changeSet>
+    <changeSet author="fineract" id="4-postgres" context="postgresql" runInTransaction="false">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="m_loan_transaction_is_reversed_index"/>
+            </not>
+        </preConditions>
+        <sql>
+            CREATE INDEX CONCURRENTLY m_loan_transaction_is_reversed_index
+                ON m_loan_transaction (is_reversed);
+        </sql>
+    </changeSet>
+    <changeSet author="fineract" id="5-postgres" context="postgresql" runInTransaction="false">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="m_loan_transaction_submitted_on_date_index"/>
+            </not>
+        </preConditions>
+        <sql>
+            CREATE INDEX CONCURRENTLY m_loan_transaction_submitted_on_date_index
+                ON m_loan_transaction (submitted_on_date);
+        </sql>
+    </changeSet>
+
+    <changeSet author="fineract" id="1-mysql" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="m_loan_transaction_transaction_type_enum_index"/>
+            </not>
+        </preConditions>
         <createIndex indexName="m_loan_transaction_transaction_type_enum_index" tableName="m_loan_transaction">
             <column name="transaction_type_enum"/>
         </createIndex>
+    </changeSet>
+    <changeSet author="fineract" id="2-mysql" context="postgresql" runInTransaction="false">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="m_loan_transaction_transaction_date_index"/>
+            </not>
+        </preConditions>
         <createIndex indexName="m_loan_transaction_transaction_date_index" tableName="m_loan_transaction">
             <column name="transaction_date"/>
         </createIndex>
+    </changeSet>
+    <changeSet author="fineract" id="3-mysql" context="postgresql" runInTransaction="false">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="m_loan_transaction_created_on_utc_index"/>
+            </not>
+        </preConditions>
         <createIndex indexName="m_loan_transaction_created_on_utc_index" tableName="m_loan_transaction">
             <column name="created_on_utc"/>
         </createIndex>
+    </changeSet>
+    <changeSet author="fineract" id="4-mysql" context="postgresql" runInTransaction="false">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="m_loan_transaction_is_reversed_index"/>
+            </not>
+        </preConditions>
         <createIndex indexName="m_loan_transaction_is_reversed_index" tableName="m_loan_transaction">
             <column name="is_reversed"/>
         </createIndex>
+    </changeSet>
+    <changeSet author="fineract" id="5-mysql" context="postgresql" runInTransaction="false">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="m_loan_transaction_submitted_on_date_index"/>
+            </not>
+        </preConditions>
         <createIndex indexName="m_loan_transaction_submitted_on_date_index" tableName="m_loan_transaction">
             <column name="submitted_on_date"/>
         </createIndex>
