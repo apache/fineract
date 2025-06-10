@@ -20,8 +20,11 @@ package org.apache.fineract.commands.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -35,11 +38,13 @@ import io.github.resilience4j.retry.RetryRegistry;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Duration;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.commands.configuration.RetryConfigurationAssembler;
 import org.apache.fineract.commands.domain.CommandProcessingResultType;
 import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandWrapper;
+import org.apache.fineract.commands.exception.CommandResultPersistenceException;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.commands.provider.CommandHandlerProvider;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -52,6 +57,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -128,6 +134,9 @@ public class SynchronousCommandProcessingServiceTest {
         var impl = new RetryConfigurationAssembler(retryRegistry, fineractProperties, fineractRequestContextHolder);
         var retry = impl.getRetryConfigurationForExecuteCommand();
         when(retryConfigurationAssembler.getRetryConfigurationForExecuteCommand()).thenReturn(retry);
+
+        var persistenceRetry = impl.getRetryConfigurationForCommandResultPersistence();
+        when(retryConfigurationAssembler.getRetryConfigurationForCommandResultPersistence()).thenReturn(persistenceRetry);
     }
 
     @AfterEach
@@ -145,11 +154,7 @@ public class SynchronousCommandProcessingServiceTest {
 
     @Test
     public void testExecuteCommandSuccessAfter2Fails() {
-        CommandWrapper commandWrapper = Mockito.mock(CommandWrapper.class);
-        when(commandWrapper.isDatatableResource()).thenReturn(false);
-        when(commandWrapper.isNoteResource()).thenReturn(false);
-        when(commandWrapper.isSurveyResource()).thenReturn(false);
-        when(commandWrapper.isLoanDisburseDetailResource()).thenReturn(false);
+        CommandWrapper commandWrapper = getCommandWrapper();
 
         long commandId = 1L;
         JsonCommand jsonCommand = Mockito.mock(JsonCommand.class);
@@ -371,11 +376,7 @@ public class SynchronousCommandProcessingServiceTest {
 
     @Test
     public void testExecuteCommandSuccess() {
-        CommandWrapper commandWrapper = Mockito.mock(CommandWrapper.class);
-        when(commandWrapper.isDatatableResource()).thenReturn(false);
-        when(commandWrapper.isNoteResource()).thenReturn(false);
-        when(commandWrapper.isSurveyResource()).thenReturn(false);
-        when(commandWrapper.isLoanDisburseDetailResource()).thenReturn(false);
+        CommandWrapper commandWrapper = getCommandWrapper();
 
         long commandId = 1L;
         JsonCommand jsonCommand = Mockito.mock(JsonCommand.class);
@@ -415,11 +416,7 @@ public class SynchronousCommandProcessingServiceTest {
 
     @Test
     public void testExecuteCommandFails() {
-        CommandWrapper commandWrapper = Mockito.mock(CommandWrapper.class);
-        when(commandWrapper.isDatatableResource()).thenReturn(false);
-        when(commandWrapper.isNoteResource()).thenReturn(false);
-        when(commandWrapper.isSurveyResource()).thenReturn(false);
-        when(commandWrapper.isLoanDisburseDetailResource()).thenReturn(false);
+        CommandWrapper commandWrapper = getCommandWrapper();
         JsonCommand jsonCommand = Mockito.mock(JsonCommand.class);
         Long commandId = jsonCommand.commandId();
 
@@ -457,6 +454,16 @@ public class SynchronousCommandProcessingServiceTest {
         verify(commandSourceService).generateErrorInfo(runtimeException);
     }
 
+    @NotNull
+    private static CommandWrapper getCommandWrapper() {
+        CommandWrapper commandWrapper = Mockito.mock(CommandWrapper.class);
+        when(commandWrapper.isDatatableResource()).thenReturn(false);
+        when(commandWrapper.isNoteResource()).thenReturn(false);
+        when(commandWrapper.isSurveyResource()).thenReturn(false);
+        when(commandWrapper.isLoanDisburseDetailResource()).thenReturn(false);
+        return commandWrapper;
+    }
+
     @Test
     public void publishHookEventHandlesInvalidJson() {
         String entityName = "entity";
@@ -473,4 +480,115 @@ public class SynchronousCommandProcessingServiceTest {
 
     private static final class RetryException extends RuntimeException {}
 
+    @Test
+    public void testExecuteCommandWithRetry() {
+        CommandWrapper commandWrapper = getCommandWrapper();
+        when(commandWrapper.isInterestPauseResource()).thenReturn(false);
+
+        long commandId = 1L;
+        JsonCommand jsonCommand = Mockito.mock(JsonCommand.class);
+        when(jsonCommand.commandId()).thenReturn(commandId);
+
+        NewCommandSourceHandler commandHandler = Mockito.mock(NewCommandSourceHandler.class);
+        CommandProcessingResult commandProcessingResult = Mockito.mock(CommandProcessingResult.class);
+        when(commandProcessingResult.isRollbackTransaction()).thenReturn(false);
+        when(commandHandler.processCommand(jsonCommand)).thenReturn(commandProcessingResult);
+        when(commandHandlerProvider.getHandler(Mockito.any(), Mockito.any())).thenReturn(commandHandler);
+
+        when(configurationDomainService.isMakerCheckerEnabledForTask(Mockito.any())).thenReturn(false);
+        String idempotencyKey = "test-idempotency-key";
+        when(idempotencyKeyResolver.resolve(commandWrapper)).thenReturn(idempotencyKey);
+
+        CommandSource commandSource = Mockito.mock(CommandSource.class);
+        when(commandSource.getId()).thenReturn(commandId);
+        when(commandSourceService.findCommandSource(commandWrapper, idempotencyKey)).thenReturn(null);
+
+        AppUser appUser = Mockito.mock(AppUser.class);
+        when(appUser.getId()).thenReturn(1L);
+        when(context.authenticatedUser(Mockito.any(CommandWrapper.class))).thenReturn(appUser);
+
+        when(commandSourceService.saveInitialNewTransaction(commandWrapper, jsonCommand, appUser, idempotencyKey))
+                .thenReturn(commandSource);
+        when(commandSourceService.processCommand(commandHandler, jsonCommand, commandSource, appUser, false))
+                .thenReturn(commandProcessingResult);
+
+        final AtomicInteger saveAttempts = new AtomicInteger(0);
+
+        doAnswer(invocation -> {
+            int attempt = saveAttempts.incrementAndGet();
+            if (attempt == 1) {
+                throw new RuntimeException("Database error on first attempt");
+            }
+            return commandSource;
+        }).when(commandSourceService).saveResultSameTransaction(any(CommandSource.class));
+
+        // When fetching the command source after failure, return the same mock
+        when(commandSourceService.getCommandSource(commandId)).thenReturn(commandSource);
+
+        // Execute the command
+        CommandProcessingResult result = underTest.executeCommand(commandWrapper, jsonCommand, false);
+
+        assertEquals(2, saveAttempts.get(), "Expected 2 save attempts");
+
+        verify(commandSource, atLeast(1)).setResultStatusCode(200);
+        verify(commandSource, atLeast(1)).updateForAudit(commandProcessingResult);
+        verify(commandSource, atLeast(1)).setResult(any());
+        verify(commandSource, atLeast(1)).setStatus(CommandProcessingResultType.PROCESSED);
+
+        assertEquals(commandProcessingResult, result);
+    }
+
+    @Test
+    public void testExecuteCommandWithMaxRetryFailure() {
+        CommandWrapper commandWrapper = getCommandWrapper();
+        when(commandWrapper.isInterestPauseResource()).thenReturn(false);
+
+        long commandId = 1L;
+        JsonCommand jsonCommand = Mockito.mock(JsonCommand.class);
+        when(jsonCommand.commandId()).thenReturn(commandId);
+
+        NewCommandSourceHandler commandHandler = Mockito.mock(NewCommandSourceHandler.class);
+        CommandProcessingResult commandProcessingResult = Mockito.mock(CommandProcessingResult.class);
+        when(commandProcessingResult.isRollbackTransaction()).thenReturn(false);
+        when(commandHandler.processCommand(jsonCommand)).thenReturn(commandProcessingResult);
+        when(commandHandlerProvider.getHandler(Mockito.any(), Mockito.any())).thenReturn(commandHandler);
+
+        when(configurationDomainService.isMakerCheckerEnabledForTask(Mockito.any())).thenReturn(false);
+        String idempotencyKey = "test-idempotency-key";
+        when(idempotencyKeyResolver.resolve(commandWrapper)).thenReturn(idempotencyKey);
+
+        CommandSource commandSource = Mockito.mock(CommandSource.class);
+        when(commandSource.getId()).thenReturn(commandId);
+        when(commandSourceService.findCommandSource(commandWrapper, idempotencyKey)).thenReturn(null);
+
+        AppUser appUser = Mockito.mock(AppUser.class);
+        when(appUser.getId()).thenReturn(1L);
+        when(context.authenticatedUser(Mockito.any(CommandWrapper.class))).thenReturn(appUser);
+
+        when(commandSourceService.saveInitialNewTransaction(commandWrapper, jsonCommand, appUser, idempotencyKey))
+                .thenReturn(commandSource);
+        when(commandSourceService.processCommand(commandHandler, jsonCommand, commandSource, appUser, false))
+                .thenReturn(commandProcessingResult);
+
+        final AtomicInteger saveAttempts = new AtomicInteger(0);
+
+        // Simulate persistent save failure - all retry attempts fail
+        RuntimeException persistentException = new RuntimeException("Database error persists");
+        doAnswer(invocation -> {
+            // Count the number of attempts
+            saveAttempts.incrementAndGet();
+            // Always throw the exception to trigger retry
+            throw persistentException;
+        }).when(commandSourceService).saveResultSameTransaction(any(CommandSource.class));
+
+        when(commandSourceService.getCommandSource(commandId)).thenReturn(commandSource);
+
+        CommandResultPersistenceException exception = assertThrows(CommandResultPersistenceException.class, () -> {
+            underTest.executeCommand(commandWrapper, jsonCommand, false);
+        });
+
+        assertEquals(persistentException, exception.getCause());
+
+        assertTrue(saveAttempts.get() >= 3, "Expected at least 3 save attempts, but got: " + saveAttempts.get());
+    }
 }
