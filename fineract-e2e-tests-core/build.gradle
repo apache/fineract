@@ -40,17 +40,17 @@ repositories {
 // Configure test compilation
 tasks.named('compileTestJava') {
     description = 'Compiles test Java source files'
-    
+
     // Enable caching
     outputs.cacheIf { true }
-    
+
     // Configure compiler options
     options.compilerArgs.add("-parameters")
-    
+
     // Ensure proper output tracking
     outputs.dir(sourceSets.test.java.destinationDirectory)
         .withPropertyName("testClassesDir")
-    
+
     // Track annotation processor outputs
     options.annotationProcessorGeneratedSourcesDirectory = 
         layout.buildDirectory.dir('generated/sources/annotationProcessor/java/test').get().asFile
@@ -69,12 +69,15 @@ dependencies {
     testImplementation 'com.squareup.retrofit2:retrofit:2.11.0'
     testImplementation 'org.apache.httpcomponents:httpclient:4.5.14'
     testImplementation 'org.apache.commons:commons-lang3:3.17.0'
-    testImplementation 'com.googlecode.json-simple:json-simple:1.1.1'
+    testImplementation ('com.googlecode.json-simple:json-simple:1.1.1') {
+        exclude group: 'junit', module: 'junit'
+    }
     testImplementation 'com.google.code.gson:gson:2.11.0'
 
     testImplementation 'io.cucumber:cucumber-java:7.20.1'
     testImplementation 'io.cucumber:cucumber-junit:7.20.1'
     testImplementation 'io.cucumber:cucumber-spring:7.20.1'
+    testImplementation 'io.cucumber:cucumber-junit-platform-engine:7.20.1'
 
     testImplementation 'io.qameta.allure:allure-cucumber7-jvm:2.29.1'
 

@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.jobs.service.increasedateby1day.increasecobdateby1day;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;

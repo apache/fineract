@@ -69,7 +69,7 @@ jobs:
         run: |
             ./gradlew --no-daemon --console=plain build -x cucumber -x test -x doc
             ./gradlew --no-daemon --console=plain cucumber -x :fineract-e2e-tests-runner:cucumber
-            ./gradlew --no-daemon --console=plain test -x :twofactor-tests:test -x :oauth2-test:test :fineract-e2e-tests-runner:test -PdbType=postgresql
+            ./gradlew --no-daemon --console=plain test -x :twofactor-tests:test -x :oauth2-test:test -x :fineract-e2e-tests-runner:test -PdbType=postgresql
             ./gradlew --no-daemon --console=plain :twofactor-tests:test -PdbType=postgresql
             ./gradlew --no-daemon --console=plain :oauth2-tests:test -PdbType=postgresql
       - name: Archive test results

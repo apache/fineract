@@ -20,9 +20,9 @@ package org.apache.fineract.integrationtests.investor.externalassetowner;
 
 import static org.apache.fineract.client.models.ExternalTransferData.StatusEnum.CANCELLED;
 import static org.apache.fineract.client.models.ExternalTransferData.StatusEnum.PENDING;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -114,21 +114,21 @@ public class SearchExternalAssetOwnerTransferTest extends ExternalAssetOwnerTran
                 .buildExternalAssetOwnerSearchRequest(textToSearch, "", null, null, 0, 10);
         PageExternalTransferData response = EXTERNAL_ASSET_OWNER_HELPER.searchExternalAssetOwnerTransfer(searchRequest);
         assertNotNull(response);
-        assertEquals("Expecting none result", 0, response.getContent().size());
+        assertEquals(0, response.getContent().size(), "Expecting none result");
 
         // Search over the current Asset Transfers and get just the first five
         textToSearch = "";
         searchRequest = EXTERNAL_ASSET_OWNER_HELPER.buildExternalAssetOwnerSearchRequest(textToSearch, "", null, null, 0, 5);
         response = EXTERNAL_ASSET_OWNER_HELPER.searchExternalAssetOwnerTransfer(searchRequest);
         assertNotNull(response);
-        assertEquals("Expecting first five results", 5, response.getContent().size());
+        assertEquals(5, response.getContent().size(), "Expecting first five results");
 
         textToSearch = response.getContent().iterator().next().getOwner().getExternalId();
         searchRequest = EXTERNAL_ASSET_OWNER_HELPER.buildExternalAssetOwnerSearchRequest(textToSearch, "", null, null, 0, 5);
         response = EXTERNAL_ASSET_OWNER_HELPER.searchExternalAssetOwnerTransfer(searchRequest);
         assertNotNull(response);
-        assertTrue("Expecting only two results", response.getContent().size() >= 2);
-        assertEquals("External Id is different", textToSearch, response.getContent().iterator().next().getOwner().getExternalId());
+        assertTrue(response.getContent().size() >= 2, "Expecting only two results");
+        assertEquals(textToSearch, response.getContent().iterator().next().getOwner().getExternalId(), "External Id is different");
     }
 
     @Test
@@ -146,7 +146,7 @@ public class SearchExternalAssetOwnerTransferTest extends ExternalAssetOwnerTran
         searchRequest = EXTERNAL_ASSET_OWNER_HELPER.buildExternalAssetOwnerSearchRequest(null, attribute, fromDate, toDate, 0, null);
         response = EXTERNAL_ASSET_OWNER_HELPER.searchExternalAssetOwnerTransfer(searchRequest);
         validateResponse(response, 1);
-        assertTrue("Transfers were not found", response.getContent().size() > 0);
+        assertTrue(response.getContent().size() > 0, "Transfers were not found");
     }
 
     @Test
@@ -164,7 +164,7 @@ public class SearchExternalAssetOwnerTransferTest extends ExternalAssetOwnerTran
         searchRequest = EXTERNAL_ASSET_OWNER_HELPER.buildExternalAssetOwnerSearchRequest(null, attribute, fromDate, toDate, 0, null);
         response = EXTERNAL_ASSET_OWNER_HELPER.searchExternalAssetOwnerTransfer(searchRequest);
         validateResponse(response, 1);
-        assertTrue("Transfers were not found", response.getContent().size() > 0);
+        assertTrue(response.getContent().size() > 0, "Transfers were not found");
     }
 
     @Test
@@ -192,11 +192,11 @@ public class SearchExternalAssetOwnerTransferTest extends ExternalAssetOwnerTran
         assertEquals(isEmpty, response.getEmpty());
         assertEquals(true, response.getFirst());
         if (isEmpty) {
-            assertTrue("Transfers size difference", response.getContent().size() == size);
-            assertTrue("Total pages difference", response.getTotalPages() == 0);
+            assertTrue(response.getContent().size() == size, "Transfers size difference");
+            assertTrue(response.getTotalPages() == 0, "Total pages difference");
         } else {
-            assertTrue("Total pages difference", response.getTotalPages() > 0);
-            assertTrue("Total number of elements difference", response.getNumberOfElements() > 0);
+            assertTrue(response.getTotalPages() > 0, "Total pages difference");
+            assertTrue(response.getNumberOfElements() > 0, "Total number of elements difference");
         }
         assertEquals(true, response.getFirst());
     }

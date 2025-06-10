@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -88,7 +88,7 @@ public class SearchResourcesTest {
                 getResources(resources));
         assertNotNull(searchResponse);
         assertEquals(1, searchResponse.size());
-        assertEquals("Client name comparation", getClientResponse.getDisplayName(), searchResponse.get(0).getEntityName());
+        assertEquals(getClientResponse.getDisplayName(), searchResponse.get(0).getEntityName(), "Client name comparation");
     }
 
     @Test

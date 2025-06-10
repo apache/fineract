@@ -26,13 +26,13 @@ import org.springframework.stereotype.Component;
 @Getter
 public class JobPollingProperties {
 
-    @Value("${fineract-test.job.interval-in-sec}")
-    private long pollingIntervalInSec;
+    @Value("${fineract-test.job.interval-in-ms}")
+    private long intervalInMillis;
 
-    @Value("${fineract-test.job.delay-in-sec}")
-    private long pollingDelayInSec;
+    @Value("${fineract-test.job.delay-in-ms}")
+    private long delayInMillis;
 
-    @Value("${fineract-test.job.at-most-in-sec}")
-    private long pollingAtMostInSec;
+    @Value("${fineract-test.job.wait-timeout-in-ms}")
+    private long timeoutInMillis;
 
 }

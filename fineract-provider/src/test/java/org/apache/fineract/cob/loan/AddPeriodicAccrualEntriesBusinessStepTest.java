@@ -20,6 +20,7 @@ package org.apache.fineract.cob.loan;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -41,7 +42,6 @@ import org.apache.fineract.infrastructure.core.exception.MultiException;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualsProcessingService;
-import org.junit.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -92,7 +92,7 @@ public class AddPeriodicAccrualEntriesBusinessStepTest {
         doThrow(new MultiException(Collections.singletonList(new RuntimeException()))).when(loanAccrualsProcessingService)
                 .addPeriodicAccruals(any(LocalDate.class), eq(loanForProcessing));
         // when
-        final BusinessStepException businessStepException = Assert.assertThrows(BusinessStepException.class,
+        final BusinessStepException businessStepException = assertThrows(BusinessStepException.class,
                 () -> underTest.execute(loanForProcessing));
         // then
         verify(loanAccrualsProcessingService, times(1)).addPeriodicAccruals(any(LocalDate.class), eq(loanForProcessing));

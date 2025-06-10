@@ -68,7 +68,6 @@ import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHe
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
-import org.junit.experimental.runners.Enclosed;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Nested;
@@ -76,9 +75,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.runner.RunWith;
 
-@RunWith(Enclosed.class)
 @Slf4j
 public class LoanTransactionChargebackTest extends BaseLoanIntegrationTest {
 

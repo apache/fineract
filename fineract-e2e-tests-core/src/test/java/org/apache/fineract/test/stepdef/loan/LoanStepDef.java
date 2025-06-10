@@ -26,8 +26,8 @@ import static org.apache.fineract.test.data.loanproduct.DefaultLoanProduct.LP2_A
 import static org.apache.fineract.test.factory.LoanProductsRequestFactory.CHARGE_OFF_REASONS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.gson.Gson;
@@ -2453,8 +2453,10 @@ public class LoanStepDef extends AbstractStepDef {
         long loanId = loanResponse.body().getLoanId();
 
         LoanStatusEnumDataV1 expectedStatus = getExpectedStatus(loanStatus);
-        await().pollDelay(Duration.ofSeconds(1L)).pollInterval(Duration.ofSeconds(1L))
-                .atMost(Duration.ofSeconds(eventProperties.getEventWaitTimeoutInSec())).untilAsserted(() -> {
+        await().atMost(Duration.ofMillis(eventProperties.getWaitTimeoutInMillis()))//
+                .pollDelay(Duration.ofMillis(eventProperties.getDelayInMillis())) //
+                .pollInterval(Duration.ofMillis(eventProperties.getIntervalInMillis()))//
+                .untilAsserted(() -> {
                     eventAssertion.assertEvent(LoanStatusChangedEvent.class, loanId).extractingData(LoanAccountDataV1::getStatus)
                             .isEqualTo(expectedStatus);
                 });
@@ -2479,7 +2481,7 @@ public class LoanStepDef extends AbstractStepDef {
     public void getLoanLastCOBDate(String date) throws IOException {
         Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.body().getLoanId();
-
+        log.debug("Loan ID: {}", loanId);
         Response<GetLoansLoanIdResponse> loanDetails = loansApi.retrieveLoan(loanId, false, "", "", "").execute();
         ErrorHelper.checkSuccessfulApiCall(loanDetails);
         if ("null".equals(date)) {
@@ -2497,9 +2499,16 @@ public class LoanStepDef extends AbstractStepDef {
 
     @When("Admin checks that Loan COB is running until the current business date")
     public void checkLoanCOBCatchUpRunningUntilCOBBusinessDate() {
-        await().atMost(Duration.ofSeconds(jobPollingProperties.getPollingAtMostInSec())) //
-                .pollInterval(Duration.ofSeconds(jobPollingProperties.getPollingIntervalInSec())) //
-                .pollDelay(Duration.ofSeconds(jobPollingProperties.getPollingDelayInSec())) //
+        await().atMost(Duration.ofMillis(jobPollingProperties.getTimeoutInMillis())) //
+                .pollInterval(Duration.ofMillis(jobPollingProperties.getIntervalInMillis())) //
+                .until(() -> {
+                    Response<IsCatchUpRunningDTO> isCatchUpRunningResponse = loanCobCatchUpApi.isCatchUpRunning().execute();
+                    ErrorHelper.checkSuccessfulApiCall(isCatchUpRunningResponse);
+                    IsCatchUpRunningDTO isCatchUpRunning = isCatchUpRunningResponse.body();
+                    return isCatchUpRunning.getCatchUpRunning();
+                });
+        await().atMost(Duration.ofMillis(jobPollingProperties.getTimeoutInMillis())) //
+                .pollInterval(Duration.ofMillis(jobPollingProperties.getIntervalInMillis())) //
                 .until(() -> {
                     Response<IsCatchUpRunningDTO> isCatchUpRunningResponse = loanCobCatchUpApi.isCatchUpRunning().execute();
                     ErrorHelper.checkSuccessfulApiCall(isCatchUpRunningResponse);
@@ -2676,8 +2685,8 @@ public class LoanStepDef extends AbstractStepDef {
 
         Response<GetLoansLoanIdTransactionsTransactionIdResponse> originalTransaction = loanTransactionsApi
                 .retrieveTransaction(loanId, originalTransactionId, "").execute();
-        assertNull(String.format("Original transaction external id is not null %n%s", originalTransaction.body()),
-                originalTransaction.body().getExternalId());
+        assertNull(originalTransaction.body().getExternalId(),
+                String.format("Original transaction external id is not null %n%s", originalTransaction.body()));
     }
 
     @Then("LoanTransactionAccrualActivityPostBusinessEvent is raised on {string}")

@@ -66,7 +66,6 @@ import org.apache.fineract.investor.exception.ExternalAssetOwnerInitiateTransfer
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -132,7 +131,7 @@ public class ExternalAssetOwnersWriteServiceTest {
         when(testContext.delayedSettlementAttributeService.isEnabled(testContext.loanProductId)).thenReturn(false);
 
         // when
-        ExternalAssetOwnerInitiateTransferException thrownException = Assert.assertThrows(ExternalAssetOwnerInitiateTransferException.class,
+        ExternalAssetOwnerInitiateTransferException thrownException = assertThrows(ExternalAssetOwnerInitiateTransferException.class,
                 () -> testContext.externalAssetOwnersWriteServiceImpl.intermediarySaleLoanByLoanId(command));
 
         // then
@@ -160,7 +159,7 @@ public class ExternalAssetOwnersWriteServiceTest {
                 any(LocalDate.class))).thenReturn(externalAssetOwnerTransferList);
 
         // when
-        ExternalAssetOwnerInitiateTransferException thrownException = Assert.assertThrows(ExternalAssetOwnerInitiateTransferException.class,
+        ExternalAssetOwnerInitiateTransferException thrownException = assertThrows(ExternalAssetOwnerInitiateTransferException.class,
                 () -> testContext.externalAssetOwnersWriteServiceImpl.intermediarySaleLoanByLoanId(command));
 
         // then
@@ -356,7 +355,7 @@ public class ExternalAssetOwnersWriteServiceTest {
         when(testContext.delayedSettlementAttributeService.isEnabled(testContext.loanProductId)).thenReturn(true);
 
         // when
-        ExternalAssetOwnerInitiateTransferException thrownException = Assert.assertThrows(ExternalAssetOwnerInitiateTransferException.class,
+        ExternalAssetOwnerInitiateTransferException thrownException = assertThrows(ExternalAssetOwnerInitiateTransferException.class,
                 () -> testContext.externalAssetOwnersWriteServiceImpl.intermediarySaleLoanByLoanId(command));
 
         // then

@@ -61,7 +61,7 @@ public class EventAssertion {
         }
         T event = eventFactory.create(eventClazz);
         try {
-            await().atMost(Duration.ofSeconds(eventProperties.getEventWaitTimeoutInSec())).until(() -> {
+            await().atMost(Duration.ofMillis(eventProperties.getWaitTimeoutInMillis())).until(() -> {
                 if (removeEventIfFound) {
                     return eventStore.removeEventById(event, id).isPresent();
                 } else {
@@ -69,8 +69,8 @@ public class EventAssertion {
                 }
             });
         } catch (ConditionTimeoutException e) {
-            Assertions
-                    .fail(event.getEventName() + " hasn't been received within " + eventProperties.getEventWaitTimeoutInSec() + " seconds");
+            Assertions.fail(
+                    event.getEventName() + " hasn't been received within " + eventProperties.getWaitTimeoutInMillis() / 1000 + " seconds");
         }
     }
 
@@ -80,7 +80,7 @@ public class EventAssertion {
         }
         T event = eventFactory.create(eventClazz);
         try {
-            await().atMost(Duration.ofSeconds(eventProperties.getEventWaitTimeoutInSec())).until(() -> {
+            await().atMost(Duration.ofMillis(eventProperties.getWaitTimeoutInMillis())).until(() -> {
                 if (id == null) {
                     return !eventStore.findByType(event).isEmpty();
                 }
@@ -115,7 +115,7 @@ public class EventAssertion {
         }
         T event = eventFactory.create(eventClazz);
         try {
-            await().atMost(Duration.ofSeconds(eventProperties.getEventWaitTimeoutInSec()))
+            await().atMost(Duration.ofMillis(eventProperties.getWaitTimeoutInMillis()))
                     .until(() -> eventStore.findByType(event).stream().anyMatch(filter));
 
             String receivedEventsLogParam = eventStore.getReceivedEvents().stream().map(LoggedEvent::new).map(LoggedEvent::toString)

@@ -376,7 +376,7 @@ configure(project.fineractJavaProjects) {
             cacheDynamicVersionsFor 0, 'seconds'
         }
     }
-    
+
     tasks.withType(JavaCompile).configureEach {
         options.incremental = true
         options.fork = true
@@ -672,7 +672,7 @@ configure(project.fineractJavaProjects) {
                 'org.junit.jupiter:junit-jupiter-api',
                 'org.junit.jupiter:junit-jupiter-engine',
                 'org.junit.jupiter:junit-jupiter-params',
-                'org.junit.platform:junit-platform-runner', // required to be able to run tests directly under Eclipse, see FINERACT-943 & FINERACT-1021
+                'org.junit.platform:junit-platform-suite', // required to be able to run tests directly under Eclipse, see FINERACT-943 & FINERACT-1021
                 'org.bouncycastle:bcpkix-jdk18on',
                 'org.bouncycastle:bcprov-jdk18on',
                 'org.bouncycastle:bcutil-jdk18on',
@@ -783,7 +783,7 @@ configure(project.fineractCustomProjects) {
                 'org.mockito:mockito-junit-jupiter',
                 'org.junit.jupiter:junit-jupiter-api',
                 'org.junit.jupiter:junit-jupiter-engine',
-                'org.junit.platform:junit-platform-runner', // required to be able to run tests directly under Eclipse, see FINERACT-943 & FINERACT-1021
+                'org.junit.platform:junit-platform-suite', // required to be able to run tests directly under Eclipse, see FINERACT-943 & FINERACT-1021
                 'org.bouncycastle:bcpkix-jdk18on',
                 'org.bouncycastle:bcprov-jdk18on',
                 'org.bouncycastle:bcutil-jdk18on',

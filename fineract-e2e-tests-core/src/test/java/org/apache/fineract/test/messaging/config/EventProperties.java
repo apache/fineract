@@ -26,8 +26,14 @@ import org.springframework.stereotype.Component;
 @Getter
 public class EventProperties {
 
-    @Value("${fineract-test.event.wait-timeout-in-sec}")
-    private int eventWaitTimeoutInSec;
+    @Value("${fineract-test.event.wait-timeout-in-ms}")
+    private long waitTimeoutInMillis;
+
+    @Value("${fineract-test.event.interval-in-ms}")
+    private long intervalInMillis;
+
+    @Value("${fineract-test.event.delay-in-ms}")
+    private long delayInMillis;
 
     @Value("${fineract-test.event.verification-enabled}")
     private boolean eventVerificationEnabled;

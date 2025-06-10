@@ -66,10 +66,10 @@ public class JobService {
 
     private void waitUntilJobIsFinished(Job job) {
         String jobName = job.getName();
-        await().atMost(Duration.ofSeconds(jobPollingProperties.getPollingAtMostInSec())) //
+        await().atMost(Duration.ofMillis(jobPollingProperties.getTimeoutInMillis())) //
                 .alias("%s didn't finish on time".formatted(jobName)) //
-                .pollInterval(Duration.ofSeconds(jobPollingProperties.getPollingIntervalInSec())) //
-                .pollDelay(Duration.ofSeconds(jobPollingProperties.getPollingDelayInSec())) //
+                .pollInterval(Duration.ofMillis(jobPollingProperties.getIntervalInMillis())) //
+                .pollDelay(Duration.ofMillis(jobPollingProperties.getDelayInMillis())) //
                 .until(() -> {
                     log.info("Waiting for job {} to finish", jobName);
                     Long jobId = jobResolver.resolve(job);
