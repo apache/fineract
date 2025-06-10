@@ -130,6 +130,7 @@ import org.apache.fineract.test.helper.Utils;
 import org.apache.fineract.test.initializer.global.LoanProductGlobalInitializerStep;
 import org.apache.fineract.test.messaging.EventAssertion;
 import org.apache.fineract.test.messaging.config.EventProperties;
+import org.apache.fineract.test.messaging.config.JobPollingProperties;
 import org.apache.fineract.test.messaging.event.EventCheckHelper;
 import org.apache.fineract.test.messaging.event.loan.LoanRescheduledDueAdjustScheduleEvent;
 import org.apache.fineract.test.messaging.event.loan.LoanStatusChangedEvent;
@@ -216,6 +217,9 @@ public class LoanStepDef extends AbstractStepDef {
 
     @Autowired
     private LoanDisbursementDetailsApi loanDisbursementDetailsApi;
+
+    @Autowired
+    private JobPollingProperties jobPollingProperties;
 
     @When("Admin creates a new Loan")
     public void createLoan() throws IOException {
@@ -2493,18 +2497,9 @@ public class LoanStepDef extends AbstractStepDef {
 
     @When("Admin checks that Loan COB is running until the current business date")
     public void checkLoanCOBCatchUpRunningUntilCOBBusinessDate() {
-        await().atMost(Duration.ofMinutes(2)) //
-                .pollInterval(Duration.ofSeconds(5)) //
-                .pollDelay(Duration.ofSeconds(5)) //
-                .until(() -> {
-                    Response<IsCatchUpRunningDTO> isCatchUpRunningResponse = loanCobCatchUpApi.isCatchUpRunning().execute();
-                    ErrorHelper.checkSuccessfulApiCall(isCatchUpRunningResponse);
-                    IsCatchUpRunningDTO isCatchUpRunning = isCatchUpRunningResponse.body();
-                    return isCatchUpRunning.getCatchUpRunning();
-                });
-        await().atMost(Duration.ofMinutes(4)) //
-                .pollInterval(Duration.ofSeconds(5)) //
-                .pollDelay(Duration.ofSeconds(5)) //
+        await().atMost(Duration.ofSeconds(jobPollingProperties.getPollingAtMostInSec())) //
+                .pollInterval(Duration.ofSeconds(jobPollingProperties.getPollingIntervalInSec())) //
+                .pollDelay(Duration.ofSeconds(jobPollingProperties.getPollingDelayInSec())) //
                 .until(() -> {
                     Response<IsCatchUpRunningDTO> isCatchUpRunningResponse = loanCobCatchUpApi.isCatchUpRunning().execute();
                     ErrorHelper.checkSuccessfulApiCall(isCatchUpRunningResponse);
