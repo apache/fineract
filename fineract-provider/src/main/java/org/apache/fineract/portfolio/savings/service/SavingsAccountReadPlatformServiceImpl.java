@@ -222,6 +222,11 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getSortOrder());
                 }
             }
+            if (searchParameters.getbirthDate() != null) {
+                sqlBuilder.append(" and c.date_of_birth = ?");
+                objectArray[arrayPos] = java.sql.Date.valueOf(searchParameters.getbirthDate());
+                arrayPos = arrayPos + 1;
+            }
 
             if (searchParameters.isLimited()) {
                 sqlBuilder.append(" ");
