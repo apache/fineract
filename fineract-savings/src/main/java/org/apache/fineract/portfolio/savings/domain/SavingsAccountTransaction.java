@@ -573,7 +573,6 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
     }
 
     public void zeroBalanceFields() {
-        this.isNegativeBalance = MathUtil.isLessThanZero(this.cumulativeBalance);
         this.runningBalance = null;
         this.cumulativeBalance = null;
         this.balanceEndDate = null;
@@ -898,5 +897,9 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
         return new SavingsAccountTransactionDetailsForPostingPeriod(getId(), this.dateOf, this.balanceEndDate, this.runningBalance,
                 this.amount, currency, this.balanceNumberOfDays, isDeposit(), isWithdrawal(), isAllowOverDraft,
                 isChargeTransactionAndNotReversed(), isDividendPayoutAndNotReversed());
+    }
+
+    public void setNegativeBalance(Boolean negativeBalance) {
+        isNegativeBalance = negativeBalance;
     }
 }
