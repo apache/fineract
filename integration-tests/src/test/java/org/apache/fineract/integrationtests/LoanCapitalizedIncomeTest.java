@@ -864,7 +864,7 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
 
             Long capitalizedIncomeAdjustmentTransactionId = loanTransactionHelper
                     .capitalizedIncomeAdjustment(loanId, capitalizedIncomeTransactionIdRef.get(), "15 April 2024", 15.0).getResourceId();
-            verifyTRJournalEntries(capitalizedIncomeAdjustmentTransactionId, journalEntry(15, feeIncomeAccount, "DEBIT"), //
+            verifyTRJournalEntries(capitalizedIncomeAdjustmentTransactionId, journalEntry(15, deferredIncomeLiabilityAccount, "DEBIT"), //
                     journalEntry(15, overpaymentAccount, "CREDIT") //
             );
 
@@ -927,7 +927,7 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
             Long loanId = loanIdRef.get();
             Long capitalizedIncomeAdjustmentTransactionId = loanTransactionHelper
                     .capitalizedIncomeAdjustment(loanId, capitalizedIncomeTransactionIdRef.get(), "15 April 2024", 15.0).getResourceId();
-            verifyTRJournalEntries(capitalizedIncomeAdjustmentTransactionId, journalEntry(15, feeIncomeAccount, "DEBIT"), //
+            verifyTRJournalEntries(capitalizedIncomeAdjustmentTransactionId, journalEntry(15, deferredIncomeLiabilityAccount, "DEBIT"), //
                     journalEntry(15.00, overpaymentAccount, "CREDIT") //
             );
 
