@@ -42,6 +42,7 @@ import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.commands.configuration.RetryConfigurationAssembler;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.filters.BatchRequestPreprocessor;
 import org.apache.fineract.infrastructure.core.persistence.ExtendedJpaTransactionManager;
@@ -53,6 +54,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 
@@ -77,6 +79,9 @@ class BatchApiServiceImplTest {
 
     @Mock
     private FineractProperties fineractProperties;
+
+    @Spy
+    private FineractRequestContextHolder fineractRequestContextHolder;
 
     @InjectMocks
     private RetryConfigurationAssembler retryConfigurationAssembler;

@@ -26,6 +26,7 @@ import java.util.Arrays;
 import lombok.AllArgsConstructor;
 import org.apache.fineract.batch.service.BatchExecutionException;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
 import org.springframework.stereotype.Service;
 
 @AllArgsConstructor
@@ -34,11 +35,21 @@ public class RetryConfigurationAssembler {
 
     public static final String EXECUTE_COMMAND = "executeCommand";
     public static final String BATCH_RETRY = "batchRetry";
+    private static final String LAST_EXECUTION_EXCEPTION_KEY = "LAST_EXECUTION_EXCEPTION";
     private final RetryRegistry registry;
     private final FineractProperties fineractProperties;
+    private final FineractRequestContextHolder fineractRequestContextHolder;
 
     private boolean isAssignableFrom(Object e, Class<? extends Throwable>[] exceptionList) {
         return Arrays.stream(exceptionList).anyMatch(re -> re.isAssignableFrom(e.getClass()));
+    }
+
+    private void setLastException(Object ex) {
+        fineractRequestContextHolder.setAttribute(LAST_EXECUTION_EXCEPTION_KEY, ex.getClass());
+    }
+
+    public Class<?> getLastException() {
+        return (Class<?>) fineractRequestContextHolder.getAttribute(RetryConfigurationAssembler.LAST_EXECUTION_EXCEPTION_KEY);
     }
 
     public Retry getRetryConfigurationForExecuteCommand() {
@@ -46,7 +57,10 @@ public class RetryConfigurationAssembler {
         RetryConfig.Builder configBuilder = buildCommonExecuteCommandConfiguration();
 
         if (exceptionList != null) {
-            configBuilder.retryOnException(e -> isAssignableFrom(e, exceptionList));
+            configBuilder.retryOnException(ex -> {
+                setLastException(ex);
+                return isAssignableFrom(ex, exceptionList);
+            });
         }
 
         RetryConfig config = configBuilder.build();
@@ -60,8 +74,10 @@ public class RetryConfigurationAssembler {
         if (exceptionList != null) {
             configBuilder.retryOnException(ex -> {
                 if (ex instanceof BatchExecutionException e) {
+                    setLastException(e.getCause().getClass());
                     return isAssignableFrom(e.getCause(), exceptionList);
                 } else {
+                    setLastException(ex);
                     return isAssignableFrom(ex, exceptionList);
                 }
             });

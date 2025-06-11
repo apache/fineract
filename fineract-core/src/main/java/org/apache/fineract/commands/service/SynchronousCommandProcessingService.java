@@ -188,7 +188,13 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         }
         CommandProcessingResultType status = CommandProcessingResultType.fromInt(command.getStatus());
         switch (status) {
-            case UNDER_PROCESSING -> throw new IdempotentCommandProcessUnderProcessingException(wrapper, idempotencyKey);
+            case UNDER_PROCESSING -> {
+                Class<?> lastExecutionExceptionClass = retryConfigurationAssembler.getLastException();
+                if (lastExecutionExceptionClass == null
+                        || IdempotentCommandProcessUnderProcessingException.class.isAssignableFrom(lastExecutionExceptionClass)) {
+                    throw new IdempotentCommandProcessUnderProcessingException(wrapper, idempotencyKey);
+                }
+            }
             case PROCESSED -> throw new IdempotentCommandProcessSucceedException(wrapper, idempotencyKey, command);
             case ERROR -> {
                 if (!retry) {
