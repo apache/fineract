@@ -82,7 +82,7 @@ cargo {
             property 'cargo.tomcat.connector.sslProtocol', 'TLS'
             property 'cargo.tomcat.connector.clientAuth', false
             property 'cargo.protocol', 'https'
-            property 'cargo.servlet.port', project.hasProperty('cargoPort') ? project.cargoPort.toInteger() : 8585
+            property 'cargo.servlet.port', 8443
         }
     }
 }
