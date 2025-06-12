@@ -3858,4 +3858,13 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId;
         return this;
     }
+
+    public CommandWrapperBuilder makeLoanBuyDownFee(final Long loanId) {
+        this.actionName = "BUYDOWNFEE";
+        this.entityName = "LOAN";
+        this.entityId = null;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/transactions/template?command=buyDownFee";
+        return this;
+    }
 }

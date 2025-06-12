@@ -19,15 +19,11 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.portfolio.loanaccount.serialization.LoanTransactionValidator;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface ProgressiveLoanTransactionValidator extends LoanTransactionValidator {
+public interface BuyDownFeePlatformService {
 
-    void validateCapitalizedIncome(JsonCommand command, Long loanId);
-
-    void validateCapitalizedIncomeAdjustment(JsonCommand command, Long loanId, Long capitalizedIncomeTransactionId);
-
-    void validateContractTerminationUndo(JsonCommand command, Long loanId);
-
-    void validateBuyDownFee(JsonCommand command, Long loanId);
+    @Transactional
+    CommandProcessingResult makeLoanBuyDownFee(Long loanId, JsonCommand command);
 }

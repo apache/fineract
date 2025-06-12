@@ -204,4 +204,5 @@
     <include file="parts/0183_add_LoanCapitalizedIncomeTransactionCreatedBusinessEvent.xml" relativeToChangelogFile="true" />
     <include file="parts/0184_add_document_event_configuration.xml" relativeToChangelogFile="true" />
     <include file="parts/0185_loan_buy_down_fee.xml" relativeToChangelogFile="true" />
+    <include file="parts/0186_add_buy_down_fee_to_loan_product.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

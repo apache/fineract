@@ -3049,6 +3049,10 @@ public class LoanTransactionHelper {
         return Calls.ok(FineractClientHelper.getFineractClient().loanTransactions.executeLoanTransaction(loanId, request, "downPayment"));
     }
 
+    public PostLoansLoanIdTransactionsResponse makeLoanBuyDownFee(Long loanId, PostLoansLoanIdTransactionsRequest request) {
+        return Calls.ok(FineractClientHelper.getFineractClient().loanTransactions.executeLoanTransaction(loanId, request, "buyDownFee"));
+    }
+
     public List<AdvancedPaymentData> getAdvancedPaymentAllocationRules(final Integer loanId) {
         return Calls.ok(FineractClientHelper.getFineractClient().legacy.getAdvancedPaymentAllocationRulesOfLoan(loanId.longValue()));
     }

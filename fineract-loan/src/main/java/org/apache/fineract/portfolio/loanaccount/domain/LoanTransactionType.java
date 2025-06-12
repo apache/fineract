@@ -73,6 +73,9 @@ public enum LoanTransactionType {
     CAPITALIZED_INCOME_AMORTIZATION_ADJUSTMENT(39, "loanTransactionType.capitalizedIncomeAmortizationAdjustment"), //
     // Kind of Final Transactions
     CONTRACT_TERMINATION(38, "loanTransactionType.contractTermination"), //
+
+    BUY_DOWN_FEE(40, "loanTransactionType.buyDownFee"), //
+    BUY_DOWN_FEE_ADJUSTMENT(41, "loanTransactionType.buyDownFeeAdjustment"), //
     ;
 
     private final Integer value;
@@ -128,6 +131,8 @@ public enum LoanTransactionType {
             case 37 -> LoanTransactionType.CAPITALIZED_INCOME_ADJUSTMENT;
             case 38 -> LoanTransactionType.CONTRACT_TERMINATION;
             case 39 -> LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION_ADJUSTMENT;
+            case 40 -> LoanTransactionType.BUY_DOWN_FEE;
+            case 41 -> LoanTransactionType.BUY_DOWN_FEE_ADJUSTMENT;
             default -> LoanTransactionType.INVALID;
         };
     }
@@ -255,5 +260,13 @@ public enum LoanTransactionType {
 
     public boolean isContractTermination() {
         return this == LoanTransactionType.CONTRACT_TERMINATION;
+    }
+
+    public boolean isBuyDownFee() {
+        return this == LoanTransactionType.BUY_DOWN_FEE;
+    }
+
+    public boolean isBuyDownFeeAdjustment() {
+        return this == LoanTransactionType.BUY_DOWN_FEE_ADJUSTMENT;
     }
 }
