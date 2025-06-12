@@ -146,10 +146,10 @@ public class LoanDisbursementService {
                     disbursementDetails.updatePrincipal(principalDisbursed);
                 }
             }
+            BigDecimal totalAmount = BigDecimal.ZERO;
             if (loan.loanProduct().isMultiDisburseLoan()) {
                 Collection<LoanDisbursementDetails> loanDisburseDetails = loan.getDisbursementDetails();
                 BigDecimal setPrincipalAmount = BigDecimal.ZERO;
-                BigDecimal totalAmount = BigDecimal.ZERO;
                 for (LoanDisbursementDetails disbursementDetails : loanDisburseDetails) {
                     if (disbursementDetails.actualDisbursementDate() != null) {
                         setPrincipalAmount = setPrincipalAmount.add(disbursementDetails.principal());
@@ -157,12 +157,11 @@ public class LoanDisbursementService {
                     totalAmount = totalAmount.add(disbursementDetails.principal());
                 }
                 loan.getLoanRepaymentScheduleDetail().setPrincipal(setPrincipalAmount);
-                loanDisbursementValidator.compareDisbursedToApprovedOrProposedPrincipal(loan, disburseAmount.getAmount(), totalAmount);
             } else {
                 loan.getLoanRepaymentScheduleDetail()
                         .setPrincipal(loan.getLoanRepaymentScheduleDetail().getPrincipal().minus(diff).getAmount());
             }
-            loanDisbursementValidator.validateDisburseAmountNotExceedingApprovedAmount(loan, diff, principalDisbursed);
+            loanDisbursementValidator.compareDisbursedToApprovedOrProposedPrincipal(loan, disburseAmount.getAmount(), totalAmount);
         }
         return disburseAmount;
     }

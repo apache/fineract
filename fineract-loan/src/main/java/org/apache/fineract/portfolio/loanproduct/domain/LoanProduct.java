@@ -410,7 +410,7 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
         }
 
         if (this.allowApprovedDisbursedAmountsOverApplied) {
-            if (!this.disallowExpectedDisbursements) {
+            if (this.isMultiDisburseLoan() && !this.disallowExpectedDisbursements) {
                 throw new LoanProductGeneralRuleException(
                         "disallowExpectedDisbursements.not.set.allowApprovedDisbursedAmountsOverApplied.cant.be.set",
                         "Disallow Expected Disbursals Not Set - Allow Approved / Disbursed Amounts Over Applied Can't Be Set");
