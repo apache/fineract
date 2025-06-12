@@ -1,11 +1,14 @@
 # NB No ASF ASL header here due to FINERACT-1195
-**/build/*
+# **/build/*
 **/.gradle/*
 **/bin/*
 
-*.jar
+# But allow this jar file back in
+!fineract-provider/build/libs/fineract-provider-0.0.0-360d2288.jar
+
+#*.jar
 *.war
 
 # Incremental "docker build" is faster if we can modify the Dockerfile
 # without "COPY ." re-transferring everything into the builder container.
-Dockerfile
+# Dockerfile
