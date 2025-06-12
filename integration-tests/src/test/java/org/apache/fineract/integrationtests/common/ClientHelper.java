@@ -38,6 +38,9 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDate;
+import java.util.Locale;
 import org.apache.fineract.client.models.ClientTextSearch;
 import org.apache.fineract.client.models.DeleteClientsClientIdResponse;
 import org.apache.fineract.client.models.GetClientClientIdAddressesResponse;
@@ -199,6 +202,18 @@ public class ClientHelper extends IntegrationTest {
                 "clientId");
     }
 
+    public static Integer createClient_Birthday(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+                                                final String birthDate) {
+        log.info("---------------------------------CREATING A CLIENT---------------------------------------------");
+
+        String officeId = "1";
+        Integer legalFormId = LEGALFORM_ID_PERSON;
+        String externalId = UUID.randomUUID().toString();
+
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, getBasicClientAsJSON_Birthday(officeId, legalFormId, externalId, birthDate),
+                "clientId");
+    }
+
     public static PostClientsResponse createClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String activationDate, final String officeId, final String externalId) {
         log.info("---------------------------------CREATING A CLIENT---------------------------------------------");
@@ -342,6 +357,20 @@ public class ClientHelper extends IntegrationTest {
         HashMap<String, Object> map = setInitialClientValues(officeId, legalFormId, externalId);
         map.put("active", "true");
         map.put("activationDate", DEFAULT_DATE);
+        final String basicClientAsJson = GSON.toJson(map);
+        log.info("Client JSON :  {}", basicClientAsJson);
+        return basicClientAsJson;
+    }
+
+    public static String getBasicClientAsJSON_Birthday(String officeId, Integer legalFormId, String externalId, String birthDate) {
+        HashMap<String, Object> map = setInitialClientValues(officeId, legalFormId, externalId);
+        map.put("active", "true");
+        map.put("activationDate", DEFAULT_DATE);
+        if (birthDate != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.ENGLISH);
+            String formattedDob = LocalDate.parse(birthDate).format(formatter);
+            map.put("dateOfBirth", formattedDob);
+        }
         final String basicClientAsJson = GSON.toJson(map);
         log.info("Client JSON :  {}", basicClientAsJson);
         return basicClientAsJson;

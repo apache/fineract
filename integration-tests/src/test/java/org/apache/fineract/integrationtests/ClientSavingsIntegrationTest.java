@@ -20,6 +20,8 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import static io.restassured.RestAssured.given;
+import java.util.concurrent.ThreadLocalRandom;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -136,6 +138,37 @@ public class ClientSavingsIntegrationTest {
 
         final Object savingsInterest = this.savingsAccountHelper.getSavingsInterest(savingsId);
         // verifySavingsInterest(savingsInterest);
+    }
+
+    @Test
+    public void testBirthdayBank() {
+
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+
+        // Generate two random DoBs with different years
+        String dob1 = generateRandomDob(2001);
+        String dob2 = generateRandomDob(1997);
+
+        // Create 3 clients: 2 with dob1, 1 with dob2
+        Integer clientId1 = createClientWithDob(dob1);
+        Integer clientId2 = createClientWithDob(dob1);
+        Integer clientId3 = createClientWithDob(dob2);
+
+        // Create savings product
+        Integer savingsProductId = createSavingsProduct(
+                this.requestSpec, this.responseSpec,
+                MINIMUM_OPENING_BALANCE, null, null,
+                "false", false
+        );
+
+        // Open savings accounts for all clients
+        applyForSavings(clientId1, savingsProductId);
+        applyForSavings(clientId2, savingsProductId);
+        applyForSavings(clientId3, savingsProductId);
+
+        // Query and validate savings accounts by DoB
+        assertAccountCountByDob(dob1, 2);
+        assertAccountCountByDob(dob2, 1);
     }
 
     @Test
@@ -3191,6 +3224,35 @@ public class ClientSavingsIntegrationTest {
         GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "38", false);
         GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "39", true);
         GlobalConfigurationHelper.updateValueForGlobalConfiguration(requestSpec, responseSpec, "39", "5");
+    }
+
+    private String generateRandomDob(int year) {
+        int month = ThreadLocalRandom.current().nextInt(1, 13);
+        int day = ThreadLocalRandom.current().nextInt(1, 29); // Safe day for all months
+        return String.format("%d-%02d-%02d", year, month, day);
+    }
+
+    private Integer createClientWithDob(String dob) {
+        Integer clientId = ClientHelper.createClient_Birthday(this.requestSpec, this.responseSpec, dob);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        return clientId;
+    }
+
+    private void applyForSavings(Integer clientId, Integer savingsProductId) {
+        this.savingsAccountHelper.applyForSavingsApplication(clientId, savingsProductId, ACCOUNT_TYPE_INDIVIDUAL);
+    }
+
+    private void assertAccountCountByDob(String dob, int expectedCount) {
+        HashMap<String, Object> response = given(requestSpec)
+                .when()
+                .get("/fineract-provider/api/v1/savingsaccounts?tenantIdentifier=default&birthDate=" + dob)
+                .then()
+                .spec(responseSpec)
+                .extract()
+                .as(HashMap.class);
+
+        List<HashMap> accounts = (List<HashMap>) response.get("pageItems");
+        Assertions.assertEquals(expectedCount, accounts.size(), "Unexpected account count for DoB: " + dob);
     }
 
     @AfterEach
