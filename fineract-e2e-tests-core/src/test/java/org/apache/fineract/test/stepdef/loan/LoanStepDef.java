@@ -33,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.google.gson.Gson;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.cucumber.datatable.DataTable;
+import io.cucumber.java.ParameterType;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -4128,6 +4129,65 @@ public class LoanStepDef extends AbstractStepDef {
 
         assertNotNull(targetProduct.getInterestRecognitionOnDisbursementDate());
         assertThat(targetProduct.getInterestRecognitionOnDisbursementDate().toString()).isEqualTo(expectedValue);
+    }
+
+    @Then("Loan Details response contains chargedOffOnDate set to {string}")
+    public void verifyChargedOffOnDateFlagInLoanResponse(final String expectedValue) throws IOException {
+        Response<PostLoansLoanIdTransactionsResponse> loanResponse = testContext().get(TestContextKey.LOAN_CHARGE_OFF_RESPONSE);
+
+        long loanId = loanResponse.body().getLoanId();
+
+        Optional<Response<GetLoansLoanIdResponse>> loanDetailsResponseOptional = Optional
+                .of(loansApi.retrieveLoan(loanId, false, "", "", "").execute());
+        Response<GetLoansLoanIdResponse> loanDetailsResponse = loanDetailsResponseOptional
+                .orElseThrow(() -> new RuntimeException("Failed to retrieve loan details - response is null"));
+
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+        testContext().set(TestContextKey.LOAN_RESPONSE, loanDetailsResponse);
+
+        assertThat(loanDetailsResponse.body().getTimeline().getChargedOffOnDate()).isEqualTo(LocalDate.parse(expectedValue, FORMATTER));
+    }
+
+    @Then("Loan Details response does not contain chargedOff flag and chargedOffOnDate field after repayment and reverted charge off")
+    public void verifyChargedOffOnDateFlagIsNotPresentLoanResponse() throws IOException {
+        Response<PostLoansLoanIdTransactionsResponse> loanResponse = testContext().get(TestContextKey.LOAN_REPAYMENT_RESPONSE);
+
+        long loanId = loanResponse.body().getLoanId();
+
+        Optional<Response<GetLoansLoanIdResponse>> loanDetailsResponseOptional = Optional
+                .of(loansApi.retrieveLoan(loanId, false, "", "", "").execute());
+        Response<GetLoansLoanIdResponse> loanDetailsResponse = loanDetailsResponseOptional
+                .orElseThrow(() -> new RuntimeException("Failed to retrieve loan details - response is null"));
+
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+        testContext().set(TestContextKey.LOAN_RESPONSE, loanDetailsResponse);
+
+        assertThat(loanDetailsResponse.body().getTimeline().getChargedOffOnDate()).isNull();
+        assertThat(loanDetailsResponse.body().getChargedOff()).isFalse();
+    }
+
+    @Then("Loan Details response contains chargedOff flag set to {booleanValue}")
+    public void verifyChargeOffFlagInLoanResponse(final Boolean expectedValue) throws IOException {
+        Response<PostLoansLoanIdTransactionsResponse> loanResponse = expectedValue
+                ? testContext().get(TestContextKey.LOAN_CHARGE_OFF_RESPONSE)
+                : testContext().get(TestContextKey.LOAN_CHARGE_OFF_UNDO_RESPONSE);
+
+        long loanId = loanResponse.body().getLoanId();
+
+        Optional<Response<GetLoansLoanIdResponse>> loanDetailsResponseOptional = Optional
+                .of(loansApi.retrieveLoan(loanId, false, "", "", "").execute());
+        Response<GetLoansLoanIdResponse> loanDetailsResponse = loanDetailsResponseOptional
+                .orElseThrow(() -> new RuntimeException("Failed to retrieve loan details - response is null"));
+
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+        testContext().set(TestContextKey.LOAN_RESPONSE, loanDetailsResponse);
+
+        assertThat(loanDetailsResponse.body().getChargedOff()).isEqualTo(expectedValue);
+    }
+
+    @ParameterType(value = "true|True|TRUE|false|False|FALSE")
+    public Boolean booleanValue(String value) {
+        return Boolean.valueOf(value);
     }
 
     public Response<PostLoansLoanIdTransactionsResponse> addCapitalizedIncomeToTheLoanOnWithEURTransactionAmount(
