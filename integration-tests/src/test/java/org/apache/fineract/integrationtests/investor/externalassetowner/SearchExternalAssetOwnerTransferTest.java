@@ -28,9 +28,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.ExternalAssetOwnerResponse;
 import org.apache.fineract.client.models.PageExternalTransferData;
 import org.apache.fineract.client.models.PagedRequestExternalAssetOwnerSearchRequest;
-import org.apache.fineract.client.models.PostInitiateTransferResponse;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Test;
@@ -50,7 +50,7 @@ public class SearchExternalAssetOwnerTransferTest extends ExternalAssetOwnerTran
             Integer loanID = createLoanForClient(clientID, "29 February 2020");
             addPenaltyForLoan(loanID, "10");
 
-            PostInitiateTransferResponse saleTransferResponse = createSaleTransfer(loanID, baseDate);
+            ExternalAssetOwnerResponse saleTransferResponse = createSaleTransfer(loanID, baseDate);
             validateResponse(saleTransferResponse, loanID);
 
             // LookUp by ExternalId

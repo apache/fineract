@@ -45,14 +45,14 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingConstants;
-import org.apache.fineract.client.models.ExternalAssetOwnerRequest;
+import org.apache.fineract.client.models.ExternalAssetOwnerResponse;
 import org.apache.fineract.client.models.ExternalOwnerTransferJournalEntryData;
 import org.apache.fineract.client.models.ExternalTransferData;
 import org.apache.fineract.client.models.GetFinancialActivityAccountsResponse;
 import org.apache.fineract.client.models.PageExternalTransferData;
 import org.apache.fineract.client.models.PostFinancialActivityAccountsRequest;
-import org.apache.fineract.client.models.PostInitiateTransferResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
+import org.apache.fineract.client.models.SaleLoanExternalAssetRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.BaseLoanIntegrationTest;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
@@ -138,7 +138,7 @@ public class ExternalAssetOwnerTransferCancelTest extends BaseLoanIntegrationTes
             Integer loanID = createLoanForClient(clientID);
             addPenaltyForLoan(loanID, "10");
 
-            PostInitiateTransferResponse saleTransferResponse = createSaleTransfer(loanID, "2020-03-02");
+            ExternalAssetOwnerResponse saleTransferResponse = createSaleTransfer(loanID, "2020-03-02");
             validateResponse(saleTransferResponse, loanID);
             getAndValidateExternalAssetOwnerTransferByLoan(loanID,
                     ExpectedExternalTransferData.expected(PENDING, saleTransferResponse.getResourceExternalId(), "2020-03-02", "2020-03-02",
@@ -179,9 +179,9 @@ public class ExternalAssetOwnerTransferCancelTest extends BaseLoanIntegrationTes
             Integer clientID = createClient();
             Integer loanID = createLoanForClient(clientID);
 
-            PostInitiateTransferResponse saleTransferResponse = createSaleTransfer(loanID, "2020-03-02");
+            ExternalAssetOwnerResponse saleTransferResponse = createSaleTransfer(loanID, "2020-03-02");
             validateResponse(saleTransferResponse, loanID);
-            PostInitiateTransferResponse buybackTransferResponse = createBuybackTransfer(loanID, "2020-03-02");
+            ExternalAssetOwnerResponse buybackTransferResponse = createBuybackTransfer(loanID, "2020-03-02");
             validateResponse(buybackTransferResponse, loanID);
 
             getAndValidateExternalAssetOwnerTransferByLoan(loanID,
@@ -239,25 +239,25 @@ public class ExternalAssetOwnerTransferCancelTest extends BaseLoanIntegrationTes
         }
     }
 
-    private PostInitiateTransferResponse createSaleTransfer(Integer loanID, String settlementDate) {
+    private ExternalAssetOwnerResponse createSaleTransfer(Integer loanID, String settlementDate) {
         String transferExternalId = UUID.randomUUID().toString();
         ownerExternalId = UUID.randomUUID().toString();
         return createSaleTransfer(loanID, settlementDate, transferExternalId, ownerExternalId, "1.0");
     }
 
-    private PostInitiateTransferResponse createSaleTransfer(Integer loanID, String settlementDate, String transferExternalId,
+    private ExternalAssetOwnerResponse createSaleTransfer(Integer loanID, String settlementDate, String transferExternalId,
             String ownerExternalId, String purchasePriceRatio) {
-        PostInitiateTransferResponse saleResponse = EXTERNAL_ASSET_OWNER_HELPER.initiateTransferByLoanId(loanID.longValue(), "sale",
-                new ExternalAssetOwnerRequest().settlementDate(settlementDate).dateFormat("yyyy-MM-dd").locale("en")
+        ExternalAssetOwnerResponse saleResponse = EXTERNAL_ASSET_OWNER_HELPER.initiateSaleTransferByLoanId(loanID.longValue(), "sale",
+                new SaleLoanExternalAssetRequest().settlementDate(settlementDate).dateFormat("yyyy-MM-dd").locale("en")
                         .transferExternalId(transferExternalId).ownerExternalId(ownerExternalId).purchasePriceRatio(purchasePriceRatio));
         assertEquals(transferExternalId, saleResponse.getResourceExternalId());
         return saleResponse;
     }
 
-    private PostInitiateTransferResponse createBuybackTransfer(Integer loanID, String settlementDate) {
+    private ExternalAssetOwnerResponse createBuybackTransfer(Integer loanID, String settlementDate) {
         String transferExternalId = UUID.randomUUID().toString();
-        PostInitiateTransferResponse saleResponse = EXTERNAL_ASSET_OWNER_HELPER.initiateTransferByLoanId(loanID.longValue(), "buyback",
-                new ExternalAssetOwnerRequest().settlementDate(settlementDate).dateFormat("yyyy-MM-dd").locale("en")
+        ExternalAssetOwnerResponse saleResponse = EXTERNAL_ASSET_OWNER_HELPER.initiateSaleTransferByLoanId(loanID.longValue(), "buyback",
+                new SaleLoanExternalAssetRequest().settlementDate(settlementDate).dateFormat("yyyy-MM-dd").locale("en")
                         .transferExternalId(transferExternalId));
         assertEquals(transferExternalId, saleResponse.getResourceExternalId());
         return saleResponse;
@@ -401,14 +401,13 @@ public class ExternalAssetOwnerTransferCancelTest extends BaseLoanIntegrationTes
         assertNull(activeTransfer);
     }
 
-    private void validateResponse(PostInitiateTransferResponse transferResponse, Integer loanID) {
+    private void validateResponse(ExternalAssetOwnerResponse transferResponse, Integer loanID) {
         assertNotNull(transferResponse);
         assertNotNull(transferResponse.getResourceId());
         assertNotNull(transferResponse.getResourceExternalId());
         assertNotNull(transferResponse.getSubResourceId());
         assertEquals((long) loanID, transferResponse.getSubResourceId());
         assertNotNull(transferResponse.getSubResourceExternalId());
-        assertNull(transferResponse.getChanges());
     }
 
     @RequiredArgsConstructor()

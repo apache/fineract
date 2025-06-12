@@ -25,7 +25,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.accounting.common.AccountingConstants;
-import org.apache.fineract.client.models.ExternalAssetOwnerRequest;
+import org.apache.fineract.client.models.BuyBackLoanExternalAssetRequest;
+import org.apache.fineract.client.models.ExternalAssetOwnerResponse;
 import org.apache.fineract.client.models.ExternalAssetOwnerSearchRequest;
 import org.apache.fineract.client.models.ExternalOwnerJournalEntryData;
 import org.apache.fineract.client.models.ExternalOwnerTransferJournalEntryData;
@@ -34,7 +35,7 @@ import org.apache.fineract.client.models.GetFinancialActivityAccountsResponse;
 import org.apache.fineract.client.models.PageExternalTransferData;
 import org.apache.fineract.client.models.PagedRequestExternalAssetOwnerSearchRequest;
 import org.apache.fineract.client.models.PostFinancialActivityAccountsRequest;
-import org.apache.fineract.client.models.PostInitiateTransferResponse;
+import org.apache.fineract.client.models.SaleLoanExternalAssetRequest;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -44,8 +45,12 @@ public class ExternalAssetOwnerHelper {
 
     public ExternalAssetOwnerHelper() {}
 
-    public PostInitiateTransferResponse initiateTransferByLoanId(Long loanId, String command, ExternalAssetOwnerRequest request) {
-        return Calls.ok(FineractClientHelper.getFineractClient().externalAssetOwners.transferRequestWithLoanId(loanId, request, command));
+    public ExternalAssetOwnerResponse initiateSaleTransferByLoanId(Long loanId, String command, SaleLoanExternalAssetRequest request) {
+        return Calls.ok(FineractClientHelper.getFineractClient().externalAssetOwners.transferRequestWithLoanId(loanId, command, request));
+    }
+
+    public ExternalAssetOwnerResponse initiateSaleTransferByLoanId(Long loanId, String command, BuyBackLoanExternalAssetRequest request) {
+        return Calls.ok(FineractClientHelper.getFineractClient().externalAssetOwners.transferRequestWithLoanId(loanId, command, request));
     }
 
     public void cancelTransferByTransferExternalId(String transferExternalId) {

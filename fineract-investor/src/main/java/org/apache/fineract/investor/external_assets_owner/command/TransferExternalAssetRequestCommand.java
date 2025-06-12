@@ -16,25 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.investor.data.request;
+package org.apache.fineract.investor.external_assets_owner.command;
 
-import java.io.Serial;
-import java.io.Serializable;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.investor.external_assets_owner.data.SaleLoanExternalAssetRequest;
 
 @Data
-@NoArgsConstructor
-public class ExternalAssetOwnerRequest implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
-
-    private String settlementDate;
-    private String ownerExternalId;
-    private String transferExternalId;
-    private String transferExternalGroupId;
-    private String purchasePriceRatio;
-    private String dateFormat;
-    private String locale;
-}
+@EqualsAndHashCode(callSuper = true)
+public class TransferExternalAssetRequestCommand extends Command<SaleLoanExternalAssetRequest> {}

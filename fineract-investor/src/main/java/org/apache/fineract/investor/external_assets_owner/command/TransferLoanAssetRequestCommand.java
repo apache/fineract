@@ -16,19 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.investor.service;
+package org.apache.fineract.investor.external_assets_owner.command;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.investor.external_assets_owner.data.IntermediarySaleLoanExternalAssetRequest;
 
-public interface ExternalAssetOwnersWriteService {
-
-    CommandProcessingResult intermediarySaleLoanByLoanId(JsonCommand jsonCommand);
-
-    CommandProcessingResult saleLoanByLoanId(JsonCommand command);
-
-    CommandProcessingResult buybackLoanByLoanId(JsonCommand command);
-
-    CommandProcessingResult cancelTransactionById(JsonCommand command);
-
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class TransferLoanAssetRequestCommand extends Command<IntermediarySaleLoanExternalAssetRequest> {}

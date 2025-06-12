@@ -16,25 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.investor.service;
+package org.apache.fineract.investor.external_assets_owner.command;
 
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.apache.fineract.command.core.Command;
-import org.apache.fineract.command.core.CommandHandler;
 import org.apache.fineract.investor.external_assets_owner.data.CancelTransactionExternalAssetRequest;
-import org.apache.fineract.investor.external_assets_owner.data.ExternalAssetOwnerResponse;
-import org.apache.fineract.investor.external_assets_owner.service.ExternalAssetOwnersWriteService;
-import org.springframework.stereotype.Component;
 
-@Component
-@RequiredArgsConstructor
-public class CancelTransactionFromExternalAssetOwnerHandler
-        implements CommandHandler<CancelTransactionExternalAssetRequest, ExternalAssetOwnerResponse> {
-
-    private final ExternalAssetOwnersWriteService externalAssetOwnersWriteService;
-
-    @Override
-    public ExternalAssetOwnerResponse handle(Command<CancelTransactionExternalAssetRequest> command) {
-        return externalAssetOwnersWriteService.cancelTransactionById(command.getPayload());
-    }
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class TransferAssetRequestCommand extends Command<CancelTransactionExternalAssetRequest> {}

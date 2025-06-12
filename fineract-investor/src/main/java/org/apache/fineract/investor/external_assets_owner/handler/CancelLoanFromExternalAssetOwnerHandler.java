@@ -16,25 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.investor.service;
+package org.apache.fineract.investor.external_assets_owner.handler;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.springframework.stereotype.Service;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.investor.external_assets_owner.data.CancelTransactionExternalAssetRequest;
+import org.apache.fineract.investor.external_assets_owner.data.ExternalAssetOwnerResponse;
+import org.apache.fineract.investor.external_assets_owner.service.ExternalAssetOwnersWriteService;
+import org.springframework.stereotype.Component;
 
+@Component
 @RequiredArgsConstructor
-@Service
-@CommandType(entity = "LOAN", action = "INTERMEDIARYSALE")
-public class IntermediarySaleToExternalAssetOwnerHandler implements NewCommandSourceHandler {
+public class CancelLoanFromExternalAssetOwnerHandler
+        implements CommandHandler<CancelTransactionExternalAssetRequest, ExternalAssetOwnerResponse> {
 
     private final ExternalAssetOwnersWriteService externalAssetOwnersWriteService;
 
     @Override
-    public CommandProcessingResult processCommand(JsonCommand command) {
-        return externalAssetOwnersWriteService.intermediarySaleLoanByLoanId(command);
+    public ExternalAssetOwnerResponse handle(Command<CancelTransactionExternalAssetRequest> command) {
+        return externalAssetOwnersWriteService.cancelTransactionById(command.getPayload());
     }
-
 }

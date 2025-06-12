@@ -19,12 +19,18 @@
 package org.apache.fineract.investor.service;
 
 import static org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType.BUSINESS_DATE;
+import static org.apache.fineract.investor.service.ExternalAssetOwnersWriteServiceTest.TestContext.DATE_FORMAT;
+import static org.apache.fineract.investor.service.ExternalAssetOwnersWriteServiceTest.TestContext.LOCALE;
+import static org.apache.fineract.investor.service.ExternalAssetOwnersWriteServiceTest.TestContext.externalLoanId;
+import static org.apache.fineract.investor.service.ExternalAssetOwnersWriteServiceTest.TestContext.loanId;
+import static org.apache.fineract.investor.service.ExternalAssetOwnersWriteServiceTest.TestContext.ownerExternalId;
+import static org.apache.fineract.investor.service.ExternalAssetOwnersWriteServiceTest.TestContext.settlementDate;
+import static org.apache.fineract.investor.service.ExternalAssetOwnersWriteServiceTest.TestContext.transferExternalId;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
@@ -34,7 +40,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import com.google.gson.JsonElement;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -44,28 +49,30 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.fineract.cob.data.LoanDataForExternalTransfer;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
-import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.apache.fineract.investor.data.ExternalTransferRequestParameters;
 import org.apache.fineract.investor.data.ExternalTransferStatus;
 import org.apache.fineract.investor.domain.ExternalAssetOwner;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerRepository;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferRepository;
 import org.apache.fineract.investor.exception.ExternalAssetOwnerInitiateTransferException;
+import org.apache.fineract.investor.external_assets_owner.data.BuyBackLoanExternalAssetRequest;
+import org.apache.fineract.investor.external_assets_owner.data.ExternalAssetOwnerResponse;
+import org.apache.fineract.investor.external_assets_owner.data.IntermediarySaleLoanExternalAssetRequest;
+import org.apache.fineract.investor.external_assets_owner.data.SaleLoanExternalAssetRequest;
+import org.apache.fineract.investor.external_assets_owner.mapping.ExternalAssetOwnerMapper;
+import org.apache.fineract.investor.external_assets_owner.service.ExternalAssetOwnersWriteServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -97,22 +104,24 @@ public class ExternalAssetOwnersWriteServiceTest {
         ArgumentCaptor<ExternalAssetOwnerTransfer> externalAssetOwnerTransferArgumentCaptor = ArgumentCaptor
                 .forClass(ExternalAssetOwnerTransfer.class);
 
-        // given
-        final JsonCommand command = createJsonCommand(testContext.jsonCommand, testContext.loanId);
+        IntermediarySaleLoanExternalAssetRequest request = IntermediarySaleLoanExternalAssetRequest.builder().loanId(loanId)
+                .settlementDate(settlementDate.toString()).ownerExternalId(ownerExternalId).transferExternalId(transferExternalId)
+                .transferExternalGroupId(TestContext.transferExternalGroupId).purchasePriceRatio(TestContext.PURCHASE_RATIO.toString())
+                .dateFormat(DATE_FORMAT).locale(LOCALE).build();
 
-        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(testContext.loanId))
+        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(loanId))
                 .thenReturn(Optional.of(testContext.loanDataForExternalTransfer));
         when(testContext.externalAssetOwnerRepository.findByExternalId(any(ExternalId.class)))
                 .thenReturn(Optional.of(testContext.externalAssetOwner));
         when(testContext.delayedSettlementAttributeService.isEnabled(testContext.loanProductId)).thenReturn(true);
 
         // when
-        testContext.externalAssetOwnersWriteServiceImpl.intermediarySaleLoanByLoanId(command);
+        testContext.externalAssetOwnersWriteServiceImpl.intermediarySaleLoanByLoanId(request);
 
         // then
         verify(testContext.externalAssetOwnerTransferRepository).saveAndFlush(externalAssetOwnerTransferArgumentCaptor.capture());
         verify(testContext.externalAssetOwnerRepository, times(0)).saveAndFlush(any(ExternalAssetOwner.class));
-        verify(testContext.loanRepository).findLoanDataForExternalTransferByLoanId(testContext.loanId);
+        verify(testContext.loanRepository).findLoanDataForExternalTransferByLoanId(loanId);
         verify(testContext.delayedSettlementAttributeService).isEnabled(testContext.loanProductId);
 
         assertAssertOwnerTransferValues(testContext, externalAssetOwnerTransferArgumentCaptor.getValue(),
@@ -123,21 +132,23 @@ public class ExternalAssetOwnersWriteServiceTest {
     public void testIntermediarySaleLoanByLoanIdDelayedSettlementIsNotEnabled() {
         TestContext testContext = new TestContext();
 
-        // given
-        final JsonCommand command = createJsonCommand(testContext.jsonCommand, testContext.loanId);
+        IntermediarySaleLoanExternalAssetRequest request = IntermediarySaleLoanExternalAssetRequest.builder().loanId(loanId)
+                .settlementDate(settlementDate.toString()).ownerExternalId(ownerExternalId).transferExternalId(transferExternalId)
+                .transferExternalGroupId(TestContext.transferExternalGroupId).purchasePriceRatio(TestContext.PURCHASE_RATIO.toString())
+                .dateFormat(DATE_FORMAT).locale(LOCALE).build();
 
-        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(testContext.loanId))
+        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(loanId))
                 .thenReturn(Optional.of(testContext.loanDataForExternalTransfer));
         when(testContext.delayedSettlementAttributeService.isEnabled(testContext.loanProductId)).thenReturn(false);
 
         // when
-        ExternalAssetOwnerInitiateTransferException thrownException = assertThrows(ExternalAssetOwnerInitiateTransferException.class,
-                () -> testContext.externalAssetOwnersWriteServiceImpl.intermediarySaleLoanByLoanId(command));
+        ExternalAssetOwnerInitiateTransferException thrownException = Assert.assertThrows(ExternalAssetOwnerInitiateTransferException.class,
+                () -> testContext.externalAssetOwnersWriteServiceImpl.intermediarySaleLoanByLoanId(request));
 
         // then
         verify(testContext.externalAssetOwnerTransferRepository, times(0)).saveAndFlush(any(ExternalAssetOwnerTransfer.class));
         verify(testContext.externalAssetOwnerRepository, times(0)).saveAndFlush(any(ExternalAssetOwner.class));
-        verify(testContext.loanRepository).findLoanDataForExternalTransferByLoanId(testContext.loanId);
+        verify(testContext.loanRepository).findLoanDataForExternalTransferByLoanId(loanId);
         verify(testContext.delayedSettlementAttributeService).isEnabled(testContext.loanProductId);
         Assertions.assertEquals(thrownException.getMessage(), "Delayed Settlement Configuration is not enabled for the loan product: "
                 + testContext.loanDataForExternalTransfer.getLoanProductShortName());
@@ -150,22 +161,25 @@ public class ExternalAssetOwnersWriteServiceTest {
         TestContext testContext = new TestContext();
 
         // given
-        final JsonCommand command = createJsonCommand(testContext.jsonCommand, testContext.loanId);
+        IntermediarySaleLoanExternalAssetRequest request = IntermediarySaleLoanExternalAssetRequest.builder().loanId(loanId)
+                .settlementDate(settlementDate.toString()).ownerExternalId(ownerExternalId).transferExternalId(transferExternalId)
+                .transferExternalGroupId(TestContext.transferExternalGroupId).purchasePriceRatio(TestContext.PURCHASE_RATIO.toString())
+                .dateFormat(DATE_FORMAT).locale(LOCALE).build();
 
-        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(testContext.loanId))
+        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(loanId))
                 .thenReturn(Optional.of(testContext.loanDataForExternalTransfer));
         when(testContext.delayedSettlementAttributeService.isEnabled(testContext.loanProductId)).thenReturn(true);
-        when(testContext.externalAssetOwnerTransferRepository.findEffectiveTransfersOrderByIdDesc(eq(testContext.loanId),
-                any(LocalDate.class))).thenReturn(externalAssetOwnerTransferList);
+        when(testContext.externalAssetOwnerTransferRepository.findEffectiveTransfersOrderByIdDesc(eq(loanId), any(LocalDate.class)))
+                .thenReturn(externalAssetOwnerTransferList);
 
         // when
-        ExternalAssetOwnerInitiateTransferException thrownException = assertThrows(ExternalAssetOwnerInitiateTransferException.class,
-                () -> testContext.externalAssetOwnersWriteServiceImpl.intermediarySaleLoanByLoanId(command));
+        ExternalAssetOwnerInitiateTransferException thrownException = Assert.assertThrows(ExternalAssetOwnerInitiateTransferException.class,
+                () -> testContext.externalAssetOwnersWriteServiceImpl.intermediarySaleLoanByLoanId(request));
 
         // then
         verify(testContext.externalAssetOwnerTransferRepository, times(0)).saveAndFlush(any(ExternalAssetOwnerTransfer.class));
         verify(testContext.externalAssetOwnerRepository, times(0)).saveAndFlush(any(ExternalAssetOwner.class));
-        verify(testContext.loanRepository).findLoanDataForExternalTransferByLoanId(testContext.loanId);
+        verify(testContext.loanRepository).findLoanDataForExternalTransferByLoanId(loanId);
         verify(testContext.delayedSettlementAttributeService).isEnabled(testContext.loanProductId);
         Assertions.assertEquals(thrownException.getMessage(), expectedErrorString);
     }
@@ -178,9 +192,12 @@ public class ExternalAssetOwnersWriteServiceTest {
                 .forClass(ExternalAssetOwnerTransfer.class);
 
         // given
-        final JsonCommand command = createJsonCommand(testContext.jsonCommand, testContext.loanId);
+        IntermediarySaleLoanExternalAssetRequest request = IntermediarySaleLoanExternalAssetRequest.builder().loanId(loanId)
+                .settlementDate(settlementDate.toString()).ownerExternalId(ownerExternalId).transferExternalId(transferExternalId)
+                .transferExternalGroupId(TestContext.transferExternalGroupId).purchasePriceRatio(TestContext.PURCHASE_RATIO.toString())
+                .dateFormat(DATE_FORMAT).locale(LOCALE).build();
 
-        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(testContext.loanId))
+        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(loanId))
                 .thenReturn(Optional.of(testContext.loanDataForExternalTransfer));
         when(testContext.externalAssetOwnerRepository.findByExternalId(any(ExternalId.class)))
                 .thenReturn(Optional.of(testContext.externalAssetOwner));
@@ -188,12 +205,12 @@ public class ExternalAssetOwnersWriteServiceTest {
         when(testContext.delayedSettlementAttributeService.isEnabled(testContext.loanProductId)).thenReturn(true);
 
         // when
-        testContext.externalAssetOwnersWriteServiceImpl.intermediarySaleLoanByLoanId(command);
+        testContext.externalAssetOwnersWriteServiceImpl.intermediarySaleLoanByLoanId(request);
 
         // then
         verify(testContext.externalAssetOwnerTransferRepository).saveAndFlush(externalAssetOwnerTransferArgumentCaptor.capture());
         verify(testContext.externalAssetOwnerRepository, times(0)).saveAndFlush(any(ExternalAssetOwner.class));
-        verify(testContext.loanRepository).findLoanDataForExternalTransferByLoanId(testContext.loanId);
+        verify(testContext.loanRepository).findLoanDataForExternalTransferByLoanId(loanId);
         verify(testContext.delayedSettlementAttributeService).isEnabled(testContext.loanProductId);
 
         assertAssertOwnerTransferValues(testContext, externalAssetOwnerTransferArgumentCaptor.getValue(),
@@ -206,22 +223,24 @@ public class ExternalAssetOwnersWriteServiceTest {
         final TestContext testContext = new TestContext();
 
         // given
-        final JsonCommand command = createJsonCommand(testContext.jsonCommand, testContext.loanId);
+        IntermediarySaleLoanExternalAssetRequest request = IntermediarySaleLoanExternalAssetRequest.builder().loanId(loanId)
+                .settlementDate(settlementDate.toString()).ownerExternalId(ownerExternalId).transferExternalId(transferExternalId)
+                .transferExternalGroupId(TestContext.transferExternalGroupId).purchasePriceRatio(TestContext.PURCHASE_RATIO.toString())
+                .dateFormat(DATE_FORMAT).locale(LOCALE).build();
 
         when(testContext.loanDataForExternalTransfer.getLoanStatus()).thenReturn(loanStatus);
         when(testContext.delayedSettlementAttributeService.isEnabled(testContext.loanProductId)).thenReturn(true);
-        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(testContext.loanId))
+        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(loanId))
                 .thenReturn(Optional.of(testContext.loanDataForExternalTransfer));
 
         // when
         ExternalAssetOwnerInitiateTransferException exception = assertThrows(ExternalAssetOwnerInitiateTransferException.class,
-                () -> testContext.externalAssetOwnersWriteServiceImpl.intermediarySaleLoanByLoanId(command));
+                () -> testContext.externalAssetOwnersWriteServiceImpl.intermediarySaleLoanByLoanId(request));
 
         assertEquals(exception.getMessage(), String.format("Loan status %s is not valid for transfer.", loanStatus.name()));
 
         // then
-        verify(testContext.fromApiJsonHelper, times(2)).parse(command.json());
-        verify(testContext.loanRepository, times(1)).findLoanDataForExternalTransferByLoanId(testContext.loanId);
+        verify(testContext.loanRepository, times(1)).findLoanDataForExternalTransferByLoanId(loanId);
         verify(testContext.delayedSettlementAttributeService).isEnabled(testContext.loanProductId);
         verify(testContext.externalAssetOwnerTransferRepository, times(1)).exists(any(Specification.class));
         verifyNoInteractions(testContext.externalAssetOwnerRepository);
@@ -239,34 +258,39 @@ public class ExternalAssetOwnersWriteServiceTest {
                 .forClass(ExternalAssetOwnerTransfer.class);
 
         // given
-        final JsonCommand command = createJsonCommand(testContext.jsonCommand, testContext.loanId);
+        SaleLoanExternalAssetRequest request = SaleLoanExternalAssetRequest.builder().loanId(loanId)
+                .settlementDate(settlementDate.toString()).ownerExternalId(ownerExternalId).transferExternalId(transferExternalId)
+                .transferExternalGroupId(TestContext.transferExternalGroupId).purchasePriceRatio(TestContext.PURCHASE_RATIO.toString())
+                .dateFormat(DATE_FORMAT).locale(LOCALE).build();
 
         when(testContext.loanDataForExternalTransfer.getLoanStatus()).thenReturn(loanStatus);
         when(testContext.delayedSettlementAttributeService.isEnabled(testContext.loanProductId)).thenReturn(true);
-        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(testContext.loanId))
+        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(loanId))
                 .thenReturn(Optional.of(testContext.loanDataForExternalTransfer));
-        when(testContext.externalAssetOwnerTransferRepository.findEffectiveTransfersOrderByIdDesc(eq(testContext.loanId),
-                any(LocalDate.class))).thenReturn(assetOwnerTransfers);
+        when(testContext.externalAssetOwnerTransferRepository.findEffectiveTransfersOrderByIdDesc(eq(loanId), any(LocalDate.class)))
+                .thenReturn(assetOwnerTransfers);
+
+        when(testContext.externalAssetOwnerMapper.map(any(ExternalAssetOwnerTransfer.class))).thenReturn(ExternalAssetOwnerResponse
+                .builder().resourceExternalId(transferExternalId).subResourceExternalId(externalLoanId).subResourceId(loanId).build());
 
         // when
-        CommandProcessingResult result = testContext.externalAssetOwnersWriteServiceImpl.saleLoanByLoanId(command);
+        ExternalAssetOwnerResponse result = testContext.externalAssetOwnersWriteServiceImpl.saleLoanByLoanId(request);
 
         // then
         verify(testContext.externalAssetOwnerRepository).findByExternalId(any(ExternalId.class));
         verify(testContext.externalAssetOwnerTransferRepository).saveAndFlush(externalAssetOwnerTransferArgumentCaptor.capture());
         verify(testContext.externalAssetOwnerRepository, times(0)).saveAndFlush(any(ExternalAssetOwner.class));
-        verify(testContext.externalAssetOwnerTransferRepository).findEffectiveTransfersOrderByIdDesc(eq(testContext.loanId),
-                any(LocalDate.class));
-        verify(testContext.loanRepository).findLoanDataForExternalTransferByLoanId(testContext.loanId);
+        verify(testContext.externalAssetOwnerTransferRepository).findEffectiveTransfersOrderByIdDesc(eq(loanId), any(LocalDate.class));
+        verify(testContext.loanRepository).findLoanDataForExternalTransferByLoanId(loanId);
         verify(testContext.delayedSettlementAttributeService).isEnabled(testContext.loanProductId);
 
         ExternalAssetOwnerTransfer savedTransfer = externalAssetOwnerTransferArgumentCaptor.getValue();
         assertAssertOwnerTransferValues(testContext, savedTransfer, ExternalTransferStatus.PENDING);
 
         assertEquals(savedTransfer.getId(), result.getResourceId());
-        assertEquals(savedTransfer.getExternalId(), result.getResourceExternalId());
+        assertEquals(savedTransfer.getExternalId().getValue(), result.getResourceExternalId());
         assertEquals(savedTransfer.getLoanId(), result.getSubResourceId());
-        assertEquals(savedTransfer.getExternalLoanId(), result.getSubResourceExternalId());
+        assertEquals(savedTransfer.getExternalLoanId().getValue(), result.getSubResourceExternalId());
     }
 
     @ParameterizedTest
@@ -275,22 +299,25 @@ public class ExternalAssetOwnersWriteServiceTest {
         final TestContext testContext = new TestContext();
 
         // given
-        final JsonCommand command = createJsonCommand(testContext.jsonCommand, testContext.loanId);
+        SaleLoanExternalAssetRequest request = SaleLoanExternalAssetRequest.builder().loanId(loanId)
+                .settlementDate(settlementDate.toString()).ownerExternalId(ownerExternalId).transferExternalId(transferExternalId)
+                .transferExternalGroupId(TestContext.transferExternalGroupId).purchasePriceRatio(TestContext.PURCHASE_RATIO.toString())
+                .dateFormat(DATE_FORMAT).locale(LOCALE).build();
 
         when(testContext.loanDataForExternalTransfer.getLoanStatus()).thenReturn(loanStatus);
         when(testContext.delayedSettlementAttributeService.isEnabled(testContext.loanProductId)).thenReturn(true);
-        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(testContext.loanId))
+        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(loanId))
                 .thenReturn(Optional.of(testContext.loanDataForExternalTransfer));
 
         // when
         ExternalAssetOwnerInitiateTransferException exception = assertThrows(ExternalAssetOwnerInitiateTransferException.class,
-                () -> testContext.externalAssetOwnersWriteServiceImpl.saleLoanByLoanId(command));
+                () -> testContext.externalAssetOwnersWriteServiceImpl.saleLoanByLoanId(request));
 
         assertEquals(exception.getMessage(), String.format("Loan status %s is not valid for transfer.", loanStatus.name()));
 
         // then
-        verify(testContext.fromApiJsonHelper, times(2)).parse(command.json());
-        verify(testContext.loanRepository, times(1)).findLoanDataForExternalTransferByLoanId(testContext.loanId);
+        // verify(testContext.fromApiJsonHelper, times(2)).parse(command.json());
+        verify(testContext.loanRepository, times(1)).findLoanDataForExternalTransferByLoanId(loanId);
         verify(testContext.delayedSettlementAttributeService).isEnabled(testContext.loanProductId);
         verify(testContext.externalAssetOwnerTransferRepository, times(1)).exists(any(Specification.class));
         verifyNoInteractions(testContext.externalAssetOwnerRepository);
@@ -305,63 +332,64 @@ public class ExternalAssetOwnersWriteServiceTest {
                 .forClass(ExternalAssetOwnerTransfer.class);
 
         // given
-        final JsonCommand command = createJsonCommand(testContext.jsonCommand, testContext.loanId);
+        SaleLoanExternalAssetRequest request = SaleLoanExternalAssetRequest.builder().loanId(loanId)
+                .settlementDate(settlementDate.toString()).ownerExternalId(ownerExternalId).transferExternalId(transferExternalId)
+                .transferExternalGroupId(TestContext.transferExternalGroupId).purchasePriceRatio(TestContext.PURCHASE_RATIO.toString())
+                .dateFormat(DATE_FORMAT).locale(LOCALE).build();
 
         when(testContext.delayedSettlementAttributeService.isEnabled(testContext.loanProductId)).thenReturn(isDelayedSettlementEnabled);
-        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(testContext.loanId))
+        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(loanId))
                 .thenReturn(Optional.of(testContext.loanDataForExternalTransfer));
-        when(testContext.externalAssetOwnerTransferRepository.findEffectiveTransfersOrderByIdDesc(eq(testContext.loanId),
-                any(LocalDate.class))).thenReturn(externalAssetOwnerTransferList);
+        when(testContext.externalAssetOwnerTransferRepository.findEffectiveTransfersOrderByIdDesc(eq(loanId), any(LocalDate.class)))
+                .thenReturn(externalAssetOwnerTransferList);
+
+        when(testContext.externalAssetOwnerMapper.map(any(ExternalAssetOwnerTransfer.class))).thenReturn(ExternalAssetOwnerResponse
+                .builder().resourceExternalId(transferExternalId).subResourceExternalId(externalLoanId).subResourceId(loanId).build());
 
         // when
-        CommandProcessingResult result = testContext.externalAssetOwnersWriteServiceImpl.saleLoanByLoanId(command);
+        ExternalAssetOwnerResponse result = testContext.externalAssetOwnersWriteServiceImpl.saleLoanByLoanId(request);
 
         // then
         verify(testContext.externalAssetOwnerRepository).findByExternalId(any(ExternalId.class));
         verify(testContext.externalAssetOwnerTransferRepository).saveAndFlush(externalAssetOwnerTransferArgumentCaptor.capture());
         verify(testContext.externalAssetOwnerRepository, times(0)).saveAndFlush(any(ExternalAssetOwner.class));
-        verify(testContext.externalAssetOwnerTransferRepository).findEffectiveTransfersOrderByIdDesc(eq(testContext.loanId),
-                any(LocalDate.class));
-        verify(testContext.loanRepository).findLoanDataForExternalTransferByLoanId(testContext.loanId);
+        verify(testContext.externalAssetOwnerTransferRepository).findEffectiveTransfersOrderByIdDesc(eq(loanId), any(LocalDate.class));
+        verify(testContext.loanRepository).findLoanDataForExternalTransferByLoanId(loanId);
         verify(testContext.delayedSettlementAttributeService).isEnabled(testContext.loanProductId);
 
         ExternalAssetOwnerTransfer savedTransfer = externalAssetOwnerTransferArgumentCaptor.getValue();
         assertAssertOwnerTransferValues(testContext, savedTransfer, ExternalTransferStatus.PENDING);
 
         assertEquals(savedTransfer.getId(), result.getResourceId());
-        assertEquals(savedTransfer.getExternalId(), result.getResourceExternalId());
+        assertEquals(savedTransfer.getExternalId().getValue(), result.getResourceExternalId());
         assertEquals(savedTransfer.getLoanId(), result.getSubResourceId());
-        assertEquals(savedTransfer.getExternalLoanId(), result.getSubResourceExternalId());
+        assertEquals(savedTransfer.getExternalLoanId().getValue(), result.getSubResourceExternalId());
     }
 
     @Test
     public void validateSettlementDateInThePastTest() {
         TestContext testContext = new TestContext();
-        final JsonElement jsonCommandElement = testContext.fromJsonHelper.parse(testContext.jsonCommand);
         ArgumentCaptor<ExternalAssetOwnerTransfer> externalAssetOwnerTransferArgumentCaptor = ArgumentCaptor
                 .forClass(ExternalAssetOwnerTransfer.class);
 
-        lenient().when(
-                testContext.fromApiJsonHelper.extractLocalDateNamed(ExternalTransferRequestParameters.SETTLEMENT_DATE, jsonCommandElement))
-                .thenReturn(LocalDate.EPOCH);
-        lenient().when(testContext.fromApiJsonHelper.extractLocalDateNamed(ExternalTransferRequestParameters.SETTLEMENT_DATE,
-                jsonCommandElement, testContext.DATE_FORMAT, Locale.GERMANY)).thenReturn(LocalDate.EPOCH);
-
         // given
-        final JsonCommand command = createJsonCommand(testContext.jsonCommand, testContext.loanId);
+        IntermediarySaleLoanExternalAssetRequest request = IntermediarySaleLoanExternalAssetRequest.builder().loanId(loanId)
+                .settlementDate(LocalDate.EPOCH.toString()).ownerExternalId(ownerExternalId).transferExternalId(transferExternalId)
+                .transferExternalGroupId(TestContext.transferExternalGroupId).purchasePriceRatio(TestContext.PURCHASE_RATIO.toString())
+                .dateFormat(DATE_FORMAT).locale(LOCALE).build();
 
-        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(testContext.loanId))
+        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(loanId))
                 .thenReturn(Optional.of(testContext.loanDataForExternalTransfer));
         when(testContext.delayedSettlementAttributeService.isEnabled(testContext.loanProductId)).thenReturn(true);
 
         // when
-        ExternalAssetOwnerInitiateTransferException thrownException = assertThrows(ExternalAssetOwnerInitiateTransferException.class,
-                () -> testContext.externalAssetOwnersWriteServiceImpl.intermediarySaleLoanByLoanId(command));
+        ExternalAssetOwnerInitiateTransferException thrownException = Assert.assertThrows(ExternalAssetOwnerInitiateTransferException.class,
+                () -> testContext.externalAssetOwnersWriteServiceImpl.intermediarySaleLoanByLoanId(request));
 
         // then
         verify(testContext.externalAssetOwnerTransferRepository, times(0)).saveAndFlush(externalAssetOwnerTransferArgumentCaptor.capture());
         verify(testContext.externalAssetOwnerRepository, times(0)).saveAndFlush(any(ExternalAssetOwner.class));
-        verify(testContext.loanRepository).findLoanDataForExternalTransferByLoanId(testContext.loanId);
+        verify(testContext.loanRepository).findLoanDataForExternalTransferByLoanId(loanId);
         verify(testContext.delayedSettlementAttributeService).isEnabled(testContext.loanProductId);
         Assertions.assertEquals(thrownException.getMessage(), "Settlement date cannot be in the past");
     }
@@ -433,32 +461,37 @@ public class ExternalAssetOwnersWriteServiceTest {
                 .forClass(ExternalAssetOwnerTransfer.class);
 
         // given
-        final JsonCommand command = createJsonCommand(testContext.jsonCommand, testContext.loanId);
+        SaleLoanExternalAssetRequest request = SaleLoanExternalAssetRequest.builder().loanId(loanId)
+                .settlementDate(settlementDate.toString()).ownerExternalId(ownerExternalId).transferExternalId(transferExternalId)
+                .transferExternalGroupId(TestContext.transferExternalGroupId).purchasePriceRatio(TestContext.PURCHASE_RATIO.toString())
+                .dateFormat(DATE_FORMAT).locale(LOCALE).build();
 
         when(testContext.delayedSettlementAttributeService.isEnabled(testContext.loanProductId)).thenReturn(false);
-        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(testContext.loanId))
+        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(loanId))
                 .thenReturn(Optional.of(testContext.loanDataForExternalTransfer));
         when(testContext.externalAssetOwnerRepository.findByExternalId(any(ExternalId.class))).thenReturn(Optional.empty());
 
+        when(testContext.externalAssetOwnerMapper.map(any(ExternalAssetOwnerTransfer.class))).thenReturn(ExternalAssetOwnerResponse
+                .builder().resourceExternalId(transferExternalId).subResourceExternalId(externalLoanId).subResourceId(loanId).build());
+
         // when
-        CommandProcessingResult result = testContext.externalAssetOwnersWriteServiceImpl.saleLoanByLoanId(command);
+        ExternalAssetOwnerResponse result = testContext.externalAssetOwnersWriteServiceImpl.saleLoanByLoanId(request);
 
         // then
         verify(testContext.externalAssetOwnerRepository).findByExternalId(any(ExternalId.class));
         verify(testContext.externalAssetOwnerTransferRepository).saveAndFlush(externalAssetOwnerTransferArgumentCaptor.capture());
         verify(testContext.externalAssetOwnerRepository).saveAndFlush(any(ExternalAssetOwner.class));
-        verify(testContext.externalAssetOwnerTransferRepository).findEffectiveTransfersOrderByIdDesc(eq(testContext.loanId),
-                any(LocalDate.class));
-        verify(testContext.loanRepository).findLoanDataForExternalTransferByLoanId(testContext.loanId);
+        verify(testContext.externalAssetOwnerTransferRepository).findEffectiveTransfersOrderByIdDesc(eq(loanId), any(LocalDate.class));
+        verify(testContext.loanRepository).findLoanDataForExternalTransferByLoanId(loanId);
         verify(testContext.delayedSettlementAttributeService).isEnabled(testContext.loanProductId);
 
         ExternalAssetOwnerTransfer savedTransfer = externalAssetOwnerTransferArgumentCaptor.getValue();
         assertAssertOwnerTransferValues(testContext, savedTransfer, ExternalTransferStatus.PENDING);
 
         assertEquals(savedTransfer.getId(), result.getResourceId());
-        assertEquals(savedTransfer.getExternalId(), result.getResourceExternalId());
+        assertEquals(savedTransfer.getExternalId().getValue(), result.getResourceExternalId());
         assertEquals(savedTransfer.getLoanId(), result.getSubResourceId());
-        assertEquals(savedTransfer.getExternalLoanId(), result.getSubResourceExternalId());
+        assertEquals(savedTransfer.getExternalLoanId().getValue(), result.getSubResourceExternalId());
     }
 
     @Test
@@ -466,69 +499,20 @@ public class ExternalAssetOwnersWriteServiceTest {
         final TestContext testContext = new TestContext();
 
         // given
-        final JsonCommand command = createJsonCommand(testContext.jsonCommand, testContext.loanId);
-        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(testContext.loanId)).thenReturn(Optional.empty());
+        SaleLoanExternalAssetRequest request = SaleLoanExternalAssetRequest.builder().loanId(loanId)
+                .settlementDate(settlementDate.toString()).ownerExternalId(ownerExternalId).transferExternalId(transferExternalId)
+                .transferExternalGroupId(TestContext.transferExternalGroupId).purchasePriceRatio(TestContext.PURCHASE_RATIO.toString())
+                .dateFormat(DATE_FORMAT).locale(LOCALE).build();
+
+        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(loanId)).thenReturn(Optional.empty());
 
         // when
-        assertThrows(LoanNotFoundException.class, () -> testContext.externalAssetOwnersWriteServiceImpl.saleLoanByLoanId(command));
+        assertThrows(LoanNotFoundException.class, () -> testContext.externalAssetOwnersWriteServiceImpl.saleLoanByLoanId(request));
 
         // then
-        verify(testContext.fromApiJsonHelper, times(1)).parse(command.json());
         verifyNoMoreInteractions(testContext.loanRepository);
         verifyNoInteractions(testContext.externalAssetOwnerRepository, testContext.externalAssetOwnerTransferRepository,
                 testContext.delayedSettlementAttributeService);
-    }
-
-    @ParameterizedTest
-    @MethodSource("invalidFieldsDataProvider")
-    public void verifyWhenFieldValueInvalidThenExceptionIsThrown(final String ownerExternalId, final String transferExternalId,
-            final String purchaseRatio, final LocalDate settlementDate) {
-        final TestContext testContext = new TestContext();
-
-        // given
-        final JsonCommand command = createJsonCommand(testContext.jsonCommand, testContext.loanId);
-        final JsonElement jsonCommandElement = testContext.fromJsonHelper.parse(testContext.jsonCommand);
-
-        when(testContext.delayedSettlementAttributeService.isEnabled(testContext.loanProductId)).thenReturn(false);
-        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(testContext.loanId))
-                .thenReturn(Optional.of(testContext.loanDataForExternalTransfer));
-        when(testContext.fromApiJsonHelper.extractStringNamed(ExternalTransferRequestParameters.OWNER_EXTERNAL_ID, jsonCommandElement))
-                .thenReturn(ownerExternalId);
-        when(testContext.fromApiJsonHelper.extractStringNamed(ExternalTransferRequestParameters.TRANSFER_EXTERNAL_ID, jsonCommandElement))
-                .thenReturn(transferExternalId);
-        when(testContext.fromApiJsonHelper.extractStringNamed(ExternalTransferRequestParameters.PURCHASE_PRICE_RATIO, jsonCommandElement))
-                .thenReturn(purchaseRatio);
-        when(testContext.fromApiJsonHelper.extractLocalDateNamed(ExternalTransferRequestParameters.SETTLEMENT_DATE, jsonCommandElement))
-                .thenReturn(settlementDate);
-
-        // when
-        assertThrows(PlatformApiDataValidationException.class,
-                () -> testContext.externalAssetOwnersWriteServiceImpl.saleLoanByLoanId(command));
-
-        // then
-        verify(testContext.fromApiJsonHelper, times(2)).parse(command.json());
-        verifyNoMoreInteractions(testContext.loanRepository);
-        verify(testContext.delayedSettlementAttributeService).isEnabled(testContext.loanProductId);
-        verifyNoInteractions(testContext.externalAssetOwnerRepository, testContext.externalAssetOwnerTransferRepository);
-    }
-
-    private static Stream<Arguments> invalidFieldsDataProvider() {
-        // ownerExternalId, transferExternalId, purchaseRatio, settlementDate
-        return Stream.of(
-                // settlement date cannot be null
-                Arguments.of("value", "value", "value", null),
-                // purchaseRatio cannot be null
-                Arguments.of("value", "value", null, LocalDate.now(ZoneId.systemDefault()).plusDays(1)),
-                // purchaseRatio length cannot be > 50
-                Arguments.of("value", "value", RandomStringUtils.randomAlphanumeric(51), LocalDate.now(ZoneId.systemDefault()).plusDays(1)),
-                // transferExternalId length cannot be > 100
-                Arguments.of("value", RandomStringUtils.randomAlphanumeric(101), "value",
-                        LocalDate.now(ZoneId.systemDefault()).plusDays(1)),
-                // ownerExternalId cannot be null
-                Arguments.of(null, "value", "value", LocalDate.now(ZoneId.systemDefault()).plusDays(1)),
-                // ownerExternalId length cannot be > 100
-                Arguments.of(RandomStringUtils.randomAlphanumeric(101), "value", "value",
-                        LocalDate.now(ZoneId.systemDefault()).plusDays(1)));
     }
 
     @Test
@@ -536,20 +520,22 @@ public class ExternalAssetOwnersWriteServiceTest {
         final TestContext testContext = new TestContext();
 
         // given
-        final JsonCommand command = createJsonCommand(testContext.jsonCommand, testContext.loanId);
+        SaleLoanExternalAssetRequest request = SaleLoanExternalAssetRequest.builder().loanId(loanId)
+                .settlementDate(settlementDate.toString()).ownerExternalId(ownerExternalId).transferExternalId(transferExternalId)
+                .transferExternalGroupId(TestContext.transferExternalGroupId).purchasePriceRatio(TestContext.PURCHASE_RATIO.toString())
+                .dateFormat(DATE_FORMAT).locale(LOCALE).build();
 
         when(testContext.delayedSettlementAttributeService.isEnabled(testContext.loanProductId)).thenReturn(false);
-        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(testContext.loanId))
+        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(loanId))
                 .thenReturn(Optional.of(testContext.loanDataForExternalTransfer));
         when(testContext.externalAssetOwnerTransferRepository.exists(any(Specification.class))).thenReturn(true);
 
         // when
         assertThrows(ExternalAssetOwnerInitiateTransferException.class,
-                () -> testContext.externalAssetOwnersWriteServiceImpl.saleLoanByLoanId(command));
+                () -> testContext.externalAssetOwnersWriteServiceImpl.saleLoanByLoanId(request));
 
         // then
-        verify(testContext.fromApiJsonHelper, times(2)).parse(command.json());
-        verify(testContext.loanRepository, times(1)).findLoanDataForExternalTransferByLoanId(testContext.loanId);
+        verify(testContext.loanRepository, times(1)).findLoanDataForExternalTransferByLoanId(loanId);
         verify(testContext.delayedSettlementAttributeService).isEnabled(testContext.loanProductId);
         verify(testContext.externalAssetOwnerTransferRepository, times(1)).exists(any(Specification.class));
         verifyNoInteractions(testContext.externalAssetOwnerRepository);
@@ -561,26 +547,29 @@ public class ExternalAssetOwnersWriteServiceTest {
         final TestContext testContext = new TestContext();
 
         // given
-        final JsonCommand command = createJsonCommand(testContext.jsonCommand, testContext.loanId);
+        SaleLoanExternalAssetRequest request = SaleLoanExternalAssetRequest.builder().loanId(loanId)
+                .settlementDate(settlementDate.toString()).ownerExternalId(ownerExternalId).transferExternalId(transferExternalId)
+                .transferExternalGroupId(TestContext.transferExternalGroupId).purchasePriceRatio(TestContext.PURCHASE_RATIO.toString())
+                .dateFormat(DATE_FORMAT).locale(LOCALE).build();
 
         when(testContext.delayedSettlementAttributeService.isEnabled(testContext.loanProductId)).thenReturn(isDelayedSettlementEnabled);
-        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(testContext.loanId))
+        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(loanId))
                 .thenReturn(Optional.of(testContext.loanDataForExternalTransfer));
-        when(testContext.externalAssetOwnerTransferRepository.findEffectiveTransfersOrderByIdDesc(eq(testContext.loanId),
-                any(LocalDate.class))).thenReturn(List.of(new ExternalAssetOwnerTransfer(), new ExternalAssetOwnerTransfer()));
+        when(testContext.externalAssetOwnerTransferRepository.findEffectiveTransfersOrderByIdDesc(eq(loanId), any(LocalDate.class)))
+                .thenReturn(List.of(new ExternalAssetOwnerTransfer(), new ExternalAssetOwnerTransfer()));
 
         // when
         ExternalAssetOwnerInitiateTransferException exception = assertThrows(ExternalAssetOwnerInitiateTransferException.class,
-                () -> testContext.externalAssetOwnersWriteServiceImpl.saleLoanByLoanId(command));
+                () -> testContext.externalAssetOwnersWriteServiceImpl.saleLoanByLoanId(request));
 
         assertEquals(exception.getMessage(), "This loan cannot be sold, there is already an in progress transfer");
 
         // then
-        verify(testContext.fromApiJsonHelper, times(2)).parse(command.json());
-        verify(testContext.loanRepository).findLoanDataForExternalTransferByLoanId(testContext.loanId);
+        // verify(testContext.fromApiJsonHelper, times(2)).parse(command.json());
+        verify(testContext.loanRepository).findLoanDataForExternalTransferByLoanId(loanId);
         verify(testContext.delayedSettlementAttributeService).isEnabled(testContext.loanProductId);
         verify(testContext.externalAssetOwnerTransferRepository).exists(any(Specification.class));
-        verify(testContext.externalAssetOwnerTransferRepository, times(1)).findEffectiveTransfersOrderByIdDesc(eq(testContext.loanId),
+        verify(testContext.externalAssetOwnerTransferRepository, times(1)).findEffectiveTransfersOrderByIdDesc(eq(loanId),
                 any(LocalDate.class));
         verify(testContext.externalAssetOwnerRepository).findByExternalId(any(ExternalId.class));
     }
@@ -594,25 +583,27 @@ public class ExternalAssetOwnersWriteServiceTest {
         final TestContext testContext = new TestContext();
 
         // given
-        final JsonCommand command = createJsonCommand(testContext.jsonCommand, testContext.loanId);
+        SaleLoanExternalAssetRequest request = SaleLoanExternalAssetRequest.builder().loanId(loanId)
+                .settlementDate(settlementDate.toString()).ownerExternalId(ownerExternalId).transferExternalId(transferExternalId)
+                .transferExternalGroupId(TestContext.transferExternalGroupId).purchasePriceRatio(TestContext.PURCHASE_RATIO.toString())
+                .dateFormat(DATE_FORMAT).locale(LOCALE).build();
 
         when(testContext.delayedSettlementAttributeService.isEnabled(testContext.loanProductId)).thenReturn(true);
-        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(testContext.loanId))
+        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(loanId))
                 .thenReturn(Optional.of(testContext.loanDataForExternalTransfer));
-        when(testContext.externalAssetOwnerTransferRepository.findEffectiveTransfersOrderByIdDesc(eq(testContext.loanId),
-                any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(testContext.externalAssetOwnerTransferRepository.findEffectiveTransfersOrderByIdDesc(eq(loanId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
 
         // when
         ExternalAssetOwnerInitiateTransferException exception = assertThrows(ExternalAssetOwnerInitiateTransferException.class,
-                () -> testContext.externalAssetOwnersWriteServiceImpl.saleLoanByLoanId(command));
+                () -> testContext.externalAssetOwnersWriteServiceImpl.saleLoanByLoanId(request));
 
         assertEquals(exception.getMessage(), "This loan cannot be sold, no effective transfer found.");
         // then
-        verify(testContext.fromApiJsonHelper, times(2)).parse(command.json());
-        verify(testContext.loanRepository).findLoanDataForExternalTransferByLoanId(testContext.loanId);
+        verify(testContext.loanRepository).findLoanDataForExternalTransferByLoanId(loanId);
         verify(testContext.delayedSettlementAttributeService).isEnabled(testContext.loanProductId);
         verify(testContext.externalAssetOwnerTransferRepository).exists(any(Specification.class));
-        verify(testContext.externalAssetOwnerTransferRepository, times(1)).findEffectiveTransfersOrderByIdDesc(eq(testContext.loanId),
+        verify(testContext.externalAssetOwnerTransferRepository, times(1)).findEffectiveTransfersOrderByIdDesc(eq(loanId),
                 any(LocalDate.class));
         verify(testContext.externalAssetOwnerRepository).findByExternalId(any(ExternalId.class));
     }
@@ -624,28 +615,31 @@ public class ExternalAssetOwnersWriteServiceTest {
         final TestContext testContext = new TestContext();
 
         // given
-        final JsonCommand command = createJsonCommand(testContext.jsonCommand, testContext.loanId);
+        SaleLoanExternalAssetRequest request = SaleLoanExternalAssetRequest.builder().loanId(loanId)
+                .settlementDate(settlementDate.toString()).ownerExternalId(ownerExternalId).transferExternalId(transferExternalId)
+                .transferExternalGroupId(TestContext.transferExternalGroupId).purchasePriceRatio(TestContext.PURCHASE_RATIO.toString())
+                .dateFormat(DATE_FORMAT).locale(LOCALE).build();
+
         final ExternalAssetOwnerTransfer externalAssetOwnerTransfer = new ExternalAssetOwnerTransfer();
         externalAssetOwnerTransfer.setStatus(externalTransferStatus);
 
         when(testContext.delayedSettlementAttributeService.isEnabled(testContext.loanProductId)).thenReturn(isDelayedSettlementEnabled);
-        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(testContext.loanId))
+        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(loanId))
                 .thenReturn(Optional.of(testContext.loanDataForExternalTransfer));
-        when(testContext.externalAssetOwnerTransferRepository.findEffectiveTransfersOrderByIdDesc(eq(testContext.loanId),
-                any(LocalDate.class))).thenReturn(List.of(externalAssetOwnerTransfer));
+        when(testContext.externalAssetOwnerTransferRepository.findEffectiveTransfersOrderByIdDesc(eq(loanId), any(LocalDate.class)))
+                .thenReturn(List.of(externalAssetOwnerTransfer));
 
         // when
         ExternalAssetOwnerInitiateTransferException exception = assertThrows(ExternalAssetOwnerInitiateTransferException.class,
-                () -> testContext.externalAssetOwnersWriteServiceImpl.saleLoanByLoanId(command));
+                () -> testContext.externalAssetOwnersWriteServiceImpl.saleLoanByLoanId(request));
 
         assertEquals(exception.getMessage(), expectedExceptionMessage);
 
         // then
-        verify(testContext.fromApiJsonHelper, times(2)).parse(command.json());
-        verify(testContext.loanRepository).findLoanDataForExternalTransferByLoanId(testContext.loanId);
+        verify(testContext.loanRepository).findLoanDataForExternalTransferByLoanId(loanId);
         verify(testContext.delayedSettlementAttributeService).isEnabled(testContext.loanProductId);
         verify(testContext.externalAssetOwnerTransferRepository).exists(any(Specification.class));
-        verify(testContext.externalAssetOwnerTransferRepository, times(1)).findEffectiveTransfersOrderByIdDesc(eq(testContext.loanId),
+        verify(testContext.externalAssetOwnerTransferRepository, times(1)).findEffectiveTransfersOrderByIdDesc(eq(loanId),
                 any(LocalDate.class));
         verify(testContext.externalAssetOwnerRepository).findByExternalId(any(ExternalId.class));
     }
@@ -677,19 +671,24 @@ public class ExternalAssetOwnersWriteServiceTest {
         // given
         TestContext testContext = new TestContext();
 
-        final JsonCommand command = createJsonCommand(testContext.jsonCommand, testContext.loanId);
+        BuyBackLoanExternalAssetRequest request = BuyBackLoanExternalAssetRequest.builder().loanId(loanId)
+                .settlementDate(settlementDate.toString()).transferExternalId(transferExternalId).dateFormat(DATE_FORMAT).locale(LOCALE)
+                .build();
 
         when(testContext.delayedSettlementAttributeService.isEnabled(testContext.loanProductId)).thenReturn(true);
-        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(testContext.loanId))
+        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(loanId))
                 .thenReturn(Optional.of(testContext.loanDataForExternalTransfer));
 
         List<ExternalAssetOwnerTransfer> transfers = transferStatuses.stream()
                 .map(transferStatus -> createExternalAssetOwnerTransfer(testContext, transferStatus)).toList();
-        when(testContext.externalAssetOwnerTransferRepository.findEffectiveTransfersOrderByIdDesc(testContext.loanId, actualDate))
+        when(testContext.externalAssetOwnerTransferRepository.findEffectiveTransfersOrderByIdDesc(loanId, actualDate))
                 .thenReturn(transfers);
 
+        when(testContext.externalAssetOwnerMapper.map(any(ExternalAssetOwnerTransfer.class))).thenReturn(ExternalAssetOwnerResponse
+                .builder().resourceExternalId(transferExternalId).subResourceExternalId(externalLoanId).subResourceId(loanId).build());
+
         // when
-        CommandProcessingResult result = testContext.externalAssetOwnersWriteServiceImpl.buybackLoanByLoanId(command);
+        ExternalAssetOwnerResponse result = testContext.externalAssetOwnersWriteServiceImpl.buybackLoanByLoanId(request);
 
         // then
         ArgumentCaptor<ExternalAssetOwnerTransfer> savedTransferCaptor = ArgumentCaptor.forClass(ExternalAssetOwnerTransfer.class);
@@ -699,20 +698,20 @@ public class ExternalAssetOwnersWriteServiceTest {
         assertNotNull(savedTransfer);
         assertFalse(transfers.isEmpty());
         ExternalAssetOwnerTransfer expectedEffectiveTransfer = transfers.get(0);
-        assertEquals(testContext.transferExternalId, savedTransfer.getExternalId().getValue());
+        assertEquals(transferExternalId, savedTransfer.getExternalId().getValue());
         assertEquals(expectedEffectiveTransfer.getOwner(), savedTransfer.getOwner());
         assertEquals(expectedStatus, savedTransfer.getStatus());
         assertEquals(expectedEffectiveTransfer.getLoanId(), savedTransfer.getLoanId());
         assertEquals(expectedEffectiveTransfer.getExternalLoanId(), savedTransfer.getExternalLoanId());
-        assertEquals(testContext.settlementDate, savedTransfer.getSettlementDate());
+        assertEquals(settlementDate, savedTransfer.getSettlementDate());
         assertEquals(actualDate, savedTransfer.getEffectiveDateFrom());
         assertEquals(FUTURE_DATE_9999_12_31, savedTransfer.getEffectiveDateTo());
         assertEquals(expectedEffectiveTransfer.getPurchasePriceRatio(), savedTransfer.getPurchasePriceRatio());
 
         assertEquals(savedTransfer.getId(), result.getResourceId());
-        assertEquals(savedTransfer.getExternalId(), result.getResourceExternalId());
+        assertEquals(savedTransfer.getExternalId().getValue(), result.getResourceExternalId());
         assertEquals(savedTransfer.getLoanId(), result.getSubResourceId());
-        assertEquals(savedTransfer.getExternalLoanId(), result.getSubResourceExternalId());
+        assertEquals(savedTransfer.getExternalLoanId().getValue(), result.getSubResourceExternalId());
 
         verifyNoInteractions(testContext.externalAssetOwnerRepository);
     }
@@ -729,20 +728,22 @@ public class ExternalAssetOwnersWriteServiceTest {
         // given
         TestContext testContext = new TestContext();
 
-        final JsonCommand command = createJsonCommand(testContext.jsonCommand, testContext.loanId);
-
         when(testContext.delayedSettlementAttributeService.isEnabled(testContext.loanProductId)).thenReturn(true);
-        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(testContext.loanId))
+        when(testContext.loanRepository.findLoanDataForExternalTransferByLoanId(loanId))
                 .thenReturn(Optional.of(testContext.loanDataForExternalTransfer));
 
         List<ExternalAssetOwnerTransfer> transfers = transferStatuses.stream()
                 .map(transferStatus -> createExternalAssetOwnerTransfer(testContext, transferStatus)).toList();
-        when(testContext.externalAssetOwnerTransferRepository.findEffectiveTransfersOrderByIdDesc(testContext.loanId, actualDate))
+        when(testContext.externalAssetOwnerTransferRepository.findEffectiveTransfersOrderByIdDesc(loanId, actualDate))
                 .thenReturn(transfers);
+
+        BuyBackLoanExternalAssetRequest request = BuyBackLoanExternalAssetRequest.builder().loanId(loanId)
+                .settlementDate(settlementDate.toString()).transferExternalId(transferExternalId).dateFormat(DATE_FORMAT).locale(LOCALE)
+                .build();
 
         // when
         ExternalAssetOwnerInitiateTransferException actualException = assertThrows(ExternalAssetOwnerInitiateTransferException.class,
-                () -> testContext.externalAssetOwnersWriteServiceImpl.buybackLoanByLoanId(command));
+                () -> testContext.externalAssetOwnersWriteServiceImpl.buybackLoanByLoanId(request));
 
         // then
         assertEquals(expectedExceptionMessage, actualException.getMessage());
@@ -807,9 +808,9 @@ public class ExternalAssetOwnersWriteServiceTest {
         transfer.setExternalId(new ExternalId(RandomStringUtils.randomAlphanumeric(10)));
         transfer.setOwner(new ExternalAssetOwner());
         transfer.setStatus(status);
-        transfer.setLoanId(testContext.loanId);
-        transfer.setExternalLoanId(new ExternalId(testContext.externalLoanId));
-        transfer.setExternalGroupId(new ExternalId(testContext.externalLoanId));
+        transfer.setLoanId(loanId);
+        transfer.setExternalLoanId(new ExternalId(externalLoanId));
+        transfer.setExternalGroupId(new ExternalId(externalLoanId));
         transfer.setPurchasePriceRatio(TestContext.PURCHASE_RATIO.toString());
 
         return transfer;
@@ -827,14 +828,14 @@ public class ExternalAssetOwnersWriteServiceTest {
      */
     private void assertAssertOwnerTransferValues(final TestContext testContext, final ExternalAssetOwnerTransfer externalAssetOwnerTransfer,
             final ExternalTransferStatus expectedTransferStatus) {
-        assertEquals(testContext.loanId, externalAssetOwnerTransfer.getLoanId());
-        assertEquals(testContext.externalLoanId, externalAssetOwnerTransfer.getExternalLoanId().getValue());
-        assertEquals(testContext.ownerExternalId, externalAssetOwnerTransfer.getOwner().getExternalId().getValue());
-        assertEquals(testContext.transferExternalId, externalAssetOwnerTransfer.getExternalId().getValue());
+        assertEquals(loanId, externalAssetOwnerTransfer.getLoanId());
+        assertEquals(externalLoanId, externalAssetOwnerTransfer.getExternalLoanId().getValue());
+        assertEquals(ownerExternalId, externalAssetOwnerTransfer.getOwner().getExternalId().getValue());
+        assertEquals(transferExternalId, externalAssetOwnerTransfer.getExternalId().getValue());
         assertEquals(testContext.transferExternalGroupId, externalAssetOwnerTransfer.getExternalGroupId().getValue());
         assertEquals(expectedTransferStatus, externalAssetOwnerTransfer.getStatus());
         assertEquals(TestContext.PURCHASE_RATIO.toString(), externalAssetOwnerTransfer.getPurchasePriceRatio());
-        assertEquals(testContext.settlementDate, externalAssetOwnerTransfer.getSettlementDate());
+        assertEquals(settlementDate, externalAssetOwnerTransfer.getSettlementDate());
         assertEquals(actualDate, externalAssetOwnerTransfer.getEffectiveDateFrom());
         assertEquals(FUTURE_DATE_9999_12_31, externalAssetOwnerTransfer.getEffectiveDateTo());
     }
@@ -849,9 +850,6 @@ public class ExternalAssetOwnersWriteServiceTest {
         private ExternalAssetOwnerRepository externalAssetOwnerRepository;
 
         @Mock
-        private FromJsonHelper fromApiJsonHelper;
-
-        @Mock
         private LoanRepository loanRepository;
 
         @Mock
@@ -860,60 +858,31 @@ public class ExternalAssetOwnersWriteServiceTest {
         @Mock
         private LoanDataForExternalTransfer loanDataForExternalTransfer;
 
+        @Mock
+        private ExternalAssetOwnerMapper externalAssetOwnerMapper;
+
         @InjectMocks
         private ExternalAssetOwnersWriteServiceImpl externalAssetOwnersWriteServiceImpl;
 
-        private static final BigDecimal PURCHASE_RATIO = BigDecimal.valueOf(Float.parseFloat(RandomStringUtils.randomNumeric(1, 3)) / 100)
+        public static final BigDecimal PURCHASE_RATIO = BigDecimal.valueOf(Float.parseFloat(RandomStringUtils.randomNumeric(1, 3)) / 100)
                 .setScale(2, RoundingMode.HALF_UP);
-        private static final String DATE_FORMAT = "yyyy-MM-dd";
-        private static final String LOCALE = "de_DE";
+        public static final String DATE_FORMAT = "yyyy-MM-dd";
+        public static final String LOCALE = "de_DE";
 
-        private final FromJsonHelper fromJsonHelper = new FromJsonHelper();
-        private final ExternalAssetOwner externalAssetOwner = new ExternalAssetOwner();
-        private final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(2));
-        private final String externalLoanId = RandomStringUtils.randomAlphanumeric(10);
-        private final Long loanProductId = Long.valueOf(RandomStringUtils.randomNumeric(2));
-        private final String loanProductShortName = RandomStringUtils.randomAlphanumeric(10);
-        private final String ownerExternalId = RandomStringUtils.randomAlphanumeric(10);
-        private final String transferExternalId = RandomStringUtils.randomAlphanumeric(10);
-        private final String transferExternalGroupId = RandomStringUtils.randomAlphanumeric(10);
-        private final LocalDate settlementDate = LocalDate.parse("9999-08-22");
-        private final String jsonCommand = String.format("""
-                {
-                    "settlementDate": "%s",
-                    "ownerExternalId": "%s",
-                    "transferExternalId": "%s",
-                    "transferExternalGroupId": "%s",
-                    "purchasePriceRatio": "%s",
-                    "dateFormat": "%s",
-                    "locale": "%s"
-                }
-                """, settlementDate, ownerExternalId, transferExternalId, transferExternalGroupId, PURCHASE_RATIO, DATE_FORMAT, LOCALE);
+        public static final ExternalAssetOwner externalAssetOwner = new ExternalAssetOwner();
+        public static final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(2));
+        public static final String externalLoanId = RandomStringUtils.randomAlphanumeric(10);
+        public static final Long loanProductId = Long.valueOf(RandomStringUtils.randomNumeric(2));
+        public static final String loanProductShortName = RandomStringUtils.randomAlphanumeric(10);
+        public static final String ownerExternalId = RandomStringUtils.randomAlphanumeric(10);
+        public static final String transferExternalId = RandomStringUtils.randomAlphanumeric(10);
+        public static final String transferExternalGroupId = RandomStringUtils.randomAlphanumeric(10);
+        public static final LocalDate settlementDate = LocalDate.parse("9999-08-22");
 
         @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
         TestContext() {
             MockitoAnnotations.openMocks(this);
-            final JsonElement jsonCommandElement = fromJsonHelper.parse(jsonCommand);
             externalAssetOwner.setExternalId(new ExternalId(ownerExternalId));
-
-            lenient().when(fromApiJsonHelper.parse(anyString())).thenReturn(jsonCommandElement);
-            lenient().when(fromApiJsonHelper.extractStringNamed(ExternalTransferRequestParameters.OWNER_EXTERNAL_ID, jsonCommandElement))
-                    .thenReturn(ownerExternalId);
-            lenient().when(fromApiJsonHelper.extractStringNamed(ExternalTransferRequestParameters.TRANSFER_EXTERNAL_ID, jsonCommandElement))
-                    .thenReturn(transferExternalId);
-            lenient().when(
-                    fromApiJsonHelper.extractStringNamed(ExternalTransferRequestParameters.TRANSFER_EXTERNAL_GROUP_ID, jsonCommandElement))
-                    .thenReturn(transferExternalGroupId);
-            lenient().when(fromApiJsonHelper.extractStringNamed(ExternalTransferRequestParameters.PURCHASE_PRICE_RATIO, jsonCommandElement))
-                    .thenReturn(PURCHASE_RATIO.toString());
-            lenient().when(fromApiJsonHelper.extractStringNamed(ExternalTransferRequestParameters.DATEFORMAT, jsonCommandElement))
-                    .thenReturn(DATE_FORMAT);
-            lenient().when(fromApiJsonHelper.extractStringNamed(ExternalTransferRequestParameters.LOCALE, jsonCommandElement))
-                    .thenReturn(LOCALE);
-            lenient().when(fromApiJsonHelper.extractLocalDateNamed(ExternalTransferRequestParameters.SETTLEMENT_DATE, jsonCommandElement))
-                    .thenReturn(settlementDate);
-            lenient().when(fromApiJsonHelper.extractLocalDateNamed(ExternalTransferRequestParameters.SETTLEMENT_DATE, jsonCommandElement,
-                    DATE_FORMAT, Locale.GERMANY)).thenReturn(settlementDate);
 
             lenient().when(externalAssetOwnerRepository.findByExternalId(any(ExternalId.class)))
                     .thenReturn(Optional.of(externalAssetOwner));

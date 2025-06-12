@@ -128,6 +128,16 @@ public class SecurityConfig {
                                 .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/self/registration/user")).permitAll(); //
                         authorizationManagers.add(selfServiceUserAuthManager());
                     }
+
+                    // External Asset Owners API endpoints
+                    auth.requestMatchers(antMatcher(HttpMethod.POST, "/api/*/external-asset-owners/transfers/loans/**"))
+                            .fullyAuthenticated()
+                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/external-asset-owners/transfers/external-id/**"))
+                            .fullyAuthenticated().requestMatchers(antMatcher(HttpMethod.POST, "/api/*/external-asset-owners/search"))
+                            .fullyAuthenticated().requestMatchers(antMatcher(HttpMethod.POST, "/api/*/external-asset-owners/transfers/**"))
+                            .fullyAuthenticated().requestMatchers(antMatcher(HttpMethod.GET, "/api/*/external-asset-owners/transfers/**"))
+                            .fullyAuthenticated().requestMatchers(antMatcher(HttpMethod.GET, "/api/*/external-asset-owners/owners/**"))
+                            .fullyAuthenticated();
                     auth.requestMatchers(antMatcher(HttpMethod.OPTIONS, "/api/**")).permitAll() //
                             .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/echo")).permitAll() //
                             .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/authentication")).permitAll() //

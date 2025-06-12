@@ -16,25 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.investor.service;
+package org.apache.fineract.investor.external_assets_owner.service;
 
-import lombok.RequiredArgsConstructor;
-import org.apache.fineract.command.core.Command;
-import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.investor.external_assets_owner.data.BuyBackLoanExternalAssetRequest;
 import org.apache.fineract.investor.external_assets_owner.data.CancelTransactionExternalAssetRequest;
 import org.apache.fineract.investor.external_assets_owner.data.ExternalAssetOwnerResponse;
-import org.apache.fineract.investor.external_assets_owner.service.ExternalAssetOwnersWriteService;
-import org.springframework.stereotype.Component;
+import org.apache.fineract.investor.external_assets_owner.data.IntermediarySaleLoanExternalAssetRequest;
+import org.apache.fineract.investor.external_assets_owner.data.SaleLoanExternalAssetRequest;
 
-@Component
-@RequiredArgsConstructor
-public class CancelTransactionFromExternalAssetOwnerHandler
-        implements CommandHandler<CancelTransactionExternalAssetRequest, ExternalAssetOwnerResponse> {
+public interface ExternalAssetOwnersWriteService {
 
-    private final ExternalAssetOwnersWriteService externalAssetOwnersWriteService;
+    ExternalAssetOwnerResponse intermediarySaleLoanByLoanId(IntermediarySaleLoanExternalAssetRequest request);
 
-    @Override
-    public ExternalAssetOwnerResponse handle(Command<CancelTransactionExternalAssetRequest> command) {
-        return externalAssetOwnersWriteService.cancelTransactionById(command.getPayload());
-    }
+    ExternalAssetOwnerResponse saleLoanByLoanId(SaleLoanExternalAssetRequest command);
+
+    ExternalAssetOwnerResponse buybackLoanByLoanId(BuyBackLoanExternalAssetRequest command);
+
+    ExternalAssetOwnerResponse cancelTransactionById(CancelTransactionExternalAssetRequest command);
 }
