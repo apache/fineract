@@ -16,12 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.collateralmanagement.service;
+package org.apache.fineract.portfolio.collateralmanagement.command;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
 import org.apache.fineract.portfolio.collateralmanagement.data.LoanCollateralDeleteRequest;
-import org.apache.fineract.portfolio.collateralmanagement.data.LoanCollateralDeletelResponse;
 
-public interface LoanCollateralManagementWritePlatformService {
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class LoanCollateralDeletelCommand extends Command<LoanCollateralDeleteRequest> {
 
-    LoanCollateralDeletelResponse deleteLoanCollateral(LoanCollateralDeleteRequest request);
 }

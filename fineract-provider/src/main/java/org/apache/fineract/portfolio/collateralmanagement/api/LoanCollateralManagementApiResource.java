@@ -23,16 +23,24 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.util.UUID;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.service.CommandWrapperBuilder;
-import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandPipeline;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.portfolio.collateralmanagement.command.LoanCollateralDeletelCommand;
+import org.apache.fineract.portfolio.collateralmanagement.data.LoanCollateralDeleteRequest;
+import org.apache.fineract.portfolio.collateralmanagement.data.LoanCollateralDeletelResponse;
 import org.apache.fineract.portfolio.collateralmanagement.data.LoanCollateralResponseData;
 import org.apache.fineract.portfolio.collateralmanagement.service.LoanCollateralManagementReadPlatformService;
 import org.springframework.stereotype.Component;
@@ -43,19 +51,27 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class LoanCollateralManagementApiResource {
 
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final LoanCollateralManagementReadPlatformService loanCollateralManagementReadPlatformService;
+    private final CommandPipeline pipeline;
 
     @DELETE
     @Path("{id}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Consumes({ MediaType.APPLICATION_JSON })
     @Operation(description = "Delete Loan Collateral", summary = "Delete Loan Collateral")
-    public CommandProcessingResult deleteLoanCollateral(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
-            @PathParam("id") @Parameter(description = "loan collateral id") final Long id) {
+    public LoanCollateralDeletelResponse deleteLoanCollateral(@HeaderParam("Idempotency-Key") @DefaultValue("") String idempotencyKey,
+            @PathParam("loanId") final Long loanId, @PathParam("id") @Parameter(description = "loan collateral id") final Long id) {
 
-        final CommandWrapper commandWrapper = new CommandWrapperBuilder().deleteLoanCollateral(loanId, id).build();
-        return this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
+        LoanCollateralDeletelCommand command = new LoanCollateralDeletelCommand();
+        initCommand(idempotencyKey, command);
+
+        LoanCollateralDeleteRequest request = new LoanCollateralDeleteRequest();
+        request.setLoanId(loanId);
+        request.setCollateralId(id);
+        command.setPayload(request);
+
+        Supplier<LoanCollateralDeletelResponse> result = pipeline.send(command);
+        return result.get();
     }
 
     @GET
@@ -68,4 +84,11 @@ public class LoanCollateralManagementApiResource {
         return this.loanCollateralManagementReadPlatformService.getLoanCollateralResponseData(collateralId);
     }
 
+    private void initCommand(String idempotencyKey, Command command) {
+        String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
+        command.setId(UUID.randomUUID());
+        command.setCreatedAt(OffsetDateTime.now(ZoneId.of("UTC")));
+        command.setTenantId(tenantIdentifier);
+        command.setIdempotencyKey(idempotencyKey);
+    }
 }

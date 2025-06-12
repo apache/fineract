@@ -18,29 +18,24 @@
  */
 package org.apache.fineract.portfolio.collateralmanagement.handler;
 
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.portfolio.collateralmanagement.data.LoanCollateralDeleteRequest;
+import org.apache.fineract.portfolio.collateralmanagement.data.LoanCollateralDeletelResponse;
 import org.apache.fineract.portfolio.collateralmanagement.service.LoanCollateralManagementWritePlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-@CommandType(entity = "LOAN_COLLATERAL_PRODUCT", action = "DELETE")
-public class DeleteLoanCollateralManagement implements NewCommandSourceHandler {
+@Component
+@RequiredArgsConstructor
+public class DeleteLoanCollateralManagement implements CommandHandler<LoanCollateralDeleteRequest, LoanCollateralDeletelResponse> {
 
     private final LoanCollateralManagementWritePlatformService loanCollateralManagementWritePlatformService;
 
-    @Autowired
-    public DeleteLoanCollateralManagement(final LoanCollateralManagementWritePlatformService loanCollateralManagement) {
-        this.loanCollateralManagementWritePlatformService = loanCollateralManagement;
-    }
-
     @Transactional
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand jsonCommand) {
-        return this.loanCollateralManagementWritePlatformService.deleteLoanCollateral(jsonCommand);
+    public LoanCollateralDeletelResponse handle(Command<LoanCollateralDeleteRequest> command) {
+        return this.loanCollateralManagementWritePlatformService.deleteLoanCollateral(command.getPayload());
     }
 }
