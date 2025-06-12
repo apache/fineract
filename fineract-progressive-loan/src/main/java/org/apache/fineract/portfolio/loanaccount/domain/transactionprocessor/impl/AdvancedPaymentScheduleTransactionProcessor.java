@@ -1649,14 +1649,12 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         Money penaltyChargesPortion = Money.zero(transactionCtx.getCurrency());
 
         if (transactionCtx.getInstallments().stream().anyMatch(this::isNotObligationsMet)) {
-            if (loanTransaction.getLoan().isProgressiveSchedule()) {
-                if (LoanChargeOffBehaviour.ZERO_INTEREST
-                        .equals(loanTransaction.getLoan().getLoanProductRelatedDetail().getChargeOffBehaviour())) {
-                    handleZeroInterestChargeOff(loanTransaction, transactionCtx);
-                } else if (LoanChargeOffBehaviour.ACCELERATE_MATURITY
-                        .equals(loanTransaction.getLoan().getLoanProductRelatedDetail().getChargeOffBehaviour())) {
-                    handleAccelerateMaturityDate(loanTransaction, transactionCtx);
-                }
+            if (LoanChargeOffBehaviour.ZERO_INTEREST
+                    .equals(loanTransaction.getLoan().getLoanProductRelatedDetail().getChargeOffBehaviour())) {
+                handleZeroInterestChargeOff(loanTransaction, transactionCtx);
+            } else if (LoanChargeOffBehaviour.ACCELERATE_MATURITY
+                    .equals(loanTransaction.getLoan().getLoanProductRelatedDetail().getChargeOffBehaviour())) {
+                handleAccelerateMaturityDate(loanTransaction, transactionCtx);
             }
 
             final BigDecimal newInterest = getInterestTillChargeOffForPeriod(loanTransaction.getLoan(),
@@ -1809,8 +1807,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                             final BigDecimal interestOutstanding = installment.getInterestOutstanding(currency).getAmount();
                             final BigDecimal newInterest = emiCalculator.getPeriodInterestTillDate(progressiveTransactionCtx.getModel(),
                                     installment.getDueDate(), transactionDate, true).getAmount();
-                            if (interestOutstanding.compareTo(BigDecimal.ZERO) > 0 || newInterest.compareTo(BigDecimal.ZERO) > 0) {
-                                final BigDecimal interestRemoved = installment.getInterestCharged().subtract(newInterest);
+                            if (MathUtil.isGreaterThanZero(interestOutstanding) || MathUtil.isGreaterThanZero(newInterest)) {
+                                final BigDecimal interestRemoved = MathUtil.subtract(MathUtil.nullToZero(installment.getInterestCharged()),
+                                        newInterest);
                                 installment.updatePrincipal(MathUtil.nullToZero(installment.getPrincipal()).add(interestRemoved));
                                 installment.updateInterestCharged(newInterest);
                             }
@@ -1845,6 +1844,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                     final BigDecimal installmentPrincipal = MathUtil.nullToZero(installment.getPrincipal());
 
                     installment.updatePrincipal(MathUtil.negativeToZero(installmentPrincipal.add(principalBalance)));
+                    if (!installment.isObligationsMet()) {
+                        installment.checkIfRepaymentPeriodObligationsAreMet(transactionDate, currency);
+                    }
                     if (MathUtil.isLessThanOrEqualTo(MathUtil.abs(principalBalance), installmentPrincipal)) {
                         principalBalance = BigDecimal.ZERO;
                     } else {
@@ -2215,10 +2217,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         paymentAllocationContext.setTransactionAmountUnprocessed(transactionAmountUnprocessed);
         boolean interestBearingAndInterestRecalculationEnabled = loanTransaction.getLoan()
                 .isInterestBearingAndInterestRecalculationEnabled();
-        boolean isProgressiveCtx = ctx instanceof ProgressiveTransactionCtx;
 
-        if (isProgressiveCtx && interestBearingAndInterestRecalculationEnabled) {
-            ProgressiveTransactionCtx progressiveTransactionCtx = (ProgressiveTransactionCtx) ctx;
+        if (interestBearingAndInterestRecalculationEnabled && ctx instanceof ProgressiveTransactionCtx progressiveTransactionCtx
+                && !progressiveTransactionCtx.isChargedOff() && !progressiveTransactionCtx.isContractTerminated()) {
             // Clear any previously skipped installments before re-evaluating
             progressiveTransactionCtx.getSkipRepaymentScheduleInstallments().clear();
             paymentAllocationContext
