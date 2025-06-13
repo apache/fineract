@@ -35,6 +35,7 @@ public class ScheduleGeneratorDTO {
     final CalendarInstance calendarInstanceForInterestRecalculation;
     final CalendarInstance compoundingCalendarInstance;
     LocalDate recalculateFrom;
+    LocalDate recalculateTill;
     final Long overdurPenaltyWaitPeriod;
     final FloatingRateDTO floatingRateDTO;
     final Calendar calendar;
@@ -50,8 +51,8 @@ public class ScheduleGeneratorDTO {
     public ScheduleGeneratorDTO(final LoanScheduleGeneratorFactory loanScheduleFactory, final CurrencyData currency,
             final LocalDate calculatedRepaymentsStartingFromDate, final HolidayDetailDTO holidayDetailDTO,
             final CalendarInstance calendarInstanceForInterestRecalculation, final CalendarInstance compoundingCalendarInstance,
-            final LocalDate recalculateFrom, final Long overdurPenaltyWaitPeriod, final FloatingRateDTO floatingRateDTO,
-            final Calendar calendar, final CalendarHistoryDataWrapper calendarHistoryDataWrapper,
+            final LocalDate recalculateFrom, final LocalDate recalculateTill, final Long overdurPenaltyWaitPeriod,
+            final FloatingRateDTO floatingRateDTO, final Calendar calendar, final CalendarHistoryDataWrapper calendarHistoryDataWrapper,
             final Boolean isInterestChargedFromDateAsDisbursementDateEnabled, final Integer numberOfdays,
             final boolean isSkipRepaymentOnFirstDayofMonth, final Boolean isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled,
             final boolean isFirstRepaymentDateAllowedOnHoliday, final boolean isInterestToBeRecoveredFirstWhenGreaterThanEMI,
@@ -63,6 +64,7 @@ public class ScheduleGeneratorDTO {
         this.calendarInstanceForInterestRecalculation = calendarInstanceForInterestRecalculation;
         this.compoundingCalendarInstance = compoundingCalendarInstance;
         this.recalculateFrom = recalculateFrom;
+        this.recalculateTill = recalculateTill;
         this.overdurPenaltyWaitPeriod = overdurPenaltyWaitPeriod;
         this.holidayDetailDTO = holidayDetailDTO;
         this.floatingRateDTO = floatingRateDTO;
@@ -95,6 +97,10 @@ public class ScheduleGeneratorDTO {
 
     public LocalDate getRecalculateFrom() {
         return this.recalculateFrom;
+    }
+
+    public LocalDate getRecalculateTill() {
+        return this.recalculateTill;
     }
 
     public Long getOverdurPenaltyWaitPeriod() {
