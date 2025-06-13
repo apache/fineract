@@ -200,7 +200,7 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
                 loan.getTransactionProcessingStrategyCode());
 
         return loanScheduleGenerator.rescheduleNextInstallments(mc, loanApplicationTerms, loan, generatorDTO.getHolidayDetailDTO(),
-                loanRepaymentScheduleTransactionProcessor, generatorDTO.getRecalculateFrom());
+                loanRepaymentScheduleTransactionProcessor, generatorDTO.getRecalculateFrom(), generatorDTO.getRecalculateTill());
     }
 
     @Override

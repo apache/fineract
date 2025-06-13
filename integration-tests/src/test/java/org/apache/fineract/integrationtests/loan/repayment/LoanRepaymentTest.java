@@ -134,4 +134,171 @@ public class LoanRepaymentTest extends BaseLoanIntegrationTest {
             );
         });
     }
+
+    @Test
+    public void test_LoanRepaymentWorks_WhenOnlyOneInstallment_AndAccrualAccounting_AndMonthlyRecalculateInterest_AndMonthlyInterestCalculationPeriod_AllowPartial() {
+
+        runAt("31 January 2023", () -> {
+            // Create Client
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            int numberOfRepayments = 1;
+            int repaymentEvery = 1;
+
+            // Create Loan Product
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct() //
+                    .numberOfRepayments(numberOfRepayments) //
+                    .repaymentEvery(repaymentEvery) //
+                    .installmentAmountInMultiplesOf(null) //
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue()) //
+                    .interestType(InterestType.DECLINING_BALANCE)//
+                    .interestCalculationPeriodType(InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD)//
+                    .interestRecalculationCompoundingMethod(InterestRecalculationCompoundingMethod.NONE)//
+                    .rescheduleStrategyMethod(RescheduleStrategyMethod.ADJUST_LAST_UNPAID_PERIOD)//
+                    .isInterestRecalculationEnabled(true)//
+                    .recalculationRestFrequencyInterval(1)//
+                    .recalculationRestFrequencyType(RecalculationRestFrequencyType.SAME_AS_REPAYMENT_PERIOD)//
+                    .rescheduleStrategyMethod(RescheduleStrategyMethod.REDUCE_EMI_AMOUNT)//
+                    .allowPartialPeriodInterestCalcualtion(true)//
+                    .preClosureInterestCalculationStrategy(1).disallowExpectedDisbursements(false)//
+                    .allowApprovedDisbursedAmountsOverApplied(false)//
+                    .overAppliedNumber(null)//
+                    .overAppliedCalculationType(null)//
+                    .interestRatePerPeriod(10.0)//
+                    .multiDisburseLoan(null);//
+
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            Long loanProductId = loanProductResponse.getResourceId();
+
+            // Apply and Approve Loan
+            double amount = 1000.0;
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "01 January 2023", amount, numberOfRepayments)//
+                    .repaymentEvery(repaymentEvery)//
+                    .loanTermFrequency(numberOfRepayments)//
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .loanTermFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .interestType(InterestType.DECLINING_BALANCE)//
+                    .interestRatePerPeriod(BigDecimal.valueOf(10.0))//
+                    .interestCalculationPeriodType(InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD);//
+
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+                    approveLoanRequest(amount, "01 January 2023"));
+
+            Long loanId = approvedLoanResult.getLoanId();
+
+            // disburse Loan
+            disburseLoan(loanId, BigDecimal.valueOf(1000.0), "01 January 2023");
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(1000.0, "Disbursement", "01 January 2023")//
+            );
+
+            verifyPrepayAmountByRepayment(loanId, "15 January 2023");
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(1000.0, "Disbursement", "01 January 2023"), //
+                    transaction(1045.16, "Repayment", "15 January 2023"), //
+                    transaction(45.16, "Accrual", "15 January 2023") //
+            );
+
+            // verify journal entries
+            verifyJournalEntries(loanId,
+
+                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), journalEntry(1000.0, fundSource, "CREDIT"),
+                    journalEntry(1045.16, fundSource, "DEBIT"), journalEntry(45.16, interestReceivableAccount, "CREDIT"),
+                    journalEntry(45.16, interestReceivableAccount, "DEBIT"), journalEntry(45.16, interestIncomeAccount, "CREDIT"),
+                    journalEntry(1000.0, fundSource, "CREDIT")
+
+            );
+        });
+    }
+
+    @Test
+    public void test_LoanRepaymentWorks_WhenOnlyOneInstallment_AndAccrualAccounting_AndDailyRecalculateInterest_AndMonthlyInterestCalculationPeriod_NotAllowPartial() {
+
+        runAt("31 January 2023", () -> {
+            // Create Client
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            int numberOfRepayments = 1;
+            int repaymentEvery = 1;
+
+            // Create Loan Product
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct() //
+                    .numberOfRepayments(numberOfRepayments) //
+                    .repaymentEvery(repaymentEvery) //
+                    .installmentAmountInMultiplesOf(null) //
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue()) //
+                    .interestType(InterestType.DECLINING_BALANCE)//
+                    .interestCalculationPeriodType(InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD)//
+                    .interestRecalculationCompoundingMethod(InterestRecalculationCompoundingMethod.NONE)//
+                    .rescheduleStrategyMethod(RescheduleStrategyMethod.ADJUST_LAST_UNPAID_PERIOD)//
+                    .isInterestRecalculationEnabled(true)//
+                    .recalculationRestFrequencyInterval(1)//
+                    .recalculationRestFrequencyType(RecalculationRestFrequencyType.SAME_AS_REPAYMENT_PERIOD)//
+                    .rescheduleStrategyMethod(RescheduleStrategyMethod.REDUCE_EMI_AMOUNT)//
+                    .allowPartialPeriodInterestCalcualtion(true)//
+                    .preClosureInterestCalculationStrategy(2).disallowExpectedDisbursements(false)//
+                    .allowApprovedDisbursedAmountsOverApplied(false)//
+                    .overAppliedNumber(null)//
+                    .overAppliedCalculationType(null)//
+                    .interestRatePerPeriod(10.0)//
+                    .multiDisburseLoan(null);//
+
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            Long loanProductId = loanProductResponse.getResourceId();
+
+            // Apply and Approve Loan
+            double amount = 1000.0;
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "01 January 2023", amount, numberOfRepayments)//
+                    .repaymentEvery(repaymentEvery)//
+                    .loanTermFrequency(numberOfRepayments)//
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .loanTermFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .interestType(InterestType.DECLINING_BALANCE)//
+                    .interestRatePerPeriod(BigDecimal.valueOf(10.0))//
+                    .interestCalculationPeriodType(InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD);//
+
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+                    approveLoanRequest(amount, "01 January 2023"));
+
+            Long loanId = approvedLoanResult.getLoanId();
+
+            // disburse Loan
+            disburseLoan(loanId, BigDecimal.valueOf(1000.0), "01 January 2023");
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(1000.0, "Disbursement", "01 January 2023")//
+            );
+
+            verifyPrepayAmountByRepayment(loanId, "15 January 2023");
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(1000.0, "Disbursement", "01 January 2023"), //
+                    transaction(1100.0, "Repayment", "15 January 2023"), //
+                    transaction(100.0, "Accrual", "15 January 2023") //
+            );
+
+            // verify journal entries
+            verifyJournalEntries(loanId,
+
+                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), journalEntry(1000.0, fundSource, "CREDIT"),
+                    journalEntry(1100.0, fundSource, "DEBIT"), journalEntry(100.0, interestReceivableAccount, "CREDIT"),
+                    journalEntry(100.0, interestReceivableAccount, "DEBIT"), journalEntry(100.0, interestIncomeAccount, "CREDIT"),
+                    journalEntry(1000.0, fundSource, "CREDIT")
+
+            );
+        });
+    }
+
 }

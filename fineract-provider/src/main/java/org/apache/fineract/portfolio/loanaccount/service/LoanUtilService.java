@@ -76,10 +76,16 @@ public class LoanUtilService {
 
     public ScheduleGeneratorDTO buildScheduleGeneratorDTO(final Loan loan, final LocalDate recalculateFrom) {
         final HolidayDetailDTO holidayDetailDTO = null;
-        return buildScheduleGeneratorDTO(loan, recalculateFrom, holidayDetailDTO);
+        return buildScheduleGeneratorDTO(loan, recalculateFrom, null, holidayDetailDTO);
     }
 
     public ScheduleGeneratorDTO buildScheduleGeneratorDTO(final Loan loan, final LocalDate recalculateFrom,
+            final LocalDate rescheduleTill) {
+        final HolidayDetailDTO holidayDetailDTO = null;
+        return buildScheduleGeneratorDTO(loan, recalculateFrom, rescheduleTill, holidayDetailDTO);
+    }
+
+    public ScheduleGeneratorDTO buildScheduleGeneratorDTO(final Loan loan, final LocalDate recalculateFrom, final LocalDate recalculateTill,
             final HolidayDetailDTO holidayDetailDTO) {
         HolidayDetailDTO holidayDetails = holidayDetailDTO;
         if (holidayDetailDTO == null) {
@@ -133,7 +139,7 @@ public class LoanUtilService {
 
         ScheduleGeneratorDTO scheduleGeneratorDTO = new ScheduleGeneratorDTO(loanScheduleFactory, applicationCurrency.toData(),
                 calculatedRepaymentsStartingFromDate, holidayDetails, restCalendarInstance, compoundingCalendarInstance, recalculateFrom,
-                overdurPenaltyWaitPeriod, floatingRateDTO, calendar, calendarHistoryDataWrapper,
+                recalculateTill, overdurPenaltyWaitPeriod, floatingRateDTO, calendar, calendarHistoryDataWrapper,
                 isInterestChargedFromDateAsDisbursementDateEnabled, numberOfDays, isSkipRepaymentOnFirstMonth,
                 isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled, isFirstRepaymentDateAllowedOnHoliday,
                 isInterestToBeRecoveredFirstWhenGreaterThanEMI, isPrincipalCompoundingDisabledForOverdueLoans);

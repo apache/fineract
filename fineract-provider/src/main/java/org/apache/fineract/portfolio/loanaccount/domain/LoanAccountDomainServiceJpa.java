@@ -242,11 +242,24 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
 
         LocalDate recalculateFrom = null;
-        if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
+        if (loan.isInterestBearingAndInterestRecalculationEnabled() && loan.getLoanProduct().getProductInterestRecalculationDetails()
+                .getPreCloseInterestCalculationStrategy().calculateTillPreClosureDateEnabled()) {
             recalculateFrom = transactionDate;
         }
+        final ScheduleGeneratorDTO scheduleGeneratorDTOForPrepay = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom,
+                transactionDate, holidayDetailDto);
+
+        Money outstanding = loanTransactionProcessingService.fetchPrepaymentDetail(scheduleGeneratorDTOForPrepay, transactionDate, loan)
+                .getTotalOutstanding();
+        LocalDate recalculateTill = null;
+        if (repaymentAmount.isGreaterThanOrEqualTo(outstanding) && loan.isInterestBearingAndInterestRecalculationEnabled()
+                && loan.getLoanProduct().getProductInterestRecalculationDetails().getPreCloseInterestCalculationStrategy()
+                        .calculateTillPreClosureDateEnabled()) {
+            recalculateTill = transactionDate;
+        }
+
         final ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom,
-                holidayDetailDto);
+                recalculateTill, holidayDetailDto);
 
         if (!isHolidayValidationDone) {
             final HolidayDetailDTO holidayDetailDTO = scheduleGeneratorDTO.getHolidayDetailDTO();
