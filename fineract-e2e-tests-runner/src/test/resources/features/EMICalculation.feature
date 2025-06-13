@@ -2171,6 +2171,10 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
       | 100.0         | 2.21     | 0.0  | 0.0       | 102.21 | 0.0  | 0.0        | 0.0  | 102.21      |
+    Then Loan has 102.21 outstanding amount
+    Then Loan has 2.21 interest outstanding amount
+    Then Loan has 34.02 total overdue amount
+    Then Loan has 1.16 total interest overdue amount
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |

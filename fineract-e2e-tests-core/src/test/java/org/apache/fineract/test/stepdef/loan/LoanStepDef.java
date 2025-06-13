@@ -1885,6 +1885,25 @@ public class LoanStepDef extends AbstractStepDef {
                 .isEqualTo(totalOutstandingExpected);
     }
 
+    @Then("Loan has {double} interest outstanding amount")
+    public void loanInterestOutstanding(double totalInterestOutstandingExpected) throws IOException {
+        final Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        assert loanCreateResponse.body() != null;
+        final long loanId = loanCreateResponse.body().getLoanId();
+
+        final Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+        testContext().set(TestContextKey.LOAN_RESPONSE, loanDetailsResponse);
+
+        assert loanDetailsResponse.body() != null;
+        assert loanDetailsResponse.body().getSummary() != null;
+        assert loanDetailsResponse.body().getSummary().getInterestOutstanding() != null;
+        final double totalInterestOutstandingActual = loanDetailsResponse.body().getSummary().getInterestOutstanding().doubleValue();
+        assertThat(totalInterestOutstandingActual)
+                .as(ErrorMessageHelper.wrongAmountInTotalOutstanding(totalInterestOutstandingActual, totalInterestOutstandingExpected))
+                .isEqualTo(totalInterestOutstandingExpected);
+    }
+
     @Then("Loan has {double} overpaid amount")
     public void loanOverpaid(double totalOverpaidExpected) throws IOException {
         Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
@@ -1917,6 +1936,24 @@ public class LoanStepDef extends AbstractStepDef {
         Double totalOverdueActual = loanDetailsResponse.body().getSummary().getTotalOverdue().doubleValue();
         assertThat(totalOverdueActual).as(ErrorMessageHelper.wrongAmountInTotalOverdue(totalOverdueActual, totalOverdueExpected))
                 .isEqualTo(totalOverdueExpected);
+    }
+
+    @Then("Loan has {double} total interest overdue amount")
+    public void loanInterestOverdue(final double totalInterestOverdueExpected) throws IOException {
+        final Response<PostLoansResponse> loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        assert loanCreateResponse.body() != null;
+        final long loanId = loanCreateResponse.body().getLoanId();
+
+        final Response<GetLoansLoanIdResponse> loanDetailsResponse = loansApi.retrieveLoan(loanId, false, "", "", "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+        testContext().set(TestContextKey.LOAN_RESPONSE, loanDetailsResponse);
+
+        assert Objects.requireNonNull(loanDetailsResponse.body()).getSummary() != null;
+        assert loanDetailsResponse.body().getSummary().getInterestOverdue() != null;
+        final double totalInterestOverdueActual = loanDetailsResponse.body().getSummary().getInterestOverdue().doubleValue();
+        assertThat(totalInterestOverdueActual)
+                .as(ErrorMessageHelper.wrongAmountInTotalOverdue(totalInterestOverdueActual, totalInterestOverdueExpected))
+                .isEqualTo(totalInterestOverdueExpected);
     }
 
     @Then("Loan has {double} last payment amount")
