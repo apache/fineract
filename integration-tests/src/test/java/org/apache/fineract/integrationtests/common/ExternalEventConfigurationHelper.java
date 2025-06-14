@@ -73,6 +73,16 @@ public class ExternalEventConfigurationHelper {
         clientRejectBusinessEvent.put("enabled", false);
         defaults.add(clientRejectBusinessEvent);
 
+        Map<String, Object> documentCreatedBusinessEvent = new HashMap<>();
+        documentCreatedBusinessEvent.put("type", "DocumentCreatedBusinessEvent");
+        documentCreatedBusinessEvent.put("enabled", false);
+        defaults.add(documentCreatedBusinessEvent);
+
+        Map<String, Object> documentDeletedBusinessEvent = new HashMap<>();
+        documentDeletedBusinessEvent.put("type", "DocumentDeletedBusinessEvent");
+        documentDeletedBusinessEvent.put("enabled", false);
+        defaults.add(documentDeletedBusinessEvent);
+
         Map<String, Object> fixedDepositAccountCreateBusinessEvent = new HashMap<>();
         fixedDepositAccountCreateBusinessEvent.put("type", "FixedDepositAccountCreateBusinessEvent");
         fixedDepositAccountCreateBusinessEvent.put("enabled", false);

@@ -31,6 +31,9 @@ import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
 import org.apache.fineract.infrastructure.documentmanagement.exception.ContentManagementException;
 import org.apache.fineract.infrastructure.documentmanagement.exception.DocumentNotFoundException;
 import org.apache.fineract.infrastructure.documentmanagement.exception.InvalidEntityTypeForDocumentManagementException;
+import org.apache.fineract.infrastructure.event.business.domain.document.DocumentCreatedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.document.DocumentDeletedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,13 +51,15 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
     private final PlatformSecurityContext context;
     private final DocumentRepository documentRepository;
     private final ContentRepositoryFactory contentRepositoryFactory;
+    private final BusinessEventNotifierService businessEventNotifierService;
 
     @Autowired
     public DocumentWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final DocumentRepository documentRepository,
-            final ContentRepositoryFactory documentStoreFactory) {
+            final ContentRepositoryFactory documentStoreFactory, BusinessEventNotifierService businessEventNotifierService) {
         this.context = context;
         this.documentRepository = documentRepository;
         this.contentRepositoryFactory = documentStoreFactory;
+        this.businessEventNotifierService = businessEventNotifierService;
     }
 
     @Transactional
@@ -78,6 +83,7 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
                     documentCommand.getDescription(), fileLocation, contentRepository.getStorageType());
 
             this.documentRepository.saveAndFlush(document);
+            businessEventNotifierService.notifyPostBusinessEvent(new DocumentCreatedBusinessEvent(document));
 
             return document.getId();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
@@ -158,6 +164,7 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
 
         final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(document.storageType());
         contentRepository.deleteFile(document.getLocation());
+        businessEventNotifierService.notifyPostBusinessEvent(new DocumentDeletedBusinessEvent(document));
         return CommandProcessingResult.resourceResult(document.getId());
     }
 
