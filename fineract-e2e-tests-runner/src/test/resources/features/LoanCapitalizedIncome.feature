@@ -6994,3 +6994,31 @@ Feature: Capitalized Income
     When Customer undo "1"th "Capitalized Income" transaction made on "01 January 2024"
     And Admin sets the business date to "05 January 2024"
     And Admin runs inline COB job for Loan
+
+  @TestRailId:C3758
+  Scenario: Verify validation of capitalized income amount with disbursement amount not exceed approved over applied amount for multidisbursal progressive loan - failed scenario
+    When Admin sets the business date to "1 January 2024"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                         | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_RECALC_EMI_360_30_MULTIDISB_OVER_APPLIED_PERCENTAGE_CAPITALIZED_INCOME | 01 January 2024   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "1 January 2024" with "1000" amount and expected disbursement date on "1 January 2024"
+    And Admin successfully disburse the loan on "1 January 2024" with "1000" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    When Admin sets the business date to "2 January 2024"
+    And Admin successfully disburse the loan on "2 January 2024" with "300" EUR transaction amount
+    Then Capitalized income with payment type "AUTOPAY" on "2 January 2024" is forbidden with amount "300" while exceed approved amount
+
+  @TestRailId:C3759
+  Scenario: Verify validation of capitalized income amount with disbursement amount not exceed approved over applied amount for multidisbursal progressive loan - successful scenario
+    When Admin sets the business date to "1 January 2024"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                         | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_RECALC_EMI_360_30_MULTIDISB_OVER_APPLIED_PERCENTAGE_CAPITALIZED_INCOME | 01 January 2024   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "1 January 2024" with "1000" amount and expected disbursement date on "1 January 2024"
+    And Admin successfully disburse the loan on "1 January 2024" with "1000" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+    When Admin sets the business date to "2 January 2024"
+    And Admin successfully disburse the loan on "2 January 2024" with "300" EUR transaction amount
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "02 January 2024" with "200" EUR transaction amount

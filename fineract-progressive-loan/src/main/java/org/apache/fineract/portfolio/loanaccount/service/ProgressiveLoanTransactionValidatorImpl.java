@@ -40,6 +40,7 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
+import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
 import org.apache.fineract.portfolio.common.service.Validator;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
@@ -54,6 +55,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepositor
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.repository.LoanCapitalizedIncomeBalanceRepository;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanTransactionValidator;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -121,17 +123,23 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
             final BigDecimal transactionAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("transactionAmount", element);
             baseDataValidator.reset().parameter("transactionAmount").value(transactionAmount).notNull().positiveAmount();
 
-            // Validate total disbursement + capitalized income <= approved amount
+            // Validate total disbursement + capitalized income <= applied amount
             if (transactionAmount != null) {
                 final BigDecimal totalDisbursed = loan.getDisbursedAmount();
-                final BigDecimal existingCapitalizedIncomeBalance = loanCapitalizedIncomeBalanceRepository.findAllByLoanId(loanId).stream()
-                        .map(LoanCapitalizedIncomeBalance::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
-                final BigDecimal approvedAmount = loan.getApprovedPrincipal();
-                final BigDecimal newTotal = totalDisbursed.add(existingCapitalizedIncomeBalance).add(transactionAmount);
+                final BigDecimal capitalizedIncome = loan.getSummary().getTotalCapitalizedIncome();
+                final BigDecimal newTotal = totalDisbursed.add(capitalizedIncome).add(transactionAmount);
 
-                if (newTotal.compareTo(approvedAmount) > 0) {
-                    baseDataValidator.reset().parameter("transactionAmount").failWithCode("exceeds.approved.amount",
-                            "Sum of disbursed amount and capitalized income cannot exceed approved amount");
+                if (loan.loanProduct().isAllowApprovedDisbursedAmountsOverApplied()) {
+                    final BigDecimal maxAppliedAmount = getOverAppliedMax(loan);
+                    if (newTotal.compareTo(maxAppliedAmount) > 0) {
+                        baseDataValidator.reset().parameter("transactionAmount").failWithCode("exceeds.approved.amount",
+                                "Sum of disbursed amount and capitalized income can't be greater than maximum applied loan amount calculation.");
+                    }
+                } else {
+                    if (newTotal.compareTo(loan.getApprovedPrincipal()) > 0) {
+                        baseDataValidator.reset().parameter("transactionAmount").failWithCode("exceeds.approved.amount",
+                                "Sum of disbursed amount and capitalized income can't be greater than approved loan principal.");
+                    }
                 }
             }
 
@@ -427,5 +435,17 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
 
     private Set<String> getContractTerminationUndoParameters() {
         return new HashSet<>(Arrays.asList("note", "reversalExternalId"));
+    }
+
+    private BigDecimal getOverAppliedMax(final Loan loan) {
+        final LoanProduct loanProduct = loan.getLoanProduct();
+        if ("percentage".equals(loanProduct.getOverAppliedCalculationType())) {
+            final BigDecimal overAppliedNumber = BigDecimal.valueOf(loanProduct.getOverAppliedNumber());
+            final BigDecimal totalPercentage = BigDecimal.valueOf(1)
+                    .add(overAppliedNumber.divide(BigDecimal.valueOf(100L), MoneyHelper.getMathContext()));
+            return loan.getProposedPrincipal().multiply(totalPercentage);
+        } else {
+            return loan.getProposedPrincipal().add(BigDecimal.valueOf(loanProduct.getOverAppliedNumber()));
+        }
     }
 }
