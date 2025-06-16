@@ -260,52 +260,52 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
         final StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
         sqlBuilder.append(this.standingInstructionMapper.schema());
-        if (standingInstructionDTO.transferType() != null || standingInstructionDTO.clientId() != null
-                || standingInstructionDTO.clientName() != null) {
+        if (standingInstructionDTO.getTransferType() != null || standingInstructionDTO.getClientId() != null
+                || standingInstructionDTO.getClientName() != null) {
             sqlBuilder.append(" where ");
         }
         boolean addAndCaluse = false;
         List<Object> paramObj = new ArrayList<>();
-        if (standingInstructionDTO.transferType() != null) {
+        if (standingInstructionDTO.getTransferType() != null) {
             if (addAndCaluse) {
                 sqlBuilder.append(" and ");
             }
             sqlBuilder.append(" atd.transfer_type=? ");
-            paramObj.add(standingInstructionDTO.transferType());
+            paramObj.add(standingInstructionDTO.getTransferType());
             addAndCaluse = true;
         }
-        if (standingInstructionDTO.clientId() != null) {
+        if (standingInstructionDTO.getClientId() != null) {
             if (addAndCaluse) {
                 sqlBuilder.append(" and ");
             }
             sqlBuilder.append(" fromclient.id=? ");
-            paramObj.add(standingInstructionDTO.clientId());
+            paramObj.add(standingInstructionDTO.getClientId());
             addAndCaluse = true;
-        } else if (standingInstructionDTO.clientName() != null) {
+        } else if (standingInstructionDTO.getClientName() != null) {
             if (addAndCaluse) {
                 sqlBuilder.append(" and ");
             }
             sqlBuilder.append(" fromclient.display_name=? ");
-            paramObj.add(standingInstructionDTO.clientName());
+            paramObj.add(standingInstructionDTO.getClientName());
             addAndCaluse = true;
         }
 
-        if (standingInstructionDTO.fromAccountType() != null && standingInstructionDTO.fromAccount() != null) {
-            PortfolioAccountType accountType = PortfolioAccountType.fromInt(standingInstructionDTO.fromAccountType());
+        if (standingInstructionDTO.getFromAccountType() != null && standingInstructionDTO.getFromAccount() != null) {
+            PortfolioAccountType accountType = PortfolioAccountType.fromInt(standingInstructionDTO.getFromAccountType());
             if (addAndCaluse) {
                 sqlBuilder.append(" and ");
             }
             if (accountType.isSavingsAccount()) {
                 sqlBuilder.append(" fromsavacc.id=? ");
-                paramObj.add(standingInstructionDTO.fromAccount());
+                paramObj.add(standingInstructionDTO.getFromAccount());
             } else if (accountType.isLoanAccount()) {
                 sqlBuilder.append(" fromloanacc.id=? ");
-                paramObj.add(standingInstructionDTO.fromAccount());
+                paramObj.add(standingInstructionDTO.getFromAccount());
             }
             addAndCaluse = true;
         }
 
-        final SearchParameters searchParameters = standingInstructionDTO.searchParameters();
+        final SearchParameters searchParameters = standingInstructionDTO.getSearchParameters();
         if (searchParameters.hasOrderBy()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
             this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());

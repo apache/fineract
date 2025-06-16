@@ -42,12 +42,12 @@ import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatfo
 import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatformServiceImpl;
 import org.apache.fineract.portfolio.account.service.PortfolioAccountReadPlatformService;
 import org.apache.fineract.portfolio.account.service.PortfolioAccountReadPlatformServiceImpl;
-import org.apache.fineract.portfolio.account.service.StandingInstructionHistoryReadPlatformService;
-import org.apache.fineract.portfolio.account.service.StandingInstructionHistoryReadPlatformServiceImpl;
 import org.apache.fineract.portfolio.account.service.StandingInstructionReadPlatformService;
 import org.apache.fineract.portfolio.account.service.StandingInstructionReadPlatformServiceImpl;
 import org.apache.fineract.portfolio.account.service.StandingInstructionWritePlatformService;
 import org.apache.fineract.portfolio.account.service.StandingInstructionWritePlatformServiceImpl;
+import org.apache.fineract.portfolio.account.standing_history.service.StandingInstructionHistoryReadPlatformService;
+import org.apache.fineract.portfolio.account.standing_history.service.StandingInstructionHistoryReadPlatformServiceImpl;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;

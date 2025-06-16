@@ -16,32 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.account.data;
+package org.apache.fineract.validation;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDate;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import jakarta.validation.Constraint;
+import jakarta.validation.Payload;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@Builder
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class StandingInstructionDTO implements Serializable {
+@Target({ ElementType.FIELD, ElementType.PARAMETER })
+@Retention(RetentionPolicy.RUNTIME)
+@Constraint(validatedBy = ExternalIdValidator.class)
+@Documented
+public @interface ExternalIdFormat {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+    String message() default "{org.apache.fineract.portfolio.account.standing_history.data.StandingInstructionHistorySearchParameters.ExternalIdFormat}";
 
-    private SearchParameters searchParameters;
-    private Integer transferType;
-    private String clientName;
-    private Long clientId;
-    private Long fromAccount;
-    private Integer fromAccountType;
-    private LocalDate startDateRange;
-    private LocalDate endDateRange;
+    Class<?>[] groups() default {};
+
+    Class<? extends Payload>[] payload() default {};
 }

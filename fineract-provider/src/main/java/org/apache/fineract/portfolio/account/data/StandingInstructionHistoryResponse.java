@@ -22,33 +22,36 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.portfolio.client.data.ClientData;
 
-@Getter
-@SuppressWarnings("unused")
-@RequiredArgsConstructor
-public class StandingInstructionHistoryData implements Serializable {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class StandingInstructionHistoryResponse implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private final Long standingInstructionId;
-    private final String name;
-    private final OfficeData fromOffice;
-    private final ClientData fromClient;
-    private final EnumOptionData fromAccountType;
-    private final PortfolioAccountData fromAccount;
-    private final EnumOptionData toAccountType;
-    private final PortfolioAccountData toAccount;
-    private final OfficeData toOffice;
-    private final ClientData toClient;
-    private final BigDecimal amount;
-    private final String status;
-    private final LocalDate executionTime;
-    private final String errorLog;
+    private Long standingInstructionId;
+    private String name;
+    private OfficeData fromOffice;
+    private ClientData fromClient;
+    private EnumOptionData fromAccountType;
+    private PortfolioAccountData fromAccount;
+    private EnumOptionData toAccountType;
+    private PortfolioAccountData toAccount;
+    private OfficeData toOffice;
+    private ClientData toClient;
+    private BigDecimal amount;
+    private String status;
+    private LocalDate executionTime;
+    private String errorLog;
 
 }

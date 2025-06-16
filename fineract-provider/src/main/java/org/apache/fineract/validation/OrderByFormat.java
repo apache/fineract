@@ -16,14 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.account.service;
+package org.apache.fineract.validation;
 
-import org.apache.fineract.infrastructure.core.service.Page;
-import org.apache.fineract.portfolio.account.data.StandingInstructionDTO;
-import org.apache.fineract.portfolio.account.data.StandingInstructionHistoryData;
+import jakarta.validation.Constraint;
+import jakarta.validation.Payload;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public interface StandingInstructionHistoryReadPlatformService {
+@Target({ ElementType.FIELD, ElementType.PARAMETER })
+@Retention(RetentionPolicy.RUNTIME)
+@Constraint(validatedBy = OrderByValidator.class)
+@Documented
+public @interface OrderByFormat {
 
-    Page<StandingInstructionHistoryData> retrieveAll(StandingInstructionDTO standingInstructionDTO);
+    String message() default "{org.apache.fineract.portfolio.account.standing_history.data.StandingInstructionHistorySearchParameters.OrderByFormat}";
 
+    Class<?>[] groups() default {};
+
+    Class<? extends Payload>[] payload() default {};
 }

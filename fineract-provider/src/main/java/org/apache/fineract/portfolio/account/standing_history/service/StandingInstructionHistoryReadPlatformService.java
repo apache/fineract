@@ -16,32 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.account.data;
+package org.apache.fineract.portfolio.account.standing_history.service;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDate;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.core.service.Page;
+import org.apache.fineract.portfolio.account.data.StandingInstructionDTO;
+import org.apache.fineract.portfolio.account.data.StandingInstructionHistoryResponse;
 
-@Builder
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class StandingInstructionDTO implements Serializable {
+public interface StandingInstructionHistoryReadPlatformService {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+    Page<StandingInstructionHistoryResponse> retrieveAll(StandingInstructionDTO standingInstructionDTO);
 
-    private SearchParameters searchParameters;
-    private Integer transferType;
-    private String clientName;
-    private Long clientId;
-    private Long fromAccount;
-    private Integer fromAccountType;
-    private LocalDate startDateRange;
-    private LocalDate endDateRange;
 }

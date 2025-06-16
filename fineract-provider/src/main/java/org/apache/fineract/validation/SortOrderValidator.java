@@ -16,32 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.account.data;
+package org.apache.fineract.validation;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDate;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.security.service.SqlValidator;
+import org.springframework.stereotype.Component;
 
-@Builder
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class StandingInstructionDTO implements Serializable {
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class SortOrderValidator implements ConstraintValidator<SortOrderFormat, String> {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+    private final SqlValidator sqlValidator;
 
-    private SearchParameters searchParameters;
-    private Integer transferType;
-    private String clientName;
-    private Long clientId;
-    private Long fromAccount;
-    private Integer fromAccountType;
-    private LocalDate startDateRange;
-    private LocalDate endDateRange;
+    @Override
+    public boolean isValid(String value, ConstraintValidatorContext context) {
+        if (StringUtils.isBlank(value)) {
+            return true;
+        }
+        sqlValidator.validate(value);
+        return true;
+    }
 }

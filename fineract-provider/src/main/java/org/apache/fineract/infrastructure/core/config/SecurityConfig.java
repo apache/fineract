@@ -143,6 +143,10 @@ public class SecurityConfig {
                             .requestMatchers(antMatcher(HttpMethod.PUT, "/api/*/instance-mode")).permitAll() //
                             .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated() //
                             .requestMatchers(antMatcher("/api/*/twofactor")).fullyAuthenticated() //
+                            // Standing Instruction History
+                            .requestMatchers(antMatcher("/api/*/standinginstructionrunhistory/**"))
+                            .hasAnyAuthority("READ_STANDINGINSTRUCTION", "ALL_FUNCTIONS", "ALL_FUNCTIONS_READ") //
+                            // Standing Instruction
                             .requestMatchers(antMatcher("/api/**"))
                             .access(allOf(authorizationManagers.toArray(new AuthorizationManager[0]))); //
                 }).httpBasic((httpBasic) -> httpBasic.authenticationEntryPoint(basicAuthenticationEntryPoint())) //
