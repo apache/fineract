@@ -40,6 +40,7 @@ import java.time.temporal.ChronoField;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -51,18 +52,15 @@ import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.charge.exception.SavingsAccountChargeWithoutMandatoryFieldException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author dv6
  *
  */
+@Slf4j
 @Entity
 @Table(name = "m_savings_account_charge")
 public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
-
-    private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountCharge.class);
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "savings_account_id", referencedColumnName = "id", nullable = false)
@@ -436,7 +434,7 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
                     this.amountOutstanding = null;
                 break;
                 case PERCENT_OF_DISBURSEMENT_AMOUNT:
-                    LOG.error("TODO Implement update ChargeCalculationType for PERCENT_OF_DISBURSEMENT_AMOUNT");
+                    log.error("TODO Implement update ChargeCalculationType for PERCENT_OF_DISBURSEMENT_AMOUNT");
                 break;
             }
         }
@@ -511,7 +509,7 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
                     this.amountOutstanding = null;
                 break;
                 case PERCENT_OF_DISBURSEMENT_AMOUNT:
-                    LOG.error("TODO Implement update ChargeCalculationType for PERCENT_OF_DISBURSEMENT_AMOUNT");
+                    log.error("TODO Implement update ChargeCalculationType for PERCENT_OF_DISBURSEMENT_AMOUNT");
                 break;
             }
         }

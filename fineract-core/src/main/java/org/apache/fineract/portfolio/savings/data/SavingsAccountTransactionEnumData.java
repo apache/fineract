@@ -70,11 +70,11 @@ public class SavingsAccountTransactionEnumData implements Serializable {
         this.rejectTransfer = transactionType == SavingsAccountTransactionType.REJECT_TRANSFER;
         this.writtenoff = transactionType == SavingsAccountTransactionType.WRITTEN_OFF;
         this.overdraftFee = false;
-        this.overdraftInterest = transactionType == SavingsAccountTransactionType.OVERDRAFT_INTEREST;
-        this.withholdTax = transactionType == SavingsAccountTransactionType.WITHHOLD_TAX;
-        this.escheat = transactionType == SavingsAccountTransactionType.ESCHEAT;
-        this.amountHold = transactionType == SavingsAccountTransactionType.AMOUNT_HOLD;
-        this.amountRelease = transactionType == SavingsAccountTransactionType.AMOUNT_RELEASE;
+        this.overdraftInterest = Long.valueOf(SavingsAccountTransactionType.OVERDRAFT_INTEREST.getValue()).equals(this.id);
+        this.withholdTax = Long.valueOf(SavingsAccountTransactionType.WITHHOLD_TAX.getValue()).equals(this.id);
+        this.escheat = Long.valueOf(SavingsAccountTransactionType.ESCHEAT.getValue()).equals(this.id);
+        this.amountHold = Long.valueOf(SavingsAccountTransactionType.AMOUNT_HOLD.getValue()).equals(this.id);
+        this.amountRelease = Long.valueOf(SavingsAccountTransactionType.AMOUNT_RELEASE.getValue()).equals(this.id);
     }
 
     public boolean isIncomeFromInterest() {

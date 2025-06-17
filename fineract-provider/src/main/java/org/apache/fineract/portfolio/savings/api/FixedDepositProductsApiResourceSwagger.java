@@ -363,20 +363,8 @@ final class FixedDepositProductsApiResourceSwagger {
                 public Boolean penalty;
             }
 
-            static final class GetFixedDepositProductsProductIdFeeToIncomeAccountMappingsIncomeAccount {
-
-                private GetFixedDepositProductsProductIdFeeToIncomeAccountMappingsIncomeAccount() {}
-
-                @Schema(example = "16")
-                public Long id;
-                @Schema(example = "income from savings fee")
-                public String name;
-                @Schema(example = "24")
-                public String glCode;
-            }
-
             public GetFixedDepositProductsProductIdFeeToIncomeAccountMappingsCharge charge;
-            public GetFixedDepositProductsProductIdFeeToIncomeAccountMappingsIncomeAccount incomeAccount;
+            public GetFixedDepositProductsGlAccount incomeAccount;
         }
 
         static final class GetFixedDepositProductsProductIdPenaltyToIncomeAccountMappings {

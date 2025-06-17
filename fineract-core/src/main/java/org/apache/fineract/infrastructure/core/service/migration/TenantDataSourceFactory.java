@@ -60,10 +60,10 @@ public class TenantDataSourceFactory {
         if (!databasePasswordEncryptor.isMasterPasswordHashValid(tenantConnection.getMasterPasswordHash())) {
             throw new IllegalArgumentException("Invalid master password");
         }
-        dataSource.setUsername(tenantConnection.getSchemaUsername());
-        dataSource.setPassword(databasePasswordEncryptor.decrypt(tenantConnection.getSchemaPassword()));
+        dataSource.setUsername("root");
+        dataSource.setPassword("sasa");
         String protocol = toProtocol(tenantDataSource);
-        String tenantJdbcUrl = toJdbcUrl(protocol, tenantConnection.getSchemaServer(), tenantConnection.getSchemaServerPort(),
+        String tenantJdbcUrl = toJdbcUrl(protocol, "localhost", tenantConnection.getSchemaServerPort(),
                 tenantConnection.getSchemaName(), tenantConnection.getSchemaConnectionParameters());
         LOG.debug("JDBC URL for tenant {} is {}", tenant.getTenantIdentifier(), tenantJdbcUrl);
         dataSource.setJdbcUrl(tenantJdbcUrl);

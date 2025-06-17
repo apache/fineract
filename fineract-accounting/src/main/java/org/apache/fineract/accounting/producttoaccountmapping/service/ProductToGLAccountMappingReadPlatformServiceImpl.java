@@ -70,47 +70,47 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
 
                 final CashAccountsForLoan glAccountForLoan = CashAccountsForLoan.fromInt(mapping.getFinancialAccountType());
 
-                final GLAccountData gLAccountData = new GLAccountData().setId(mapping.getGlAccount().getId())
+                final GLAccountData glAccountData = new GLAccountData().setId(mapping.getGlAccount().getId())
                         .setName(mapping.getGlAccount().getName()).setGlCode(mapping.getGlAccount().getGlCode());
 
                 if (glAccountForLoan.equals(CashAccountsForLoan.FUND_SOURCE)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.FUND_SOURCE.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.FUND_SOURCE.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(CashAccountsForLoan.INCOME_FROM_FEES)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_FEES.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_FEES.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(CashAccountsForLoan.INCOME_FROM_PENALTIES)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_PENALTIES.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_PENALTIES.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(CashAccountsForLoan.INTEREST_ON_LOANS)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.INTEREST_ON_LOANS.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INTEREST_ON_LOANS.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(CashAccountsForLoan.LOAN_PORTFOLIO)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.LOAN_PORTFOLIO.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.LOAN_PORTFOLIO.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(CashAccountsForLoan.TRANSFERS_SUSPENSE)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.TRANSFERS_SUSPENSE.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.TRANSFERS_SUSPENSE.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(CashAccountsForLoan.LOSSES_WRITTEN_OFF)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.LOSSES_WRITTEN_OFF.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.LOSSES_WRITTEN_OFF.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(CashAccountsForLoan.GOODWILL_CREDIT)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.GOODWILL_CREDIT.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.GOODWILL_CREDIT.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(CashAccountsForLoan.OVERPAYMENT)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.OVERPAYMENT.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.OVERPAYMENT.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(CashAccountsForLoan.INCOME_FROM_RECOVERY)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_RECOVERY.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_RECOVERY.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_CHARGE_OFF_FEES.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_CHARGE_OFF_FEES.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_INTEREST)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_CHARGE_OFF_INTEREST.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_CHARGE_OFF_INTEREST.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(CashAccountsForLoan.CHARGE_OFF_EXPENSE)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.CHARGE_OFF_EXPENSE.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.CHARGE_OFF_EXPENSE.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(CashAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.CHARGE_OFF_FRAUD_EXPENSE.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.CHARGE_OFF_FRAUD_EXPENSE.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_CHARGE_OFF_PENALTY.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_CHARGE_OFF_PENALTY.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(CashAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_INTEREST)) {
                     accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_GOODWILL_CREDIT_INTEREST.getValue(),
-                            gLAccountData);
+                            glAccountData);
                 } else if (glAccountForLoan.equals(CashAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_FEES)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_GOODWILL_CREDIT_FEES.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_GOODWILL_CREDIT_FEES.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(CashAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_PENALTY)) {
                     accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_GOODWILL_CREDIT_PENALTY.getValue(),
-                            gLAccountData);
+                            glAccountData);
                 }
 
             }
@@ -120,57 +120,57 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
             for (ProductToGLAccountMapping mapping : mappings) {
                 final AccrualAccountsForLoan glAccountForLoan = AccrualAccountsForLoan.fromInt(mapping.getFinancialAccountType());
 
-                final GLAccountData gLAccountData = new GLAccountData().setId(mapping.getGlAccount().getId())
+                final GLAccountData glAccountData = new GLAccountData().setId(mapping.getGlAccount().getId())
                         .setName(mapping.getGlAccount().getName()).setGlCode(mapping.getGlAccount().getGlCode());
 
                 if (glAccountForLoan.equals(AccrualAccountsForLoan.FUND_SOURCE)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.FUND_SOURCE.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.FUND_SOURCE.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(AccrualAccountsForLoan.INCOME_FROM_FEES)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_FEES.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_FEES.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(AccrualAccountsForLoan.INCOME_FROM_PENALTIES)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_PENALTIES.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_PENALTIES.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(AccrualAccountsForLoan.INTEREST_ON_LOANS)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.INTEREST_ON_LOANS.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INTEREST_ON_LOANS.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(AccrualAccountsForLoan.LOAN_PORTFOLIO)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.LOAN_PORTFOLIO.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.LOAN_PORTFOLIO.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(AccrualAccountsForLoan.OVERPAYMENT)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.OVERPAYMENT.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.OVERPAYMENT.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(AccrualAccountsForLoan.TRANSFERS_SUSPENSE)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.TRANSFERS_SUSPENSE.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.TRANSFERS_SUSPENSE.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(AccrualAccountsForLoan.LOSSES_WRITTEN_OFF)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.LOSSES_WRITTEN_OFF.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.LOSSES_WRITTEN_OFF.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(AccrualAccountsForLoan.GOODWILL_CREDIT)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.GOODWILL_CREDIT.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.GOODWILL_CREDIT.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(AccrualAccountsForLoan.INTEREST_RECEIVABLE)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.INTEREST_RECEIVABLE.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INTEREST_RECEIVABLE.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(AccrualAccountsForLoan.FEES_RECEIVABLE)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.FEES_RECEIVABLE.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.FEES_RECEIVABLE.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(AccrualAccountsForLoan.PENALTIES_RECEIVABLE)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.PENALTIES_RECEIVABLE.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.PENALTIES_RECEIVABLE.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(AccrualAccountsForLoan.INCOME_FROM_RECOVERY)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_RECOVERY.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_RECOVERY.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_CHARGE_OFF_FEES.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_CHARGE_OFF_FEES.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_INTEREST)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_CHARGE_OFF_INTEREST.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_CHARGE_OFF_INTEREST.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(AccrualAccountsForLoan.CHARGE_OFF_EXPENSE)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.CHARGE_OFF_EXPENSE.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.CHARGE_OFF_EXPENSE.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(AccrualAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.CHARGE_OFF_FRAUD_EXPENSE.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.CHARGE_OFF_FRAUD_EXPENSE.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(AccrualAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_CHARGE_OFF_PENALTY.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_CHARGE_OFF_PENALTY.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(AccrualAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_INTEREST)) {
                     accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_GOODWILL_CREDIT_INTEREST.getValue(),
-                            gLAccountData);
+                            glAccountData);
                 } else if (glAccountForLoan.equals(AccrualAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_FEES)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_GOODWILL_CREDIT_FEES.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_GOODWILL_CREDIT_FEES.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(AccrualAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_PENALTY)) {
                     accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_GOODWILL_CREDIT_PENALTY.getValue(),
-                            gLAccountData);
+                            glAccountData);
                 } else if (glAccountForLoan.equals(AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.DEFERRED_INCOME_LIABILITY.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.DEFERRED_INCOME_LIABILITY.getValue(), glAccountData);
                 } else if (glAccountForLoan.equals(AccrualAccountsForLoan.INCOME_FROM_CAPITALIZATION)) {
-                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_CAPITALIZATION.getValue(), gLAccountData);
+                    accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_CAPITALIZATION.getValue(), glAccountData);
                 }
             }
 
@@ -307,17 +307,17 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
             for (final ProductToGLAccountMapping mapping : mappings) {
                 final CashAccountsForShares glAccountForShares = CashAccountsForShares.fromInt(mapping.getFinancialAccountType());
 
-                final GLAccountData gLAccountData = new GLAccountData().setId(mapping.getGlAccount().getId())
+                final GLAccountData glAccountData = new GLAccountData().setId(mapping.getGlAccount().getId())
                         .setName(mapping.getGlAccount().getName()).setGlCode(mapping.getGlAccount().getGlCode());
 
                 if (glAccountForShares.equals(CashAccountsForShares.SHARES_REFERENCE)) {
-                    accountMappingDetails.put(SharesProductAccountingParams.SHARES_REFERENCE.getValue(), gLAccountData);
+                    accountMappingDetails.put(SharesProductAccountingParams.SHARES_REFERENCE.getValue(), glAccountData);
                 } else if (glAccountForShares.equals(CashAccountsForShares.SHARES_SUSPENSE)) {
-                    accountMappingDetails.put(SharesProductAccountingParams.SHARES_SUSPENSE.getValue(), gLAccountData);
+                    accountMappingDetails.put(SharesProductAccountingParams.SHARES_SUSPENSE.getValue(), glAccountData);
                 } else if (glAccountForShares.equals(CashAccountsForShares.INCOME_FROM_FEES)) {
-                    accountMappingDetails.put(SharesProductAccountingParams.INCOME_FROM_FEES.getValue(), gLAccountData);
+                    accountMappingDetails.put(SharesProductAccountingParams.INCOME_FROM_FEES.getValue(), glAccountData);
                 } else if (glAccountForShares.equals(CashAccountsForShares.SHARES_EQUITY)) {
-                    accountMappingDetails.put(SharesProductAccountingParams.SHARES_EQUITY.getValue(), gLAccountData);
+                    accountMappingDetails.put(SharesProductAccountingParams.SHARES_EQUITY.getValue(), glAccountData);
                 }
             }
         }
@@ -354,6 +354,8 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
                 // Assets
                 if (glAccountForSavings.equals(AccrualAccountsForSavings.SAVINGS_REFERENCE)) {
                     accountMappingDetails.put(SavingProductAccountingDataParams.SAVINGS_REFERENCE.getValue(), glAccountData);
+                } else if(glAccountForSavings.equals(AccrualAccountsForSavings.INTEREST_RECEIVABLE)){
+                    accountMappingDetails.put(SavingProductAccountingDataParams.INTEREST_RECEIVABLE.getValue(), glAccountData);
                 } else if (glAccountForSavings.equals(AccrualAccountsForSavings.OVERDRAFT_PORTFOLIO_CONTROL)) {
                     accountMappingDetails.put(SavingProductAccountingDataParams.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), glAccountData);
                 } else if (glAccountForSavings.equals(AccrualAccountsForSavings.FEES_RECEIVABLE)) {

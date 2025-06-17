@@ -35,6 +35,7 @@ public class SavingsApiConstants {
     public static final String withdrawnByApplicantAction = ".withdrawnByApplicant";
     public static final String activateAction = ".activate";
     public static final String modifyApplicationAction = ".modify";
+    public static final String undoActivateAction = ".undoactivate";
     public static final String deleteApplicationAction = ".delete";
     public static final String undoTransactionAction = ".undotransaction";
     public static final String applyAnnualFeeTransactionAction = ".applyannualfee";
@@ -65,6 +66,7 @@ public class SavingsApiConstants {
     public static final String COMMAND_BLOCK_DEBIT = "blockDebit";
     public static final String COMMAND_UNBLOCK_DEBIT = "unblockDebit";
     public static final String COMMAND_UNBLOCK_CREDIT = "unblockCredit";
+    public static final String COMMAND_ADD_ACCRUAL_TRANSACTION = "addAccrualTransactions";
 
     // general
     public static final String localeParamName = "locale";
@@ -156,6 +158,7 @@ public class SavingsApiConstants {
     // charges parameters
     public static final String chargeIdParamName = "chargeId";
     public static final String chargesParamName = "charges";
+    public static final String accrualChargesParamName = "accrualCharges";
     public static final String savingsAccountChargeIdParamName = "savingsAccountChargeId";
     public static final String chargeNameParamName = "name";
     public static final String penaltyParamName = "penalty";

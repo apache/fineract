@@ -156,4 +156,12 @@ public class DepositAccountInterestRateChart extends AbstractPersistableCustom<L
     public boolean isPrimaryGroupingByAmount() {
         return this.chartFields.isPrimaryGroupingByAmount();
     }
+
+    public SavingsAccount getAccount() {
+        return account;
+    }
+
+    public void setAccount(SavingsAccount account) {
+        this.account = account;
+    }
 }

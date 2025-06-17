@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 public class SavingsProductHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsProductHelper.class);
+    private static final Gson GSON = new JSON().getGson();
     private static final String SAVINGS_PRODUCT_URL = "/fineract-provider/api/v1/savingsproducts";
     private static final String CREATE_SAVINGS_PRODUCT_URL = SAVINGS_PRODUCT_URL + "?" + Utils.TENANT_IDENTIFIER;
     private static final Gson GSON = new JSON().getGson();
@@ -239,6 +240,12 @@ public class SavingsProductHelper {
         return this;
     }
 
+    public SavingsProductHelper withAccountingRuleAsAccrualBased(final Account[] account_list) {
+        this.accountingRule = ACCRUAL_BASED;
+        this.accountList = account_list;
+        return this;
+    }
+
     public SavingsProductHelper withMinRequiredBalance(final String minRequiredBalance) {
         this.minRequiredBalance = minRequiredBalance;
         return this;
@@ -373,10 +380,14 @@ public class SavingsProductHelper {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_SAVINGS_PRODUCT_URL, savingsProductJSON, "resourceId");
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
+    public static GetSavingsProductsProductIdResponse getSavingsProductById(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final Integer productId) {
+        LOG.info("-------------------- RETRIEVING SAVINGS DEPOSIT PRODUCT BY ID --------------------------");
+        final String GET_PRODUCT_BY_ID_URL = SAVINGS_PRODUCT_URL + "/" + productId + "?" + Utils.TENANT_IDENTIFIER;
+        final String response = Utils.performServerGet(requestSpec, responseSpec, GET_PRODUCT_BY_ID_URL);
+        return GSON.fromJson(response, GetSavingsProductsProductIdResponse.class);
+    }
+
     public static void verifySavingsProductCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedProductID) {
         LOG.info("------------------------------CHECK CLIENT DETAILS------------------------------------\n");

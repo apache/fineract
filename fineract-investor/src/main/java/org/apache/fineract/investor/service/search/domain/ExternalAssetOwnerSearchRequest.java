@@ -21,6 +21,9 @@ package org.apache.fineract.investor.service.search.domain;
 import java.time.LocalDate;
 import lombok.Data;
 
+/**
+ * Immutable data object representing datatable data.
+ */
 @Data
 public class ExternalAssetOwnerSearchRequest {
 

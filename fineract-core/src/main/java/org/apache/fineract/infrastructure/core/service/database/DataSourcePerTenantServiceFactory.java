@@ -80,15 +80,15 @@ public class DataSourcePerTenantServiceFactory {
             schemaConnectionParameters = StringUtils.defaultIfBlank(tenantConnection.getReadOnlySchemaConnectionParameters(),
                     schemaConnectionParameters);
         }
-        String jdbcUrl = toJdbcUrl(protocol, schemaServer, schemaPort, schemaName, schemaConnectionParameters);
+        String jdbcUrl = toJdbcUrl(protocol, "localhost", schemaPort, schemaName, schemaConnectionParameters);
         log.debug("{}", jdbcUrl);
 
         HikariConfig config = new HikariConfig();
         config.setReadOnly(fineractProperties.getMode().isReadOnlyMode());
         config.setJdbcUrl(jdbcUrl);
         config.setPoolName(schemaName + "_pool");
-        config.setUsername(schemaUsername);
-        config.setPassword(databasePasswordEncryptor.decrypt(schemaPassword));
+        config.setUsername("root");
+        config.setPassword("sasa");
         config.setMinimumIdle(getMinPoolSize(tenantConnection));
         config.setMaximumPoolSize(getMaxPoolSize(tenantConnection));
         config.setValidationTimeout(tenantConnection.getValidationInterval());

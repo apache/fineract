@@ -105,6 +105,9 @@ public final class SavingsAccountTransactionData implements Serializable {
     private BigDecimal overdraftAmount;
     private transient Long modifiedId;
     private transient String refNo;
+    private Boolean isNegativeBalance;
+    private Boolean flagValidationInterest;
+    private Boolean flagValidationOverdraft;
 
     private SavingsAccountTransactionData(final Long id, final SavingsAccountTransactionEnumData transactionType,
             final PaymentDetailData paymentDetailData, final Long savingsId, final String savingsAccountNo, final LocalDate transactionDate,
@@ -112,7 +115,7 @@ public final class SavingsAccountTransactionData implements Serializable {
             final boolean reversed, final AccountTransferData transfer, final Collection<PaymentTypeData> paymentTypeOptions,
             final LocalDate submittedOnDate, final boolean interestedPostedAsOn, final String submittedByUsername, final String note,
             final Boolean isReversal, final Long originalTransactionId, boolean isManualTransaction, final Boolean lienTransaction,
-            final Long releaseTransactionId, final String reasonForBlock) {
+            final Long releaseTransactionId, final String reasonForBlock, final Boolean isNegativeBalance) {
         this.id = id;
         this.transactionType = transactionType;
         TransactionEntryType entryType = null;
@@ -146,6 +149,7 @@ public final class SavingsAccountTransactionData implements Serializable {
         this.lienTransaction = lienTransaction;
         this.releaseTransactionId = releaseTransactionId;
         this.reasonForBlock = reasonForBlock;
+        this.isNegativeBalance = isNegativeBalance;
     }
 
     private static SavingsAccountTransactionData createData(final Long id, final SavingsAccountTransactionEnumData transactionType,
@@ -156,7 +160,7 @@ public final class SavingsAccountTransactionData implements Serializable {
             final Boolean lienTransaction) {
         return new SavingsAccountTransactionData(id, transactionType, paymentDetailData, accountId, accountNo, date, currency, amount,
                 outstandingChargeAmount, runningBalance, reversed, transfer, paymentTypeOptions, submittedOnDate, interestedPostedAsOn,
-                submittedByUsername, note, null, null, false, lienTransaction, null, null);
+                submittedByUsername, note, null, null, false, lienTransaction, null, null, false);
     }
 
     public static SavingsAccountTransactionData create(final Long id, final SavingsAccountTransactionEnumData transactionType,
@@ -167,7 +171,7 @@ public final class SavingsAccountTransactionData implements Serializable {
             final Boolean lienTransaction, final Long releaseTransactionId, final String reasonForBlock) {
         return new SavingsAccountTransactionData(id, transactionType, paymentDetailData, savingsId, savingsAccountNo, date, currency,
                 amount, outstandingChargeAmount, runningBalance, reversed, transfer, null, submittedOnDate, interestedPostedAsOn,
-                submittedByUsername, note, isReversal, originalTransactionId, false, lienTransaction, releaseTransactionId, reasonForBlock);
+                submittedByUsername, note, isReversal, originalTransactionId, false, lienTransaction, releaseTransactionId, reasonForBlock, false);
     }
 
     public static SavingsAccountTransactionData create(final Long id, final SavingsAccountTransactionEnumData transactionType,
@@ -235,10 +239,10 @@ public final class SavingsAccountTransactionData implements Serializable {
     private static SavingsAccountTransactionData createImport(final SavingsAccountTransactionEnumData transactionType,
             final PaymentDetailData paymentDetailData, final Long savingsAccountId, final String accountNumber,
             final LocalDate transactionDate, final BigDecimal transactionAmount, final boolean reversed, final LocalDate submittedOnDate,
-            boolean isManualTransaction, final Boolean lienTransaction) {
+            boolean isManualTransaction, final Boolean lienTransaction, final Boolean isNegativeBalance) {
         SavingsAccountTransactionData data = new SavingsAccountTransactionData(null, transactionType, paymentDetailData, savingsAccountId,
                 accountNumber, transactionDate, null, transactionAmount, null, null, reversed, null, null, submittedOnDate, false, null,
-                null, null, null, isManualTransaction, lienTransaction, null, null);
+                null, null, null, isManualTransaction, lienTransaction, null, null, isNegativeBalance);
         // duplicated import fields
         data.savingsAccountId = savingsAccountId;
         data.accountNumber = accountNumber;
@@ -251,14 +255,14 @@ public final class SavingsAccountTransactionData implements Serializable {
         return createImport(accountTransaction.getTransactionType(), accountTransaction.getPaymentDetailData(),
                 accountTransaction.getSavingsAccountId(), null, accountTransaction.getTransactionDate(), accountTransaction.getAmount(),
                 accountTransaction.isReversed(), accountTransaction.getSubmittedOnDate(), accountTransaction.isManualTransaction(),
-                accountTransaction.getLienTransaction());
+                accountTransaction.getLienTransaction(), false);
     }
 
     public static SavingsAccountTransactionData importInstance(BigDecimal transactionAmount, LocalDate transactionDate, Long paymentTypeId,
             String accountNumber, String checkNumber, String routingCode, String receiptNumber, String bankNumber, String note,
             Long savingsAccountId, SavingsAccountTransactionEnumData transactionType, Integer rowIndex, String locale, String dateFormat) {
         SavingsAccountTransactionData data = createImport(transactionType, null, savingsAccountId, accountNumber, transactionDate,
-                transactionAmount, false, transactionDate, false, false);
+                transactionAmount, false, transactionDate, false, false, false);
         data.rowIndex = rowIndex;
         data.paymentTypeId = paymentTypeId;
         data.checkNumber = checkNumber;
@@ -272,10 +276,10 @@ public final class SavingsAccountTransactionData implements Serializable {
     }
 
     private static SavingsAccountTransactionData createImport(SavingsAccountTransactionEnumData transactionType, Long savingsAccountId,
-            LocalDate transactionDate, BigDecimal transactionAmount, final LocalDate submittedOnDate, boolean isManualTransaction) {
+            LocalDate transactionDate, BigDecimal transactionAmount, final LocalDate submittedOnDate, boolean isManualTransaction, Boolean isNegativeBalance) {
         // import transaction
         return createImport(transactionType, null, savingsAccountId, null, transactionDate, transactionAmount, false, submittedOnDate,
-                isManualTransaction, false);
+                isManualTransaction, false, isNegativeBalance);
     }
 
     public static SavingsAccountTransactionData interestPosting(final SavingsAccountData savingsAccount, final LocalDate date,
@@ -285,17 +289,27 @@ public final class SavingsAccountTransactionData implements Serializable {
         SavingsAccountTransactionEnumData transactionType = new SavingsAccountTransactionEnumData(
                 savingsAccountTransactionType.getValue().longValue(), savingsAccountTransactionType.getCode(),
                 savingsAccountTransactionType.getValue().toString());
-        return createImport(transactionType, savingsAccount.getId(), date, amount.getAmount(), submittedOnDate, isManualTransaction);
+        return createImport(transactionType, savingsAccount.getId(), date, amount.getAmount(), submittedOnDate, isManualTransaction, false);
+    }
+
+    public static SavingsAccountTransactionData accrual(final SavingsAccountData savingsAccount, final LocalDate date, final Money amount,
+            final boolean isManualTransaction) {
+        final LocalDate submittedOnDate = DateUtils.getBusinessLocalDate();
+        final SavingsAccountTransactionType savingsAccountTransactionType = SavingsAccountTransactionType.ACCRUAL;
+        SavingsAccountTransactionEnumData transactionType = new SavingsAccountTransactionEnumData(
+                savingsAccountTransactionType.getValue().longValue(), savingsAccountTransactionType.getCode(),
+                savingsAccountTransactionType.getValue().toString());
+        return createImport(transactionType, savingsAccount.getId(), date, amount.getAmount(), submittedOnDate, isManualTransaction, false);
     }
 
     public static SavingsAccountTransactionData overdraftInterest(final SavingsAccountData savingsAccount, final LocalDate date,
-            final Money amount, final boolean isManualTransaction) {
+            final Money amount, final boolean isManualTransaction, final Boolean isNegativeBalance) {
         final LocalDate submittedOnDate = DateUtils.getBusinessLocalDate();
         final SavingsAccountTransactionType savingsAccountTransactionType = SavingsAccountTransactionType.OVERDRAFT_INTEREST;
         SavingsAccountTransactionEnumData transactionType = new SavingsAccountTransactionEnumData(
                 savingsAccountTransactionType.getValue().longValue(), savingsAccountTransactionType.getCode(),
                 savingsAccountTransactionType.getValue().toString());
-        return createImport(transactionType, savingsAccount.getId(), date, amount.getAmount(), submittedOnDate, isManualTransaction);
+        return createImport(transactionType, savingsAccount.getId(), date, amount.getAmount(), submittedOnDate, isManualTransaction, isNegativeBalance);
     }
 
     public static SavingsAccountTransactionData withHoldTax(final SavingsAccountData savingsAccount, final LocalDate date,
@@ -306,7 +320,7 @@ public final class SavingsAccountTransactionData implements Serializable {
                 savingsAccountTransactionType.getValue().longValue(), savingsAccountTransactionType.getCode(),
                 savingsAccountTransactionType.getValue().toString());
         SavingsAccountTransactionData accountTransaction = createImport(transactionType, savingsAccount.getId(), date, amount.getAmount(),
-                submittedOnDate, false);
+                submittedOnDate, false, false);
         accountTransaction.addTaxDetails(taxDetails);
         return accountTransaction;
     }
@@ -321,6 +335,22 @@ public final class SavingsAccountTransactionData implements Serializable {
 
     public boolean isOverdraftInterestAndNotReversed() {
         return this.transactionType.isIncomeFromInterest() && isNotReversed();
+    }
+
+    public Boolean getFlagValidationInterest() {
+        return flagValidationInterest;
+    }
+
+    public void setFlagValidationInterest(Boolean flagValidationInterest) {
+        this.flagValidationInterest = flagValidationInterest;
+    }
+
+    public Boolean getFlagValidationOverdraft() {
+        return flagValidationOverdraft;
+    }
+
+    public void setFlagValidationOverdraft(Boolean flagValidationOverdraft) {
+        this.flagValidationOverdraft = flagValidationOverdraft;
     }
 
     public boolean isCredit() {
@@ -388,16 +418,24 @@ public final class SavingsAccountTransactionData implements Serializable {
         Money endOfDayBalance = openingBalance.copy();
         if (isDeposit() || isDividendPayoutAndNotReversed()) {
             endOfDayBalance = openingBalance.plus(getAmount());
+            endOfDayBalance = Money.of(currency, this.runningBalance);
         } else if (isWithdrawal() || isChargeTransactionAndNotReversed()) {
-
-            if (openingBalance.isGreaterThanZero()) {
+            if (isWithdrawal()){
+                endOfDayBalance = Money.of(currency, this.runningBalance);
+            }else if (openingBalance.isGreaterThanZero()) {
                 endOfDayBalance = openingBalance.minus(getAmount());
             } else {
                 endOfDayBalance = Money.of(currency, this.runningBalance);
             }
         }
 
-        return EndOfDayBalance.from(getTransactionDate(), openingBalance, endOfDayBalance, this.balanceNumberOfDays);
+        return EndOfDayBalance.from(getTransactionDate(), openingBalance, endOfDayBalance, this.balanceNumberOfDays, currency.getDigitsAfterDecimal());
+    }
+    public EndOfDayBalance toEndOfDayBalanceDates(final Money openingBalance, LocalDateInterval date) {
+        final MonetaryCurrency currency = openingBalance.getCurrency();
+        Money endOfDayBalance = Money.of(currency, this.runningBalance);
+
+        return EndOfDayBalance.from(getTransactionDate(), openingBalance, endOfDayBalance, this.balanceNumberOfDays != null ? this.balanceNumberOfDays: date.endDate().getDayOfMonth(), currency.getDigitsAfterDecimal());
     }
 
     public boolean isChargeTransactionAndNotReversed() {
@@ -427,7 +465,9 @@ public final class SavingsAccountTransactionData implements Serializable {
             if (isDeposit() || isDividendPayoutAndNotReversed()) {
                 endOfDayBalance = endOfDayBalance.plus(getAmount());
             } else if (isWithdrawal() || isChargeTransactionAndNotReversed()) {
-                if (endOfDayBalance.isGreaterThanZero() || isAllowOverdraft) {
+                if (isWithdrawal()){
+                    endOfDayBalance = Money.of(currency, this.runningBalance);
+                } else if (endOfDayBalance.isGreaterThanZero() || isAllowOverdraft) {
                     endOfDayBalance = endOfDayBalance.minus(getAmount());
                 } else {
                     endOfDayBalance = Money.of(currency, this.runningBalance);
@@ -441,7 +481,7 @@ public final class SavingsAccountTransactionData implements Serializable {
             numberOfDaysOfBalance = spanOfBalance.daysInPeriodInclusiveOfEndDate();
         }
 
-        return EndOfDayBalance.from(balanceStartDate, openingBalance, endOfDayBalance, numberOfDaysOfBalance);
+        return EndOfDayBalance.from(balanceStartDate, openingBalance, endOfDayBalance, numberOfDaysOfBalance, currency.getDigitsAfterDecimal());
     }
 
     public void reverse() {

@@ -93,9 +93,33 @@ public enum SavingsAccountTransactionType {
         return entryType != null && entryType.isDebit();
     }
 
-    public static SavingsAccountTransactionType fromInt(final Integer value) {
-        SavingsAccountTransactionType transactionType = BY_ID.get(value);
-        return transactionType == null ? INVALID : transactionType;
+    public static SavingsAccountTransactionType fromInt(final Integer transactionType) {
+
+        if (transactionType == null) {
+            return SavingsAccountTransactionType.INVALID;
+        }
+        return switch (transactionType) {
+            case 1 -> SavingsAccountTransactionType.DEPOSIT;
+            case 2 -> SavingsAccountTransactionType.WITHDRAWAL;
+            case 3 -> SavingsAccountTransactionType.INTEREST_POSTING;
+            case 4 -> SavingsAccountTransactionType.WITHDRAWAL_FEE;
+            case 5 -> SavingsAccountTransactionType.ANNUAL_FEE;
+            case 6 -> SavingsAccountTransactionType.WAIVE_CHARGES;
+            case 7 -> SavingsAccountTransactionType.PAY_CHARGE;
+            case 8 -> SavingsAccountTransactionType.DIVIDEND_PAYOUT;
+            case 10 -> SavingsAccountTransactionType.ACCRUAL;
+            case 12 -> SavingsAccountTransactionType.INITIATE_TRANSFER;
+            case 13 -> SavingsAccountTransactionType.APPROVE_TRANSFER;
+            case 14 -> SavingsAccountTransactionType.WITHDRAW_TRANSFER;
+            case 15 -> SavingsAccountTransactionType.REJECT_TRANSFER;
+            case 16 -> SavingsAccountTransactionType.WRITTEN_OFF;
+            case 17 -> SavingsAccountTransactionType.OVERDRAFT_INTEREST;
+            case 18 -> SavingsAccountTransactionType.WITHHOLD_TAX;
+            case 19 -> SavingsAccountTransactionType.ESCHEAT;
+            case 20 -> SavingsAccountTransactionType.AMOUNT_HOLD;
+            case 21 -> SavingsAccountTransactionType.AMOUNT_RELEASE;
+            default -> SavingsAccountTransactionType.INVALID;
+        };
     }
 
     public boolean isValid() {
@@ -112,6 +136,10 @@ public enum SavingsAccountTransactionType {
 
     public boolean isInterestPosting() {
         return this == INTEREST_POSTING;
+    }
+
+    public boolean isAccrual() {
+        return this.equals(SavingsAccountTransactionType.ACCRUAL);
     }
 
     public boolean isOverDraftInterestPosting() {
@@ -180,10 +208,6 @@ public enum SavingsAccountTransactionType {
 
     public boolean isAmountRelease() {
         return this == AMOUNT_RELEASE;
-    }
-
-    public boolean isAccrual() {
-        return this == ACCRUAL;
     }
 
     public boolean isCredit() {

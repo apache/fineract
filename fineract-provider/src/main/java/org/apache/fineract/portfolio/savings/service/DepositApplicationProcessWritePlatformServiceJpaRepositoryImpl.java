@@ -234,6 +234,18 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 account.updateAccountNo(this.accountNumberGenerator.generate(account, accountNumberFormat));
             }
 
+            // Save linked account information
+            final Long savingsAccountId = command.longValueOfParameterNamed(DepositsApiConstants.linkedAccountParamName);
+            if (savingsAccountId != null) {
+                final SavingsAccount savingsAccount = this.depositAccountAssembler.assembleFrom(savingsAccountId,
+                        DepositAccountType.SAVINGS_DEPOSIT);
+                this.depositAccountDataValidator.validatelinkedSavingsAccount(savingsAccount, account);
+                boolean isActive = true;
+                final AccountAssociations accountAssociations = AccountAssociations.associateSavingsAccount(account, savingsAccount,
+                        AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue(), isActive);
+                this.accountAssociationsRepository.save(accountAssociations);
+            }
+
             final Long savingsId = account.getId();
             final CalendarInstance calendarInstance = getCalendarInstance(command, account);
             this.calendarInstanceRepository.save(calendarInstance);

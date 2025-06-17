@@ -26,4 +26,9 @@ public class SavingsAccountBlockedException extends AbstractPlatformDomainRuleEx
         super("error.msg.saving.account.blocked.transaction.not.allowed",
                 "Any transaction to " + accountId + " is not allowed, since the account is blocked", accountId);
     }
+
+    public SavingsAccountBlockedException(final String accountNo) {
+        super("error.msg.saving.account.blocked.transaction.not.allowed",
+                "Any transaction to " + accountNo + " is not allowed, since the account is blocked", accountNo);
+    }
 }

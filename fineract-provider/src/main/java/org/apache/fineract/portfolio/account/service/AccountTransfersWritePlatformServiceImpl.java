@@ -33,7 +33,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
@@ -71,6 +73,7 @@ import org.apache.fineract.portfolio.savings.service.SavingsAccountDomainService
 import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformService;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @RequiredArgsConstructor
 public class AccountTransfersWritePlatformServiceImpl implements AccountTransfersWritePlatformService {
 
@@ -206,6 +209,37 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         }
 
         return builder.build();
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult adjust(JsonCommand command) {
+
+        final Long accountTransferId = command.entityId();
+
+        Optional<AccountTransferTransaction> optAccountTransfer = this.accountTransferRepository.findById(accountTransferId);
+        if (!optAccountTransfer.isPresent()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.accounttransfer.was.not.found", "Account transfer was not found");
+        }
+        final boolean backdatedTxnsAllowedTill = this.configurationDomainService.retrievePivotDateConfig();
+
+        AccountTransferTransaction accountTransfer = optAccountTransfer.get();
+        if (accountTransfer.getToSavingsTransaction() != null) {
+            log.info("Reverse savings transfer to {} {}", accountTransfer.getToSavingsTransaction().getSavingsAccount().getAccountNumber(),
+                    accountTransfer.getToSavingsTransaction().getId());
+            savingsAccountDomainService.reverseTransfer(accountTransfer.getToSavingsTransaction(), backdatedTxnsAllowedTill);
+        }
+        if (accountTransfer.getFromSavingsTransaction() != null) {
+            log.info("Reverse savings transfer from {} {}",
+                    accountTransfer.getFromSavingsTransaction().getSavingsAccount().getAccountNumber(),
+                    accountTransfer.getFromSavingsTransaction().getId());
+            savingsAccountDomainService.reverseTransfer(accountTransfer.getFromSavingsTransaction(), backdatedTxnsAllowedTill);
+        }
+
+        accountTransfer.reverse();
+        this.accountTransferRepository.save(accountTransfer);
+
+        return new CommandProcessingResultBuilder().withEntityId(accountTransferId).build();
     }
 
     @Override
@@ -350,7 +384,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             this.accountTransferDetailRepository.saveAndFlush(accountTransferDetails);
             transferTransactionId = accountTransferDetails.getId();
         } else if (isSavingsToSavingsAccountTransfer(accountTransferDTO.getFromAccountType(), accountTransferDTO.getToAccountType())) {
-
+            log.info("Savings to Savings {}", accountTransferDTO.getFromAccountId());
             SavingsAccount fromSavingsAccount;
             SavingsAccount toSavingsAccount;
             if (accountTransferDetails == null) {
@@ -373,6 +407,8 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                 toSavingsAccount = accountTransferDetails.toSavingsAccount();
                 this.savingsAccountAssembler.setHelpers(toSavingsAccount);
             }
+
+            log.info("Transfer funds from {} to {}", fromSavingsAccount.getId(), toSavingsAccount.getId());
 
             final SavingsTransactionBooleanValues transactionBooleanValues = new SavingsTransactionBooleanValues(isAccountTransfer,
                     isRegularTransaction, fromSavingsAccount.isWithdrawalFeeApplicableForTransfer(),

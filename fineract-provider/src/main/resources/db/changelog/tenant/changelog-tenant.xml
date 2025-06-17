@@ -153,6 +153,7 @@
     <include file="parts/0131_add_configuration_maker_checker.xml" relativeToChangelogFile="true" />
     <include file="parts/0132_add_configuration_loan_next_repayment_date_calculation.xml" relativeToChangelogFile="true" />
     <include file="parts/0133_transaction_summary_with_asset_owner_report_recovery_repayments_chargeoff_reason.xml" relativeToChangelogFile="true" />
+    <include file="parts/0134_deposits_undo_activation.xml" relativeToChangelogFile="true" />
     <include file="parts/0134_transaction_summary_with_asset_owner_report_down_payment_amount_fix.xml" relativeToChangelogFile="true" />
     <include file="parts/0135_add_external_event_for_loan_reaging.xml" relativeToChangelogFile="true" />
     <include file="parts/0136_loan_reaging_parameters.xml" relativeToChangelogFile="true" />
@@ -202,4 +203,6 @@
     <include file="parts/0181_add_capitalized_income_amortization_adjustment_transaction.xml" relativeToChangelogFile="true" />
     <include file="parts/0182_transaction_summary_with_asset_owner_report_fix_charge_reason_and_add_buyback_intermediate.xml" relativeToChangelogFile="true" />
     <include file="parts/0183_add_LoanCapitalizedIncomeTransactionCreatedBusinessEvent.xml" relativeToChangelogFile="true" />
+
+    <include file="parts/0184_add_column_ip.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

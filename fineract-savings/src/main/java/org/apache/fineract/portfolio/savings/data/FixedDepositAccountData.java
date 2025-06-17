@@ -517,6 +517,10 @@ public final class FixedDepositAccountData extends DepositAccountData {
         this.transferToSavingsId = transferToSavingsId;
     }
 
+    public void setSavingsAccounts(Collection<SavingsAccountData> savingsAccounts) {
+        this.savingsAccounts = savingsAccounts;
+    }
+
     @Override
     public boolean equals(final Object obj) {
 

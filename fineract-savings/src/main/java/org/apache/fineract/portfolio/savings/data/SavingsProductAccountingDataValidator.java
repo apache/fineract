@@ -118,7 +118,6 @@ public class SavingsProductAccountingDataValidator {
                 }
             }
         }
-
         // GL Accounts for Accrual Period only
         if (AccountingValidations.isAccrualPeriodicBasedAccounting(accountingRuleType)) {
             if (fromApiJsonHelper.parameterExists(SavingProductAccountingParams.FEES_RECEIVABLE.getValue(), element)

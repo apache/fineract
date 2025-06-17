@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.savings.service;
 
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.RECURRING_DEPOSIT_PRODUCT_RESOURCE_NAME;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.accountingRuleParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.accrualChargesParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.chargesParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroupIdParamName;
 
@@ -105,12 +106,17 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
 
             final Map<String, Object> changes = product.update(command);
 
-            if (changes.containsKey(chargesParamName)) {
-                final Set<Charge> savingsProductCharges = this.depositProductAssembler.assembleListOfSavingsProductCharges(command,
-                        product.currency().getCode());
-                final boolean updated = product.update(savingsProductCharges);
+            if (changes.containsKey(chargesParamName) || changes.containsKey(accrualChargesParamName)) {
+                final Set<Charge> savingsProductCharges = depositProductAssembler.assembleListOfSavingsProductCharges(command,
+                        product.currency().getCode(), chargesParamName);
+
+                final Set<Charge> savingsProductAccrualCharges = depositProductAssembler.assembleListOfSavingsProductCharges(command,
+                        product.currency().getCode(), accrualChargesParamName);
+
+                final boolean updated = product.update(savingsProductCharges, savingsProductAccrualCharges);
                 if (!updated) {
                     changes.remove(chargesParamName);
+                    changes.remove(accrualChargesParamName);
                 }
             }
 

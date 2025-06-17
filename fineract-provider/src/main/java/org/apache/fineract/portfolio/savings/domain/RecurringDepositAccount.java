@@ -23,13 +23,8 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.deposit
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.maxDepositTermParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.onAccountClosureIdParamName;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.OrderBy;
+import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
@@ -42,6 +37,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -73,7 +70,9 @@ import org.apache.fineract.portfolio.savings.domain.interest.PostingPeriod;
 import org.apache.fineract.portfolio.savings.domain.interest.SavingsAccountTransactionDetailsForPostingPeriod;
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.springframework.beans.factory.annotation.Autowired;
 
+@Slf4j
 @Entity
 @DiscriminatorValue("300")
 public class RecurringDepositAccount extends SavingsAccount {
@@ -91,6 +90,9 @@ public class RecurringDepositAccount extends SavingsAccount {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "account", orphanRemoval = true, fetch = FetchType.LAZY)
     private List<RecurringDepositScheduleInstallment> depositScheduleInstallments = new ArrayList<>();
 
+    @Autowired
+    @Transient
+    private ConfigurationDomainService configurationDomainServiceI;
     protected RecurringDepositAccount() {
         //
     }
@@ -199,7 +201,7 @@ public class RecurringDepositAccount extends SavingsAccount {
     }
 
     @Override
-    protected BigDecimal getEffectiveInterestRateAsFraction(final MathContext mc, final LocalDate interestPostingUpToDate) {
+    public BigDecimal getEffectiveInterestRateAsFraction(final MathContext mc, final LocalDate interestPostingUpToDate) {
         boolean isPreMatureClosure = false;
         return getEffectiveInterestRateAsFraction(mc, interestPostingUpToDate, isPreMatureClosure);
     }
@@ -536,11 +538,11 @@ public class RecurringDepositAccount extends SavingsAccount {
         return Money.of(this.currency, this.minRequiredOpeningBalance);
     }
 
-    protected void processAccountUponActivation(final DateTimeFormatter fmt, final boolean postReversals) {
+    protected void processAccountUponActivation(final DateTimeFormatter fmt, final boolean postReversals, final Long relaxingDaysConfigForPivotDate) {
         final Money minRequiredOpeningBalance = Money.of(this.currency, this.minRequiredOpeningBalance);
         final boolean backdatedTxnsAllowedTill = false;
         String refNo = null;
-        final Long relaxingDaysConfigForPivotDate = this.configurationDomainService.retrieveRelaxingDaysConfigForPivotDate();
+        //final Long relaxingDaysConfigForPivotDate = this.configurationDomainServiceI.retrieveRelaxingDaysConfigForPivotDate();
         if (minRequiredOpeningBalance.isGreaterThanZero()) {
             final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, getActivationDate(),
                     minRequiredOpeningBalance.getAmount(), null, null, accountType);
@@ -577,8 +579,7 @@ public class RecurringDepositAccount extends SavingsAccount {
             }
         }
         if (maturityDate() != null && DateUtils.isBefore(closedDate, maturityDate())) {
-            baseDataValidator.reset().parameter(SavingsApiConstants.closedOnDateParamName).value(closedDate)
-                    .failWithCode("must.be.after.account.maturity.date");
+            baseDataValidator.reset().parameter(SavingsApiConstants.closedOnDateParamName).value(closedDate);
             if (!dataValidationErrors.isEmpty()) {
                 throw new PlatformApiDataValidationException(dataValidationErrors);
             }
@@ -750,14 +751,14 @@ public class RecurringDepositAccount extends SavingsAccount {
         return interestOnMaturity;
     }
 
-    @Override
-    public void postInterest(final MathContext mc, final LocalDate postingDate, final boolean isInterestTransfer,
-            final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
-            final LocalDate postInterestAson, final boolean backdatedTxnsAllowedTill, final boolean postReversals) {
-        final LocalDate interestPostingUpToDate = interestPostingUpToDate(postingDate);
-        super.postInterest(mc, interestPostingUpToDate, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-                financialYearBeginningMonth, postInterestAson, backdatedTxnsAllowedTill, postReversals);
-    }
+    /*
+     * @Override public void postInterest(final MathContext mc, final LocalDate postingDate, final boolean
+     * isInterestTransfer, final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer
+     * financialYearBeginningMonth, final LocalDate postInterestAson, final boolean backdatedTxnsAllowedTill, final
+     * boolean postReversals) { final LocalDate interestPostingUpToDate = interestPostingUpToDate(postingDate);
+     * super.postInterest(mc, interestPostingUpToDate, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
+     * financialYearBeginningMonth, postInterestAson, backdatedTxnsAllowedTill, postReversals); }
+     */
 
     @Override
     public List<PostingPeriod> calculateInterestUsing(final MathContext mc, final LocalDate postingDate, boolean isInterestTransfer,
@@ -824,6 +825,10 @@ public class RecurringDepositAccount extends SavingsAccount {
         }
 
         return actualChanges;
+    }
+
+    public Map<String, Object> undoActivate() {
+        return super.undoActivate();
     }
 
     protected List<SavingsAccountTransaction> sortTransactions(final List<SavingsAccountTransaction> transactions) {
@@ -1006,6 +1011,10 @@ public class RecurringDepositAccount extends SavingsAccount {
             final boolean isValidDepositPeriod = this.accountTermAndPreClosure.depositTermDetail()
                     .isDepositBetweenMinAndMax(depositStartDate(), calculateMaturityDate());
             if (!isValidDepositPeriod) {
+                final Integer depositPeriodInDays = this.accountTermAndPreClosure.depositTermDetail().getDepositPeriodInDays(depositPeriod,
+                        depositPeriodFrequencyType);
+                log.error("Recurring Deposit account with invalid deposit period {} {} : {} to {}", depositPeriodInDays,
+                        depositPeriodFrequencyType.getCode(), depositStartDate(), calculateMaturityDate());
                 baseDataValidator.reset().parameter(depositPeriodParamName).value(depositPeriod)
                         .failWithCodeNoParameterAddedToErrorCode("deposit.period.not.between.min.and.max.deposit.term");
             } else {

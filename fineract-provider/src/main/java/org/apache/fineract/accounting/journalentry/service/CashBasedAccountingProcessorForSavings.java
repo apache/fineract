@@ -38,7 +38,7 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
     private final AccountingProcessorHelper helper;
 
     @Override
-    public void createJournalEntriesForSavings(final SavingsDTO savingsDTO) {
+    public void createJournalEntriesForSavings(final SavingsDTO savingsDTO, boolean isNegativeBalance) {
         final GLClosure latestGLClosure = this.helper.getLatestClosureByBranch(savingsDTO.getOfficeId());
         final Long savingsProductId = savingsDTO.getSavingsProductId();
         final Long savingsId = savingsDTO.getSavingsId();
