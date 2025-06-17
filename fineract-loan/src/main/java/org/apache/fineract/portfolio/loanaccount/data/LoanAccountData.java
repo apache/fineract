@@ -174,6 +174,9 @@ public class LoanAccountData {
     private List<StringEnumOptionData> capitalizedIncomeCalculationTypeOptions;
     private List<StringEnumOptionData> capitalizedIncomeStrategyOptions;
     private List<StringEnumOptionData> capitalizedIncomeTypeOptions;
+    private List<StringEnumOptionData> buyDownFeeCalculationTypeOptions;
+    private List<StringEnumOptionData> buyDownFeeStrategyOptions;
+    private List<StringEnumOptionData> buyDownFeeIncomeTypeOptions;
 
     @Transient
     private BigDecimal feeChargesAtDisbursementCharged;
@@ -280,6 +283,11 @@ public class LoanAccountData {
     private StringEnumOptionData capitalizedIncomeCalculationType;
     private StringEnumOptionData capitalizedIncomeStrategy;
     private StringEnumOptionData capitalizedIncomeType;
+
+    private Boolean enableBuyDownFee;
+    private StringEnumOptionData buyDownFeeCalculationType;
+    private StringEnumOptionData buyDownFeeStrategy;
+    private StringEnumOptionData buyDownFeeIncomeType;
 
     public static LoanAccountData importInstanceIndividual(EnumOptionData loanTypeEnumOption, Long clientId, Long productId,
             Long loanOfficerId, LocalDate submittedOnDate, Long fundId, BigDecimal principal, Integer numberOfRepayments,
@@ -473,7 +481,9 @@ public class LoanAccountData {
             final EnumOptionData loanScheduleProcessingType, final Integer fixedLength, final StringEnumOptionData chargeOffBehaviour,
             final boolean isInterestRecognitionOnDisbursementDate, final StringEnumOptionData daysInYearCustomStrategy,
             final boolean enableIncomeCapitalization, final StringEnumOptionData capitalizedIncomeCalculationType,
-            final StringEnumOptionData capitalizedIncomeStrategy, StringEnumOptionData capitalizedIncomeType) {
+            final StringEnumOptionData capitalizedIncomeStrategy, StringEnumOptionData capitalizedIncomeType,
+            final boolean enableBuyDownFee, final StringEnumOptionData buyDownFeeCalculationType,
+            final StringEnumOptionData buyDownFeeStrategy, final StringEnumOptionData buyDownFeeIncomeType) {
 
         final CollectionData delinquent = CollectionData.template();
 
@@ -521,7 +531,9 @@ public class LoanAccountData {
                 .setChargeOffBehaviour(chargeOffBehaviour).setInterestRecognitionOnDisbursementDate(isInterestRecognitionOnDisbursementDate)
                 .setDaysInYearCustomStrategy(daysInYearCustomStrategy).setEnableIncomeCapitalization(enableIncomeCapitalization)
                 .setCapitalizedIncomeCalculationType(capitalizedIncomeCalculationType)
-                .setCapitalizedIncomeStrategy(capitalizedIncomeStrategy).setCapitalizedIncomeType(capitalizedIncomeType);
+                .setCapitalizedIncomeStrategy(capitalizedIncomeStrategy).setCapitalizedIncomeType(capitalizedIncomeType)
+                .setEnableBuyDownFee(enableBuyDownFee).setBuyDownFeeCalculationType(buyDownFeeCalculationType)
+                .setBuyDownFeeStrategy(buyDownFeeStrategy).setBuyDownFeeIncomeType(buyDownFeeIncomeType);
     }
 
     /*
@@ -550,7 +562,9 @@ public class LoanAccountData {
             final List<StringEnumOptionData> daysInYearCustomStrategyOptions,
             final List<StringEnumOptionData> capitalizedIncomeCalculationTypeOptions,
             final List<StringEnumOptionData> capitalizedIncomeStrategyOptions,
-            final List<StringEnumOptionData> capitalizedIncomeTypeOptions) {
+            final List<StringEnumOptionData> capitalizedIncomeTypeOptions,
+            final List<StringEnumOptionData> buyDownFeeCalculationTypeOptions, final List<StringEnumOptionData> buyDownFeeStrategyOptions,
+            final List<StringEnumOptionData> buyDownFeeIncomeTypeOptions) {
 
         // TODO: why are these variables 'calendarData', 'chargeTemplate' never used (see original private constructor)
 
@@ -574,7 +588,9 @@ public class LoanAccountData {
                 .setDaysInYearCustomStrategyOptions(daysInYearCustomStrategyOptions)
                 .setCapitalizedIncomeCalculationTypeOptions(capitalizedIncomeCalculationTypeOptions)
                 .setCapitalizedIncomeStrategyOptions(capitalizedIncomeStrategyOptions)
-                .setCapitalizedIncomeTypeOptions(capitalizedIncomeTypeOptions);
+                .setCapitalizedIncomeTypeOptions(capitalizedIncomeTypeOptions)
+                .setBuyDownFeeCalculationTypeOptions(buyDownFeeCalculationTypeOptions)
+                .setBuyDownFeeStrategyOptions(buyDownFeeStrategyOptions).setBuyDownFeeIncomeTypeOptions(buyDownFeeIncomeTypeOptions);
     }
 
     public LoanAccountData associationsAndTemplate(final Collection<LoanProductData> productOptions,

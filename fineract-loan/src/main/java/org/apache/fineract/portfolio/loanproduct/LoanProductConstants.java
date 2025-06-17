@@ -177,4 +177,10 @@ public interface LoanProductConstants {
     String CAPITALIZED_INCOME_CALCULATION_TYPE_PARAM_NAME = "capitalizedIncomeCalculationType";
     String CAPITALIZED_INCOME_STRATEGY_PARAM_NAME = "capitalizedIncomeStrategy";
     String CAPITALIZED_INCOME_TYPE_PARAM_NAME = "capitalizedIncomeType";
+
+    // Buy down fee
+    String ENABLE_BUY_DOWN_FEE_PARAM_NAME = "enableBuyDownFee";
+    String BUY_DOWN_FEE_CALCULATION_TYPE_PARAM_NAME = "buyDownFeeCalculationType";
+    String BUY_DOWN_FEE_STRATEGY_PARAM_NAME = "buyDownFeeStrategy";
+    String BUY_DOWN_FEE_INCOME_TYPE_PARAM_NAME = "buyDownFeeIncomeType";
 }
