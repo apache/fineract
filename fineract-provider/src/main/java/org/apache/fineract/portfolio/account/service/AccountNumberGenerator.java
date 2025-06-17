@@ -97,6 +97,7 @@ public class AccountNumberGenerator {
         Map<String, String> propertyMap = new HashMap<>();
         propertyMap.put(ID, shareaccount.getId().toString());
         propertyMap.put(SHARE_PRODUCT_SHORT_NAME, shareaccount.getShareProduct().getShortName());
+        propertyMap.put(ENTITY_TYPE, "shareAccount");
         return generateAccountNumber(propertyMap, accountNumberFormat);
     }
 
@@ -240,6 +241,7 @@ public class AccountNumberGenerator {
         Map<String, String> propertyMap = new HashMap<>();
         propertyMap.put(ID, group.getId().toString());
         propertyMap.put(OFFICE_NAME, group.getOffice().getName());
+        propertyMap.put(ENTITY_TYPE, "group");
         return generateAccountNumber(propertyMap, accountNumberFormat);
     }
 
@@ -247,7 +249,7 @@ public class AccountNumberGenerator {
         Map<String, String> propertyMap = new HashMap<>();
         propertyMap.put(ID, group.getId().toString());
         propertyMap.put(OFFICE_NAME, group.getOffice().getName());
+        propertyMap.put(ENTITY_TYPE, "center");
         return generateAccountNumber(propertyMap, accountNumberFormat);
     }
-
 }
