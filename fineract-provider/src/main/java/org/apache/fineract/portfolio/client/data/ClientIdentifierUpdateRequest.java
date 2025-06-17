@@ -16,31 +16,41 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.command.core;
+package org.apache.fineract.portfolio.client.data;
 
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.OffsetDateTime;
-import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.experimental.FieldNameConstants;
+import lombok.NoArgsConstructor;
 
+@Builder
 @Data
-@FieldNameConstants
-public class Command<T> implements Serializable {
+@NoArgsConstructor
+@AllArgsConstructor
+public class ClientIdentifierUpdateRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private UUID id;
+    @Schema(example = "1")
+    private Long documentTypeId;
 
-    private OffsetDateTime createdAt;
+    @Schema(example = "KA-54677")
+    private String documentKey;
 
-    private String tenantId;
+    @Schema(example = "Document has been verified")
+    private String description;
 
-    private String username;
+    @Schema(example = "Active")
+    private String status;
 
-    private T payload;
+    @Hidden
+    private Long clientId;
+    @Hidden
+    private Long clientIdentifierId;
 
-    private String idempotencyKey;
 }

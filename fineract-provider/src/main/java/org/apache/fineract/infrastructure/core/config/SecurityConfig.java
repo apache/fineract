@@ -142,6 +142,10 @@ public class SecurityConfig {
                             .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/authentication")).permitAll() //
                             .requestMatchers(antMatcher(HttpMethod.PUT, "/api/*/instance-mode")).permitAll() //
                             .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated() //
+                            // ClientIdentifiersApiResource
+                            .requestMatchers(antMatcher(HttpMethod.PUT, "/api/*/clients/{clientId}/identifiers")).authenticated() //
+                            .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/clients/{clientId}/identifiers/{identifierId}"))
+                            .authenticated() //
                             .requestMatchers(antMatcher("/api/*/twofactor")).fullyAuthenticated() //
                             .requestMatchers(antMatcher("/api/**"))
                             .access(allOf(authorizationManagers.toArray(new AuthorizationManager[0]))); //

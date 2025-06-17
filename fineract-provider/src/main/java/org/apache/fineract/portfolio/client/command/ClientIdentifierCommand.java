@@ -54,6 +54,7 @@ public class ClientIdentifierCommand {
         return this.description;
     }
 
+    @Deprecated
     public void validateForCreate() {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 

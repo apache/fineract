@@ -26,11 +26,15 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "m_client_identifier", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "document_type_id", "document_key" }, name = "unique_identifier_key"),
@@ -57,6 +61,7 @@ public class ClientIdentifier extends AbstractAuditableWithUTCDateTimeCustom<Lon
     @Column(name = "active")
     private Integer active;
 
+    @Deprecated
     public static ClientIdentifier fromJson(final Client client, final CodeValue documentType, final JsonCommand command) {
         final String documentKey = command.stringValueOfParameterNamed("documentKey");
         final String description = command.stringValueOfParameterNamed("description");
@@ -68,7 +73,7 @@ public class ClientIdentifier extends AbstractAuditableWithUTCDateTimeCustom<Lon
         //
     }
 
-    private ClientIdentifier(final Client client, final CodeValue documentType, final String documentKey, final String statusName,
+    public ClientIdentifier(final Client client, final CodeValue documentType, final String documentKey, final String statusName,
             String description) {
         this.client = client;
         this.documentType = documentType;
@@ -86,6 +91,7 @@ public class ClientIdentifier extends AbstractAuditableWithUTCDateTimeCustom<Lon
         this.documentType = documentType;
     }
 
+    @Deprecated
     public Map<String, Object> update(final JsonCommand command) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
@@ -120,11 +126,4 @@ public class ClientIdentifier extends AbstractAuditableWithUTCDateTimeCustom<Lon
         return actualChanges;
     }
 
-    public String documentKey() {
-        return this.documentKey;
-    }
-
-    public Long documentTypeId() {
-        return this.documentType.getId();
-    }
 }

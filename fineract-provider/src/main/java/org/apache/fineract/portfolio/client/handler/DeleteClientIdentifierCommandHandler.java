@@ -18,31 +18,29 @@
  */
 package org.apache.fineract.portfolio.client.handler;
 
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.portfolio.client.data.ClientIdentifierDeleteRequest;
+import org.apache.fineract.portfolio.client.data.ClientIdentifierDeleteResponse;
 import org.apache.fineract.portfolio.client.service.ClientIdentifierWritePlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-@CommandType(entity = "CLIENTIDENTIFIER", action = "DELETE")
-public class DeleteClientIdentifierCommandHandler implements NewCommandSourceHandler {
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class DeleteClientIdentifierCommandHandler implements CommandHandler<ClientIdentifierDeleteRequest, ClientIdentifierDeleteResponse> {
 
     private final ClientIdentifierWritePlatformService clientIdentifierWritePlatformService;
 
-    @Autowired
-    public DeleteClientIdentifierCommandHandler(final ClientIdentifierWritePlatformService clientIdentifierWritePlatformService) {
-        this.clientIdentifierWritePlatformService = clientIdentifierWritePlatformService;
-    }
-
     @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.clientIdentifierWritePlatformService.deleteClientIdentifier(command.getClientId(), command.entityId(),
-                command.commandId());
+    @Override
+    public ClientIdentifierDeleteResponse handle(Command<ClientIdentifierDeleteRequest> command) {
+        return this.clientIdentifierWritePlatformService.deleteClientIdentifier(command.getPayload().getClientId(),
+                command.getPayload().getClientIdentifierId());
+
     }
 }

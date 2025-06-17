@@ -22,13 +22,15 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -37,25 +39,36 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.service.CommandWrapperBuilder;
-import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandPipeline;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.client.command.ClientIdentifierCreateCommand;
+import org.apache.fineract.portfolio.client.command.ClientIdentifierDeleteCommand;
+import org.apache.fineract.portfolio.client.command.ClientIdentifierUpdateCommand;
 import org.apache.fineract.portfolio.client.data.ClientData;
+import org.apache.fineract.portfolio.client.data.ClientIdentifierCreateNewRequest;
+import org.apache.fineract.portfolio.client.data.ClientIdentifierCreateResponse;
 import org.apache.fineract.portfolio.client.data.ClientIdentifierData;
-import org.apache.fineract.portfolio.client.data.ClientIdentifierRequest;
+import org.apache.fineract.portfolio.client.data.ClientIdentifierDeleteRequest;
+import org.apache.fineract.portfolio.client.data.ClientIdentifierDeleteResponse;
+import org.apache.fineract.portfolio.client.data.ClientIdentifierUpdateRequest;
+import org.apache.fineract.portfolio.client.data.ClientIdentifierUpdateResponse;
 import org.apache.fineract.portfolio.client.exception.DuplicateClientIdentifierException;
 import org.apache.fineract.portfolio.client.service.ClientIdentifierReadPlatformService;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
@@ -79,7 +92,7 @@ public class ClientIdentifiersApiResource {
     private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final DefaultToApiJsonSerializer<ClientIdentifierData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final CommandPipeline pipeline;
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -114,17 +127,18 @@ public class ClientIdentifiersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create an Identifier for a Client", description = "Mandatory Fields\n" + "documentKey, documentTypeId ")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ClientIdentifiersApiResourceSwagger.PostClientsClientIdIdentifiersRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientIdentifiersApiResourceSwagger.PostClientsClientIdIdentifiersResponse.class))) })
-    public CommandProcessingResult createClientIdentifier(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
-            @Parameter(hidden = true) final ClientIdentifierRequest clientIdentifierRequest) {
+    public ClientIdentifierCreateResponse createClientIdentifier(@HeaderParam("Idempotency-Key") String idempotencyKey,
+            @PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
+            @Valid ClientIdentifierCreateNewRequest request) {
 
         try {
-            final CommandWrapper commandRequest = new CommandWrapperBuilder().createClientIdentifier(clientId)
-                    .withJson(toApiJsonSerializer.serialize(clientIdentifierRequest)).build();
+            ClientIdentifierCreateCommand command = new ClientIdentifierCreateCommand();
+            initCommand(idempotencyKey, command);
+            request.setClientId(clientId);
+            command.setPayload(request);
 
-            return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            Supplier<ClientIdentifierCreateResponse> result = pipeline.send(command);
+            return result.get();
         } catch (final DuplicateClientIdentifierException e) {
             DuplicateClientIdentifierException rethrowas = e;
             if (e.getDocumentTypeId() != null) {
@@ -169,18 +183,20 @@ public class ClientIdentifiersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Client Identifier", description = "Updates a Client Identifier")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ClientIdentifierRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientIdentifiersApiResourceSwagger.PutClientsClientIdIdentifiersIdentifierIdResponse.class))) })
-    public CommandProcessingResult updateClientIdentifer(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
+    public ClientIdentifierUpdateResponse updateClientIdentifer(@HeaderParam("Idempotency-Key") @DefaultValue("") String idempotencyKey,
+            @PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @PathParam("identifierId") @Parameter(description = "identifierId") final Long clientIdentifierId,
-            @Parameter(hidden = true) final ClientIdentifierRequest clientIdentifierRequest) {
+            @Valid final ClientIdentifierUpdateRequest request) {
 
         try {
-            final CommandWrapper commandRequest = new CommandWrapperBuilder().updateClientIdentifier(clientId, clientIdentifierId)
-                    .withJson(toApiJsonSerializer.serialize(clientIdentifierRequest)).build();
+            ClientIdentifierUpdateCommand command = new ClientIdentifierUpdateCommand();
+            initCommand(idempotencyKey, command);
+            request.setClientId(clientId);
+            request.setClientIdentifierId(clientIdentifierId);
+            command.setPayload(request);
 
-            return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            Supplier<ClientIdentifierUpdateResponse> result = pipeline.send(command);
+            return result.get();
 
         } catch (final DuplicateClientIdentifierException e) {
             DuplicateClientIdentifierException reThrowAs = e;
@@ -199,13 +215,25 @@ public class ClientIdentifiersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Client Identifier", description = "Deletes a Client Identifier")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientIdentifiersApiResourceSwagger.DeleteClientsClientIdIdentifiersIdentifierIdResponse.class))) })
-    public CommandProcessingResult deleteClientIdentifier(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
+    public ClientIdentifierDeleteResponse deleteClientIdentifier(@HeaderParam("Idempotency-Key") String idempotencyKey,
+            @PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @PathParam("identifierId") @Parameter(description = "identifierId") final Long clientIdentifierId) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteClientIdentifier(clientId, clientIdentifierId).build();
+        ClientIdentifierDeleteCommand command = new ClientIdentifierDeleteCommand();
+        initCommand(idempotencyKey, command);
 
-        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        ClientIdentifierDeleteRequest deleteRequest = new ClientIdentifierDeleteRequest(clientId, clientIdentifierId);
+        command.setPayload(deleteRequest);
+
+        Supplier<ClientIdentifierDeleteResponse> result = pipeline.send(command);
+        return result.get();
+    }
+
+    private void initCommand(String idempotencyKey, Command command) {
+        String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
+        command.setId(UUID.randomUUID());
+        command.setCreatedAt(OffsetDateTime.now(ZoneId.of("UTC")));
+        command.setTenantId(tenantIdentifier);
+        command.setIdempotencyKey(idempotencyKey);
     }
 }

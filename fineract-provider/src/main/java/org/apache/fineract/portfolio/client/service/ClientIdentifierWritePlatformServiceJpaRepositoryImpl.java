@@ -19,20 +19,28 @@
 package org.apache.fineract.portfolio.client.service;
 
 import jakarta.persistence.PersistenceException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.codes.exception.CodeValueNotFoundException;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.portfolio.client.command.ClientIdentifierCommand;
+import org.apache.fineract.portfolio.client.data.ClientIdentifierCreateNewRequest;
+import org.apache.fineract.portfolio.client.data.ClientIdentifierCreateResponse;
+import org.apache.fineract.portfolio.client.data.ClientIdentifierDeleteResponse;
+import org.apache.fineract.portfolio.client.data.ClientIdentifierUpdateRequest;
+import org.apache.fineract.portfolio.client.data.ClientIdentifierUpdateResponse;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientIdentifier;
 import org.apache.fineract.portfolio.client.domain.ClientIdentifierRepository;
+import org.apache.fineract.portfolio.client.domain.ClientIdentifierStatus;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.exception.ClientIdentifierNotFoundException;
 import org.apache.fineract.portfolio.client.exception.DuplicateClientIdentifierException;
@@ -70,56 +78,49 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
 
     @Transactional
     @Override
-    public CommandProcessingResult addClientIdentifier(final Long clientId, final JsonCommand command) {
+    public ClientIdentifierCreateResponse addClientIdentifier(final Long clientId, final ClientIdentifierCreateNewRequest request) {
 
-        this.context.authenticatedUser();
-        final ClientIdentifierCommand clientIdentifierCommand = this.clientIdentifierCommandFromApiJsonDeserializer
-                .commandFromApiJson(command.json());
-        clientIdentifierCommand.validateForCreate();
-
-        final String documentKey = clientIdentifierCommand.getDocumentKey();
+        final String documentKey = request.getDocumentKey();
         String documentTypeLabel = null;
         Long documentTypeId = null;
         try {
             final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
 
-            final CodeValue documentType = this.codeValueRepository
-                    .findOneWithNotFoundDetection(clientIdentifierCommand.getDocumentTypeId());
+            final CodeValue documentType = this.codeValueRepository.findOneWithNotFoundDetection(request.getDocumentTypeId());
             documentTypeId = documentType.getId();
             documentTypeLabel = documentType.getLabel();
 
-            final ClientIdentifier clientIdentifier = ClientIdentifier.fromJson(client, documentType, command);
+            final ClientIdentifier clientIdentifier = new ClientIdentifier(client, documentType, documentKey, request.getStatus(),
+                    request.getDescription());
 
             this.clientIdentifierRepository.saveAndFlush(clientIdentifier);
 
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(command.commandId()) //
-                    .withOfficeId(client.officeId()) //
-                    .withClientId(clientId) //
-                    .withEntityId(clientIdentifier.getId()) //
+            return new ClientIdentifierCreateResponse().builder() //
+                    .officeId(client.officeId()) //
+                    .clientId(clientId) //
+                    .resourceId(clientIdentifier.getId()) // entityId
                     .build();
+
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve.getMostSpecificCause(), dve);
-            return CommandProcessingResult.empty();
+            return new ClientIdentifierCreateResponse();
         } catch (final PersistenceException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, throwable, dve);
-            return CommandProcessingResult.empty();
+            return new ClientIdentifierCreateResponse();
         }
     }
 
     @Transactional
     @Override
-    public CommandProcessingResult updateClientIdentifier(final Long clientId, final Long identifierId, final JsonCommand command) {
+    public ClientIdentifierUpdateResponse updateClientIdentifier(final Long clientId, final Long identifierId,
+            final ClientIdentifierUpdateRequest request) {
 
-        this.context.authenticatedUser();
-        final ClientIdentifierCommand clientIdentifierCommand = this.clientIdentifierCommandFromApiJsonDeserializer
-                .commandFromApiJson(command.json());
-        clientIdentifierCommand.validateForUpdate();
+        Long documentTypeId = request.getDocumentTypeId();
+        validateForUpdate(documentTypeId, request.getDocumentKey());
 
         String documentTypeLabel = null;
         String documentKey = null;
-        Long documentTypeId = clientIdentifierCommand.getDocumentTypeId();
         try {
             CodeValue documentType = null;
 
@@ -127,7 +128,7 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
             final ClientIdentifier clientIdentifierForUpdate = this.clientIdentifierRepository.findById(identifierId)
                     .orElseThrow(() -> new ClientIdentifierNotFoundException(identifierId));
 
-            final Map<String, Object> changes = clientIdentifierForUpdate.update(command);
+            final Map<String, Object> changes = update(clientIdentifierForUpdate, request);
 
             if (changes.containsKey("documentTypeId")) {
                 documentType = this.codeValueRepository.findOneWithNotFoundDetection(documentTypeId);
@@ -141,40 +142,35 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
             }
 
             if (changes.containsKey("documentTypeId") && changes.containsKey("documentKey")) {
-                documentTypeId = clientIdentifierCommand.getDocumentTypeId();
-                documentKey = clientIdentifierCommand.getDocumentKey();
+                documentTypeId = request.getDocumentTypeId();
+                documentKey = request.getDocumentKey();
             } else if (changes.containsKey("documentTypeId") && !changes.containsKey("documentKey")) {
-                documentTypeId = clientIdentifierCommand.getDocumentTypeId();
-                documentKey = clientIdentifierForUpdate.documentKey();
+                documentTypeId = request.getDocumentTypeId();
+                documentKey = clientIdentifierForUpdate.getDocumentKey();
             } else if (!changes.containsKey("documentTypeId") && changes.containsKey("documentKey")) {
-                documentTypeId = clientIdentifierForUpdate.documentTypeId();
-                documentKey = clientIdentifierForUpdate.documentKey();
+                documentTypeId = clientIdentifierForUpdate.getDocumentType().getId();
+                documentKey = clientIdentifierForUpdate.getDocumentKey();
             }
 
             if (!changes.isEmpty()) {
                 this.clientIdentifierRepository.saveAndFlush(clientIdentifierForUpdate);
             }
 
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(command.commandId()) //
-                    .withOfficeId(client.officeId()) //
-                    .withClientId(clientId) //
-                    .withEntityId(identifierId) //
-                    .with(changes) //
-                    .build();
+            return ClientIdentifierUpdateResponse.builder().clientId(client.officeId()).clientId(clientId).resourceId(identifierId) // entityId
+                    .changes(changes).build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve.getMostSpecificCause(), dve);
-            return CommandProcessingResult.resourceResult(-1L);
+            return ClientIdentifierUpdateResponse.builder().resourceId(-1L).build();
         } catch (final PersistenceException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, throwable, dve);
-            return CommandProcessingResult.empty();
+            return new ClientIdentifierUpdateResponse();
         }
     }
 
     @Transactional
     @Override
-    public CommandProcessingResult deleteClientIdentifier(final Long clientId, final Long identifierId, final Long commandId) {
+    public ClientIdentifierDeleteResponse deleteClientIdentifier(final Long clientId, final Long identifierId) {
 
         final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
 
@@ -182,12 +178,7 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
                 .orElseThrow(() -> new ClientIdentifierNotFoundException(identifierId));
         this.clientIdentifierRepository.delete(clientIdentifier);
 
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(commandId) //
-                .withOfficeId(client.officeId()) //
-                .withClientId(clientId) //
-                .withEntityId(identifierId) //
-                .build();
+        return ClientIdentifierDeleteResponse.builder().officeId(client.officeId()).clientId(clientId).resourceId(identifierId).build();
     }
 
     private void handleClientIdentifierDataIntegrityViolation(final String documentTypeLabel, final Long documentTypeId,
@@ -206,4 +197,60 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
         LOG.error("Error occured.", dve);
     }
+
+    // TODO refactor
+    public void validateForUpdate(final Long documentTypeId, final String documentKey) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("clientIdentifier");
+
+        baseDataValidator.reset().parameter("documentKey").value(documentKey).ignoreIfNull().notBlank();
+
+        // FIXME - KW - add in validation
+        // if (command.isDocumentTypeChanged()) {
+        // baseDataValidator.reset().parameter("documentTypeId").value(command.getDocumentTypeId()).notNull().integerGreaterThanZero();
+        // }
+
+        baseDataValidator.reset().anyOfNotNull(documentTypeId, documentKey);
+
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
+    }
+
+    public Map<String, Object> update(ClientIdentifier clientIdentifierForUpdate, final ClientIdentifierUpdateRequest request) {
+
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
+
+        final String documentTypeIdParamName = "documentTypeId";
+        Long documentTypeId = request.getDocumentTypeId();
+        if (documentTypeId.compareTo(clientIdentifierForUpdate.getDocumentType().getId()) != 0) {
+            actualChanges.put(documentTypeIdParamName, documentTypeId);
+        }
+
+        final String documentKeyParamName = "documentKey";
+        String documentKey = request.getDocumentKey();
+        if (documentKey.compareTo(clientIdentifierForUpdate.getDocumentKey()) != 0) {
+            actualChanges.put(documentKeyParamName, documentKey);
+            clientIdentifierForUpdate.setDocumentKey(documentKey);
+        }
+
+        final String descriptionParamName = "description";
+        String description = request.getDescription();
+        if (description.compareTo(clientIdentifierForUpdate.getDescription()) != 0) {
+            actualChanges.put(descriptionParamName, description);
+            clientIdentifierForUpdate.setDescription(description);
+        }
+
+        final String statusParamName = "status";
+        String status = request.getStatus();
+        if (status.compareTo(ClientIdentifierStatus.fromInt(clientIdentifierForUpdate.getStatus()).getCode()) != 0) {
+            actualChanges.put(statusParamName, ClientIdentifierStatus.valueOf(status));
+            clientIdentifierForUpdate.setStatus(ClientIdentifierStatus.valueOf(status).getValue());
+        }
+
+        return actualChanges;
+    }
+
 }

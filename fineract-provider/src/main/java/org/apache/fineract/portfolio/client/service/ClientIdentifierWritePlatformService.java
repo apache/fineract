@@ -18,14 +18,17 @@
  */
 package org.apache.fineract.portfolio.client.service;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.client.data.ClientIdentifierCreateNewRequest;
+import org.apache.fineract.portfolio.client.data.ClientIdentifierCreateResponse;
+import org.apache.fineract.portfolio.client.data.ClientIdentifierDeleteResponse;
+import org.apache.fineract.portfolio.client.data.ClientIdentifierUpdateRequest;
+import org.apache.fineract.portfolio.client.data.ClientIdentifierUpdateResponse;
 
 public interface ClientIdentifierWritePlatformService {
 
-    CommandProcessingResult addClientIdentifier(Long clientId, JsonCommand command);
+    ClientIdentifierCreateResponse addClientIdentifier(Long clientId, ClientIdentifierCreateNewRequest request);
 
-    CommandProcessingResult updateClientIdentifier(Long clientId, Long clientIdentifierId, JsonCommand command);
+    ClientIdentifierUpdateResponse updateClientIdentifier(Long clientId, Long clientIdentifierId, ClientIdentifierUpdateRequest request);
 
-    CommandProcessingResult deleteClientIdentifier(Long clientId, Long clientIdentifierId, Long commandId);
+    ClientIdentifierDeleteResponse deleteClientIdentifier(Long clientId, Long clientIdentifierId);
 }

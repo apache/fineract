@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.client.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.apache.fineract.portfolio.client.data.ClientIdentifierRequest;
 
 /**
  * Created by Chirag Gupta on 01/13/18.
@@ -54,58 +53,4 @@ final class ClientIdentifiersApiResourceSwagger {
         public String description;
     }
 
-    @Schema(description = "PostClientsClientIdIdentifiersRequest")
-    public static final class PostClientsClientIdIdentifiersRequest {
-
-        private PostClientsClientIdIdentifiersRequest() {}
-
-        @Schema(example = "1")
-        public Long documentTypeId;
-        @Schema(example = "KA-54677")
-        public String documentKey;
-        @Schema(example = "Document has been verified")
-        public String description;
-        @Schema(example = "Active")
-        public String status;
-    }
-
-    @Schema(description = "PutClientsClientIdIdentifiersIdentifierIdResponse")
-    public static final class PutClientsClientIdIdentifiersIdentifierIdResponse {
-
-        private PutClientsClientIdIdentifiersIdentifierIdResponse() {}
-
-        @Schema(example = "1")
-        public Long officeId;
-        @Schema(example = "1")
-        public Long clientId;
-        @Schema(example = "3")
-        public Long resourceId;
-        public ClientIdentifierRequest changes;
-    }
-
-    @Schema(description = "PostClientsClientIdIdentifiersResponse")
-    public static final class PostClientsClientIdIdentifiersResponse {
-
-        private PostClientsClientIdIdentifiersResponse() {}
-
-        @Schema(example = "1")
-        public Long officeId;
-        @Schema(example = "1")
-        public Long clientId;
-        @Schema(example = "3")
-        public Long resourceId;
-    }
-
-    @Schema(description = "DeleteClientsClientIdIdentifiersIdentifierIdResponse")
-    public static final class DeleteClientsClientIdIdentifiersIdentifierIdResponse {
-
-        private DeleteClientsClientIdIdentifiersIdentifierIdResponse() {}
-
-        @Schema(example = "1")
-        public Long officeId;
-        @Schema(example = "1")
-        public Long clientId;
-        @Schema(example = "3")
-        public Long resourceId;
-    }
 }

@@ -24,11 +24,11 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
+import org.apache.fineract.client.models.ClientIdentifierCreateNewRequest;
+import org.apache.fineract.client.models.ClientIdentifierCreateResponse;
 import org.apache.fineract.client.models.GetClientsClientIdResponse;
 import org.apache.fineract.client.models.GetClientsResponse;
 import org.apache.fineract.client.models.PageClientSearchData;
-import org.apache.fineract.client.models.PostClientsClientIdIdentifiersRequest;
-import org.apache.fineract.client.models.PostClientsClientIdIdentifiersResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostOfficesRequest;
@@ -254,10 +254,11 @@ public class ClientSearchTest extends IntegrationTest {
         request1.setMobileNo(Utils.randomNumberGenerator(8).toString());
         PostClientsResponse clientResponse = clientHelper.createClient(request1);
         final Long documentType = 1L;
-        PostClientsClientIdIdentifiersRequest identifierRequest = ClientHelper.createClientIdentifer(documentType);
+        ClientIdentifierCreateNewRequest identifierRequest = ClientHelper.createClientIdentifer(documentType);
         final String documentKey = identifierRequest.getDocumentKey();
-        PostClientsClientIdIdentifiersResponse clientIdentifierResponse = clientHelper.createClientIdentifer(clientResponse.getClientId(),
-                identifierRequest);
+        String idempotencyKey = "Idempotency-Key";
+        ClientIdentifierCreateResponse clientIdentifierResponse = clientHelper.createClientIdentifer(idempotencyKey,
+                clientResponse.getClientId(), identifierRequest);
 
         PostClientsRequest request2 = ClientHelper.defaultClientCreationRequest();
         clientHelper.createClient(request2);
