@@ -87,6 +87,44 @@ Feature: Loan
     And Admin successfully disburse the loan on "1 September 2022" with "1400" EUR transaction amount
     Then Admin fails to disburse the loan on "1 September 2022" with "101" EUR transaction amount because of wrong amount
 
+  @TestRailId:C3767
+  Scenario: Verify disbursed amount exceeds approved over applied amount for progressive loan with percentage overAppliedCalculationType
+    When Admin sets the business date to "1 September 2022"
+    When Admin creates a client with random data
+    When Admin successfully creates a new customised Loan submitted on date: "1 September 2022", with Principal: "1000", a loanTermFrequency: 3 months, and numberOfRepayments: 3
+    And Admin successfully approves the loan on "1 September 2022" with "1300" amount and expected disbursement date on "1 September 2022"
+    And Admin successfully disburse the loan on "1 September 2022" with "1200" EUR transaction amount
+    Then Admin fails to disburse the loan on "1 September 2022" with "301" EUR transaction amount because of wrong amount
+
+    When Loan Pay-off is made on "1 September 2022"
+    Then Loan's all installments have obligations met
+
+  @TestRailId:C3768
+  Scenario: Verify approved amount exceeds approved over applied amount for progressive loan with flat overAppliedCalculationType
+    When Admin sets the business date to "1 January 2024"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                  | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            | charge calculation type  | charge amount % |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_RECALC_EMI_360_30_APPROVED_OVER_APPLIED_FLAT_CAPITALIZED_INCOME | 01 January 2024   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION | LOAN_DISBURSEMENT_CHARGE | 2               |
+    Then Admin fails to approve the loan on "1 January 2024" with "2001" amount and expected disbursement date on "1 January 2024" because of wrong amount
+
+    And Admin successfully rejects the loan on "1 January 2024"
+    Then Loan status will be "REJECTED"
+
+  @TestRailId:C3769
+  Scenario: Verify disbursed amount exceeds approved over applied amount for progressive loan with flat overAppliedCalculationType
+    When Admin sets the business date to "1 January 2024"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                   | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            | charge calculation type  | charge amount % |
+      | LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL | 01 January 2024   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION | LOAN_DISBURSEMENT_CHARGE | 2               |
+    And Admin successfully approves the loan on "1 January 2024" with "9000" amount and expected disbursement date on "1 January 2024"
+    And Admin successfully disburse the loan on "1 January 2024" with "9900" EUR transaction amount
+    Then Admin fails to disburse the loan on "1 January 2024" with "1200" EUR transaction amount because of wrong amount
+
+    When Loan Pay-off is made on "1 January 2024"
+    Then Loan's all installments have obligations met
+
   @TestRailId:C67
   Scenario: As admin I would like to check that amounts are distributed equally in loan repayment schedule
     When Admin sets the business date to "1 September 2022"
