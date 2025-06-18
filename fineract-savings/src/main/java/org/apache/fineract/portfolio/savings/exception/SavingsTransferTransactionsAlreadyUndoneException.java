@@ -16,11 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.accounting.journalentry.service;
+package org.apache.fineract.portfolio.savings.exception;
 
-import org.apache.fineract.accounting.journalentry.data.SavingsDTO;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-public interface AccountingProcessorForSavings {
+/**
+ * {@link AbstractPlatformDomainRuleException} thrown an action to transition a loan from one state to another violates
+ * a domain rule.
+ */
+public class SavingsTransferTransactionsAlreadyUndoneException extends AbstractPlatformDomainRuleException {
 
-    void createJournalEntriesForSavings(SavingsDTO savingsDTO, boolean isNegativeBalance);
+    public SavingsTransferTransactionsAlreadyUndoneException(final String accountNo, final Long transactionId) {
+        super("error.msg.savings.transfer.transactions.cannot.be.undone",
+                "Transaction related to savings account " + accountNo + " already undone", transactionId, accountNo);
+    }
+
 }

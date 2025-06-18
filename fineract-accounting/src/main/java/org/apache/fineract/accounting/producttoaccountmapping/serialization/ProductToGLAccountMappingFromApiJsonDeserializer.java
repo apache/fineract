@@ -169,7 +169,8 @@ public final class ProductToGLAccountMappingFromApiJsonDeserializer {
                 Locale.getDefault());
         baseDataValidator.reset().parameter(accountingRuleParamName).value(accountingRuleType).notNull().inMinMaxRange(1, 3);
 
-        if (AccountingValidations.isCashBasedAccounting(accountingRuleType)) {
+        if (AccountingValidations.isCashBasedAccounting(accountingRuleType)
+                || AccountingValidations.isAccrualBasedAccounting(accountingRuleType)) {
 
             final Long savingsControlAccountId = this.fromApiJsonHelper
                     .extractLongNamed(SavingProductAccountingParams.SAVINGS_CONTROL.getValue(), element);
@@ -225,7 +226,6 @@ public final class ProductToGLAccountMappingFromApiJsonDeserializer {
                 baseDataValidator.reset().parameter(SavingProductAccountingParams.LOSSES_WRITTEN_OFF.getValue()).value(writtenOff).notNull()
                         .integerGreaterThanZero();
             }
-
         }
 
         // Periodic Accrual Accounting aditional GL Accounts

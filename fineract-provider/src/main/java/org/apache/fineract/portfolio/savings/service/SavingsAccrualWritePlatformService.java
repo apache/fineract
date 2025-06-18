@@ -16,11 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.accounting.journalentry.service;
+package org.apache.fineract.portfolio.savings.service;
 
-import org.apache.fineract.accounting.journalentry.data.SavingsDTO;
+import java.time.LocalDate;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.exception.MultiException;
 
-public interface AccountingProcessorForSavings {
+public interface SavingsAccrualWritePlatformService {
 
-    void createJournalEntriesForSavings(SavingsDTO savingsDTO, boolean isNegativeBalance);
+    void addAccrualEntries(LocalDate tillDate) throws MultiException;
+
+    CommandProcessingResult addAccrualEntries(Long savingsAccountId);
+
 }

@@ -199,6 +199,7 @@ public class AccountingProcessorHelper {
             final boolean reversed = (Boolean) map.get("reversed");
             final Long paymentTypeId = (Long) map.get("paymentTypeId");
             final BigDecimal overdraftAmount = (BigDecimal) map.get("overdraftAmount");
+            final Boolean isNegativeBalance = (Boolean) map.get("isNegativeBalance");
 
             final List<ChargePaymentDTO> feePayments = new ArrayList<>();
             final List<ChargePaymentDTO> penaltyPayments = new ArrayList<>();
@@ -210,8 +211,12 @@ public class AccountingProcessorHelper {
                     final Long chargeId = (Long) loanChargePaid.get("chargeId");
                     final Long loanChargeId = (Long) loanChargePaid.get("savingsChargeId");
                     final boolean isPenalty = (Boolean) loanChargePaid.get("isPenalty");
+                    final boolean accrualRecognized = (Boolean) loanChargePaid.get("accrualRecognized") != null
+                            ? (Boolean) loanChargePaid.get("accrualRecognized")
+                            : false;
                     final BigDecimal chargeAmountPaid = (BigDecimal) loanChargePaid.get("amount");
-                    final ChargePaymentDTO chargePaymentDTO = new ChargePaymentDTO(chargeId, chargeAmountPaid, loanChargeId);
+                    ChargePaymentDTO chargePaymentDTO = new ChargePaymentDTO(chargeId, chargeAmountPaid, loanChargeId);
+                    chargePaymentDTO.setAccrualRecognized(accrualRecognized);
                     if (isPenalty) {
                         penaltyPayments.add(chargePaymentDTO);
                     } else {
@@ -238,7 +243,7 @@ public class AccountingProcessorHelper {
             }
             final SavingsTransactionDTO transaction = new SavingsTransactionDTO(transactionOfficeId, paymentTypeId, transactionId,
                     transactionDate, transactionType, amount, reversed, feePayments, penaltyPayments, overdraftAmount, isAccountTransfer,
-                    taxPayments);
+                    taxPayments, isNegativeBalance);
 
             newSavingsTransactions.add(transaction);
 

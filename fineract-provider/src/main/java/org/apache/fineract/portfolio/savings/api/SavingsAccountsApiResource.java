@@ -573,6 +573,9 @@ public class SavingsAccountsApiResource {
         } else if (is(commandParam, SavingsApiConstants.COMMAND_UNBLOCK_ACCOUNT)) {
             final CommandWrapper commandRequest = builder.unblockSavingsAccount(accountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, SavingsApiConstants.COMMAND_ADD_ACCRUAL_TRANSACTION)) {
+            final CommandWrapper commandRequest = builder.addAccrualsToSavingsAccount(accountId).build();
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
         if (result == null) {
@@ -582,7 +585,8 @@ public class SavingsAccountsApiResource {
                             "postInterest", "close", "assignSavingsOfficer", "unassignSavingsOfficer",
                             SavingsApiConstants.COMMAND_BLOCK_DEBIT, SavingsApiConstants.COMMAND_UNBLOCK_DEBIT,
                             SavingsApiConstants.COMMAND_BLOCK_CREDIT, SavingsApiConstants.COMMAND_UNBLOCK_CREDIT,
-                            SavingsApiConstants.COMMAND_BLOCK_ACCOUNT, SavingsApiConstants.COMMAND_UNBLOCK_ACCOUNT });
+                            SavingsApiConstants.COMMAND_BLOCK_ACCOUNT, SavingsApiConstants.COMMAND_UNBLOCK_ACCOUNT,
+                            SavingsApiConstants.COMMAND_ADD_ACCRUAL_TRANSACTION });
         }
 
         return toApiJsonSerializer.serialize(result);

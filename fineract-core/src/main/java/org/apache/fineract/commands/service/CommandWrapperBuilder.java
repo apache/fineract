@@ -3416,6 +3416,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder addAccrualsToSavingsAccount(final Long accountId) {
+        this.actionName = "ADD_ACCRUALS";
+        this.entityName = "SAVINGSACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = null;
+        this.href = "/savingsaccounts/" + accountId + "?command=addAccrualTransactions";
+        return this;
+    }
+
     public CommandWrapperBuilder disableAdHoc(Long adHocId) {
         this.actionName = "DISABLE";
         this.entityName = "ADHOC";

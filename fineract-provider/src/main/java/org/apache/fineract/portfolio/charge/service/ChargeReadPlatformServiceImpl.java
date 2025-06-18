@@ -294,6 +294,10 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             return chargeSchema() + " join m_savings_product_charge spc on spc.charge_id = c.id";
         }
 
+        public String savingsProductAccrualChargeSchema() {
+            return chargeSchema() + " join m_savings_product_accrual_charge spc on spc.charge_id = c.id";
+        }
+
         public String shareProductChargeSchema() {
             return chargeSchema() + " join m_share_product_charge mspc on mspc.charge_id = c.id";
         }
@@ -416,6 +420,17 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         final ChargeMapper rm = new ChargeMapper();
 
         String sql = "select " + rm.savingsProductChargeSchema()
+                + " where c.is_deleted=false and c.is_active=true and spc.savings_product_id=? ";
+        sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] { savingsProductId }); // NOSONAR
+    }
+
+    @Override
+    public Collection<ChargeData> retrieveSavingsProductAccrualCharges(final Long savingsProductId) {
+        final ChargeMapper rm = new ChargeMapper();
+
+        String sql = "select " + rm.savingsProductAccrualChargeSchema()
                 + " where c.is_deleted=false and c.is_active=true and spc.savings_product_id=? ";
         sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
 

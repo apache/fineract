@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.savings.service;
 
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.accountingRuleParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.accrualChargesParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.chargesParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroupIdParamName;
 
@@ -140,7 +141,7 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
 
             final Map<String, Object> changes = product.update(command);
 
-            if (changes.containsKey(chargesParamName)) {
+            if (changes.containsKey(chargesParamName) || changes.containsKey(accrualChargesParamName)) {
                 final Set<Charge> savingsProductCharges = this.savingsProductAssembler.assembleListOfSavingsProductCharges(command,
                         product.currency().getCode());
                 final boolean updated = product.update(savingsProductCharges);

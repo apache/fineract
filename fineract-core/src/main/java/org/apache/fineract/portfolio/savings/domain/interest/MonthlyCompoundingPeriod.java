@@ -47,14 +47,15 @@ public final class MonthlyCompoundingPeriod implements CompoundingPeriod {
     public BigDecimal calculateInterest(final SavingsCompoundingInterestPeriodType compoundingInterestPeriodType,
             final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestToCompound,
             final BigDecimal interestRateAsFraction, final long daysInYear, final BigDecimal minBalanceForInterestCalculation,
-            final BigDecimal overdraftInterestRateAsFraction, final BigDecimal minOverdraftForInterestCalculation) {
+            final BigDecimal overdraftInterestRateAsFraction, final BigDecimal minOverdraftForInterestCalculation, Boolean isAccrual) {
 
         BigDecimal interestEarned = BigDecimal.ZERO;
 
         switch (interestCalculationType) {
             case DAILY_BALANCE:
                 interestEarned = calculateUsingDailyBalanceMethod(compoundingInterestPeriodType, interestToCompound, interestRateAsFraction,
-                        daysInYear, minBalanceForInterestCalculation, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation);
+                        daysInYear, minBalanceForInterestCalculation, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation,
+                        isAccrual);
             break;
             case AVERAGE_DAILY_BALANCE:
                 interestEarned = calculateUsingAverageDailyBalanceMethod(interestToCompound, interestRateAsFraction, daysInYear,
@@ -114,7 +115,7 @@ public final class MonthlyCompoundingPeriod implements CompoundingPeriod {
     private BigDecimal calculateUsingDailyBalanceMethod(final SavingsCompoundingInterestPeriodType compoundingInterestPeriodType,
             final BigDecimal interestToCompound, final BigDecimal interestRateAsFraction, final long daysInYear,
             final BigDecimal minBalanceForInterestCalculation, final BigDecimal overdraftInterestRateAsFraction,
-            final BigDecimal minOverdraftForInterestCalculation) {
+            final BigDecimal minOverdraftForInterestCalculation, Boolean isAccrual) {
 
         BigDecimal interestEarned = BigDecimal.ZERO;
         BigDecimal interestOnBalanceUnrounded = BigDecimal.ZERO;
@@ -127,8 +128,15 @@ public final class MonthlyCompoundingPeriod implements CompoundingPeriod {
                             minOverdraftForInterestCalculation);
                 break;
                 case MONTHLY:
-                    interestOnBalanceUnrounded = balance.calculateInterestOnBalance(interestToCompound, interestRateAsFraction, daysInYear,
-                            minBalanceForInterestCalculation, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation);
+                    interestOnBalanceUnrounded = isAccrual
+                            ? balance.calculateInterestOnBalanceNegative(interestToCompound, interestRateAsFraction, daysInYear,
+                                    minBalanceForInterestCalculation, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation)
+                            : balance.calculateInterestOnBalance(interestToCompound, interestRateAsFraction, daysInYear,
+                                    minBalanceForInterestCalculation, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation);
+                    if (isAccrual && balance.getNumberOfDays() == 0) {
+                        interestOnBalanceUnrounded = BigDecimal.ZERO;
+                    }
+
                 break;
                 // case QUATERLY:
                 // break;

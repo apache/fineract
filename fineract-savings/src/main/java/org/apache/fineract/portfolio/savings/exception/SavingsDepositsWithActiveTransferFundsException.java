@@ -16,11 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.accounting.journalentry.service;
+package org.apache.fineract.portfolio.savings.exception;
 
-import org.apache.fineract.accounting.journalentry.data.SavingsDTO;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-public interface AccountingProcessorForSavings {
+/**
+ * {@link AbstractPlatformDomainRuleException} thrown an action to transition a loan from one state to another violates
+ * a domain rule.
+ */
+public class SavingsDepositsWithActiveTransferFundsException extends AbstractPlatformDomainRuleException {
 
-    void createJournalEntriesForSavings(SavingsDTO savingsDTO, boolean isNegativeBalance);
+    public SavingsDepositsWithActiveTransferFundsException(final String accountNo, final Long transactionId) {
+        super("error.msg.savings.deposits.with.active.transfer.funds.transaction",
+                "Savings/Deposit account " + accountNo + " with active transfer funds transaction " + transactionId, transactionId,
+                accountNo);
+    }
+
 }
