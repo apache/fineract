@@ -346,6 +346,7 @@ public class LoanProductData implements Serializable {
         final boolean enableAutoRepaymentForDownPayment = false;
         final EnumOptionData repaymentStartDateType = null;
         final boolean enableInstallmentLevelDelinquency = false;
+        final boolean allowAccrualPostingInArrears = false;
         final EnumOptionData loanScheduleType = null;
         final EnumOptionData loanScheduleProcessingType = null;
         final boolean enableAccrualActivityPosting = false;
@@ -477,6 +478,7 @@ public class LoanProductData implements Serializable {
         final Collection<CreditAllocationData> creditAllocation = null;
         final EnumOptionData repaymentStartDateType = null;
         final boolean enableInstallmentLevelDelinquency = false;
+        final boolean allowAccrualPostingInArrears = false;
         final EnumOptionData loanScheduleType = null;
         final EnumOptionData loanScheduleProcessingType = null;
         final boolean enableAccrualActivityPosting = false;
@@ -615,6 +617,7 @@ public class LoanProductData implements Serializable {
         final Collection<CreditAllocationData> creditAllocation = null;
         final EnumOptionData repaymentStartDateType = LoanEnumerations.repaymentStartDateType(RepaymentStartDateType.DISBURSEMENT_DATE);
         final boolean enableInstallmentLevelDelinquency = false;
+        final boolean allowAccrualPostingInArrears = false;
         final EnumOptionData loanScheduleType = LoanScheduleType.CUMULATIVE.asEnumOptionData();
         final EnumOptionData loanScheduleProcessingType = LoanScheduleProcessingType.HORIZONTAL.asEnumOptionData();
         final boolean enableAccrualActivityPosting = false;
@@ -747,6 +750,7 @@ public class LoanProductData implements Serializable {
         final Collection<CreditAllocationData> creditAllocationData = null;
         final EnumOptionData repaymentStartDateType = LoanEnumerations.repaymentStartDateType(RepaymentStartDateType.DISBURSEMENT_DATE);
         final boolean enableInstallmentLevelDelinquency = false;
+        final boolean allowAccrualPostingInArrears = false;
         final EnumOptionData loanScheduleType = null;
         final EnumOptionData loanScheduleProcessingType = null;
         final boolean enableAccrualActivityPosting = false;

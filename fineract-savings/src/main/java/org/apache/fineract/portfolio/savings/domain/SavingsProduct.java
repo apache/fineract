@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.savings.domain;
 
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.accountingRuleParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.accrualChargesParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.chargesParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
@@ -163,6 +164,10 @@ public class SavingsProduct extends AbstractPersistableCustom<Long> {
     @JoinTable(name = "m_savings_product_charge", joinColumns = @JoinColumn(name = "savings_product_id"), inverseJoinColumns = @JoinColumn(name = "charge_id"))
     protected Set<Charge> charges;
 
+    @ManyToMany
+    @JoinTable(name = "m_savings_product_accrual_charge", joinColumns = @JoinColumn(name = "savings_product_id"), inverseJoinColumns = @JoinColumn(name = "charge_id"))
+    protected Set<Charge> accrualCharges;
+
     @Column(name = "allow_overdraft")
     private boolean allowOverdraft;
 
@@ -220,14 +225,15 @@ public class SavingsProduct extends AbstractPersistableCustom<Long> {
             final BigDecimal minRequiredBalance, final boolean lienAllowed, final BigDecimal maxAllowedLienLimit,
             final BigDecimal minBalanceForInterestCalculation, final BigDecimal nominalAnnualInterestRateOverdraft,
             final BigDecimal minOverdraftForInterestCalculation, boolean withHoldTax, TaxGroup taxGroup,
-            final Boolean isDormancyTrackingActive, final Long daysToInactive, final Long daysToDormancy, final Long daysToEscheat) {
+            final Boolean isDormancyTrackingActive, final Long daysToInactive, final Long daysToDormancy, final Long daysToEscheat,
+            final Set<Charge> accrualCharges) {
 
         return new SavingsProduct(name, shortName, description, currency, interestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeApplicableForTransfer, accountingRuleType, charges,
                 allowOverdraft, overdraftLimit, enforceMinRequiredBalance, minRequiredBalance, lienAllowed, maxAllowedLienLimit,
                 minBalanceForInterestCalculation, nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax,
-                taxGroup, isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat);
+                taxGroup, isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat, accrualCharges);
     }
 
     protected SavingsProduct() {
@@ -242,11 +248,12 @@ public class SavingsProduct extends AbstractPersistableCustom<Long> {
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
             final boolean withdrawalFeeApplicableForTransfer, final AccountingRuleType accountingRuleType, final Set<Charge> charges,
             final boolean allowOverdraft, final BigDecimal overdraftLimit, BigDecimal minBalanceForInterestCalculation, boolean withHoldTax,
-            TaxGroup taxGroup) {
+            TaxGroup taxGroup, final Set<Charge> accrualCharges) {
         this(name, shortName, description, currency, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
                 interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
                 lockinPeriodFrequencyType, withdrawalFeeApplicableForTransfer, accountingRuleType, charges, allowOverdraft, overdraftLimit,
-                false, null, false, null, minBalanceForInterestCalculation, null, null, withHoldTax, taxGroup, null, null, null, null);
+                false, null, false, null, minBalanceForInterestCalculation, null, null, withHoldTax, taxGroup, null, null, null, null,
+                accrualCharges);
     }
 
     protected SavingsProduct(final String name, final String shortName, final String description, final MonetaryCurrency currency,
@@ -259,7 +266,8 @@ public class SavingsProduct extends AbstractPersistableCustom<Long> {
             final BigDecimal minRequiredBalance, final boolean lienAllowed, final BigDecimal maxAllowedLienLimit,
             BigDecimal minBalanceForInterestCalculation, final BigDecimal nominalAnnualInterestRateOverdraft,
             final BigDecimal minOverdraftForInterestCalculation, final boolean withHoldTax, final TaxGroup taxGroup,
-            final Boolean isDormancyTrackingActive, final Long daysToInactive, final Long daysToDormancy, final Long daysToEscheat) {
+            final Boolean isDormancyTrackingActive, final Long daysToInactive, final Long daysToDormancy, final Long daysToEscheat,
+            final Set<Charge> accrualCharges) {
 
         this.name = name;
         this.shortName = shortName;
@@ -289,6 +297,10 @@ public class SavingsProduct extends AbstractPersistableCustom<Long> {
 
         if (charges != null) {
             this.charges = charges;
+        }
+
+        if (accrualCharges != null) {
+            this.accrualCharges = accrualCharges;
         }
 
         validateLockinDetails();
@@ -494,9 +506,17 @@ public class SavingsProduct extends AbstractPersistableCustom<Long> {
 
         // charges
         if (command.hasParameter(chargesParamName)) {
-            final JsonArray jsonArray = command.arrayOfParameterNamed(chargesParamName);
+            JsonArray jsonArray = command.arrayOfParameterNamed(chargesParamName);
             if (jsonArray != null) {
                 actualChanges.put(chargesParamName, command.jsonFragment(chargesParamName));
+            }
+
+            // accrual charges
+            if (command.hasParameter(accrualChargesParamName)) {
+                jsonArray = command.arrayOfParameterNamed(accrualChargesParamName);
+                if (jsonArray != null) {
+                    actualChanges.put(accrualChargesParamName, command.jsonFragment(accrualChargesParamName));
+                }
             }
         }
 
@@ -671,23 +691,27 @@ public class SavingsProduct extends AbstractPersistableCustom<Long> {
         return this.accountingRule;
     }
 
-    public boolean update(final Set<Charge> newSavingsProductCharges) {
-        if (newSavingsProductCharges == null) {
-            return false;
-        }
+    public boolean update(final Set<Charge> newSavingsProductCharges, final Set<Charge> newSavingsProductAccrualCharges) {
+        final boolean updatedCharges = (newSavingsProductCharges == null) ? false : validateCharges(this.charges, newSavingsProductCharges);
+        final boolean updatedAccrualCharges = (newSavingsProductAccrualCharges == null) ? false
+                : validateCharges(this.accrualCharges, newSavingsProductAccrualCharges);
 
+        return updatedCharges || updatedAccrualCharges;
+    }
+
+    private boolean validateCharges(Set<Charge> currentCharges, final Set<Charge> newSavingsProductCharges) {
         boolean updated = false;
-        if (this.charges != null) {
-            final Set<Charge> currentSetOfCharges = new HashSet<>(this.charges);
+        if (currentCharges != null) {
+            final Set<Charge> currentSetOfCharges = new HashSet<>(currentCharges);
             final Set<Charge> newSetOfCharges = new HashSet<>(newSavingsProductCharges);
 
             if (!currentSetOfCharges.equals(newSetOfCharges)) {
                 updated = true;
-                this.charges = newSavingsProductCharges;
+                currentCharges = newSavingsProductCharges;
             }
         } else {
             updated = true;
-            this.charges = newSavingsProductCharges;
+            currentCharges = newSavingsProductCharges;
         }
         return updated;
     }
@@ -722,6 +746,14 @@ public class SavingsProduct extends AbstractPersistableCustom<Long> {
 
     public Set<Charge> charges() {
         return this.charges;
+    }
+
+    public Set<Charge> accrualCharges() {
+        return this.accrualCharges;
+    }
+
+    public List<Long> accrualChargeIds() {
+        return accrualCharges.stream().map(Charge::getId).toList();
     }
 
     public InterestRateChart applicableChart(@SuppressWarnings("unused") final LocalDate target) {
@@ -778,6 +810,14 @@ public class SavingsProduct extends AbstractPersistableCustom<Long> {
 
     public Long getDaysToEscheat() {
         return this.daysToEscheat;
+    }
+
+    public void setCharges(Set<Charge> charges) {
+        this.charges = charges;
+    }
+
+    public void setAccrualCharges(Set<Charge> accrualCharges) {
+        this.accrualCharges = accrualCharges;
     }
 
 }

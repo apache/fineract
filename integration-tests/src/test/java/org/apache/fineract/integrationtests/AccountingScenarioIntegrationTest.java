@@ -45,6 +45,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import org.apache.fineract.client.models.GetRecurringDepositProductsProductIdResponse;
+import org.apache.fineract.client.models.GetSavingsProductsProductIdResponse;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
 import org.apache.fineract.client.models.GetRecurringDepositProductsProductIdResponse;
 import org.apache.fineract.client.models.GetSavingsProductsProductIdResponse;
@@ -639,6 +641,15 @@ public class AccountingScenarioIntegrationTest {
                 .withInterestPostingPeriodTypeAsQuarterly() //
                 .withInterestCalculationPeriodTypeAsDailyBalance() //
                 .withMinimumOpenningBalance(minOpenningBalance).withAccountingRuleAsCashBased(accounts).build();
+        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+    }
+
+    public static Integer createSavingsProductWithAccrualAccounting(final String minOpenningBalance, final Account... accounts) {
+        LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
+        final String savingsProductJSON = new SavingsProductHelper().withInterestCompoundingPeriodTypeAsDaily() //
+                .withInterestPostingPeriodTypeAsQuarterly() //
+                .withInterestCalculationPeriodTypeAsDailyBalance() //
+                .withMinimumOpenningBalance(minOpenningBalance).withAccountingRuleAsAccrualBased(accounts).build();
         return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
     }
 

@@ -50,6 +50,8 @@ public class FineractProperties {
 
     private FineractCorrelationProperties correlation;
 
+    private FineractGeolocationProperties geolocation;
+
     private FineractPartitionedJob partitionedJob;
 
     private FineractRemoteJobMessageHandlerProperties remoteJobMessageHandler;
@@ -151,6 +153,13 @@ public class FineractProperties {
 
         private boolean enabled;
         private String headerName;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractGeolocationProperties {
+
+        private boolean enabled;
     }
 
     @Getter
@@ -599,22 +608,6 @@ public class FineractProperties {
         private String pattern;
     }
 
-    @Getter
-    @Setter
-    public static class FineractCache {
-
-        private FineractCacheDetails defaultTemplate;
-        private Map<String, FineractCacheDetails> customTemplates = new HashMap<>();
-    }
-
-    @Getter
-    @Setter
-    public static class FineractCacheDetails {
-
-        private Duration ttl;
-        private Integer maximumEntries;
-    }
-
     @Setter
     @Getter
     public static class RetryProperties {
@@ -640,4 +633,21 @@ public class FineractProperties {
             }
         }
     }
+
+    @Getter
+    @Setter
+    public static class FineractCache {
+
+        private FineractCacheDetails defaultTemplate;
+        private Map<String, FineractCacheDetails> customTemplates = new HashMap<>();
+    }
+
+    @Getter
+    @Setter
+    public static class FineractCacheDetails {
+
+        private Duration ttl;
+        private Integer maximumEntries;
+    }
+
 }

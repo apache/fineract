@@ -70,7 +70,7 @@ public final class RecurringDepositAccountData extends DepositAccountData {
 
     private final Collection<EnumOptionData> preClosurePenalInterestOnTypeOptions;
     private final Collection<EnumOptionData> periodFrequencyTypeOptions;
-    private final Collection<SavingsAccountData> savingsAccounts;
+    private Collection<SavingsAccountData> savingsAccounts;
 
     // for account close
     private final Collection<EnumOptionData> onAccountClosureOptions;
@@ -235,11 +235,12 @@ public final class RecurringDepositAccountData extends DepositAccountData {
 
             final Collection<EnumOptionData> preClosurePenalInterestOnTypeOptions = null;
             final Collection<EnumOptionData> periodFrequencyTypeOptions = null;
+            final Collection<SavingsAccountData> savingsAccounts = null;
 
             return withTemplateOptions(account, productOptions, fieldOfficerOptions, interestCompoundingPeriodTypeOptions,
                     interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
                     lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, transactions, charges, chargeOptions,
-                    preClosurePenalInterestOnTypeOptions, periodFrequencyTypeOptions);
+                    preClosurePenalInterestOnTypeOptions, periodFrequencyTypeOptions, savingsAccounts);
         }
 
         return new RecurringDepositAccountData(account.id, account.accountNo, account.externalId, account.groupId, account.groupName,
@@ -274,7 +275,7 @@ public final class RecurringDepositAccountData extends DepositAccountData {
             final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<EnumOptionData> withdrawalFeeTypeOptions,
             final Collection<SavingsAccountTransactionData> transactions, final Collection<SavingsAccountChargeData> charges,
             final Collection<ChargeData> chargeOptions, final Collection<EnumOptionData> preClosurePenalInterestOnTypeOptions,
-            final Collection<EnumOptionData> periodFrequencyTypeOptions) {
+            final Collection<EnumOptionData> periodFrequencyTypeOptions, final Collection<SavingsAccountData> savingsAccounts) {
 
         return new RecurringDepositAccountData(account.id, account.accountNo, account.externalId, account.groupId, account.groupName,
                 account.clientId, account.clientName, account.depositProductId, account.depositProductName, account.fieldOfficerId,
@@ -291,7 +292,7 @@ public final class RecurringDepositAccountData extends DepositAccountData {
                 account.inMultiplesOfDepositTermType, account.depositAmount, account.maturityAmount, account.maturityDate,
                 account.depositPeriod, account.depositPeriodFrequency, account.mandatoryRecommendedDepositAmount,
                 periodFrequencyTypeOptions, account.depositType, account.onAccountClosure, account.onAccountClosureOptions,
-                account.paymentTypeOptions, account.savingsAccounts, account.expectedFirstDepositOnDate, account.totalOverdueAmount,
+                account.paymentTypeOptions, savingsAccounts, account.expectedFirstDepositOnDate, account.totalOverdueAmount,
                 account.noOfOverdueInstallments, account.isMandatoryDeposit, account.allowWithdrawal,
                 account.adjustAdvanceTowardsFuturePayments, account.isCalendarInherited, account.recurringFrequency,
                 account.recurringFrequencyType, account.withHoldTax, account.taxGroup);

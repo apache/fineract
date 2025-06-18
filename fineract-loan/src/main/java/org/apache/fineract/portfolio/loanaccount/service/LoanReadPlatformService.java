@@ -29,17 +29,12 @@ import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
 import org.apache.fineract.portfolio.floatingrates.data.InterestRatePeriodData;
-import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentScheduleInstallmentData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
-import org.apache.fineract.portfolio.loanaccount.data.PaidInAdvanceData;
-import org.apache.fineract.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
+import org.apache.fineract.portfolio.loanaccount.data.*;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepaymentPeriodData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.springframework.data.domain.Pageable;
@@ -155,4 +150,17 @@ public interface LoanReadPlatformService {
     List<Long> retrieveLoanIdsByExternalIds(List<ExternalId> externalIds);
 
     boolean existsByLoanId(Long loanId);
+
+    Collection<LoanTermVariationsData> retrieveLoanTermVariations(Long loanId, Integer termType);
+
+    Collection<LoanScheduleAccrualData> retrievePeriodicAccrualData(LocalDate tillDate, Loan loan);
+
+    Collection<LoanScheduleAccrualData> retrievePeriodicAccrualData(LocalDate tillDate);
+
+    Collection<LoanScheduleAccrualData> retriveScheduleAccrualData();
+
+    Collection<LoanSchedulePeriodData> fetchWaiverInterestRepaymentData(Long loanId);
+
+    Collection<LoanTransactionData> retrieveWaiverLoanTransactions(Long loanId);
+
 }

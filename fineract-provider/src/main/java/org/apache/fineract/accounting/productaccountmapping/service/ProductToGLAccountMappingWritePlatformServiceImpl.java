@@ -223,6 +223,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
     private void saveSavingsBaseAccountMapping(final Long savingProductId, final DepositAccountType accountType, final JsonCommand command,
             final JsonElement element) {
         // asset
+
         this.savingsProductToGLAccountMappingHelper.saveSavingsToAssetAccountMapping(element,
                 SavingProductAccountingParams.SAVINGS_REFERENCE.getValue(), savingProductId,
                 CashAccountsForSavings.SAVINGS_REFERENCE.getValue());
@@ -297,6 +298,10 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
             case ACCRUAL_PERIODIC:
                 saveSavingsBaseAccountMapping(savingProductId, accountType, command, element);
                 // assets
+                this.savingsProductToGLAccountMappingHelper.saveSavingsToAssetAccountMapping(element,
+                        SavingProductAccountingParams.INTEREST_RECEIVABLE.getValue(), savingProductId,
+                        AccrualAccountsForSavings.INTEREST_RECEIVABLE.getValue());
+
                 this.savingsProductToGLAccountMappingHelper.saveSavingsToAssetAccountMapping(element,
                         SavingProductAccountingParams.FEES_RECEIVABLE.getValue(), savingProductId,
                         AccrualAccountsForSavings.FEES_RECEIVABLE.getValue());

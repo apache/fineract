@@ -172,19 +172,16 @@ public class PostInterestForSavingTasklet implements Tasklet {
         }
 
         while (queue.size() <= QUEUE_SIZE) {
-            log.debug("Fetching while threads are running!..:: this is not supposed to run........");
             savingsAccounts = Collections.synchronizedList(this.savingAccountReadPlatformService
                     .retrieveAllSavingsDataForInterestPosting(backdatedTxnsAllowedTill, pageSize, ACTIVE.getValue(), maxId));
             if (savingsAccounts.isEmpty()) {
                 break;
             }
             maxId = savingsAccounts.get(savingsAccounts.size() - 1).getId();
-            log.debug("Add to the Queue");
             queue.add(savingsAccounts);
         }
 
         checkCompletion(responses);
-        log.debug("Queue size {}", queue.size());
     }
 
     private <T> List<T> safeSubList(List<T> list, int fromIndex, int toIndex) {

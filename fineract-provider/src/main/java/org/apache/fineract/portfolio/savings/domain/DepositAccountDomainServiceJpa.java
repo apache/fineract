@@ -214,6 +214,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         account.postMaturityInterest(isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
         final Integer onAccountClosureId = command.integerValueOfParameterNamed(onAccountClosureIdParamName);
         final DepositAccountOnClosureType onClosureType = DepositAccountOnClosureType.fromInt(onAccountClosureId);
+        account.setClosedOnDate(closedDate);
         if (onClosureType.isReinvest()) {
             FixedDepositAccount reinvestedDeposit = account.reInvest(account.getAccountBalance());
             this.depositAccountAssembler.assignSavingAccountHelpers(reinvestedDeposit);
@@ -273,7 +274,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         Long savingsTransactionId = null;
         account.postMaturityInterest(isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
         final DepositAccountOnClosureType onClosureType = DepositAccountOnClosureType.fromInt(onAccountClosureId);
-        if (onClosureType.isReinvest()) {
+        if (onClosureType.isReinvest() && account.getClosedOnDate() != null) {
             BigDecimal reInvestAmount;
             if (onClosureType.isReinvestPrincipal()) {
                 reInvestAmount = account.getDepositAmount();
@@ -367,10 +368,11 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             this.calendarInstanceRepository.save(calendarInstance);
             final Calendar calendar = calendarInstance.getCalendar();
             final PeriodFrequencyType frequencyType = CalendarFrequencyType.from(CalendarUtils.getFrequency(calendar.getRecurrence()));
+            final Long relaxingDaysConfigForPivotDate = this.configurationDomainService.retrieveRelaxingDaysConfigForPivotDate();
             Integer frequency = CalendarUtils.getInterval(calendar.getRecurrence());
             frequency = frequency == -1 ? 1 : frequency;
             reinvestedDeposit.generateSchedule(frequencyType, frequency, calendar);
-            reinvestedDeposit.processAccountUponActivation(fmt, postReversals);
+            reinvestedDeposit.processAccountUponActivation(fmt, postReversals, relaxingDaysConfigForPivotDate);
             reinvestedDeposit.updateMaturityDateAndAmount(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
                     financialYearBeginningMonth);
             this.savingsAccountRepository.save(reinvestedDeposit);
@@ -381,9 +383,14 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             savingsTransactionId = withdrawal.getId();
 
         } else if (onClosureType.isTransferToSavings()) {
-            final Long toSavingsId = command.longValueOfParameterNamed(toSavingsAccountIdParamName);
+            final Long toSavingsId = command.longValueOfParameterNamed(toSavingsAccountIdParamName) != null
+                    ? command.longValueOfParameterNamed(toSavingsAccountIdParamName)
+                    : command.getSavingsId();
+            ;
+            final SavingsAccount SavingsAccount = this.depositAccountAssembler.assembleFrom(toSavingsId,
+                    DepositAccountType.RECURRING_DEPOSIT);
             final String transferDescription = command.stringValueOfParameterNamed(transferDescriptionParamName);
-            final SavingsAccount toSavingsAccount = this.depositAccountAssembler.assembleFrom(toSavingsId,
+            final SavingsAccount toSavingsAccount = this.depositAccountAssembler.getClientSavingAccount(SavingsAccount.getClient().getId(),
                     DepositAccountType.SAVINGS_DEPOSIT);
             final boolean isExceptionForBalanceCheck = false;
             final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(closedDate, transactionAmount,

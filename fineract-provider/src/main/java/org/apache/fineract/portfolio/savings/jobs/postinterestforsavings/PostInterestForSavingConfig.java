@@ -18,13 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.jobs.postinterestforsavings;
 
-import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
-import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
-import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformService;
-import org.apache.fineract.portfolio.savings.service.SavingsSchedularInterestPosterTask;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -34,9 +28,7 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
 @Configuration
 public class PostInterestForSavingConfig {
@@ -45,22 +37,6 @@ public class PostInterestForSavingConfig {
     private JobRepository jobRepository;
     @Autowired
     private PlatformTransactionManager transactionManager;
-    @Autowired
-    private SavingsAccountReadPlatformService savingAccountReadPlatformService;
-    @Autowired
-    private ConfigurationDomainService configurationDomainService;
-    @Autowired
-    private SavingsSchedularInterestPosterTask savingsSchedularInterestPosterTask;
-    @Autowired
-    private SavingsAccountWritePlatformService savingsAccountWritePlatformService;
-    @Autowired
-    private SavingsAccountRepositoryWrapper savingsAccountRepository;
-    @Autowired
-    private SavingsAccountAssembler savingAccountAssembler;
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-    @Autowired
-    private TransactionTemplate transactionTemplate;
 
     @Bean
     protected Step postInterestForSavingStep(PostInterestForSavingTasklet postInterestForSavingTasklet) {

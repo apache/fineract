@@ -161,6 +161,8 @@ public interface LoanProductConstants {
     String LOAN_SCHEDULE_TYPE = "loanScheduleType";
     String LOAN_SCHEDULE_PROCESSING_TYPE = "loanScheduleProcessingType";
 
+    String ALLOW_ACCRUAL_POSTING_IN_ARREARS = "allowAccrualPostingInArrears";
+
     // Repayment Strategies
     String ADVANCED_PAYMENT_ALLOCATION_STRATEGY = "advanced-payment-allocation-strategy";
 

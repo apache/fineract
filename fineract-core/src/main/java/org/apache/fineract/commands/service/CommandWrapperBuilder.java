@@ -1307,6 +1307,14 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder excuteAccrualAccountingForSavings() {
+        this.actionName = "EXECUTE";
+        this.entityName = "PERIODICACCRUALACCOUNTINGFORSAVINGS";
+        this.entityId = null;
+        this.href = "/accrualaccounting";
+        return this;
+    }
+
     public CommandWrapperBuilder createGLAccount() {
         this.actionName = "CREATE";
         this.entityName = "GLACCOUNT";
@@ -1539,6 +1547,14 @@ public class CommandWrapperBuilder {
         this.actionName = "CREATE";
         this.entityName = "ACCOUNTTRANSFER";
         this.entityId = null;
+        this.href = "/accounttransfers";
+        return this;
+    }
+
+    public CommandWrapperBuilder adjustAccountTransfer(final Long accountTransferId) {
+        this.actionName = "ADJUST";
+        this.entityName = "ACCOUNTTRANSFER";
+        this.entityId = accountTransferId;
         this.href = "/accounttransfers";
         return this;
     }
@@ -2442,6 +2458,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder fixedDepositAccountUndoActivation(final Long accountId) {
+        this.actionName = "UNDO_ACTIVATE";
+        this.entityName = "FIXEDDEPOSITACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = accountId;
+        this.href = "/fixeddepositaccounts/" + accountId + "?command=activate";
+        return this;
+    }
+
     public CommandWrapperBuilder closeFixedDepositAccount(final Long accountId) {
         this.actionName = "CLOSE";
         this.entityName = "FIXEDDEPOSITACCOUNT";
@@ -2602,6 +2627,15 @@ public class CommandWrapperBuilder {
         this.savingsId = accountId;
         this.entityId = accountId;
         this.href = "/recurringdepositaccounts/" + accountId + "?command=activate";
+        return this;
+    }
+
+    public CommandWrapperBuilder recurringDepositAccountUndoActivation(final Long accountId) {
+        this.actionName = "UNDO_ACTIVATE";
+        this.entityName = "RECURRINGDEPOSITACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = accountId;
+        this.href = "/recurringdepositaccounts/" + accountId + "?command=undoactivate";
         return this;
     }
 
@@ -3413,6 +3447,15 @@ public class CommandWrapperBuilder {
         this.savingsId = accountId;
         this.entityId = null;
         this.href = "/savingsaccounts/" + accountId + "?command=unblock";
+        return this;
+    }
+
+    public CommandWrapperBuilder addAccrualsToSavingsAccount(final Long accountId) {
+        this.actionName = "ADD_ACCRUALS";
+        this.entityName = "SAVINGSACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = null;
+        this.href = "/savingsaccounts/" + accountId + "?command=addAccrualTransactions";
         return this;
     }
 

@@ -109,6 +109,7 @@ public final class DepositsApiConstants {
     public static final String paymentTypeIdParamName = "paymentTypeId";
     public static final String transactionAccountNumberParamName = "accountNumber";
     public static final String checkNumberParamName = "checkNumber";
+    public static final String chequeNumber = "chequeNumber";
     public static final String routingCodeParamName = "routingCode";
     public static final String receiptNumberParamName = "receiptNumber";
     public static final String bankNumberParamName = "bankNumber";
@@ -222,7 +223,7 @@ public final class DepositsApiConstants {
             interestPostingPeriodTypeParamName, interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName,
             lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName, accountingRuleParamName, chargesParamName,
             SavingProductAccountingParams.INCOME_FROM_FEES.getValue(), SavingProductAccountingParams.INCOME_FROM_PENALTIES.getValue(),
-            SavingProductAccountingParams.INTEREST_ON_SAVINGS.getValue(),
+            SavingProductAccountingParams.INTEREST_ON_SAVINGS.getValue(), SavingProductAccountingParams.FEES_RECEIVABLE.getValue(),
             SavingProductAccountingParams.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(),
             SavingProductAccountingParams.SAVINGS_CONTROL.getValue(), SavingProductAccountingParams.TRANSFERS_SUSPENSE.getValue(),
             SavingProductAccountingParams.SAVINGS_REFERENCE.getValue(), SavingProductAccountingParams.FEE_INCOME_ACCOUNT_MAPPING.getValue(),
@@ -304,14 +305,14 @@ public final class DepositsApiConstants {
      * Depost Account parameters
      */
 
-    private static final Set<String> DEPOSIT_ACCOUNT_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(localeParamName, dateFormatParamName, monthDayFormatParamName, accountNoParamName, externalIdParamName,
-                    clientIdParamName, groupIdParamName, productIdParamName, fieldOfficerIdParamName, submittedOnDateParamName,
-                    nominalAnnualInterestRateParamName, interestCompoundingPeriodTypeParamName, interestPostingPeriodTypeParamName,
-                    interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName, lockinPeriodFrequencyParamName,
-                    lockinPeriodFrequencyTypeParamName, chargesParamName, chartsParamName, depositAmountParamName, depositPeriodParamName,
-                    depositPeriodFrequencyIdParamName, savingsAccounts, expectedFirstDepositOnDateParamName,
-                    SavingsApiConstants.withHoldTaxParamName, maturityInstructionIdParamName, transferToSavingsIdParamName));
+    private static final Set<String> DEPOSIT_ACCOUNT_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
+            dateFormatParamName, monthDayFormatParamName, accountNoParamName, externalIdParamName, clientIdParamName, groupIdParamName,
+            productIdParamName, fieldOfficerIdParamName, submittedOnDateParamName, nominalAnnualInterestRateParamName,
+            interestCompoundingPeriodTypeParamName, interestPostingPeriodTypeParamName, interestCalculationTypeParamName,
+            interestCalculationDaysInYearTypeParamName, lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName,
+            chargesParamName, chartsParamName, depositAmountParamName, depositPeriodParamName, depositPeriodFrequencyIdParamName,
+            savingsAccounts, expectedFirstDepositOnDateParamName, SavingsApiConstants.withHoldTaxParamName, maturityInstructionIdParamName,
+            transferToSavingsIdParamName, linkedAccountParamName, transferInterestToSavingsParamName));
 
     public static final Set<String> FIXED_DEPOSIT_ACCOUNT_REQUEST_DATA_PARAMETERS = fixedDepositAccountRequestData();
     public static final Set<String> FIXED_DEPOSIT_ACCOUNT_RESPONSE_DATA_PARAMETERS = fixedDepositAccountResponseData();

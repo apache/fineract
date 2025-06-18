@@ -34,6 +34,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.filters.ClientIpHolder;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.useradministration.domain.AppUser;
 
@@ -134,6 +135,9 @@ public class CommandSource extends AbstractPersistableCustom<Long> {
     @Column(name = "result_status_code")
     private Integer resultStatusCode;
 
+    @Column(name = "client_ip", nullable = true)
+    private String clientIp;
+
     @Column(name = "loan_external_id", length = 100)
     private ExternalId loanExternalId;
 
@@ -162,6 +166,7 @@ public class CommandSource extends AbstractPersistableCustom<Long> {
                 .transactionId(command.getTransactionId()) //
                 .creditBureauId(command.getCreditBureauId()) //
                 .organisationCreditBureauId(command.getOrganisationCreditBureauId()) //
+                .clientIp(ClientIpHolder.getClientIp()) //
                 .loanExternalId(command.getLoanExternalId()).sanitized(sanitized).build(); //
     }
 

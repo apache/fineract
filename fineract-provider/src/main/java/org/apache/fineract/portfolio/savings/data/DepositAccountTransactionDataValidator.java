@@ -18,18 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.data;
 
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.activatedOnDateParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.bankNumberParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.checkNumberParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.closedOnDateParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.onAccountClosureIdParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.paymentTypeIdParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.receiptNumberParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.routingCodeParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.toSavingsAccountIdParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transactionAccountNumberParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transactionAmountParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transactionDateParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.*;
 
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
@@ -77,7 +66,7 @@ public class DepositAccountTransactionDataValidator {
             Arrays.asList(DepositsApiConstants.localeParamName, DepositsApiConstants.dateFormatParamName, closedOnDateParamName,
                     DepositsApiConstants.noteParamName, onAccountClosureIdParamName, paymentTypeIdParamName,
                     transactionAccountNumberParamName, checkNumberParamName, routingCodeParamName, receiptNumberParamName,
-                    bankNumberParamName, DepositsApiConstants.transferDescriptionParamName, toSavingsAccountIdParamName));
+                    bankNumberParamName, DepositsApiConstants.transferDescriptionParamName, toSavingsAccountIdParamName, chequeNumber));
 
     private static final Set<String> DEPOSIT_ACCOUNT_PRE_MATURE_CALCULATION_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(DepositsApiConstants.localeParamName, DepositsApiConstants.dateFormatParamName, closedOnDateParamName));
@@ -223,7 +212,8 @@ public class DepositAccountTransactionDataValidator {
         if (onAccountClosureId != null) {
             final DepositAccountOnClosureType accountOnClosureType = DepositAccountOnClosureType.fromInt(onAccountClosureId);
             if (accountOnClosureType.isTransferToSavings()) {
-                final Long toSavingsAccountId = this.fromApiJsonHelper.extractLongNamed(toSavingsAccountIdParamName, element);
+                final Long toSavingsAccountId = command.getSavingsId(); // this.fromApiJsonHelper.extractLongNamed(toSavingsAccountIdParamName,
+                                                                        // element);
                 baseDataValidator.reset().parameter(toSavingsAccountIdParamName).value(toSavingsAccountId)
                         .cantBeBlankWhenParameterProvidedIs(onAccountClosureIdParamName,
                                 DepositAccountOnClosureType.fromInt(onAccountClosureId).getCode());

@@ -149,7 +149,7 @@ public class FixedDepositAccount extends SavingsAccount {
     }
 
     @Override
-    protected BigDecimal getEffectiveInterestRateAsFraction(final MathContext mc, final LocalDate interestPostingUpToDate) {
+    public BigDecimal getEffectiveInterestRateAsFraction(final MathContext mc, final LocalDate interestPostingUpToDate) {
         boolean isPreMatureClosure = false;
         return getEffectiveInterestRateAsFraction(mc, interestPostingUpToDate, isPreMatureClosure);
     }
@@ -555,8 +555,12 @@ public class FixedDepositAccount extends SavingsAccount {
                 }
             }
         }
-        recalucateDailyBalanceDetails = applyWithholdTaxForDepositAccounts(interestPostingUpToDate, recalucateDailyBalanceDetails,
-                backdatedTxnsAllowedTill);
+        recalucateDailyBalanceDetails = chart.getAccount().applyWithholdTaxForDepositAccounts(interestPostingUpToDate,
+                recalucateDailyBalanceDetails, backdatedTxnsAllowedTill);
+        /*
+         * recalucateDailyBalanceDetails = applyWithholdTaxForDepositAccounts(interestPostingUpToDate,
+         * recalucateDailyBalanceDetails, backdatedTxnsAllowedTill);
+         */
         if (recalucateDailyBalanceDetails) {
             // update existing transactions so derived balance fields are
             // correct.
@@ -631,14 +635,14 @@ public class FixedDepositAccount extends SavingsAccount {
         return interestOnMaturity;
     }
 
-    public void postInterest(final MathContext mc, final LocalDate postingDate, boolean isInterestTransfer,
-            final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
-            final LocalDate postInterestOnDate, final boolean backdatedTxnsAllowedTill) {
-        final LocalDate interestPostingUpToDate = interestPostingUpToDate(postingDate);
-        boolean postReversals = false;
-        super.postInterest(mc, interestPostingUpToDate, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-                financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill, postReversals);
-    }
+    /*
+     * public void postInterest(final MathContext mc, final LocalDate postingDate, boolean isInterestTransfer, final
+     * boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth, final LocalDate
+     * postInterestOnDate, final boolean backdatedTxnsAllowedTill) { final LocalDate interestPostingUpToDate =
+     * interestPostingUpToDate(postingDate); boolean postReversals = false; super.postInterest(mc,
+     * interestPostingUpToDate, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
+     * financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill, postReversals); }
+     */
 
     @Override
     public List<PostingPeriod> calculateInterestUsing(final MathContext mc, final LocalDate postingDate, boolean isInterestTransfer,
@@ -693,6 +697,11 @@ public class FixedDepositAccount extends SavingsAccount {
         // PlatformApiDataValidationException(dataValidationErrors); }
         // }
         return actualChanges;
+    }
+
+    @Override
+    public Map<String, Object> undoActivate(final AppUser currentUser, final JsonCommand command, final LocalDate tenantsTodayDate) {
+        return super.undoActivate(currentUser, command, tenantsTodayDate);
     }
 
     private LocalDate depositStartDate() {
@@ -846,7 +855,7 @@ public class FixedDepositAccount extends SavingsAccount {
 
     @Override
     public boolean allowModify() {
-        return false;
+        return true;
     }
 
     @Override

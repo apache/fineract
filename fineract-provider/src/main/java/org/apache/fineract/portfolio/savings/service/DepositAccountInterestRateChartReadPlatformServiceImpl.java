@@ -198,7 +198,7 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
                     .append("from ")
                     .append("m_savings_account_interest_rate_chart irc left join m_savings_account_interest_rate_slab ircd on irc.id=ircd.savings_account_interest_rate_chart_id ")
                     .append(" left join m_savings_interest_incentives  iri on iri.deposit_account_interest_rate_slab_id =ircd.id ")
-                    .append(" left join m_code_value code on " + sqlGenerator.castChar("code.id") + " = iri.attribute_value ")
+                    .append(" left join m_code_value code on code.id = iri.attribute_value ")
                     .append("left join m_currency curr on ircd.currency_code= curr.code ")
                     .append("left join m_savings_account sa on irc.savings_account_id=sa.id ");
 

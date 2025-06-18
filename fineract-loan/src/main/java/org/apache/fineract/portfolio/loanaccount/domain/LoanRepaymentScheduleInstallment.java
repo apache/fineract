@@ -290,6 +290,14 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         return Money.of(currency, this.principalCompleted);
     }
 
+    public BigDecimal getPrincipalCompleted() {
+        return this.principalCompleted != null ? this.principalCompleted : BigDecimal.ZERO;
+    }
+
+    public void updateLoanRepaymentSchedule(final BigDecimal amountWaived) {
+        this.feeChargesWaived = this.feeChargesWaived.subtract(amountWaived);
+    }
+
     public Money getPrincipalWrittenOff(final MonetaryCurrency currency) {
         return Money.of(currency, this.principalWrittenOff);
     }

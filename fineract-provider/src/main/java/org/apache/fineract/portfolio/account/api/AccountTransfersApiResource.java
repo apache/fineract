@@ -34,7 +34,9 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -129,6 +131,28 @@ public class AccountTransfersApiResource {
     public AccountTransferData retrieveOne(@PathParam("transferId") @Parameter(description = "transferId") final Long transferId) {
         context.authenticatedUser().validateHasReadPermission(AccountTransfersApiConstants.ACCOUNT_TRANSFER_RESOURCE_NAME);
         return accountTransfersReadPlatformService.retrieveOne(transferId);
+    }
+
+    @POST
+    @Path("{transferId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Update account transfer", description = "Update account transfer\n\n" + "Example Requests :\n\n" + "\n\n"
+            + "accounttransfers/1")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountTransfersApiResourceSwagger.GetAccountTransfersResponse.GetAccountTransfersPageItems.class))) })
+    public String adjustAccountTransfer(@PathParam("transferId") @Parameter(description = "transferId") final Long transferId,
+            @Context final UriInfo uriInfo, @Parameter(hidden = true) final String apiRequestBodyAsJson,
+            @QueryParam("command") @Parameter(description = "command") final String commandParam) {
+
+        this.context.authenticatedUser().validateHasReadPermission(AccountTransfersApiConstants.ACCOUNT_TRANSFER_RESOURCE_NAME);
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().adjustAccountTransfer(transferId).withJson(apiRequestBodyAsJson)
+                .build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @GET

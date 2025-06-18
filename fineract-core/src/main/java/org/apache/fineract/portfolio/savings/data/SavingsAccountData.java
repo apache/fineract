@@ -144,6 +144,15 @@ public final class SavingsAccountData implements Serializable {
     private transient Long glAccountIdForSavingsControl;
     private transient Long glAccountIdForInterestOnSavings;
 
+    private transient Long glAccountIdForSavingsControlAcountPositiveInterestNegative;
+    private transient Long glAccountIdForInterestReceivablePositiveInterestNegative;
+
+    private transient Long glAccountIdForOverdraftPorfolioNegative;
+    private transient Long glAccountIdForInterestReceivableNegative;
+
+    private BigDecimal interestPosting;
+    private BigDecimal overdraftPosting;
+
     public static SavingsAccountData importInstanceIndividual(Long clientId, Long productId, Long fieldOfficerId, LocalDate submittedOnDate,
             BigDecimal nominalAnnualInterestRate, EnumOptionData interestCompoundingPeriodTypeEnum,
             EnumOptionData interestPostingPeriodTypeEnum, EnumOptionData interestCalculationTypeEnum,
@@ -295,6 +304,43 @@ public final class SavingsAccountData implements Serializable {
 
     public void setGlAccountIdForInterestOnSavings(final Long glAccountIdForInterestOnSavings) {
         this.glAccountIdForInterestOnSavings = glAccountIdForInterestOnSavings;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Long getGlAccountIdForSavingsControlAcountPositiveInterestNegative() {
+        return glAccountIdForSavingsControlAcountPositiveInterestNegative;
+    }
+
+    public void setGlAccountIdForSavingsControlAcountPositiveInterestNegative(
+            Long glAccountIdForSavingsControlAcountPositiveInterestNegative) {
+        this.glAccountIdForSavingsControlAcountPositiveInterestNegative = glAccountIdForSavingsControlAcountPositiveInterestNegative;
+    }
+
+    public Long getGlAccountIdForInterestReceivablePositiveInterestNegative() {
+        return glAccountIdForInterestReceivablePositiveInterestNegative;
+    }
+
+    public void setGlAccountIdForInterestReceivablePositiveInterestNegative(Long glAccountIdForInterestReceivablePositiveInterestNegative) {
+        this.glAccountIdForInterestReceivablePositiveInterestNegative = glAccountIdForInterestReceivablePositiveInterestNegative;
+    }
+
+    public Long getGlAccountIdForOverdraftPorfolioNegative() {
+        return glAccountIdForOverdraftPorfolioNegative;
+    }
+
+    public void setGlAccountIdForOverdraftPorfolioNegative(Long glAccountIdForOverdraftPorfolioNegative) {
+        this.glAccountIdForOverdraftPorfolioNegative = glAccountIdForOverdraftPorfolioNegative;
+    }
+
+    public Long getGlAccountIdForInterestReceivableNegative() {
+        return glAccountIdForInterestReceivableNegative;
+    }
+
+    public void setGlAccountIdForInterestReceivableNegative(Long glAccountIdForInterestReceivableNegative) {
+        this.glAccountIdForInterestReceivableNegative = glAccountIdForInterestReceivableNegative;
     }
 
     public void setHelpers(final SavingsAccountTransactionDataSummaryWrapper savingsAccountTransactionSummaryWrapper,
@@ -963,5 +1009,21 @@ public final class SavingsAccountData implements Serializable {
 
     public boolean isIsDormancyTrackingActive() {
         return this.isDormancyTrackingActive;
+    }
+
+    public BigDecimal getInterestPosting() {
+        return interestPosting;
+    }
+
+    public void setInterestPosting(BigDecimal interestPosting) {
+        this.interestPosting = interestPosting;
+    }
+
+    public BigDecimal getOverdraftPosting() {
+        return overdraftPosting;
+    }
+
+    public void setOverdraftPosting(BigDecimal overdraftPosting) {
+        this.overdraftPosting = overdraftPosting;
     }
 }

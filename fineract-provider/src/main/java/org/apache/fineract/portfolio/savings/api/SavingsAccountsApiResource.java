@@ -60,6 +60,7 @@ import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.service.CommandParameterUtil;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
@@ -272,31 +273,31 @@ public class SavingsAccountsApiResource {
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(jsonApiRequest);
 
         CommandProcessingResult result = null;
-        if (is(commandParam, "reject")) {
+        if (CommandParameterUtil.is(commandParam, "reject")) {
             final CommandWrapper commandRequest = builder.rejectGSIMAccountApplication(parentAccountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "withdrawnByApplicant")) {
+        } else if (CommandParameterUtil.is(commandParam, "withdrawnByApplicant")) {
             final CommandWrapper commandRequest = builder.withdrawSavingsAccountApplication(parentAccountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "approve")) {
+        } else if (CommandParameterUtil.is(commandParam, "approve")) {
             final CommandWrapper commandRequest = builder.approveGSIMAccountApplication(parentAccountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "undoapproval")) {
+        } else if (CommandParameterUtil.is(commandParam, "undoapproval")) {
             final CommandWrapper commandRequest = builder.undoGSIMApplicationApproval(parentAccountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "activate")) {
+        } else if (CommandParameterUtil.is(commandParam, "activate")) {
             final CommandWrapper commandRequest = builder.gsimAccountActivation(parentAccountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "calculateInterest")) {
+        } else if (CommandParameterUtil.is(commandParam, "calculateInterest")) {
             final CommandWrapper commandRequest = builder.withNoJsonBody().savingsAccountInterestCalculation(parentAccountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "postInterest")) {
+        } else if (CommandParameterUtil.is(commandParam, "postInterest")) {
             final CommandWrapper commandRequest = builder.savingsAccountInterestPosting(parentAccountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "applyAnnualFees")) {
+        } else if (CommandParameterUtil.is(commandParam, "applyAnnualFees")) {
             final CommandWrapper commandRequest = builder.savingsAccountApplyAnnualFees(parentAccountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "close")) {
+        } else if (CommandParameterUtil.is(commandParam, "close")) {
             final CommandWrapper commandRequest = builder.closeGSIMApplication(parentAccountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
@@ -404,10 +405,6 @@ public class SavingsAccountsApiResource {
         return handleCommands(null, externalId, commandParam, apiRequestBodyAsJson);
     }
 
-    private boolean is(final String commandParam, final String commandValue) {
-        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
-    }
-
     @DELETE
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -478,7 +475,8 @@ public class SavingsAccountsApiResource {
             String chargeStatus, UriInfo uriInfo) {
         context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
 
-        if (!(is(chargeStatus, "all") || is(chargeStatus, "active") || is(chargeStatus, "inactive"))) {
+        if (!(CommandParameterUtil.is(chargeStatus, "all") || CommandParameterUtil.is(chargeStatus, "active")
+                || CommandParameterUtil.is(chargeStatus, "inactive"))) {
             throw new UnrecognizedQueryParamException("status", chargeStatus, new Object[] { "all", "active", "inactive" });
         }
 
@@ -493,7 +491,7 @@ public class SavingsAccountsApiResource {
         ExternalId accountExternalId = ExternalIdFactory.produce(externalId);
         accountId = getResolvedAccountId(accountId, accountExternalId);
 
-        if (is(commandParam, "updateWithHoldTax")) {
+        if (CommandParameterUtil.is(commandParam, "updateWithHoldTax")) {
             final CommandWrapper commandRequest = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson).updateWithHoldTax(accountId)
                     .build();
             final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
@@ -520,58 +518,61 @@ public class SavingsAccountsApiResource {
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(jsonApiRequest);
 
         CommandProcessingResult result = null;
-        if (is(commandParam, "reject")) {
+        if (CommandParameterUtil.is(commandParam, "reject")) {
             final CommandWrapper commandRequest = builder.rejectSavingsAccountApplication(accountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "withdrawnByApplicant")) {
+        } else if (CommandParameterUtil.is(commandParam, "withdrawnByApplicant")) {
             final CommandWrapper commandRequest = builder.withdrawSavingsAccountApplication(accountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "approve")) {
+        } else if (CommandParameterUtil.is(commandParam, "approve")) {
             final CommandWrapper commandRequest = builder.approveSavingsAccountApplication(accountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "undoapproval")) {
+        } else if (CommandParameterUtil.is(commandParam, "undoapproval")) {
             final CommandWrapper commandRequest = builder.undoSavingsAccountApplication(accountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "activate")) {
+        } else if (CommandParameterUtil.is(commandParam, "activate")) {
             final CommandWrapper commandRequest = builder.savingsAccountActivation(accountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "calculateInterest")) {
+        } else if (CommandParameterUtil.is(commandParam, "calculateInterest")) {
             final CommandWrapper commandRequest = builder.withNoJsonBody().savingsAccountInterestCalculation(accountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "postInterest")) {
+        } else if (CommandParameterUtil.is(commandParam, "postInterest")) {
             final CommandWrapper commandRequest = builder.savingsAccountInterestPosting(accountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "applyAnnualFees")) {
+        } else if (CommandParameterUtil.is(commandParam, "applyAnnualFees")) {
             final CommandWrapper commandRequest = builder.savingsAccountApplyAnnualFees(accountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "close")) {
+        } else if (CommandParameterUtil.is(commandParam, "close")) {
             final CommandWrapper commandRequest = builder.closeSavingsAccountApplication(accountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "assignSavingsOfficer")) {
+        } else if (CommandParameterUtil.is(commandParam, "assignSavingsOfficer")) {
             final CommandWrapper commandRequest = builder.assignSavingsOfficer(accountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
             return toApiJsonSerializer.serialize(result);
-        } else if (is(commandParam, "unassignSavingsOfficer")) {
+        } else if (CommandParameterUtil.is(commandParam, "unassignSavingsOfficer")) {
             final CommandWrapper commandRequest = builder.unassignSavingsOfficer(accountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
             return toApiJsonSerializer.serialize(result);
-        } else if (is(commandParam, SavingsApiConstants.COMMAND_BLOCK_DEBIT)) {
+        } else if (CommandParameterUtil.is(commandParam, SavingsApiConstants.COMMAND_BLOCK_DEBIT)) {
             final CommandWrapper commandRequest = builder.blockDebitsFromSavingsAccount(accountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, SavingsApiConstants.COMMAND_UNBLOCK_DEBIT)) {
+        } else if (CommandParameterUtil.is(commandParam, SavingsApiConstants.COMMAND_UNBLOCK_DEBIT)) {
             final CommandWrapper commandRequest = builder.unblockDebitsFromSavingsAccount(accountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, SavingsApiConstants.COMMAND_BLOCK_CREDIT)) {
+        } else if (CommandParameterUtil.is(commandParam, SavingsApiConstants.COMMAND_BLOCK_CREDIT)) {
             final CommandWrapper commandRequest = builder.blockCreditsToSavingsAccount(accountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, SavingsApiConstants.COMMAND_UNBLOCK_CREDIT)) {
+        } else if (CommandParameterUtil.is(commandParam, SavingsApiConstants.COMMAND_UNBLOCK_CREDIT)) {
             final CommandWrapper commandRequest = builder.unblockCreditsToSavingsAccount(accountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, SavingsApiConstants.COMMAND_BLOCK_ACCOUNT)) {
+        } else if (CommandParameterUtil.is(commandParam, SavingsApiConstants.COMMAND_BLOCK_ACCOUNT)) {
             final CommandWrapper commandRequest = builder.blockSavingsAccount(accountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, SavingsApiConstants.COMMAND_UNBLOCK_ACCOUNT)) {
+        } else if (CommandParameterUtil.is(commandParam, SavingsApiConstants.COMMAND_UNBLOCK_ACCOUNT)) {
             final CommandWrapper commandRequest = builder.unblockSavingsAccount(accountId).build();
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (CommandParameterUtil.is(commandParam, SavingsApiConstants.COMMAND_ADD_ACCRUAL_TRANSACTION)) {
+            final CommandWrapper commandRequest = builder.addAccrualsToSavingsAccount(accountId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
@@ -582,7 +583,8 @@ public class SavingsAccountsApiResource {
                             "postInterest", "close", "assignSavingsOfficer", "unassignSavingsOfficer",
                             SavingsApiConstants.COMMAND_BLOCK_DEBIT, SavingsApiConstants.COMMAND_UNBLOCK_DEBIT,
                             SavingsApiConstants.COMMAND_BLOCK_CREDIT, SavingsApiConstants.COMMAND_UNBLOCK_CREDIT,
-                            SavingsApiConstants.COMMAND_BLOCK_ACCOUNT, SavingsApiConstants.COMMAND_UNBLOCK_ACCOUNT });
+                            SavingsApiConstants.COMMAND_BLOCK_ACCOUNT, SavingsApiConstants.COMMAND_UNBLOCK_ACCOUNT,
+                            SavingsApiConstants.COMMAND_ADD_ACCRUAL_TRANSACTION });
         }
 
         return toApiJsonSerializer.serialize(result);
@@ -626,7 +628,7 @@ public class SavingsAccountsApiResource {
 
             if (associationParameters.contains(SavingsApiConstants.transactions)) {
                 final Collection<SavingsAccountTransactionData> currentTransactions = savingsAccountReadPlatformService
-                        .retrieveAllTransactions(accountId, DepositAccountType.SAVINGS_DEPOSIT);
+                        .retrieveAllTransactions(accountId, DepositAccountType.fromInt(savingsAccount.getDepositTypeId()));
                 if (!CollectionUtils.isEmpty(currentTransactions)) {
                     transactions = currentTransactions;
                 }

@@ -1438,6 +1438,8 @@ public final class LoanProductsApiResourceSwagger {
         @Schema(example = "false")
         public Boolean enableAutoRepaymentForDownPayment;
         public GetLoanProductsRepaymentStartDateType repaymentStartDateType;
+        @Schema(example = "false")
+        public Boolean allowAccrualPostingInArrears;
         @Schema(example = "CUMULATIVE")
         public EnumOptionData loanScheduleType;
         @Schema(example = "HORIZONTAL")

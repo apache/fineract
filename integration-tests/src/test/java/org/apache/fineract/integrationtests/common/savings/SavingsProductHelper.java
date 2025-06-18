@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 public class SavingsProductHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsProductHelper.class);
+    private static final Gson GSON = new JSON().getGson();
     private static final String SAVINGS_PRODUCT_URL = "/fineract-provider/api/v1/savingsproducts";
     private static final String CREATE_SAVINGS_PRODUCT_URL = SAVINGS_PRODUCT_URL + "?" + Utils.TENANT_IDENTIFIER;
     private static final Gson GSON = new JSON().getGson();
@@ -239,6 +240,12 @@ public class SavingsProductHelper {
         return this;
     }
 
+    public SavingsProductHelper withAccountingRuleAsAccrualBased(final Account[] account_list) {
+        this.accountingRule = ACCRUAL_BASED;
+        this.accountList = account_list;
+        return this;
+    }
+
     public SavingsProductHelper withMinRequiredBalance(final String minRequiredBalance) {
         this.minRequiredBalance = minRequiredBalance;
         return this;
@@ -373,10 +380,6 @@ public class SavingsProductHelper {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_SAVINGS_PRODUCT_URL, savingsProductJSON, "resourceId");
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
     public static void verifySavingsProductCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedProductID) {
         LOG.info("------------------------------CHECK CLIENT DETAILS------------------------------------\n");

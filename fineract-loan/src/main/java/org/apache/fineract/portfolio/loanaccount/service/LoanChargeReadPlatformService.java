@@ -47,4 +47,6 @@ public interface LoanChargeReadPlatformService {
             Integer installmentNumber);
 
     Long retrieveLoanChargeIdByExternalId(ExternalId loanChargeExternalId);
+
+    Collection<LoanChargeData> retrieveLoanChargesForAccrual(Long loanId);
 }
