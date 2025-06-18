@@ -20,8 +20,9 @@ package org.apache.fineract.commands.handler;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.exception.MultiException;
 
 public interface NewCommandSourceHandler {
 
-    CommandProcessingResult processCommand(JsonCommand command);
+    CommandProcessingResult processCommand(JsonCommand command) throws MultiException;
 }

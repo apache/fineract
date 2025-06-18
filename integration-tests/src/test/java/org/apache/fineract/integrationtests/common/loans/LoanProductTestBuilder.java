@@ -166,6 +166,8 @@ public class LoanProductTestBuilder {
     private List<String> supportedInterestRefundTypes = null;
     private String chargeOffBehaviour;
     private boolean interestRecognitionOnDisbursementDate = false;
+    private Boolean enableBuyDownFee = false;
+    private String buyDownFeeCalculationType;
 
     public String build() {
         final HashMap<String, Object> map = build(null, null);
@@ -339,6 +341,14 @@ public class LoanProductTestBuilder {
 
         if (this.chargeOffBehaviour != null) {
             map.put("chargeOffBehaviour", chargeOffBehaviour);
+        }
+
+        if (this.enableBuyDownFee != null) {
+            map.put("enableBuyDownFee", this.enableBuyDownFee);
+        }
+
+        if (this.buyDownFeeCalculationType != null) {
+            map.put("buyDownFeeCalculationType", this.buyDownFeeCalculationType);
         }
 
         return map;
@@ -906,4 +916,13 @@ public class LoanProductTestBuilder {
         }
     }
 
+    public LoanProductTestBuilder withEnableBuyDownFee(final Boolean enableBuyDownFee) {
+        this.enableBuyDownFee = enableBuyDownFee;
+        return this;
+    }
+
+    public LoanProductTestBuilder withBuyDownFeeCalculationType(final String buyDownFeeCalculationType) {
+        this.buyDownFeeCalculationType = buyDownFeeCalculationType;
+        return this;
+    }
 }

@@ -20,8 +20,10 @@ package org.apache.fineract.organisation.monetary.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import lombok.Getter;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
+@Getter
 @Embeddable
 public class MonetaryCurrency {
 
@@ -74,17 +76,4 @@ public class MonetaryCurrency {
         }
         return currencyData;
     }
-
-    public String getCode() {
-        return this.code;
-    }
-
-    public int getDigitsAfterDecimal() {
-        return this.digitsAfterDecimal;
-    }
-
-    public Integer getCurrencyInMultiplesOf() {
-        return this.inMultiplesOf;
-    }
-
 }

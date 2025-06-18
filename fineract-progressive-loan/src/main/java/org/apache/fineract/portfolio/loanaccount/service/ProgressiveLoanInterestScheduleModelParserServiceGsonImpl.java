@@ -31,8 +31,8 @@ import org.apache.fineract.infrastructure.core.serialization.gson.JsonExcludeAnn
 import org.apache.fineract.infrastructure.core.serialization.gson.LocalDateAdapter;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
-import org.apache.fineract.organisation.monetary.serialization.gson.MoneyDeserializer;
-import org.apache.fineract.organisation.monetary.serialization.gson.MoneySerializer;
+import org.apache.fineract.organisation.monetary.serialization.MoneyDeserializer;
+import org.apache.fineract.organisation.monetary.serialization.MoneySerializer;
 import org.apache.fineract.portfolio.loanproduct.calc.data.InterestPeriod;
 import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
 import org.apache.fineract.portfolio.loanproduct.calc.data.RepaymentPeriod;

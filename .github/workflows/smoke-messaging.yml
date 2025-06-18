@@ -1,0 +1,61 @@
+name: Fineract Messaging Smoke Tests
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-test:
+    name: Smoke Test with ${{ matrix.messaging }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - messaging: ActiveMQ
+            compose_file: docker-compose-postgresql-activemq.yml
+          - messaging: Kafka
+            compose_file: docker-compose-postgresql-kafka.yml
+
+    env:
+      DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+      IMAGE_NAME: fineract
+
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4
+        with:
+          java-version: '21'
+          distribution: 'zulu'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@ac638b010cf58a27ee6c972d7336334ccaf61c96 # v4.4.1
+
+      - name: Build the image
+        run: ./gradlew --no-daemon --console=plain :fineract-provider:jibDockerBuild -Djib.to.image=$IMAGE_NAME -x test -x cucumber
+
+      - name: Start the ${{ matrix.messaging }} Stack
+        run: docker compose -f ${{ matrix.compose_file }} up --scale fineract-worker=1 -d
+
+      - name: Check the stack
+        run: docker ps
+
+      - name: Check health Manager
+        run: curl -f -k --retry 60 --retry-all-errors --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/health
+
+      - name: Check health Worker1
+        run: curl -f -k --retry 60 --retry-all-errors --connect-timeout 30 --retry-delay 30 https://localhost:8444/fineract-provider/actuator/health
+
+      - name: Check info Manager
+        run: (( $(curl -f -k --retry 5 --retry-all-errors --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/info | wc --chars) > 100 ))
+
+      - name: Check info Worker1
+        run: (( $(curl -f -k --retry 5 --retry-all-errors --connect-timeout 30 --retry-delay 30 https://localhost:8444/fineract-provider/actuator/info | wc --chars) > 100 ))
+
+      - name: Run Smoke Test with Remote COB
+        run: ./gradlew --no-daemon --console=plain :integration-tests:cleanTest :integration-tests:test --tests "org.apache.fineract.integrationtests.investor.externalassetowner.InitiateExternalAssetOwnerTransferTest.saleActiveLoanToExternalAssetOwnerAndBuybackADayLater" -PcargoDisabled

@@ -61,8 +61,8 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
     private final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessorFactory;
     private final LoanTermVariationsMapper loanMapper;
     private final InterestScheduleModelRepositoryWrapper modelRepository;
-    private final LoanTransactionService loanTransactionService;
     private final LoanBalanceService loanBalanceService;
+    private final LoanTransactionService loanTransactionService;
 
     @Override
     public boolean canProcessLatestTransactionOnly(Loan loan, LoanTransaction loanTransaction,

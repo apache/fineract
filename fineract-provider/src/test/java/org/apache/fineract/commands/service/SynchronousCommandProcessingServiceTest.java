@@ -54,6 +54,7 @@ import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
 import org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessUnderProcessingException;
+import org.apache.fineract.infrastructure.core.exception.MultiException;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -153,7 +154,7 @@ public class SynchronousCommandProcessingServiceTest {
     }
 
     @Test
-    public void testExecuteCommandSuccessAfter2Fails() {
+    public void testExecuteCommandSuccessAfter2Fails() throws MultiException {
         CommandWrapper commandWrapper = getCommandWrapper();
 
         long commandId = 1L;
@@ -198,7 +199,7 @@ public class SynchronousCommandProcessingServiceTest {
      * stays in the same status therefor it should fail after reaching max retry count.
      */
     @Test
-    public void executeCommandShouldFailAfterRetriesWithIdempotentCommandProcessUnderProcessingException() {
+    public void executeCommandShouldFailAfterRetriesWithIdempotentCommandProcessUnderProcessingException() throws MultiException {
         CommandWrapper commandWrapper = Mockito.mock(CommandWrapper.class);
         when(commandWrapper.isDatatableResource()).thenReturn(false);
         when(commandWrapper.isNoteResource()).thenReturn(false);
@@ -254,7 +255,7 @@ public class SynchronousCommandProcessingServiceTest {
      * processable.
      */
     @Test
-    public void executeCommandShouldPassAfter1retryFailsByIdempotentCommandProcessUnderProcessingException() {
+    public void executeCommandShouldPassAfter1retryFailsByIdempotentCommandProcessUnderProcessingException() throws MultiException {
         CommandWrapper commandWrapper = Mockito.mock(CommandWrapper.class);
         when(commandWrapper.isDatatableResource()).thenReturn(false);
         when(commandWrapper.isNoteResource()).thenReturn(false);
@@ -312,7 +313,7 @@ public class SynchronousCommandProcessingServiceTest {
      * fail, status should be still the same. On 3rd try it should result no error.
      */
     @Test
-    public void executeCommandShouldPassAfter2RetriesOnRetryExceptionAndWithStuckStatus() {
+    public void executeCommandShouldPassAfter2RetriesOnRetryExceptionAndWithStuckStatus() throws MultiException {
         CommandWrapper commandWrapper = Mockito.mock(CommandWrapper.class);
         when(commandWrapper.isDatatableResource()).thenReturn(false);
         when(commandWrapper.isNoteResource()).thenReturn(false);
@@ -375,7 +376,7 @@ public class SynchronousCommandProcessingServiceTest {
     }
 
     @Test
-    public void testExecuteCommandSuccess() {
+    public void testExecuteCommandSuccess() throws MultiException {
         CommandWrapper commandWrapper = getCommandWrapper();
 
         long commandId = 1L;
@@ -415,7 +416,7 @@ public class SynchronousCommandProcessingServiceTest {
     }
 
     @Test
-    public void testExecuteCommandFails() {
+    public void testExecuteCommandFails() throws MultiException {
         CommandWrapper commandWrapper = getCommandWrapper();
         JsonCommand jsonCommand = Mockito.mock(JsonCommand.class);
         Long commandId = jsonCommand.commandId();
@@ -482,7 +483,7 @@ public class SynchronousCommandProcessingServiceTest {
     private static final class RetryException extends RuntimeException {}
 
     @Test
-    public void testExecuteCommandWithRetry() {
+    public void testExecuteCommandWithRetry() throws MultiException {
         CommandWrapper commandWrapper = getCommandWrapper();
         when(commandWrapper.isInterestPauseResource()).thenReturn(false);
 
@@ -540,7 +541,7 @@ public class SynchronousCommandProcessingServiceTest {
     }
 
     @Test
-    public void testExecuteCommandWithMaxRetryFailure() {
+    public void testExecuteCommandWithMaxRetryFailure() throws MultiException {
         CommandWrapper commandWrapper = getCommandWrapper();
         when(commandWrapper.isInterestPauseResource()).thenReturn(false);
 

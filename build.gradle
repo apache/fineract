@@ -341,7 +341,8 @@ allprojects  {
             "**/generated/**/*MapperImpl.java",
             '**/META-INF/fineract-test.config',
             // Apache-specific GitHub metadata settings file
-            '/.asf.yaml'
+            '/.asf.yaml',
+            '**/*.sh'
         ]
     }
 }
@@ -374,20 +375,6 @@ configure(project.fineractJavaProjects) {
         }
         withSourcesJar()
         withJavadocJar()
-    }
-
-    // TODO: we are forcing Gradle to do something it shouldn't! This effects Gradle caching AND breaks Liquibase!
-    // tasks.withType(ProcessResources) {
-    //     destinationDir = layout.buildDirectory.dir('classes/java/main').get().asFile
-    // }
-
-    processResources {
-        destinationDir = file("${buildDir}/resources/main")
-
-        doLast {
-            delete fileTree(dir: "${buildDir}/classes/java/main/db")
-            delete fileTree(dir: "${buildDir}/classes/java/main/META-INF")
-        }
     }
 
     // Add performance optimizations

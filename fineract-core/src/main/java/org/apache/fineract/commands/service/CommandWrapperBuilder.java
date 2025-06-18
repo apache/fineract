@@ -3416,6 +3416,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder addAccrualsToSavingsAccount(final Long accountId) {
+        this.actionName = "ADD_ACCRUALS";
+        this.entityName = "SAVINGSACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = null;
+        this.href = "/savingsaccounts/" + accountId + "?command=addAccrualTransactions";
+        return this;
+    }
+
     public CommandWrapperBuilder disableAdHoc(Long adHocId) {
         this.actionName = "DISABLE";
         this.entityName = "ADHOC";
@@ -3856,6 +3865,15 @@ public class CommandWrapperBuilder {
         this.entityId = loanId;
         this.loanId = loanId;
         this.href = "/loans/" + loanId;
+        return this;
+    }
+
+    public CommandWrapperBuilder makeLoanBuyDownFee(final Long loanId) {
+        this.actionName = "BUYDOWNFEE";
+        this.entityName = "LOAN";
+        this.entityId = null;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/transactions/template?command=buyDownFee";
         return this;
     }
 }

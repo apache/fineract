@@ -596,6 +596,8 @@ public class LoanTransactionsApiResource {
             commandRequest = builder.undoReAmortize(resolvedLoanId).build();
         } else if (CommandParameterUtil.is(commandParam, CAPITALIZED_INCOME)) {
             commandRequest = builder.addCapitalizedIncome(resolvedLoanId).build();
+        } else if (CommandParameterUtil.is(commandParam, LoanApiConstants.BUY_DOWN_FEE_COMMAND)) {
+            commandRequest = builder.makeLoanBuyDownFee(resolvedLoanId).build();
         }
 
         if (commandRequest == null) {
@@ -684,6 +686,8 @@ public class LoanTransactionsApiResource {
         } else if (CommandParameterUtil.is(commandParam, LoanApiConstants.CAPITALIZED_INCOME_ADJUSTMENT_TRANSACTION_COMMAND)) {
             transactionData = this.loanReadPlatformService.retrieveLoanTransactionTemplate(resolvedLoanId,
                     LoanTransactionType.CAPITALIZED_INCOME_ADJUSTMENT, transactionId);
+        } else if (CommandParameterUtil.is(commandParam, LoanApiConstants.BUY_DOWN_FEE_COMMAND)) {
+            transactionData = this.loanReadPlatformService.retrieveLoanTransactionTemplate(resolvedLoanId);
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }

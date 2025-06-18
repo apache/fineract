@@ -23,6 +23,7 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -33,9 +34,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
@@ -53,6 +56,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionProcessingException;
 import org.apache.fineract.portfolio.loanaccount.repository.LoanCapitalizedIncomeBalanceRepository;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanTransactionValidator;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
@@ -267,6 +271,60 @@ public class ProgressiveLoanTransactionValidatorImpl implements ProgressiveLoanT
             validateNote(baseDataValidator, element);
             validateReversalExternalId(baseDataValidator, element);
         });
+    }
+
+    private static final List<String> BUY_DOWN_FEE_TRANSACTION_SUPPORTED_PARAMETERS = List
+            .of(new String[] { "transactionDate", "dateFormat", "locale", "transactionAmount", "paymentTypeId", "note", "externalId" });
+
+    @Override
+    public void validateBuyDownFee(JsonCommand command, Long loanId) {
+        final String json = command.json();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, BUY_DOWN_FEE_TRANSACTION_SUPPORTED_PARAMETERS);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource("loan.transaction.buyDownFee");
+
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+        final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
+
+        if (!loan.getLoanProductRelatedDetail().isEnableBuyDownFee()) {
+            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("buy.down.fee.not.enabled",
+                    "Buy down fee is not enabled for this loan product");
+        }
+
+        // Basic validation
+        validateBuyDownFeeEligibility(loan);
+
+        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed("transactionDate", element);
+        baseDataValidator.reset().parameter("transactionDate").value(transactionDate).notNull();
+
+        // Validate transaction date is on or after first disbursement
+        if (transactionDate != null) {
+            final LocalDate firstDisbursementDate = loan.getDisbursementDate();
+            if (firstDisbursementDate != null && transactionDate.isBefore(firstDisbursementDate)) {
+                baseDataValidator.reset().parameter("transactionDate").failWithCode("cannot.be.before.first.disbursement.date");
+            }
+        }
+
+        final BigDecimal transactionAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("transactionAmount", element);
+        baseDataValidator.reset().parameter("transactionAmount").value(transactionAmount).notNull().positiveAmount();
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    public void validateBuyDownFeeEligibility(Loan loan) {
+        if (!loan.getStatus().isActive()) {
+            throw new LoanTransactionProcessingException("Buy Down fees can only be added to active loans");
+        }
+    }
+
+    private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
     }
 
     // Delegates

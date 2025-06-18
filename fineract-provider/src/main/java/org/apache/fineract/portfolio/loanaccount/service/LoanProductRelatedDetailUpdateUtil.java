@@ -55,7 +55,7 @@ public class LoanProductRelatedDetailUpdateUtil {
 
         String currencyCode = loanRepaymentScheduleDetail.getCurrency().getCode();
         Integer digitsAfterDecimal = loanRepaymentScheduleDetail.getCurrency().getDigitsAfterDecimal();
-        Integer inMultiplesOf = loanRepaymentScheduleDetail.getCurrency().getCurrencyInMultiplesOf();
+        Integer inMultiplesOf = loanRepaymentScheduleDetail.getCurrency().getInMultiplesOf();
 
         final String digitsAfterDecimalParamName = "digitsAfterDecimal";
         if (command.isChangeInIntegerParameterNamed(digitsAfterDecimalParamName, digitsAfterDecimal)) {

@@ -1,92 +1,142 @@
-name: Fineract Build & Test - MySQL
+name: Fineract Cargo & Unit- & Integration tests - MySQL
+
 on: [push, pull_request]
+
 permissions:
   contents: read
+
 jobs:
-  build:
+  test:
     runs-on: ubuntu-24.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        task: [test-core-1, test-core-2, test-core-3, test-core-4, test-core-5, test-twofactor, test-oauth2]
+
     services:
-        mariad:
-            image: mysql:9.1
-            ports:
-                - 3306:3306
-            env:
-                MYSQL_ROOT_PASSWORD: mysql
-            options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
-        mock-oauth2-server:
-          image: ghcr.io/navikt/mock-oauth2-server:2.1.10
-          ports:
-            - 9000:9000
-          env:
-            SERVER_PORT: 9000
-            JSON_CONFIG: '{ "interactiveLogin": true, "httpServer": "NettyWrapper", "tokenCallbacks": [ { "issuerId": "auth/realms/fineract", "tokenExpiry": 120, "requestMappings": [{ "requestParam": "scope", "match": "fineract", "claims": { "sub": "mifos", "scope": [ "test" ] } } ] } ] }'
+      mysql:
+        image: mysql:9.1
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: mysql
+        options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
+
+      mock-oauth2-server:
+        image: ghcr.io/navikt/mock-oauth2-server:2.1.10
+        ports:
+          - 9000:9000
+        env:
+          SERVER_PORT: 9000
+          JSON_CONFIG: '{ "interactiveLogin": true, "httpServer": "NettyWrapper", "tokenCallbacks": [ { "issuerId": "auth/realms/fineract", "tokenExpiry": 120, "requestMappings": [{ "requestParam": "scope", "match": "fineract", "claims": { "sub": "mifos", "scope": [ "test" ] } } ] } ] }'
+
     env:
-        TZ: Asia/Kolkata
-        DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+      TZ: Asia/Kolkata
+      DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+      AWS_ENDPOINT_URL: http://localhost:4566
+      AWS_ACCESS_KEY_ID: localstack
+      AWS_SECRET_ACCESS_KEY: localstack
+      AWS_REGION: us-east-1
+      FINERACT_REPORT_EXPORT_S3_ENABLED: true
+      FINERACT_REPORT_EXPORT_S3_BUCKET_NAME: fineract-reports
+
     steps:
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          fetch-tags: true
+
       - name: Set up JDK 21
-        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4
+        uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'zulu'
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+
       - name: Setup Gradle and Validate Wrapper
-        uses: gradle/actions/setup-gradle@ac638b010cf58a27ee6c972d7336334ccaf61c96 # v4.4.1
+        uses: gradle/actions/setup-gradle@v4.4.1
         with:
           validate-wrappers: true
-      - name: Verify MariaDB connection
+
+      - name: Verify MySQL connection
         run: |
-            while ! mysqladmin ping -h"127.0.0.1" -P3306 ; do
-                sleep 1
-            done
+          while ! mysqladmin ping -h"127.0.0.1" -P3306 ; do
+            sleep 1
+          done
+
       - name: Initialise databases
         run: |
-            ./gradlew --no-daemon -q createMySQLDB -PdbName=fineract_tenants
-            ./gradlew --no-daemon -q createMySQLDB -PdbName=fineract_default
+          ./gradlew --no-daemon -q createMySQLDB -PdbName=fineract_tenants
+          ./gradlew --no-daemon -q createMySQLDB -PdbName=fineract_default
+
       - name: Start LocalStack
-        env:
-          AWS_ENDPOINT_URL: http://localhost:4566
-          AWS_ACCESS_KEY_ID: localstack
-          AWS_SECRET_ACCESS_KEY: localstack
-          AWS_REGION: us-east-1
         run: |
           docker run -d --name localstack -p 4566:4566 -p 4510-4559:4510-4559 localstack/localstack:2.1
           sleep 10
           docker exec localstack awslocal s3api create-bucket --bucket fineract-reports
-          echo "LocalStack initialization complete"
-      - name: Build & Test
-        env:
-          AWS_ENDPOINT_URL: http://localhost:4566
-          AWS_ACCESS_KEY_ID: localstack
-          AWS_SECRET_ACCESS_KEY: localstack
-          AWS_REGION: us-east-1
-          FINERACT_REPORT_EXPORT_S3_ENABLED: true
-          FINERACT_REPORT_EXPORT_S3_BUCKET_NAME: fineract-reports
+
+      - name: Generate test class list (only for test-core-X)
+        if: startsWith(matrix.task, 'test-core-')
         run: |
-            ./gradlew --no-daemon --console=plain build -x cucumber -x test -x doc
-            ./gradlew --no-daemon --console=plain cucumber -x :fineract-e2e-tests-runner:cucumber
-            ./gradlew --no-daemon --console=plain test -x :twofactor-tests:test -x :oauth2-test:test -x :fineract-e2e-tests-runner:test -PdbType=mysql
-            ./gradlew --no-daemon --console=plain :twofactor-tests:test -PdbType=mysql
-            ./gradlew --no-daemon --console=plain :oauth2-tests:test -PdbType=mysql
+          chmod +x scripts/split-tests.sh
+          SHARD_INDEX=$(echo "${{ matrix.task }}" | awk -F'-' '{print $3}')
+          ./scripts/split-tests.sh 5 $SHARD_INDEX
+          cat "shard-tests_${SHARD_INDEX}.txt"
+
+      - name: Run Gradle Task
+        run: |
+          SHARD_INDEX=$(echo "${{ matrix.task }}" | awk -F'-' '{print $3}')
+          case "${{ matrix.task }}" in
+            test-twofactor)
+              ./gradlew --no-daemon :twofactor-tests:test -PdbType=mysql -x checkstyleJmh -x checkstyleMain -x checkstyleTest -x spotlessCheck -x spotlessApply -x spotbugsMain -x spotbugsTest -x javadoc -x javadocJar -x modernizer
+              ;;
+            test-oauth2)
+              ./gradlew --no-daemon :oauth2-tests:test -PdbType=mysql -x checkstyleJmh -x checkstyleMain -x checkstyleTest -x spotlessCheck -x spotlessApply -x spotbugsMain -x spotbugsTest -x javadoc -x javadocJar -x modernizer
+              ;;
+            test-core-*)
+              echo "Grouping test classes by module..."
+              declare -A module_tests
+
+              while IFS=, read -r module class; do
+                module_tests["$module"]+="$class "
+              done < "shard-tests_${SHARD_INDEX}.txt"
+
+              for module in "${!module_tests[@]}"; do
+                echo "Running tests in $module:"
+                for class in ${module_tests[$module]}; do
+                  echo "  - $class"
+                done
+
+                # Build test args
+                test_args=$(for class in ${module_tests[$module]}; do echo --tests "$class"; done | xargs)
+
+                # Run test task for this module
+                ./gradlew "$module:test" $test_args -PdbType=mysql -x checkstyleJmh -x checkstyleMain -x checkstyleTest -x spotlessCheck -x spotlessApply -x spotbugsMain -x spotbugsTest -x javadoc -x javadocJar -x modernizer
+              done
+              ;;
+          esac
+
       - name: Archive test results
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@v4
         with:
-          name: test-results
-          path: |
-            build/reports/
-            integration-tests/build/reports/
-            twofactor-tests/build/reports/
-            oauth2-tests/build/reports/
+          name: test-results-${{ matrix.task }}
+          path: '**/build/reports/'
+          retention-days: 5
+
       - name: Archive server logs
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@v4
         with:
-          name: server-logs
-          path: |
-            integration-tests/build/cargo/
-            twofactor-tests/build/cargo/
-            oauth2-tests/build/cargo/
+          name: server-logs-${{ matrix.task }}
+          path: '**/build/cargo/'
+          retention-days: 5

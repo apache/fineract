@@ -42,6 +42,7 @@ import org.apache.fineract.portfolio.delinquency.validator.DelinquencyBucketPars
 import org.apache.fineract.portfolio.delinquency.validator.DelinquencyRangeParseAndValidator;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionReadService;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -60,11 +61,12 @@ public class DelinquencyConfiguration {
             LoanDelinquencyDomainService loanDelinquencyDomainService,
             LoanInstallmentDelinquencyTagRepository repositoryLoanInstallmentDelinquencyTag,
             LoanDelinquencyActionRepository loanDelinquencyActionRepository,
-            DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper, ConfigurationDomainService configurationDomainService) {
+            DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper, ConfigurationDomainService configurationDomainService,
+            LoanTransactionRepository loanTransactionRepository) {
         return new DelinquencyReadPlatformServiceImpl(repositoryRange, repositoryBucket, repositoryLoanDelinquencyTagHistory, mapperRange,
                 mapperBucket, mapperLoanDelinquencyTagHistory, loanRepository, loanDelinquencyDomainService,
                 repositoryLoanInstallmentDelinquencyTag, loanDelinquencyActionRepository, delinquencyEffectivePauseHelper,
-                configurationDomainService);
+                configurationDomainService, loanTransactionRepository);
     }
 
     @Bean

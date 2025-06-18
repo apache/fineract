@@ -18,10 +18,10 @@
  */
 package org.apache.fineract.organisation.monetary.service;
 
-import org.apache.fineract.organisation.monetary.data.ApplicationCurrencyConfigurationData;
+import org.apache.fineract.organisation.monetary.data.CurrencyConfigurationData;
 
 public interface OrganisationCurrencyReadPlatformService {
 
-    ApplicationCurrencyConfigurationData retrieveCurrencyConfiguration();
+    CurrencyConfigurationData retrieveCurrencyConfiguration();
 
 }

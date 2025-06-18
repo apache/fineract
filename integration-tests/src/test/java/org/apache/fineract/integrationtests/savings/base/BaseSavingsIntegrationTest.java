@@ -119,7 +119,12 @@ public class BaseSavingsIntegrationTest extends IntegrationTest {
                 .accountingRule(1) // none
                 .interestCalculationDaysInYearType(DaysInYearType.DAYS_365).interestCompoundingPeriodType(InterestPeriodType.DAILY)
                 .interestCalculationType(InterestCalculationType.AVERAGE_DAILY_BALANCE) //
-                .interestPostingPeriodType(InterestPeriodType.DAILY);//
+                .interestPostingPeriodType(InterestPeriodType.DAILY) //
+                .withdrawalFeeForTransfers(false) //
+                .enforceMinRequiredBalance(false) //
+                .allowOverdraft(false) //
+                .withHoldTax(false) //
+                .isDormancyTrackingActive(false); //
     }
 
     protected PostSavingsProductsResponse createProduct(PostSavingsProductsRequest productsRequest) {

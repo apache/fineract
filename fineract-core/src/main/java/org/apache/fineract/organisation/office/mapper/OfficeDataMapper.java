@@ -33,8 +33,11 @@ public interface OfficeDataMapper {
         if (hierarchy == null) {
             nameDecorated = "";
         } else {
-            nameDecorated = hierarchy.substring(0, (hierarchy.length() - hierarchy.replace(".", "").length() - 1) * 4)
-                    + Optional.ofNullable(office.getName()).orElse("");
+            long count = hierarchy.chars().filter(c -> c == '.').count();
+            if (count > 0) {
+                count--;
+            }
+            nameDecorated = "....".repeat((int) count) + Optional.ofNullable(office.getName()).orElse("");
         }
         return new OfficeData(office.getId(), office.getName(), nameDecorated, office.getExternalId(), office.getOpeningDate(),
                 office.getHierarchy(), office.getParent() != null ? office.getParent().getId() : null,

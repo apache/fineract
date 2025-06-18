@@ -18,23 +18,20 @@
  */
 package org.apache.fineract.infrastructure.cache.data;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
+@Builder
 @Data
 @NoArgsConstructor
-@Accessors(chain = true)
+@AllArgsConstructor
 public final class CacheData {
 
     @SuppressWarnings("unused")
     private EnumOptionData cacheType;
     @SuppressWarnings("unused")
     private boolean enabled;
-
-    public static CacheData instance(final EnumOptionData cacheType, final boolean enabled) {
-        return new CacheData().setCacheType(cacheType).setEnabled(enabled);
-    }
-
 }

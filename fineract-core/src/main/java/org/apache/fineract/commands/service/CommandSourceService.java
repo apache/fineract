@@ -37,6 +37,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessUnderProcessingException;
+import org.apache.fineract.infrastructure.core.exception.MultiException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.lang.NonNull;
@@ -131,7 +132,7 @@ public class CommandSourceService {
 
     @Transactional
     public CommandProcessingResult processCommand(NewCommandSourceHandler handler, JsonCommand command, CommandSource commandSource,
-            AppUser user, boolean isApprovedByChecker) {
+            AppUser user, boolean isApprovedByChecker) throws MultiException {
         final CommandProcessingResult result = handler.processCommand(command);
 
         String permission = commandSource.getPermissionCode();

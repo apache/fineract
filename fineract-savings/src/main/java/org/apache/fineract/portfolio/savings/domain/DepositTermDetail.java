@@ -166,6 +166,10 @@ public class DepositTermDetail {
         return this.inMultiplesOfDepositTermType;
     }
 
+    public Integer getDepositPeriodInDays(final Integer depositPeriod, final SavingsPeriodFrequencyType depositPeriodFrequencyType) {
+        return this.convertToSafeDays(depositPeriod, depositPeriodFrequencyType);
+    }
+
     public boolean isDepositBetweenMinAndMax(LocalDate depositStartDate, LocalDate depositEndDate) {
         return isEqualOrGreaterThanMin(depositStartDate, depositEndDate) && isEqualOrLessThanMax(depositStartDate, depositEndDate);
     }
@@ -263,4 +267,5 @@ public class DepositTermDetail {
         return DepositTermDetail.createFrom(minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType,
                 inMultiplesOfDepositTerm, inMultiplesOfDepositTermType);
     }
+
 }

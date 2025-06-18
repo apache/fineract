@@ -36,6 +36,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
@@ -53,7 +54,7 @@ public class ProgressiveLoanSummaryDataProvider extends CommonLoanSummaryDataPro
     private final AdvancedPaymentScheduleTransactionProcessor advancedPaymentScheduleTransactionProcessor;
     private final EMICalculator emiCalculator;
     private final LoanRepositoryWrapper loanRepository;
-    private final LoanTransactionService loanTransactionService;
+    private final LoanTransactionRepository loanTransactionRepository;
     private final InterestScheduleModelRepositoryWrapper modelRepository;
 
     @Override
@@ -81,8 +82,8 @@ public class ProgressiveLoanSummaryDataProvider extends CommonLoanSummaryDataPro
     }
 
     private ProgressiveLoanInterestScheduleModel calculateModel(Loan loan, LocalDate businessDate) {
-        final List<LoanTransaction> transactionsToReprocess = loanTransactionService.retrieveListOfTransactionsForReprocessing(loan)
-                .stream().filter(t -> !t.isAccrualActivity()).toList();
+        final List<LoanTransaction> transactionsToReprocess = loanTransactionRepository
+                .findNonReversedTransactionsForReprocessingByLoan(loan).stream().filter(t -> !t.isAccrualActivity()).toList();
         Pair<ChangedTransactionDetail, ProgressiveLoanInterestScheduleModel> changedTransactionDetailProgressiveLoanInterestScheduleModelPair = advancedPaymentScheduleTransactionProcessor
                 .reprocessProgressiveLoanTransactions(loan.getDisbursementDate(), businessDate, transactionsToReprocess, loan.getCurrency(),
                         loan.getRepaymentScheduleInstallments(), loan.getActiveCharges());

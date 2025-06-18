@@ -678,7 +678,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
         generateAccountNumber(account);
         // post journal entries for activation charges
-        this.savingsAccountDomainService.postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, false);
+        this.savingsAccountDomainService.postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, false, false);
 
         return new CommandProcessingResultBuilder() //
                 .withSavingsId(account.getId()) //

@@ -272,7 +272,7 @@ public class SchedulerJobHelper {
 
     private void awaitJob(Instant beforeExecuteTime, Supplier<Callable<Map<String, String>>> retrieveLastRunHistory) {
         final Duration timeout = Duration.ofMinutes(2);
-        final Duration pause = Duration.ofSeconds(5);
+        final Duration pause = Duration.ofSeconds(1);
         DateTimeFormatter df = DateTimeFormatter.ISO_INSTANT; // FINERACT-926
         // Await JobDetailData.lastRunHistory [JobDetailHistoryData]
         // jobRunStartTime >= beforeExecuteTime (or timeout)

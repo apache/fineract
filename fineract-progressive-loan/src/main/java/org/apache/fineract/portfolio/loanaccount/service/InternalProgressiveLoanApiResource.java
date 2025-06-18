@@ -40,6 +40,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
 import org.springframework.beans.factory.InitializingBean;
@@ -56,9 +57,8 @@ public class InternalProgressiveLoanApiResource implements InitializingBean {
 
     private final LoanRepositoryWrapper loanRepository;
     private final AdvancedPaymentScheduleTransactionProcessor advancedPaymentScheduleTransactionProcessor;
-    private final ProgressiveLoanInterestScheduleModelParserService progressiveLoanInterestScheduleModelParserService;
     private final InterestScheduleModelRepositoryWrapper writePlatformService;
-    private final LoanTransactionService loanTransactionService;
+    private final LoanTransactionRepository loanTransactionRepository;
 
     @Override
     @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
@@ -87,7 +87,8 @@ public class InternalProgressiveLoanApiResource implements InitializingBean {
     }
 
     private ProgressiveLoanInterestScheduleModel reprocessTransactionsAndGetModel(final Loan loan) {
-        final List<LoanTransaction> transactionsToReprocess = loanTransactionService.retrieveListOfTransactionsForReprocessing(loan);
+        final List<LoanTransaction> transactionsToReprocess = loanTransactionRepository
+                .findNonReversedTransactionsForReprocessingByLoan(loan);
         final LocalDate businessDate = ThreadLocalContextUtil.getBusinessDate();
         final Pair<ChangedTransactionDetail, ProgressiveLoanInterestScheduleModel> changedTransactionDetailProgressiveLoanInterestScheduleModelPair = advancedPaymentScheduleTransactionProcessor
                 .reprocessProgressiveLoanTransactionsTransactional(loan.getDisbursementDate(), businessDate, transactionsToReprocess,

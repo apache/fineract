@@ -911,10 +911,6 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
                 || this.isIncomePosting());
     }
 
-    public boolean hasLoanTransactionRelations() {
-        return !loanTransactionRelations.isEmpty();
-    }
-
     public List<LoanTransactionRelation> getLoanTransactionRelations(Predicate<LoanTransactionRelation> predicate) {
         return loanTransactionRelations.stream().filter(predicate).toList();
     }
@@ -965,4 +961,13 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
         this.dateOf = transactionDate;
     }
 
+    public static LoanTransaction buyDownFee(final Loan loan, final Money amount, final PaymentDetail paymentDetail,
+            final LocalDate transactionDate, final ExternalId externalId) {
+        return new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.BUY_DOWN_FEE, paymentDetail, amount.getAmount(),
+                transactionDate, externalId);
+    }
+
+    public boolean isBuyDownFee() {
+        return LoanTransactionType.BUY_DOWN_FEE.equals(this.typeOf);
+    }
 }

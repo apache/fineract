@@ -358,6 +358,8 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
                 // Assets
                 if (glAccountForSavings.equals(AccrualAccountsForSavings.SAVINGS_REFERENCE)) {
                     accountMappingDetails.put(SavingProductAccountingDataParams.SAVINGS_REFERENCE.getValue(), glAccountData);
+                } else if (glAccountForSavings.equals(AccrualAccountsForSavings.INTEREST_RECEIVABLE)) {
+                    accountMappingDetails.put(SavingProductAccountingDataParams.INTEREST_RECEIVABLE.getValue(), glAccountData);
                 } else if (glAccountForSavings.equals(AccrualAccountsForSavings.OVERDRAFT_PORTFOLIO_CONTROL)) {
                     accountMappingDetails.put(SavingProductAccountingDataParams.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), glAccountData);
                 } else if (glAccountForSavings.equals(AccrualAccountsForSavings.FEES_RECEIVABLE)) {

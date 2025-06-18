@@ -134,7 +134,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final ConfigurationDomainService configurationDomainService;
     private final HolidayRepository holidayRepository;
     private final WorkingDaysRepositoryWrapper workingDaysRepository;
-
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final NoteRepository noteRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
@@ -464,7 +463,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         chargesPayment.updateComponents(zero, zero, charge.getAmount(loan.getCurrency()), zero);
         chargesPayment.updateLoan(loan);
         loan.addLoanTransaction(chargesPayment);
-        loan.updateLoanOutstandingBalances();
+        loanBalanceService.updateLoanOutstandingBalances(loan);
         charge.markAsFullyPaid();
     }
 

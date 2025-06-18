@@ -78,8 +78,8 @@ public class RuntimeDelegatingCacheManager implements CacheManager, Initializing
         final EnumOptionData noCacheType = CacheEnumerations.cacheType(CacheType.NO_CACHE);
         final EnumOptionData singleNodeCacheType = CacheEnumerations.cacheType(CacheType.SINGLE_NODE);
 
-        final CacheData noCache = CacheData.instance(noCacheType, noCacheEnabled);
-        final CacheData singleNodeCache = CacheData.instance(singleNodeCacheType, ehCacheEnabled);
+        final CacheData noCache = CacheData.builder().cacheType(noCacheType).enabled(noCacheEnabled).build();
+        final CacheData singleNodeCache = CacheData.builder().cacheType(singleNodeCacheType).enabled(ehCacheEnabled).build();
 
         return Arrays.asList(noCache, singleNodeCache);
     }

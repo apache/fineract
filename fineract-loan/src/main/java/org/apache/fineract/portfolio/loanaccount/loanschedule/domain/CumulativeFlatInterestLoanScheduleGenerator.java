@@ -25,8 +25,9 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.organisation.monetary.mapper.CurrencyMapper;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
-import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionService;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -37,8 +38,8 @@ public class CumulativeFlatInterestLoanScheduleGenerator extends AbstractCumulat
 
     public CumulativeFlatInterestLoanScheduleGenerator(final ScheduledDateGenerator scheduledDateGenerator,
             final PaymentPeriodsInOneYearCalculator paymentPeriodsInOneYearCalculator,
-            final LoanTransactionService loanTransactionService) {
-        super(loanTransactionService);
+            final LoanTransactionRepository loanTransactionRepository, final CurrencyMapper currencyMapper) {
+        super(loanTransactionRepository, currencyMapper);
         this.scheduledDateGenerator = scheduledDateGenerator;
         this.paymentPeriodsInOneYearCalculator = paymentPeriodsInOneYearCalculator;
     }

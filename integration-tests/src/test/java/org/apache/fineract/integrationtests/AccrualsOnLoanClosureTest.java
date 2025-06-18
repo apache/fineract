@@ -86,6 +86,9 @@ public class AccrualsOnLoanClosureTest extends BaseLoanIntegrationTest {
                     transaction(800.0, "Disbursement", "22 April 2024", 800.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
                     transaction(820.0, "Repayment", "25 April 2024", 0.0, 800.0, 0.0, 0.0, 20.0, 0.0, 0.0),
                     transaction(20.0, "Accrual", "25 April 2024", 0.0, 0.0, 0.0, 0.0, 20.0, 0.0, 0.0));
+
+            globalConfigurationHelper.updateGlobalConfiguration(CHARGE_ACCRUAL_DATE,
+                    new PutGlobalConfigurationsRequest().stringValue("due-date"));
         });
     }
 }

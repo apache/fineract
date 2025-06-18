@@ -18,10 +18,8 @@
  */
 package org.apache.fineract.organisation.monetary.service;
 
-import java.util.Collection;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.organisation.monetary.data.ApplicationCurrencyConfigurationData;
-import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.organisation.monetary.data.CurrencyConfigurationData;
 
 @RequiredArgsConstructor
 public class OrganisationCurrencyReadPlatformServiceImpl implements OrganisationCurrencyReadPlatformService {
@@ -29,14 +27,15 @@ public class OrganisationCurrencyReadPlatformServiceImpl implements Organisation
     private final CurrencyReadPlatformService currencyReadPlatformService;
 
     @Override
-    public ApplicationCurrencyConfigurationData retrieveCurrencyConfiguration() {
+    public CurrencyConfigurationData retrieveCurrencyConfiguration() {
 
-        final Collection<CurrencyData> selectedCurrencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
-        final Collection<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllPlatformCurrencies();
+        final var selectedCurrencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
+        final var currencyOptions = currencyReadPlatformService.retrieveAllPlatformCurrencies();
 
         // remove selected currency options
         currencyOptions.removeAll(selectedCurrencyOptions);
 
-        return new ApplicationCurrencyConfigurationData(selectedCurrencyOptions, currencyOptions);
+        return CurrencyConfigurationData.builder().selectedCurrencyOptions(selectedCurrencyOptions).currencyOptions(currencyOptions)
+                .build();
     }
 }

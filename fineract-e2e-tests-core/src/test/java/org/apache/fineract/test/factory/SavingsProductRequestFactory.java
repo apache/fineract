@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.test.factory;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.fineract.client.models.PostSavingsCharges;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
 
@@ -43,7 +43,7 @@ public final class SavingsProductRequestFactory {
     private SavingsProductRequestFactory() {}
 
     public static PostSavingsProductsRequest defaultSavingsProductRequest() {
-        Set<PostSavingsCharges> charges = new HashSet<>();
+        List<PostSavingsCharges> charges = new ArrayList<>();
 
         return new PostSavingsProductsRequest().name(DEFAULT_SAVINGS_PRODUCT_NAME)//
                 .shortName(DEFAULT_SAVINGS_PRODUCT_SHORT_NAME)//

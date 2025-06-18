@@ -931,7 +931,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
 
         createUpdateIncomePostingTransaction(loan, compoundingDetail, interest, fee, penalties, externalId);
         createUpdateAccrualTransaction(loan, compoundingDetail, interest, fee, penalties, feeDetails, externalId);
-        loan.updateLoanOutstandingBalances();
+        loanBalanceService.updateLoanOutstandingBalances(loan);
     }
 
     private void createUpdateIncomePostingTransaction(Loan loan, LoanInterestRecalcualtionAdditionalDetails compoundingDetail,
@@ -1000,7 +1000,7 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
 
             createIncomePostingAndAccrualTransactionOnLoanClosure(loan, closedDate, interestToPost, feeToPost, penaltyToPost, amountToPost);
         }
-        loan.updateLoanOutstandingBalances();
+        loanBalanceService.updateLoanOutstandingBalances(loan);
     }
 
     private void determineCumulativeIncomeFromInstallments(final Loan loan,

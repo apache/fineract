@@ -69,9 +69,19 @@ final class SavingsProductsApiResourceSwagger {
         public Integer interestCalculationDaysInYearType;
         @Schema(example = "1")
         public Integer accountingRule;
-        public Set<PostSavingsCharges> charges;
+        public List<PostSavingsCharges> charges;
         @Schema(example = "accountMappingForPayment")
         public String accountMappingForPayment;
+        @Schema(example = "false")
+        public Boolean withdrawalFeeForTransfers;
+        @Schema(example = "false")
+        public Boolean enforceMinRequiredBalance;
+        @Schema(example = "false")
+        public Boolean allowOverdraft;
+        @Schema(example = "false")
+        public Boolean withHoldTax;
+        @Schema(example = "false")
+        public Boolean isDormancyTrackingActive;
     }
 
     @Schema(description = "PostSavingsProductsResponse")
@@ -317,7 +327,21 @@ final class SavingsProductsApiResourceSwagger {
             }
 
             public GetSavingsProductsFeeToIncomeAccountMappingsCharge charge;
-            public GetSavingsProductsFeeToIncomeAccountMappingsIncomeAccount incomeAccount;
+            public GetSavingsProductsGlAccount incomeAccount;
+        }
+
+        static final class GetSavingsProductsCharge {
+
+            private GetSavingsProductsCharge() {}
+
+            @Schema(example = "12")
+            public Integer id;
+            @Schema(example = "12.34")
+            public BigDecimal amount;
+            @Schema(example = "Annual Fee")
+            public String name;
+            @Schema(example = "false")
+            public Boolean active;
         }
 
         static final class GetSavingsProductsPenaltyToIncomeAccountMappings {

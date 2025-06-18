@@ -173,8 +173,9 @@ public class SavingsProductsApiResource {
         SavingsProductData savingProductData = this.savingProductReadPlatformService.retrieveOne(productId);
 
         final Collection<ChargeData> charges = this.chargeReadPlatformService.retrieveSavingsProductCharges(productId);
+        final Collection<ChargeData> accrualCharges = this.chargeReadPlatformService.retrieveSavingsProductAccrualCharges(productId);
 
-        savingProductData = SavingsProductData.withCharges(savingProductData, charges);
+        savingProductData = SavingsProductData.withCharges(savingProductData, charges, accrualCharges);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 

@@ -145,6 +145,10 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
             if (transactionType.isCapitalizedIncomeAmortizationAdjustment()) {
                 createJournalEntriesForCapitalizedIncomeAmortizationAdjustment(loanDTO, loanTransactionDTO, office);
             }
+            // Handle Buy Down Fee
+            if (transactionType.isBuyDownFee()) {
+                createJournalEntriesForBuyDownFee(loanDTO, loanTransactionDTO, office);
+            }
         }
     }
 
@@ -409,6 +413,26 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
                 this.helper.createDebitJournalEntryForLoan(office, loanDTO.getCurrencyCode(), loanDTO.getLoanId(),
                         loanTransactionDTO.getTransactionId(), loanTransactionDTO.getTransactionDate(), debitEntry.getValue(), glAccount);
             }
+        }
+    }
+
+    private void createJournalEntriesForBuyDownFee(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO,
+            final Office office) {
+        // loan properties
+        final Long loanProductId = loanDTO.getLoanProductId();
+        final Long loanId = loanDTO.getLoanId();
+        final String currencyCode = loanDTO.getCurrencyCode();
+
+        // transaction properties
+        final String transactionId = loanTransactionDTO.getTransactionId();
+        final LocalDate transactionDate = loanTransactionDTO.getTransactionDate();
+        final BigDecimal amount = loanTransactionDTO.getAmount();
+        final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
+
+        if (MathUtil.isGreaterThanZero(amount)) {
+            this.helper.createJournalEntriesForLoan(office, currencyCode, AccrualAccountsForLoan.BUY_DOWN_EXPENSE.getValue(),
+                    AccrualAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), loanProductId, paymentTypeId, loanId, transactionId,
+                    transactionDate, amount);
         }
     }
 

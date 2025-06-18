@@ -71,7 +71,7 @@ public class JobService {
                 .pollInterval(Duration.ofMillis(jobPollingProperties.getIntervalInMillis())) //
                 .pollDelay(Duration.ofMillis(jobPollingProperties.getDelayInMillis())) //
                 .until(() -> {
-                    log.info("Waiting for job {} to finish", jobName);
+                    log.debug("Waiting for job {} to finish", jobName);
                     Long jobId = jobResolver.resolve(job);
                     Response<GetJobsResponse> getJobsResponse = schedulerJobApi.retrieveOne5(jobId).execute();
                     ErrorHelper.checkSuccessfulApiCall(getJobsResponse);

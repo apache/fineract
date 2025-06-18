@@ -81,13 +81,23 @@ tasks.named('cucumber').get().finalizedBy 'allureReport'
 tasks.named('cucumber').get().dependsOn 'spotlessCheck'
 
 cucumber {
-    tags = 'not @ignore'
-    main = 'io.cucumber.core.cli.Main'
-    shorten = 'argfile'
-    plugin = [
-        'pretty',
-        'io.qameta.allure.cucumber7jvm.AllureCucumber7Jvm'
-    ]
+    // Use -Pcucumber.features=... if passed, otherwise default
+    if (project.hasProperty("cucumber.features")) {
+        featurePath = project.getProperty("cucumber.features")
+    } else {
+        featurePath = "src/test/resources/features";
+    }
+
+    tags = 'not @Skip'
+    if (project.hasProperty("cucumber.tags")) {
+        tags = [project.getProperty("cucumber.tags")]
+    }
+
+    if (project.hasProperty("cucumber.name")) {
+        name = project.getProperty("cucumber.name")
+    }
+
+    plugin = ['pretty', 'io.qameta.allure.cucumber7jvm.AllureCucumber7Jvm']
 }
 
 allure {

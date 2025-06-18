@@ -19,18 +19,18 @@
 package org.apache.fineract.infrastructure.event.external.handler;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.command.core.Command;
 import org.apache.fineract.command.core.CommandHandler;
-import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationUpdateRequest;
 import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationUpdateResponse;
 import org.apache.fineract.infrastructure.event.external.service.ExternalEventConfigurationWritePlatformService;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
+@Component
 @RequiredArgsConstructor
-@Service
-@CommandType(entity = "EXTERNAL_EVENT_CONFIGURATION", action = "UPDATE")
 public class ExternalEventConfigurationUpdateHandler
         implements CommandHandler<ExternalEventConfigurationUpdateRequest, ExternalEventConfigurationUpdateResponse> {
 

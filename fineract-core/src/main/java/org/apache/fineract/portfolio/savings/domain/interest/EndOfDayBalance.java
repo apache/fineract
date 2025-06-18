@@ -32,17 +32,20 @@ public class EndOfDayBalance {
     private final Money openingBalance;
     private final Money endOfDayBalance;
     private final int numberOfDays;
+    private int decimals;
 
     public static EndOfDayBalance from(final LocalDate date, final Money openingBalance, final Money endOfDayBalance,
-            final int numberOfDays) {
-        return new EndOfDayBalance(date, openingBalance, endOfDayBalance, numberOfDays);
+            final int numberOfDays, final int decimals) {
+        return new EndOfDayBalance(date, openingBalance, endOfDayBalance, numberOfDays, decimals);
     }
 
-    public EndOfDayBalance(final LocalDate date, final Money openingBalance, final Money endOfDayBalance, final int numberOfDays) {
+    public EndOfDayBalance(final LocalDate date, final Money openingBalance, final Money endOfDayBalance, final int numberOfDays,
+            final int decimals) {
         this.date = date;
         this.openingBalance = openingBalance;
         this.endOfDayBalance = endOfDayBalance;
         this.numberOfDays = numberOfDays;
+        this.decimals = decimals;
     }
 
     public LocalDate date() {
@@ -60,11 +63,15 @@ public class EndOfDayBalance {
                 MoneyHelper.getRoundingMode());
     }
 
+    public void setDecimals(int decimals) {
+        this.decimals = decimals;
+    }
+
     public BigDecimal calculateInterestOnBalance(final BigDecimal interestToCompound, final BigDecimal interestRateAsFraction,
             final long daysInYear, final BigDecimal minBalanceForInterestCalculation, final BigDecimal overdraftInterestRateAsFraction,
             final BigDecimal minOverdraftForInterestCalculation) {
 
-        BigDecimal interest = BigDecimal.ZERO.setScale(9, MoneyHelper.getRoundingMode());
+        BigDecimal interest = BigDecimal.ZERO.setScale(this.decimals, MoneyHelper.getRoundingMode());
         final BigDecimal realBalanceForInterestCalculation = this.endOfDayBalance.getAmount().add(interestToCompound);
         if (realBalanceForInterestCalculation.compareTo(BigDecimal.ZERO) >= 0) {
             if (realBalanceForInterestCalculation.compareTo(minBalanceForInterestCalculation) >= 0) {
@@ -72,7 +79,7 @@ public class EndOfDayBalance {
                 final BigDecimal dailyInterestRate = interestRateAsFraction.multiply(multiplicand, MathContext.DECIMAL64);
                 final BigDecimal periodicInterestRate = dailyInterestRate.multiply(BigDecimal.valueOf(this.numberOfDays),
                         MathContext.DECIMAL64);
-                interest = realBalanceForInterestCalculation.multiply(periodicInterestRate, MathContext.DECIMAL64).setScale(9,
+                interest = realBalanceForInterestCalculation.multiply(periodicInterestRate, MathContext.DECIMAL64).setScale(this.decimals,
                         MoneyHelper.getRoundingMode());
             }
         } else {
@@ -81,8 +88,39 @@ public class EndOfDayBalance {
                 final BigDecimal dailyInterestRate = overdraftInterestRateAsFraction.multiply(multiplicand, MathContext.DECIMAL64);
                 final BigDecimal periodicInterestRate = dailyInterestRate.multiply(BigDecimal.valueOf(this.numberOfDays),
                         MathContext.DECIMAL64);
-                interest = realBalanceForInterestCalculation.multiply(periodicInterestRate, MathContext.DECIMAL64).setScale(9,
+                interest = realBalanceForInterestCalculation.multiply(periodicInterestRate, MathContext.DECIMAL64).setScale(this.decimals,
                         MoneyHelper.getRoundingMode());
+            }
+        }
+        return interest;
+    }
+
+    public BigDecimal calculateInterestOnBalanceNegative(final BigDecimal interestToCompound, final BigDecimal interestRateAsFraction,
+            final long daysInYear, final BigDecimal minBalanceForInterestCalculation, final BigDecimal overdraftInterestRateAsFraction,
+            final BigDecimal minOverdraftForInterestCalculation) {
+
+        BigDecimal interest = BigDecimal.ZERO.setScale(this.decimals, MoneyHelper.getRoundingMode());
+        final BigDecimal realBalanceForInterestCalculation = this.endOfDayBalance.getAmount().add(interestToCompound);
+        if (realBalanceForInterestCalculation.compareTo(BigDecimal.ZERO) >= 0) {
+            if (realBalanceForInterestCalculation.compareTo(minBalanceForInterestCalculation) >= 0) {
+                final BigDecimal multiplicand = BigDecimal.ONE.divide(BigDecimal.valueOf(daysInYear), MathContext.DECIMAL64);
+                final BigDecimal dailyInterestRate = interestRateAsFraction.multiply(multiplicand, MathContext.DECIMAL64);
+                final BigDecimal periodicInterestRate = dailyInterestRate.multiply(BigDecimal.valueOf(this.numberOfDays),
+                        MathContext.DECIMAL64);
+                interest = realBalanceForInterestCalculation.multiply(periodicInterestRate, MathContext.DECIMAL64).setScale(this.decimals,
+                        MoneyHelper.getRoundingMode());
+            }
+        } else {
+            if (realBalanceForInterestCalculation.compareTo(minOverdraftForInterestCalculation.negate()) < 0) {
+                final BigDecimal balanceConvertPositive = realBalanceForInterestCalculation.abs();
+                final BigDecimal porcentaje = overdraftInterestRateAsFraction.divide(BigDecimal.valueOf(100));
+                final BigDecimal forDaysInYear = porcentaje.divide(BigDecimal.valueOf(daysInYear), MathContext.DECIMAL64);
+                final BigDecimal fordays = forDaysInYear.multiply(BigDecimal.valueOf(this.numberOfDays == 0 ? 1 : this.numberOfDays));
+
+                final BigDecimal calculationInteresNegative = fordays.multiply(balanceConvertPositive);
+
+                interest = calculationInteresNegative.setScale(this.decimals, MoneyHelper.getRoundingMode());
+
             }
         }
         return interest;
@@ -163,7 +201,7 @@ public class EndOfDayBalance {
             daysOfBalance = balancePeriodInterval.daysInPeriodInclusiveOfEndDate();
         }
 
-        return new EndOfDayBalance(balanceStartDate, startingBalance, this.endOfDayBalance, daysOfBalance);
+        return new EndOfDayBalance(balanceStartDate, startingBalance, this.endOfDayBalance, daysOfBalance, this.decimals);
     }
 
     public boolean contains(final LocalDateInterval compoundingPeriodInterval) {

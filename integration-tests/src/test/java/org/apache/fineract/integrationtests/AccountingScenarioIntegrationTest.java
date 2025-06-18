@@ -642,6 +642,15 @@ public class AccountingScenarioIntegrationTest {
         return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
     }
 
+    public static Integer createSavingsProductWithAccrualAccounting(final String minOpenningBalance, final Account... accounts) {
+        LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
+        final String savingsProductJSON = new SavingsProductHelper().withInterestCompoundingPeriodTypeAsDaily() //
+                .withInterestPostingPeriodTypeAsQuarterly() //
+                .withInterestCalculationPeriodTypeAsDailyBalance() //
+                .withMinimumOpenningBalance(minOpenningBalance).withAccountingRuleAsAccrualBased(accounts).build();
+        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+    }
+
     private Integer createFixedDepositProduct(final String validFrom, final String validTo, Account... accounts) {
         LOG.info("------------------------------CREATING NEW FIXED DEPOSIT PRODUCT ---------------------------------------");
         FixedDepositProductHelper fixedDepositProductHelper = new FixedDepositProductHelper(requestSpec, responseSpec);

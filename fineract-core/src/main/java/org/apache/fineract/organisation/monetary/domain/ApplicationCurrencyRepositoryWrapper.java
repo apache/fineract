@@ -51,7 +51,7 @@ public class ApplicationCurrencyRepositoryWrapper {
         }
 
         final ApplicationCurrency applicationCurrency = ApplicationCurrency.from(defaultApplicationCurrency,
-                currency.getDigitsAfterDecimal(), currency.getCurrencyInMultiplesOf());
+                currency.getDigitsAfterDecimal(), currency.getInMultiplesOf());
 
         return applicationCurrency;
     }
