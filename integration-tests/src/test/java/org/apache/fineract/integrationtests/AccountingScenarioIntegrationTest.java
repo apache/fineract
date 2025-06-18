@@ -1301,5 +1301,4 @@ public class AccountingScenarioIntegrationTest {
                 .withSubmittedDate("01 Jan 2016").withApplicationDate("01 Jan 2016").withRequestedShares("100").build();
         return ShareAccountTransactionHelper.createShareAccount(shareAccountJSON, requestSpec, responseSpec);
     }
-
 }

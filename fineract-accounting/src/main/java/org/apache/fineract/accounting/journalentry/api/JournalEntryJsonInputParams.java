@@ -43,7 +43,8 @@ public enum JournalEntryJsonInputParams {
     CHECK_NUMBER("checkNumber"), //
     ROUTING_CODE("routingCode"), //
     RECEIPT_NUMBER("receiptNumber"), //
-    BANK_NUMBER("bankNumber"); //
+    BANK_NUMBER("bankNumber"), //
+    EXTERNAL_ASSET_OWNER("externalAssetOwner"); //
 
     private final String value;
 

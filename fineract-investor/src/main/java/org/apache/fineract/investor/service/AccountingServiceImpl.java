@@ -120,7 +120,8 @@ public class AccountingServiceImpl implements AccountingService {
         return journalEntryList;
     }
 
-    private void createMappingToOwner(final ExternalAssetOwner owner, final JournalEntry journalEntry) {
+    @Override
+    public void createMappingToOwner(final ExternalAssetOwner owner, final JournalEntry journalEntry) {
         if (owner == null) {
             return;
         }

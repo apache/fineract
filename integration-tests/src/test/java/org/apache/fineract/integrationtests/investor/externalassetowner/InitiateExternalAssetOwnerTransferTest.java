@@ -60,11 +60,20 @@ import org.apache.fineract.client.models.ExternalOwnerJournalEntryData;
 import org.apache.fineract.client.models.ExternalOwnerTransferJournalEntryData;
 import org.apache.fineract.client.models.ExternalTransferData;
 import org.apache.fineract.client.models.GetFinancialActivityAccountsResponse;
+import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
+import org.apache.fineract.client.models.JournalEntryCommand;
+import org.apache.fineract.client.models.JournalEntryTransactionItem;
 import org.apache.fineract.client.models.PageExternalTransferData;
 import org.apache.fineract.client.models.PostFinancialActivityAccountsRequest;
 import org.apache.fineract.client.models.PostInitiateTransferResponse;
+import org.apache.fineract.client.models.PostJournalEntriesResponse;
+import org.apache.fineract.client.models.PostLoanProductsResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
+import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
+import org.apache.fineract.client.models.SingleDebitOrCreditEntryCommand;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
@@ -80,6 +89,7 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.integrationtests.common.accounting.FinancialActivityAccountHelper;
+import org.apache.fineract.integrationtests.common.accounting.JournalEntryHelper;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.externalevents.ExternalEventHelper;
 import org.apache.fineract.integrationtests.common.externalevents.ExternalEventsExtension;
@@ -1176,6 +1186,69 @@ public class InitiateExternalAssetOwnerTransferTest extends BaseLoanIntegrationT
         } finally {
             cleanUpAndRestoreBusinessDate();
         }
+    }
+
+    @Test
+    public void addManualJournalEntriesWithAssetExternalization() {
+        runAt("10 April 2025", () -> {
+
+            final Account glAccountDebit = accountHelper.createAssetAccount();
+            final Account glAccountCredit = accountHelper.createLiabilityAccount();
+            final String externalAssetOwner = Utils.uniqueRandomStringGenerator("ASSET_EXTERNAL_", 5);
+
+            CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class,
+                    () -> JournalEntryHelper.createJournalEntry("", new JournalEntryCommand().amount(BigDecimal.TEN).officeId(1L)
+                            .currencyCode("USD").locale("en").dateFormat("uuuu-MM-dd").transactionDate(LocalDate.of(2024, 1, 1))
+                            .addCreditsItem(new SingleDebitOrCreditEntryCommand().glAccountId(glAccountDebit.getAccountID().longValue())
+                                    .amount(BigDecimal.TEN))
+                            .addDebitsItem(new SingleDebitOrCreditEntryCommand().glAccountId(glAccountCredit.getAccountID().longValue())
+                                    .amount(BigDecimal.TEN))
+                            .externalAssetOwner(externalAssetOwner)));
+            Assertions.assertTrue(callFailedRuntimeException.getMessage().contains("External asset owner with external id:"));
+
+            final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+            final String operationDate = "10 April 2025";
+
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(
+                    createOnePeriod30DaysPeriodicAccrualProductWithAdvancedPaymentAllocationAndInterestRecalculation(12.0, 4));
+
+            final PostLoansRequest applicationRequest = applyLoanRequest(clientId.longValue(), loanProductResponse.getResourceId(),
+                    operationDate, 1000.0, 4).transactionProcessingStrategyCode("advanced-payment-allocation-strategy")//
+                    .interestRatePerPeriod(BigDecimal.valueOf(12.0));
+
+            final PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            final Long loanId = loanResponse.getLoanId();
+
+            loanTransactionHelper.approveLoan(loanId, new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000.0))
+                    .dateFormat(DATETIME_PATTERN).approvedOnDate(operationDate).locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanId, new PostLoansLoanIdRequest().actualDisbursementDate(operationDate)
+                    .dateFormat(DATETIME_PATTERN).transactionAmount(BigDecimal.valueOf(1000.0)).locale("en"));
+
+            PostInitiateTransferResponse transferResponse = EXTERNAL_ASSET_OWNER_HELPER.initiateTransferByLoanId(loanId, "sale",
+                    new ExternalAssetOwnerRequest().settlementDate("2025-04-20").dateFormat("yyyy-MM-dd").locale("en")
+                            .transferExternalId(externalAssetOwner).transferExternalGroupId(null).ownerExternalId(externalAssetOwner)
+                            .purchasePriceRatio("0.90"));
+            assertEquals(externalAssetOwner, transferResponse.getResourceExternalId());
+
+            final PostJournalEntriesResponse journalEntriesResponse = JournalEntryHelper.createJournalEntry("",
+                    new JournalEntryCommand().amount(BigDecimal.TEN).officeId(1L).currencyCode("USD").locale("en").dateFormat("uuuu-MM-dd")
+                            .transactionDate(LocalDate.of(2024, 1, 1))
+                            .addCreditsItem(new SingleDebitOrCreditEntryCommand().glAccountId(glAccountDebit.getAccountID().longValue())
+                                    .amount(BigDecimal.TEN))
+                            .addDebitsItem(new SingleDebitOrCreditEntryCommand().glAccountId(glAccountCredit.getAccountID().longValue())
+                                    .amount(BigDecimal.TEN))
+                            .externalAssetOwner(externalAssetOwner));
+
+            final GetJournalEntriesTransactionIdResponse journalEntriesTransactionIdResponse = JournalEntryHelper
+                    .retrieveJournalEntryByTransactionId(journalEntriesResponse.getTransactionId());
+            Assertions.assertNotNull(journalEntriesTransactionIdResponse);
+            assertEquals(2, journalEntriesTransactionIdResponse.getPageItems().size());
+            JournalEntryTransactionItem journalEntryItem = journalEntriesTransactionIdResponse.getPageItems().get(0);
+            assertEquals(externalAssetOwner, journalEntryItem.getExternalAssetOwner());
+            journalEntryItem = journalEntriesTransactionIdResponse.getPageItems().get(1);
+            assertEquals(externalAssetOwner, journalEntryItem.getExternalAssetOwner());
+        });
     }
 
     private void updateBusinessDateAndExecuteCOBJob(String date) {

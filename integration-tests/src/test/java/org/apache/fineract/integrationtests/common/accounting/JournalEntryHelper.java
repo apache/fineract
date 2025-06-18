@@ -192,4 +192,10 @@ public class JournalEntryHelper {
     public static PostJournalEntriesResponse createJournalEntry(String command, JournalEntryCommand request) {
         return Calls.ok(FineractClientHelper.getFineractClient().journalEntries.createGLJournalEntry(command, request));
     }
+
+    public static GetJournalEntriesTransactionIdResponse retrieveJournalEntryByTransactionId(final String transactionId) {
+        return Calls.ok(FineractClientHelper.getFineractClient().journalEntries.retrieveAll1(//
+                null, null, null, null, null, null, null, transactionId, null, //
+                null, null, null, null, null, null, null, null, null, true));
+    }
 }

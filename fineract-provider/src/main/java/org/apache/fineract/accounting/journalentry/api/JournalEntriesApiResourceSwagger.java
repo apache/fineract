@@ -177,6 +177,8 @@ final class JournalEntriesApiResourceSwagger {
         public String createdByUserName;
         @Schema(example = "[2022, 07, 01]")
         public LocalDate createdDate;
+        @Schema(example = "qwerty1234")
+        public String externalAssetOwner;
 
         public CurrencyItem currency;
         public EnumOptionType glAccountType;

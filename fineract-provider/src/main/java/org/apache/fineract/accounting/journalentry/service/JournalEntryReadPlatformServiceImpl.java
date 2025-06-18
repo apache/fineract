@@ -99,7 +99,8 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                     .append(" creatingUser.username as createdByUserName, journalEntry.description as comments, ")
                     .append(" journalEntry.submitted_on_date as submittedOnDate, journalEntry.reversed as reversed, ")
                     .append(" journalEntry.currency_code as currencyCode, curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ")
-                    .append(" curr.display_symbol as currencyDisplaySymbol, curr.decimal_places as currencyDigits, curr.currency_multiplesof as inMultiplesOf ");
+                    .append(" curr.display_symbol as currencyDisplaySymbol, curr.decimal_places as currencyDigits, curr.currency_multiplesof as inMultiplesOf, ")
+                    .append(" eao.external_id as externalAssetOwner ");
             if (associationParametersData.isRunningBalanceRequired()) {
                 sb.append(" ,journalEntry.is_running_balance_calculated as runningBalanceComputed, ")
                         .append(" journalEntry.office_running_balance as officeRunningBalance, ")
@@ -117,7 +118,9 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                     .append(" left join acc_gl_account as glAccount on glAccount.id = journalEntry.account_id")
                     .append(" left join m_office as office on office.id = journalEntry.office_id")
                     .append(" left join m_appuser as creatingUser on creatingUser.id = journalEntry.created_by ")
-                    .append(" join m_currency curr on curr.code = journalEntry.currency_code ");
+                    .append(" join m_currency curr on curr.code = journalEntry.currency_code ")
+                    .append(" left join m_external_asset_owner_journal_entry_mapping eajem on eajem.journal_entry_id = journalEntry.id ")
+                    .append(" left join m_external_asset_owner eao on eao.id = eajem.owner_id ");
             if (associationParametersData.isTransactionDetailsRequired()) {
                 sb.append(" left join m_loan_transaction as lt on journalEntry.loan_transaction_id = lt.id ")
                         .append(" left join m_savings_account_transaction as st on journalEntry.savings_transaction_id = st.id ")
@@ -150,7 +153,6 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             EnumOptionData entityType = null;
             if (entityTypeId != null) {
                 entityType = AccountingEnumerations.portfolioProductType(entityTypeId);
-
             }
 
             final Long entityId = JdbcSupport.getLong(rs, "entityId");
@@ -224,10 +226,12 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
                 transactionDetailData = new TransactionDetailData(transaction, paymentDetailData, noteData, transactionTypeEnumData);
             }
+            final String externalAssetOwner = rs.getString("externalAssetOwner");
+
             return new JournalEntryData(id, officeId, officeName, glAccountName, glAccountId, glCode, accountType, transactionDate,
                     entryType, amount, transactionId, manualEntry, entityType, entityId, createdByUserId, submittedOnDate,
                     createdByUserName, comments, reversed, referenceNumber, officeRunningBalance, organizationRunningBalance,
-                    runningBalanceComputed, transactionDetailData, currency);
+                    runningBalanceComputed, transactionDetailData, currency, externalAssetOwner);
         }
     }
 

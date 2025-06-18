@@ -16,18 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.investor.service;
+package org.apache.fineract.investor.exception;
 
-import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
-import org.apache.fineract.investor.domain.ExternalAssetOwner;
-import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
-public interface AccountingService {
+public class ExternalAssetOwnerNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    void createJournalEntriesForSaleAssetTransfer(Loan loan, ExternalAssetOwnerTransfer transfer, ExternalAssetOwner previousOwner);
+    public ExternalAssetOwnerNotFoundException(ExternalId externalId) {
+        super("error.msg.external.asset.owner.external.id",
+                String.format("External asset owner with external id: %s does not found", externalId.getValue()), externalId.getValue());
+    }
 
-    void createJournalEntriesForBuybackAssetTransfer(Loan loan, ExternalAssetOwnerTransfer transfer);
-
-    void createMappingToOwner(ExternalAssetOwner owner, JournalEntry journalEntry);
+    public ExternalAssetOwnerNotFoundException(Long id) {
+        super("error.msg.external.asset.owner.id", String.format("External asset owner with id: %s does not found", id), id);
+    }
 }

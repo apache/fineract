@@ -27,6 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -60,17 +61,25 @@ import org.apache.fineract.accounting.provisioning.domain.ProvisioningEntry;
 import org.apache.fineract.accounting.rule.domain.AccountingRule;
 import org.apache.fineract.accounting.rule.domain.AccountingRuleRepository;
 import org.apache.fineract.accounting.rule.exception.AccountingRuleNotFoundException;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
+import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.investor.domain.ExternalAssetOwner;
+import org.apache.fineract.investor.domain.ExternalAssetOwnerRepository;
+import org.apache.fineract.investor.exception.ExternalAssetOwnerNotFoundException;
+import org.apache.fineract.investor.service.AccountingService;
 import org.apache.fineract.organisation.monetary.domain.OrganisationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
@@ -105,6 +114,9 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
     private final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper;
     private final CashBasedAccountingProcessorForClientTransactions accountingProcessorForClientTransactions;
+    private final ConfigurationReadPlatformService configurationReadPlatformService;
+    private final AccountingService accountingService;
+    private final ExternalAssetOwnerRepository externalAssetOwnerRepository;
 
     @Transactional
     @Override
@@ -131,6 +143,22 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             final String transactionId = generateTransactionId(officeId);
             final String referenceNumber = command.stringValueOfParameterNamed(JournalEntryJsonInputParams.REFERENCE_NUMBER.getValue());
 
+            ExternalAssetOwner externalAssetOwner = null;
+            final ExternalId externalId = ExternalIdFactory
+                    .produce(command.stringValueOfParameterNamed(JournalEntryJsonInputParams.EXTERNAL_ASSET_OWNER.getValue()));
+            if (!externalId.isEmpty()) {
+                if (!configurationReadPlatformService
+                        .retrieveGlobalConfiguration(GlobalConfigurationConstants.ASSET_EXTERNALIZATION_OF_NON_ACTIVE_LOANS).isEnabled()) {
+                    throw new JournalEntryRuntimeException("error.msg.glJournalEntry.asset.externalization.not.enabled",
+                            "GL Journal Entry with Asset Externalization not enabled");
+                }
+                final Optional<ExternalAssetOwner> optExternalAssetOwner = externalAssetOwnerRepository.findByExternalId(externalId);
+                if (!optExternalAssetOwner.isPresent()) {
+                    throw new ExternalAssetOwnerNotFoundException(externalId);
+                }
+                externalAssetOwner = optExternalAssetOwner.get();
+            }
+
             if (accountRuleId != null) {
 
                 final AccountingRule accountingRule = this.accountingRuleRepository.findById(accountRuleId)
@@ -147,13 +175,13 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
                     }
 
                     saveAllDebitOrCreditEntries(journalEntryCommand, office, paymentDetail, currencyCode, transactionDate,
-                            journalEntryCommand.getCredits(), transactionId, JournalEntryType.CREDIT, referenceNumber);
+                            journalEntryCommand.getCredits(), transactionId, JournalEntryType.CREDIT, referenceNumber, externalAssetOwner);
                 } else {
                     final GLAccount creditAccountHead = accountingRule.getAccountToCredit();
                     validateGLAccountForTransaction(creditAccountHead);
                     validateDebitOrCreditArrayForExistingGLAccount(creditAccountHead, journalEntryCommand.getCredits());
                     saveAllDebitOrCreditEntries(journalEntryCommand, office, paymentDetail, currencyCode, transactionDate,
-                            journalEntryCommand.getCredits(), transactionId, JournalEntryType.CREDIT, referenceNumber);
+                            journalEntryCommand.getCredits(), transactionId, JournalEntryType.CREDIT, referenceNumber, externalAssetOwner);
                 }
 
                 if (accountingRule.getAccountToDebit() == null) {
@@ -167,21 +195,21 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
                     }
 
                     saveAllDebitOrCreditEntries(journalEntryCommand, office, paymentDetail, currencyCode, transactionDate,
-                            journalEntryCommand.getDebits(), transactionId, JournalEntryType.DEBIT, referenceNumber);
+                            journalEntryCommand.getDebits(), transactionId, JournalEntryType.DEBIT, referenceNumber, externalAssetOwner);
                 } else {
                     final GLAccount debitAccountHead = accountingRule.getAccountToDebit();
                     validateGLAccountForTransaction(debitAccountHead);
                     validateDebitOrCreditArrayForExistingGLAccount(debitAccountHead, journalEntryCommand.getDebits());
                     saveAllDebitOrCreditEntries(journalEntryCommand, office, paymentDetail, currencyCode, transactionDate,
-                            journalEntryCommand.getDebits(), transactionId, JournalEntryType.DEBIT, referenceNumber);
+                            journalEntryCommand.getDebits(), transactionId, JournalEntryType.DEBIT, referenceNumber, externalAssetOwner);
                 }
             } else {
 
                 saveAllDebitOrCreditEntries(journalEntryCommand, office, paymentDetail, currencyCode, transactionDate,
-                        journalEntryCommand.getDebits(), transactionId, JournalEntryType.DEBIT, referenceNumber);
+                        journalEntryCommand.getDebits(), transactionId, JournalEntryType.DEBIT, referenceNumber, externalAssetOwner);
 
                 saveAllDebitOrCreditEntries(journalEntryCommand, office, paymentDetail, currencyCode, transactionDate,
-                        journalEntryCommand.getCredits(), transactionId, JournalEntryType.CREDIT, referenceNumber);
+                        journalEntryCommand.getCredits(), transactionId, JournalEntryType.CREDIT, referenceNumber, externalAssetOwner);
 
             }
 
@@ -598,7 +626,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     private void saveAllDebitOrCreditEntries(final JournalEntryCommand command, final Office office, final PaymentDetail paymentDetail,
             final String currencyCode, final LocalDate transactionDate,
             final SingleDebitOrCreditEntryCommand[] singleDebitOrCreditEntryCommands, final String transactionId,
-            final JournalEntryType type, final String referenceNumber) {
+            final JournalEntryType type, final String referenceNumber, final ExternalAssetOwner externalAssetOwner) {
         final boolean manualEntry = true;
         for (final SingleDebitOrCreditEntryCommand singleDebitOrCreditEntryCommand : singleDebitOrCreditEntryCommands) {
             final GLAccount glAccount = this.glAccountRepository.findById(singleDebitOrCreditEntryCommand.getGlAccountId())
@@ -618,6 +646,8 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
                     manualEntry, transactionDate, type, singleDebitOrCreditEntryCommand.getAmount(), comments, null, null, referenceNumber,
                     null, null, null, null);
             helper.persistJournalEntry(glJournalEntry);
+
+            accountingService.createMappingToOwner(externalAssetOwner, glJournalEntry);
         }
     }
 

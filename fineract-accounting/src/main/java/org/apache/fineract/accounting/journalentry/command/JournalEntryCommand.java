@@ -54,6 +54,7 @@ public class JournalEntryCommand {
     private final SingleDebitOrCreditEntryCommand[] debits;
     private final String locale;
     private final String dateFormat;
+    private final String externalAssetOwner;
 
     public void validateForCreate() {
 
@@ -74,6 +75,9 @@ public class JournalEntryCommand {
         baseDataValidator.reset().parameter("accountingRule").value(this.accountingRuleId).ignoreIfNull().longGreaterThanZero();
 
         baseDataValidator.reset().parameter("paymentTypeId").value(this.paymentTypeId).ignoreIfNull().longGreaterThanZero();
+
+        baseDataValidator.reset().parameter(JournalEntryJsonInputParams.EXTERNAL_ASSET_OWNER.getValue()).value(this.externalAssetOwner)
+                .ignoreIfNull().notExceedingLengthOf(100);
 
         // validation for credit array elements
         if (this.credits != null) {
