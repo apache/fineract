@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.command.persistence;
 
-import org.apache.fineract.command.persistence.model.CommandEntity;
+import org.apache.fineract.command.persistence.domain.CommandEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 

@@ -31,30 +31,54 @@ apply plugin: 'se.thinkcode.cucumber-runner'
 check.dependsOn('cucumber')
 
 tasks.register('staticWeaveJpa', JavaExec) {
-    group = "build"
-    description = "Performs EclipseLink static weaving of entity classes"
-
     dependsOn classes
 
-    def classesDir = file("$buildDir/classes/java/main")
+    def classesDir = layout.buildDirectory.dir("classes/java/main").get().asFile
+    def outputDir = layout.buildDirectory.dir("weaved-classes").get().asFile
+    def persistenceInfo = layout.buildDirectory.dir('static-weaving').get()
+    copy {
+        from file("src/main/resources/jpa/static-weaving/module/provider/persistence.xml")
+        into "${persistenceInfo}/META-INF/"
+    }
 
-    mainClass.set('org.eclipse.persistence.tools.weaving.jpa.StaticWeave')
+    mainClass.set("org.eclipse.persistence.tools.weaving.jpa.StaticWeave")
     classpath = sourceSets.main.runtimeClasspath
-    args '-persistenceinfo', classesDir.absolutePath, classesDir.absolutePath, classesDir.absolutePath
+
+    args = [
+            '-persistenceinfo', persistenceInfo,
+            classesDir.absolutePath,
+            outputDir.absolutePath
+    ]
 }
 
-staticWeaveJpa.doLast {
-    delete "${sourceSets.main.output.classesDirs.asPath}/META-INF/persistence.xml"
+tasks.register("weavedJar", Jar) {
+    archiveClassifier.set("")
+    dependsOn staticWeaveJpa
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(layout.buildDirectory.dir("weaved-classes"))
+    exclude("META-INF/persistence.xml")
 }
 
-tasks.named('classes') {
-    finalizedBy staticWeaveJpa
+tasks.register("weavedPlainJar", Jar) {
+    archiveClassifier.set("plain")
+    dependsOn staticWeaveJpa
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    from(layout.buildDirectory.dir("weaved-classes"))
+
+    exclude("META-INF/persistence.xml")
 }
 
-tasks.named('processResources') {
-    from('src/main/resources')
-    into sourceSets.main.java.classesDirectory
-    outputs.upToDateWhen { false }
+// Configure the default jar task to depend on weavedJar and use its output
+tasks.named('jar') {
+    dependsOn weavedPlainJar
+    enabled = false  // Disable the default jar task
+    // The weavedJar will be used as the primary artifact
+}
+
+// Make sure the assemble task depends on weavedJar
+tasks.named('assemble') {
+    dependsOn weavedJar
 }
 
 tasks.named('staticWeaveJpa') {
@@ -244,7 +268,22 @@ tasks.register('setBlankPassword') {
     }
 }
 
+tasks.register("mergeWeavedOutput", Copy) {
+    dependsOn staticWeaveJpa
+    from layout.buildDirectory.dir("weaved-classes")
+    into layout.buildDirectory.dir("merged-weaved-classes/java/main")
+    // Optional: exclude files like persistence.xml
+    exclude("META-INF/persistence.xml")
+}
+
 bootRun {
+    dependsOn mergeWeavedOutput
+
+    def weavedClasses = layout.buildDirectory.dir("weaved-classes").get().asFile
+
+    classpath = files(weavedClasses) + sourceSets.main.runtimeClasspath.filter { file ->
+        file.name.endsWith('.jar')
+    }
     jvmArgs = [
         "-Dspring.output.ansi.enabled=ALWAYS"
     ]
@@ -259,13 +298,64 @@ springBoot {
     mainClass = 'org.apache.fineract.ServerApplication'
 }
 
-bootJar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    manifest {
-        attributes('Main-Class': 'org.springframework.boot.loader.launch.PropertiesLauncher', 'Implementation-Title': 'Apache Fineract', 'Implementation-Version': project.version)
-    }
-    archiveClassifier = ''
+// Create a new weavedBootJar task that extends BootJar
+tasks.register("weavedBootJar", org.springframework.boot.gradle.tasks.bundling.BootJar) {
+    group = "build"
+    description = "Builds a bootable JAR with weaved classes"
+    dependsOn staticWeaveJpa
     dependsOn resolve
+
+    archiveClassifier.set("")
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    //Required for bootable JAR
+    mainClass.set("org.apache.fineract.ServerApplication")
+    targetJavaVersion.set(JavaVersion.VERSION_21)
+
+    // Replace default classes with weaved ones
+    into("BOOT-INF/classes") {
+        from(layout.buildDirectory.dir("weaved-classes"))
+    }
+
+    manifest {
+        attributes(
+                'Main-Class': 'org.springframework.boot.loader.launch.PropertiesLauncher',
+                'Implementation-Title': 'Apache Fineract',
+                'Implementation-Version': project.version,
+                'Start-Class': 'org.apache.fineract.ServerApplication'
+        )
+    }
+    classpath configurations.runtimeClasspath
+}
+
+// Configure the bootJar task to include all dependencies
+tasks.withType(org.springframework.boot.gradle.tasks.bundling.BootJar) {
+    // This ensures the launcher is included
+    requiresUnpack '**/*.jar'
+
+    // This ensures the launcher classes are included
+    launchScript()
+}
+
+// Make assemble depend on weavedBootJar instead of bootJar
+tasks.named('assemble') {
+    dependsOn 'weavedBootJar'
+}
+
+// Disable the default bootJar task
+bootJar {
+    dependsOn weavedBootJar
+    enabled = false
+}
+
+// Ensure jib uses the weaved classes
+tasks.named('jibDockerBuild') {
+    dependsOn 'staticWeaveJpa'
+}
+
+// Ensure staticWeaveJpa runs before jib
+tasks.named('jib') {
+    dependsOn 'staticWeaveJpa'
 }
 
 jib {
@@ -300,6 +390,15 @@ jib {
         ports = ['8080/tcp', '8443/tcp']
         labels = [maintainer: 'Aleksandar Vidakovic <aleks@apache.org>']
         user = 'nobody:nogroup'
+    }
+
+    extraDirectories {
+        paths {
+            path {
+                from = layout.buildDirectory.dir("weaved-classes").get().asFile
+                into = '/app/classes'
+            }
+        }
     }
 
     allowInsecureRegistries = true
@@ -416,4 +515,51 @@ tasks.register('devRun', org.springframework.boot.gradle.tasks.run.BootRun) {
     doFirst {
         println "Running in development mode - quality checks are disabled"
     }
+}
+
+tasks.named("test") {
+    dependsOn staticWeaveJpa
+
+    def testClasses = layout.buildDirectory.dir("classes/java/test").get().asFile
+    def weavedClasses = layout.buildDirectory.dir("weaved-classes").get().asFile
+    def testResources = layout.buildDirectory.dir("resources/test").get().asFile
+
+    classpath = files(
+            weavedClasses,
+            testClasses,
+            testResources,
+            configurations.testRuntimeClasspath
+    )
+}
+
+tasks.register("weavedCucumberTest", JavaExec) {
+    group = "verification"
+    description = "Runs Cucumber tests with weaved classes"
+
+    dependsOn staticWeaveJpa, compileTestJava, processTestResources
+
+    def weavedClasses = layout.buildDirectory.dir("weaved-classes").get().asFile
+    def testClasses = layout.buildDirectory.dir("classes/java/test").get().asFile
+    def testResources = layout.buildDirectory.dir("resources/test").get().asFile
+
+    classpath = files(
+            weavedClasses,
+            testClasses,
+            testResources,
+            configurations.testRuntimeClasspath
+    )
+
+    mainClass.set("io.cucumber.core.cli.Main") // Cucumber JUnit 5 CLI entrypoint
+
+    args = [
+            '--glue', 'org.apache.fineract', // your step defs package
+            'src/test/resources/features'    // your feature files path
+    ]
+
+    jvmArgs = ["-Dspring.output.ansi.enabled=ALWAYS"]
+}
+
+tasks.named("cucumber") {
+    dependsOn weavedCucumberTest
+    enabled = false
 }

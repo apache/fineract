@@ -22,7 +22,7 @@ import static org.mapstruct.InjectionStrategy.CONSTRUCTOR;
 import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
 
 import org.apache.fineract.command.core.Command;
-import org.apache.fineract.command.persistence.model.CommandEntity;
+import org.apache.fineract.command.persistence.domain.CommandEntity;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
