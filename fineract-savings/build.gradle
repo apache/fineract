@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import org.apache.fineract.gradle.StaticWeaveJpaTask
 description = 'Fineract Savings'
 
 apply plugin: 'java'
@@ -25,25 +26,12 @@ tasks.named('classes') {
     finalizedBy staticWeaveJpa
 }
 
-tasks.register('staticWeaveJpa', JavaExec) {
+tasks.register("staticWeaveJpa", StaticWeaveJpaTask) {
     dependsOn classes
 
-    def classesDir = layout.buildDirectory.dir("classes/java/main").get().asFile
-    def outputDir = layout.buildDirectory.dir("weaved-classes").get().asFile
-    def persistenceInfo = layout.buildDirectory.dir('static-weaving').get()
-    copy {
-        from file("src/main/resources/jpa/static-weaving/module/savings/persistence.xml")
-        into "${persistenceInfo}/META-INF/"
-    }
-
-    mainClass.set("org.eclipse.persistence.tools.weaving.jpa.StaticWeave")
-    classpath = sourceSets.main.runtimeClasspath
-
-    args = [
-            '-persistenceinfo', persistenceInfo,
-            classesDir.absolutePath,
-            outputDir.absolutePath
-    ]
+    inputClasses.set(layout.buildDirectory.dir("classes/java/main").get())
+    persistenceXml.set(file("src/main/resources/jpa/static-weaving/module/savings/persistence.xml"))
+    outputDir.set(layout.buildDirectory.dir("weaved-classes").get())
 }
 
 tasks.register("weavedJar", Jar) {
@@ -74,6 +62,8 @@ compileJava {
 
 // Configuration for Swagger documentation generation task
 // https://github.com/swagger-api/swagger-core/tree/master/modules/swagger-gradle-plugin
+
+import org.apache.fineract.gradle.StaticWeaveJpaTask
 import org.apache.tools.ant.filters.ReplaceTokens
 
 
