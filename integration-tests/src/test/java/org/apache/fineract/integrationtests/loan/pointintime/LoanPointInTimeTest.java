@@ -342,7 +342,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     transaction(500.0, "Repayment", "09 February 2023"), //
                     transaction(500.0, "Repayment", "01 March 2023"), //
                     transaction(5032.52, "Repayment", "05 March 2023"), //
-                    transaction(1282.52, "Accrual", "05 March 2023") //
+                    transaction(1110.08, "Accrual", "05 March 2023") //
             );
         });
     }

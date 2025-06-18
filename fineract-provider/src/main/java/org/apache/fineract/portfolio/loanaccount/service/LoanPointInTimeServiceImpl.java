@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.FlushModeType;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,19 +37,22 @@ import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionInterceptor;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class LoanPointInTimeServiceImpl implements LoanPointInTimeService {
 
     private final LoanUtilService loanUtilService;
     private final LoanScheduleService loanScheduleService;
     private final LoanAssembler loanAssembler;
     private final LoanPointInTimeData.Mapper dataMapper;
+    private final EntityManager entityManager;
 
     @Override
     public LoanPointInTimeData retrieveAt(Long loanId, LocalDate date) {
+        entityManager.setFlushMode(FlushModeType.COMMIT);
         validateSingularRetrieval(loanId, date);
 
         // Note: since everything is running in a readOnly transaction
@@ -66,6 +71,8 @@ public class LoanPointInTimeServiceImpl implements LoanPointInTimeService {
 
             return dataMapper.map(loan);
         } finally {
+            entityManager.clear();
+            TransactionInterceptor.currentTransactionStatus().setRollbackOnly();
             ThreadLocalContextUtil.setBusinessDates(originalBDs);
         }
     }
@@ -89,7 +96,9 @@ public class LoanPointInTimeServiceImpl implements LoanPointInTimeService {
     @Override
     public List<LoanPointInTimeData> retrieveAt(List<Long> loanIds, LocalDate date) {
         validateBulkRetrieval(loanIds, date);
-        return loanIds.stream().map(loanId -> retrieveAt(loanId, date)).toList();
+        List<LoanPointInTimeData> result = loanIds.stream().map(loanId -> retrieveAt(loanId, date)).toList();
+        TransactionInterceptor.currentTransactionStatus().setRollbackOnly();
+        return result;
     }
 
     private void validateBulkRetrieval(List<Long> loanIds, LocalDate date) {

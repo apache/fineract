@@ -143,11 +143,11 @@ Feature: LoanAccrualTransaction
     And Admin successfully approves the loan on "01 January 2023" with "1000" amount and expected disbursement date on "01 January 2023"
     When Admin successfully disburse the loan on "01 January 2023" with "1000" EUR transaction amount
     When Admin sets the business date to "02 January 2023"
-    And Customer makes "AUTOPAY" repayment on "02 January 2023" with 1010.19 EUR transaction amount
+    And Customer makes "AUTOPAY" repayment on "02 January 2023" with 1000.33 EUR transaction amount
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
     Then Loan Transactions tab has a transaction with date: "02 January 2023", and with the following data:
       | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
-      | Accrual          | 10.19  | 0.0       | 10.19    | 0.0  | 0.0       | 0.0          |
+      | Accrual          | 0.33   | 0.0       | 0.33     | 0.0  | 0.0       | 0.0          |
     Then LoanAccrualTransactionCreatedBusinessEvent is raised on "02 January 2023"
 
   @TestRailId:C2683
