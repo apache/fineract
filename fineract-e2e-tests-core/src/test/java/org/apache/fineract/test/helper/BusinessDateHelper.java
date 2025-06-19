@@ -36,7 +36,8 @@ public class BusinessDateHelper {
     public static final String DATE_FORMAT = "dd MMMM yyyy";
     public static final String DEFAULT_LOCALE = "en";
     public static final String BUSINESS_DATE = "BUSINESS_DATE";
-    public static final String BUSINESS_DATE_REQUEST_TYPE = "BUSINESS_DATE";
+    public static final String DEFAULT = "BUSINESS_DATE";
+    public static final String COB = "COB_DATE";
 
     private final BusinessDateManagementApi businessDateManagementApi;
 
@@ -56,10 +57,10 @@ public class BusinessDateHelper {
     }
 
     public BusinessDateRequest defaultBusinessDateRequest() {
-        return new BusinessDateRequest().type(BUSINESS_DATE_REQUEST_TYPE).dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE);
+        return new BusinessDateRequest().type(DEFAULT).dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE);
     }
 
     public String getBusinessDate() throws IOException {
-        return businessDateManagementApi.getBusinessDate(DATE_FORMAT).toString();
+        return businessDateManagementApi.getBusinessDate(DEFAULT).toString();
     }
 }

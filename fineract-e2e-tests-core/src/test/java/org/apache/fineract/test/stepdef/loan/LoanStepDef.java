@@ -61,6 +61,7 @@ import org.apache.fineract.avro.loan.v1.LoanChargePaidByDataV1;
 import org.apache.fineract.avro.loan.v1.LoanStatusEnumDataV1;
 import org.apache.fineract.avro.loan.v1.LoanTransactionDataV1;
 import org.apache.fineract.client.models.AdvancedPaymentData;
+import org.apache.fineract.client.models.BusinessDateData;
 import org.apache.fineract.client.models.DeleteLoansLoanIdResponse;
 import org.apache.fineract.client.models.DisbursementDetail;
 import org.apache.fineract.client.models.GetLoanProductsChargeOffReasonOptions;
@@ -81,6 +82,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.IsCatchUpRunningDTO;
+import org.apache.fineract.client.models.OldestCOBProcessedLoanDTO;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostAddAndDeleteDisbursementDetailRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
@@ -97,6 +99,7 @@ import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.PutLoansLoanIdRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
+import org.apache.fineract.client.services.BusinessDateManagementApi;
 import org.apache.fineract.client.services.LoanCobCatchUpApi;
 import org.apache.fineract.client.services.LoanDisbursementDetailsApi;
 import org.apache.fineract.client.services.LoanInterestPauseApi;
@@ -223,6 +226,9 @@ public class LoanStepDef extends AbstractStepDef {
 
     @Autowired
     private JobPollingProperties jobPollingProperties;
+
+    @Autowired
+    private BusinessDateManagementApi businessDateApi;
 
     @When("Admin creates a new Loan")
     public void createLoan() throws IOException {
@@ -2563,14 +2569,29 @@ public class LoanStepDef extends AbstractStepDef {
                     IsCatchUpRunningDTO isCatchUpRunning = isCatchUpRunningResponse.body();
                     return isCatchUpRunning.getCatchUpRunning();
                 });
-        await().atMost(Duration.ofMillis(jobPollingProperties.getTimeoutInMillis())) //
-                .pollInterval(Duration.ofMillis(jobPollingProperties.getIntervalInMillis())) //
-                .until(() -> {
-                    Response<IsCatchUpRunningDTO> isCatchUpRunningResponse = loanCobCatchUpApi.isCatchUpRunning().execute();
-                    ErrorHelper.checkSuccessfulApiCall(isCatchUpRunningResponse);
-                    IsCatchUpRunningDTO isCatchUpRunning = isCatchUpRunningResponse.body();
-                    return !isCatchUpRunning.getCatchUpRunning();
-                });
+        // Then wait for catch-up to complete
+        await().atMost(Duration.ofMinutes(4)).pollInterval(Duration.ofSeconds(5)).pollDelay(Duration.ofSeconds(5)).until(() -> {
+            // Check if catch-up is still running
+            Response<IsCatchUpRunningDTO> statusResponse = loanCobCatchUpApi.isCatchUpRunning().execute();
+            ErrorHelper.checkSuccessfulApiCall(statusResponse);
+
+            // Only proceed with date check if catch-up is not running
+            if (!statusResponse.body().getCatchUpRunning()) {
+                // Get the current business date
+                Response<BusinessDateData> businessDateResponse = businessDateApi.getBusinessDate(BusinessDateHelper.COB).execute();
+                ErrorHelper.checkSuccessfulApiCall(businessDateResponse);
+                LocalDate currentBusinessDate = businessDateResponse.body().getDate();
+
+                // Get the last closed business date
+                Response<OldestCOBProcessedLoanDTO> catchUpResponse = loanCobCatchUpApi.getOldestCOBProcessedLoan().execute();
+                ErrorHelper.checkSuccessfulApiCall(catchUpResponse);
+                LocalDate lastClosedDate = catchUpResponse.body().getCobBusinessDate();
+
+                // Verify that the last closed date is not before the current business date
+                return !lastClosedDate.isBefore(currentBusinessDate);
+            }
+            return false;
+        });
     }
 
     @Then("Loan's actualMaturityDate is {string}")
