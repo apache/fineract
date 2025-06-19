@@ -111,7 +111,10 @@ public final class AccountingConstants {
         INCOME_FROM_GOODWILL_CREDIT_FEES(20), //
         INCOME_FROM_GOODWILL_CREDIT_PENALTY(21), //
         INCOME_FROM_CAPITALIZATION(22), //
-        DEFERRED_INCOME_LIABILITY(23); //
+        DEFERRED_INCOME_LIABILITY(23), //
+        BUY_DOWN_EXPENSE(24), //
+        INCOME_FROM_BUY_DOWN(25), //
+        ;
 
         private final Integer value;
 
@@ -179,7 +182,10 @@ public final class AccountingConstants {
         EXPENSE_GL_ACCOUNT_ID("expenseAccountId"), //
         CHARGE_OFF_REASON_CODE_VALUE_ID("chargeOffReasonCodeValueId"), //
         DEFERRED_INCOME_LIABILITY("deferredIncomeLiabilityAccountId"), //
-        INCOME_FROM_CAPITALIZATION("incomeFromCapitalizationAccountId"); //
+        INCOME_FROM_CAPITALIZATION("incomeFromCapitalizationAccountId"), //
+        BUY_DOWN_EXPENSE("buyDownExpenseAccountId"), //
+        INCOME_FROM_BUY_DOWN("incomeFromBuyDownAccountId"), //
+        ;
 
         private final String value;
 
@@ -223,7 +229,10 @@ public final class AccountingConstants {
         INCOME_FROM_GOODWILL_CREDIT_FEES("incomeFromGoodwillCreditFeesAccount"), //
         INCOME_FROM_GOODWILL_CREDIT_PENALTY("incomeFromGoodwillCreditPenaltyAccount"), //
         DEFERRED_INCOME_LIABILITY("deferredIncomeLiabilityAccount"), //
-        INCOME_FROM_CAPITALIZATION("incomeFromCapitalizationAccount"); //
+        INCOME_FROM_CAPITALIZATION("incomeFromCapitalizationAccount"), //
+        BUY_DOWN_EXPENSE("buyDownExpenseAccount"), //
+        INCOME_FROM_BUY_DOWN("incomeFromBuyDownAccount"), //
+        ;
 
         private final String value;
 

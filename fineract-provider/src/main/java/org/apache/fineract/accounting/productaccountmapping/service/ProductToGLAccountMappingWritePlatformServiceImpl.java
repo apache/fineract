@@ -190,6 +190,9 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 this.loanProductToGLAccountMappingHelper.saveLoanToIncomeAccountMapping(element,
                         LoanProductAccountingParams.INCOME_FROM_CAPITALIZATION.getValue(), loanProductId,
                         AccrualAccountsForLoan.INCOME_FROM_CAPITALIZATION.getValue());
+                this.loanProductToGLAccountMappingHelper.saveLoanToIncomeAccountMapping(element,
+                        LoanProductAccountingParams.INCOME_FROM_BUY_DOWN.getValue(), loanProductId,
+                        AccrualAccountsForLoan.INCOME_FROM_BUY_DOWN.getValue());
 
                 // expenses
                 this.loanProductToGLAccountMappingHelper.saveLoanToExpenseAccountMapping(element,
@@ -204,6 +207,9 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 this.loanProductToGLAccountMappingHelper.saveLoanToExpenseAccountMapping(element,
                         LoanProductAccountingParams.CHARGE_OFF_FRAUD_EXPENSE.getValue(), loanProductId,
                         AccrualAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE.getValue());
+                this.loanProductToGLAccountMappingHelper.saveLoanToExpenseAccountMapping(element,
+                        LoanProductAccountingParams.BUY_DOWN_EXPENSE.getValue(), loanProductId,
+                        AccrualAccountsForLoan.BUY_DOWN_EXPENSE.getValue());
 
                 // liabilities
                 this.loanProductToGLAccountMappingHelper.saveLoanToLiabilityAccountMapping(element,
