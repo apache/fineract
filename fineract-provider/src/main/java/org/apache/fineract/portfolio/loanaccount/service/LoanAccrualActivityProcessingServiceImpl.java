@@ -274,16 +274,19 @@ public class LoanAccrualActivityProcessingServiceImpl implements LoanAccrualActi
                 transactionDate);
 
         if (newAccrualActivityTransaction != null) {
-            makeAccrualActivityTransaction(loan, newAccrualActivityTransaction);
+            LoanTransaction savedNewTransaction = makeAccrualActivityTransaction(loan, newAccrualActivityTransaction);
+            loan.addLoanTransaction(savedNewTransaction);
         }
     }
 
-    private void makeAccrualActivityTransaction(final @NonNull Loan loan, @NonNull LoanTransaction newAccrualActivityTransaction) {
+    private LoanTransaction makeAccrualActivityTransaction(final @NonNull Loan loan,
+            @NonNull LoanTransaction newAccrualActivityTransaction) {
         businessEventNotifierService.notifyPreBusinessEvent(new LoanTransactionAccrualActivityPreBusinessEvent(loan));
-        newAccrualActivityTransaction = loanAccountService
+        LoanTransaction savedNewAccrualActivityTransaction = loanAccountService
                 .saveLoanTransactionWithDataIntegrityViolationChecks(newAccrualActivityTransaction);
         businessEventNotifierService
-                .notifyPostBusinessEvent(new LoanTransactionAccrualActivityPostBusinessEvent(newAccrualActivityTransaction));
+                .notifyPostBusinessEvent(new LoanTransactionAccrualActivityPostBusinessEvent(savedNewAccrualActivityTransaction));
+        return savedNewAccrualActivityTransaction;
     }
 
 }

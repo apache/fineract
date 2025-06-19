@@ -678,9 +678,9 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
 
         // update repayment schedule portions
         addTransactionMappings(transaction, accrualPeriod, adjustment);
-        loanTransactionRepository.save(transaction);
-
-        return transaction;
+        LoanTransaction savedTransaction = loanTransactionRepository.save(transaction);
+        loan.addLoanTransaction(savedTransaction);
+        return savedTransaction;
     }
 
     private void mergeAccrualTransaction(@NotNull final LoanTransaction transaction, final AccrualPeriodData accrualPeriod,
@@ -825,7 +825,8 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
                     }
                     final LoanTransaction interestAccrualTransaction = LoanTransaction.accrueInterest(loan.getOffice(), loan,
                             interestApplied, loan.getDisbursementDate(), externalId);
-                    loanTransactionRepository.save(interestAccrualTransaction);
+                    LoanTransaction savedInterestAccrualTransaction = loanTransactionRepository.save(interestAccrualTransaction);
+                    loan.addLoanTransaction(savedInterestAccrualTransaction);
                 }
             } else {
                 Set<LoanChargePaidBy> chargePaidBies = accrualTransaction.getLoanChargesPaid();
@@ -940,12 +941,14 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
         if (incomeTransaction.isEmpty()) {
             LoanTransaction transaction = LoanTransaction.incomePosting(loan, loan.getOffice(), compoundingDetail.getEffectiveDate(),
                     compoundingDetail.getAmount(), interest, fee, penalties, externalId);
-            loanTransactionRepository.save(transaction);
+            LoanTransaction savedTransaction = loanTransactionRepository.save(transaction);
+            loan.addLoanTransaction(savedTransaction);
         } else if (incomeTransaction.get().getAmount(loan.getCurrency()).getAmount().compareTo(compoundingDetail.getAmount()) != 0) {
             incomeTransaction.get().reverse();
             LoanTransaction transaction = LoanTransaction.incomePosting(loan, loan.getOffice(), compoundingDetail.getEffectiveDate(),
                     compoundingDetail.getAmount(), interest, fee, penalties, externalId);
-            loanTransactionRepository.save(transaction);
+            LoanTransaction savedTransaction = loanTransactionRepository.save(transaction);
+            loan.addLoanTransaction(savedTransaction);
         }
     }
 
@@ -964,7 +967,8 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
                 LoanTransaction accrual = LoanTransaction.accrueTransaction(loan, loan.getOffice(), compoundingDetail.getEffectiveDate(),
                         compoundingDetail.getAmount(), interest, fee, penalties, externalId);
                 updateLoanChargesPaidBy(loan, accrual, feeDetails, null);
-                loanTransactionRepository.save(accrual);
+                LoanTransaction savedAccrual = loanTransactionRepository.save(accrual);
+                loan.addLoanTransaction(savedAccrual);
             }
         }
     }
@@ -1025,7 +1029,8 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
         }
         LoanTransaction finalIncomeTransaction = LoanTransaction.incomePosting(loan, loan.getOffice(), closedDate, amountToPost,
                 interestToPost, feeToPost, penaltyToPost, externalId);
-        loanTransactionRepository.save(finalIncomeTransaction);
+        LoanTransaction savedFinalIncomeTransaction = loanTransactionRepository.save(finalIncomeTransaction);
+        loan.addLoanTransaction(savedFinalIncomeTransaction);
 
         if (loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
             final LocalDate lastAccruedDate = loanTransactionRepository
@@ -1040,7 +1045,8 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
             LoanTransaction finalAccrual = LoanTransaction.accrueTransaction(loan, loan.getOffice(), closedDate, amountToPost,
                     interestToPost, feeToPost, penaltyToPost, externalId);
             updateLoanChargesPaidBy(loan, finalAccrual, feeDetails, null);
-            loanTransactionRepository.save(finalAccrual);
+            LoanTransaction savedFinalAccrual = loanTransactionRepository.save(finalAccrual);
+            loan.addLoanTransaction(savedFinalAccrual);
         }
     }
 

@@ -802,8 +802,9 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
 
         for (LoanTransaction newTransaction : newTransactions) {
-            loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(newTransaction);
-            transactionIds.add(newTransaction.getId());
+            LoanTransaction savedNewTransaction = loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(newTransaction);
+            loan.addLoanTransaction(savedNewTransaction);
+            transactionIds.add(savedNewTransaction.getId());
         }
         changes.put("transactions", transactionIds);
         changes.put("eventAmount", payPrincipal.getAmount().negate());
