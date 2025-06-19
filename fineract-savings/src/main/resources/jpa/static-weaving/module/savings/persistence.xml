@@ -92,7 +92,6 @@
         <class>org.apache.fineract.portfolio.interestratechart.domain.InterestIncentives</class>
         <class>org.apache.fineract.portfolio.interestratechart.domain.InterestRateChart</class>
         <class>org.apache.fineract.portfolio.interestratechart.domain.InterestRateChartSlab</class>
-        <class>org.apache.fineract.portfolio.interestratechart.domain.InterestRateChartFields</class>
         <class>org.apache.fineract.portfolio.savings.domain.DepositAccountInterestIncentive</class>
         <class>org.apache.fineract.portfolio.savings.domain.DepositAccountInterestIncentives</class>
         <class>org.apache.fineract.portfolio.savings.domain.DepositAccountInterestRateChart</class>

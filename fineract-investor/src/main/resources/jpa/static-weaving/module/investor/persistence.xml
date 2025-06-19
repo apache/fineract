@@ -88,6 +88,9 @@
         <class>org.apache.fineract.investor.domain.ExternalAssetOwnerTransferLoanMapping</class>
         <class>org.apache.fineract.investor.domain.ExternalAssetOwnerJournalEntryMapping</class>
 
+        <!-- Investor Module Converters -->
+        <class>org.apache.fineract.investor.domain.ExternalIdConverter</class>
+
         <!-- Loan Module Entities -->
         <class>org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketMappings</class>
         <class>org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyAction</class>
@@ -109,7 +112,6 @@
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanRescheduleRequestToTermVariationMapping</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanStatusChangeHistory</class>
-        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanStatusConverter</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanTopupDetails</class>
         <class>org.apache.fineract.portfolio.loanaccount.domain.LoanTrancheCharge</class>
@@ -130,12 +132,18 @@
         <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProductPaymentAllocationRule</class>
         <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProductVariableInstallmentConfig</class>
         <class>org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks</class>
-        <class>org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTypeListConverter</class>
-        <class>org.apache.fineract.portfolio.loanproduct.domain.SupportedInterestRefundTypesListConverter</class>
-        <class>org.apache.fineract.portfolio.loanproduct.domain.AllocationTypeListConverter</class>
         <class>org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagement</class>
         <class>org.apache.fineract.portfolio.collateralmanagement.domain.CollateralManagementDomain</class>
         <class>org.apache.fineract.portfolio.collateral.domain.LoanCollateral</class>
+
+        <!-- Loan Module Converters -->
+        <class>org.apache.fineract.portfolio.loanproduct.domain.AllocationTypeListConverter</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.AccountingRuleTypeConverter</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanSubStatusConverter</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionTypeConverter</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTypeListConverter</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.SupportedInterestRefundTypesListConverter</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanStatusConverter</class>
 
         <!-- Tax Module Entities -->
         <class>org.apache.fineract.portfolio.tax.domain.TaxComponent</class>
