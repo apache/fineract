@@ -567,10 +567,10 @@ public class LoanAccountConfiguration {
     @ConditionalOnMissingBean(LoanBuyDownFeeAmortizationProcessingService.class)
     public LoanBuyDownFeeAmortizationProcessingService loanBuyDownFeeAmortizationProcessingService(
             final LoanTransactionRepository loanTransactionRepository,
-            final LoanBuyDownFeesBalanceRepository loanBuyDownFeesBalanceRepository,
+            final LoanBuyDownFeeBalanceRepository loanBuyDownFeeBalanceRepository,
             final BusinessEventNotifierService businessEventNotifierService, final LoanJournalEntryPoster journalEntryPoster,
             final ExternalIdFactory externalIdFactory) {
-        return new LoanBuyDownFeeAmortizationProcessingServiceImpl(loanTransactionRepository, loanBuyDownFeesBalanceRepository,
+        return new LoanBuyDownFeeAmortizationProcessingServiceImpl(loanTransactionRepository, loanBuyDownFeeBalanceRepository,
                 businessEventNotifierService, journalEntryPoster, externalIdFactory);
     }
 }

@@ -33,7 +33,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanBuyDownFeeBalance;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
-import org.apache.fineract.portfolio.loanaccount.repository.LoanBuyDownFeesBalanceRepository;
+import org.apache.fineract.portfolio.loanaccount.repository.LoanBuyDownFeeBalanceRepository;
 import org.apache.fineract.portfolio.loanaccount.util.BuyDownFeeAmortizationUtil;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
@@ -44,7 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class LoanBuyDownFeeAmortizationProcessingServiceImpl implements LoanBuyDownFeeAmortizationProcessingService {
 
     private final LoanTransactionRepository loanTransactionRepository;
-    private final LoanBuyDownFeesBalanceRepository loanBuyDownFeesBalanceRepository;
+    private final LoanBuyDownFeeBalanceRepository loanBuyDownFeeBalanceRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanJournalEntryPoster journalEntryPoster;
     private final ExternalIdFactory externalIdFactory;
@@ -55,7 +55,7 @@ public class LoanBuyDownFeeAmortizationProcessingServiceImpl implements LoanBuyD
         final List<Long> existingTransactionIds = loanTransactionRepository.findTransactionIdsByLoan(loan);
         final List<Long> existingReversedTransactionIds = loanTransactionRepository.findReversedTransactionIdsByLoan(loan);
 
-        List<LoanBuyDownFeeBalance> balances = loanBuyDownFeesBalanceRepository.findAllByLoanId(loan.getId());
+        List<LoanBuyDownFeeBalance> balances = loanBuyDownFeeBalanceRepository.findAllByLoanId(loan.getId());
 
         LocalDate maturityDate = loan.getMaturityDate() != null ? loan.getMaturityDate()
                 : getFinalBuyDownFeeAmortizationTransactionDate(loan);
@@ -75,7 +75,7 @@ public class LoanBuyDownFeeAmortizationProcessingServiceImpl implements LoanBuyD
                     .subtract(amortizationTillDate.getAmount()));
         }
 
-        loanBuyDownFeesBalanceRepository.saveAll(balances);
+        loanBuyDownFeeBalanceRepository.saveAll(balances);
 
         BigDecimal totalAmortized = loanTransactionRepository.getAmortizedAmountBuyDownFee(loan);
         BigDecimal totalAmortizationAmount = totalAmortization.getAmount().subtract(totalAmortized);

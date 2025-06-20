@@ -484,16 +484,41 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         switch (transactionType) {
             case CAPITALIZED_INCOME:
                 final Loan loan = loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
+                BigDecimal capitalizedIncomeBalance = BigDecimal.ZERO;
+                BigDecimal buyDownFeeBalance = BigDecimal.ZERO;
                 if (loan.getLoanProduct().getLoanProductRelatedDetail().isEnableIncomeCapitalization()) {
-                    final BigDecimal capitalizedIncomeBalance = loanCapitalizedIncomeBalanceRepository.findAllByLoanId(loanId).stream()
+                    capitalizedIncomeBalance = loanCapitalizedIncomeBalanceRepository.findAllByLoanId(loanId).stream()
                             .map(LoanCapitalizedIncomeBalance::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
-                    transactionAmount = loan.getApprovedPrincipal().subtract(loan.getDisbursedAmount()).subtract(capitalizedIncomeBalance);
                 }
+                // Calculate Buy Down Fee balance to subtract from Capitalized Income formula
+                buyDownFeeBalance = loanBuyDownFeeBalanceRepository.findAllByLoanId(loanId).stream().map(LoanBuyDownFeeBalance::getAmount)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                transactionAmount = loan.getApprovedPrincipal().subtract(loan.getDisbursedAmount()).subtract(capitalizedIncomeBalance)
+                        .subtract(buyDownFeeBalance);
                 paymentOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
                 loanTransactionData = LoanTransactionData.loanTransactionDataForCreditTemplate(
                         LoanEnumerations.transactionType(transactionType), DateUtils.getBusinessLocalDate(), transactionAmount,
                         paymentOptions, retriveLoanCurrencyData(loanId));
+            break;
+            case BUY_DOWN_FEE:
+                final Loan buyDownLoan = loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
+                BigDecimal buyDownFeeBalanceForCalc = BigDecimal.ZERO;
+                BigDecimal capitalizedIncomeBalanceForCalc = BigDecimal.ZERO;
 
+                // Calculate existing Buy Down Fee balance
+                buyDownFeeBalanceForCalc = loanBuyDownFeeBalanceRepository.findAllByLoanId(loanId).stream()
+                        .map(LoanBuyDownFeeBalance::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+                // Calculate Capitalized Income balance to subtract from Buy Down Fee formula
+                if (buyDownLoan.getLoanProduct().getLoanProductRelatedDetail().isEnableIncomeCapitalization()) {
+                    capitalizedIncomeBalanceForCalc = loanCapitalizedIncomeBalanceRepository.findAllByLoanId(loanId).stream()
+                            .map(LoanCapitalizedIncomeBalance::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+                }
+                transactionAmount = buyDownLoan.getApprovedPrincipal().subtract(buyDownLoan.getDisbursedAmount())
+                        .subtract(buyDownFeeBalanceForCalc).subtract(capitalizedIncomeBalanceForCalc);
+                paymentOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
+                loanTransactionData = LoanTransactionData.loanTransactionDataForCreditTemplate(
+                        LoanEnumerations.transactionType(transactionType), DateUtils.getBusinessLocalDate(), transactionAmount,
+                        paymentOptions, retriveLoanCurrencyData(loanId));
             break;
             case CAPITALIZED_INCOME_ADJUSTMENT:
                 final LoanCapitalizedIncomeBalance loanCapitalizedIncomeBalance = loanCapitalizedIncomeBalanceRepository

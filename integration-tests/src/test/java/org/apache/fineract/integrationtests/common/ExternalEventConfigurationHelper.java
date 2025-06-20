@@ -636,15 +636,15 @@ public class ExternalEventConfigurationHelper {
         loanTransactionUndoContractTerminationBusinessEvent.put("enabled", false);
         defaults.add(loanTransactionUndoContractTerminationBusinessEvent);
 
-        Map<String, Object> loanBuyDownFeeTransactionCreatedBusinessEvent = new HashMap<>();
-        loanBuyDownFeeTransactionCreatedBusinessEvent.put("type", "LoanBuyDownFeeTransactionCreatedBusinessEvent");
-        loanBuyDownFeeTransactionCreatedBusinessEvent.put("enabled", false);
-        defaults.add(loanBuyDownFeeTransactionCreatedBusinessEvent);
+        Map<String, Object> loanTransactionBuyDownFeePostBusinessEvent = new HashMap<>();
+        loanTransactionBuyDownFeePostBusinessEvent.put("type", "LoanBuyDownFeeTransactionCreatedBusinessEvent");
+        loanTransactionBuyDownFeePostBusinessEvent.put("enabled", false);
+        defaults.add(loanTransactionBuyDownFeePostBusinessEvent);
 
-        Map<String, Object> loanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent = new HashMap<>();
-        loanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent.put("type", "LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent");
-        loanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent.put("enabled", false);
-        defaults.add(loanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent);
+        Map<String, Object> loanTransactionBuyDownFeeAdjustmentPostBusinessEvent = new HashMap<>();
+        loanTransactionBuyDownFeeAdjustmentPostBusinessEvent.put("type", "LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent");
+        loanTransactionBuyDownFeeAdjustmentPostBusinessEvent.put("enabled", false);
+        defaults.add(loanTransactionBuyDownFeeAdjustmentPostBusinessEvent);
 
         Map<String, Object> loanBuyDownFeeAmortizationTransactionCreatedBusinessEvent = new HashMap<>();
         loanBuyDownFeeAmortizationTransactionCreatedBusinessEvent.put("type", "LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent");

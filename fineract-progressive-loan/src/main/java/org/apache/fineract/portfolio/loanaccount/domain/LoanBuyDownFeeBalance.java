@@ -61,4 +61,5 @@ public class LoanBuyDownFeeBalance extends AbstractAuditableWithUTCDateTimeCusto
 
     @Column(name = "amount_adjustment", scale = 6, precision = 19)
     private BigDecimal amountAdjustment;
+
 }
