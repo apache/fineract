@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+
+
+<persistence version="2.0"
+    xmlns="http://java.sun.com/xml/ns/persistence"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+
+    <!--  This file is only used for static weaving, nothing more.  -->
+    <!--  You can find the runtime configuration in the JPAConfig class  -->
+    <persistence-unit name="jpa-pu" transaction-type="RESOURCE_LOCAL">
+        <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+
+        <!-- Core Module Entities -->
+        <class>org.apache.fineract.useradministration.domain.Role</class>
+        <class>org.apache.fineract.portfolio.fund.domain.Fund</class>
+        <class>org.apache.fineract.infrastructure.documentmanagement.domain.Image</class>
+        <class>org.apache.fineract.organisation.workingdays.domain.WorkingDays</class>
+        <class>org.apache.fineract.useradministration.domain.Permission</class>
+        <class>org.apache.fineract.useradministration.domain.AppUserClientMapping</class>
+        <class>org.apache.fineract.commands.domain.CommandSource</class>
+        <class>org.apache.fineract.useradministration.domain.AppUser</class>
+        <class>org.apache.fineract.accounting.glaccount.domain.GLAccount</class>
+        <class>org.apache.fineract.organisation.monetary.domain.OrganisationCurrency</class>
+        <class>org.apache.fineract.organisation.staff.domain.Staff</class>
+        <class>org.apache.fineract.portfolio.rate.domain.Rate</class>
+        <class>org.apache.fineract.organisation.monetary.domain.ApplicationCurrency</class>
+        <class>org.apache.fineract.portfolio.calendar.domain.CalendarInstance</class>
+        <class>org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail</class>
+        <class>org.apache.fineract.portfolio.calendar.domain.Calendar</class>
+        <class>org.apache.fineract.portfolio.calendar.domain.CalendarHistory</class>
+        <class>org.apache.fineract.portfolio.client.domain.ClientIdentifier</class>
+        <class>org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket</class>
+        <class>org.apache.fineract.portfolio.delinquency.domain.DelinquencyRange</class>
+        <class>org.apache.fineract.portfolio.group.domain.StaffAssignmentHistory</class>
+        <class>org.apache.fineract.portfolio.group.domain.Group</class>
+        <class>org.apache.fineract.portfolio.client.domain.Client</class>
+        <class>org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventConfiguration</class>
+        <class>org.apache.fineract.portfolio.group.domain.GroupRole</class>
+        <class>org.apache.fineract.portfolio.paymenttype.domain.PaymentType</class>
+        <class>org.apache.fineract.portfolio.group.domain.GroupLevel</class>
+        <class>org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEvent</class>
+        <class>org.apache.fineract.organisation.office.domain.Office</class>
+        <class>org.apache.fineract.organisation.holiday.domain.Holiday</class>
+        <class>org.apache.fineract.infrastructure.cache.domain.PlatformCache</class>
+        <class>org.apache.fineract.infrastructure.codes.domain.Code</class>
+        <class>org.apache.fineract.infrastructure.businessdate.domain.BusinessDate</class>
+        <class>org.apache.fineract.infrastructure.codes.domain.CodeValue</class>
+
+        <!-- Accounting Module Entities -->
+        <class>org.apache.fineract.accounting.closure.domain.GLClosure</class>
+        <class>org.apache.fineract.accounting.financialactivityaccount.domain.FinancialActivityAccount</class>
+        <class>org.apache.fineract.accounting.glaccount.domain.TrialBalance</class>
+        <class>org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGLAccountMapping</class>
+        <class>org.apache.fineract.accounting.rule.domain.AccountingRule</class>
+        <class>org.apache.fineract.accounting.rule.domain.AccountingTagRule</class>
+        <class>org.apache.fineract.accounting.journalentry.domain.JournalEntry</class>
+
+        <!-- Credit Bureau Module Entities -->
+        <class>org.apache.fineract.infrastructure.creditbureau.domain.CreditBureauToken</class>
+        <class>org.apache.fineract.infrastructure.creditbureau.domain.CreditReport</class>
+        <class>org.apache.fineract.infrastructure.creditbureau.domain.CreditBureau</class>
+        <class>org.apache.fineract.infrastructure.creditbureau.domain.CreditBureauLoanProductMapping</class>
+        <class>org.apache.fineract.infrastructure.creditbureau.domain.CreditBureauConfiguration</class>
+        <class>org.apache.fineract.infrastructure.creditbureau.domain.OrganisationCreditBureau</class>
+
+        <!-- Configuration Module Entities -->
+        <class>org.apache.fineract.infrastructure.configuration.domain.ExternalService</class>
+        <class>org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationProperty</class>
+        <class>org.apache.fineract.infrastructure.configuration.domain.ExternalServicesProperties</class>
+
+        <!-- Bulk Import Module Entities -->
+        <class>org.apache.fineract.infrastructure.bulkimport.domain.ImportDocument</class>
+
+        <!-- Survey Module Entities -->
+        <class>org.apache.fineract.infrastructure.survey.domain.Likelihood</class>
+
+        <!-- Entity Access Module Entities -->
+        <class>org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelation</class>
+        <class>org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityToEntityMapping</class>
+        <class>org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccess</class>
+
+        <!-- SMS Module Entities -->
+        <class>org.apache.fineract.infrastructure.sms.domain.SmsMessage</class>
+        <class>org.apache.fineract.infrastructure.campaigns.sms.domain.SmsCampaign</class>
+
+        <!-- Security Module Entities -->
+        <class>org.apache.fineract.infrastructure.security.domain.TFAccessToken</class>
+        <class>org.apache.fineract.infrastructure.security.domain.TwoFactorConfiguration</class>
+
+        <!-- Email Campaign Module Entities -->
+        <class>org.apache.fineract.infrastructure.campaigns.email.domain.EmailCampaign</class>
+        <class>org.apache.fineract.infrastructure.campaigns.email.domain.EmailConfiguration</class>
+        <class>org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessage</class>
+
+        <!-- Account Number Format Module Entities -->
+        <class>org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat</class>
+
+        <!-- Client Module Entities -->
+        <class>org.apache.fineract.portfolio.client.domain.ClientFamilyMembers</class>
+        <class>org.apache.fineract.portfolio.client.domain.ClientNonPerson</class>
+        <class>org.apache.fineract.portfolio.client.domain.ClientTransferDetails</class>
+        <class>org.apache.fineract.portfolio.client.domain.ClientAddress</class>
+        <class>org.apache.fineract.portfolio.client.domain.ClientCharge</class>
+        <class>org.apache.fineract.portfolio.client.domain.ClientTransaction</class>
+        <class>org.apache.fineract.portfolio.client.domain.ClientChargePaidBy</class>
+
+        <!-- Meeting Module Entities -->
+        <class>org.apache.fineract.portfolio.meeting.domain.Meeting</class>
+        <class>org.apache.fineract.portfolio.meeting.attendance.domain.ClientAttendance</class>
+
+        <!-- Hooks Module Entities -->
+        <class>org.apache.fineract.infrastructure.hooks.domain.Hook</class>
+        <class>org.apache.fineract.infrastructure.hooks.domain.HookResource</class>
+        <class>org.apache.fineract.infrastructure.hooks.domain.HookTemplate</class>
+        <class>org.apache.fineract.infrastructure.hooks.domain.Schema</class>
+        <class>org.apache.fineract.infrastructure.hooks.domain.HookConfiguration</class>
+
+        <!-- Address Module Entities -->
+        <class>org.apache.fineract.portfolio.address.domain.FieldConfiguration</class>
+        <class>org.apache.fineract.portfolio.address.domain.Address</class>
+
+        <!-- Entity Access Module Entities -->
+        <class>org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelation</class>
+        <class>org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityToEntityMapping</class>
+        <class>org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccess</class>
+
+        <!-- Self Service Module Entities -->
+        <class>org.apache.fineract.portfolio.self.account.domain.SelfBeneficiariesTPT</class>
+        <class>org.apache.fineract.portfolio.self.device.domain.DeviceRegistration</class>
+        <class>org.apache.fineract.portfolio.self.pockets.domain.Pocket</class>
+        <class>org.apache.fineract.portfolio.self.pockets.domain.PocketAccountMapping</class>
+        <class>org.apache.fineract.portfolio.self.registration.domain.SelfServiceRegistration</class>
+
+        <!-- Command Module Entities -->
+
+        <class>org.apache.fineract.command.persistence.domain.CommandEntity</class>
+        <class>org.apache.fineract.command.persistence.converter.JsonAttributeConverter</class>
+
+        <!-- Charge Module Entities -->
+        <class>org.apache.fineract.portfolio.charge.domain.Charge</class>
+
+        <!-- Branch Module Entities -->
+        <class>org.apache.fineract.organisation.teller.domain.CashierTransaction</class>
+        <class>org.apache.fineract.organisation.teller.domain.Teller</class>
+        <class>org.apache.fineract.organisation.teller.domain.Cashier</class>
+        <class>org.apache.fineract.organisation.teller.domain.TellerTransaction</class>
+
+        <!-- Investor Module Entities -->
+        <class>org.apache.fineract.investor.domain.ExternalAssetOwner</class>
+        <class>org.apache.fineract.investor.domain.ExternalAssetOwnerLoanProductAttributes</class>
+        <class>org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer</class>
+        <class>org.apache.fineract.investor.domain.ExternalAssetOwnerTransferDetails</class>
+        <class>org.apache.fineract.investor.domain.ExternalAssetOwnerTransferJournalEntryMapping</class>
+        <class>org.apache.fineract.investor.domain.ExternalAssetOwnerTransferLoanMapping</class>
+        <class>org.apache.fineract.investor.domain.ExternalAssetOwnerJournalEntryMapping</class>
+
+        <!-- Investor Module Converters -->
+        <class>org.apache.fineract.investor.domain.ExternalIdConverter</class>
+
+        <!-- Loan Module Entities -->
+        <class>org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketMappings</class>
+        <class>org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyAction</class>
+        <class>org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyTagHistory</class>
+        <class>org.apache.fineract.portfolio.delinquency.domain.LoanInstallmentDelinquencyTag</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoringAccount</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.Loan</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanCharge</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidBy</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanCreditAllocationRule</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanInstallmentCharge</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanInterestRecalcualtionAdditionalDetails</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanInterestRecalculationDetails</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanOfficerAssignmentHistory</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanOverdueInstallmentCharge</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanPaymentAllocationRule</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanRescheduleRequestToTermVariationMapping</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanStatusChangeHistory</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanTopupDetails</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanTrancheCharge</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanTrancheDisbursementCharge</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionToRepaymentScheduleMapping</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParameter</class>
+        <class>org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanRepaymentScheduleHistory</class>
+        <class>org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProduct</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProductBorrowerCycleVariations</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProductConfigurableAttributes</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProductCreditAllocationRule</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProductFloatingRates</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProductGuaranteeDetails</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProductInterestRecalculationDetails</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProductPaymentAllocationRule</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.LoanProductVariableInstallmentConfig</class>
+        <class>org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks</class>
+        <class>org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagement</class>
+        <class>org.apache.fineract.portfolio.collateralmanagement.domain.CollateralManagementDomain</class>
+        <class>org.apache.fineract.portfolio.collateral.domain.LoanCollateral</class>
+
+        <!-- Loan Module Converters -->
+        <class>org.apache.fineract.portfolio.loanproduct.domain.AllocationTypeListConverter</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.AccountingRuleTypeConverter</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanSubStatusConverter</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionTypeConverter</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTypeListConverter</class>
+        <class>org.apache.fineract.portfolio.loanproduct.domain.SupportedInterestRefundTypesListConverter</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanStatusConverter</class>
+
+        <!-- Document Module Entities -->
+        <class>org.apache.fineract.infrastructure.documentmanagement.domain.Document</class>
+
+        <!-- Tax Module Entities -->
+        <class>org.apache.fineract.portfolio.tax.domain.TaxComponent</class>
+        <class>org.apache.fineract.portfolio.tax.domain.TaxComponentHistory</class>
+        <class>org.apache.fineract.portfolio.tax.domain.TaxGroup</class>
+        <class>org.apache.fineract.portfolio.tax.domain.TaxGroupMappings</class>
+
+        <!-- Rates Module Entities -->
+        <class>org.apache.fineract.portfolio.floatingrates.domain.FloatingRate</class>
+        <class>org.apache.fineract.portfolio.floatingrates.domain.FloatingRatePeriod</class>
+
+        <!-- Savings Module Entities -->
+        <class>org.apache.fineract.interoperation.domain.InteropIdentifier</class>
+        <class>org.apache.fineract.portfolio.interestratechart.domain.InterestIncentives</class>
+        <class>org.apache.fineract.portfolio.interestratechart.domain.InterestRateChart</class>
+        <class>org.apache.fineract.portfolio.interestratechart.domain.InterestRateChartSlab</class>
+        <class>org.apache.fineract.portfolio.savings.domain.DepositAccountInterestIncentive</class>
+        <class>org.apache.fineract.portfolio.savings.domain.DepositAccountInterestIncentives</class>
+        <class>org.apache.fineract.portfolio.savings.domain.DepositAccountInterestRateChart</class>
+        <class>org.apache.fineract.portfolio.savings.domain.DepositAccountInterestRateChartSlabs</class>
+        <class>org.apache.fineract.portfolio.savings.domain.DepositAccountOnHoldTransaction</class>
+        <class>org.apache.fineract.portfolio.savings.domain.DepositAccountTermAndPreClosure</class>
+        <class>org.apache.fineract.portfolio.savings.domain.DepositProductRecurringDetail</class>
+        <class>org.apache.fineract.portfolio.savings.domain.DepositProductTermAndPreClosure</class>
+        <class>org.apache.fineract.portfolio.savings.domain.FixedDepositProduct</class>
+        <class>org.apache.fineract.portfolio.savings.domain.GroupSavingsIndividualMonitoring</class>
+        <class>org.apache.fineract.portfolio.savings.domain.RecurringDepositProduct</class>
+        <class>org.apache.fineract.portfolio.savings.domain.SavingsAccount</class>
+        <class>org.apache.fineract.portfolio.savings.domain.SavingsAccountCharge</class>
+        <class>org.apache.fineract.portfolio.savings.domain.SavingsAccountChargePaidBy</class>
+        <class>org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction</class>
+        <class>org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionTaxDetails</class>
+        <class>org.apache.fineract.portfolio.savings.domain.SavingsOfficerAssignmentHistory</class>
+        <class>org.apache.fineract.portfolio.savings.domain.SavingsProduct</class>
+
+        <!-- Progressive Loan Module Entities -->
+        <class>org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeBalance</class>
+        <class>org.apache.fineract.portfolio.loanaccount.domain.ProgressiveLoanModel</class>
+
+        <!-- Account Module Entities -->
+        <class>org.apache.fineract.portfolio.account.domain.AccountAssociations</class>
+        <class>org.apache.fineract.portfolio.account.domain.AccountTransferDetails</class>
+        <class>org.apache.fineract.portfolio.account.domain.AccountTransferStandingInstruction</class>
+        <class>org.apache.fineract.portfolio.account.domain.AccountTransferTransaction</class>
+
+        <!-- Provider Module Entities -->
+        <!-- Notification -->
+        <class>org.apache.fineract.notification.domain.NotificationMapper</class>
+        <class>org.apache.fineract.notification.domain.Notification</class>
+
+        <!-- AdHocQuery -->
+        <class>org.apache.fineract.adhocquery.domain.AdHoc</class>
+
+        <!-- Mix -->
+        <class>org.apache.fineract.mix.domain.MixTaxonomyMapping</class>
+
+        <!-- COB (Chunk of Business) -->
+        <class>org.apache.fineract.cob.domain.LoanAccountLock</class>
+        <class>org.apache.fineract.cob.domain.BatchBusinessStep</class>
+
+        <!-- Template -->
+        <class>org.apache.fineract.template.domain.Template</class>
+        <class>org.apache.fineract.template.domain.TemplateMapper</class>
+
+        <!-- Accounting/Provisioning -->
+        <class>org.apache.fineract.accounting.provisioning.domain.LoanProductProvisioningEntry</class>
+        <class>org.apache.fineract.accounting.provisioning.domain.ProvisioningEntry</class>
+
+        <!-- User Administration -->
+        <class>org.apache.fineract.useradministration.domain.AppUserPreviousPassword</class>
+        <class>org.apache.fineract.useradministration.domain.PasswordValidationPolicy</class>
+
+        <!-- SPM (Smart Pilot Module) -->
+        <class>org.apache.fineract.spm.domain.Question</class>
+        <class>org.apache.fineract.spm.domain.LookupTable</class>
+        <class>org.apache.fineract.spm.domain.Component</class>
+        <class>org.apache.fineract.spm.domain.Scorecard</class>
+        <class>org.apache.fineract.spm.domain.Survey</class>
+        <class>org.apache.fineract.spm.domain.Response</class>
+
+        <!-- Product Mix -->
+        <class>org.apache.fineract.portfolio.loanproduct.productmix.domain.ProductMix</class>
+
+        <!-- Provisioning -->
+        <class>org.apache.fineract.organisation.provisioning.domain.ProvisioningCriteria</class>
+        <class>org.apache.fineract.organisation.provisioning.domain.LoanProductProvisionCriteria</class>
+        <class>org.apache.fineract.organisation.provisioning.domain.ProvisioningCriteriaDefinition</class>
+        <class>org.apache.fineract.organisation.provisioning.domain.ProvisioningCategory</class>
+
+        <!-- Office -->
+        <class>org.apache.fineract.organisation.office.domain.OfficeTransaction</class>
+
+        <!-- Self Registration -->
+        <class>org.apache.fineract.portfolio.self.registration.domain.SelfServiceRegistration</class>
+
+        <!-- Note -->
+        <class>org.apache.fineract.portfolio.note.domain.Note</class>
+
+        <!-- Savings -->
+        <class>org.apache.fineract.portfolio.savings.domain.RecurringDepositScheduleInstallment</class>
+        <class>org.apache.fineract.portfolio.savings.domain.FixedDepositAccount</class>
+        <class>org.apache.fineract.portfolio.savings.domain.RecurringDepositAccount</class>
+        <class>org.apache.fineract.portfolio.savings.domain.DepositAccountRecurringDetail</class>
+
+        <!-- Share Products -->
+        <class>org.apache.fineract.portfolio.shareproducts.domain.ShareProductDividendPayOutDetails</class>
+        <class>org.apache.fineract.portfolio.shareproducts.domain.ShareProduct</class>
+        <class>org.apache.fineract.portfolio.shareproducts.domain.ShareProductMarketPrice</class>
+
+        <!-- Share Accounts -->
+        <class>org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount</class>
+        <class>org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountCharge</class>
+        <class>org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountChargePaidBy</class>
+        <class>org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountDividendDetails</class>
+        <class>org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountTransaction</class>
+
+        <!-- Report Mailing Job -->
+        <class>org.apache.fineract.infrastructure.reportmailingjob.domain.ReportMailingJob</class>
+        <class>org.apache.fineract.infrastructure.reportmailingjob.domain.ReportMailingJobConfiguration</class>
+        <class>org.apache.fineract.infrastructure.reportmailingjob.domain.ReportMailingJobRunHistory</class>
+
+        <!-- Data Queries -->
+        <class>org.apache.fineract.infrastructure.dataqueries.domain.RegisteredDatatable</class>
+        <class>org.apache.fineract.infrastructure.dataqueries.domain.Report</class>
+        <class>org.apache.fineract.infrastructure.dataqueries.domain.ReportParameterUsage</class>
+        <class>org.apache.fineract.infrastructure.dataqueries.domain.ReportParameter</class>
+        <class>org.apache.fineract.infrastructure.dataqueries.domain.EntityDatatableChecks</class>
+
+        <!-- Guarantor -->
+        <class>org.apache.fineract.portfolio.loanaccount.guarantor.domain.GuarantorFundingDetails</class>
+        <class>org.apache.fineract.portfolio.loanaccount.guarantor.domain.GuarantorFundingTransaction</class>
+        <class>org.apache.fineract.portfolio.loanaccount.guarantor.domain.Guarantor</class>
+
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+            <property name="eclipselink.weaving" value="static" />
+        </properties>
+    </persistence-unit>
+</persistence>

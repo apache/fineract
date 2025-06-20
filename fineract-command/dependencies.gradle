@@ -41,7 +41,9 @@ dependencies {
             'com.ibm.icu:icu4j',
             'org.yakworks:spring-icu4j',
             )
-
+    implementation('org.eclipse.persistence:org.eclipse.persistence.jpa') {
+        exclude group: 'org.eclipse.persistence', module: 'jakarta.persistence'
+    }
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor 'org.mapstruct:mapstruct-processor'

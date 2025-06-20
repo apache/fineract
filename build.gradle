@@ -146,6 +146,11 @@ gitVersioning.apply {
 ext['groovy.version'] = '4.0.17'
 ext['swaggerFile'] = "$rootDir/fineract-provider/build/classes/java/main/static/fineract.json".toString()
 
+// Apply static weaving configuration to all subprojects
+subprojects { subproject ->
+    apply from: rootProject.file('static-weaving.gradle')
+}
+
 allprojects  {
     group = 'org.apache.fineract'
 
@@ -405,10 +410,6 @@ configure(project.fineractJavaProjects) {
     apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.dependencies.gradle"
 
     group = 'org.apache.fineract'
-
-    /* http://stackoverflow.com/questions/19653311/jpa-repository-works-in-idea-and-production-but-not-in-gradle */
-    sourceSets.main.output.resourcesDir = sourceSets.main.java.classesDirectory
-    sourceSets.test.output.resourcesDir = sourceSets.test.java.classesDirectory
 
     configurations.named('spotbugs').configure {
         resolutionStrategy.eachDependency {

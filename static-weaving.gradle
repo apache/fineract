@@ -1,0 +1,65 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+// In static-weaving.gradle
+
+// Wait until after project evaluation to ensure all plugins are applied
+project.afterEvaluate {
+    // Only configure if this is a Java project
+    if (!project.plugins.hasPlugin('java')) {
+        logger.lifecycle("ℹ Skipping static weaving configuration for non-Java project: ${project.name}")
+        return
+    }
+
+    // Check if the module contains JPA entities
+    def persistenceXmlFile = file("src/main/resources/jpa/static-weaving/module/${project.name}/persistence.xml")
+    def hasJpaEntities = persistenceXmlFile.exists()
+
+    if (hasJpaEntities) {
+        logger.lifecycle("Configuring EclipseLink static weaving for ${project.name}")
+
+        compileJava.doLast {
+            def source = sourceSets.main.java.classesDirectory.get()
+
+            File weavingRoot = new File(temporaryDir, "static-weaving")
+            File metaInf = new File(weavingRoot, "META-INF")
+            metaInf.mkdirs()
+
+            copy {
+                from persistenceXmlFile.toPath()
+                into metaInf.toPath()
+            }
+
+            javaexec {
+                description = 'Performs EclipseLink static weaving of entity classes'
+                mainClass.set("org.eclipse.persistence.tools.weaving.jpa.StaticWeave")
+                classpath = project.sourceSets.main.runtimeClasspath
+                args = [
+                    "-persistenceinfo",
+                    weavingRoot.absolutePath,
+                    source,
+                    source
+                ]
+            }
+        }
+
+        logger.lifecycle("✓ EclipseLink static weaving configured for ${project.name}")
+    } else {
+        logger.lifecycle("ℹ No JPA entities found in ${project.name}, skipping static weaving configuration")
+    }
+}
