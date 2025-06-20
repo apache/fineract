@@ -154,6 +154,7 @@ import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransaction
 import org.apache.fineract.test.messaging.store.EventStore;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
+import org.assertj.core.api.SoftAssertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import retrofit2.Response;
 
@@ -4181,6 +4182,13 @@ public class LoanStepDef extends AbstractStepDef {
 
     @Then("Loan Product response contains interestRecognitionOnDisbursementDate flag with value {string}")
     public void verifyInterestRecognitionOnDisbursementDateFlag(final String expectedValue) throws IOException {
+        GetLoanProductsResponse targetProduct = getLoanProductResponse();
+
+        assertNotNull(targetProduct.getInterestRecognitionOnDisbursementDate());
+        assertThat(targetProduct.getInterestRecognitionOnDisbursementDate().toString()).isEqualTo(expectedValue);
+    }
+
+    public GetLoanProductsResponse getLoanProductResponse() throws IOException {
         final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         assertNotNull(loanResponse.body());
         final Long loanId = loanResponse.body().getLoanId();
@@ -4203,8 +4211,94 @@ public class LoanStepDef extends AbstractStepDef {
             return product.getId().equals(targetLoanProductId);
         }).findFirst().orElseThrow(() -> new AssertionError("Loan product with ID " + targetLoanProductId + " not found in response"));
 
-        assertNotNull(targetProduct.getInterestRecognitionOnDisbursementDate());
-        assertThat(targetProduct.getInterestRecognitionOnDisbursementDate().toString()).isEqualTo(expectedValue);
+        return targetProduct;
+    }
+
+    @Then("Loan Product response contains Buy Down Fees flag {string} with data:")
+    public void verifyLoanProductWithBuyDownFeesData(String expectedValue, DataTable table) throws IOException {
+        GetLoanProductsResponse targetProduct = getLoanProductResponse();
+
+        assertNotNull(targetProduct.getEnableBuyDownFee());
+        assertThat(targetProduct.getEnableBuyDownFee().toString()).isEqualTo(expectedValue);
+
+        List<String> data = table.asLists().get(1); // skip header
+        String buyDownFeeCalculationType = data.get(0);
+        String buyDownFeeStrategy = data.get(1);
+        String buyDownFeeIncomeType = data.get(2);
+
+        assertNotNull(targetProduct.getBuyDownFeeCalculationType());
+        assertNotNull(targetProduct.getBuyDownFeeStrategy());
+        assertNotNull(targetProduct.getBuyDownFeeIncomeType());
+
+        SoftAssertions assertions = new SoftAssertions();
+        assertions.assertThat(buyDownFeeCalculationType).isEqualTo(targetProduct.getBuyDownFeeCalculationType().getValue());
+        assertions.assertThat(buyDownFeeStrategy).isEqualTo(targetProduct.getBuyDownFeeStrategy().getValue());
+        assertions.assertThat(buyDownFeeIncomeType).isEqualTo(targetProduct.getBuyDownFeeIncomeType().getValue());
+        assertions.assertAll();
+    }
+
+    @Then("Loan Product response contains Buy Down Fees flag {string}")
+    public void verifyLoanProductWithBuyDownFeesFlag(String expectedValue) throws IOException {
+        GetLoanProductsResponse targetProduct = getLoanProductResponse();
+
+        assertNotNull(targetProduct.getEnableBuyDownFee());
+        assertThat(targetProduct.getEnableBuyDownFee().toString()).isEqualTo(expectedValue);
+    }
+
+    public Response<GetLoansLoanIdResponse> getLoanDetailsResponse() throws IOException {
+        Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+
+        long loanId = loanResponse.body().getLoanId();
+
+        Optional<Response<GetLoansLoanIdResponse>> loanDetailsResponseOptional = Optional
+                .of(loansApi.retrieveLoan(loanId, false, "", "", "").execute());
+        Response<GetLoansLoanIdResponse> loanDetailsResponse = loanDetailsResponseOptional
+                .orElseThrow(() -> new RuntimeException("Failed to retrieve loan details - response is null"));
+
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+        testContext().set(TestContextKey.LOAN_RESPONSE, loanDetailsResponse);
+        return loanDetailsResponse;
+    }
+
+    @Then("Loan Details response contains Buy Down Fees flag {string} and data:")
+    public void verifyBuyDownFeeDataInLoanResponse(final String expectedValue, DataTable table) throws IOException {
+        Response<GetLoansLoanIdResponse> loanDetailsResponse = getLoanDetailsResponse();
+
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+        testContext().set(TestContextKey.LOAN_RESPONSE, loanDetailsResponse);
+
+        GetLoansLoanIdResponse loanDetails = loanDetailsResponse.body();
+
+        assertNotNull(loanDetails.getEnableBuyDownFee());
+        assertThat(loanDetails.getEnableBuyDownFee().toString()).isEqualTo(expectedValue);
+
+        List<String> data = table.asLists().get(1); // skip header
+        String buyDownFeeCalculationType = data.get(0);
+        String buyDownFeeStrategy = data.get(1);
+        String buyDownFeeIncomeType = data.get(2);
+
+        assertNotNull(loanDetails.getBuyDownFeeCalculationType());
+        assertNotNull(loanDetails.getBuyDownFeeStrategy());
+        assertNotNull(loanDetails.getBuyDownFeeIncomeType());
+
+        SoftAssertions assertions = new SoftAssertions();
+        assertions.assertThat(buyDownFeeCalculationType).isEqualTo(loanDetails.getBuyDownFeeCalculationType().getValue());
+        assertions.assertThat(buyDownFeeStrategy).isEqualTo(loanDetails.getBuyDownFeeStrategy().getValue());
+        assertions.assertThat(buyDownFeeIncomeType).isEqualTo(loanDetails.getBuyDownFeeIncomeType().getValue());
+        assertions.assertAll();
+    }
+
+    @Then("Loan Details response contains Buy Down Fees flag {string}")
+    public void verifyBuyDownFeeFlagInLoanResponse(final String expectedValue) throws IOException {
+        Response<GetLoansLoanIdResponse> loanDetailsResponse = getLoanDetailsResponse();
+
+        ErrorHelper.checkSuccessfulApiCall(loanDetailsResponse);
+        testContext().set(TestContextKey.LOAN_RESPONSE, loanDetailsResponse);
+
+        GetLoansLoanIdResponse loanDetails = loanDetailsResponse.body();
+
+        assertNotNull(loanDetails.getEnableBuyDownFee());
+        assertThat(loanDetails.getEnableBuyDownFee().toString()).isEqualTo(expectedValue);
     }
 
     @Then("Loan Details response contains chargedOffOnDate set to {string}")
@@ -4283,23 +4377,6 @@ public class LoanStepDef extends AbstractStepDef {
         return capitalizedIncomeResponse;
     }
 
-    public Response<PostLoansLoanIdTransactionsResponse> addBuyDownFeeToTheLoanOnWithEURTransactionAmount(
-            final String transactionPaymentType, final String transactionDate, final String amount) throws IOException {
-        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-        final long loanId = loanResponse.body().getLoanId();
-
-        final DefaultPaymentType paymentType = DefaultPaymentType.valueOf(transactionPaymentType);
-        final Long paymentTypeValue = paymentTypeResolver.resolve(paymentType);
-
-        final PostLoansLoanIdTransactionsRequest buyDownFeeRequest = LoanRequestFactory.defaultBuyDownFeeIncomeRequest()
-                .transactionDate(transactionDate).transactionAmount(Double.valueOf(amount)).paymentTypeId(paymentTypeValue)
-                .externalId("EXT-BUY-DOWN-FEES" + UUID.randomUUID());
-
-        final Response<PostLoansLoanIdTransactionsResponse> buyDownFeeResponse = loanTransactionsApi
-                .executeLoanTransaction(loanId, buyDownFeeRequest, "buyDownFee").execute();
-        return buyDownFeeResponse;
-    }
-
     @And("Admin adds capitalized income with {string} payment type to the loan on {string} with {string} EUR transaction amount")
     public void adminAddsCapitalizedIncomeToTheLoanOnWithEURTransactionAmount(final String transactionPaymentType,
             final String transactionDate, final String amount) throws IOException {
@@ -4307,15 +4384,6 @@ public class LoanStepDef extends AbstractStepDef {
                 transactionPaymentType, transactionDate, amount);
         testContext().set(TestContextKey.LOAN_CAPITALIZED_INCOME_RESPONSE, capitalizedIncomeResponse);
         ErrorHelper.checkSuccessfulApiCall(capitalizedIncomeResponse);
-    }
-
-    @And("Admin adds buy down fee with {string} payment type to the loan on {string} with {string} EUR transaction amount")
-    public void adminAddsBuyDownFeesToTheLoanOnWithEURTransactionAmount(final String transactionPaymentType, final String transactionDate,
-            final String amount) throws IOException {
-        final Response<PostLoansLoanIdTransactionsResponse> buyDownFeesIncomeResponse = addBuyDownFeeToTheLoanOnWithEURTransactionAmount(
-                transactionPaymentType, transactionDate, amount);
-        testContext().set(TestContextKey.LOAN_BUY_DOWN_FEE_RESPONSE, buyDownFeesIncomeResponse);
-        ErrorHelper.checkSuccessfulApiCall(buyDownFeesIncomeResponse);
     }
 
     public Response<PostLoansLoanIdTransactionsResponse> adjustCapitalizedIncome(final String transactionPaymentType,
