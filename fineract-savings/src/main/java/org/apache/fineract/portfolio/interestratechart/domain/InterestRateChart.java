@@ -102,20 +102,27 @@ public class InterestRateChart extends AbstractPersistableCustom<Long> {
 
         for (int i = 0; i < chartSlabsList.size(); i++) {
             InterestRateChartSlab iSlabs = chartSlabsList.get(i);
+            String slabContext = "(Slab " + (i + 1) + ") ";
             if (!iSlabs.slabFields().isValidChart(isPrimaryGroupingByAmount)) {
                 if (isPrimaryGroupingByAmount) {
-                    baseDataValidator.parameter(InterestRateChartSlabApiConstants.amountRangeFromParamName).failWithCode("cannot.be.blank");
+                    baseDataValidator.parameter(InterestRateChartSlabApiConstants.amountRangeFromParamName)
+                        .failWithCode("cannot.be.blank", slabContext + "Amount range start is required.");
                 } else {
-                    baseDataValidator.parameter(InterestRateChartSlabApiConstants.fromPeriodParamName).failWithCode("cannot.be.blank");
+                    baseDataValidator.parameter(InterestRateChartSlabApiConstants.fromPeriodParamName)
+                        .failWithCode("cannot.be.blank", slabContext + "Period start is required.");
                 }
 
             } else if (i > 0) {
                 if (isPeriodChart ^ iSlabs.slabFields().fromPeriod() != null) {
-                    baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.period.range.incomplete");
+                    baseDataValidator.failWithCodeNoParameterAddedToErrorCode(
+                        "chart.slabs.period.range.incomplete",
+                        slabContext + "Period range is incomplete. Please check the start and end periods.");
                     isPeriodChart = isPeriodChart || iSlabs.slabFields().fromPeriod() != null;
                 }
                 if (isAmountChart ^ iSlabs.slabFields().getAmountRangeFrom() != null) {
-                    baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.amount.range.incomplete");
+                    baseDataValidator.failWithCodeNoParameterAddedToErrorCode(
+                        "chart.slabs.amount.range.incomplete",
+                        slabContext + "Amount range is incomplete. Please check the start and end amounts.");
                     isAmountChart = isAmountChart || iSlabs.slabFields().getAmountRangeFrom() != null;
                 }
             }
@@ -123,59 +130,76 @@ public class InterestRateChart extends AbstractPersistableCustom<Long> {
             if (i == 0) {
                 tmpPeriodType = iSlabs.slabFields().periodType();
                 if (iSlabs.slabFields().isNotProperChartStart()) {
-                    baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.start.incorrect",
-                            iSlabs.slabFields().fromPeriod(), iSlabs.slabFields().getAmountRangeFrom());
+                    baseDataValidator.failWithCodeNoParameterAddedToErrorCode(
+                        "chart.slabs.range.start.incorrect",
+                        slabContext + "The first slab must start from the minimum period/amount.",
+                        iSlabs.slabFields().fromPeriod(), iSlabs.slabFields().getAmountRangeFrom());
                 }
                 isAmountChart = isAmountChart || iSlabs.slabFields().getAmountRangeFrom() != null;
                 isPeriodChart = isPeriodChart || iSlabs.slabFields().fromPeriod() != null;
             } else if (iSlabs.slabFields().periodType() != null && !iSlabs.slabFields().periodType().equals(tmpPeriodType)) {
                 baseDataValidator.parameter(periodTypeParamName).value(iSlabs.slabFields().periodType())
-                        .failWithCode("period.type.is.not.same", tmpPeriodType);
+                    .failWithCode("period.type.is.not.same", slabContext + "Period type must be the same for all slabs.", tmpPeriodType);
             }
             if (i + 1 < chartSlabsList.size()) {
                 InterestRateChartSlab nextSlabs = chartSlabsList.get(i + 1);
+                String nextSlabContext = "(Slab " + (i + 2) + ") ";
                 if (iSlabs.slabFields().isValidChart(isPrimaryGroupingByAmount)
                         && nextSlabs.slabFields().isValidChart(isPrimaryGroupingByAmount)) {
                     if (iSlabs.slabFields().isRateChartOverlapping(nextSlabs.slabFields(), isPrimaryGroupingByAmount)) {
-                        baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.overlapping",
-                                iSlabs.slabFields().fromPeriod(), iSlabs.slabFields().toPeriod(), nextSlabs.slabFields().fromPeriod(),
-                                nextSlabs.slabFields().toPeriod(), iSlabs.slabFields().getAmountRangeFrom(),
-                                iSlabs.slabFields().getAmountRangeTo(), nextSlabs.slabFields().getAmountRangeFrom(),
-                                nextSlabs.slabFields().getAmountRangeTo());
+                        baseDataValidator.failWithCodeNoParameterAddedToErrorCode(
+                            "chart.slabs.range.overlapping",
+                            slabContext + " and " + nextSlabContext + "There is an overlap between these slabs. Please ensure slabs do not overlap.",
+                            iSlabs.slabFields().fromPeriod(), iSlabs.slabFields().toPeriod(), nextSlabs.slabFields().fromPeriod(),
+                            nextSlabs.slabFields().toPeriod(), iSlabs.slabFields().getAmountRangeFrom(),
+                            iSlabs.slabFields().getAmountRangeTo(), nextSlabs.slabFields().getAmountRangeFrom(),
+                            nextSlabs.slabFields().getAmountRangeTo());
                     } else if (iSlabs.slabFields().isRateChartHasGap(nextSlabs.slabFields(), isPrimaryGroupingByAmount)) {
-                        baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.has.gap",
-                                iSlabs.slabFields().fromPeriod(), iSlabs.slabFields().toPeriod(), nextSlabs.slabFields().fromPeriod(),
-                                nextSlabs.slabFields().toPeriod(), iSlabs.slabFields().getAmountRangeFrom(),
-                                iSlabs.slabFields().getAmountRangeTo(), nextSlabs.slabFields().getAmountRangeFrom(),
-                                nextSlabs.slabFields().getAmountRangeTo());
+                        baseDataValidator.failWithCodeNoParameterAddedToErrorCode(
+                            "chart.slabs.range.has.gap",
+                            slabContext + " and " + nextSlabContext + "There is a gap between these slabs. Please ensure slabs are continuous.",
+                            iSlabs.slabFields().fromPeriod(), iSlabs.slabFields().toPeriod(), nextSlabs.slabFields().fromPeriod(),
+                            nextSlabs.slabFields().toPeriod(), iSlabs.slabFields().getAmountRangeFrom(),
+                            iSlabs.slabFields().getAmountRangeTo(), nextSlabs.slabFields().getAmountRangeFrom(),
+                            nextSlabs.slabFields().getAmountRangeTo());
                     }
                     if (isPrimaryGroupingByAmount) {
                         if (!iSlabs.slabFields().isAmountSame(nextSlabs.slabFields())) {
                             if (InterestRateChartSlabFields.isNotProperPeriodStart(nextSlabs.slabFields())) {
-                                baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.period.range.start.incorrect",
-                                        nextSlabs.slabFields().toPeriod());
+                                baseDataValidator.failWithCodeNoParameterAddedToErrorCode(
+                                    "chart.slabs.period.range.start.incorrect",
+                                    nextSlabContext + "The start period of this slab is incorrect.",
+                                    nextSlabs.slabFields().toPeriod());
                             }
                             if (iSlabs.slabFields().toPeriod() != null) {
-                                baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.period.range.end.incorrect",
-                                        iSlabs.slabFields().toPeriod());
+                                baseDataValidator.failWithCodeNoParameterAddedToErrorCode(
+                                    "chart.slabs.period.range.end.incorrect",
+                                    slabContext + "The end period of this slab is incorrect.",
+                                    iSlabs.slabFields().toPeriod());
                             }
 
                         }
                     } else if (!iSlabs.slabFields().isPeriodsSame(nextSlabs.slabFields())) {
                         if (InterestRateChartSlabFields.isNotProperAmountStart(nextSlabs.slabFields())) {
-                            baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.amount.range.start.incorrect",
-                                    nextSlabs.slabFields().getAmountRangeFrom());
+                            baseDataValidator.failWithCodeNoParameterAddedToErrorCode(
+                                "chart.slabs.amount.range.start.incorrect",
+                                nextSlabContext + "The start amount of this slab is incorrect.",
+                                nextSlabs.slabFields().getAmountRangeFrom());
                         }
                         if (iSlabs.slabFields().getAmountRangeTo() != null) {
-                            baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.amount.range.end.incorrect",
-                                    iSlabs.slabFields().getAmountRangeTo());
+                            baseDataValidator.failWithCodeNoParameterAddedToErrorCode(
+                                "chart.slabs.amount.range.end.incorrect",
+                                slabContext + "The end amount of this slab is incorrect.",
+                                iSlabs.slabFields().getAmountRangeTo());
                         }
 
                     }
                 }
             } else if (iSlabs.slabFields().isNotProperPriodEnd()) {
-                baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.end.incorrect", iSlabs.slabFields().toPeriod(),
-                        iSlabs.slabFields().getAmountRangeTo());
+                baseDataValidator.failWithCodeNoParameterAddedToErrorCode(
+                    "chart.slabs.range.end.incorrect",
+                    slabContext + "The last slab must end at the maximum period/amount.",
+                    iSlabs.slabFields().toPeriod(), iSlabs.slabFields().getAmountRangeTo());
             }
         }
     }
