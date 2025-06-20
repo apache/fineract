@@ -22,49 +22,31 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 
 tasks.register('staticWeaveJpa', JavaExec) {
-    dependsOn classes
+    group = "build"
+    description = "Performs EclipseLink static weaving of entity classes"
 
-    def classesDir = layout.buildDirectory.dir("classes/java/main").get().asFile
-    def outputDir = layout.buildDirectory.dir("weaved-classes").get().asFile
-    def persistenceInfo = layout.buildDirectory.dir('static-weaving').get()
-    copy {
-        from file("src/main/resources/jpa/static-weaving/module/core/persistence.xml")
-        into "${persistenceInfo}/META-INF/"
-    }
+    dependsOn classes, processResources
 
-    mainClass.set("org.eclipse.persistence.tools.weaving.jpa.StaticWeave")
+    def classesDir = file(sourceSets.main.output.classesDirs.asPath)
+
+    mainClass.set('org.eclipse.persistence.tools.weaving.jpa.StaticWeave')
     classpath = sourceSets.main.runtimeClasspath
-
-    args = [
-            '-persistenceinfo', persistenceInfo,
-            classesDir.absolutePath,
-            outputDir.absolutePath
-    ]
+    args '-persistenceinfo', classesDir, classesDir, classesDir
 }
 
-
-
-tasks.register("weavedJar", Jar) {
-    archiveClassifier.set("")
-    dependsOn staticWeaveJpa
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from(layout.buildDirectory.dir("weaved-classes"))
-    exclude("META-INF/persistence.xml")
+staticWeaveJpa.doLast {
+    delete "${sourceSets.main.output.classesDirs.asPath}/META-INF/persistence.xml"
 }
 
-// Configure the default jar task to depend on weavedJar and use its output
-tasks.named('jar') {
-    dependsOn weavedJar
-    enabled = false  // Disable the default jar task
-    // The weavedJar will be used as the primary artifact
+tasks.named('classes') {
+    finalizedBy staticWeaveJpa
 }
 
-// Make sure the assemble task depends on weavedJar
-tasks.named('assemble') {
-    dependsOn weavedJar
+tasks.named('processResources') {
+    from('src/main/resources')
+    into sourceSets.main.java.classesDirectory
+    outputs.upToDateWhen { false }
 }
-
-
 
 configurations {
     providedRuntime // needed for Spring Boot executable WAR
@@ -90,7 +72,7 @@ configurations {
 apply from: 'dependencies.gradle'
 
 compileJava {
-    dependsOn ':fineract-avro-schemas:compileJava'
+    dependsOn ':fineract-avro-schemas:compileJava', processResources
     options.compilerArgs += ['-parameters']
 }
 
@@ -118,19 +100,4 @@ if (!(project.hasProperty('env') && project.getProperty('env') == 'dev')) {
             }
         }
     }
-}
-
-tasks.named("test") {
-    dependsOn staticWeaveJpa
-
-    def testClasses = layout.buildDirectory.dir("classes/java/test").get().asFile
-    def weavedClasses = layout.buildDirectory.dir("weaved-classes").get().asFile
-    def testResources = layout.buildDirectory.dir("resources/test").get().asFile
-
-    classpath = files(
-            weavedClasses,
-            testClasses,
-            testResources,
-            configurations.testRuntimeClasspath
-    )
 }

@@ -132,4 +132,8 @@ tasks.named('sourcesJar') {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-
+tasks.named('processResources') {
+    from('src/main/resources')
+    into sourceSets.main.java.classesDirectory
+    outputs.upToDateWhen { false }
+}
