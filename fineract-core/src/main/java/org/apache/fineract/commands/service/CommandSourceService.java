@@ -22,9 +22,11 @@ import static org.apache.fineract.commands.domain.CommandProcessingResultType.UN
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.batch.exception.ErrorInfo;
+import org.apache.fineract.commands.domain.CommandProcessingResultType;
 import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandSourceRepository;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -70,12 +72,6 @@ public class CommandSourceService {
     }
 
     @NonNull
-    @Transactional(propagation = Propagation.REQUIRED)
-    public CommandSource saveInitialSameTransaction(CommandWrapper wrapper, JsonCommand jsonCommand, AppUser maker, String idempotencyKey) {
-        return saveInitial(wrapper, jsonCommand, maker, idempotencyKey);
-    }
-
-    @NonNull
     private CommandSource saveInitial(CommandWrapper wrapper, JsonCommand jsonCommand, AppUser maker, String idempotencyKey) {
         try {
             CommandSource initialCommandSource = getInitialCommandSource(wrapper, jsonCommand, maker, idempotencyKey);
@@ -90,8 +86,8 @@ public class CommandSourceService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.REPEATABLE_READ)
-    public CommandSource saveResultNewTransaction(@NonNull CommandSource commandSource) {
-        return saveResult(commandSource);
+    public void saveResultNewTransaction(@NonNull CommandSource commandSource) {
+        saveResult(commandSource);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -106,6 +102,14 @@ public class CommandSourceService {
 
     public ErrorInfo generateErrorInfo(Throwable t) {
         return errorHandler.handle(ErrorHandler.getMappable(t));
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void saveFailedCommandSourcesNewTransaction(final List<CommandSource> commandSources) {
+        commandSources.forEach(commandSource -> {
+            commandSource.setStatus(CommandProcessingResultType.ROLLBACK);
+            commandSourceRepository.saveAndFlush(commandSource);
+        });
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)

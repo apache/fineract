@@ -53,6 +53,8 @@ import org.apache.fineract.batch.exception.BatchReferenceInvalidException;
 import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.batch.service.ResolutionHelper.BatchRequestNode;
 import org.apache.fineract.commands.configuration.RetryConfigurationAssembler;
+import org.apache.fineract.commands.domain.CommandSource;
+import org.apache.fineract.commands.service.CommandSourceService;
 import org.apache.fineract.infrastructure.core.domain.BatchRequestContextHolder;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.filters.BatchCallHandler;
@@ -93,6 +95,8 @@ public class BatchApiServiceImpl implements BatchApiService {
     private final List<BatchRequestPreprocessor> batchPreprocessors;
 
     private final RetryConfigurationAssembler retryConfigurationAssembler;
+
+    private final CommandSourceService commandSourceService;
 
     private EntityManager entityManager;
 
@@ -166,9 +170,11 @@ public class BatchApiServiceImpl implements BatchApiService {
         try {
             return retryingBatch.get();
         } catch (TransactionException | NonTransientDataAccessException ex) {
+            saveFailedCommandSourceEntries(ex);
             return buildErrorResponses(ex, responseList);
         } catch (BatchExecutionException ex) {
             log.error("Exception during the batch request processing", ex);
+            saveFailedCommandSourceEntries(ex.getCause());
             responseList.add(buildErrorResponse(ex.getCause(), ex.getRequest()));
             return responseList;
         }
@@ -394,5 +400,18 @@ public class BatchApiServiceImpl implements BatchApiService {
     @PersistenceContext
     public void setEntityManager(EntityManager entityManager) {
         this.entityManager = entityManager;
+    }
+
+    private void saveFailedCommandSourceEntries(final Throwable ex) {
+        try {
+            final List<CommandSource> commandSources = BatchRequestContextHolder.getCommandSources();
+            if (!commandSources.isEmpty()) {
+                final String errorMessage = ex != null ? ex.getMessage() : "Batch processing failed";
+                log.debug("Saving {} failed entries for batch audit with error: {}", commandSources.size(), errorMessage);
+                commandSourceService.saveFailedCommandSourcesNewTransaction(commandSources);
+            }
+        } catch (Exception e) {
+            log.error("Failed to save failed CommandSource entries for batch audit", e);
+        }
     }
 }
