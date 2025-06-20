@@ -57,11 +57,9 @@ tasks.register('preprocessAvroSchemas', PreprocessAvroSchemasTask) {
     inputDir = file("$projectDir/src/main/avro")
     bigDecimalTemplate = file("$projectDir/src/main/resources/avro-templates/bigdecimal.avsc")
     outputDir = file("$buildDir/generated/avro/src/main/avro")
-    finalizedBy buildJavaSdk
 }
 
-tasks.register('buildJavaSdk', GenerateAvroJavaTask) {
-    dependsOn preprocessAvroSchemas, spotlessJsonApply
+task buildJavaSdk(type: GenerateAvroJavaTask) {
     source("$buildDir/generated/avro/src/main/avro")
     outputDir = file("$buildDir/generated/java/src/main/java")
     templateDirectory = "$projectDir/src/main/resources/avro-generator-templates/"
@@ -75,10 +73,12 @@ spotless {
     }
 }
 
+buildJavaSdk.dependsOn(preprocessAvroSchemas, spotlessJsonApply)
+
 sourceSets {
     main {
         java {
-            srcDirs += "$buildDir/generated/java/src/main/java"
+            srcDir file("$buildDir/generated/java/src/main/java")
         }
         resources {
             srcDir file("$projectDir/src/main/resources")
@@ -97,7 +97,7 @@ jar {
 }
 
 compileJava {
-    dependsOn buildJavaSdk, processResources
+    dependsOn buildJavaSdk
     source = sourceSets.main.java.srcDirs
     options.compilerArgs += ['-parameters']
 }
@@ -130,10 +130,4 @@ licenseMain.dependsOn licenseFormatMain
 tasks.named('sourcesJar') {
     dependsOn tasks.named('buildJavaSdk')
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
-
-tasks.named('processResources') {
-    from('src/main/resources')
-    into sourceSets.main.java.classesDirectory
-    outputs.upToDateWhen { false }
 }

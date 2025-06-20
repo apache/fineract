@@ -1,5 +1,3 @@
-import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -37,7 +35,7 @@ openApiValidate {
     recommend = true
 }
 
-tasks.register('buildJavaSdk', GenerateTask) {
+task buildJavaSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
     generatorName = 'java'
     verbose = false
     validateSpec = false
@@ -50,11 +48,11 @@ tasks.register('buildJavaSdk', GenerateTask) {
     invokerPackage = 'org.apache.fineract.client'
     modelPackage = 'org.apache.fineract.client.models'
     configOptions = [
-            dateLibrary            : 'java8',
-            useRxJava2             : 'false',
-            library                : 'retrofit2',
-            hideGenerationTimestamp: 'true',
-            containerDefaultToNull : 'true'
+        dateLibrary: 'java8',
+        useRxJava2: 'false',
+        library: 'retrofit2',
+        hideGenerationTimestamp: 'true',
+        containerDefaultToNull: 'true'
     ]
     generateModelTests = false
     generateApiTests = false
@@ -62,7 +60,7 @@ tasks.register('buildJavaSdk', GenerateTask) {
     dependsOn(':fineract-provider:resolve')
 }
 
-tasks.register('buildTypescriptAngularSdk', GenerateTask) {
+task buildTypescriptAngularSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask){
     generatorName = 'typescript-angular'
     verbose = false
     validateSpec = false
@@ -73,16 +71,16 @@ tasks.register('buildTypescriptAngularSdk', GenerateTask) {
     invokerPackage = 'apache-fineract-client/invoker'
     modelPackage = 'apache-fineract-client/models'
     configOptions = [
-            apiModulePrefix    : 'apacheFineractClient',
-            configurationPrefix: 'apacheFineractClient',
-            ngVersion          : '12.0.0',
-            npmName            : '@apache/fineract-client',
-            npmRepository      : "${npmRepository}"
+        apiModulePrefix: 'apacheFineractClient',
+        configurationPrefix: 'apacheFineractClient',
+        ngVersion: '12.0.0',
+        npmName: '@apache/fineract-client',
+        npmRepository: "${npmRepository}"
     ]
     dependsOn(':fineract-provider:resolve')
 }
 
-tasks.register('buildAsciidoc', GenerateTask) {
+task buildAsciidoc(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask){
     generatorName = 'asciidoc'
     verbose = false
     validateSpec = false
@@ -93,18 +91,18 @@ tasks.register('buildAsciidoc', GenerateTask) {
     invokerPackage = 'org.apache.fineract.client'
     modelPackage = 'org.apache.fineract.client.models'
     configOptions = [
-            appName         : 'Apache Fineract REST API',
-            appDescription  : '''Apache Fineract is a secure, multi-tenanted microfinance platform.
+        appName: 'Apache Fineract REST API',
+        appDescription: '''Apache Fineract is a secure, multi-tenanted microfinance platform.
             The goal of the Apache Fineract API is to empower developers to build apps on top of the Apache Fineract Platform.
-            The [reference app](https://cui.fineract.dev) (username: mifos, password: password) works on the same demo tenant as the interactive links in this documentation.
-            Until we complete the new REST API documentation you still have the legacy documentation available [here](https://fineract.apache.org/docs/legacy/).
-            Please check [the Fineract documentation](https://fineract.apache.org/docs/current/) for more information.''',
-            headerAttributes: 'false',
-            infoEmail       : 'dev@fineract.apache.org',
-            infoUrl         : 'https://fineract.apache.org',
-            licenseInfo     : 'Apache 2.0',
-            licenseUrl      : 'http://www.apache.org/licenses/LICENSE-2.0.html',
-            useMethodAndPath: 'true'
+            The https://cui.fineract.dev[reference app] (username: mifos, password: password) works on the same demo tenant as the interactive links in this documentation.
+            Until we complete the new REST API documentation you still have the legacy documentation available https://fineract.apache.org/legacy-docs/apiLive.htm[here].
+            Please check https://fineract.apache.org/docs/current[the Fineract documentation] for more information.''',
+        headerAttributes: 'false',
+        infoEmail: 'dev@fineract.apache.org',
+        infoUrl: 'https://fineract.apache.org',
+        licenseInfo: 'Apache 2.0',
+        licenseUrl: 'http://www.apache.org/licenses/LICENSE-2.0.html',
+        useMethodAndPath: 'true'
     ]
     dependsOn(':fineract-provider:resolve')
 }
@@ -133,23 +131,23 @@ tasks.withType(Jar).configureEach {
 }
 
 // Improve the cleanup task to track inputs and outputs
-tasks.register('cleanupGeneratedJavaFiles') {
+task cleanupGeneratedJavaFiles() {
     def tempDir = file("$buildDir/generated/temp-java")
     def targetDir = file("$buildDir/generated/java")
-
+    
     inputs.dir(tempDir)
     outputs.dir(targetDir)
-
+    
     doLast {
         copy {
             from tempDir
             into targetDir
             filter { line ->
                 line
-                        .replaceAll("import org\\.joda\\.time\\.\\*;", "")
-                        .replaceAll(", \\)", ")")
-                        .replaceAll(", , @HeaderMap", ", @HeaderMap")
-                        .replaceAll("\\(, ", "(")
+                    .replaceAll("import org\\.joda\\.time\\.\\*;", "")
+                    .replaceAll(", \\)", ")")
+                    .replaceAll(", , @HeaderMap", ", @HeaderMap")
+                    .replaceAll("\\(, ", "(")
             }
             // Also set duplicates strategy for the copy task
             duplicatesStrategy = DuplicatesStrategy.EXCLUDE
