@@ -87,19 +87,14 @@ public final class CurrenciesApiResourceSwagger {
 	
 	    @Schema(example = "USD")
 	    public String code;
-
 	    @Schema(example = "2")
 	    public Integer decimalPlaces;
-
 	    @Schema(example = "5")
 	    public Integer inMultiplesOf;
-
 	    @Schema(example = "US Dollar")
 	    public String name;
-
 	    @Schema(example = "currency.USD")
 	    public String nameCode;
-
 	    @Schema(example = "$")
 	    public String displaySymbol;
 	}
