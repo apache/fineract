@@ -24,5 +24,5 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 public interface CurrencyWritePlatformService {
 
     CommandProcessingResult updateAllowedCurrencies(JsonCommand command);
-
+    CommandProcessingResult createAllowedCurrencies(JsonCommand command);
 }

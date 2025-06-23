@@ -41,6 +41,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.ApplicationCurrencyConfigurationData;
+import org.apache.fineract.organisation.monetary.data.request.CurrencyCreateRequest;
 import org.apache.fineract.organisation.monetary.data.request.CurrencyRequest;
 import org.apache.fineract.organisation.monetary.service.OrganisationCurrencyReadPlatformService;
 import org.springframework.stereotype.Component;
@@ -91,13 +92,15 @@ public class CurrenciesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create New Currency", description = "Creates a new currency for use.")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CurrencyRequest.class)))
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CurrenciesApiResourceSwagger.PostCurrenciesRequest.class)))
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "CREATED") })
-    public String createNewCurrency() {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CurrenciesApiResourceSwagger.PostCurrenciesResponse.class))) })
+    public CommandProcessingResult createNewCurrency(@Parameter(hidden = true) CurrencyCreateRequest currencyCreateRequest) {
 
-        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
-
-        return "Created New Currency Successfully!";
+    	final CommandWrapper commandRequest = new CommandWrapperBuilder() //
+          .createCurrencies() //
+          .withJson(toApiJsonSerializer.serialize(currencyCreateRequest)) //
+          .build();
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 }
