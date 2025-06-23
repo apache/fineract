@@ -95,4 +95,20 @@ public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWr
                 .with(changes) //
                 .build();
     }
+
+    @Transactional
+		@Override
+		public CommandProcessingResult createAllowedCurrencies(JsonCommand command) {
+
+    	String jsonString = command.getFromApiJsonHelper().toJson(command.parsedJson());
+    	OrganisationCurrency createCurrency = command.getFromApiJsonHelper()
+    	    .fromJson(jsonString, OrganisationCurrency.class);
+    	
+    	final Map<String, Object> changes = new LinkedHashMap<>();
+    	changes.put("Currency", "ABC");
+    	return new CommandProcessingResultBuilder()
+          .withCommandId(command.commandId())
+          .with(changes)
+          .build();
+		}
 }
