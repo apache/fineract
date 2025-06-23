@@ -94,7 +94,7 @@ public class CurrenciesApiResource {
     @Operation(summary = "Create New Currency", description = "Creates a new currency for use.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CurrenciesApiResourceSwagger.PostCurrenciesRequest.class)))
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "CREATED", content = @Content(schema = @Schema(implementation = CurrenciesApiResourceSwagger.PostCurrenciesResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CurrenciesApiResourceSwagger.PostCurrenciesResponse.class))) })
     public CommandProcessingResult createNewCurrency(@Parameter(hidden = true) CurrencyCreateRequest currencyCreateRequest) {
 
     	final CommandWrapper commandRequest = new CommandWrapperBuilder() //
