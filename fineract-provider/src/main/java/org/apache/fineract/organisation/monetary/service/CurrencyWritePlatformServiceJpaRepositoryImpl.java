@@ -31,6 +31,8 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
+import org.apache.fineract.organisation.monetary.domain.CreateCurrency;
+import org.apache.fineract.organisation.monetary.domain.CreateCurrencyRepository;
 import org.apache.fineract.organisation.monetary.domain.OrganisationCurrency;
 import org.apache.fineract.organisation.monetary.domain.OrganisationCurrencyRepository;
 import org.apache.fineract.organisation.monetary.exception.CurrencyInUseException;
@@ -46,6 +48,7 @@ public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWr
     private final PlatformSecurityContext context;
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
     private final OrganisationCurrencyRepository organisationCurrencyRepository;
+    private final CreateCurrencyRepository createCurrencyRepository;
     private final CurrencyCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final LoanProductReadPlatformService loanProductService;
     private final SavingsProductReadPlatformService savingsProductService;
@@ -95,4 +98,31 @@ public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWr
                 .with(changes) //
                 .build();
     }
+
+    @Transactional
+		@Override
+		public CommandProcessingResult createAllowedCurrencies(JsonCommand command) {
+    	this.context.authenticatedUser();
+      this.fromApiJsonDeserializer.validateForCreate(command.json());
+    	
+    	final String jsonString = command.getFromApiJsonHelper().toJson(command.parsedJson());
+    	
+    	final CreateCurrency createNewCurrency = command.getFromApiJsonHelper()
+    	    .fromJson(jsonString, CreateCurrency.class);
+    	
+    	final CreateCurrency results = this.createCurrencyRepository.save(createNewCurrency);
+    	
+    	final Map<String, Object> changes = Map.of(
+    			"code", results.getCode(),
+    			"decimalPlaces", results.getDecimalPlaces(),
+    			"inMultiplesOf", results.getInMultiplesOf(),
+    			"name", results.getName(),
+    			"nameCode", results.getNameCode(),
+    			"displaySymbol", results.getDisplaySymbol());
+
+    	return new CommandProcessingResultBuilder()
+          .withCommandId(command.commandId())
+          .with(changes)
+          .build();
+		}
 }
