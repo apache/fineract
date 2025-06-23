@@ -20,6 +20,7 @@ package org.apache.fineract.organisation.monetary.starter;
 
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
+import org.apache.fineract.organisation.monetary.domain.CreateCurrencyRepository;
 import org.apache.fineract.organisation.monetary.domain.OrganisationCurrencyRepository;
 import org.apache.fineract.organisation.monetary.serialization.CurrencyCommandFromApiJsonDeserializer;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
@@ -47,13 +48,13 @@ public class OrganisationMonetaryConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(CurrencyWritePlatformService.class)
-    public CurrencyWritePlatformService currencyWritePlatformService(PlatformSecurityContext context,
+    CurrencyWritePlatformService currencyWritePlatformService(PlatformSecurityContext context,
             ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
-            OrganisationCurrencyRepository organisationCurrencyRepository, CurrencyCommandFromApiJsonDeserializer fromApiJsonDeserializer,
+            OrganisationCurrencyRepository organisationCurrencyRepository, CreateCurrencyRepository createCurrencyRepository, CurrencyCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             LoanProductReadPlatformService loanProductService, SavingsProductReadPlatformService savingsProductService,
             ChargeReadPlatformService chargeService) {
         return new CurrencyWritePlatformServiceJpaRepositoryImpl(context, applicationCurrencyRepository, organisationCurrencyRepository,
-                fromApiJsonDeserializer, loanProductService, savingsProductService, chargeService);
+        		createCurrencyRepository, fromApiJsonDeserializer, loanProductService, savingsProductService, chargeService);
     }
 
     @Bean
