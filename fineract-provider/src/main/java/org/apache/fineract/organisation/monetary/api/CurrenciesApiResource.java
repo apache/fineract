@@ -28,6 +28,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -84,5 +85,19 @@ public class CurrenciesApiResource {
                 .build();
 
         return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    }
+    
+    @POST
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Create New Currency", description = "Creates a new currency for use.")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CurrencyRequest.class)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "CREATED") })
+    public String createNewCurrency() {
+
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
+
+        return "Created New Currency Successfully!";
     }
 }
