@@ -69,6 +69,25 @@ public final class CurrencyCommandFromApiJsonDeserializer {
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
+    
+    public void validateForCreate(final String json) {
+
+      if (StringUtils.isBlank(json)) {
+          throw new InvalidJsonException();
+      }
+
+//      final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+//      this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
+//
+      final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+//      final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(CURRENCIES);
+//
+//      final JsonElement element = this.fromApiJsonHelper.parse(json);
+//      final String[] currencies = this.fromApiJsonHelper.extractArrayNamed(CURRENCIES, element);
+//      baseDataValidator.reset().parameter(CURRENCIES).value(currencies).arrayNotEmpty();
+
+      throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) {
