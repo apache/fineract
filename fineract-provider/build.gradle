@@ -241,6 +241,30 @@ bootJar {
     dependsOn resolve
 }
 
+// Task to copy files from resources/main to the compiled output directory
+tasks.register('injectDefaultResources', Copy) {
+    dependsOn bootJar, jar
+    from layout.buildDirectory.dir("resources/main")
+    into "$buildDir/classes/java/main"
+}
+tasks.injectDefaultResources.dependsOn(bootJar)
+
+// Ensure this runs before the Jib build
+tasks.named("jib").configure {
+    dependsOn injectDefaultResources
+    finalizedBy removeMergedClasses
+}
+
+tasks.named("jibDockerBuild").configure {
+    dependsOn injectDefaultResources
+    finalizedBy removeMergedClasses
+}
+
+// Task to delete files from the merged output directory
+tasks.register('removeMergedClasses', Delete) {
+    delete layout.buildDirectory.dir("classes/java/main")
+}
+
 jib {
     from {
         image = 'azul/zulu-openjdk-alpine:21'
@@ -273,15 +297,6 @@ jib {
         ports = ['8080/tcp', '8443/tcp']
         labels = [maintainer: 'Aleksandar Vidakovic <aleks@apache.org>']
         user = 'nobody:nogroup'
-    }
-
-    extraDirectories {
-        paths {
-            path {
-                from = layout.buildDirectory.dir("resources/main").get().asFile
-                into = '/app/classes'
-            }
-        }
     }
 
     allowInsecureRegistries = true

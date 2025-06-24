@@ -49,6 +49,9 @@ import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanBuyDownFeeCalculationType;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanBuyDownFeeIncomeType;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanBuyDownFeeStrategy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeCalculationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeStrategy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeType;
@@ -194,7 +197,9 @@ public final class LoanProductDataValidator {
             LoanProductConstants.DAYS_IN_YEAR_CUSTOM_STRATEGY_TYPE_PARAMETER_NAME,
             LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME,
             LoanProductConstants.CAPITALIZED_INCOME_CALCULATION_TYPE_PARAM_NAME,
-            LoanProductConstants.CAPITALIZED_INCOME_STRATEGY_PARAM_NAME, LoanProductConstants.CAPITALIZED_INCOME_TYPE_PARAM_NAME));
+            LoanProductConstants.CAPITALIZED_INCOME_STRATEGY_PARAM_NAME, LoanProductConstants.CAPITALIZED_INCOME_TYPE_PARAM_NAME,
+            LoanProductConstants.ENABLE_BUY_DOWN_FEE_PARAM_NAME, LoanProductConstants.BUY_DOWN_FEE_CALCULATION_TYPE_PARAM_NAME,
+            LoanProductConstants.BUY_DOWN_FEE_STRATEGY_PARAM_NAME, LoanProductConstants.BUY_DOWN_FEE_INCOME_TYPE_PARAM_NAME));
 
     private static final String[] SUPPORTED_LOAN_CONFIGURABLE_ATTRIBUTES = { LoanProductConstants.amortizationTypeParamName,
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyCodeParamName,
@@ -886,6 +891,8 @@ public final class LoanProductDataValidator {
         }
 
         validateIncomeCapitalization(transactionProcessingStrategyCode, element, baseDataValidator, accountingRuleType);
+
+        validateBuyDownFee(transactionProcessingStrategyCode, element, baseDataValidator);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -1935,6 +1942,8 @@ public final class LoanProductDataValidator {
 
         validateIncomeCapitalization(transactionProcessingStrategyCode, element, baseDataValidator, accountingRuleType);
 
+        validateBuyDownFee(transactionProcessingStrategyCode, element, baseDataValidator);
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -2741,6 +2750,61 @@ public final class LoanProductDataValidator {
                 baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_INCOME_CAPITALIZATION_PARAM_NAME).failWithCode(
                         "supported.only.for.progressive.loan.income.capitalization",
                         "Income capitalization is only supported for Progressive loans");
+            }
+        }
+    }
+
+    private void validateBuyDownFee(String transactionProcessingStrategyCode, JsonElement element, DataValidatorBuilder baseDataValidator) {
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.BUY_DOWN_FEE_CALCULATION_TYPE_PARAM_NAME, element)) {
+            final String buyDownFeeCalculationType = this.fromApiJsonHelper
+                    .extractStringNamed(LoanProductConstants.BUY_DOWN_FEE_CALCULATION_TYPE_PARAM_NAME, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.BUY_DOWN_FEE_CALCULATION_TYPE_PARAM_NAME)
+                    .value(buyDownFeeCalculationType).isOneOfEnumValues(LoanBuyDownFeeCalculationType.class);
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.BUY_DOWN_FEE_STRATEGY_PARAM_NAME, element)) {
+            final String buyDownFeeStrategy = this.fromApiJsonHelper
+                    .extractStringNamed(LoanProductConstants.BUY_DOWN_FEE_STRATEGY_PARAM_NAME, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.BUY_DOWN_FEE_STRATEGY_PARAM_NAME).value(buyDownFeeStrategy)
+                    .isOneOfEnumValues(LoanBuyDownFeeStrategy.class);
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.BUY_DOWN_FEE_INCOME_TYPE_PARAM_NAME, element)) {
+            final String buyDownFeeIncomeType = this.fromApiJsonHelper
+                    .extractStringNamed(LoanProductConstants.BUY_DOWN_FEE_INCOME_TYPE_PARAM_NAME, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.BUY_DOWN_FEE_INCOME_TYPE_PARAM_NAME).value(buyDownFeeIncomeType)
+                    .isOneOfEnumValues(LoanBuyDownFeeIncomeType.class);
+        }
+
+        if (AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY.equals(transactionProcessingStrategyCode)
+                && this.fromApiJsonHelper.parameterExists(LoanProductConstants.ENABLE_BUY_DOWN_FEE_PARAM_NAME, element)) {
+            Boolean enableBuyDownFee = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.ENABLE_BUY_DOWN_FEE_PARAM_NAME,
+                    element);
+            baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_BUY_DOWN_FEE_PARAM_NAME).value(enableBuyDownFee).ignoreIfNull()
+                    .validateForBooleanValue();
+            if (enableBuyDownFee) {
+                final String buyDownFeeCalculationType = this.fromApiJsonHelper
+                        .extractStringNamed(LoanProductConstants.BUY_DOWN_FEE_CALCULATION_TYPE_PARAM_NAME, element);
+                baseDataValidator.reset().parameter(LoanProductConstants.BUY_DOWN_FEE_CALCULATION_TYPE_PARAM_NAME)
+                        .value(buyDownFeeCalculationType).isOneOfEnumValues(LoanBuyDownFeeCalculationType.class)
+                        .cantBeBlankWhenParameterProvidedIs(LoanProductConstants.ENABLE_BUY_DOWN_FEE_PARAM_NAME, true);
+                final String buyDownFeeStrategy = this.fromApiJsonHelper
+                        .extractStringNamed(LoanProductConstants.BUY_DOWN_FEE_STRATEGY_PARAM_NAME, element);
+                baseDataValidator.reset().parameter(LoanProductConstants.BUY_DOWN_FEE_STRATEGY_PARAM_NAME).value(buyDownFeeStrategy)
+                        .isOneOfEnumValues(LoanBuyDownFeeStrategy.class)
+                        .cantBeBlankWhenParameterProvidedIs(LoanProductConstants.ENABLE_BUY_DOWN_FEE_PARAM_NAME, true);
+                final String buyDownFeeIncomeType = this.fromApiJsonHelper
+                        .extractStringNamed(LoanProductConstants.BUY_DOWN_FEE_INCOME_TYPE_PARAM_NAME, element);
+                baseDataValidator.reset().parameter(LoanProductConstants.BUY_DOWN_FEE_INCOME_TYPE_PARAM_NAME).value(buyDownFeeIncomeType)
+                        .isOneOfEnumValues(LoanBuyDownFeeIncomeType.class)
+                        .cantBeBlankWhenParameterProvidedIs(LoanProductConstants.ENABLE_BUY_DOWN_FEE_PARAM_NAME, true);
+            }
+        } else if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.ENABLE_BUY_DOWN_FEE_PARAM_NAME, element)) {
+            Boolean enableBuyDownFee = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.ENABLE_BUY_DOWN_FEE_PARAM_NAME,
+                    element);
+            if (Boolean.TRUE.equals(enableBuyDownFee)) {
+                baseDataValidator.reset().parameter(LoanProductConstants.ENABLE_BUY_DOWN_FEE_PARAM_NAME).failWithCode(
+                        "supported.only.for.progressive.loan.buyDownFee", "Buy down fee is only supported for Progressive loans");
             }
         }
     }

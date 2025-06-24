@@ -40,6 +40,9 @@ import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRate;
 import org.apache.fineract.portfolio.fund.domain.Fund;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanBuyDownFeeCalculationType;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanBuyDownFeeIncomeType;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanBuyDownFeeStrategy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeCalculationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeStrategy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCapitalizedIncomeType;
@@ -317,6 +320,14 @@ public class LoanProductAssembler {
         final LoanCapitalizedIncomeType capitalizedIncomeType = command
                 .enumValueOfParameterNamed(LoanProductConstants.CAPITALIZED_INCOME_TYPE_PARAM_NAME, LoanCapitalizedIncomeType.class);
 
+        final boolean enableBuyDownFee = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ENABLE_BUY_DOWN_FEE_PARAM_NAME);
+        final LoanBuyDownFeeCalculationType buyDownFeeCalculationType = command.enumValueOfParameterNamed(
+                LoanProductConstants.BUY_DOWN_FEE_CALCULATION_TYPE_PARAM_NAME, LoanBuyDownFeeCalculationType.class);
+        final LoanBuyDownFeeStrategy buyDownFeeStrategy = command
+                .enumValueOfParameterNamed(LoanProductConstants.BUY_DOWN_FEE_STRATEGY_PARAM_NAME, LoanBuyDownFeeStrategy.class);
+        final LoanBuyDownFeeIncomeType buyDownFeeIncomeType = command
+                .enumValueOfParameterNamed(LoanProductConstants.BUY_DOWN_FEE_INCOME_TYPE_PARAM_NAME, LoanBuyDownFeeIncomeType.class);
+
         return new LoanProduct(fund, loanTransactionProcessingStrategy, loanProductPaymentAllocationRules, loanProductCreditAllocationRules,
                 name, shortName, description, currency, principal, minPrincipal, maxPrincipal, interestRatePerPeriod,
                 minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType, annualInterestRate, interestMethod,
@@ -338,7 +349,7 @@ public class LoanProductAssembler {
                 repaymentStartDateType, enableInstallmentLevelDelinquency, loanScheduleType, loanScheduleProcessingType, fixedLength,
                 enableAccrualActivityPosting, supportedInterestRefundTypes, chargeOffBehaviour, interestRecognitionOnDisbursementDate,
                 daysInYearCustomStrategy, enableIncomeCapitalization, capitalizedIncomeCalculationType, capitalizedIncomeStrategy,
-                capitalizedIncomeType);
+                capitalizedIncomeType, enableBuyDownFee, buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType);
 
     }
 

@@ -203,6 +203,14 @@ public final class LoanProductsApiResourceSwagger {
         public String capitalizedIncomeStrategy;
         @Schema(example = "FEE", allowableValues = { "FEE", "INTEREST" })
         public String capitalizedIncomeType;
+        @Schema(example = "false")
+        public Boolean enableBuyDownFee;
+        @Schema(example = "FLAT", allowableValues = "FLAT")
+        public String buyDownFeeCalculationType;
+        @Schema(example = "EQUAL_AMORTIZATION", allowableValues = "EQUAL_AMORTIZATION")
+        public String buyDownFeeStrategy;
+        @Schema(example = "FEE", allowableValues = { "FEE", "INTEREST" })
+        public String buyDownFeeIncomeType;
 
         // Interest Recalculation
         @Schema(example = "false")
@@ -671,6 +679,14 @@ public final class LoanProductsApiResourceSwagger {
         public StringEnumOptionData capitalizedIncomeStrategy;
         @Schema(example = "FEE")
         public StringEnumOptionData capitalizedIncomeType;
+        @Schema(example = "false")
+        public Boolean enableBuyDownFee;
+        @Schema(example = "FLAT")
+        public StringEnumOptionData buyDownFeeCalculationType;
+        @Schema(example = "EQUAL_AMORTIZATION")
+        public StringEnumOptionData buyDownFeeStrategy;
+        @Schema(example = "FEE")
+        public StringEnumOptionData buyDownFeeIncomeType;
     }
 
     @Schema(description = "GetLoanProductsTemplateResponse")
@@ -1128,6 +1144,18 @@ public final class LoanProductsApiResourceSwagger {
         public List<StringEnumOptionData> capitalizedIncomeCalculationTypeOptions;
         public List<StringEnumOptionData> capitalizedIncomeStrategyOptions;
         public List<StringEnumOptionData> capitalizedIncomeTypeOptions;
+
+        @Schema(example = "false")
+        public Boolean enableBuyDownFee;
+        @Schema(example = "FLAT")
+        public StringEnumOptionData buyDownFeeCalculationType;
+        @Schema(example = "EQUAL_AMORTIZATION")
+        public StringEnumOptionData buyDownFeeStrategy;
+        @Schema(example = "FEE")
+        public StringEnumOptionData buyDownFeeIncomeType;
+        public List<StringEnumOptionData> buyDownFeeCalculationTypeOptions;
+        public List<StringEnumOptionData> buyDownFeeStrategyOptions;
+        public List<StringEnumOptionData> buyDownFeeIncomeTypeOptions;
     }
 
     @Schema(description = "GetLoanProductsProductIdResponse")
@@ -1460,6 +1488,18 @@ public final class LoanProductsApiResourceSwagger {
         public List<StringEnumOptionData> capitalizedIncomeCalculationTypeOptions;
         public List<StringEnumOptionData> capitalizedIncomeStrategyOptions;
         public List<StringEnumOptionData> capitalizedIncomeTypeOptions;
+
+        @Schema(example = "false")
+        public Boolean enableBuyDownFee;
+        @Schema(example = "FLAT")
+        public StringEnumOptionData buyDownFeeCalculationType;
+        @Schema(example = "EQUAL_AMORTIZATION")
+        public StringEnumOptionData buyDownFeeStrategy;
+        @Schema(example = "FEE")
+        public StringEnumOptionData buyDownFeeIncomeType;
+        public List<StringEnumOptionData> buyDownFeeCalculationTypeOptions;
+        public List<StringEnumOptionData> buyDownFeeStrategyOptions;
+        public List<StringEnumOptionData> buyDownFeeIncomeTypeOptions;
     }
 
     @Schema(description = "PutLoanProductsProductIdRequest")
@@ -1727,6 +1767,14 @@ public final class LoanProductsApiResourceSwagger {
         public String capitalizedIncomeStrategy;
         @Schema(example = "FEE", allowableValues = { "FEE", "INTEREST" })
         public String capitalizedIncomeType;
+        @Schema(example = "false")
+        public Boolean enableBuyDownFee;
+        @Schema(example = "FLAT", allowableValues = "FLAT")
+        public String buyDownFeeCalculationType;
+        @Schema(example = "EQUAL_AMORTIZATION", allowableValues = "EQUAL_AMORTIZATION")
+        public String buyDownFeeStrategy;
+        @Schema(example = "FEE", allowableValues = { "FEE", "INTEREST" })
+        public String buyDownFeeIncomeType;
     }
 
     public static final class AdvancedPaymentData {

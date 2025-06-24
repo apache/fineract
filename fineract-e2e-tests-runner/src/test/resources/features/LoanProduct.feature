@@ -224,3 +224,30 @@ Feature: LoanProduct
       | LoanProduct                                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
       | LP2_ADV_PYMNT_INTEREST_RECOGNITION_DISBURSEMENT_DAILY_EMI_360_30_ACCRUAL_ACTIVITY | 01 January 2025   | 1000           | 26                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 4                 | MONTHS                | 1              | MONTHS                 | 4                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     Then Loan Product response contains interestRecognitionOnDisbursementDate flag with value "true"
+
+  @TestRailId:C3780
+  Scenario: As a user I would like to verify BuyDownFees enabled in loan product response
+    When Admin sets the business date to "01 January 2025"
+    When Admin creates a client with random data
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES | 01 January 2025   | 1000           | 26                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 4                 | MONTHS                | 1              | MONTHS                 | 4                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    Then Loan Product response contains Buy Down Fees flag "true" with data:
+      | buyDownFeeCalculationType | buyDownFeeStrategy    | buyDownFeeIncomeType |
+      | Flat                      | Equal amortization    | Interest             |
+    Then Loan Details response contains Buy Down Fees flag "true" and data:
+      | buyDownFeeCalculationType | buyDownFeeStrategy    | buyDownFeeIncomeType |
+      | Flat                      | Equal amortization    | Interest             |
+
+  @TestRailId:C3781
+  Scenario: As a user I would like to verify BuyDownFees disabled in loan product response
+    When Admin sets the business date to "01 January 2025"
+    When Admin creates a client with random data
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_RECOGNITION_DISBURSEMENT_DAILY_EMI_360_30_ACCRUAL_ACTIVITY | 01 January 2025   | 1000           | 26                     | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 4                 | MONTHS                | 1              | MONTHS                 | 4                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    Then Loan Product response contains Buy Down Fees flag "false"
+    Then Loan Details response contains Buy Down Fees flag "false"
+
