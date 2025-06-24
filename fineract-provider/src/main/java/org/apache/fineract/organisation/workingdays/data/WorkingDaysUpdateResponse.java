@@ -16,12 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.workingdays.service;
+package org.apache.fineract.organisation.workingdays.data;
 
-import org.apache.fineract.organisation.workingdays.data.WorkingDaysUpdateRequest;
-import org.apache.fineract.organisation.workingdays.data.WorkingDaysUpdateResponse;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Map;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public interface WorkingDaysWritePlatformService {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class WorkingDaysUpdateResponse implements Serializable {
 
-    WorkingDaysUpdateResponse updateWorkingDays(WorkingDaysUpdateRequest command);
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    private Long resourceId;
+    private Map<String, Object> changes;
 }

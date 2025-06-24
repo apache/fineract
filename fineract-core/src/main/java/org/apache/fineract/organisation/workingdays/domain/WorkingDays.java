@@ -30,6 +30,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.workingdays.api.WorkingDaysApiConstants;
 
 @Getter
+@Setter
 @Entity
 @Table(name = "m_working_days")
 public class WorkingDays extends AbstractPersistableCustom<Long> {
@@ -59,6 +60,7 @@ public class WorkingDays extends AbstractPersistableCustom<Long> {
         this.extendTermForRepaymentsOnHolidays = extendTermForRepaymentsOnHolidays;
     }
 
+    @Deprecated(forRemoval = true)
     public Map<String, Object> update(final JsonCommand command) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
 

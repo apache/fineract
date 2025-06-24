@@ -16,12 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.workingdays.service;
+package org.apache.fineract.organisation.workingdays.validation;
 
-import org.apache.fineract.organisation.workingdays.data.WorkingDaysUpdateRequest;
-import org.apache.fineract.organisation.workingdays.data.WorkingDaysUpdateResponse;
+import static java.lang.annotation.ElementType.*;
 
-public interface WorkingDaysWritePlatformService {
+import jakarta.validation.Constraint;
+import jakarta.validation.Payload;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-    WorkingDaysUpdateResponse updateWorkingDays(WorkingDaysUpdateRequest command);
+@Target({ FIELD })
+@Retention(RetentionPolicy.RUNTIME)
+@Constraint(validatedBy = ValidRepaymentRescheduleTypeValidator.class)
+@Documented
+public @interface ValidRepaymentRescheduleType {
+
+    String message() default "{org.apache.fineract.organisation.workingdays.data.working-days-request.repaymentRescheduleType.inrange}";
+
+    Class<?>[] groups() default {};
+
+    Class<? extends Payload>[] payload() default {};
+
+    int min();
+
+    int max();
 }

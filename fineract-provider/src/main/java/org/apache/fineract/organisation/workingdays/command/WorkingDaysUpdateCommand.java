@@ -16,12 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.workingdays.service;
+package org.apache.fineract.organisation.workingdays.command;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
 import org.apache.fineract.organisation.workingdays.data.WorkingDaysUpdateRequest;
-import org.apache.fineract.organisation.workingdays.data.WorkingDaysUpdateResponse;
 
-public interface WorkingDaysWritePlatformService {
-
-    WorkingDaysUpdateResponse updateWorkingDays(WorkingDaysUpdateRequest command);
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class WorkingDaysUpdateCommand extends Command<WorkingDaysUpdateRequest> {}

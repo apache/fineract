@@ -19,27 +19,33 @@
 package org.apache.fineract.organisation.workingdays.api;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.util.UUID;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.service.CommandWrapperBuilder;
-import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandPipeline;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.organisation.workingdays.command.WorkingDaysUpdateCommand;
 import org.apache.fineract.organisation.workingdays.data.WorkingDaysData;
+import org.apache.fineract.organisation.workingdays.data.WorkingDaysUpdateRequest;
+import org.apache.fineract.organisation.workingdays.data.WorkingDaysUpdateResponse;
 import org.apache.fineract.organisation.workingdays.service.WorkingDaysReadPlatformService;
 import org.springframework.stereotype.Component;
 
@@ -52,10 +58,9 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class WorkingDaysApiResource {
 
-    private final DefaultToApiJsonSerializer<WorkingDaysData> toApiJsonSerializer;
     private final WorkingDaysReadPlatformService workingDaysReadPlatformService;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final PlatformSecurityContext context;
+    private final CommandPipeline pipeline;
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -71,16 +76,16 @@ public class WorkingDaysApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Working Day", description = "Mandatory Fields\n"
             + "recurrence,repaymentRescheduleType,extendTermForDailyRepayments,locale")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = WorkingDaysApiResourceSwagger.PutWorkingDaysRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = WorkingDaysApiResourceSwagger.PutWorkingDaysResponse.class))) })
-    public String update(@Parameter(hidden = true) final String jsonRequestBody) {
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = WorkingDaysUpdateRequest.class)))
+    public WorkingDaysUpdateResponse update(@HeaderParam("Idempotency-Key") String idempotencyKey,
+            @Valid final WorkingDaysUpdateRequest request) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateWorkingDays().withJson(jsonRequestBody).build();
+        WorkingDaysUpdateCommand command = new WorkingDaysUpdateCommand();
+        initCommand(idempotencyKey, command);
+        command.setPayload(request);
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+        Supplier<WorkingDaysUpdateResponse> result = pipeline.send(command);
+        return result.get();
     }
 
     @GET
@@ -97,4 +102,11 @@ public class WorkingDaysApiResource {
         return this.workingDaysReadPlatformService.repaymentRescheduleType();
     }
 
+    private void initCommand(String idempotencyKey, Command command) {
+        String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
+        command.setId(UUID.randomUUID());
+        command.setCreatedAt(OffsetDateTime.now(ZoneId.of("UTC")));
+        command.setTenantId(tenantIdentifier);
+        command.setIdempotencyKey(idempotencyKey);
+    }
 }

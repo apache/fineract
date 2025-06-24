@@ -58,31 +58,4 @@ final class WorkingDaysApiResourceSwagger {
         public Collection<EnumOptionData> repaymentRescheduleOptions;
     }
 
-    @Schema(description = "PutWorkingDaysRequest")
-    public static final class PutWorkingDaysRequest {
-
-        private PutWorkingDaysRequest() {
-
-        }
-
-        @Schema(example = "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR")
-        public String recurrence;
-        @Schema(example = "en")
-        public String locale;
-        @Schema(example = "4")
-        public EnumOptionData repaymentRescheduleType;
-        @Schema(example = "true")
-        public Boolean extendTermForDailyRepayments;
-    }
-
-    @Schema(description = "PutWorkingDaysResponse")
-    public static final class PutWorkingDaysResponse {
-
-        private PutWorkingDaysResponse() {
-
-        }
-
-        @Schema(example = "1")
-        public Long resourceId;
-    }
 }

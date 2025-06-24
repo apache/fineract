@@ -37,6 +37,7 @@ import org.apache.fineract.organisation.workingdays.api.WorkingDaysApiConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+@Deprecated(forRemoval = true)
 @Component
 public class WorkingDayValidator {
 
@@ -51,6 +52,7 @@ public class WorkingDayValidator {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
+    @Deprecated(forRemoval = true)
     public void validateForUpdate(final String json) {
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
