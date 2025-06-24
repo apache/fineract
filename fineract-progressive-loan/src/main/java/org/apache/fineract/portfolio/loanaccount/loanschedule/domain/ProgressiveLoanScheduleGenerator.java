@@ -203,7 +203,7 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
         Optional<ProgressiveLoanInterestScheduleModel> savedModel = interestScheduleModelRepositoryWrapper.getSavedModel(loan,
                 transactionDate);
         ProgressiveLoanInterestScheduleModel model = savedModel
-                .orElseGet(() -> processor.calculateInterestScheduleModel(loan.getId(), onDate));
+                .orElseGet(() -> processor.calculateInterestScheduleModel(loan.getId(), transactionDate));
         OutstandingDetails outstandingAmounts = emiCalculator.getOutstandingAmountsTillDate(model, transactionDate);
         // TODO: We should add all the past due outstanding amounts as well
         OutstandingAmountsDTO result = new OutstandingAmountsDTO(currency) //

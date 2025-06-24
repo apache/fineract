@@ -1237,6 +1237,22 @@ public final class LoanProductDataValidator {
         baseDataValidator.reset().parameter(LoanProductConstants.preClosureInterestCalculationStrategyParamName)
                 .value(preCloseInterestCalculationStrategy).ignoreIfNull().inMinMaxRange(
                         LoanPreCloseInterestCalculationStrategy.getMinValue(), LoanPreCloseInterestCalculationStrategy.getMaxValue());
+
+        String loanScheduleType = LoanScheduleType.CUMULATIVE.toString();
+        if (fromApiJsonHelper.parameterExists(LoanProductConstants.LOAN_SCHEDULE_TYPE, element)) {
+            loanScheduleType = fromApiJsonHelper.extractStringNamed(LoanProductConstants.LOAN_SCHEDULE_TYPE, element);
+        }
+        if (LoanScheduleType.PROGRESSIVE.equals(LoanScheduleType.valueOf(loanScheduleType))
+                && preCloseInterestCalculationStrategy != null) {
+            LoanPreCloseInterestCalculationStrategy preCloseStrategy = LoanPreCloseInterestCalculationStrategy
+                    .fromInt(preCloseInterestCalculationStrategy);
+            if (preCloseStrategy.calculateTillRestFrequencyEnabled() && !frequencyType.isSameAsRepayment() && !frequencyType.isDaily()) {
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
+                        "when.preclose.strategy.is.till.rest.frequency.then.frequency.type.is.daily.or.same.as.repayment",
+                        "When the pre-close interest calculation strategy is set to `Till Rest Frequency Date` "
+                                + "the frequency of outstanding principal calculation must be `Daily` or `Same as repayment period`.");
+            }
+        }
     }
 
     public void validateForUpdate(final JsonCommand command, final LoanProduct loanProduct) {

@@ -3901,18 +3901,18 @@ Feature: Charge-off
       | 1  | 31   | 01 February 2024 | 01 February 2024 | 86.02           | 13.98         | 7.0      | 0.0  | 0.0       | 20.98 | 20.98 | 0.0        | 0.0  | 0.0         |
       | 2  | 29   | 01 March 2024    |                  | 71.06           | 14.96         | 6.02     | 0.0  | 0.0       | 20.98 | 0.0   | 0.0        | 0.0  | 20.98       |
       | 3  | 31   | 01 April 2024    |                  | 56.1            | 14.96         | 6.02     | 0.0  | 0.0       | 20.98 | 0.0   | 0.0        | 0.0  | 20.98       |
-      | 4  | 30   | 01 May 2024      |                  | 41.14           | 14.96         | 6.02     | 0.0  | 0.0       | 20.98 | 0.0   | 0.0        | 0.0  | 20.98       |
-      | 5  | 31   | 01 June 2024     |                  | 23.04           | 18.1          | 2.88     | 0.0  | 0.0       | 20.98 | 0.0   | 0.0        | 0.0  | 20.98       |
-      | 6  | 30   | 01 July 2024     |                  | 0.0             | 23.04         | 1.61     | 0.0  | 0.0       | 24.65 | 0.0   | 0.0        | 0.0  | 24.65       |
+      | 4  | 30   | 01 May 2024      |                  | 39.12           | 16.98         | 4.0      | 0.0  | 0.0       | 20.98 | 0.0   | 0.0        | 0.0  | 20.98       |
+      | 5  | 31   | 01 June 2024     |                  | 20.88           | 18.24         | 2.74     | 0.0  | 0.0       | 20.98 | 0.0   | 0.0        | 0.0  | 20.98       |
+      | 6  | 30   | 01 July 2024     |                  | 0.0             | 20.88         | 1.46     | 0.0  | 0.0       | 22.34 | 0.0   | 0.0        | 0.0  | 22.34       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
-      | 100.0         | 29.55    | 0.0  | 0.0       | 129.55 | 20.98 | 0.0        | 0.0  | 108.57      |
+      | 100.0         | 27.24    | 0.0  | 0.0       | 127.24 | 20.98 | 0.0        | 0.0  | 106.26      |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 01 February 2024 | Repayment        | 20.98  | 13.98     | 7.0      | 0.0  | 0.0       | 86.02        | false    | false    |
       | 02 April 2024    | Accrual          | 19.24  | 0.0       | 19.24    | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 02 April 2024    | Charge-off       | 108.57 | 86.02     | 22.55    | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 02 April 2024    | Charge-off       | 106.26 | 86.02     | 20.24    | 0.0  | 0.0       | 0.0          | false    | false    |
 
   @TestRailId:C3363
   Scenario: Charge-off on due date when loan behavior is zero-interest with interestRecalculation disabled - UC1
@@ -6006,17 +6006,17 @@ Feature: Charge-off
       |    |      | 01 January 2024  |               | 100.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |       |             |
       | 1  | 31   | 01 February 2024 | 01 March 2024 | 83.57           | 16.43         | 0.58     | 0.0  | 0.0       | 17.01 | 17.01 | 0.0        | 17.01 | 0.0         |
       | 2  | 29   | 01 March 2024    | 01 March 2024 | 67.05           | 16.52         | 0.49     | 0.0  | 0.0       | 17.01 | 17.01 | 0.0        | 0.0   | 0.0         |
-      | 3  | 30   | 31 March 2024    |               | 0.0             | 67.05         | 0.08     | 0.0  | 0.0       | 67.13 | 35.98 | 35.98      | 0.0   | 31.15       |
+      | 3  | 30   | 31 March 2024    |               | 0.0             | 67.05         | 0.18     | 0.0  | 0.0       | 67.23 | 35.98 | 35.98      | 0.0   | 31.25       |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late  | Outstanding |
-      | 100.0         | 1.15     | 0.0  | 0.0       | 101.15 | 70.0  | 35.98      | 17.01 | 31.15       |
+      | 100.0         | 1.25     | 0.0  | 0.0       | 101.25 | 70.0  | 35.98      | 17.01 | 31.25       |
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 01 January 2024  | Disbursement       | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    | false    |
       | 01 March 2024    | Repayment          | 70.0   | 68.93     | 1.07     | 0.0  | 0.0       | 31.07        | false    | false    |
       | 31 March 2024    | Accrual            | 1.72   | 0.0       | 1.72     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 31 March 2024    | Accrual Adjustment | 0.57   | 0.0       | 0.57     | 0.0  | 0.0       | 0.0          | false    | false    |
-      | 31 March 2024    | Charge-off         | 31.15  | 31.07     | 0.08     | 0.0  | 0.0       | 0.0          | false    | true     |
+      | 31 March 2024    | Accrual Adjustment | 0.47   | 0.0       | 0.47     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 31 March 2024    | Charge-off         | 31.25  | 31.07     | 0.18     | 0.0  | 0.0       | 0.0          | false    | true     |
     And Global configuration "is-principal-compounding-disabled-for-overdue-loans" is disabled
 
   @TestRailId:C3499 @AdvancedPaymentAllocation

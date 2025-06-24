@@ -44,6 +44,8 @@ public class ProgressiveTransactionCtx extends TransactionCtx {
     private boolean isChargedOff = false;
     @Setter
     private boolean isContractTerminated = false;
+    @Setter
+    private boolean isPrepayAttempt = false;
     private List<LoanRepaymentScheduleInstallment> skipRepaymentScheduleInstallments = new ArrayList<>();
 
     public ProgressiveTransactionCtx(MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments,
