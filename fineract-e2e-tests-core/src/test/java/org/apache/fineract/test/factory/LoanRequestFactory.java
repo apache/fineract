@@ -60,6 +60,8 @@ public class LoanRequestFactory {
     public static final String DATE_FORMAT = "dd MMMM yyyy";
     public static final String DEFAULT_LOCALE = "en";
     public static final DefaultLoanProduct DEFAULT_LOAN_PRODUCT = DefaultLoanProduct.valueOf("LP1");
+    public static final DefaultLoanProduct DEFAULT_PROGRESSIVE_LOAN_PRODUCT = DefaultLoanProduct
+            .valueOf("LP2_ADV_CUSTOM_PMT_ALLOC_PROGRESSIVE_LOAN_SCHEDULE_HORIZONTAL");
     public static final Double DEFAULT_PAYMENT_TRANSACTION_AMOUNT = 200.00;
     public static final Double DEFAULT_UNDO_TRANSACTION_AMOUNT = 0.0;
     public static final Double DEFAULT_REPAYMENT_TRANSACTION_AMOUNT = 200.00;
@@ -78,13 +80,16 @@ public class LoanRequestFactory {
     public static final String DEFAULT_REAGING_FREQUENCY_TYPE = "MONTHS";
     public static final BigDecimal DEFAULT_INTEREST_RATE_PER_PERIOD = new BigDecimal(0);
     public static final Integer DEFAULT_INTEREST_TYPE = InterestType.FLAT.value;
+    public static final Integer DEFAULT_PROGRESSIVE_INTEREST_TYPE = InterestType.DECLINING_BALANCE.value;
     public static final Integer DEFAULT_INTEREST_CALCULATION_PERIOD_TYPE_SAME_AS_REPAYMENT_PERIOD = InterestCalculationPeriodTime.SAME_AS_REPAYMENT_PERIOD.value;
+    public static final Integer DEFAULT_PROGRESSIVE_INTEREST_CALCULATION_PERIOD_TYPE_SAME_AS_REPAYMENT_PERIOD = InterestCalculationPeriodTime.DAILY.value;
     public static final Integer DEFAULT_AMORTIZATION_TYPE = 1;
     public static final String DEFAULT_LOAN_TYPE = "individual";
     public static final Integer DEFAULT_NUMBER_OF_REPAYMENTS = 1;
     public static final Integer DEFAULT_NUMBER_OF_INSTALLMENTS = 5;
     public static final Integer DEFAULT_REPAYMENT_FREQUENCY = 30;
     public static final String DEFAULT_TRANSACTION_PROCESSING_STRATEGY_CODE = TransactionProcessingStrategyCode.PENALTIES_FEES_INTEREST_PRINCIPAL_ORDER.value;
+    public static final String DEFAULT_PROGRESSIVE_TRANSACTION_PROCESSING_STRATEGY_CODE = TransactionProcessingStrategyCode.ADVANCED_PAYMENT_ALLOCATION.value;
 
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
     public static final String DATE_SUBMIT_STRING = FORMATTER.format(Utils.now().minusMonths(1L));
@@ -113,6 +118,30 @@ public class LoanRequestFactory {
                 .interestCalculationPeriodType(DEFAULT_INTEREST_CALCULATION_PERIOD_TYPE_SAME_AS_REPAYMENT_PERIOD)//
                 .amortizationType(DEFAULT_AMORTIZATION_TYPE)//
                 .transactionProcessingStrategyCode(DEFAULT_TRANSACTION_PROCESSING_STRATEGY_CODE)//
+                .dateFormat(DATE_FORMAT)//
+                .graceOnArrearsAgeing(3)//
+                .maxOutstandingLoanBalance(new BigDecimal(10000));
+    }
+
+    public PostLoansRequest defaultProgressiveLoansRequest(final Long clientId) {
+        return new PostLoansRequest()//
+                .clientId(clientId)//
+                .productId(loanProductResolver.resolve(DEFAULT_PROGRESSIVE_LOAN_PRODUCT))//
+                .submittedOnDate(DATE_SUBMIT_STRING)//
+                .expectedDisbursementDate(DATE_SUBMIT_STRING)//
+                .principal(DEFAULT_PRINCIPAL)//
+                .locale(DEFAULT_LOCALE)//
+                .loanTermFrequency(DEFAULT_LOAN_TERM_FREQUENCY)//
+                .loanTermFrequencyType(DEFAULT_LOAN_TERM_FREQUENCY_TYPE)//
+                .loanType(DEFAULT_LOAN_TYPE)//
+                .numberOfRepayments(DEFAULT_NUMBER_OF_REPAYMENTS)//
+                .repaymentEvery(DEFAULT_REPAYMENT_FREQUENCY)//
+                .repaymentFrequencyType(DEFAULT_REPAYMENT_FREQUENCY_TYPE)//
+                .interestRatePerPeriod(DEFAULT_INTEREST_RATE_PER_PERIOD)//
+                .interestType(DEFAULT_PROGRESSIVE_INTEREST_TYPE)//
+                .interestCalculationPeriodType(DEFAULT_PROGRESSIVE_INTEREST_CALCULATION_PERIOD_TYPE_SAME_AS_REPAYMENT_PERIOD)//
+                .amortizationType(DEFAULT_AMORTIZATION_TYPE)//
+                .transactionProcessingStrategyCode(DEFAULT_PROGRESSIVE_TRANSACTION_PROCESSING_STRATEGY_CODE)//
                 .dateFormat(DATE_FORMAT)//
                 .graceOnArrearsAgeing(3)//
                 .maxOutstandingLoanBalance(new BigDecimal(10000));

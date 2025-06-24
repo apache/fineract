@@ -66,12 +66,17 @@ public class ChangeOperation implements Comparable<ChangeOperation> {
         return loanCharge.isPresent();
     }
 
+    public boolean isInstallmentFee() {
+        return loanCharge.map(LoanCharge::isInstalmentFee).orElse(false);
+    }
+
     private boolean isAccrualActivity() {
         return isTransaction() && loanTransaction.get().isAccrualActivity();
     }
 
     private boolean isBackdatedCharge() {
-        return isCharge() && DateUtils.isBefore(loanCharge.get().getDueDate(), loanCharge.get().getSubmittedOnDate());
+        return isCharge() && loanCharge.isPresent() && loanCharge.get().getDueDate() != null
+                && DateUtils.isBefore(loanCharge.get().getDueDate(), loanCharge.get().getSubmittedOnDate());
     }
 
     private LocalDate getEffectiveDate() {
@@ -80,6 +85,8 @@ public class ChangeOperation implements Comparable<ChangeOperation> {
         } else if (loanCharge.isPresent()) {
             if (isBackdatedCharge()) {
                 return loanCharge.get().getDueDate();
+            } else if (isInstallmentFee()) {
+                return loanCharge.get().getLoan().isDisbursed() ? loanCharge.get().getSubmittedOnDate() : loanCharge.get().getDueDate();
             } else {
                 return loanCharge.get().getSubmittedOnDate();
             }
@@ -119,6 +126,17 @@ public class ChangeOperation implements Comparable<ChangeOperation> {
     public int compareTo(@NonNull ChangeOperation o) {
         int datePortion = DateUtils.compareWithNullsLast(this.getEffectiveDate(), o.getEffectiveDate());
         if (datePortion == 0) {
+            boolean thisIsDisb = this.isTransaction() && this.getLoanTransaction().isPresent()
+                    && this.getLoanTransaction().get().isDisbursement();
+            boolean otherIsDisb = o.isTransaction() && o.getLoanTransaction().isPresent() && o.getLoanTransaction().get().isDisbursement();
+
+            if (thisIsDisb && o.isCharge() && o.isInstallmentFee()) {
+                return -1;
+            }
+            if (this.isCharge() && this.isInstallmentFee() && otherIsDisb) {
+                return 1;
+            }
+
             final boolean isAccrual = isAccrualActivity();
             if (isAccrual != o.isAccrualActivity()) {
                 return isAccrual ? 1 : -1;

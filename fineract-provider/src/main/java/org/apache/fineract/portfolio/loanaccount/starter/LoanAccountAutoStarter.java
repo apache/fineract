@@ -36,6 +36,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.imp
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.RBILoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanChargeService;
 import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanInterestRefundServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.service.schedule.LoanScheduleComponent;
 import org.apache.fineract.portfolio.loanproduct.calc.EMICalculator;
@@ -139,8 +140,8 @@ public class LoanAccountAutoStarter {
             final @Lazy ProgressiveLoanInterestRefundServiceImpl progressiveLoanInterestRefundService,
             final ExternalIdFactory externalIdFactory, final LoanScheduleComponent loanSchedule,
             final LoanTransactionRepository loanTransactionRepository, final LoanChargeValidator loanChargeValidator,
-            final LoanBalanceService loanBalanceService) {
+            final LoanBalanceService loanBalanceService, @Lazy final LoanChargeService loanChargeService) {
         return new AdvancedPaymentScheduleTransactionProcessor(emiCalculator, loanRepositoryWrapper, progressiveLoanInterestRefundService,
-                externalIdFactory, loanSchedule, loanTransactionRepository, loanChargeValidator, loanBalanceService);
+                externalIdFactory, loanSchedule, loanTransactionRepository, loanChargeValidator, loanBalanceService, loanChargeService);
     }
 }

@@ -42,6 +42,8 @@ public final class LoanProductsApiResourceSwagger {
 
         @Schema(example = "1")
         public Long id;
+        @Schema(example = "60.0")
+        public BigDecimal amount;
     }
 
     @Schema(description = "LoanProductChargeToGLAccountMapper")
@@ -1421,7 +1423,7 @@ public final class LoanProductsApiResourceSwagger {
         @Schema(example = "false")
         public Boolean canDefineInstallmentAmount;
         @Schema(example = "[]")
-        public List<Integer> charges;
+        public List<LoanProductChargeData> charges;
         public Set<GetLoanProductsPrincipalVariationsForBorrowerCycle> productsPrincipalVariationsForBorrowerCycle;
         @Schema(example = "[]")
         public List<Integer> interestRateVariationsForBorrowerCycle;

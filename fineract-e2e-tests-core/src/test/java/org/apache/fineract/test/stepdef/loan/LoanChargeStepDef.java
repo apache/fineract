@@ -90,7 +90,7 @@ public class LoanChargeStepDef extends AbstractStepDef {
         Long chargeTypeId = chargeProductType.getValue();
         if (chargeTypeId.equals(ChargeProductType.LOAN_DISBURSEMENT_PERCENTAGE_FEE.getValue())
                 || chargeTypeId.equals(ChargeProductType.LOAN_TRANCHE_DISBURSEMENT_PERCENTAGE_FEE.getValue())
-                || chargeTypeId.equals(ChargeProductType.LOAN_INSTALLMENT_PERCENTAGE_FEE.getValue())) {
+                || chargeTypeId.equals(ChargeProductType.LOAN_INSTALLMENT_FEE_PERCENTAGE_AMOUNT_PLUS_INTEREST.getValue())) {
             throw new IllegalStateException(String.format("The requested %s charge is NOT due date type, cannot be used here", chargeType));
         }
 
@@ -115,7 +115,8 @@ public class LoanChargeStepDef extends AbstractStepDef {
         Long chargeTypeId = chargeProductType.getValue();
         if (!chargeTypeId.equals(ChargeProductType.LOAN_DISBURSEMENT_PERCENTAGE_FEE.getValue())
                 && !chargeTypeId.equals(ChargeProductType.LOAN_TRANCHE_DISBURSEMENT_PERCENTAGE_FEE.getValue())
-                && !chargeTypeId.equals(ChargeProductType.LOAN_INSTALLMENT_PERCENTAGE_FEE.getValue())) {
+                && !chargeTypeId.equals(ChargeProductType.LOAN_INSTALLMENT_FEE_PERCENTAGE_AMOUNT.getValue())
+                && !chargeTypeId.equals(ChargeProductType.LOAN_INSTALLMENT_FEE_PERCENTAGE_AMOUNT_PLUS_INTEREST.getValue())) {
             throw new IllegalStateException(String.format("The requested %s charge is due date type, cannot be used here", chargeType));
         }
 
@@ -126,6 +127,54 @@ public class LoanChargeStepDef extends AbstractStepDef {
                 .execute();
         ErrorHelper.checkSuccessfulApiCall(loanChargeResponse);
         testContext().set(TestContextKey.ADD_DUE_DATE_CHARGE_RESPONSE, loanChargeResponse);
+    }
+
+    @When("Admin adds {string} installment charge with {double} amount")
+    public void addInstallmentFeeCharge(final String chargeType, final double amount) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        assert loanResponse.body() != null;
+        final long loanId = loanResponse.body().getLoanId();
+
+        final ChargeProductType chargeProductType = ChargeProductType.valueOf(chargeType);
+        final Long chargeTypeId = chargeProductType.getValue();
+        if (!chargeTypeId.equals(ChargeProductType.LOAN_INSTALLMENT_FEE_FLAT.getValue())
+                && !chargeTypeId.equals(ChargeProductType.LOAN_INSTALLMENT_FEE_PERCENTAGE_AMOUNT.getValue())
+                && !chargeTypeId.equals(ChargeProductType.LOAN_INSTALLMENT_FEE_PERCENTAGE_INTEREST.getValue())
+                && !chargeTypeId.equals(ChargeProductType.LOAN_INSTALLMENT_FEE_PERCENTAGE_AMOUNT_PLUS_INTEREST.getValue())) {
+            throw new IllegalStateException(
+                    String.format("The requested %s charge is not installment fee type, cannot be used here", chargeType));
+        }
+
+        final PostLoansLoanIdChargesRequest loanIdChargesRequest = LoanChargeRequestFactory.defaultLoanChargeRequest()
+                .chargeId(chargeTypeId).amount(amount);
+
+        final Response<PostLoansLoanIdChargesResponse> loanChargeResponse = loanChargesApi
+                .executeLoanCharge(loanId, loanIdChargesRequest, "").execute();
+        ErrorHelper.checkSuccessfulApiCall(loanChargeResponse);
+        testContext().set(TestContextKey.ADD_INSTALLMENT_FEE_CHARGE_RESPONSE, loanChargeResponse);
+    }
+
+    @Then("Admin fails to add {string} installment charge with {double} amount because of wrong charge calculation type")
+    public void addInstallmentFeeChargeFails(final String chargeType, final double amount) throws IOException {
+        final Response<PostLoansResponse> loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        assert loanResponse.body() != null;
+
+        final long loanId = loanResponse.body().getLoanId();
+        final ChargeProductType chargeProductType = ChargeProductType.valueOf(chargeType);
+        final Long chargeTypeId = chargeProductType.getValue();
+
+        final PostLoansLoanIdChargesRequest loanIdChargesRequest = LoanChargeRequestFactory.defaultLoanChargeRequest()
+                .chargeId(chargeTypeId).amount(amount);
+
+        final Response<PostLoansLoanIdChargesResponse> loanChargeResponse = loanChargesApi
+                .executeLoanCharge(loanId, loanIdChargesRequest, "").execute();
+        testContext().set(TestContextKey.ADD_INSTALLMENT_FEE_CHARGE_RESPONSE, loanChargeResponse);
+        final ErrorResponse errorDetails = ErrorResponse.from(loanChargeResponse);
+        assertThat(errorDetails.getHttpStatusCode()).isEqualTo(400);
+        assertThat(errorDetails.getSingleError().getDeveloperMessage())
+                .isEqualTo(chargeProductType.equals(ChargeProductType.LOAN_INSTALLMENT_FEE_PERCENTAGE_INTEREST)
+                        ? ErrorMessageHelper.addInstallmentFeeInterestPercentageChargeFailure()
+                        : ErrorMessageHelper.addInstallmentFeePrincipalPercentageChargeFailure());
     }
 
     @Then("Admin is not able to add {string} due date charge with {string} due date and {double} EUR transaction amount because the of charged-off account")
@@ -284,7 +333,7 @@ public class LoanChargeStepDef extends AbstractStepDef {
         Long chargeTypeId = chargeProductType.getValue();
         if (chargeTypeId.equals(ChargeProductType.LOAN_DISBURSEMENT_PERCENTAGE_FEE.getValue())
                 || chargeTypeId.equals(ChargeProductType.LOAN_TRANCHE_DISBURSEMENT_PERCENTAGE_FEE.getValue())
-                || chargeTypeId.equals(ChargeProductType.LOAN_INSTALLMENT_PERCENTAGE_FEE.getValue())) {
+                || chargeTypeId.equals(ChargeProductType.LOAN_INSTALLMENT_FEE_PERCENTAGE_AMOUNT_PLUS_INTEREST.getValue())) {
             throw new IllegalStateException(String.format("The requested %s charge is NOT due date type, cannot be used here", chargeType));
         }
 

@@ -972,4 +972,12 @@ public final class ErrorMessageHelper {
     public static String addInterestPauseForNotInactiveLoanFailure() {
         return "Operations on interest pauses are restricted to active loans.";
     }
+
+    public static String addInstallmentFeeInterestPercentageChargeFailure() {
+        return "Failed data validation due to: installment.loancharge.with.calculation.type.interest.not.allowed.";
+    }
+
+    public static String addInstallmentFeePrincipalPercentageChargeFailure() {
+        return "Failed data validation due to: installment.loancharge.with.calculation.type.principal.not.allowed.";
+    }
 }

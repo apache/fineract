@@ -721,4 +721,8 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
                 .chargePaymentMode(chargePaymentModeData).paid(paid).waived(waived).loanId(loan.getId()).minCap(minCap).maxCap(maxCap)
                 .installmentChargeData(loanInstallmentChargeDataList).externalId(externalId).build();
     }
+
+    public boolean hasInstallmentFor(final LoanRepaymentScheduleInstallment installment) {
+        return this.getInstallmentLoanCharge(installment.getInstallmentNumber()) != null;
+    }
 }

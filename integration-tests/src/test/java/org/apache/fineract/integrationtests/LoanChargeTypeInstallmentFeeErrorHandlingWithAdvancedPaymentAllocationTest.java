@@ -46,6 +46,7 @@ import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class LoanChargeTypeInstallmentFeeErrorHandlingWithAdvancedPaymentAllocationTest extends BaseLoanIntegrationTest {
@@ -67,9 +68,7 @@ public class LoanChargeTypeInstallmentFeeErrorHandlingWithAdvancedPaymentAllocat
         ACCOUNT_HELPER = new AccountHelper(REQUEST_SPEC, RESPONSE_SPEC);
     }
 
-    /*
-     * TODO: To be disabled when Installment Fee Charges are handled for Advanced Payment Allocation
-     */
+    @Disabled
     @Test
     public void addingLoanChargeTypeInstallmentFeeForAdvancedPaymentAllocationGivesErrorTest() {
         try {

@@ -22,7 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -75,6 +75,14 @@ public class LoanChargeService {
         loan.updateSummaryWithTotalFeeChargesDueAtDisbursement(loan.deriveSumTotalOfChargesDueAtDisbursement());
     }
 
+    public void recalculateParticularChargesAfterTransactionOccurs(final Loan loan, final List<LoanCharge> loanCharges,
+            final LocalDate transactionDate) {
+        for (final LoanCharge loanCharge : loanCharges) {
+            recalculateLoanCharge(loan, loanCharge, 0, transactionDate);
+        }
+        loan.updateSummaryWithTotalFeeChargesDueAtDisbursement(loan.deriveSumTotalOfChargesDueAtDisbursement());
+    }
+
     public void recalculateLoanCharge(final Loan loan, final LoanCharge loanCharge, final int penaltyWaitPeriod) {
         BigDecimal amount = BigDecimal.ZERO;
         BigDecimal chargeAmt;
@@ -94,8 +102,34 @@ public class LoanChargeService {
         }
         if (loanCharge.isActive()) {
             clearLoanInstallmentChargesBeforeRegeneration(loanCharge);
-            update(loanCharge, chargeAmt, loanCharge.getDueLocalDate(), amount, loan.fetchNumberOfInstallmensAfterExceptions(),
+            update(loanCharge, chargeAmt, loanCharge.getDueLocalDate(), amount, loan.fetchNumberOfInstallmentsAfterExceptions(),
                     totalChargeAmt);
+            loanChargeValidator.validateChargeHasValidSpecifiedDateIfApplicable(loan, loanCharge, loan.getDisbursementDate());
+        }
+    }
+
+    public void recalculateLoanCharge(final Loan loan, final LoanCharge loanCharge, final int penaltyWaitPeriod,
+            final LocalDate transactionDate) {
+        BigDecimal amount = BigDecimal.ZERO;
+        BigDecimal chargeAmt;
+        BigDecimal totalChargeAmt = BigDecimal.ZERO;
+        if (loanCharge.getChargeCalculation().isPercentageBased()) {
+            if (loanCharge.isOverdueInstallmentCharge()) {
+                amount = calculateOverdueAmountPercentageAppliedTo(loan, loanCharge, penaltyWaitPeriod);
+            } else {
+                amount = calculateAmountPercentageAppliedTo(loan, loanCharge);
+            }
+            chargeAmt = loanCharge.getPercentage();
+            if (loanCharge.isInstalmentFee()) {
+                totalChargeAmt = calculatePerInstallmentChargeAmount(loan, loanCharge);
+            }
+        } else {
+            chargeAmt = loanCharge.amountOrPercentage();
+        }
+        if (loanCharge.isActive()) {
+            clearLoanInstallmentChargesBeforeRegeneration(loanCharge);
+            update(loanCharge, chargeAmt, loanCharge.getDueLocalDate(), amount, loan.fetchNumberOfInstallmentsAfterExceptions(),
+                    totalChargeAmt, transactionDate);
             loanChargeValidator.validateChargeHasValidSpecifiedDateIfApplicable(loan, loanCharge, loan.getDisbursementDate());
         }
     }
@@ -191,7 +225,8 @@ public class LoanChargeService {
         } else {
             chargeAmt = loanCharge.amountOrPercentage();
         }
-        update(loanCharge, chargeAmt, loanCharge.getDueLocalDate(), amount, loan.fetchNumberOfInstallmensAfterExceptions(), totalChargeAmt);
+        update(loanCharge, chargeAmt, loanCharge.getDueLocalDate(), amount, loan.fetchNumberOfInstallmentsAfterExceptions(),
+                totalChargeAmt);
 
         // NOTE: must add new loan charge to set of loan charges before
         // reprocessing the repayment schedule.
@@ -275,7 +310,7 @@ public class LoanChargeService {
                 chargeAmt = loanCharge.amountOrPercentage();
             }
             if (charge != null) {
-                update(charge, chargeAmt, loanCharge.getDueLocalDate(), amount, loan.fetchNumberOfInstallmensAfterExceptions(),
+                update(charge, chargeAmt, loanCharge.getDueLocalDate(), amount, loan.fetchNumberOfInstallmentsAfterExceptions(),
                         totalChargeAmt);
             }
         }
@@ -325,7 +360,7 @@ public class LoanChargeService {
                 case FLAT:
                     if (loanCharge.isInstalmentFee()) {
                         loanCharge.setAmount(
-                                newValue.multiply(BigDecimal.valueOf(loanCharge.getLoan().fetchNumberOfInstallmensAfterExceptions())));
+                                newValue.multiply(BigDecimal.valueOf(loanCharge.getLoan().fetchNumberOfInstallmentsAfterExceptions())));
                     } else {
                         loanCharge.setAmount(newValue);
                     }
@@ -375,7 +410,7 @@ public class LoanChargeService {
                 loanCharge.setAmountPaid(null);
                 if (loanCharge.isInstalmentFee()) {
                     if (numberOfRepayments == null) {
-                        numberOfRepayments = loanCharge.getLoan().fetchNumberOfInstallmensAfterExceptions();
+                        numberOfRepayments = loanCharge.getLoan().fetchNumberOfInstallmentsAfterExceptions();
                     }
                     loanCharge.setAmount(chargeAmount.multiply(BigDecimal.valueOf(numberOfRepayments)));
                 } else {
@@ -574,40 +609,47 @@ public class LoanChargeService {
         return calculatePerInstallmentChargeAmount(loan, loanCharge.getChargeCalculation(), loanCharge.getPercentage());
     }
 
-    private void updateInstallmentCharges(final LoanCharge loanCharge) {
-        final Collection<LoanInstallmentCharge> remove = new HashSet<>();
+    public void updateInstallmentCharges(final LoanCharge loanCharge) {
         final List<LoanInstallmentCharge> newChargeInstallments = generateInstallmentLoanCharges(loanCharge.getLoan(), loanCharge);
+
         if (loanCharge.getLoanInstallmentCharge().isEmpty()) {
             loanCharge.getLoanInstallmentCharge().addAll(newChargeInstallments);
         } else {
-            int index = 0;
-            final List<LoanInstallmentCharge> oldChargeInstallments = new ArrayList<>();
-            if (loanCharge.getLoanInstallmentCharge() != null && !loanCharge.getLoanInstallmentCharge().isEmpty()) {
-                oldChargeInstallments.addAll(loanCharge.getLoanInstallmentCharge());
-            }
-            Collections.sort(oldChargeInstallments);
-            final LoanInstallmentCharge[] loanChargePerInstallmentArray = newChargeInstallments
-                    .toArray(new LoanInstallmentCharge[newChargeInstallments.size()]);
-            for (final LoanInstallmentCharge chargePerInstallment : oldChargeInstallments) {
-                if (index == loanChargePerInstallmentArray.length) {
-                    remove.add(chargePerInstallment);
-                    chargePerInstallment.getInstallment().getInstallmentCharges().remove(chargePerInstallment);
-                } else {
-                    LoanInstallmentCharge newLoanInstallmentCharge = loanChargePerInstallmentArray[index++];
-                    newLoanInstallmentCharge.getInstallment().getInstallmentCharges().remove(newLoanInstallmentCharge);
-                    chargePerInstallment.copyFrom(newLoanInstallmentCharge);
+            final Map<Integer, LoanInstallmentCharge> newChargeMap = new HashMap<>();
+            for (final LoanInstallmentCharge newCharge : newChargeInstallments) {
+                if (newCharge.getInstallment() != null && newCharge.getInstallment().getInstallmentNumber() != null) {
+                    newChargeMap.put(newCharge.getInstallment().getInstallmentNumber(), newCharge);
                 }
             }
-            loanCharge.getLoanInstallmentCharge().removeAll(remove);
-            while (index < loanChargePerInstallmentArray.length) {
-                loanCharge.getLoanInstallmentCharge().add(loanChargePerInstallmentArray[index++]);
+
+            final Collection<LoanInstallmentCharge> chargesToRemoveFromLoanCharge = new HashSet<>();
+            final Collection<LoanInstallmentCharge> chargesToAddIntoLoanCharge = new HashSet<>();
+
+            for (final LoanInstallmentCharge oldCharge : loanCharge.getLoanInstallmentCharge()) {
+                final Integer oldInstallmentNumber = oldCharge.getInstallment().getInstallmentNumber();
+
+                if (newChargeMap.containsKey(oldInstallmentNumber)) {
+                    chargesToRemoveFromLoanCharge.add(oldCharge);
+                    oldCharge.getInstallment().getInstallmentCharges().remove(oldCharge);
+                    chargesToAddIntoLoanCharge.add(newChargeMap.get(oldInstallmentNumber));
+                    newChargeMap.remove(oldInstallmentNumber);
+                } else {
+                    chargesToRemoveFromLoanCharge.add(oldCharge);
+                    oldCharge.getInstallment().getInstallmentCharges().remove(oldCharge);
+                }
             }
+
+            chargesToAddIntoLoanCharge.addAll(newChargeMap.values());
+
+            loanCharge.getLoanInstallmentCharge().removeAll(chargesToRemoveFromLoanCharge);
+            loanCharge.getLoanInstallmentCharge().addAll(chargesToAddIntoLoanCharge);
         }
-        Money amount = Money.zero(loanCharge.getLoan().getCurrency());
+
+        Money totalAmount = Money.zero(loanCharge.getLoan().getCurrency());
         for (LoanInstallmentCharge charge : loanCharge.getLoanInstallmentCharge()) {
-            amount = amount.plus(charge.getAmount());
+            totalAmount = totalAmount.plus(charge.getAmount());
         }
-        loanCharge.setAmount(amount.getAmount());
+        loanCharge.setAmount(totalAmount.getAmount());
     }
 
     private List<LoanInstallmentCharge> generateInstallmentLoanCharges(final Loan loan, final LoanCharge loanCharge) {
@@ -615,9 +657,6 @@ public class LoanChargeService {
         if (loanCharge.isInstalmentFee()) {
             List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
             for (final LoanRepaymentScheduleInstallment installment : installments) {
-                if (installment.isRecalculatedInterestComponent()) {
-                    continue;
-                }
                 BigDecimal amount;
                 if (loanCharge.getChargeCalculation().isFlat()) {
                     amount = loanCharge.amountOrPercentage();
@@ -631,6 +670,78 @@ public class LoanChargeService {
             }
         }
         return loanChargePerInstallments;
+    }
+
+    private List<LoanInstallmentCharge> generateInstallmentLoanCharges(final Loan loan, final LoanCharge loanCharge,
+            final LocalDate transactionDate) {
+        final List<LoanInstallmentCharge> loanChargePerInstallments = new ArrayList<>();
+        if (loanCharge.isInstalmentFee()) {
+            final List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments().stream()
+                    .filter(i -> i != null && i.isNotFullyPaidOff() && i.getDueDate() != null && !i.getDueDate().isBefore(transactionDate))
+                    .toList();
+            for (final LoanRepaymentScheduleInstallment installment : installments) {
+                BigDecimal amount;
+                if (loanCharge.getChargeCalculation().isFlat()) {
+                    amount = loanCharge.amountOrPercentage();
+                } else {
+                    amount = calculateInstallmentChargeAmount(loan, loanCharge.getChargeCalculation(), loanCharge.getPercentage(),
+                            installment).getAmount();
+                }
+                final LoanInstallmentCharge loanInstallmentCharge = new LoanInstallmentCharge(amount, loanCharge, installment);
+                installment.getInstallmentCharges().add(loanInstallmentCharge);
+                loanChargePerInstallments.add(loanInstallmentCharge);
+            }
+        }
+        return loanChargePerInstallments;
+    }
+
+    public void updateInstallmentCharges(final LoanCharge loanCharge, final LocalDate transactionDate) {
+        final List<LoanInstallmentCharge> newChargeInstallments = generateInstallmentLoanCharges(loanCharge.getLoan(), loanCharge,
+                transactionDate);
+
+        if (loanCharge.getLoanInstallmentCharge().isEmpty()) {
+            loanCharge.getLoanInstallmentCharge().addAll(newChargeInstallments);
+        } else {
+            final List<LoanInstallmentCharge> oldLoanInstallmentCharges = loanCharge
+                    .getLoanInstallmentCharge().stream().filter(i -> i != null && !i.isPaid() && i.getInstallment() != null
+                            && i.getInstallment().getDueDate() != null && !i.getInstallment().getDueDate().isBefore(transactionDate))
+                    .toList();
+
+            final Map<Integer, LoanInstallmentCharge> newChargeMap = new HashMap<>();
+            for (final LoanInstallmentCharge newCharge : newChargeInstallments) {
+                if (newCharge.getInstallment() != null && newCharge.getInstallment().getInstallmentNumber() != null) {
+                    newChargeMap.put(newCharge.getInstallment().getInstallmentNumber(), newCharge);
+                }
+            }
+
+            final Collection<LoanInstallmentCharge> chargesToRemoveFromLoanCharge = new HashSet<>();
+            final Collection<LoanInstallmentCharge> chargesToAddIntoLoanCharge = new HashSet<>();
+
+            for (final LoanInstallmentCharge oldCharge : oldLoanInstallmentCharges) {
+                final Integer oldInstallmentNumber = oldCharge.getInstallment().getInstallmentNumber();
+
+                if (newChargeMap.containsKey(oldInstallmentNumber)) {
+                    chargesToRemoveFromLoanCharge.add(oldCharge);
+                    oldCharge.getInstallment().getInstallmentCharges().remove(oldCharge);
+                    chargesToAddIntoLoanCharge.add(newChargeMap.get(oldInstallmentNumber));
+                    newChargeMap.remove(oldInstallmentNumber);
+                } else {
+                    chargesToRemoveFromLoanCharge.add(oldCharge);
+                    oldCharge.getInstallment().getInstallmentCharges().remove(oldCharge);
+                }
+            }
+
+            chargesToAddIntoLoanCharge.addAll(newChargeMap.values());
+
+            loanCharge.getLoanInstallmentCharge().removeAll(chargesToRemoveFromLoanCharge);
+            loanCharge.getLoanInstallmentCharge().addAll(chargesToAddIntoLoanCharge);
+        }
+
+        Money totalAmount = Money.zero(loanCharge.getLoan().getCurrency());
+        for (LoanInstallmentCharge charge : loanCharge.getLoanInstallmentCharge()) {
+            totalAmount = totalAmount.plus(charge.getAmount());
+        }
+        loanCharge.setAmount(totalAmount.getAmount());
     }
 
     private BigDecimal calculateOverdueAmountPercentageAppliedTo(final Loan loan, final LoanCharge loanCharge,
@@ -674,7 +785,7 @@ public class LoanChargeService {
                 case FLAT:
                     if (loanCharge.isInstalmentFee()) {
                         if (numberOfRepayments == null) {
-                            numberOfRepayments = loanCharge.getLoan().fetchNumberOfInstallmensAfterExceptions();
+                            numberOfRepayments = loanCharge.getLoan().fetchNumberOfInstallmentsAfterExceptions();
                         }
                         loanCharge.setAmount(amount.multiply(BigDecimal.valueOf(numberOfRepayments)));
                     } else {
@@ -697,6 +808,46 @@ public class LoanChargeService {
             loanCharge.setAmountOutstanding(loanCharge.calculateOutstanding());
             if (loanCharge.getLoan() != null && loanCharge.isInstalmentFee()) {
                 updateInstallmentCharges(loanCharge);
+            }
+        }
+    }
+
+    private void update(final LoanCharge loanCharge, final BigDecimal amount, final LocalDate dueDate, final BigDecimal loanPrincipal,
+            Integer numberOfRepayments, BigDecimal loanChargeAmount, final LocalDate transactionDate) {
+        if (dueDate != null) {
+            loanCharge.setDueDate(dueDate);
+        }
+
+        if (amount != null) {
+            switch (loanCharge.getChargeCalculation()) {
+                case INVALID:
+                break;
+                case FLAT:
+                    if (loanCharge.isInstalmentFee()) {
+                        if (numberOfRepayments == null) {
+                            numberOfRepayments = loanCharge.getLoan().fetchNumberOfInstallmentsAfterExceptions();
+                        }
+                        loanCharge.setAmount(amount.multiply(BigDecimal.valueOf(numberOfRepayments)));
+                    } else {
+                        loanCharge.setAmount(amount);
+                    }
+                break;
+                case PERCENT_OF_AMOUNT:
+                case PERCENT_OF_AMOUNT_AND_INTEREST:
+                case PERCENT_OF_INTEREST:
+                case PERCENT_OF_DISBURSEMENT_AMOUNT:
+                    loanCharge.setPercentage(amount);
+                    loanCharge.setAmountPercentageAppliedTo(loanPrincipal);
+                    if (loanChargeAmount.compareTo(BigDecimal.ZERO) == 0) {
+                        loanChargeAmount = loanCharge.percentageOf(loanCharge.getAmountPercentageAppliedTo());
+                    }
+                    loanCharge.setAmount(loanCharge.minimumAndMaximumCap(loanChargeAmount));
+                break;
+            }
+            loanCharge.setAmountOrPercentage(amount);
+            loanCharge.setAmountOutstanding(loanCharge.calculateOutstanding());
+            if (loanCharge.getLoan() != null && loanCharge.isInstalmentFee()) {
+                updateInstallmentCharges(loanCharge, transactionDate);
             }
         }
     }

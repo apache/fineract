@@ -52,12 +52,17 @@ public class ChargeGlobalInitializerStep implements FineractGlobalInitializerSte
     public static final String CHARGE_LOAN_NSF_FEE = "NSF fee";
     public static final String CHARGE_LOAN_DISBURSEMENT_PERCENT_FEE = "Disbursement percentage fee";
     public static final String CHARGE_LOAN_TRANCHE_DISBURSEMENT_PERCENT_FEE = "Tranche Disbursement percentage fee";
-    public static final String CHARGE_LOAN_INSTALLMENT_PERCENT_FEE = "Installment percentage fee";
+    public static final String CHARGE_LOAN_INSTALLMENT_FEE_FLAT = "Installment flat fee";
+    public static final String CHARGE_LOAN_INSTALLMENT_FEE_PERCENT_AMOUNT = "Installment percentage amount fee";
+    public static final String CHARGE_LOAN_INSTALLMENT_FEE_PERCENT_INTEREST = "Installment percentage interest fee";
+    public static final String CHARGE_LOAN_INSTALLMENT_FEE_PERCENT_AMOUNT_PLUS_INTEREST = "Installment percentage amount + interest fee";
     public static final String CHARGE_CLIENT_FIXED_FEE = "Fixed fee for Client";
     public static final String CHARGE_DISBURSEMENT_CHARGE = "Disbursement Charge";
     public static final String CHARGE_LOAN_TRANCHE_DISBURSEMENT_CHARGE_AMOUNT = "Tranche Disbursement Charge Amount";
     public static final String CHARGE_LOAN_TRANCHE_DISBURSEMENT_CHARGE_PERCENT = "Tranche Disbursement Charge Percent";
     public static final Double CHARGE_AMOUNT_FLAT = 25D;
+    public static final Double CHARGE_INSTALLMENT_FEE_AMOUNT_FLAT = 10D;
+    public static final Double CHARGE_INSTALLMENT_FEE_AMOUNT_PERCENTAGE = 1D;
     public static final Double CHARGE_AMOUNT_PERCENTAGE = 5D;
     public static final Double CHARGE_AMOUNT_DISBURSEMENT_PERCENTAGE = 1.5D;
     public static final Double CHARGE_AMOUNT_INSTALLMENT_PERCENTAGE = 1.5D;
@@ -69,6 +74,7 @@ public class ChargeGlobalInitializerStep implements FineractGlobalInitializerSte
     public static final Integer CHARGE_TIME_TYPE_INSTALLMENT = ChargeTimeType.INSTALLMENT_FEE.value;
     public static final Integer CHARGE_CALCULATION_TYPE_FLAT = ChargeCalculationType.FLAT.value;
     public static final Integer CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT = ChargeCalculationType.PERCENTAGE_AMOUNT.value;
+    public static final Integer CHARGE_CALCULATION_TYPE_PERCENTAGE_INTEREST = ChargeCalculationType.PERCENTAGE_INTEREST.value;
     public static final Integer CHARGE_CALCULATION_TYPE_PERCENTAGE_DISBURSEMENT_AMOUNT = ChargeCalculationType.PERCENTAGE_DISBURSEMENT_AMOUNT.value;
     public static final Integer CHARGE_CALCULATION_TYPE_PERCENTAGE_LOAN_AMOUNT_PLUS_INTEREST = ChargeCalculationType.PERCENTAGE_LOAN_AMOUNT_PLUS_INTEREST.value;
 
@@ -130,12 +136,14 @@ public class ChargeGlobalInitializerStep implements FineractGlobalInitializerSte
         TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_LOAN_TRANCHE_DISBURSEMENT_PERCENT_CREATE_RESPONSE,
                 responseLoanTrancheDisbursePercent);
 
-        // Loan - Installment % fee
-        ChargeRequest requestLoanInstallmentPercent = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN, CHARGE_LOAN_INSTALLMENT_PERCENT_FEE,
-                CHARGE_TIME_TYPE_INSTALLMENT, CHARGE_CALCULATION_TYPE_PERCENTAGE_LOAN_AMOUNT_PLUS_INTEREST,
-                CHARGE_AMOUNT_INSTALLMENT_PERCENTAGE, true, false);
-        Response<PostChargesResponse> responseLoanInstallmentPercent = chargesApi.createCharge(requestLoanInstallmentPercent).execute();
-        TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_LOAN_INSTALLMENT_FEE_CREATE_RESPONSE, responseLoanInstallmentPercent);
+        // Loan - Installment % fee Amount + Interest
+        final ChargeRequest requestLoanInstallmentPercentAmountPlusInterest = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN,
+                CHARGE_LOAN_INSTALLMENT_FEE_PERCENT_AMOUNT_PLUS_INTEREST, CHARGE_TIME_TYPE_INSTALLMENT,
+                CHARGE_CALCULATION_TYPE_PERCENTAGE_LOAN_AMOUNT_PLUS_INTEREST, CHARGE_INSTALLMENT_FEE_AMOUNT_PERCENTAGE, true, false);
+        final Response<PostChargesResponse> responseLoanInstallmentPercentAmountPlusInterest = chargesApi
+                .createCharge(requestLoanInstallmentPercentAmountPlusInterest).execute();
+        TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_LOAN_INSTALLMENT_FEE_PERCENTAGE_AMOUNT_PLUS_INTEREST_CREATE_RESPONSE,
+                responseLoanInstallmentPercentAmountPlusInterest);
 
         // Loan - % late (overdue) fee amount+interest
         ChargeRequest requestLoanPercentAmountPlusInterestLate = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN,
@@ -175,6 +183,30 @@ public class ChargeGlobalInitializerStep implements FineractGlobalInitializerSte
                 .createCharge(requestTrancheDisbursementChargePercent).execute();
         TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_LOAN_TRANCHE_DISBURSEMENT_CHARGE_PERCENT_CREATE_RESPONSE,
                 responseTrancheDisbursementChargePercent);
+
+        // Loan - Installment flat fee
+        final ChargeRequest requestLoanInstallmentFlat = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN, CHARGE_LOAN_INSTALLMENT_FEE_FLAT,
+                CHARGE_TIME_TYPE_INSTALLMENT, CHARGE_CALCULATION_TYPE_FLAT, CHARGE_INSTALLMENT_FEE_AMOUNT_FLAT, true, false);
+        final Response<PostChargesResponse> responseLoanInstallmentFlat = chargesApi.createCharge(requestLoanInstallmentFlat).execute();
+        TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_LOAN_INSTALLMENT_FEE_FLAT_CREATE_RESPONSE, responseLoanInstallmentFlat);
+
+        // Loan - Installment % fee Amount
+        final ChargeRequest requestLoanInstallmentPercentAmount = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN,
+                CHARGE_LOAN_INSTALLMENT_FEE_PERCENT_AMOUNT, CHARGE_TIME_TYPE_INSTALLMENT, CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT,
+                CHARGE_INSTALLMENT_FEE_AMOUNT_PERCENTAGE, true, false);
+        final Response<PostChargesResponse> responseLoanInstallmentPercentAmount = chargesApi
+                .createCharge(requestLoanInstallmentPercentAmount).execute();
+        TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_LOAN_INSTALLMENT_FEE_PERCENTAGE_AMOUNT_CREATE_RESPONSE,
+                responseLoanInstallmentPercentAmount);
+
+        // Loan - Installment % fee Interest
+        final ChargeRequest requestLoanInstallmentPercentInterest = defaultChargesRequest(CHARGE_APPLIES_TO_LOAN,
+                CHARGE_LOAN_INSTALLMENT_FEE_PERCENT_INTEREST, CHARGE_TIME_TYPE_INSTALLMENT, CHARGE_CALCULATION_TYPE_PERCENTAGE_INTEREST,
+                CHARGE_AMOUNT_PERCENTAGE, true, false);
+        final Response<PostChargesResponse> responseLoanInstallmentPercentInterest = chargesApi
+                .createCharge(requestLoanInstallmentPercentInterest).execute();
+        TestContext.INSTANCE.set(TestContextKey.CHARGE_FOR_LOAN_INSTALLMENT_FEE_PERCENTAGE_INTEREST_CREATE_RESPONSE,
+                responseLoanInstallmentPercentInterest);
     }
 
     public static ChargeRequest defaultChargesRequest(Enum<ChargeProductAppliesTo> appliesTo, String name, Integer chargeTimeType,

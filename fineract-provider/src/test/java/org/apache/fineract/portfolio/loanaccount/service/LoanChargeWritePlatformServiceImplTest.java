@@ -199,7 +199,7 @@ class LoanChargeWritePlatformServiceImplTest {
         when(loan.getDisbursementDate()).thenReturn(LocalDate.now(ZoneId.systemDefault()));
         when(loan.getRepaymentScheduleInstallments()).thenReturn(new ArrayList<>());
         when(loanChargeService.calculateAmountPercentageAppliedTo(any(Loan.class), any(LoanCharge.class))).thenReturn(BigDecimal.TEN);
-        when(loan.fetchNumberOfInstallmensAfterExceptions()).thenReturn(5);
+        when(loan.fetchNumberOfInstallmentsAfterExceptions()).thenReturn(5);
         when(loan.updateSummaryWithTotalFeeChargesDueAtDisbursement(any(BigDecimal.class))).thenReturn(null);
         when(loan.deriveSumTotalOfChargesDueAtDisbursement()).thenReturn(BigDecimal.ZERO);
         when(loanCharge.getDueLocalDate()).thenReturn(LocalDate.now(ZoneId.systemDefault()));
