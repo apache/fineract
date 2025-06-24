@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.commands.service;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -53,7 +54,6 @@ import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
 import org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessUnderProcessingException;
-import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -473,7 +473,8 @@ public class SynchronousCommandProcessingServiceTest {
 
         when(command.json()).thenReturn(invalidJson);
 
-        assertThrows(PlatformApiDataValidationException.class, () -> {
+        // Test that no exception is thrown (exceptions are caught and logged)
+        assertDoesNotThrow(() -> {
             underTest.publishHookEvent(entityName, actionName, command, Object.class);
         });
     }
