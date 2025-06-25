@@ -67,6 +67,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
@@ -74,7 +75,6 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanSchedul
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanaccount.service.InterestRefundService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
-import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionService;
 import org.apache.fineract.portfolio.loanaccount.service.schedule.LoanScheduleComponent;
 import org.apache.fineract.portfolio.loanproduct.calc.EMICalculator;
 import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
@@ -120,7 +120,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
     public void setUp() {
         underTest = new AdvancedPaymentScheduleTransactionProcessor(emiCalculator, Mockito.mock(LoanRepositoryWrapper.class),
                 Mockito.mock(InterestRefundService.class), Mockito.mock(ExternalIdFactory.class), Mockito.mock(LoanScheduleComponent.class),
-                Mockito.mock(LoanTransactionService.class), Mockito.mock(LoanChargeValidator.class),
+                Mockito.mock(LoanTransactionRepository.class), Mockito.mock(LoanChargeValidator.class),
                 Mockito.mock(LoanBalanceService.class));
 
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));

@@ -363,7 +363,7 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
         DelinquencyReadPlatformService delinquencyReadPlatformService = new DelinquencyReadPlatformServiceImpl(repositoryRange,
                 repositoryBucket, repositoryLoanDelinquencyTagHistory, mapperRange, mapperBucket, mapperLoanDelinquencyTagHistory,
                 loanRepository, loanDelinquencyDomainService, repositoryLoanInstallmentDelinquencyTag, loanDelinquencyActionRepository,
-                delinquencyEffectivePauseHelper, configurationDomainService);
+                delinquencyEffectivePauseHelper, configurationDomainService, Mockito.mock(LoanTransactionRepository.class));
 
         LoanProduct loanProduct = Mockito.mock(LoanProduct.class);
         when(loanProduct.isMultiDisburseLoan()).thenReturn(false);

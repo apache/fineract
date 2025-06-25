@@ -457,9 +457,9 @@ public class LoanAccountConfiguration {
     @ConditionalOnMissingBean(LoanDisbursementService.class)
     public LoanDisbursementService loanDisbursementService(LoanChargeValidator loanChargeValidator,
             LoanDisbursementValidator loanDisbursementValidator, ReprocessLoanTransactionsService reprocessLoanTransactionsService,
-            LoanChargeService loanChargeService) {
+            LoanChargeService loanChargeService, LoanBalanceService loanBalanceService) {
         return new LoanDisbursementService(loanChargeValidator, loanDisbursementValidator, reprocessLoanTransactionsService,
-                loanChargeService);
+                loanChargeService, loanBalanceService);
     }
 
     @Bean

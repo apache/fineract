@@ -911,10 +911,6 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
                 || this.isIncomePosting());
     }
 
-    public boolean hasLoanTransactionRelations() {
-        return !loanTransactionRelations.isEmpty();
-    }
-
     public List<LoanTransactionRelation> getLoanTransactionRelations(Predicate<LoanTransactionRelation> predicate) {
         return loanTransactionRelations.stream().filter(predicate).toList();
     }

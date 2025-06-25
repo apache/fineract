@@ -594,8 +594,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         if (loan.getLoanProduct().isMultiDisburseLoan() || loan.isProgressiveSchedule()) {
-            final List<LoanTransaction> allNonContraTransactionsPostDisbursement = loanTransactionService
-                    .retrieveListOfTransactionsForReprocessing(loan);
+            final List<LoanTransaction> allNonContraTransactionsPostDisbursement = loanTransactionRepository
+                    .findNonReversedTransactionsForReprocessingByLoan(loan);
             if (!allNonContraTransactionsPostDisbursement.isEmpty()) {
                 reprocessLoanTransactionsService.reprocessTransactions(loan);
             }
@@ -2246,7 +2246,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 throw new MultiDisbursementDataNotAllowedException(LoanApiConstants.disbursementDataParameterName, errorMessage);
             }
         } else {
-            if (disbursementDataArray == null || disbursementDataArray.size() == 0) {
+            if (disbursementDataArray == null || disbursementDataArray.isEmpty()) {
                 final String errorMessage = "For this loan product, disbursement details must be provided";
                 throw new MultiDisbursementDataRequiredException(LoanApiConstants.disbursementDataParameterName, errorMessage);
             }
@@ -2821,7 +2821,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 final ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, null, null);
                 loanScheduleService.regenerateRepaymentScheduleWithInterestRecalculation(loan, scheduleGeneratorDTO);
             }
-            final List<LoanTransaction> loanTransactions = loanTransactionService.retrieveListOfTransactionsForReprocessing(loan);
+            final List<LoanTransaction> loanTransactions = loanTransactionRepository.findNonReversedTransactionsForReprocessingByLoan(loan);
             loanTransactions.add(chargeOffTransaction);
             reprocessLoanTransactionsService.reprocessParticularTransactions(loan, loanTransactions);
             loan.addLoanTransaction(chargeOffTransaction);
@@ -3031,7 +3031,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final String errorMessage = "loan.product.does.not.support.multiple.disbursals.cannot.undo.last.disbursal";
             throw new LoanMultiDisbursementException(errorMessage);
         }
-        Integer trancheDisbursedCount = 0;
+        int trancheDisbursedCount = 0;
         for (LoanDisbursementDetails disbursementDetails : loan.getDisbursementDetails()) {
             if (disbursementDetails.actualDisbursementDate() != null) {
                 trancheDisbursedCount++;
@@ -3361,13 +3361,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
         List<LoanTransaction> loanTransactions = loan.retrieveListOfTransactionsByType(LoanTransactionType.DISBURSEMENT);
         loanTransactions.sort(Comparator.comparing(LoanTransaction::getId));
-        final LoanTransaction lastDisbursalTransaction = loanTransactions.get(loanTransactions.size() - 1);
+        final LoanTransaction lastDisbursalTransaction = loanTransactions.getLast();
         final LocalDate lastTransactionDate = lastDisbursalTransaction.getTransactionDate();
 
         existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
         existingReversedTransactionIds.addAll(loanTransactionRepository.findReversedTransactionIdsByLoan(loan));
 
-        loanTransactions = loan.retrieveListOfTransactionsExcludeAccruals();
+        loanTransactions = loanTransactionRepository.findNonReversedMonetaryTransactionsByLoan(loan);
         Collections.reverse(loanTransactions);
         for (final LoanTransaction previousTransaction : loanTransactions) {
             if (DateUtils.isBefore(lastTransactionDate, previousTransaction.getTransactionDate())

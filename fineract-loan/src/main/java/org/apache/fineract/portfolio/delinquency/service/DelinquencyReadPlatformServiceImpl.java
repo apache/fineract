@@ -58,6 +58,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -77,6 +78,7 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
     private final LoanDelinquencyActionRepository loanDelinquencyActionRepository;
     private final DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper;
     private final ConfigurationDomainService configurationDomainService;
+    private final LoanTransactionRepository loanTransactionRepository;
 
     @Override
     public List<DelinquencyRangeData> retrieveAllDelinquencyRanges() {
@@ -174,7 +176,7 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
     private void addInstallmentLevelDelinquencyData(CollectionData collectionData, Long loanId) {
         Collection<LoanInstallmentDelinquencyTagData> loanInstallmentDelinquencyTagData = retrieveLoanInstallmentsCurrentDelinquencyTag(
                 loanId);
-        if (loanInstallmentDelinquencyTagData != null && loanInstallmentDelinquencyTagData.size() > 0) {
+        if (loanInstallmentDelinquencyTagData != null && !loanInstallmentDelinquencyTagData.isEmpty()) {
 
             // installment level delinquency grouped by rangeId, and summed up the delinquent amount
             Collection<InstallmentLevelDelinquency> installmentLevelDelinquencies = loanInstallmentDelinquencyTagData.stream()
@@ -254,12 +256,7 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
             }
         }
 
-        LocalDate lastTransactionDate = null;
-        for (final LoanTransaction transaction : loan.getLoanTransactions()) {
-            if (transaction.isRepaymentLikeType() && transaction.isGreaterThanZero()) {
-                lastTransactionDate = transaction.getTransactionDate();
-            }
-        }
+        final LocalDate lastTransactionDate = loanTransactionRepository.findLastRepaymentLikeTransactionDate(loan).orElse(null);
 
         LocalDate possibleNextRepaymentDate = earliestUnpaidInstallmentDate;
         if (DateUtils.isAfter(lastTransactionDate, earliestUnpaidInstallmentDate)) {

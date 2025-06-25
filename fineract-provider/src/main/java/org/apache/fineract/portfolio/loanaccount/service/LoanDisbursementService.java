@@ -63,6 +63,7 @@ public class LoanDisbursementService {
     private final LoanDisbursementValidator loanDisbursementValidator;
     private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
     private final LoanChargeService loanChargeService;
+    private final LoanBalanceService loanBalanceService;
 
     public void updateDisbursementDetails(final Loan loan, final JsonCommand jsonCommand, final Map<String, Object> actualChanges) {
         final List<Long> disbursementList = loan.fetchDisbursementIds();
@@ -217,7 +218,7 @@ public class LoanDisbursementService {
             chargesPayment.updateComponentsAndTotal(zero, zero, disbursentMoney, zero);
             chargesPayment.updateLoan(loan);
             loan.addLoanTransaction(chargesPayment);
-            loan.updateLoanOutstandingBalances();
+            loanBalanceService.updateLoanOutstandingBalances(loan);
         }
 
         final LocalDate expectedDate = loan.getExpectedFirstRepaymentOnDate();

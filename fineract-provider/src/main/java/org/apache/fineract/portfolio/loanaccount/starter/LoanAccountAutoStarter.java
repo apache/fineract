@@ -22,6 +22,7 @@ import java.util.List;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.CreocoreLoanRepaymentScheduleTransactionProcessor;
@@ -35,7 +36,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.imp
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.RBILoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
-import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionService;
 import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanInterestRefundServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.service.schedule.LoanScheduleComponent;
 import org.apache.fineract.portfolio.loanproduct.calc.EMICalculator;
@@ -138,9 +138,9 @@ public class LoanAccountAutoStarter {
             final LoanRepositoryWrapper loanRepositoryWrapper,
             final @Lazy ProgressiveLoanInterestRefundServiceImpl progressiveLoanInterestRefundService,
             final ExternalIdFactory externalIdFactory, final LoanScheduleComponent loanSchedule,
-            final LoanTransactionService loanTransactionService, final LoanChargeValidator loanChargeValidator,
+            final LoanTransactionRepository loanTransactionRepository, final LoanChargeValidator loanChargeValidator,
             final LoanBalanceService loanBalanceService) {
         return new AdvancedPaymentScheduleTransactionProcessor(emiCalculator, loanRepositoryWrapper, progressiveLoanInterestRefundService,
-                externalIdFactory, loanSchedule, loanTransactionService, loanChargeValidator, loanBalanceService);
+                externalIdFactory, loanSchedule, loanTransactionRepository, loanChargeValidator, loanBalanceService);
     }
 }

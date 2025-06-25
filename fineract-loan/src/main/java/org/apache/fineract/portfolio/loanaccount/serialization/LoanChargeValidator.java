@@ -19,17 +19,23 @@
 package org.apache.fineract.portfolio.loanaccount.serialization;
 
 import java.time.LocalDate;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.charge.exception.LoanChargeCannotBeAddedException;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanStateTransitionException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanChargeRefundException;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public final class LoanChargeValidator {
+
+    private final LoanTransactionRepository loanTransactionRepository;
 
     public void validateLoanIsNotClosed(final Loan loan, final LoanCharge loanCharge) {
         if (loan.isClosed()) {
@@ -80,13 +86,13 @@ public final class LoanChargeValidator {
     public void validateRepaymentTypeTransactionNotBeforeAChargeRefund(final Loan loan, final LoanTransaction repaymentTransaction,
             final String reversedOrCreated) {
         if (repaymentTransaction.isRepaymentLikeType() && !repaymentTransaction.isChargeRefund()) {
-            for (LoanTransaction txn : loan.getLoanTransactions()) {
-                if (txn.isChargeRefund() && DateUtils.isBefore(repaymentTransaction.getTransactionDate(), txn.getTransactionDate())) {
-                    final String errorMessage = "loan.transaction.cant.be." + reversedOrCreated + ".because.later.charge.refund.exists";
-                    final String details = "Loan Transaction: " + loan.getId() + " Can't be " + reversedOrCreated
-                            + " because a Later Charge Refund Exists.";
-                    throw new LoanChargeRefundException(errorMessage, details);
-                }
+            final boolean existsChargeRefund = loanTransactionRepository.existsNonReversedByLoanAndTypeAndAfterDate(loan,
+                    LoanTransactionType.CHARGE_REFUND, repaymentTransaction.getTransactionDate());
+            if (existsChargeRefund) {
+                final String errorMessage = "loan.transaction.cant.be." + reversedOrCreated + ".because.later.charge.refund.exists";
+                final String details = "Loan Transaction: " + loan.getId() + " Can't be " + reversedOrCreated
+                        + " because a Later Charge Refund Exists.";
+                throw new LoanChargeRefundException(errorMessage, details);
             }
         }
     }

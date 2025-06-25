@@ -148,7 +148,7 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
         LoanTransaction savedCapitalizedIncomeAdjustment = loanTransactionRepository.saveAndFlush(capitalizedIncomeAdjustment);
 
         // Update outstanding loan balances
-        loan.updateLoanOutstandingBalances();
+        loanBalanceService.updateLoanOutstandingBalances(loan);
 
         // Create a note if provided
         final String noteText = command.stringValueOfParameterNamed("note");

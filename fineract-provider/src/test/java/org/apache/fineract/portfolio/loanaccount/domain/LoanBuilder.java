@@ -40,7 +40,6 @@ import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
@@ -80,7 +79,6 @@ public class LoanBuilder {
     private BigDecimal fixedPrincipalPercentagePerInstallment;
     private ExternalId externalId = ExternalId.empty();
     private LoanApplicationTerms loanApplicationTerms = mock(LoanApplicationTerms.class);
-    private LoanScheduleModel loanScheduleModel = mock(LoanScheduleModel.class);
     private Boolean enableInstallmentLevelDelinquency = false;
     private LocalDate submittedOnDate = LocalDate.now(ZoneId.systemDefault());
     private LocalDate approvedOnDate;
@@ -116,8 +114,8 @@ public class LoanBuilder {
             Loan loan = Loan.newIndividualLoanApplication(accountNo, client, loanType, loanProduct, fund, loanOfficer, loanPurpose,
                     transactionProcessor, loanRepaymentScheduleDetail, charges, collateral, fixedEmiAmount, disbursementDetails,
                     maxOutstandingLoanBalance, createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential,
-                    rates, fixedPrincipalPercentagePerInstallment, externalId, loanApplicationTerms, loanScheduleModel,
-                    enableInstallmentLevelDelinquency, submittedOnDate);
+                    rates, fixedPrincipalPercentagePerInstallment, externalId, loanApplicationTerms, enableInstallmentLevelDelinquency,
+                    submittedOnDate);
 
             if (id != null) {
                 loan.setId(id);
@@ -332,11 +330,6 @@ public class LoanBuilder {
 
     public LoanBuilder withLoanApplicationTerms(LoanApplicationTerms loanApplicationTerms) {
         this.loanApplicationTerms = loanApplicationTerms;
-        return this;
-    }
-
-    public LoanBuilder withLoanScheduleModel(LoanScheduleModel loanScheduleModel) {
-        this.loanScheduleModel = loanScheduleModel;
         return this;
     }
 

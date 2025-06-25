@@ -70,10 +70,10 @@ public class LoanContractTerminationServiceImpl {
     private final LoanUtilService loanUtilService;
     private final ExternalIdFactory externalIdFactory;
     private final BusinessEventNotifierService businessEventNotifierService;
-    private final LoanTransactionService loanTransactionService;
     private final LoanScheduleService loanScheduleService;
     private final LoanChargeValidator loanChargeValidator;
     private final ProgressiveLoanTransactionValidator loanTransactionValidator;
+    private final LoanTransactionService loanTransactionService;
 
     public CommandProcessingResult applyContractTermination(final JsonCommand command) {
         final Loan loan = loanAssembler.assembleFrom(command.getLoanId());

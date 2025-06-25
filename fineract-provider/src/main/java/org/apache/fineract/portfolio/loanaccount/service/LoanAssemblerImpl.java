@@ -261,20 +261,20 @@ public class LoanAssemblerImpl implements LoanAssembler {
                     loanOfficer, loanPurpose, transactionProcessingStrategy, loanProductRelatedDetail, loanCharges,
                     syncDisbursementWithMeeting, fixedEmiAmount, disbursementDetails, maxOutstandingLoanBalance,
                     createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential, rates,
-                    fixedPrincipalPercentagePerInstallment, externalId, loanApplicationTerms, loanScheduleModel,
-                    isEnableInstallmentLevelDelinquency, submittedOnDate);
+                    fixedPrincipalPercentagePerInstallment, externalId, loanApplicationTerms, isEnableInstallmentLevelDelinquency,
+                    submittedOnDate);
         } else if (group != null) {
             loanApplication = Loan.newGroupLoanApplication(accountNo, group, loanAccountType, loanProduct, fund, loanOfficer, loanPurpose,
                     transactionProcessingStrategy, loanProductRelatedDetail, loanCharges, syncDisbursementWithMeeting, fixedEmiAmount,
                     disbursementDetails, maxOutstandingLoanBalance, createStandingInstructionAtDisbursement, isFloatingInterestRate,
                     interestRateDifferential, rates, fixedPrincipalPercentagePerInstallment, externalId, loanApplicationTerms,
-                    loanScheduleModel, isEnableInstallmentLevelDelinquency, submittedOnDate);
+                    isEnableInstallmentLevelDelinquency, submittedOnDate);
         } else if (client != null) {
             loanApplication = Loan.newIndividualLoanApplication(accountNo, client, loanAccountType, loanProduct, fund, loanOfficer,
                     loanPurpose, transactionProcessingStrategy, loanProductRelatedDetail, loanCharges, collateral, fixedEmiAmount,
                     disbursementDetails, maxOutstandingLoanBalance, createStandingInstructionAtDisbursement, isFloatingInterestRate,
                     interestRateDifferential, rates, fixedPrincipalPercentagePerInstallment, externalId, loanApplicationTerms,
-                    loanScheduleModel, isEnableInstallmentLevelDelinquency, submittedOnDate);
+                    isEnableInstallmentLevelDelinquency, submittedOnDate);
         } else {
             throw new IllegalStateException("No loan application exists for either a client or group (or both).");
         }
