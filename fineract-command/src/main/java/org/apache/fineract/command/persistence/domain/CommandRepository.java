@@ -16,11 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.jobs.service.increasedateby1day;
+package org.apache.fineract.command.persistence.domain;
 
-import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface IncreaseDateBy1DayService {
-
-    void increaseDateByTypeByOneDay(BusinessDateType businessDateType);
-}
+public interface CommandRepository extends JpaRepository<CommandEntity, Long>, JpaSpecificationExecutor<CommandEntity> {}

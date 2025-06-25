@@ -19,7 +19,7 @@
 package org.apache.fineract.infrastructure.businessdate.mapper;
 
 import java.util.List;
-import org.apache.fineract.infrastructure.businessdate.data.BusinessDateData;
+import org.apache.fineract.infrastructure.businessdate.data.BusinessDateResponse;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDate;
 import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
 import org.mapstruct.Mapper;
@@ -29,8 +29,8 @@ import org.mapstruct.Mappings;
 @Mapper(config = MapstructMapperConfig.class)
 public interface BusinessDateMapper {
 
-    @Mappings({ @Mapping(target = "description", source = "source.type.description") })
-    BusinessDateData map(BusinessDate source);
+    @Mappings({ @Mapping(target = "description", source = "source.type.description"), @Mapping(target = "changes", ignore = true) })
+    BusinessDateResponse map(BusinessDate source);
 
-    List<BusinessDateData> map(List<BusinessDate> sources);
+    List<BusinessDateResponse> map(List<BusinessDate> sources);
 }

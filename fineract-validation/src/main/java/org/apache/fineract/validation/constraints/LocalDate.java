@@ -16,26 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.businessdate.api;
+package org.apache.fineract.validation.constraints;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.Map;
+import jakarta.validation.Constraint;
+import jakarta.validation.Payload;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-final class BusinessDateApiResourceSwagger {
+@Documented
+@Constraint(validatedBy = LocalDateValidator.class)
+@Target({ ElementType.TYPE })
+@Retention(RetentionPolicy.RUNTIME)
+public @interface LocalDate {
 
-    private BusinessDateApiResourceSwagger() {
+    String message() default "{org.apache.fineract.validation.local-date}";
 
-    }
+    String dateField();
 
-    @Schema(description = "BusinessDateResponse")
-    public static final class BusinessDateResponse {
+    String formatField();
 
-        @Schema(example = "1")
-        public Long commandId;
-        public Map<String, Object> changes;
+    String localeField();
 
-        private BusinessDateResponse() {
+    Class<?>[] groups() default {};
 
-        }
-    }
+    Class<? extends Payload>[] payload() default {};
 }

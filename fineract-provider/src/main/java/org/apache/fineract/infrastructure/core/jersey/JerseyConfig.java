@@ -46,6 +46,7 @@ public class JerseyConfig extends ResourceConfig {
                 bind(PageableParamProvider.class).to(ValueParamProvider.class).in(Singleton.class);
             }
         });
+        register(org.glassfish.jersey.server.validation.ValidationFeature.class);
         property(ServerProperties.WADL_FEATURE_DISABLE, true);
     }
 

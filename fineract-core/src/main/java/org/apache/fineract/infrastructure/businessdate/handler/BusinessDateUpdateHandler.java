@@ -18,26 +18,26 @@
  */
 package org.apache.fineract.infrastructure.businessdate.handler;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.infrastructure.businessdate.data.BusinessDateResponse;
+import org.apache.fineract.infrastructure.businessdate.data.BusinessDateUpdateRequest;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateWritePlatformService;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
+@Component
 @RequiredArgsConstructor
-@Service
-@CommandType(entity = "BUSINESS_DATE", action = "UPDATE")
-public class BusinessDateUpdateHandler implements NewCommandSourceHandler {
+public class BusinessDateUpdateHandler implements CommandHandler<BusinessDateUpdateRequest, BusinessDateResponse> {
 
     private final BusinessDateWritePlatformService businessDateWritePlatformService;
 
     @Transactional
     @Override
-    public CommandProcessingResult processCommand(@NotNull final JsonCommand command) {
-        return businessDateWritePlatformService.updateBusinessDate(command);
+    public BusinessDateResponse handle(Command<BusinessDateUpdateRequest> command) {
+        return businessDateWritePlatformService.updateBusinessDate(command.getPayload());
     }
 }

@@ -35,7 +35,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
-import org.apache.fineract.client.models.BusinessDateRequest;
+import org.apache.fineract.client.models.BusinessDateUpdateRequest;
 import org.apache.fineract.client.models.ChargeRequest;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostChargesResponse;
@@ -49,7 +49,6 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionI
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
-import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -436,7 +435,7 @@ public class LoanSpecificDueDateChargeAfterMaturityTest extends BaseLoanIntegrat
         try {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
-            BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+            BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
                     .date("01 September 2023").dateFormat(DATETIME_PATTERN).locale("en"));
 
             PostChargesResponse penaltyCharge = CHARGES_HELPER.createCharges(new ChargeRequest().penalty(true).amount(10.0)
@@ -462,7 +461,7 @@ public class LoanSpecificDueDateChargeAfterMaturityTest extends BaseLoanIntegrat
             validateLoanTransaction(loanDetails, 0, 1000.0, 0.0, 0.0, 1000.0);
             assertTrue(loanDetails.getStatus().getActive());
 
-            BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+            BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
                     .date("01 October 2023").dateFormat(DATETIME_PATTERN).locale("en"));
 
             PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanResponse.getLoanId(),
@@ -475,7 +474,7 @@ public class LoanSpecificDueDateChargeAfterMaturityTest extends BaseLoanIntegrat
             validateLoanTransaction(loanDetails, 1, 1000.0, 1000.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getClosedObligationsMet());
 
-            BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+            BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
                     .date("04 October 2023").dateFormat(DATETIME_PATTERN).locale("en"));
 
             loanTransactionHelper.makeMerchantIssuedRefund(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()

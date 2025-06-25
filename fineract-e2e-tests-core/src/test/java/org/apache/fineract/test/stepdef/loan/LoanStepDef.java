@@ -61,7 +61,7 @@ import org.apache.fineract.avro.loan.v1.LoanChargePaidByDataV1;
 import org.apache.fineract.avro.loan.v1.LoanStatusEnumDataV1;
 import org.apache.fineract.avro.loan.v1.LoanTransactionDataV1;
 import org.apache.fineract.client.models.AdvancedPaymentData;
-import org.apache.fineract.client.models.BusinessDateData;
+import org.apache.fineract.client.models.BusinessDateResponse;
 import org.apache.fineract.client.models.DeleteLoansLoanIdResponse;
 import org.apache.fineract.client.models.DisbursementDetail;
 import org.apache.fineract.client.models.GetLoanProductsChargeOffReasonOptions;
@@ -2579,7 +2579,7 @@ public class LoanStepDef extends AbstractStepDef {
             // Only proceed with date check if catch-up is not running
             if (!statusResponse.body().getCatchUpRunning()) {
                 // Get the current business date
-                Response<BusinessDateData> businessDateResponse = businessDateApi.getBusinessDate(BusinessDateHelper.COB).execute();
+                Response<BusinessDateResponse> businessDateResponse = businessDateApi.getBusinessDate(BusinessDateHelper.COB).execute();
                 ErrorHelper.checkSuccessfulApiCall(businessDateResponse);
                 LocalDate currentBusinessDate = businessDateResponse.body().getDate();
 

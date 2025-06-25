@@ -19,7 +19,6 @@
 package org.apache.fineract.integrationtests;
 
 import static java.lang.Boolean.TRUE;
-import static org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType.BUSINESS_DATE;
 import static org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.PAUSE;
 import static org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.RESUME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,7 +34,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.fineract.client.models.BusinessDateRequest;
+import org.apache.fineract.client.models.BusinessDateUpdateRequest;
 import org.apache.fineract.client.models.GetDelinquencyActionsResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdDelinquencyPausePeriod;
@@ -137,8 +136,8 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
             loanTransactionHelper.createLoanDelinquencyAction(loanId, PAUSE, "10 January 2023", "15 January 2023");
 
             // Update business date
-            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BUSINESS_DATE.getName()).date("14 January 2023")
-                    .dateFormat(DATETIME_PATTERN).locale("en"));
+            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
+                    .date("14 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
 
             // Create 2nd Delinquency Resume for the Loan
             loanTransactionHelper.createLoanDelinquencyAction(loanId, RESUME, "14 January 2023");
@@ -175,8 +174,8 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
             loanTransactionHelper.createLoanDelinquencyAction(loanId, PAUSE, "10 January 2023", "15 January 2023");
 
             // Update business date
-            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BUSINESS_DATE.getName()).date("14 January 2023")
-                    .dateFormat(DATETIME_PATTERN).locale("en"));
+            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
+                    .date("14 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
 
             // Validate Loan Delinquency Pause Period on Loan
             validateLoanDelinquencyPausePeriods(loanId, pausePeriods("10 January 2023", "15 January 2023", true));
@@ -188,8 +187,8 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
             validateLoanDelinquencyPausePeriods(loanId, pausePeriods("10 January 2023", "14 January 2023", true));
 
             // Update business date to 15 January 2023
-            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BUSINESS_DATE.getName()).date("15 January 2023")
-                    .dateFormat(DATETIME_PATTERN).locale("en"));
+            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
+                    .date("15 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
 
             // Validate Loan Delinquency Pause Period on Loan
             validateLoanDelinquencyPausePeriods(loanId, pausePeriods("10 January 2023", "14 January 2023", false));
@@ -343,8 +342,8 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
             disburseLoan(loanId, BigDecimal.valueOf(100.00), "01 November 2023");
 
             // Update business date
-            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BUSINESS_DATE.getName()).date("05 November 2023")
-                    .dateFormat(DATETIME_PATTERN).locale("en"));
+            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
+                    .date("05 November 2023").dateFormat(DATETIME_PATTERN).locale("en"));
 
             // Create Delinquency Pause for the Loan
             PostLoansDelinquencyActionResponse response = loanTransactionHelper.createLoanDelinquencyAction(loanId, PAUSE,
@@ -352,8 +351,8 @@ public class DelinquencyActionIntegrationTests extends BaseLoanIntegrationTest {
 
             // run cob for business date 26 November
             final InlineLoanCOBHelper inlineLoanCOBHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
-            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BUSINESS_DATE.getName()).date("26 November 2023")
-                    .dateFormat(DATETIME_PATTERN).locale("en"));
+            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
+                    .date("26 November 2023").dateFormat(DATETIME_PATTERN).locale("en"));
             inlineLoanCOBHelper.executeInlineCOB(List.of(loanId.longValue()));
 
             // Loan delinquency data

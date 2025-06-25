@@ -43,6 +43,7 @@ project.afterEvaluate {
             copy {
                 from persistenceXmlFile.toPath()
                 into metaInf.toPath()
+                duplicatesStrategy = DuplicatesStrategy.EXCLUDE
             }
 
             javaexec {
