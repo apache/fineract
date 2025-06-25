@@ -22,7 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.apache.fineract.infrastructure.event.external.service.validation.ExternalEventDTO;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -47,7 +47,7 @@ public class LoanTransactionBusinessEvent extends BusinessEvent {
     }
 
     @Override
-    public boolean verify(ExternalEventDTO externalEvent, DateTimeFormatter formatter) {
+    public boolean verify(ExternalEventResponse externalEvent, DateTimeFormatter formatter) {
         Object amount = externalEvent.getPayLoad().get("amount");
         Object outstandingLoanBalance = externalEvent.getPayLoad().get("outstandingLoanBalance");
         Object principalPortion = externalEvent.getPayLoad().get("principalPortion");

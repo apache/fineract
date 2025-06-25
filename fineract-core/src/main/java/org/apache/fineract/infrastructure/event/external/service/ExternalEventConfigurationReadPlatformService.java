@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.infrastructure.event.external.service;
 
-import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationData;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationResponse;
 
 public interface ExternalEventConfigurationReadPlatformService {
 
-    ExternalEventConfigurationData findAllExternalEventConfigurations();
+    ExternalEventConfigurationResponse findAllExternalEventConfigurations();
 }

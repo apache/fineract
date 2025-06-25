@@ -18,15 +18,24 @@
  */
 package org.apache.fineract.infrastructure.event.external.data;
 
+import jakarta.validation.constraints.NotNull;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Map;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExternalEventConfigurationItemData {
+public class ExternalEventConfigurationUpdateRequest implements Serializable {
 
-    private String type;
-    private boolean enabled;
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    @NotNull(message = "{org.apache.fineract.externalevent.configurations.not-null}")
+    private Map<String, Boolean> externalEventConfigurations;
 }

@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.event.external.api;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -30,51 +29,36 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.boot.FineractProfiles;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
 import org.apache.fineract.infrastructure.event.external.service.InternalExternalEventService;
-import org.apache.fineract.infrastructure.event.external.service.validation.ExternalEventDTO;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+@Slf4j
+// TODO: can't we test this differently without creating boilerplate code that's only available during testing?
 @Profile(FineractProfiles.TEST)
 @Component
 @Path("/v1/internal/externalevents")
 @RequiredArgsConstructor
-@Slf4j
-public class InternalExternalEventsApiResource implements InitializingBean {
+public class InternalExternalEventsApiResource {
 
     private final InternalExternalEventService internalExternalEventService;
-    private final DefaultToApiJsonSerializer<List<ExternalEventDTO>> jsonSerializer;
-
-    @Override
-    @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
-    public void afterPropertiesSet() throws Exception {
-        log.warn("------------------------------------------------------------");
-        log.warn("                                                            ");
-        log.warn("DO NOT USE THIS IN PRODUCTION!");
-        log.warn("Internal client services mode is enabled");
-        log.warn("DO NOT USE THIS IN PRODUCTION!");
-        log.warn("                                                            ");
-        log.warn("------------------------------------------------------------");
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String getAllExternalEvents(@QueryParam("idempotencyKey") final String idempotencyKey, @QueryParam("type") final String type,
-            @QueryParam("category") final String category, @QueryParam("aggregateRootId") final Long aggregateRootId) {
-        log.debug("getAllExternalEvents called with params idempotencyKey:{}, type:{}, category:{}, aggregateRootId:{}  ", idempotencyKey,
-                type, category, aggregateRootId);
-        List<ExternalEventDTO> allExternalEvents = internalExternalEventService.getAllExternalEvents(idempotencyKey, type, category,
-                aggregateRootId);
-        return jsonSerializer.serialize(allExternalEvents);
+    public List<ExternalEventResponse> getAllExternalEvents(@QueryParam("idempotencyKey") final String idempotencyKey,
+            @QueryParam("type") final String type, @QueryParam("category") final String category,
+            @QueryParam("aggregateRootId") final Long aggregateRootId) {
+        // TODO: authorization constraints?
+        return internalExternalEventService.getAllExternalEvents(idempotencyKey, type, category, aggregateRootId);
     }
 
     @DELETE
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     public void deleteAllExternalEvents() {
-        log.debug("deleteAllExternalEvents called");
+        // TODO: authorization constraints?
         internalExternalEventService.deleteAllExternalEvents();
     }
-
 }

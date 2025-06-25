@@ -16,26 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.external.service.validation;
+package org.apache.fineract.infrastructure.event.external.data;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.util.Map;
+import java.io.Serial;
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
+@Builder
+@Data
+@NoArgsConstructor
 @AllArgsConstructor
-@ToString
-public class ExternalEventDTO {
+public class ExternalEventConfigurationItemResponse implements Serializable {
 
-    private final Long eventId;
-    private final String type;
-    private final String category;
-    private final OffsetDateTime createdAt;
-    private final Map<String, Object> payLoad;
-    private final LocalDate businessDate;
-    private final String schema;
-    private final Long aggregateRootId;
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    private String type;
+    private boolean enabled;
 }

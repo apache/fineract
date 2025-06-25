@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Objects;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.apache.fineract.infrastructure.event.external.service.validation.ExternalEventDTO;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -79,7 +79,7 @@ public class LoanAdjustTransactionBusinessEvent extends BusinessEvent {
     }
 
     @Override
-    public boolean verify(ExternalEventDTO externalEvent, DateTimeFormatter formatter) {
+    public boolean verify(ExternalEventResponse externalEvent, DateTimeFormatter formatter) {
         final Object transactionToAdjust = externalEvent.getPayLoad().get("transactionToAdjust");
         final Map<?, Object> transActionToAdjustMap = transactionToAdjust instanceof Map ? (Map<String, Object>) transactionToAdjust
                 : Collections.emptyMap();

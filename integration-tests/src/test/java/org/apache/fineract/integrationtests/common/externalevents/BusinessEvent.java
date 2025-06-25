@@ -25,7 +25,7 @@ import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.fineract.infrastructure.event.external.service.validation.ExternalEventDTO;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
 
 @Data
 @AllArgsConstructor
@@ -35,7 +35,7 @@ public class BusinessEvent {
     protected String type;
     protected String businessDate;
 
-    public boolean verify(@NotNull ExternalEventDTO externalEvent, DateTimeFormatter formatter) {
+    public boolean verify(@NotNull ExternalEventResponse externalEvent, DateTimeFormatter formatter) {
         var businessDate = LocalDate.parse(getBusinessDate(), formatter);
 
         return Objects.equals(externalEvent.getType(), getType()) && Objects.equals(externalEvent.getBusinessDate(), businessDate);

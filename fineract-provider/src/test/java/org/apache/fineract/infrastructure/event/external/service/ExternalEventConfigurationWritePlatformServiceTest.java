@@ -22,13 +22,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
 import java.util.Map;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.event.external.command.ExternalEventConfigurationCommand;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationUpdateRequest;
 import org.apache.fineract.infrastructure.event.external.repository.ExternalEventConfigurationRepository;
 import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventConfiguration;
-import org.apache.fineract.infrastructure.event.external.serialization.ExternalEventConfigurationCommandFromApiJsonDeserializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,31 +38,26 @@ public class ExternalEventConfigurationWritePlatformServiceTest {
 
     @Mock
     private ExternalEventConfigurationRepository repository;
-    @Mock
-    private ExternalEventConfigurationCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
     private ExternalEventConfigurationWritePlatformServiceImpl underTest;
 
     @BeforeEach
     public void setUp() {
-        underTest = new ExternalEventConfigurationWritePlatformServiceImpl(repository, fromApiJsonDeserializer);
+        underTest = new ExternalEventConfigurationWritePlatformServiceImpl(repository);
     }
 
     @Test
     public void givenExternalEventConfigurationsWithChangeWhenUpdateConfigurationThenConfigurationIsUpdated() {
         // given
-        final JsonCommand jsonCommand = Mockito.mock(JsonCommand.class);
-        Map<String, Boolean> mapOfConfigurationsForUpdate = new HashMap<>();
-        mapOfConfigurationsForUpdate.put("aType", Boolean.TRUE);
-        ExternalEventConfigurationCommand command = new ExternalEventConfigurationCommand(mapOfConfigurationsForUpdate);
-        when(jsonCommand.json()).thenReturn("");
-        when(fromApiJsonDeserializer.commandFromApiJson(Mockito.anyString())).thenReturn(command);
+        var configurations = Map.of("aType", Boolean.TRUE);
+        var request = new ExternalEventConfigurationUpdateRequest(configurations);
+
         when(repository.findExternalEventConfigurationByTypeWithNotFoundDetection(Mockito.anyString()))
                 .thenReturn(new ExternalEventConfiguration("aType", false));
+
         // when
-        underTest.updateConfigurations(jsonCommand);
+        underTest.updateConfigurations(request);
         // then
         verify(repository, times(1)).saveAll(Mockito.anyCollection());
     }
-
 }

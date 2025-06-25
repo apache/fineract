@@ -19,27 +19,25 @@
 package org.apache.fineract.infrastructure.event.external.api;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import java.util.UUID;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.service.CommandWrapperBuilder;
-import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
-import org.apache.fineract.infrastructure.event.external.command.ExternalEventConfigurationCommand;
-import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationData;
+import org.apache.fineract.command.core.CommandPipeline;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.event.external.command.ExternalConfigurationsUpdateCommand;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationResponse;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationUpdateRequest;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationUpdateResponse;
 import org.apache.fineract.infrastructure.event.external.service.ExternalEventConfigurationReadPlatformService;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
@@ -48,19 +46,14 @@ import org.springframework.stereotype.Component;
 @Tag(name = "External event configuration", description = "External event configuration enables user to enable/disable event posting to downstream message channel")
 public class ExternalEventConfigurationApiResource {
 
-    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "EXTERNAL_EVENT_CONFIGURATION";
-
-    private final PlatformSecurityContext context;
-    private final PortfolioCommandSourceWritePlatformService commandWritePlatformService;
-    private final DefaultToApiJsonSerializer<ExternalEventConfigurationData> jsonSerializer;
     private final ExternalEventConfigurationReadPlatformService readPlatformService;
+    private final CommandPipeline commandPipeline;
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List all external event configurations", description = "")
-    public ExternalEventConfigurationData retrieveExternalEventConfiguration() {
-        context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
+    public ExternalEventConfigurationResponse getExternalEventConfigurations() {
         return readPlatformService.findAllExternalEventConfigurations();
     }
 
@@ -68,12 +61,17 @@ public class ExternalEventConfigurationApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Enable/Disable external events posting", description = "")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ExternalEventConfigurationCommand.class)))
-    public CommandProcessingResult updateExternalEventConfigurationsDetails(
-            @Parameter(hidden = true) ExternalEventConfigurationCommand command) {
-        context.authenticatedUser().validateHasUpdatePermission(RESOURCE_NAME_FOR_PERMISSIONS);
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateExternalEventConfigurations()
-                .withJson(jsonSerializer.serialize(command)).build();
-        return commandWritePlatformService.logCommandSource(commandRequest);
+    public ExternalEventConfigurationUpdateResponse updateExternalEventConfigurations(@HeaderParam("Idempotency-Key") String idempotencyKey,
+            @Valid ExternalEventConfigurationUpdateRequest request) {
+        final var command = new ExternalConfigurationsUpdateCommand();
+
+        command.setId(UUID.randomUUID());
+        command.setIdempotencyKey(idempotencyKey);
+        command.setCreatedAt(DateUtils.getAuditOffsetDateTime());
+        command.setPayload(request);
+
+        final Supplier<ExternalEventConfigurationUpdateResponse> response = commandPipeline.send(command);
+
+        return response.get();
     }
 }

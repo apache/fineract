@@ -26,11 +26,11 @@ import java.util.List;
 import java.util.Map;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.client.models.CommandProcessingResult;
-import org.apache.fineract.client.models.ExternalEventConfigurationCommand;
+import org.apache.fineract.client.models.ExternalEventConfigurationUpdateRequest;
+import org.apache.fineract.client.models.ExternalEventConfigurationUpdateResponse;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.JSON;
-import org.apache.fineract.infrastructure.event.external.service.validation.ExternalEventDTO;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
 import org.apache.fineract.integrationtests.common.ExternalEventConfigurationHelper;
 import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -78,24 +78,24 @@ public final class ExternalEventHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static List<ExternalEventDTO> getAllExternalEvents(final RequestSpecification requestSpec,
+    public static List<ExternalEventResponse> getAllExternalEvents(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
         final String url = "/fineract-provider/api/v1/internal/externalevents?" + Utils.TENANT_IDENTIFIER;
         log.info("---------------------------------GETTING ALL EXTERNAL EVENTS---------------------------------------------");
         String response = Utils.performServerGet(requestSpec, responseSpec, url);
-        return GSON.fromJson(response, new TypeToken<List<ExternalEventDTO>>() {}.getType());
+        return GSON.fromJson(response, new TypeToken<List<ExternalEventResponse>>() {}.getType());
     }
 
     // TODO: Rewrite to use fineract-client instead!
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static List<ExternalEventDTO> getAllExternalEvents(final RequestSpecification requestSpec,
+    public static List<ExternalEventResponse> getAllExternalEvents(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, Filter filter) {
         final String url = "/fineract-provider/api/v1/internal/externalevents?" + filter.toQueryParams() + Utils.TENANT_IDENTIFIER;
         log.info("---------------------------------GETTING ALL EXTERNAL EVENTS---------------------------------------------");
         String response = Utils.performServerGet(requestSpec, responseSpec, url);
-        return GSON.fromJson(response, new TypeToken<List<ExternalEventDTO>>() {}.getType());
+        return GSON.fromJson(response, new TypeToken<List<ExternalEventResponse>>() {}.getType());
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -122,9 +122,9 @@ public final class ExternalEventHelper {
     }
 
     public void configureBusinessEvent(String eventName, boolean enabled) {
-        CommandProcessingResult result = Calls
-                .ok(FineractClientHelper.getFineractClient().externalEventConfigurationApi.updateExternalEventConfigurationsDetails(
-                        new ExternalEventConfigurationCommand().putExternalEventConfigurationsItem(eventName, enabled)));
+        ExternalEventConfigurationUpdateResponse result = Calls
+                .ok(FineractClientHelper.getFineractClient().externalEventConfigurationApi.updateExternalEventConfigurations("",
+                        new ExternalEventConfigurationUpdateRequest().externalEventConfigurations(Map.of(eventName, enabled))));
         Map<String, Object> changes = result.getChanges();
         Assertions.assertNotNull(changes);
         Assertions.assertInstanceOf(Map.class, changes);
