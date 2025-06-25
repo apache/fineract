@@ -23,16 +23,11 @@ import org.apache.fineract.command.core.CommandProperties;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.MessageSource;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.validation.Validator;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-import yakworks.i18n.icu.ICUBundleMessageSource;
 
 @Slf4j
 @Configuration
@@ -42,22 +37,4 @@ import yakworks.i18n.icu.ICUBundleMessageSource;
 @EnableAsync
 @PropertySource("classpath:application-test.properties")
 @ComponentScan("org.apache.fineract.command.sample")
-public class TestConfiguration {
-
-    @Bean
-    MessageSource messageSource() {
-        var messageSource = new ICUBundleMessageSource();
-        messageSource.setBasenames("classpath:org.apache.fineract.messages");
-        messageSource.setDefaultEncoding("UTF-8");
-
-        return messageSource;
-    }
-
-    @Bean
-    Validator validatorFactoryBean(MessageSource messageSource) {
-        var localValidatorFactoryBean = new LocalValidatorFactoryBean();
-        localValidatorFactoryBean.setValidationMessageSource(messageSource);
-
-        return localValidatorFactoryBean;
-    }
-}
+public class TestConfiguration {}

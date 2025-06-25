@@ -28,6 +28,7 @@ buildscript {
             [
                 'fineract-api',
                 'fineract-core',
+                'fineract-validation',
                 'fineract-command',
                 'fineract-accounting',
                 'fineract-provider',
@@ -57,6 +58,7 @@ buildscript {
                 'fineract-api',
                 'fineract-client',
                 'fineract-core',
+                'fineract-validation',
                 'fineract-command',
                 'fineract-accounting',
                 'fineract-provider',
@@ -159,6 +161,10 @@ allprojects  {
     }
 
     configurations {
+        implementation {
+            exclude group: 'commons-logging', module: 'commons-logging'
+        }
+
         api {
             canBeResolved = true
         }
@@ -370,8 +376,18 @@ configure(project.fineractJavaProjects) {
         withJavadocJar()
     }
 
-    tasks.withType(ProcessResources) {
-        destinationDir = layout.buildDirectory.dir('classes/java/main').get().asFile
+    // TODO: we are forcing Gradle to do something it shouldn't! This effects Gradle caching AND breaks Liquibase!
+    // tasks.withType(ProcessResources) {
+    //     destinationDir = layout.buildDirectory.dir('classes/java/main').get().asFile
+    // }
+
+    processResources {
+        destinationDir = file("${buildDir}/resources/main")
+
+        doLast {
+            delete fileTree(dir: "${buildDir}/classes/java/main/db")
+            delete fileTree(dir: "${buildDir}/classes/java/main/META-INF")
+        }
     }
 
     // Add performance optimizations

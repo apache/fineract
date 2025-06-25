@@ -38,6 +38,7 @@ dependencyManagement {
         mavenBom 'software.amazon.awssdk:bom:2.29.9'
         mavenBom 'io.github.resilience4j:resilience4j-bom:2.2.0'
         mavenBom 'org.testcontainers:testcontainers-bom:1.20.4'
+        mavenBom 'org.glassfish.jersey:jersey-bom:3.1.10'
     }
 
     dependencies {
@@ -50,7 +51,6 @@ dependencyManagement {
         dependency 'ch.qos.logback.contrib:logback-json-classic:0.1.5'
         dependency 'ch.qos.logback.contrib:logback-jackson:0.1.5'
         dependency 'org.codehaus.janino:janino:3.1.12'
-
 
         dependency 'org.eclipse.persistence:org.eclipse.persistence.jpa:4.0.2'
         dependency 'com.google.guava:guava:33.1.0-jre'
@@ -76,8 +76,13 @@ dependencyManagement {
         dependency 'org.ehcache:ehcache:3.10.8'
         dependency 'com.github.spullara.mustache.java:compiler:0.9.14'
         dependency 'com.jayway.jsonpath:json-path:2.9.0'
-        dependency 'org.apache.tika:tika-core:2.9.3'
-        dependency ('org.apache.tika:tika-parser-microsoft-module:2.9.3') {
+        dependency ('org.apache.tika:tika-core:2.9.3') {
+            exclude 'commons-logging:commons-logging'
+        }
+        dependency ('org.apache.tika:tika-core:2.9.3') {
+            exclude 'commons-logging:commons-logging'
+        }
+        dependency ('org.apache.tika:tika-parser-miscoffice-module:2.9.3') {
             exclude 'org.bouncycastle:bcprov-jdk15on'
             exclude 'org.bouncycastle:bcmail-jdk15on'
             exclude 'org.bouncycastle:bcprov-jdk18on'
@@ -94,7 +99,7 @@ dependencyManagement {
             exclude 'org.apache.commons:commons-compress'
             exclude 'xml-apis:xml-apis'
         }
-        dependency ('org.apache.tika:tika-parser-miscoffice-module:2.9.3') {
+        dependency ('org.apache.tika:tika-parser-microsoft-module:2.9.3') {
             exclude 'org.bouncycastle:bcprov-jdk15on'
             exclude 'org.bouncycastle:bcmail-jdk15on'
             exclude 'org.bouncycastle:bcprov-jdk18on'
@@ -117,7 +122,6 @@ dependencyManagement {
         dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
         dependency 'jakarta.jms:jakarta.jms-api:3.1.0'
         dependency 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
-        dependency 'org.glassfish.jersey.media:jersey-media-multipart:3.1.10'
         dependency 'org.glassfish.jaxb:jaxb-runtime:2.3.6' // Swagger needs exactly this version
         dependency 'org.apache.bval:org.apache.bval.bundle:3.0.2'
         dependency 'joda-time:joda-time:2.13.1'
@@ -195,6 +199,8 @@ dependencyManagement {
         dependency ('jakarta.xml.bind:jakarta.xml.bind-api:4.0.2') {
             exclude 'jakarta.activation:jakarta.activation-api'
         }
+        dependency 'jakarta.validation:jakarta.validation-api:3.1.1'
+        dependency 'org.hibernate.validator:hibernate-validator:8.0.2.Final'
 
         dependency ('org.liquibase:liquibase-core:4.31.1') {
             exclude 'javax.xml.bind:jaxb-api'
@@ -243,6 +249,7 @@ dependencyManagement {
         dependency 'org.assertj:assertj-core:3.26.3'
 
         dependency 'org.apache.commons:commons-math3:3.6.1'
+        dependency 'commons-beanutils:commons-beanutils:1.11.0'
 
         dependency 'org.mockito:mockito-inline:5.2.0'
 

@@ -23,9 +23,10 @@ dependencies {
     // Note that we never use 'api', because Fineract at least currently is a simple monolithic application ("WAR"), not a library.
     // We also (normally should have) no need to ever use 'compileOnly'.
 
-    implementation(
-            project(path: ':fineract-avro-schemas')
-            )
+    implementation(project(path: ':fineract-avro-schemas'))
+    implementation(project(path: ':fineract-command'))
+    implementation(project(path: ':fineract-validation'))
+
 
     // implementation dependencies are directly used (compiled against) in src/main (and src/test)
     implementation(

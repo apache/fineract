@@ -20,30 +20,26 @@ package org.apache.fineract.infrastructure.businessdate.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import java.util.List;
+import java.util.UUID;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.service.CommandWrapperBuilder;
-import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.businessdate.data.BusinessDateData;
-import org.apache.fineract.infrastructure.businessdate.data.request.BusinessDateRequest;
+import org.apache.fineract.command.core.CommandPipeline;
+import org.apache.fineract.infrastructure.businessdate.command.BusinessDateUpdateCommand;
+import org.apache.fineract.infrastructure.businessdate.data.BusinessDateResponse;
+import org.apache.fineract.infrastructure.businessdate.data.BusinessDateUpdateRequest;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
@@ -52,19 +48,14 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Business Date Management", description = "Business date management enables you to set up, fetch and adjust organisation business dates")
 public class BusinessDateApiResource {
 
-    private static final String BUSINESS_DATE = "BUSINESS_DATE";
-
-    private final PlatformSecurityContext securityContext;
-    private final DefaultToApiJsonSerializer<BusinessDateData> jsonSerializer;
     private final BusinessDateReadPlatformService readPlatformService;
-    private final PortfolioCommandSourceWritePlatformService commandWritePlatformService;
+    private final CommandPipeline commandPipeline;
 
     @GET
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "List all business dates", description = "")
-    public List<BusinessDateData> getBusinessDates() {
-        securityContext.authenticatedUser().validateHasReadPermission(BUSINESS_DATE);
+    public List<BusinessDateResponse> getBusinessDates() {
         return this.readPlatformService.findAll();
     }
 
@@ -73,8 +64,7 @@ public class BusinessDateApiResource {
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Retrieve a specific Business date", description = "")
-    public BusinessDateData getBusinessDate(@PathParam("type") @Parameter(description = "type") final String type) {
-        securityContext.authenticatedUser().validateHasReadPermission(BUSINESS_DATE);
+    public BusinessDateResponse getBusinessDate(@PathParam("type") @Parameter(description = "type") final String type) {
         return this.readPlatformService.findByType(type);
     }
 
@@ -82,14 +72,19 @@ public class BusinessDateApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update Business Date", description = "")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = BusinessDateRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = BusinessDateApiResourceSwagger.BusinessDateResponse.class))) })
-    public CommandProcessingResult updateBusinessDate(BusinessDateRequest businessDateRequest) {
-        securityContext.authenticatedUser().validateHasUpdatePermission(BUSINESS_DATE);
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateBusinessDate()
-                .withJson(jsonSerializer.serialize(businessDateRequest)).build();
-        return commandWritePlatformService.logCommandSource(commandRequest);
+    public BusinessDateResponse updateBusinessDate(@HeaderParam("Idempotency-Key") String idempotencyKey,
+            @Valid BusinessDateUpdateRequest request) {
+
+        final var command = new BusinessDateUpdateCommand();
+
+        command.setId(UUID.randomUUID());
+        command.setIdempotencyKey(idempotencyKey);
+        command.setCreatedAt(DateUtils.getAuditOffsetDateTime());
+        command.setPayload(request);
+
+        final Supplier<BusinessDateResponse> response = commandPipeline.send(command);
+
+        return response.get();
     }
 
 }
