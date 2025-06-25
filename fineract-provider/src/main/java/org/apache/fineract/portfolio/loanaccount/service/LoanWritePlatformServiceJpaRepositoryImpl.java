@@ -2232,7 +2232,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     private void validateMultiDisbursementData(final JsonCommand command, LocalDate expectedDisbursementDate,
-            boolean isDisallowExpectedDisbursements) {
+            boolean isDisallowExpectedDisbursements, Loan loan) {
         final String json = command.json();
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
@@ -2254,7 +2254,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final BigDecimal principal = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("approvedLoanAmount", element);
 
-        loanApplicationValidator.validateLoanMultiDisbursementDate(element, baseDataValidator, expectedDisbursementDate, principal);
+        loanApplicationValidator.validateLoanMultiDisbursementDate(element, baseDataValidator, expectedDisbursementDate, principal, loan);
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
@@ -2296,7 +2296,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final String errorMessage = "cannot.modify.tranches.if.loan.is.pendingapproval.closed.overpaid.writtenoff";
             throw new LoanMultiDisbursementException(errorMessage);
         }
-        validateMultiDisbursementData(command, expectedDisbursementDate, loan.loanProduct().isDisallowExpectedDisbursements());
+        validateMultiDisbursementData(command, expectedDisbursementDate, loan.loanProduct().isDisallowExpectedDisbursements(), loan);
 
         this.validateForAddAndDeleteTranche(loan);
 

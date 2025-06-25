@@ -1667,14 +1667,20 @@ public final class LoanApplicationValidator {
         }
     }
 
-    public void validateLoanMultiDisbursementDate(final JsonElement element, LocalDate expectedDisbursementDate, BigDecimal principal) {
+    public void validateLoanMultiDisbursementDate(final JsonElement element, LocalDate expectedDisbursementDate, BigDecimal principal,
+            Loan loan) {
         Validator.validateOrThrow("loan", baseDataValidator -> {
-            validateLoanMultiDisbursementDate(element, baseDataValidator, expectedDisbursementDate, principal);
+            validateLoanMultiDisbursementDate(element, baseDataValidator, expectedDisbursementDate, principal, loan);
         });
     }
 
     public void validateLoanMultiDisbursementDate(final JsonElement element, final DataValidatorBuilder baseDataValidator,
             LocalDate expectedDisbursement, BigDecimal totalPrincipal) {
+        validateLoanMultiDisbursementDate(element, baseDataValidator, expectedDisbursement, totalPrincipal, null);
+    }
+
+    public void validateLoanMultiDisbursementDate(final JsonElement element, final DataValidatorBuilder baseDataValidator,
+            LocalDate expectedDisbursement, BigDecimal totalPrincipal, Loan loan) {
         this.validateDisbursementsAreDatewiseOrdered(element, baseDataValidator);
 
         final JsonObject topLevelJsonElement = element.getAsJsonObject();
@@ -1732,11 +1738,31 @@ public final class LoanApplicationValidator {
                     baseDataValidator.reset().parameter(LoanApiConstants.disbursementPrincipalParameterName)
                             .failWithCode(LoanApiConstants.APPROVED_AMOUNT_IS_LESS_THAN_SUM_OF_TRANCHES);
                 }
-                final Integer interestType = this.fromApiJsonHelper
-                        .extractIntegerSansLocaleNamed(LoanApiConstants.interestTypeParameterName, element);
-                baseDataValidator.reset().parameter(LoanApiConstants.interestTypeParameterName).value(interestType).ignoreIfNull()
-                        .integerSameAsNumber(InterestMethod.DECLINING_BALANCE.getValue());
 
+                if (loan == null) {
+                    final String transactionProcessingStrategyCode = this.fromApiJsonHelper
+                            .extractStringNamed(LoanApiConstants.transactionProcessingStrategyCodeParameterName, element);
+                    if (transactionProcessingStrategyCode != null) {
+                        final Integer interestType = this.fromApiJsonHelper.extractIntegerNamed(LoanApiConstants.interestTypeParameterName,
+                                element, Locale.getDefault());
+                        String processorCode = loanRepaymentScheduleTransactionProcessorFactory
+                                .determineProcessor(transactionProcessingStrategyCode).getCode();
+                        boolean isProgressive = "advanced-payment-allocation-strategy".equals(processorCode);
+                        if (isProgressive) {
+                            baseDataValidator.reset().parameter(LoanApiConstants.interestTypeParameterName).value(interestType)
+                                    .ignoreIfNull().inMinMaxRange(0, 1);
+                        } else {
+                            baseDataValidator.reset().parameter(LoanApiConstants.interestTypeParameterName).value(interestType)
+                                    .ignoreIfNull().integerSameAsNumber(InterestMethod.DECLINING_BALANCE.getValue());
+                        }
+                    }
+                } else {
+                    if (loan.isCumulativeSchedule()) {
+                        baseDataValidator.reset().parameter(LoanApiConstants.interestTypeParameterName)
+                                .value(loan.getLoanProductRelatedDetail().getInterestMethod()).ignoreIfNull()
+                                .value(InterestMethod.DECLINING_BALANCE);
+                    }
+                }
             }
         }
     }
@@ -1756,7 +1782,7 @@ public final class LoanApplicationValidator {
             final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod
                     .fromInt(interestCalculationPeriodType);
             boolean considerPartialPeriodUpdates = interestCalculationPeriodMethod.isDaily() ? interestCalculationPeriodMethod.isDaily()
-                    : loanProduct.getLoanProductRelatedDetail().isAllowPartialPeriodInterestCalcualtion();
+                    : loanProduct.getLoanProductRelatedDetail().isAllowPartialPeriodInterestCalculation();
             if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME,
                     element)) {
                 final Boolean considerPartialInterestEnabled = this.fromApiJsonHelper
@@ -1780,7 +1806,8 @@ public final class LoanApplicationValidator {
                             .failWithCode("not.supported.for.selected.interest.calcualtion.type");
                 }
 
-                if (loanProduct.isMultiDisburseLoan()) {
+                if (loanProduct.isMultiDisburseLoan()
+                        && !"advanced-payment-allocation-strategy".equals(loanProduct.getTransactionProcessingStrategyCode())) {
                     baseDataValidator.reset().parameter(LoanProductConstants.MULTI_DISBURSE_LOAN_PARAMETER_NAME)
                             .failWithCode("not.supported.for.selected.interest.calcualtion.type");
                 }
@@ -2045,7 +2072,7 @@ public final class LoanApplicationValidator {
 
             LoanProduct loanProduct = loan.loanProduct();
             if (loanProduct.isMultiDisburseLoan()) {
-                validateLoanMultiDisbursementDate(element, expectedDisbursementDate, principal);
+                validateLoanMultiDisbursementDate(element, expectedDisbursementDate, principal, loan);
 
                 final JsonArray disbursementDataArray = this.fromApiJsonHelper
                         .extractJsonArrayNamed(LoanApiConstants.disbursementDataParameterName, element);

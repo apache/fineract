@@ -786,7 +786,7 @@ public final class LoanProductDataValidator {
             }
         }
 
-        validateMultiDisburseLoanData(baseDataValidator, element);
+        validateMultiDisburseLoanData(baseDataValidator, element, null);
 
         validateLoanConfigurableAttributes(baseDataValidator, element);
 
@@ -1014,7 +1014,8 @@ public final class LoanProductDataValidator {
         }
     }
 
-    private void validateMultiDisburseLoanData(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
+    private void validateMultiDisburseLoanData(final DataValidatorBuilder baseDataValidator, final JsonElement element,
+            final LoanProduct loanProduct) {
         Boolean multiDisburseLoan = false;
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.MULTI_DISBURSE_LOAN_PARAMETER_NAME, element)) {
             multiDisburseLoan = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.MULTI_DISBURSE_LOAN_PARAMETER_NAME,
@@ -1045,12 +1046,32 @@ public final class LoanProductDataValidator {
                     .integerGreaterThanZero();
 
             final Integer interestType = this.fromApiJsonHelper.extractIntegerNamed(INTEREST_TYPE, element, Locale.getDefault());
-            baseDataValidator.reset().parameter(INTEREST_TYPE).value(interestType).ignoreIfNull()
-                    .integerSameAsNumber(InterestMethod.DECLINING_BALANCE.getValue());
+
+            boolean isProgressive = isProgressive(element, loanProduct);
+            if (isProgressive) {
+                baseDataValidator.reset().parameter(INTEREST_TYPE).value(interestType).ignoreIfNull().inMinMaxRange(0, 1);
+            } else {
+                baseDataValidator.reset().parameter(INTEREST_TYPE).value(interestType).ignoreIfNull()
+                        .integerSameAsNumber(InterestMethod.DECLINING_BALANCE.getValue());
+            }
         }
 
         final String overAppliedCalculationType = this.fromApiJsonHelper.extractStringNamed(OVER_APPLIED_CALCULATION_TYPE, element);
         baseDataValidator.reset().parameter(OVER_APPLIED_CALCULATION_TYPE).value(overAppliedCalculationType).notExceedingLengthOf(10);
+    }
+
+    private boolean isProgressive(JsonElement element, LoanProduct loanProduct) {
+        String processorCode = null;
+        if (loanProduct != null) {
+            processorCode = loanProduct.getTransactionProcessingStrategyCode();
+        }
+        final String transactionProcessingStrategyCode = this.fromApiJsonHelper.extractStringNamed(TRANSACTION_PROCESSING_STRATEGY_CODE,
+                element);
+        if (transactionProcessingStrategyCode != null) {
+            processorCode = loanRepaymentScheduleTransactionProcessorFactory.determineProcessor(transactionProcessingStrategyCode)
+                    .getCode();
+        }
+        return "advanced-payment-allocation-strategy".equals(processorCode);
     }
 
     private void validateInterestRecalculationParams(final JsonElement element, final DataValidatorBuilder baseDataValidator,
@@ -1868,7 +1889,7 @@ public final class LoanProductDataValidator {
             }
         }
 
-        validateMultiDisburseLoanData(baseDataValidator, element);
+        validateMultiDisburseLoanData(baseDataValidator, element, loanProduct);
 
         // validateLoanConfigurableAttributes(baseDataValidator,element);
 
@@ -2549,7 +2570,7 @@ public final class LoanProductDataValidator {
                 }
             } else if (loanProduct != null) {
                 if (!interestCalculationPeriodMethod.isDaily()) {
-                    considerPartialPeriodUpdates = loanProduct.getLoanProductRelatedDetail().isAllowPartialPeriodInterestCalcualtion();
+                    considerPartialPeriodUpdates = loanProduct.getLoanProductRelatedDetail().isAllowPartialPeriodInterestCalculation();
                 }
             }
 
@@ -2574,7 +2595,7 @@ public final class LoanProductDataValidator {
                 } else if (loanProduct != null) {
                     multiDisburseLoan = loanProduct.isMultiDisburseLoan();
                 }
-                if (multiDisburseLoan != null && multiDisburseLoan) {
+                if (multiDisburseLoan != null && multiDisburseLoan && !isProgressive(element, loanProduct)) {
                     baseDataValidator.reset().parameter(LoanProductConstants.MULTI_DISBURSE_LOAN_PARAMETER_NAME)
                             .failWithCode("not.supported.for.selected.interest.calculation.type");
                 }

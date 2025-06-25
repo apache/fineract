@@ -27,6 +27,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleP
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePlanRepaymentPeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.EmbeddableProgressiveLoanScheduleGenerator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanRepaymentScheduleModelData;
+import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -58,8 +59,10 @@ public class Main {
         final Integer fixedLength = null;
         final Boolean interestRecognitionOnDisbursementDate = false;
         final DaysInYearCustomStrategyType dasInYearCustomStrategy = null;
+        final InterestMethod interestMethod = InterestMethod.DECLINING_BALANCE;
+        final boolean allowPartialPeriodInterestCalculation = true;
 
-        var config = new LoanRepaymentScheduleModelData(startDate, currency, disbursedAmount, disbursementDate, noRepayments, repaymentFrequency, repaymentFrequencyType, annualNominalInterestRate, isDownPaymentEnabled, daysInMonthType, daysInYearType, downPaymentPercentage, installmentAmountInMultiplesOf, fixedLength, interestRecognitionOnDisbursementDate, dasInYearCustomStrategy);
+        var config = new LoanRepaymentScheduleModelData(startDate, currency, disbursedAmount, disbursementDate, noRepayments, repaymentFrequency, repaymentFrequencyType, annualNominalInterestRate, isDownPaymentEnabled, daysInMonthType, daysInYearType, downPaymentPercentage, installmentAmountInMultiplesOf, fixedLength, interestRecognitionOnDisbursementDate, dasInYearCustomStrategy, interestMethod, allowPartialPeriodInterestCalculation);
 
         final LoanSchedulePlan plan = calculator.generate(mc, config);
         printPlan(plan);
