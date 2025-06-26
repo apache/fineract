@@ -26,7 +26,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.infrastructure.event.external.service.validation.ExternalEventDTO;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -54,7 +54,7 @@ public class LoanBusinessEvent extends BusinessEvent {
     }
 
     @Override
-    public boolean verify(ExternalEventDTO externalEvent, DateTimeFormatter formatter) {
+    public boolean verify(ExternalEventResponse externalEvent, DateTimeFormatter formatter) {
         Object summaryRes = externalEvent.getPayLoad().get("summary");
         Object statusRes = externalEvent.getPayLoad().get("status");
         Map<String, Object> summary = summaryRes instanceof Map ? (Map<String, Object>) summaryRes : Map.of();

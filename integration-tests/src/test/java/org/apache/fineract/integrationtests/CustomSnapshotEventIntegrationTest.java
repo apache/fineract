@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.BusinessDateUpdateRequest;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
-import org.apache.fineract.infrastructure.event.external.service.validation.ExternalEventDTO;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
 import org.apache.fineract.integrationtests.common.BusinessStepHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.ExternalEventConfigurationHelper;
@@ -85,7 +85,7 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
             updateBusinessDateAndExecuteCOBJob("01 February 2023");
 
             // verify external events
-            List<ExternalEventDTO> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+            List<ExternalEventResponse> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
             Assertions.assertEquals(1, allExternalEvents.size());
             Assertions.assertEquals("LoanAccountCustomSnapshotBusinessEvent", allExternalEvents.get(0).getType());
             Assertions.assertEquals(loanId, allExternalEvents.get(0).getAggregateRootId());
@@ -163,7 +163,7 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
             updateBusinessDateAndExecuteCOBJob("01 February 2023");
 
             // verify external events
-            List<ExternalEventDTO> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+            List<ExternalEventResponse> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
             Assertions.assertEquals(0, allExternalEvents.size());
         });
     }
@@ -208,7 +208,7 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
             updateBusinessDateAndExecuteCOBJob("01 February 2023");
 
             // verify external events
-            List<ExternalEventDTO> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+            List<ExternalEventResponse> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
             Assertions.assertEquals(0, allExternalEvents.size());
         });
     }
@@ -252,7 +252,7 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
             updateBusinessDateAndExecuteCOBJob("31 January 2023");
 
             // verify external events
-            List<ExternalEventDTO> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+            List<ExternalEventResponse> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
             Assertions.assertEquals(0, allExternalEvents.size());
         });
     }
@@ -297,7 +297,7 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
             updateBusinessDateAndExecuteCOBJob("01 February 2023");
 
             // verify external events
-            List<ExternalEventDTO> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+            List<ExternalEventResponse> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
             Assertions.assertEquals(0, allExternalEvents.size());
         });
     }

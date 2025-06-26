@@ -86,7 +86,7 @@ import org.apache.fineract.client.models.RetrieveLoansPointInTimeRequest;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
-import org.apache.fineract.infrastructure.event.external.service.validation.ExternalEventDTO;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.BatchHelper;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
@@ -1274,7 +1274,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     }
 
     protected void verifyBusinessEvents(BusinessEvent... businessEvents) {
-        List<ExternalEventDTO> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+        List<ExternalEventResponse> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
         logBusinessEvents(allExternalEvents);
         Assertions.assertNotNull(businessEvents);
         Assertions.assertNotNull(allExternalEvents);
@@ -1288,7 +1288,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
         }
     }
 
-    protected void logBusinessEvents(List<ExternalEventDTO> allExternalEvents) {
+    protected void logBusinessEvents(List<ExternalEventResponse> allExternalEvents) {
         allExternalEvents.forEach(externalEventDTO -> {
             Object amount = externalEventDTO.getPayLoad().get("amount");
             Object outstandingLoanBalance = externalEventDTO.getPayLoad().get("outstandingLoanBalance");
@@ -1305,7 +1305,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
 
     protected void deleteAllExternalEvents() {
         ExternalEventHelper.deleteAllExternalEvents(requestSpec, createResponseSpecification(Matchers.is(204)));
-        List<ExternalEventDTO> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+        List<ExternalEventResponse> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
         Assertions.assertEquals(0, allExternalEvents.size());
     }
 

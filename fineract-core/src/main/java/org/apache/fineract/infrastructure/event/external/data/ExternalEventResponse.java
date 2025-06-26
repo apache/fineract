@@ -18,13 +18,31 @@
  */
 package org.apache.fineract.infrastructure.event.external.data;
 
-import java.util.List;
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.Map;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Builder
 @Data
 @NoArgsConstructor
-public class ExternalEventConfigurationData {
+@AllArgsConstructor
+public class ExternalEventResponse implements Serializable {
 
-    private List<ExternalEventConfigurationItemData> externalEventConfiguration;
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    private Long eventId;
+    private String type;
+    private String category;
+    private OffsetDateTime createdAt;
+    private Map<String, Object> payLoad;
+    private LocalDate businessDate;
+    private String schema;
+    private Long aggregateRootId;
 }

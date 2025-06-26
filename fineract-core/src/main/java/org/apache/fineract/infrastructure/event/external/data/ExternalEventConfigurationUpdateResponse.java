@@ -16,15 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.external.command;
+package org.apache.fineract.infrastructure.event.external.data;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Map;
+import java.util.HashMap;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public record ExternalEventConfigurationCommand(Map<String, Boolean> externalEventConfigurations) implements Serializable {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class ExternalEventConfigurationUpdateResponse implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
+    private HashMap<String, Object> changes;
 }
