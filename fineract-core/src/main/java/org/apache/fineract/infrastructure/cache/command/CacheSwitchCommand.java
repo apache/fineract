@@ -16,22 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.cache.data;
+package org.apache.fineract.infrastructure.cache.command;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.infrastructure.cache.data.CacheSwitchRequest;
 
-@Builder
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-public final class CacheData {
-
-    @SuppressWarnings("unused")
-    private EnumOptionData cacheType;
-    @SuppressWarnings("unused")
-    private boolean enabled;
-}
+@EqualsAndHashCode(callSuper = true)
+public class CacheSwitchCommand extends Command<CacheSwitchRequest> {}

@@ -16,38 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.cache.api;
+package org.apache.fineract.infrastructure.cache.data;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Map;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-/**
- * Created by sanyam on 28/7/17.
- */
-final class CacheApiResourceSwagger {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class CacheSwitchResponse implements Serializable {
 
-    private CacheApiResourceSwagger() {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    }
-
-    @Schema(description = "PutCachesResponse")
-    public static final class PutCachesResponse {
-
-        private PutCachesResponse() {
-
-        }
-
-        public static final class PutCachechangesSwagger {
-
-            private PutCachechangesSwagger() {
-
-            }
-
-            @Schema(example = "2")
-            public Long cacheType;
-
-        }
-
-        public PutCachechangesSwagger cacheType;
-
-    }
+    private Integer cacheType;
+    private Map<String, Object> changes;
 }

@@ -19,13 +19,8 @@
 package org.apache.fineract.infrastructure.cache.api;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.PUT;
@@ -33,16 +28,16 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import java.util.Collection;
+import java.util.UUID;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.service.CommandWrapperBuilder;
-import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.command.core.CommandPipeline;
+import org.apache.fineract.infrastructure.cache.command.CacheSwitchCommand;
 import org.apache.fineract.infrastructure.cache.data.CacheData;
-import org.apache.fineract.infrastructure.cache.data.request.CacheRequest;
+import org.apache.fineract.infrastructure.cache.data.CacheSwitchRequest;
+import org.apache.fineract.infrastructure.cache.data.CacheSwitchResponse;
 import org.apache.fineract.infrastructure.cache.service.RuntimeDelegatingCacheManager;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -50,37 +45,45 @@ import org.springframework.stereotype.Component;
 @Consumes({ MediaType.APPLICATION_JSON })
 @Produces({ MediaType.APPLICATION_JSON })
 @Component
-@Tag(name = "Cache", description = "The following settings are possible for cache:\n" + "\n" + "No Caching: caching turned off\n"
-        + "Single node: caching on for single instance deployments of platorm (works for multiple tenants but only one tomcat)\n"
-        + "By default caching is set to No Caching. Switching between caches results in the cache been clear e.g. from Single node to No cache and back again would clear down the single node cache.")
+@Tag(name = "Cache", description = """
+        The following settings are possible for cache:
+
+        No Caching: caching turned off
+
+        Single node: caching on for single instance deployments of platorm (works for multiple tenants but only one tomcat).
+        By default caching is set to No Caching. Switching between caches results in the cache been clear e.g. from single
+        node to no cache and back again would clear down the single node cache.
+        """)
 @RequiredArgsConstructor
 public class CacheApiResource {
 
-    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "CACHE";
-
-    private final PlatformSecurityContext context;
-    private final DefaultToApiJsonSerializer<CacheData> toApiJsonSerializer;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     @Qualifier("runtimeDelegatingCacheManager")
     private final RuntimeDelegatingCacheManager cacheService;
+    private final CommandPipeline commandPipeline;
 
     @GET
-    @Operation(summary = "Retrieve Cache Types", description = "Returns the list of caches.\n" + "\n" + "Example Requests:\n" + "\n"
-            + "caches")
+    @Operation(summary = "Retrieve Cache Types", description = """
+            Returns the list of caches.
+
+            Example Requests:
+
+            caches
+            """)
     public Collection<CacheData> retrieveAll() {
-        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
         return cacheService.retrieveAll();
     }
 
     @PUT
     @Operation(summary = "Switch Cache", description = "Switches the cache to chosen one.")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CacheRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CacheApiResourceSwagger.PutCachesResponse.class))) })
-    public CommandProcessingResult switchCache(@Parameter(hidden = true) CacheRequest cacheRequest) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateCache()
-                .withJson(toApiJsonSerializer.serialize(cacheRequest)).build();
+    public CacheSwitchResponse switchCache(@Valid CacheSwitchRequest request) {
+        final var command = new CacheSwitchCommand();
 
-        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        command.setId(UUID.randomUUID());
+        command.setCreatedAt(DateUtils.getAuditOffsetDateTime());
+        command.setPayload(request);
+
+        final Supplier<CacheSwitchResponse> response = commandPipeline.send(command);
+
+        return response.get();
     }
 }

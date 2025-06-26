@@ -142,6 +142,11 @@ public class SecurityConfig {
                             .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "READ_EXTERNAL_EVENT_CONFIGURATION")
                             .requestMatchers(antMatcher(HttpMethod.PUT, "/api/*/externalevents/configuration"))
                             .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "UPDATE_EXTERNAL_EVENT_CONFIGURATION")
+                            // cache
+                            .requestMatchers(antMatcher(HttpMethod.GET, "/api/*/caches"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "READ_CACHE")
+                            .requestMatchers(antMatcher(HttpMethod.PUT, "/api/*/caches"))
+                            .hasAnyAuthority("ALL_FUNCTIONS", "ALL_FUNCTIONS_WRITE", "UPDATE_CACHE")
                             // ...
                             .requestMatchers(antMatcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated() //
                             .requestMatchers(antMatcher("/api/*/twofactor")).fullyAuthenticated() //
