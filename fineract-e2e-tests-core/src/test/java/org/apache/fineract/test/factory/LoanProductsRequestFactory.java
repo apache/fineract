@@ -1752,6 +1752,8 @@ public class LoanProductsRequestFactory {
                 .buyDownFeeStrategy(PostLoanProductsRequest.BuyDownFeeStrategyEnum.EQUAL_AMORTIZATION)//
                 .buyDownFeeCalculationType(PostLoanProductsRequest.BuyDownFeeCalculationTypeEnum.FLAT)//
                 .buyDownFeeIncomeType(PostLoanProductsRequest.BuyDownFeeIncomeTypeEnum.INTEREST)//
-                .enableBuyDownFee(true);//
+                .enableBuyDownFee(true)//
+                .buyDownExpenseAccountId(accountTypeResolver.resolve(DefaultAccountType.BUY_DOWN_EXPENSE))//
+                .incomeFromBuyDownAccountId(accountTypeResolver.resolve(DefaultAccountType.INCOME_FROM_BUY_DOWN));//
     }
 }

@@ -363,6 +363,9 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
                 mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_CAPITALIZATION.getValue(),
                         loanProductId, AccrualAccountsForLoan.INCOME_FROM_CAPITALIZATION.getValue(),
                         AccrualAccountsForLoan.INCOME_FROM_CAPITALIZATION.toString(), changes);
+                mergeLoanToIncomeAccountMappingChanges(element, LoanProductAccountingParams.INCOME_FROM_BUY_DOWN.getValue(), loanProductId,
+                        AccrualAccountsForLoan.INCOME_FROM_BUY_DOWN.getValue(), AccrualAccountsForLoan.INCOME_FROM_BUY_DOWN.toString(),
+                        changes);
 
                 // expenses
                 mergeLoanToExpenseAccountMappingChanges(element, LoanProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(), loanProductId,
@@ -376,6 +379,8 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
                 mergeLoanToExpenseAccountMappingChanges(element, LoanProductAccountingParams.CHARGE_OFF_FRAUD_EXPENSE.getValue(),
                         loanProductId, AccrualAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE.getValue(),
                         AccrualAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE.toString(), changes);
+                mergeLoanToExpenseAccountMappingChanges(element, LoanProductAccountingParams.BUY_DOWN_EXPENSE.getValue(), loanProductId,
+                        AccrualAccountsForLoan.BUY_DOWN_EXPENSE.getValue(), AccrualAccountsForLoan.BUY_DOWN_EXPENSE.toString(), changes);
 
                 // liabilities
                 mergeLoanToLiabilityAccountMappingChanges(element, LoanProductAccountingParams.OVERPAYMENT.getValue(), loanProductId,

@@ -20,7 +20,7 @@ package org.apache.fineract.command;
 
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.command.persistence.CommandRepository;
+import org.apache.fineract.command.persistence.domain.CommandRepository;
 import org.apache.fineract.command.persistence.mapping.CommandMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

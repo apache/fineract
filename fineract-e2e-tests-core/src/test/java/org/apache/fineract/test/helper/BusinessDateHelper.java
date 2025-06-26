@@ -21,8 +21,8 @@ package org.apache.fineract.test.helper;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.client.models.BusinessDateRequest;
 import org.apache.fineract.client.models.BusinessDateResponse;
+import org.apache.fineract.client.models.BusinessDateUpdateRequest;
 import org.apache.fineract.client.services.BusinessDateManagementApi;
 import org.apache.fineract.test.support.TestContext;
 import org.apache.fineract.test.support.TestContextKey;
@@ -36,15 +36,14 @@ public class BusinessDateHelper {
     public static final String DATE_FORMAT = "dd MMMM yyyy";
     public static final String DEFAULT_LOCALE = "en";
     public static final String BUSINESS_DATE = "BUSINESS_DATE";
-    public static final String DEFAULT = "BUSINESS_DATE";
     public static final String COB = "COB_DATE";
 
     private final BusinessDateManagementApi businessDateManagementApi;
 
     public void setBusinessDate(String businessDate) throws IOException {
-        BusinessDateRequest businessDateRequest = defaultBusinessDateRequest().date(businessDate);
+        BusinessDateUpdateRequest businessDateRequest = defaultBusinessDateRequest().date(businessDate);
 
-        Response<BusinessDateResponse> businessDateRequestResponse = businessDateManagementApi.updateBusinessDate(businessDateRequest)
+        Response<BusinessDateResponse> businessDateRequestResponse = businessDateManagementApi.updateBusinessDate(null, businessDateRequest)
                 .execute();
         ErrorHelper.checkSuccessfulApiCall(businessDateRequestResponse);
         TestContext.INSTANCE.set(TestContextKey.BUSINESS_DATE_RESPONSE, businessDateRequestResponse);
@@ -56,11 +55,12 @@ public class BusinessDateHelper {
         setBusinessDate(today);
     }
 
-    public BusinessDateRequest defaultBusinessDateRequest() {
-        return new BusinessDateRequest().type(DEFAULT).dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE);
+    public BusinessDateUpdateRequest defaultBusinessDateRequest() {
+        return new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE).dateFormat(DATE_FORMAT)
+                .locale(DEFAULT_LOCALE);
     }
 
     public String getBusinessDate() throws IOException {
-        return businessDateManagementApi.getBusinessDate(DEFAULT).toString();
+        return businessDateManagementApi.getBusinessDate(BUSINESS_DATE).toString();
     }
 }

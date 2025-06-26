@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public final class CommandJsonMapper {
+final class CommandJsonMapper {
 
     private static final String CLASS_ATTRIBUTE = "@class";
     private final ObjectMapper mapper;

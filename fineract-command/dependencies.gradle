@@ -38,8 +38,6 @@ dependencies {
             'com.github.spotbugs:spotbugs-annotations',
             'org.mapstruct:mapstruct',
             'com.lmax:disruptor',
-            'com.ibm.icu:icu4j',
-            'org.yakworks:spring-icu4j',
             )
     implementation('org.eclipse.persistence:org.eclipse.persistence.jpa') {
         exclude group: 'org.eclipse.persistence', module: 'jakarta.persistence'
@@ -62,6 +60,7 @@ dependencies {
         exclude group: 'org.skyscreamer'
     }
     testImplementation (
+            project(':fineract-validation'),
             'org.springframework.boot:spring-boot-starter-web',
             'org.mockito:mockito-inline',
             'org.openjdk.jmh:jmh-core',
